@@ -104,6 +104,7 @@ public class WorldChunkManager
                 crashreportcategory.addCrashSection("z", Integer.valueOf(z));
                 crashreportcategory.addCrashSection("w", Integer.valueOf(width));
                 crashreportcategory.addCrashSection("h", Integer.valueOf(length));
+                crashreportcategory.addCrashSection("BIL", this.biomeIndexLayer.toString());
                 throw new ReportedException(crashreport);
             }
         }

@@ -2,6 +2,7 @@ package net.minecraft.world.chunk;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
@@ -36,6 +38,8 @@ import net.minecraftforge.event.world.ChunkEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import ru.fewizz.idextender.Hooks;
+
 public class Chunk
 {
     private static final Logger logger = LogManager.getLogger();
@@ -47,7 +51,7 @@ public class Chunk
      */
     private ExtendedBlockStorage[] storageArrays;
     /** Contains a 16x16 mapping on the X/Z plane of the biome ID to which each colum belongs. */
-    private byte[] blockBiomeArray;
+    private short[] blockBiomeArray;
     /** A map, similar to heightMap, that tracks how far down precipitation can fall. */
     public int[] precipitationHeightMap;
     /** Which columns need their skylightMaps updated. */
@@ -92,7 +96,7 @@ public class Chunk
     public Chunk(World p_i1995_1_, int p_i1995_2_, int p_i1995_3_)
     {
         this.storageArrays = new ExtendedBlockStorage[16];
-        this.blockBiomeArray = new byte[256];
+        this.blockBiomeArray = new short[256];
         this.precipitationHeightMap = new int[256];
         this.updateSkylightColumns = new boolean[256];
         this.chunkTileEntityMap = new HashMap();
@@ -1356,8 +1360,15 @@ public class Chunk
 
         if (p_76607_4_)
         {
-            System.arraycopy(p_76607_1_, k, this.blockBiomeArray, 0, this.blockBiomeArray.length);
-            int i1 = k + this.blockBiomeArray.length;
+        	//System.out.println("Принял на: " + k + " " + p_76607_1_.length);
+        	byte[] byteArray = new byte[256];
+        	byte[] byteArray2 = new byte[256];
+            System.arraycopy(p_76607_1_, k, byteArray, 0, 256);
+            k += 256;
+            System.arraycopy(p_76607_1_, k, byteArray2, 0, 256);
+            k += 256;
+            this.blockBiomeArray = Hooks.getShortArrayFromByteArrays(byteArray, byteArray2);
+            //int i1 = k + this.blockBiomeArray.length;
         }
 
         for (l = 0; l < this.storageArrays.length; ++l)
@@ -1399,13 +1410,13 @@ public class Chunk
      */
     public BiomeGenBase getBiomeGenForWorldCoords(int p_76591_1_, int p_76591_2_, WorldChunkManager p_76591_3_)
     {
-        int k = this.blockBiomeArray[p_76591_2_ << 4 | p_76591_1_] & 255;
+        int k = this.blockBiomeArray[p_76591_2_ << 4 | p_76591_1_] & 0xffff;
 
         if (k == 255)
         {
             BiomeGenBase biomegenbase = p_76591_3_.getBiomeGenAt((this.xPosition << 4) + p_76591_1_, (this.zPosition << 4) + p_76591_2_);
             k = biomegenbase.biomeID;
-            this.blockBiomeArray[p_76591_2_ << 4 | p_76591_1_] = (byte)(k & 255);
+            this.blockBiomeArray[p_76591_2_ << 4 | p_76591_1_] = (short)(k & 0xffff);
         }
 
         return BiomeGenBase.getBiome(k) == null ? BiomeGenBase.plains : BiomeGenBase.getBiome(k);
@@ -1414,7 +1425,7 @@ public class Chunk
     /**
      * Returns an array containing a 16x16 mapping on the X/Z of block positions in this Chunk to biome IDs.
      */
-    public byte[] getBiomeArray()
+    public short[] getBiomeArray()
     {
         return this.blockBiomeArray;
     }
@@ -1423,7 +1434,7 @@ public class Chunk
      * Accepts a 256-entry array that contains a 16x16 mapping on the X/Z plane of block positions in this Chunk to
      * biome IDs.
      */
-    public void setBiomeArray(byte[] p_76616_1_)
+    public void setBiomeArray(short[] p_76616_1_)
     {
         this.blockBiomeArray = p_76616_1_;
     }

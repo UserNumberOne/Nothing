@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import ru.fewizz.idextender.Hooks;
 import cpw.mods.fml.common.FMLLog;
 
 public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO
@@ -352,7 +353,9 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO
         }
 
         p_75820_3_.setTag("Sections", nbttaglist);
-        p_75820_3_.setByteArray("Biomes", p_75820_1_.getBiomeArray());
+        p_75820_3_.setByteArray("Biomes8bit", Hooks.getFirstPartOfShortArray(p_75820_1_.getBiomeArray()));
+        p_75820_3_.setByteArray("Biomes8bit2", Hooks.getSecondPartOfShortArray(p_75820_1_.getBiomeArray()));
+        
         p_75820_1_.hasEntities = false;
         NBTTagList nbttaglist2 = new NBTTagList();
         Iterator iterator1;
@@ -473,12 +476,10 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO
 
         chunk.setStorageArrays(aextendedblockstorage);
 
-        if (p_75823_2_.hasKey("Biomes", 7))
-        {
-            chunk.setBiomeArray(p_75823_2_.getByteArray("Biomes"));
+        if(p_75823_2_.hasKey("Biomes8bit", 7) && p_75823_2_.hasKey("Biomes8bit2", 7)){        	
+        	chunk.setBiomeArray(Hooks.getShortArrayFromByteArrays(p_75823_2_.getByteArray("Biomes8bit"), p_75823_2_.getByteArray("Biomes8bit2")));
         }
-
-        // End this method here and split off entity loading to another method
+        
         return chunk;
     }
 

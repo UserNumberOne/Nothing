@@ -1,5 +1,7 @@
 package net.minecraft.world.gen.layer;
 
+import ru.fewizz.idextender.asm.Constants;
+
 public class GenLayerVoronoiZoom extends GenLayer
 {
     private static final String __OBFID = "CL_00000571";
@@ -48,8 +50,8 @@ public class GenLayerVoronoiZoom extends GenLayer
                 this.initChunkSeed((long)(l2 + i1 + 1 << 2), (long)(k2 + j1 + 1 << 2));
                 double d7 = ((double)this.nextInt(1024) / 1024.0D - 0.5D) * 3.6D + 4.0D;
                 double d8 = ((double)this.nextInt(1024) / 1024.0D - 0.5D) * 3.6D + 4.0D;
-                int k3 = aint[l2 + 1 + (k2 + 0) * k1] & 255;
-                int l3 = aint[l2 + 1 + (k2 + 1) * k1] & 255;
+                int k3 = aint[l2 + 1 + (k2 + 0) * k1] & Constants.blockIdMask;
+                int l3 = aint[l2 + 1 + (k2 + 1) * k1] & Constants.blockIdMask;
 
                 for (int i4 = 0; i4 < 4; ++i4)
                 {
