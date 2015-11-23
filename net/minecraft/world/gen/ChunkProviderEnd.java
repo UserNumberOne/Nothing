@@ -211,11 +211,11 @@ public class ChunkProviderEnd implements IChunkProvider
         this.func_147420_a(p_73154_1_, p_73154_2_, ablock, this.biomesForGeneration);
         this.replaceBiomeBlocks(p_73154_1_, p_73154_2_, ablock, this.biomesForGeneration, meta);
         Chunk chunk = new Chunk(this.endWorld, ablock, meta, p_73154_1_, p_73154_2_);
-        byte[] abyte = chunk.getBiomeArray();
+        short[] abyte = chunk.getBiomeShortArray();
 
         for (int k = 0; k < abyte.length; ++k)
         {
-            abyte[k] = (byte)this.biomesForGeneration[k].biomeID;
+            abyte[k] = (short)this.biomesForGeneration[k].biomeID;
         }
 
         chunk.generateSkylightMap();

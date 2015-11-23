@@ -241,11 +241,11 @@ public class ChunkProviderGenerate implements IChunkProvider
         }
 
         Chunk chunk = new Chunk(this.worldObj, ablock, abyte, x, z);
-        byte[] abyte1 = chunk.getBiomeArray();
+        short[] abyte1 = chunk.getBiomeShortArray();
 
         for (int k = 0; k < abyte1.length; ++k)
         {
-            abyte1[k] = (byte)this.biomesForGeneration[k].biomeID;
+            abyte1[k] = (short)this.biomesForGeneration[k].biomeID;
         }
 
         chunk.generateSkylightMap();

@@ -62,7 +62,7 @@ public abstract class BiomeGenBase
     protected static final BiomeGenBase.Height height_LowIslands = new BiomeGenBase.Height(0.2F, 0.3F);
     protected static final BiomeGenBase.Height height_PartiallySubmerged = new BiomeGenBase.Height(-0.2F, 0.1F);
     /** An array of all the biomes, indexed by biome id. */
-    private static final BiomeGenBase[] biomeList = new BiomeGenBase[256];
+    private static final BiomeGenBase[] biomeList = new BiomeGenBase[65536];
     public static final Set explorationBiomesList = Sets.newHashSet();
     public static final BiomeGenBase ocean = (new BiomeGenOcean(0)).setColor(112).setBiomeName("Ocean").setHeight(height_Oceans);
     public static final BiomeGenBase plains = (new BiomeGenPlains(1)).setColor(9286496).setBiomeName("Plains");

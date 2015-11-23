@@ -286,11 +286,11 @@ public class ChunkProviderHell implements IChunkProvider
         this.netherCaveGenerator.func_151539_a(this, this.worldObj, p_73154_1_, p_73154_2_, ablock);
         this.genNetherBridge.func_151539_a(this, this.worldObj, p_73154_1_, p_73154_2_, ablock);
         Chunk chunk = new Chunk(this.worldObj, ablock, meta, p_73154_1_, p_73154_2_);
-        byte[] abyte = chunk.getBiomeArray();
+        short[] abyte = chunk.getBiomeShortArray();
 
         for (int k = 0; k < abyte.length; ++k)
         {
-            abyte[k] = (byte)abiomegenbase[k].biomeID;
+            abyte[k] = (short)abiomegenbase[k].biomeID;
         }
 
         chunk.resetRelightChecks();
