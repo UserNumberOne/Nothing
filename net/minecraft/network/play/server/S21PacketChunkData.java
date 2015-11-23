@@ -2,14 +2,11 @@ package net.minecraft.network.play.server;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-
 import java.io.IOException;
 import java.util.concurrent.Semaphore;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
-
-import ru.fewizz.idextender.Hooks;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
@@ -256,13 +253,9 @@ public class S21PacketChunkData extends Packet
 
         if (p_149269_1_)
         {
-        	//System.out.println("Отправил на: " + j + " " + abyte.length);
-        	byte[] byteArray1 = Hooks.getFirstPartOfShortArray(p_149269_0_.getBiomeArray());
-        	System.arraycopy(byteArray1, 0, abyte, j, 256);
-        	j += 256;
-        	byte[] byteArray2 = Hooks.getSecondPartOfShortArray(p_149269_0_.getBiomeArray());
-        	System.arraycopy(byteArray2, 0, abyte, j, 256);
-        	j += 256;
+            byte[] abyte2 = p_149269_0_.getBiomeArray();
+            System.arraycopy(abyte2, 0, abyte, j, abyte2.length);
+            j += abyte2.length;
         }
 
         extracted.field_150282_a = new byte[j];

@@ -113,11 +113,11 @@ public class ChunkProviderGenerate implements IChunkProvider
         this.mobSpawnerNoise = (NoiseGeneratorOctaves)noiseGens[6];
     }
 
-    public void func_147424_a(int p_147424_1_, int p_147424_2_, Block[] p_147424_3_)
+    public void func_147424_a(int x, int z, Block[] blocks)
     {
-        byte b0 = 63;
-        this.biomesForGeneration = this.worldObj.getWorldChunkManager().getBiomesForGeneration(this.biomesForGeneration, p_147424_1_ * 4 - 2, p_147424_2_ * 4 - 2, 10, 10);
-        this.func_147423_a(p_147424_1_ * 4, 0, p_147424_2_ * 4);
+        byte waterLevel = 63;
+        this.biomesForGeneration = this.worldObj.getWorldChunkManager().getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
+        this.func_147423_a(x * 4, 0, z * 4);
 
         for (int k = 0; k < 4; ++k)
         {
@@ -164,15 +164,15 @@ public class ChunkProviderGenerate implements IChunkProvider
                             {
                                 if ((d15 += d16) > 0.0D)
                                 {
-                                    p_147424_3_[j3 += short1] = Blocks.stone;
+                                    blocks[j3 += short1] = Blocks.stone;
                                 }
-                                else if (k2 * 8 + l2 < b0)
+                                else if (k2 * 8 + l2 < waterLevel)
                                 {
-                                    p_147424_3_[j3 += short1] = Blocks.water;
+                                    blocks[j3 += short1] = Blocks.water;
                                 }
                                 else
                                 {
-                                    p_147424_3_[j3 += short1] = null;
+                                    blocks[j3 += short1] = null;
                                 }
                             }
 
@@ -190,21 +190,21 @@ public class ChunkProviderGenerate implements IChunkProvider
         }
     }
 
-    public void replaceBlocksForBiome(int p_147422_1_, int p_147422_2_, Block[] p_147422_3_, byte[] p_147422_4_, BiomeGenBase[] p_147422_5_)
+    public void replaceBlocksForBiome(int x, int z, Block[] blockArray, byte[] byteArray, BiomeGenBase[] biomeArray)
     {
-        ChunkProviderEvent.ReplaceBiomeBlocks event = new ChunkProviderEvent.ReplaceBiomeBlocks(this, p_147422_1_, p_147422_2_, p_147422_3_, p_147422_4_, p_147422_5_, this.worldObj);
+        ChunkProviderEvent.ReplaceBiomeBlocks event = new ChunkProviderEvent.ReplaceBiomeBlocks(this, x, z, blockArray, byteArray, biomeArray, this.worldObj);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.getResult() == Result.DENY) return;
 
         double d0 = 0.03125D;
-        this.stoneNoise = this.field_147430_m.func_151599_a(this.stoneNoise, (double)(p_147422_1_ * 16), (double)(p_147422_2_ * 16), 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
+        this.stoneNoise = this.field_147430_m.func_151599_a(this.stoneNoise, (double)(x * 16), (double)(z * 16), 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
 
         for (int k = 0; k < 16; ++k)
         {
             for (int l = 0; l < 16; ++l)
             {
-                BiomeGenBase biomegenbase = p_147422_5_[l + k * 16];
-                biomegenbase.genTerrainBlocks(this.worldObj, this.rand, p_147422_3_, p_147422_4_, p_147422_1_ * 16 + k, p_147422_2_ * 16 + l, this.stoneNoise[l + k * 16]);
+                BiomeGenBase biomegenbase = biomeArray[l + k * 16];
+                biomegenbase.genTerrainBlocks(this.worldObj, this.rand, blockArray, byteArray, x * 16 + k, z * 16 + l, this.stoneNoise[l + k * 16]);
             }
         }
     }
@@ -241,27 +241,27 @@ public class ChunkProviderGenerate implements IChunkProvider
         }
 
         Chunk chunk = new Chunk(this.worldObj, ablock, abyte, x, z);
-        short[] abyte1 = chunk.getBiomeArray();
+        byte[] abyte1 = chunk.getBiomeArray();
 
         for (int k = 0; k < abyte1.length; ++k)
         {
-            abyte1[k] = (short) this.biomesForGeneration[k].biomeID;
+            abyte1[k] = (byte)this.biomesForGeneration[k].biomeID;
         }
 
         chunk.generateSkylightMap();
         return chunk;
     }
 
-    private void func_147423_a(int p_147423_1_, int p_147423_2_, int p_147423_3_)
+    private void func_147423_a(int x, int int1, int z)
     {
         double d0 = 684.412D;
         double d1 = 684.412D;
         double d2 = 512.0D;
         double d3 = 512.0D;
-        this.field_147426_g = this.noiseGen6.generateNoiseOctaves(this.field_147426_g, p_147423_1_, p_147423_3_, 5, 5, 200.0D, 200.0D, 0.5D);
-        this.field_147427_d = this.field_147429_l.generateNoiseOctaves(this.field_147427_d, p_147423_1_, p_147423_2_, p_147423_3_, 5, 33, 5, 8.555150000000001D, 4.277575000000001D, 8.555150000000001D);
-        this.field_147428_e = this.field_147431_j.generateNoiseOctaves(this.field_147428_e, p_147423_1_, p_147423_2_, p_147423_3_, 5, 33, 5, 684.412D, 684.412D, 684.412D);
-        this.field_147425_f = this.field_147432_k.generateNoiseOctaves(this.field_147425_f, p_147423_1_, p_147423_2_, p_147423_3_, 5, 33, 5, 684.412D, 684.412D, 684.412D);
+        this.field_147426_g = this.noiseGen6.generateNoiseOctaves(this.field_147426_g, x, z, 5, 5, 200.0D, 200.0D, 0.5D);
+        this.field_147427_d = this.field_147429_l.generateNoiseOctaves(this.field_147427_d, x, int1, z, 5, 33, 5, 8.555150000000001D, 4.277575000000001D, 8.555150000000001D);
+        this.field_147428_e = this.field_147431_j.generateNoiseOctaves(this.field_147428_e, x, int1, z, 5, 33, 5, 684.412D, 684.412D, 684.412D);
+        this.field_147425_f = this.field_147432_k.generateNoiseOctaves(this.field_147425_f, x, int1, z, 5, 33, 5, 684.412D, 684.412D, 684.412D);
         boolean flag1 = false;
         boolean flag = false;
         int l = 0;

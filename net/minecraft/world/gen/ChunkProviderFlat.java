@@ -147,7 +147,7 @@ public class ChunkProviderFlat implements IChunkProvider
 
         chunk.generateSkylightMap();
         BiomeGenBase[] abiomegenbase = this.worldObj.getWorldChunkManager().loadBlockGeneratorData((BiomeGenBase[])null, p_73154_1_ * 16, p_73154_2_ * 16, 16, 16);
-        short[] abyte = chunk.getBiomeArray();
+        byte[] abyte = chunk.getBiomeArray();
 
         for (l = 0; l < abyte.length; ++l)
         {

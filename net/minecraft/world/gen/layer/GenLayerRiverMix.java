@@ -48,7 +48,7 @@ public class GenLayerRiverMix extends GenLayer
                     }
                     else if (aint[i1] != BiomeGenBase.mushroomIsland.biomeID && aint[i1] != BiomeGenBase.mushroomIslandShore.biomeID)
                     {
-                        aint2[i1] = aint1[i1] & 0xffff;
+                        aint2[i1] = aint1[i1] & 255;
                     }
                     else
                     {

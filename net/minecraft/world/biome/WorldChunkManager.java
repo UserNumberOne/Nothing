@@ -21,7 +21,7 @@ import static net.minecraft.world.biome.BiomeGenBase.*;
 public class WorldChunkManager
 {
     public static ArrayList<BiomeGenBase> allowedBiomes = new ArrayList<BiomeGenBase>(Arrays.asList(forest, plains, taiga, taigaHills, forestHills, jungle, jungleHills));
-    private GenLayer genBiomes;
+    private GenLayer genRiverMix;
     /** A GenLayer containing the indices into BiomeGenBase.biomeList[] */
     private GenLayer biomeIndexLayer;
     /** The BiomeCache object for this world. */
@@ -42,7 +42,7 @@ public class WorldChunkManager
         this();
         GenLayer[] genLayers = GenLayer.initializeAllBiomeGenerators(seed, worldType);
         genLayers = getModdedBiomeGenerators(worldType, seed, genLayers);
-        this.genBiomes = genLayers[0];
+        this.genRiverMix = genLayers[0];
         this.biomeIndexLayer = genLayers[1];
     }
 
@@ -104,7 +104,6 @@ public class WorldChunkManager
                 crashreportcategory.addCrashSection("z", Integer.valueOf(z));
                 crashreportcategory.addCrashSection("w", Integer.valueOf(width));
                 crashreportcategory.addCrashSection("h", Integer.valueOf(length));
-                crashreportcategory.addCrashSection("BIL", this.biomeIndexLayer.toString());
                 throw new ReportedException(crashreport);
             }
         }
@@ -124,35 +123,35 @@ public class WorldChunkManager
     /**
      * Returns an array of biomes for the location input.
      */
-    public BiomeGenBase[] getBiomesForGeneration(BiomeGenBase[] p_76937_1_, int p_76937_2_, int p_76937_3_, int p_76937_4_, int p_76937_5_)
+    public BiomeGenBase[] getBiomesForGeneration(BiomeGenBase[] listToReuse, int x, int z, int width, int length)
     {
         IntCache.resetIntCache();
 
-        if (p_76937_1_ == null || p_76937_1_.length < p_76937_4_ * p_76937_5_)
+        if (listToReuse == null || listToReuse.length < width * length)
         {
-            p_76937_1_ = new BiomeGenBase[p_76937_4_ * p_76937_5_];
+            listToReuse = new BiomeGenBase[width * length];
         }
 
-        int[] aint = this.genBiomes.getInts(p_76937_2_, p_76937_3_, p_76937_4_, p_76937_5_);
+        int[] aint = this.genRiverMix.getInts(x, z, width, length);
 
         try
         {
-            for (int i1 = 0; i1 < p_76937_4_ * p_76937_5_; ++i1)
+            for (int i1 = 0; i1 < width * length; ++i1)
             {
-                p_76937_1_[i1] = BiomeGenBase.getBiome(aint[i1]);
+                listToReuse[i1] = BiomeGenBase.getBiome(aint[i1]);
             }
 
-            return p_76937_1_;
+            return listToReuse;
         }
         catch (Throwable throwable)
         {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Invalid Biome id");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("RawBiomeBlock");
-            crashreportcategory.addCrashSection("biomes[] size", Integer.valueOf(p_76937_1_.length));
-            crashreportcategory.addCrashSection("x", Integer.valueOf(p_76937_2_));
-            crashreportcategory.addCrashSection("z", Integer.valueOf(p_76937_3_));
-            crashreportcategory.addCrashSection("w", Integer.valueOf(p_76937_4_));
-            crashreportcategory.addCrashSection("h", Integer.valueOf(p_76937_5_));
+            crashreportcategory.addCrashSection("biomes[] size", Integer.valueOf(listToReuse.length));
+            crashreportcategory.addCrashSection("x", Integer.valueOf(x));
+            crashreportcategory.addCrashSection("z", Integer.valueOf(z));
+            crashreportcategory.addCrashSection("w", Integer.valueOf(width));
+            crashreportcategory.addCrashSection("h", Integer.valueOf(length));
             throw new ReportedException(crashreport);
         }
     }
@@ -210,7 +209,7 @@ public class WorldChunkManager
         int k1 = p_76940_2_ + p_76940_3_ >> 2;
         int l1 = j1 - l + 1;
         int i2 = k1 - i1 + 1;
-        int[] aint = this.genBiomes.getInts(l, i1, l1, i2);
+        int[] aint = this.genRiverMix.getInts(l, i1, l1, i2);
 
         try
         {
@@ -230,7 +229,7 @@ public class WorldChunkManager
         {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Invalid Biome id");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Layer");
-            crashreportcategory.addCrashSection("Layer", this.genBiomes.toString());
+            crashreportcategory.addCrashSection("Layer", this.genRiverMix.toString());
             crashreportcategory.addCrashSection("x", Integer.valueOf(p_76940_1_));
             crashreportcategory.addCrashSection("z", Integer.valueOf(p_76940_2_));
             crashreportcategory.addCrashSection("radius", Integer.valueOf(p_76940_3_));
@@ -248,7 +247,7 @@ public class WorldChunkManager
         int k1 = p_150795_2_ + p_150795_3_ >> 2;
         int l1 = j1 - l + 1;
         int i2 = k1 - i1 + 1;
-        int[] aint = this.genBiomes.getInts(l, i1, l1, i2);
+        int[] aint = this.genRiverMix.getInts(l, i1, l1, i2);
         ChunkPosition chunkposition = null;
         int j2 = 0;
 

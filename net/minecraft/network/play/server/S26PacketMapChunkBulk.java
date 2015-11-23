@@ -142,7 +142,7 @@ public class S26PacketMapChunkBulk extends Packet
                 l += this.field_149262_d[j] >> i1 & 1;
             }
 
-            i1 = 2048 * 4 * k + 512;
+            i1 = 2048 * 4 * k + 256;
             i1 += 2048 * l;
 
             if (this.field_149267_h)
