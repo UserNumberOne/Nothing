@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketPlayer implements Packet {
    protected double x;
@@ -17,44 +15,36 @@ public class CPacketPlayer implements Packet {
    protected boolean moving;
    protected boolean rotating;
 
-   public CPacketPlayer() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketPlayer(boolean var1) {
-      this.onGround = onGroundIn;
-   }
-
    public void processPacket(INetHandlerPlayServer var1) {
-      handler.processPlayer(this);
+      var1.processPlayer(this);
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.onGround = buf.readUnsignedByte() != 0;
+      this.onGround = var1.readUnsignedByte() != 0;
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeByte(this.onGround ? 1 : 0);
+      var1.writeByte(this.onGround ? 1 : 0);
    }
 
    public double getX(double var1) {
-      return this.moving ? this.x : defaultValue;
+      return this.moving ? this.x : var1;
    }
 
    public double getY(double var1) {
-      return this.moving ? this.y : defaultValue;
+      return this.moving ? this.y : var1;
    }
 
    public double getZ(double var1) {
-      return this.moving ? this.z : defaultValue;
+      return this.moving ? this.z : var1;
    }
 
    public float getYaw(float var1) {
-      return this.rotating ? this.yaw : defaultValue;
+      return this.rotating ? this.yaw : var1;
    }
 
    public float getPitch(float var1) {
-      return this.rotating ? this.pitch : defaultValue;
+      return this.rotating ? this.pitch : var1;
    }
 
    public boolean isOnGround() {
@@ -66,27 +56,18 @@ public class CPacketPlayer implements Packet {
          this.moving = true;
       }
 
-      @SideOnly(Side.CLIENT)
-      public Position(double var1, double var3, double var5, boolean var7) {
-         this.x = xIn;
-         this.y = yIn;
-         this.z = zIn;
-         this.onGround = onGroundIn;
-         this.moving = true;
-      }
-
       public void readPacketData(PacketBuffer var1) throws IOException {
-         this.x = buf.readDouble();
-         this.y = buf.readDouble();
-         this.z = buf.readDouble();
-         super.readPacketData(buf);
+         this.x = var1.readDouble();
+         this.y = var1.readDouble();
+         this.z = var1.readDouble();
+         super.readPacketData(var1);
       }
 
       public void writePacketData(PacketBuffer var1) throws IOException {
-         buf.writeDouble(this.x);
-         buf.writeDouble(this.y);
-         buf.writeDouble(this.z);
-         super.writePacketData(buf);
+         var1.writeDouble(this.x);
+         var1.writeDouble(this.y);
+         var1.writeDouble(this.z);
+         super.writePacketData(var1);
       }
    }
 
@@ -96,34 +77,22 @@ public class CPacketPlayer implements Packet {
          this.rotating = true;
       }
 
-      @SideOnly(Side.CLIENT)
-      public PositionRotation(double var1, double var3, double var5, float var7, float var8, boolean var9) {
-         this.x = xIn;
-         this.y = yIn;
-         this.z = zIn;
-         this.yaw = yawIn;
-         this.pitch = pitchIn;
-         this.onGround = onGroundIn;
-         this.rotating = true;
-         this.moving = true;
-      }
-
       public void readPacketData(PacketBuffer var1) throws IOException {
-         this.x = buf.readDouble();
-         this.y = buf.readDouble();
-         this.z = buf.readDouble();
-         this.yaw = buf.readFloat();
-         this.pitch = buf.readFloat();
-         super.readPacketData(buf);
+         this.x = var1.readDouble();
+         this.y = var1.readDouble();
+         this.z = var1.readDouble();
+         this.yaw = var1.readFloat();
+         this.pitch = var1.readFloat();
+         super.readPacketData(var1);
       }
 
       public void writePacketData(PacketBuffer var1) throws IOException {
-         buf.writeDouble(this.x);
-         buf.writeDouble(this.y);
-         buf.writeDouble(this.z);
-         buf.writeFloat(this.yaw);
-         buf.writeFloat(this.pitch);
-         super.writePacketData(buf);
+         var1.writeDouble(this.x);
+         var1.writeDouble(this.y);
+         var1.writeDouble(this.z);
+         var1.writeFloat(this.yaw);
+         var1.writeFloat(this.pitch);
+         super.writePacketData(var1);
       }
    }
 
@@ -132,24 +101,16 @@ public class CPacketPlayer implements Packet {
          this.rotating = true;
       }
 
-      @SideOnly(Side.CLIENT)
-      public Rotation(float var1, float var2, boolean var3) {
-         this.yaw = yawIn;
-         this.pitch = pitchIn;
-         this.onGround = onGroundIn;
-         this.rotating = true;
-      }
-
       public void readPacketData(PacketBuffer var1) throws IOException {
-         this.yaw = buf.readFloat();
-         this.pitch = buf.readFloat();
-         super.readPacketData(buf);
+         this.yaw = var1.readFloat();
+         this.pitch = var1.readFloat();
+         super.readPacketData(var1);
       }
 
       public void writePacketData(PacketBuffer var1) throws IOException {
-         buf.writeFloat(this.yaw);
-         buf.writeFloat(this.pitch);
-         super.writePacketData(buf);
+         var1.writeFloat(this.yaw);
+         var1.writeFloat(this.pitch);
+         super.writePacketData(var1);
       }
    }
 }

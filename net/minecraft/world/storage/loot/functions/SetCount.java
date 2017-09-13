@@ -15,13 +15,13 @@ public class SetCount extends LootFunction {
    private final RandomValueRange countRange;
 
    public SetCount(LootCondition[] var1, RandomValueRange var2) {
-      super(conditionsIn);
-      this.countRange = countRangeIn;
+      super(var1);
+      this.countRange = var2;
    }
 
    public ItemStack apply(ItemStack var1, Random var2, LootContext var3) {
-      stack.stackSize = this.countRange.generateInt(rand);
-      return stack;
+      var1.stackSize = this.countRange.generateInt(var2);
+      return var1;
    }
 
    public static class Serializer extends LootFunction.Serializer {
@@ -30,11 +30,16 @@ public class SetCount extends LootFunction {
       }
 
       public void serialize(JsonObject var1, SetCount var2, JsonSerializationContext var3) {
-         object.add("count", serializationContext.serialize(functionClazz.countRange));
+         var1.add("count", var3.serialize(var2.countRange));
       }
 
       public SetCount deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
-         return new SetCount(conditionsIn, (RandomValueRange)JsonUtils.deserializeClass(object, "count", deserializationContext, RandomValueRange.class));
+         return new SetCount(var3, (RandomValueRange)JsonUtils.deserializeClass(var1, "count", var2, RandomValueRange.class));
+      }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

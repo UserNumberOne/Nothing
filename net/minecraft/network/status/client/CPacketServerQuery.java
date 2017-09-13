@@ -13,6 +13,6 @@ public class CPacketServerQuery implements Packet {
    }
 
    public void processPacket(INetHandlerStatusServer var1) {
-      handler.processServerQuery(this);
+      var1.processServerQuery(this);
    }
 }

@@ -24,33 +24,33 @@ public class ItemFood extends Item {
 
    public ItemFood(int var1, float var2, boolean var3) {
       this.itemUseDuration = 32;
-      this.healAmount = amount;
-      this.isWolfsFavoriteMeat = isWolfFood;
-      this.saturationModifier = saturation;
+      this.healAmount = var1;
+      this.isWolfsFavoriteMeat = var3;
+      this.saturationModifier = var2;
       this.setCreativeTab(CreativeTabs.FOOD);
    }
 
    public ItemFood(int var1, boolean var2) {
-      this(amount, 0.6F, isWolfFood);
+      this(var1, 0.6F, var2);
    }
 
    @Nullable
    public ItemStack onItemUseFinish(ItemStack var1, World var2, EntityLivingBase var3) {
-      --stack.stackSize;
-      if (entityLiving instanceof EntityPlayer) {
-         EntityPlayer entityplayer = (EntityPlayer)entityLiving;
-         entityplayer.getFoodStats().addStats(this, stack);
-         worldIn.playSound((EntityPlayer)null, entityplayer.posX, entityplayer.posY, entityplayer.posZ, SoundEvents.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 0.5F, worldIn.rand.nextFloat() * 0.1F + 0.9F);
-         this.onFoodEaten(stack, worldIn, entityplayer);
-         entityplayer.addStat(StatList.getObjectUseStats(this));
+      --var1.stackSize;
+      if (var3 instanceof EntityPlayer) {
+         EntityPlayer var4 = (EntityPlayer)var3;
+         var4.getFoodStats().addStats(this, var1);
+         var2.playSound((EntityPlayer)null, var4.posX, var4.posY, var4.posZ, SoundEvents.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 0.5F, var2.rand.nextFloat() * 0.1F + 0.9F);
+         this.onFoodEaten(var1, var2, var4);
+         var4.addStat(StatList.getObjectUseStats(this));
       }
 
-      return stack;
+      return var1;
    }
 
    protected void onFoodEaten(ItemStack var1, World var2, EntityPlayer var3) {
-      if (!worldIn.isRemote && this.potionId != null && worldIn.rand.nextFloat() < this.potionEffectProbability) {
-         player.addPotionEffect(new PotionEffect(this.potionId));
+      if (!var2.isRemote && this.potionId != null && var2.rand.nextFloat() < this.potionEffectProbability) {
+         var3.addPotionEffect(new PotionEffect(this.potionId));
       }
 
    }
@@ -64,11 +64,11 @@ public class ItemFood extends Item {
    }
 
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      if (playerIn.canEat(this.alwaysEdible)) {
-         playerIn.setActiveHand(hand);
-         return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
+      if (var3.canEat(this.alwaysEdible)) {
+         var3.setActiveHand(var4);
+         return new ActionResult(EnumActionResult.SUCCESS, var1);
       } else {
-         return new ActionResult(EnumActionResult.FAIL, itemStackIn);
+         return new ActionResult(EnumActionResult.FAIL, var1);
       }
    }
 
@@ -85,8 +85,8 @@ public class ItemFood extends Item {
    }
 
    public ItemFood setPotionEffect(PotionEffect var1, float var2) {
-      this.potionId = p_185070_1_;
-      this.potionEffectProbability = p_185070_2_;
+      this.potionId = var1;
+      this.potionEffectProbability = var2;
       return this;
    }
 

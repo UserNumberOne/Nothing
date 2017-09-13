@@ -6,14 +6,14 @@ public class UserListEntry {
    private final Object value;
 
    public UserListEntry(Object var1) {
-      this.value = valueIn;
+      this.value = var1;
    }
 
    protected UserListEntry(Object var1, JsonObject var2) {
-      this.value = valueIn;
+      this.value = var1;
    }
 
-   Object getValue() {
+   public Object getValue() {
       return this.value;
    }
 

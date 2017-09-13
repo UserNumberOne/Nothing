@@ -12,12 +12,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockWeb extends Block {
    public BlockWeb() {
@@ -26,7 +23,7 @@ public class BlockWeb extends Block {
    }
 
    public void onEntityCollidedWithBlock(World var1, BlockPos var2, IBlockState var3, Entity var4) {
-      entityIn.setInWeb();
+      var4.setInWeb();
    }
 
    public boolean isOpaqueCube(IBlockState var1) {
@@ -51,18 +48,12 @@ public class BlockWeb extends Block {
       return true;
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
-   }
-
    public void harvestBlock(World var1, EntityPlayer var2, BlockPos var3, IBlockState var4, @Nullable TileEntity var5, @Nullable ItemStack var6) {
-      if (!worldIn.isRemote && stack != null && stack.getItem() == Items.SHEARS) {
-         player.addStat(StatList.getBlockStats(this));
-         spawnAsEntity(worldIn, pos, new ItemStack(Item.getItemFromBlock(this), 1));
+      if (!var1.isRemote && var6 != null && var6.getItem() == Items.SHEARS) {
+         var2.addStat(StatList.getBlockStats(this));
+         spawnAsEntity(var1, var3, new ItemStack(Item.getItemFromBlock(this), 1));
       } else {
-         super.harvestBlock(worldIn, player, pos, state, te, stack);
+         super.harvestBlock(var1, var2, var3, var4, var5, var6);
       }
-
    }
 }

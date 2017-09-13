@@ -11,20 +11,20 @@ import net.minecraft.world.World;
 
 public abstract class BlockContainer extends Block implements ITileEntityProvider {
    protected BlockContainer(Material var1) {
-      this(materialIn, materialIn.getMaterialMapColor());
+      this(var1, var1.getMaterialMapColor());
    }
 
    protected BlockContainer(Material var1, MapColor var2) {
-      super(materialIn, color);
+      super(var1, var2);
       this.isBlockContainer = true;
    }
 
    protected boolean isInvalidNeighbor(World var1, BlockPos var2, EnumFacing var3) {
-      return worldIn.getBlockState(pos.offset(facing)).getMaterial() == Material.CACTUS;
+      return var1.getBlockState(var2.offset(var3)).getMaterial() == Material.CACTUS;
    }
 
    protected boolean hasInvalidNeighbor(World var1, BlockPos var2) {
-      return this.isInvalidNeighbor(worldIn, pos, EnumFacing.NORTH) || this.isInvalidNeighbor(worldIn, pos, EnumFacing.SOUTH) || this.isInvalidNeighbor(worldIn, pos, EnumFacing.WEST) || this.isInvalidNeighbor(worldIn, pos, EnumFacing.EAST);
+      return this.isInvalidNeighbor(var1, var2, EnumFacing.NORTH) || this.isInvalidNeighbor(var1, var2, EnumFacing.SOUTH) || this.isInvalidNeighbor(var1, var2, EnumFacing.WEST) || this.isInvalidNeighbor(var1, var2, EnumFacing.EAST);
    }
 
    public EnumBlockRenderType getRenderType(IBlockState var1) {
@@ -32,13 +32,13 @@ public abstract class BlockContainer extends Block implements ITileEntityProvide
    }
 
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      super.breakBlock(worldIn, pos, state);
-      worldIn.removeTileEntity(pos);
+      super.breakBlock(var1, var2, var3);
+      var1.removeTileEntity(var2);
    }
 
    public boolean eventReceived(IBlockState var1, World var2, BlockPos var3, int var4, int var5) {
-      super.eventReceived(state, worldIn, pos, id, param);
-      TileEntity tileentity = worldIn.getTileEntity(pos);
-      return tileentity == null ? false : tileentity.receiveClientEvent(id, param);
+      super.eventReceived(var1, var2, var3, var4, var5);
+      TileEntity var6 = var2.getTileEntity(var3);
+      return var6 == null ? false : var6.receiveClientEvent(var4, var5);
    }
 }

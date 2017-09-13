@@ -11,7 +11,7 @@ public class EntityAIFollowGolem extends EntityAIBase {
    private boolean tookGolemRose;
 
    public EntityAIFollowGolem(EntityVillager var1) {
-      this.theVillager = theVillagerIn;
+      this.theVillager = var1;
       this.setMutexBits(3);
    }
 
@@ -21,13 +21,13 @@ public class EntityAIFollowGolem extends EntityAIBase {
       } else if (!this.theVillager.world.isDaytime()) {
          return false;
       } else {
-         List list = this.theVillager.world.getEntitiesWithinAABB(EntityIronGolem.class, this.theVillager.getEntityBoundingBox().expand(6.0D, 2.0D, 6.0D));
-         if (list.isEmpty()) {
+         List var1 = this.theVillager.world.getEntitiesWithinAABB(EntityIronGolem.class, this.theVillager.getEntityBoundingBox().expand(6.0D, 2.0D, 6.0D));
+         if (var1.isEmpty()) {
             return false;
          } else {
-            for(EntityIronGolem entityirongolem : list) {
-               if (entityirongolem.getHoldRoseTick() > 0) {
-                  this.theGolem = entityirongolem;
+            for(EntityIronGolem var3 : var1) {
+               if (var3.getHoldRoseTick() > 0) {
+                  this.theGolem = var3;
                   break;
                }
             }

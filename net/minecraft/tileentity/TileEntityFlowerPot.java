@@ -16,30 +16,30 @@ public class TileEntityFlowerPot extends TileEntity {
    }
 
    public TileEntityFlowerPot(Item var1, int var2) {
-      this.flowerPotItem = potItem;
-      this.flowerPotData = potData;
+      this.flowerPotItem = var1;
+      this.flowerPotData = var2;
    }
 
    public static void registerFixesFlowerPot(DataFixer var0) {
    }
 
    public NBTTagCompound writeToNBT(NBTTagCompound var1) {
-      super.writeToNBT(compound);
-      ResourceLocation resourcelocation = (ResourceLocation)Item.REGISTRY.getNameForObject(this.flowerPotItem);
-      compound.setString("Item", resourcelocation == null ? "" : resourcelocation.toString());
-      compound.setInteger("Data", this.flowerPotData);
-      return compound;
+      super.writeToNBT(var1);
+      ResourceLocation var2 = (ResourceLocation)Item.REGISTRY.getNameForObject(this.flowerPotItem);
+      var1.setString("Item", var2 == null ? "" : var2.toString());
+      var1.setInteger("Data", this.flowerPotData);
+      return var1;
    }
 
    public void readFromNBT(NBTTagCompound var1) {
-      super.readFromNBT(compound);
-      if (compound.hasKey("Item", 8)) {
-         this.flowerPotItem = Item.getByNameOrId(compound.getString("Item"));
+      super.readFromNBT(var1);
+      if (var1.hasKey("Item", 8)) {
+         this.flowerPotItem = Item.getByNameOrId(var1.getString("Item"));
       } else {
-         this.flowerPotItem = Item.getItemById(compound.getInteger("Item"));
+         this.flowerPotItem = Item.getItemById(var1.getInteger("Item"));
       }
 
-      this.flowerPotData = compound.getInteger("Data");
+      this.flowerPotData = var1.getInteger("Data");
    }
 
    @Nullable
@@ -52,8 +52,8 @@ public class TileEntityFlowerPot extends TileEntity {
    }
 
    public void setFlowerPotData(Item var1, int var2) {
-      this.flowerPotItem = potItem;
-      this.flowerPotData = potData;
+      this.flowerPotItem = var1;
+      this.flowerPotData = var2;
    }
 
    @Nullable

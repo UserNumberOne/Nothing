@@ -7,8 +7,6 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketRespawn implements Packet {
    private int dimensionID;
@@ -20,21 +18,21 @@ public class SPacketRespawn implements Packet {
    }
 
    public SPacketRespawn(int var1, EnumDifficulty var2, WorldType var3, GameType var4) {
-      this.dimensionID = dimensionIdIn;
-      this.difficulty = difficultyIn;
-      this.gameType = gameModeIn;
-      this.worldType = worldTypeIn;
+      this.dimensionID = var1;
+      this.difficulty = var2;
+      this.gameType = var4;
+      this.worldType = var3;
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      handler.handleRespawn(this);
+      var1.handleRespawn(this);
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.dimensionID = buf.readInt();
-      this.difficulty = EnumDifficulty.getDifficultyEnum(buf.readUnsignedByte());
-      this.gameType = GameType.getByID(buf.readUnsignedByte());
-      this.worldType = WorldType.parseWorldType(buf.readString(16));
+      this.dimensionID = var1.readInt();
+      this.difficulty = EnumDifficulty.getDifficultyEnum(var1.readUnsignedByte());
+      this.gameType = GameType.getByID(var1.readUnsignedByte());
+      this.worldType = WorldType.parseWorldType(var1.readString(16));
       if (this.worldType == null) {
          this.worldType = WorldType.DEFAULT;
       }
@@ -42,29 +40,9 @@ public class SPacketRespawn implements Packet {
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeInt(this.dimensionID);
-      buf.writeByte(this.difficulty.getDifficultyId());
-      buf.writeByte(this.gameType.getID());
-      buf.writeString(this.worldType.getName());
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getDimensionID() {
-      return this.dimensionID;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EnumDifficulty getDifficulty() {
-      return this.difficulty;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public GameType getGameType() {
-      return this.gameType;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public WorldType getWorldType() {
-      return this.worldType;
+      var1.writeInt(this.dimensionID);
+      var1.writeByte(this.difficulty.getDifficultyId());
+      var1.writeByte(this.gameType.getID());
+      var1.writeString(this.worldType.getName());
    }
 }

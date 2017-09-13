@@ -4,43 +4,57 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerHopper extends Container {
    private final IInventory hopperInventory;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
 
-   public ContainerHopper(InventoryPlayer var1, IInventory var2, EntityPlayer var3) {
-      this.hopperInventory = hopperInventoryIn;
-      hopperInventoryIn.openInventory(player);
-      int i = 51;
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventory inventory = new CraftInventory(this.hopperInventory);
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
+         return this.bukkitEntity;
+      }
+   }
 
-      for(int j = 0; j < hopperInventoryIn.getSizeInventory(); ++j) {
-         this.addSlotToContainer(new Slot(hopperInventoryIn, j, 44 + j * 18, 20));
+   public ContainerHopper(InventoryPlayer playerinventory, IInventory iinventory, EntityPlayer entityhuman) {
+      this.hopperInventory = iinventory;
+      this.player = playerinventory;
+      iinventory.openInventory(entityhuman);
+
+      for(int i = 0; i < iinventory.getSizeInventory(); ++i) {
+         this.addSlotToContainer(new Slot(iinventory, i, 44 + i * 18, 20));
       }
 
-      for(int l = 0; l < 3; ++l) {
-         for(int k = 0; k < 9; ++k) {
-            this.addSlotToContainer(new Slot(playerInventory, k + l * 9 + 9, 8 + k * 18, l * 18 + 51));
+      for(int var6 = 0; var6 < 3; ++var6) {
+         for(int j = 0; j < 9; ++j) {
+            this.addSlotToContainer(new Slot(playerinventory, j + var6 * 9 + 9, 8 + j * 18, var6 * 18 + 51));
          }
       }
 
-      for(int i1 = 0; i1 < 9; ++i1) {
-         this.addSlotToContainer(new Slot(playerInventory, i1, 8 + i1 * 18, 109));
+      for(int var7 = 0; var7 < 9; ++var7) {
+         this.addSlotToContainer(new Slot(playerinventory, var7, 8 + var7 * 18, 109));
       }
 
    }
 
-   public boolean canInteractWith(EntityPlayer var1) {
-      return this.hopperInventory.isUsableByPlayer(playerIn);
+   public boolean canInteractWith(EntityPlayer entityhuman) {
+      return !this.checkReachable ? true : this.hopperInventory.isUsableByPlayer(entityhuman);
    }
 
    @Nullable
-   public ItemStack transferStackInSlot(EntityPlayer var1, int var2) {
+   public ItemStack transferStackInSlot(EntityPlayer entityhuman, int i) {
       ItemStack itemstack = null;
-      Slot slot = (Slot)this.inventorySlots.get(index);
+      Slot slot = (Slot)this.inventorySlots.get(i);
       if (slot != null && slot.getHasStack()) {
          ItemStack itemstack1 = slot.getStack();
          itemstack = itemstack1.copy();
-         if (index < this.hopperInventory.getSizeInventory()) {
+         if (i < this.hopperInventory.getSizeInventory()) {
             if (!this.mergeItemStack(itemstack1, this.hopperInventory.getSizeInventory(), this.inventorySlots.size(), true)) {
                return null;
             }
@@ -58,8 +72,8 @@ public class ContainerHopper extends Container {
       return itemstack;
    }
 
-   public void onContainerClosed(EntityPlayer var1) {
-      super.onContainerClosed(playerIn);
-      this.hopperInventory.closeInventory(playerIn);
+   public void onContainerClosed(EntityPlayer entityhuman) {
+      super.onContainerClosed(entityhuman);
+      this.hopperInventory.closeInventory(entityhuman);
    }
 }

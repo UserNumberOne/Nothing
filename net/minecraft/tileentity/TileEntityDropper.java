@@ -6,7 +6,7 @@ import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 
 public class TileEntityDropper extends TileEntityDispenser {
    public static void registerFixesDropper(DataFixer var0) {
-      fixer.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists("Dropper", new String[]{"Items"}));
+      var0.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists("Dropper", new String[]{"Items"}));
    }
 
    public String getName() {

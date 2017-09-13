@@ -11,24 +11,24 @@ public class PotionItems implements IFixableData {
    }
 
    public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
-      if ("minecraft:potion".equals(compound.getString("id"))) {
-         NBTTagCompound nbttagcompound = compound.getCompoundTag("tag");
-         short short1 = compound.getShort("Damage");
-         if (!nbttagcompound.hasKey("Potion", 8)) {
-            String s = POTION_IDS[short1 & 127];
-            nbttagcompound.setString("Potion", s == null ? "minecraft:water" : s);
-            compound.setTag("tag", nbttagcompound);
-            if ((short1 & 16384) == 16384) {
-               compound.setString("id", "minecraft:splash_potion");
+      if ("minecraft:potion".equals(var1.getString("id"))) {
+         NBTTagCompound var2 = var1.getCompoundTag("tag");
+         short var3 = var1.getShort("Damage");
+         if (!var2.hasKey("Potion", 8)) {
+            String var4 = POTION_IDS[var3 & 127];
+            var2.setString("Potion", var4 == null ? "minecraft:water" : var4);
+            var1.setTag("tag", var2);
+            if ((var3 & 16384) == 16384) {
+               var1.setString("id", "minecraft:splash_potion");
             }
          }
 
-         if (short1 != 0) {
-            compound.setShort("Damage", (short)0);
+         if (var3 != 0) {
+            var1.setShort("Damage", (short)0);
          }
       }
 
-      return compound;
+      return var1;
    }
 
    static {

@@ -10,10 +10,10 @@ public class StringToUUID implements IFixableData {
    }
 
    public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
-      if (compound.hasKey("UUID", 8)) {
-         compound.setUniqueId("UUID", UUID.fromString(compound.getString("UUID")));
+      if (var1.hasKey("UUID", 8)) {
+         var1.setUniqueId("UUID", UUID.fromString(var1.getString("UUID")));
       }
 
-      return compound;
+      return var1;
    }
 }

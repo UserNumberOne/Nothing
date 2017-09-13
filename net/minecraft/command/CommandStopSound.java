@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketCustomPayload;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -26,47 +26,53 @@ public class CommandStopSound extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length >= 1 && args.length <= 3) {
-         int i = 0;
-         EntityPlayerMP entityplayermp = getPlayer(server, sender, args[i++]);
-         String s = "";
-         String s1 = "";
-         if (args.length >= 2) {
-            String s2 = args[i++];
-            SoundCategory soundcategory = SoundCategory.getByName(s2);
-            if (soundcategory == null) {
-               throw new CommandException("commands.stopsound.unknownSoundSource", new Object[]{s2});
+      if (var3.length >= 1 && var3.length <= 3) {
+         int var4 = 0;
+         EntityPlayerMP var5 = a(var1, var2, var3[var4++]);
+         String var6 = "";
+         String var7 = "";
+         if (var3.length >= 2) {
+            String var8 = var3[var4++];
+            SoundCategory var9 = SoundCategory.getByName(var8);
+            if (var9 == null) {
+               throw new CommandException("commands.stopsound.unknownSoundSource", new Object[]{var8});
             }
 
-            s = soundcategory.getName();
+            var6 = var9.getName();
          }
 
-         if (args.length == 3) {
-            s1 = args[i++];
+         if (var3.length == 3) {
+            var7 = var3[var4++];
          }
 
-         PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
-         packetbuffer.writeString(s);
-         packetbuffer.writeString(s1);
-         entityplayermp.connection.sendPacket(new SPacketCustomPayload("MC|StopSound", packetbuffer));
-         if (s.isEmpty() && s1.isEmpty()) {
-            notifyCommandListener(sender, this, "commands.stopsound.success.all", new Object[]{entityplayermp.getName()});
-         } else if (s1.isEmpty()) {
-            notifyCommandListener(sender, this, "commands.stopsound.success.soundSource", new Object[]{s, entityplayermp.getName()});
+         PacketBuffer var12 = new PacketBuffer(Unpooled.buffer());
+         var12.writeString(var6);
+         var12.writeString(var7);
+         var5.connection.sendPacket(new SPacketCustomPayload("MC|StopSound", var12));
+         if (var6.isEmpty() && var7.isEmpty()) {
+            notifyCommandListener(var2, this, "commands.stopsound.success.all", new Object[]{var5.getName()});
+         } else if (var7.isEmpty()) {
+            notifyCommandListener(var2, this, "commands.stopsound.success.soundSource", new Object[]{var6, var5.getName()});
          } else {
-            notifyCommandListener(sender, this, "commands.stopsound.success.individualSound", new Object[]{s1, s, entityplayermp.getName()});
+            notifyCommandListener(var2, this, "commands.stopsound.success.individualSound", new Object[]{var7, var6, var5.getName()});
          }
 
       } else {
-         throw new WrongUsageException(this.getUsage(sender), new Object[0]);
+         throw new WrongUsageException(this.getUsage(var2), new Object[0]);
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : (args.length == 2 ? getListOfStringsMatchingLastWord(args, SoundCategory.getSoundCategoryNames()) : (args.length == 3 ? getListOfStringsMatchingLastWord(args, SoundEvent.REGISTRY.getKeys()) : Collections.emptyList()));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else if (var3.length == 2) {
+         return getListOfStringsMatchingLastWord(var3, SoundCategory.getSoundCategoryNames());
+      } else {
+         return var3.length == 3 ? getListOfStringsMatchingLastWord(var3, SoundEvent.REGISTRY.getKeys()) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return index == 0;
+      return var2 == 0;
    }
 }

@@ -12,11 +12,11 @@ public class RandomChance implements LootCondition {
    private final float chance;
 
    public RandomChance(float var1) {
-      this.chance = chanceIn;
+      this.chance = var1;
    }
 
    public boolean testCondition(Random var1, LootContext var2) {
-      return rand.nextFloat() < this.chance;
+      return var1.nextFloat() < this.chance;
    }
 
    public static class Serializer extends LootCondition.Serializer {
@@ -25,11 +25,16 @@ public class RandomChance implements LootCondition {
       }
 
       public void serialize(JsonObject var1, RandomChance var2, JsonSerializationContext var3) {
-         json.addProperty("chance", Float.valueOf(value.chance));
+         var1.addProperty("chance", Float.valueOf(var2.chance));
       }
 
       public RandomChance deserialize(JsonObject var1, JsonDeserializationContext var2) {
-         return new RandomChance(JsonUtils.getFloat(json, "chance"));
+         return new RandomChance(JsonUtils.getFloat(var1, "chance"));
+      }
+
+      // $FF: synthetic method
+      public LootCondition deserialize(JsonObject var1, JsonDeserializationContext var2) {
+         return this.deserialize(var1, var2);
       }
    }
 }

@@ -14,7 +14,7 @@ public abstract class PhaseBase implements IPhase {
    protected final EntityDragon dragon;
 
    public PhaseBase(EntityDragon var1) {
-      this.dragon = dragonIn;
+      this.dragon = var1;
    }
 
    public boolean getIsStationary() {
@@ -46,12 +46,12 @@ public abstract class PhaseBase implements IPhase {
    }
 
    public float getAdjustedDamage(EntityDragonPart var1, DamageSource var2, float var3) {
-      return damage;
+      return var3;
    }
 
    public float getYawFactor() {
-      float f = MathHelper.sqrt(this.dragon.motionX * this.dragon.motionX + this.dragon.motionZ * this.dragon.motionZ) + 1.0F;
-      float f1 = Math.min(f, 40.0F);
-      return 0.7F / f1 / f;
+      float var1 = MathHelper.sqrt(this.dragon.motionX * this.dragon.motionX + this.dragon.motionZ * this.dragon.motionZ) + 1.0F;
+      float var2 = Math.min(var1, 40.0F);
+      return 0.7F / var2 / var1;
    }
 }

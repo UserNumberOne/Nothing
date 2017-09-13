@@ -4,7 +4,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentWaterWorker extends Enchantment {
    public EnchantmentWaterWorker(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
-      super(rarityIn, EnumEnchantmentType.ARMOR_HEAD, slots);
+      super(var1, EnumEnchantmentType.ARMOR_HEAD, var2);
       this.setName("waterWorker");
    }
 
@@ -13,7 +13,7 @@ public class EnchantmentWaterWorker extends Enchantment {
    }
 
    public int getMaxEnchantability(int var1) {
-      return this.getMinEnchantability(enchantmentLevel) + 40;
+      return this.getMinEnchantability(var1) + 40;
    }
 
    public int getMaxLevel() {

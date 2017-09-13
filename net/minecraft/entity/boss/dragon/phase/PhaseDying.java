@@ -12,15 +12,15 @@ public class PhaseDying extends PhaseBase {
    private int time;
 
    public PhaseDying(EntityDragon var1) {
-      super(dragonIn);
+      super(var1);
    }
 
    public void doClientRenderEffects() {
       if (this.time++ % 10 == 0) {
-         float f = (this.dragon.getRNG().nextFloat() - 0.5F) * 8.0F;
-         float f1 = (this.dragon.getRNG().nextFloat() - 0.5F) * 4.0F;
-         float f2 = (this.dragon.getRNG().nextFloat() - 0.5F) * 8.0F;
-         this.dragon.world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.dragon.posX + (double)f, this.dragon.posY + 2.0D + (double)f1, this.dragon.posZ + (double)f2, 0.0D, 0.0D, 0.0D);
+         float var1 = (this.dragon.getRNG().nextFloat() - 0.5F) * 8.0F;
+         float var2 = (this.dragon.getRNG().nextFloat() - 0.5F) * 4.0F;
+         float var3 = (this.dragon.getRNG().nextFloat() - 0.5F) * 8.0F;
+         this.dragon.world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.dragon.posX + (double)var1, this.dragon.posY + 2.0D + (double)var2, this.dragon.posZ + (double)var3, 0.0D, 0.0D, 0.0D);
       }
 
    }
@@ -28,12 +28,12 @@ public class PhaseDying extends PhaseBase {
    public void doLocalUpdate() {
       ++this.time;
       if (this.targetLocation == null) {
-         BlockPos blockpos = this.dragon.world.getHeight(WorldGenEndPodium.END_PODIUM_LOCATION);
-         this.targetLocation = new Vec3d((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
+         BlockPos var1 = this.dragon.world.getHeight(WorldGenEndPodium.END_PODIUM_LOCATION);
+         this.targetLocation = new Vec3d((double)var1.getX(), (double)var1.getY(), (double)var1.getZ());
       }
 
-      double d0 = this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
-      if (d0 >= 100.0D && d0 <= 22500.0D && !this.dragon.isCollidedHorizontally && !this.dragon.isCollidedVertically) {
+      double var2 = this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
+      if (var2 >= 100.0D && var2 <= 22500.0D && !this.dragon.isCollidedHorizontally && !this.dragon.isCollidedVertically) {
          this.dragon.setHealth(1.0F);
       } else {
          this.dragon.setHealth(0.0F);

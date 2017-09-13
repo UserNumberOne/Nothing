@@ -6,11 +6,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockFalling extends Block {
    public static boolean fallInstantly;
@@ -21,48 +18,47 @@ public class BlockFalling extends Block {
    }
 
    public BlockFalling(Material var1) {
-      super(materialIn);
+      super(var1);
    }
 
    public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
-      worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+      var1.scheduleUpdate(var2, this, this.tickRate(var1));
    }
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+      var2.scheduleUpdate(var3, this, this.tickRate(var2));
    }
 
    public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
-      if (!worldIn.isRemote) {
-         this.checkFallable(worldIn, pos);
+      if (!var1.isRemote) {
+         this.checkFallable(var1, var2);
       }
 
    }
 
    private void checkFallable(World var1, BlockPos var2) {
-      if ((worldIn.isAirBlock(pos.down()) || canFallThrough(worldIn.getBlockState(pos.down()))) && pos.getY() >= 0) {
-         int i = 32;
-         if (!fallInstantly && worldIn.isAreaLoaded(pos.add(-32, -32, -32), pos.add(32, 32, 32))) {
-            if (!worldIn.isRemote) {
-               EntityFallingBlock entityfallingblock = new EntityFallingBlock(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY(), (double)pos.getZ() + 0.5D, worldIn.getBlockState(pos));
-               this.onStartFalling(entityfallingblock);
-               worldIn.spawnEntity(entityfallingblock);
+      if (canFallThrough(var1.getBlockState(var2.down())) && var2.getY() >= 0) {
+         boolean var3 = true;
+         if (!fallInstantly && var1.isAreaLoaded(var2.add(-32, -32, -32), var2.add(32, 32, 32))) {
+            if (!var1.isRemote) {
+               EntityFallingBlock var5 = new EntityFallingBlock(var1, (double)var2.getX() + 0.5D, (double)var2.getY(), (double)var2.getZ() + 0.5D, var1.getBlockState(var2));
+               this.onStartFalling(var5);
+               var1.spawnEntity(var5);
             }
          } else {
-            IBlockState state = worldIn.getBlockState(pos);
-            worldIn.setBlockToAir(pos);
+            var1.setBlockToAir(var2);
 
-            BlockPos blockpos;
-            for(blockpos = pos.down(); (worldIn.isAirBlock(blockpos) || canFallThrough(worldIn.getBlockState(blockpos))) && blockpos.getY() > 0; blockpos = blockpos.down()) {
+            BlockPos var4;
+            for(var4 = var2.down(); canFallThrough(var1.getBlockState(var4)) && var4.getY() > 0; var4 = var4.down()) {
                ;
             }
 
-            if (blockpos.getY() > 0) {
-               worldIn.setBlockState(blockpos.up(), state);
+            if (var4.getY() > 0) {
+               var1.setBlockState(var4.up(), this.getDefaultState());
             }
          }
-      }
 
+      }
    }
 
    protected void onStartFalling(EntityFallingBlock var1) {
@@ -73,30 +69,11 @@ public class BlockFalling extends Block {
    }
 
    public static boolean canFallThrough(IBlockState var0) {
-      Block block = state.getBlock();
-      Material material = state.getMaterial();
-      return block == Blocks.FIRE || material == Material.AIR || material == Material.WATER || material == Material.LAVA;
+      Block var1 = var0.getBlock();
+      Material var2 = var0.getMaterial();
+      return var1 == Blocks.FIRE || var2 == Material.AIR || var2 == Material.WATER || var2 == Material.LAVA;
    }
 
    public void onEndFalling(World var1, BlockPos var2) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      if (rand.nextInt(16) == 0) {
-         BlockPos blockpos = pos.down();
-         if (canFallThrough(worldIn.getBlockState(blockpos))) {
-            double d0 = (double)((float)pos.getX() + rand.nextFloat());
-            double d1 = (double)pos.getY() - 0.05D;
-            double d2 = (double)((float)pos.getZ() + rand.nextFloat());
-            worldIn.spawnParticle(EnumParticleTypes.FALLING_DUST, d0, d1, d2, 0.0D, 0.0D, 0.0D, Block.getStateId(stateIn));
-         }
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getDustColor(IBlockState var1) {
-      return -16777216;
    }
 }

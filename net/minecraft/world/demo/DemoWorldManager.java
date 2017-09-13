@@ -9,6 +9,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
@@ -19,45 +20,45 @@ public class DemoWorldManager extends PlayerInteractionManager {
    private int gameModeTicks;
 
    public DemoWorldManager(World var1) {
-      super(worldIn);
+      super(var1);
    }
 
    public void updateBlockRemoving() {
       super.updateBlockRemoving();
       ++this.gameModeTicks;
-      long i = this.world.getTotalWorldTime();
-      long j = i / 24000L + 1L;
+      long var1 = this.world.getTotalWorldTime();
+      long var3 = var1 / 24000L + 1L;
       if (!this.displayedIntro && this.gameModeTicks > 20) {
          this.displayedIntro = true;
          this.player.connection.sendPacket(new SPacketChangeGameState(5, 0.0F));
       }
 
-      this.demoTimeExpired = i > 120500L;
+      this.demoTimeExpired = var1 > 120500L;
       if (this.demoTimeExpired) {
          ++this.demoEndedReminder;
       }
 
-      if (i % 24000L == 500L) {
-         if (j <= 6L) {
-            this.player.sendMessage(new TextComponentTranslation("demo.day." + j, new Object[0]));
+      if (var1 % 24000L == 500L) {
+         if (var3 <= 6L) {
+            this.player.sendMessage((ITextComponent)(new TextComponentTranslation("demo.day." + var3, new Object[0])));
          }
-      } else if (j == 1L) {
-         if (i == 100L) {
+      } else if (var3 == 1L) {
+         if (var1 == 100L) {
             this.player.connection.sendPacket(new SPacketChangeGameState(5, 101.0F));
-         } else if (i == 175L) {
+         } else if (var1 == 175L) {
             this.player.connection.sendPacket(new SPacketChangeGameState(5, 102.0F));
-         } else if (i == 250L) {
+         } else if (var1 == 250L) {
             this.player.connection.sendPacket(new SPacketChangeGameState(5, 103.0F));
          }
-      } else if (j == 5L && i % 24000L == 22000L) {
-         this.player.sendMessage(new TextComponentTranslation("demo.day.warning", new Object[0]));
+      } else if (var3 == 5L && var1 % 24000L == 22000L) {
+         this.player.sendMessage((ITextComponent)(new TextComponentTranslation("demo.day.warning", new Object[0])));
       }
 
    }
 
    private void sendDemoReminder() {
       if (this.demoEndedReminder > 100) {
-         this.player.sendMessage(new TextComponentTranslation("demo.reminder", new Object[0]));
+         this.player.sendMessage((ITextComponent)(new TextComponentTranslation("demo.reminder", new Object[0])));
          this.demoEndedReminder = 0;
       }
 
@@ -67,20 +68,18 @@ public class DemoWorldManager extends PlayerInteractionManager {
       if (this.demoTimeExpired) {
          this.sendDemoReminder();
       } else {
-         super.onBlockClicked(pos, side);
+         super.onBlockClicked(var1, var2);
       }
-
    }
 
    public void blockRemoving(BlockPos var1) {
       if (!this.demoTimeExpired) {
-         super.blockRemoving(pos);
+         super.blockRemoving(var1);
       }
-
    }
 
    public boolean tryHarvestBlock(BlockPos var1) {
-      return this.demoTimeExpired ? false : super.tryHarvestBlock(pos);
+      return this.demoTimeExpired ? false : super.tryHarvestBlock(var1);
    }
 
    public EnumActionResult processRightClick(EntityPlayer var1, World var2, ItemStack var3, EnumHand var4) {
@@ -88,7 +87,7 @@ public class DemoWorldManager extends PlayerInteractionManager {
          this.sendDemoReminder();
          return EnumActionResult.PASS;
       } else {
-         return super.processRightClick(player, worldIn, stack, hand);
+         return super.processRightClick(var1, var2, var3, var4);
       }
    }
 
@@ -97,7 +96,7 @@ public class DemoWorldManager extends PlayerInteractionManager {
          this.sendDemoReminder();
          return EnumActionResult.PASS;
       } else {
-         return super.processRightClickBlock(player, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
+         return super.processRightClickBlock(var1, var2, var3, var4, var5, var6, var7, var8, var9);
       }
    }
 }

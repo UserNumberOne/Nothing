@@ -9,7 +9,7 @@ public class LockCode {
    private final String lock;
 
    public LockCode(String var1) {
-      this.lock = code;
+      this.lock = var1;
    }
 
    public boolean isEmpty() {
@@ -21,13 +21,13 @@ public class LockCode {
    }
 
    public void toNBT(NBTTagCompound var1) {
-      nbt.setString("Lock", this.lock);
+      var1.setString("Lock", this.lock);
    }
 
    public static LockCode fromNBT(NBTTagCompound var0) {
-      if (nbt.hasKey("Lock", 8)) {
-         String s = nbt.getString("Lock");
-         return new LockCode(s);
+      if (var0.hasKey("Lock", 8)) {
+         String var1 = var0.getString("Lock");
+         return new LockCode(var1);
       } else {
          return EMPTY_CODE;
       }

@@ -6,8 +6,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.WorldServer;
+import org.bukkit.craftbukkit.v1_10_R1.util.LongHash;
 
 public class WorldBorder {
    private final List listeners = Lists.newArrayList();
@@ -22,6 +22,7 @@ public class WorldBorder {
    private double damageBuffer;
    private int warningTime;
    private int warningDistance;
+   public WorldServer world;
 
    public WorldBorder() {
       this.endDiameter = this.startDiameter;
@@ -32,30 +33,38 @@ public class WorldBorder {
       this.warningDistance = 5;
    }
 
-   public boolean contains(BlockPos var1) {
-      return (double)(pos.getX() + 1) > this.minX() && (double)pos.getX() < this.maxX() && (double)(pos.getZ() + 1) > this.minZ() && (double)pos.getZ() < this.maxZ();
+   public boolean contains(BlockPos blockposition) {
+      return (double)(blockposition.getX() + 1) > this.minX() && (double)blockposition.getX() < this.maxX() && (double)(blockposition.getZ() + 1) > this.minZ() && (double)blockposition.getZ() < this.maxZ();
    }
 
-   public boolean contains(ChunkPos var1) {
-      return (double)range.getXEnd() > this.minX() && (double)range.getXStart() < this.maxX() && (double)range.getZEnd() > this.minZ() && (double)range.getZStart() < this.maxZ();
+   public boolean contains(ChunkPos chunkcoordintpair) {
+      return this.isInBounds(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
    }
 
-   public boolean contains(AxisAlignedBB var1) {
-      return bb.maxX > this.minX() && bb.minX < this.maxX() && bb.maxZ > this.minZ() && bb.minZ < this.maxZ();
+   public boolean isInBounds(long chunkcoords) {
+      return this.isInBounds(LongHash.msw(chunkcoords), LongHash.lsw(chunkcoords));
    }
 
-   public double getClosestDistance(Entity var1) {
-      return this.getClosestDistance(entityIn.posX, entityIn.posZ);
+   public boolean isInBounds(int x, int z) {
+      return (double)((x << 4) + 15) > this.minX() && (double)(x << 4) < this.maxX() && (double)((z << 4) + 15) > this.minZ() && (double)(x << 4) < this.maxZ();
    }
 
-   public double getClosestDistance(double var1, double var3) {
-      double d0 = z - this.minZ();
-      double d1 = this.maxZ() - z;
-      double d2 = x - this.minX();
-      double d3 = this.maxX() - x;
-      double d4 = Math.min(d2, d3);
-      d4 = Math.min(d4, d0);
-      return Math.min(d4, d1);
+   public boolean contains(AxisAlignedBB axisalignedbb) {
+      return axisalignedbb.maxX > this.minX() && axisalignedbb.minX < this.maxX() && axisalignedbb.maxZ > this.minZ() && axisalignedbb.minZ < this.maxZ();
+   }
+
+   public double getClosestDistance(Entity entity) {
+      return this.getClosestDistance(entity.posX, entity.posZ);
+   }
+
+   public double getClosestDistance(double d0, double d1) {
+      double d2 = d1 - this.minZ();
+      double d3 = this.maxZ() - d1;
+      double d4 = d0 - this.minX();
+      double d5 = this.maxX() - d0;
+      double d6 = Math.min(d4, d5);
+      d6 = Math.min(d6, d2);
+      return Math.min(d6, d3);
    }
 
    public EnumBorderStatus getStatus() {
@@ -106,12 +115,12 @@ public class WorldBorder {
       return this.centerZ;
    }
 
-   public void setCenter(double var1, double var3) {
-      this.centerX = x;
-      this.centerZ = z;
+   public void setCenter(double d0, double d1) {
+      this.centerX = d0;
+      this.centerZ = d1;
 
-      for(IBorderListener iborderlistener : this.getListeners()) {
-         iborderlistener.onCenterChanged(this, x, z);
+      for(IBorderListener iworldborderlistener : this.getListeners()) {
+         iworldborderlistener.onCenterChanged(this, d0, d1);
       }
 
    }
@@ -137,26 +146,26 @@ public class WorldBorder {
       return this.endDiameter;
    }
 
-   public void setTransition(double var1) {
-      this.startDiameter = newSize;
-      this.endDiameter = newSize;
+   public void setTransition(double d0) {
+      this.startDiameter = d0;
+      this.endDiameter = d0;
       this.endTime = System.currentTimeMillis();
       this.startTime = this.endTime;
 
-      for(IBorderListener iborderlistener : this.getListeners()) {
-         iborderlistener.onSizeChanged(this, newSize);
+      for(IBorderListener iworldborderlistener : this.getListeners()) {
+         iworldborderlistener.onSizeChanged(this, d0);
       }
 
    }
 
-   public void setTransition(double var1, double var3, long var5) {
-      this.startDiameter = oldSize;
-      this.endDiameter = newSize;
+   public void setTransition(double d0, double d1, long i) {
+      this.startDiameter = d0;
+      this.endDiameter = d1;
       this.startTime = System.currentTimeMillis();
-      this.endTime = this.startTime + time;
+      this.endTime = this.startTime + i;
 
-      for(IBorderListener iborderlistener : this.getListeners()) {
-         iborderlistener.onTransitionStarted(this, oldSize, newSize, time);
+      for(IBorderListener iworldborderlistener : this.getListeners()) {
+         iworldborderlistener.onTransitionStarted(this, d0, d1, i);
       }
 
    }
@@ -165,12 +174,14 @@ public class WorldBorder {
       return Lists.newArrayList(this.listeners);
    }
 
-   public void addListener(IBorderListener var1) {
-      this.listeners.add(listener);
+   public void addListener(IBorderListener iworldborderlistener) {
+      if (!this.listeners.contains(iworldborderlistener)) {
+         this.listeners.add(iworldborderlistener);
+      }
    }
 
-   public void setSize(int var1) {
-      this.worldSize = size;
+   public void setSize(int i) {
+      this.worldSize = i;
    }
 
    public int getSize() {
@@ -181,11 +192,11 @@ public class WorldBorder {
       return this.damageBuffer;
    }
 
-   public void setDamageBuffer(double var1) {
-      this.damageBuffer = bufferSize;
+   public void setDamageBuffer(double d0) {
+      this.damageBuffer = d0;
 
-      for(IBorderListener iborderlistener : this.getListeners()) {
-         iborderlistener.onDamageBufferChanged(this, bufferSize);
+      for(IBorderListener iworldborderlistener : this.getListeners()) {
+         iworldborderlistener.onDamageBufferChanged(this, d0);
       }
 
    }
@@ -194,29 +205,24 @@ public class WorldBorder {
       return this.damageAmount;
    }
 
-   public void setDamageAmount(double var1) {
-      this.damageAmount = newAmount;
+   public void setDamageAmount(double d0) {
+      this.damageAmount = d0;
 
-      for(IBorderListener iborderlistener : this.getListeners()) {
-         iborderlistener.onDamageAmountChanged(this, newAmount);
+      for(IBorderListener iworldborderlistener : this.getListeners()) {
+         iworldborderlistener.onDamageAmountChanged(this, d0);
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getResizeSpeed() {
-      return this.endTime == this.startTime ? 0.0D : Math.abs(this.startDiameter - this.endDiameter) / (double)(this.endTime - this.startTime);
    }
 
    public int getWarningTime() {
       return this.warningTime;
    }
 
-   public void setWarningTime(int var1) {
-      this.warningTime = warningTime;
+   public void setWarningTime(int i) {
+      this.warningTime = i;
 
-      for(IBorderListener iborderlistener : this.getListeners()) {
-         iborderlistener.onWarningTimeChanged(this, warningTime);
+      for(IBorderListener iworldborderlistener : this.getListeners()) {
+         iworldborderlistener.onWarningTimeChanged(this, i);
       }
 
    }
@@ -225,16 +231,12 @@ public class WorldBorder {
       return this.warningDistance;
    }
 
-   public void setWarningDistance(int var1) {
-      this.warningDistance = warningDistance;
+   public void setWarningDistance(int i) {
+      this.warningDistance = i;
 
-      for(IBorderListener iborderlistener : this.getListeners()) {
-         iborderlistener.onWarningDistanceChanged(this, warningDistance);
+      for(IBorderListener iworldborderlistener : this.getListeners()) {
+         iworldborderlistener.onWarningDistanceChanged(this, i);
       }
 
-   }
-
-   public void removeListener(IBorderListener var1) {
-      this.listeners.remove(listener);
    }
 }

@@ -12,7 +12,7 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandTestFor extends CommandBase {
@@ -29,35 +29,35 @@ public class CommandTestFor extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length < 1) {
+      if (var3.length < 1) {
          throw new WrongUsageException("commands.testfor.usage", new Object[0]);
       } else {
-         Entity entity = getEntity(server, sender, args[0]);
-         NBTTagCompound nbttagcompound = null;
-         if (args.length >= 2) {
+         Entity var4 = b(var1, var2, var3[0]);
+         NBTTagCompound var5 = null;
+         if (var3.length >= 2) {
             try {
-               nbttagcompound = JsonToNBT.getTagFromJson(buildString(args, 1));
+               var5 = JsonToNBT.getTagFromJson(buildString(var3, 1));
             } catch (NBTException var7) {
                throw new CommandException("commands.testfor.tagError", new Object[]{var7.getMessage()});
             }
          }
 
-         if (nbttagcompound != null) {
-            NBTTagCompound nbttagcompound1 = entityToNBT(entity);
-            if (!NBTUtil.areNBTEquals(nbttagcompound, nbttagcompound1, true)) {
-               throw new CommandException("commands.testfor.failure", new Object[]{entity.getName()});
+         if (var5 != null) {
+            NBTTagCompound var6 = entityToNBT(var4);
+            if (!NBTUtil.areNBTEquals(var5, var6, true)) {
+               throw new CommandException("commands.testfor.failure", new Object[]{var4.getName()});
             }
          }
 
-         notifyCommandListener(sender, this, "commands.testfor.success", new Object[]{entity.getName()});
+         notifyCommandListener(var2, this, "commands.testfor.success", new Object[]{var4.getName()});
       }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return index == 0;
+      return var2 == 0;
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getPlayers()) : Collections.emptyList();
    }
 }

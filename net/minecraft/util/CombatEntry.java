@@ -13,12 +13,12 @@ public class CombatEntry {
    private final float fallDistance;
 
    public CombatEntry(DamageSource var1, int var2, float var3, float var4, String var5, float var6) {
-      this.damageSrc = damageSrcIn;
-      this.time = p_i1564_2_;
-      this.damage = damageAmount;
-      this.health = healthAmount;
-      this.fallSuffix = fallSuffixIn;
-      this.fallDistance = fallDistanceIn;
+      this.damageSrc = var1;
+      this.time = var2;
+      this.damage = var4;
+      this.health = var3;
+      this.fallSuffix = var5;
+      this.fallDistance = var6;
    }
 
    public DamageSource getDamageSrc() {

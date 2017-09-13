@@ -1,7 +1,6 @@
 package net.minecraft.block;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.UnmodifiableIterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.EnumPushReaction;
@@ -9,33 +8,30 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BlockRailBase extends Block {
    protected static final AxisAlignedBB FLAT_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D);
    protected final boolean isPowered;
 
    public static boolean isRailBlock(World var0, BlockPos var1) {
-      return isRailBlock(worldIn.getBlockState(pos));
+      return isRailBlock(var0.getBlockState(var1));
    }
 
    public static boolean isRailBlock(IBlockState var0) {
-      Block block = state.getBlock();
-      return block instanceof BlockRailBase;
+      Block var1 = var0.getBlock();
+      return var1 == Blocks.RAIL || var1 == Blocks.GOLDEN_RAIL || var1 == Blocks.DETECTOR_RAIL || var1 == Blocks.ACTIVATOR_RAIL;
    }
 
    protected BlockRailBase(boolean var1) {
       super(Material.CIRCUITS);
-      this.isPowered = isPowered;
+      this.isPowered = var1;
       this.setCreativeTab(CreativeTabs.TRANSPORTATION);
    }
 
@@ -49,8 +45,8 @@ public abstract class BlockRailBase extends Block {
    }
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = state.getBlock() == this ? (BlockRailBase.EnumRailDirection)state.getValue(this.getShapeProperty()) : null;
-      return blockrailbase$enumraildirection != null && blockrailbase$enumraildirection.isAscending() ? FULL_BLOCK_AABB : FLAT_AABB;
+      BlockRailBase.EnumRailDirection var4 = var1.getBlock() == this ? (BlockRailBase.EnumRailDirection)var1.getValue(this.getShapeProperty()) : null;
+      return var4 != null && var4.isAscending() ? FULL_BLOCK_AABB : FLAT_AABB;
    }
 
    public boolean isFullCube(IBlockState var1) {
@@ -58,111 +54,72 @@ public abstract class BlockRailBase extends Block {
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      return worldIn.getBlockState(pos.down()).isSideSolid(worldIn, pos.down(), EnumFacing.UP);
+      return var1.getBlockState(var2.down()).isFullyOpaque();
    }
 
    public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
-      if (!worldIn.isRemote) {
-         state = this.updateDir(worldIn, pos, state, true);
+      if (!var1.isRemote) {
+         var3 = this.updateDir(var1, var2, var3, true);
          if (this.isPowered) {
-            state.neighborChanged(worldIn, pos, this);
+            var3.neighborChanged(var1, var2, this);
          }
       }
 
    }
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      if (!worldIn.isRemote) {
-         BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection)state.getValue(this.getShapeProperty());
-         boolean flag = false;
-         if (!worldIn.getBlockState(pos.down()).isSideSolid(worldIn, pos.down(), EnumFacing.UP)) {
-            flag = true;
+      if (!var2.isRemote) {
+         BlockRailBase.EnumRailDirection var5 = (BlockRailBase.EnumRailDirection)var1.getValue(this.getShapeProperty());
+         boolean var6 = false;
+         if (!var2.getBlockState(var3.down()).isFullyOpaque()) {
+            var6 = true;
          }
 
-         if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_EAST && !worldIn.getBlockState(pos.east()).isSideSolid(worldIn, pos.east(), EnumFacing.UP)) {
-            flag = true;
-         } else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_WEST && !worldIn.getBlockState(pos.west()).isSideSolid(worldIn, pos.west(), EnumFacing.UP)) {
-            flag = true;
-         } else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_NORTH && !worldIn.getBlockState(pos.north()).isSideSolid(worldIn, pos.north(), EnumFacing.UP)) {
-            flag = true;
-         } else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_SOUTH && !worldIn.getBlockState(pos.south()).isSideSolid(worldIn, pos.south(), EnumFacing.UP)) {
-            flag = true;
+         if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_EAST && !var2.getBlockState(var3.east()).isFullyOpaque()) {
+            var6 = true;
+         } else if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_WEST && !var2.getBlockState(var3.west()).isFullyOpaque()) {
+            var6 = true;
+         } else if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_NORTH && !var2.getBlockState(var3.north()).isFullyOpaque()) {
+            var6 = true;
+         } else if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_SOUTH && !var2.getBlockState(var3.south()).isFullyOpaque()) {
+            var6 = true;
          }
 
-         if (flag && !worldIn.isAirBlock(pos)) {
-            this.dropBlockAsItem(worldIn, pos, state, 0);
-            worldIn.setBlockToAir(pos);
+         if (var6 && !var2.isAirBlock(var3)) {
+            this.dropBlockAsItem(var2, var3, var1, 0);
+            var2.setBlockToAir(var3);
          } else {
-            this.updateState(state, worldIn, pos, blockIn);
+            this.updateState(var1, var2, var3, var4);
          }
-      }
 
+      }
    }
 
    protected void updateState(IBlockState var1, World var2, BlockPos var3, Block var4) {
    }
 
    protected IBlockState updateDir(World var1, BlockPos var2, IBlockState var3, boolean var4) {
-      return worldIn.isRemote ? state : (new BlockRailBase.Rail(worldIn, pos, state)).place(worldIn.isBlockPowered(pos), p_176564_4_).getBlockState();
+      return var1.isRemote ? var3 : (new BlockRailBase.Rail(var1, var2, var3)).place(var1.isBlockPowered(var2), var4).getBlockState();
    }
 
    public EnumPushReaction getMobilityFlag(IBlockState var1) {
       return EnumPushReaction.NORMAL;
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
-   }
-
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      super.breakBlock(worldIn, pos, state);
-      if (((BlockRailBase.EnumRailDirection)state.getValue(this.getShapeProperty())).isAscending()) {
-         worldIn.notifyNeighborsOfStateChange(pos.up(), this);
+      super.breakBlock(var1, var2, var3);
+      if (((BlockRailBase.EnumRailDirection)var3.getValue(this.getShapeProperty())).isAscending()) {
+         var1.notifyNeighborsOfStateChange(var2.up(), this);
       }
 
       if (this.isPowered) {
-         worldIn.notifyNeighborsOfStateChange(pos, this);
-         worldIn.notifyNeighborsOfStateChange(pos.down(), this);
+         var1.notifyNeighborsOfStateChange(var2, this);
+         var1.notifyNeighborsOfStateChange(var2.down(), this);
       }
 
    }
 
    public abstract IProperty getShapeProperty();
-
-   public boolean isFlexibleRail(IBlockAccess var1, BlockPos var2) {
-      return !this.isPowered;
-   }
-
-   public boolean canMakeSlopes(IBlockAccess var1, BlockPos var2) {
-      return true;
-   }
-
-   public BlockRailBase.EnumRailDirection getRailDirection(IBlockAccess var1, BlockPos var2, IBlockState var3, @Nullable EntityMinecart var4) {
-      return (BlockRailBase.EnumRailDirection)state.getValue(this.getShapeProperty());
-   }
-
-   public float getRailMaxSpeed(World var1, EntityMinecart var2, BlockPos var3) {
-      return 0.4F;
-   }
-
-   public void onMinecartPass(World var1, EntityMinecart var2, BlockPos var3) {
-   }
-
-   public boolean rotateBlock(World var1, BlockPos var2, EnumFacing var3) {
-      IBlockState state = world.getBlockState(pos);
-      UnmodifiableIterator var5 = state.getProperties().keySet().iterator();
-
-      while(var5.hasNext()) {
-         IProperty prop = (IProperty)var5.next();
-         if (prop.getName().equals("shape")) {
-            world.setBlockState(pos, state.cycleProperty(prop));
-            return true;
-         }
-      }
-
-      return false;
-   }
 
    public static enum EnumRailDirection implements IStringSerializable {
       NORTH_SOUTH(0, "north_south"),
@@ -181,8 +138,8 @@ public abstract class BlockRailBase extends Block {
       private final String name;
 
       private EnumRailDirection(int var3, String var4) {
-         this.meta = meta;
-         this.name = name;
+         this.meta = var3;
+         this.name = var4;
       }
 
       public int getMetadata() {
@@ -198,11 +155,11 @@ public abstract class BlockRailBase extends Block {
       }
 
       public static BlockRailBase.EnumRailDirection byMetadata(int var0) {
-         if (meta < 0 || meta >= META_LOOKUP.length) {
-            meta = 0;
+         if (var0 < 0 || var0 >= META_LOOKUP.length) {
+            var0 = 0;
          }
 
-         return META_LOOKUP[meta];
+         return META_LOOKUP[var0];
       }
 
       public String getName() {
@@ -210,8 +167,8 @@ public abstract class BlockRailBase extends Block {
       }
 
       static {
-         for(BlockRailBase.EnumRailDirection blockrailbase$enumraildirection : values()) {
-            META_LOOKUP[blockrailbase$enumraildirection.getMetadata()] = blockrailbase$enumraildirection;
+         for(BlockRailBase.EnumRailDirection var3 : values()) {
+            META_LOOKUP[var3.getMetadata()] = var3;
          }
 
       }
@@ -224,17 +181,15 @@ public abstract class BlockRailBase extends Block {
       private IBlockState state;
       private final boolean isPowered;
       private final List connectedRails = Lists.newArrayList();
-      private final boolean canMakeSlopes;
 
       public Rail(World var2, BlockPos var3, IBlockState var4) {
-         this.world = worldIn;
-         this.pos = pos;
-         this.state = state;
-         this.block = (BlockRailBase)state.getBlock();
-         BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = this.block.getRailDirection(worldIn, pos, state, (EntityMinecart)null);
-         this.isPowered = !this.block.isFlexibleRail(worldIn, pos);
-         this.canMakeSlopes = this.block.canMakeSlopes(worldIn, pos);
-         this.updateConnectedRails(blockrailbase$enumraildirection);
+         this.world = var2;
+         this.pos = var3;
+         this.state = var4;
+         this.block = (BlockRailBase)var4.getBlock();
+         BlockRailBase.EnumRailDirection var5 = (BlockRailBase.EnumRailDirection)var4.getValue(this.block.getShapeProperty());
+         this.isPowered = this.block.isPowered;
+         this.updateConnectedRails(var5);
       }
 
       public List getConnectedRails() {
@@ -243,7 +198,7 @@ public abstract class BlockRailBase extends Block {
 
       private void updateConnectedRails(BlockRailBase.EnumRailDirection var1) {
          this.connectedRails.clear();
-         switch(railDirection) {
+         switch(var1) {
          case NORTH_SOUTH:
             this.connectedRails.add(this.pos.north());
             this.connectedRails.add(this.pos.south());
@@ -288,60 +243,47 @@ public abstract class BlockRailBase extends Block {
       }
 
       private void removeSoftConnections() {
-         for(int i = 0; i < this.connectedRails.size(); ++i) {
-            BlockRailBase.Rail blockrailbase$rail = this.findRailAt((BlockPos)this.connectedRails.get(i));
-            if (blockrailbase$rail != null && blockrailbase$rail.isConnectedToRail(this)) {
-               this.connectedRails.set(i, blockrailbase$rail.pos);
+         for(int var1 = 0; var1 < this.connectedRails.size(); ++var1) {
+            BlockRailBase.Rail var2 = this.findRailAt((BlockPos)this.connectedRails.get(var1));
+            if (var2 != null && var2.isConnectedToRail(this)) {
+               this.connectedRails.set(var1, var2.pos);
             } else {
-               this.connectedRails.remove(i--);
+               this.connectedRails.remove(var1--);
             }
          }
 
       }
 
       private boolean hasRailAt(BlockPos var1) {
-         return BlockRailBase.isRailBlock(this.world, pos) || BlockRailBase.isRailBlock(this.world, pos.up()) || BlockRailBase.isRailBlock(this.world, pos.down());
+         return BlockRailBase.isRailBlock(this.world, var1) || BlockRailBase.isRailBlock(this.world, var1.up()) || BlockRailBase.isRailBlock(this.world, var1.down());
       }
 
       @Nullable
       private BlockRailBase.Rail findRailAt(BlockPos var1) {
-         IBlockState iblockstate = this.world.getBlockState(pos);
-         if (BlockRailBase.isRailBlock(iblockstate)) {
-            BlockRailBase var8 = BlockRailBase.this;
-            BlockRailBase.this.getClass();
-            return var8.new Rail(this.world, pos, iblockstate);
+         IBlockState var3 = this.world.getBlockState(var1);
+         if (BlockRailBase.isRailBlock(var3)) {
+            return BlockRailBase.this.new Rail(this.world, var1, var3);
          } else {
-            BlockPos lvt_2_1_ = pos.up();
-            iblockstate = this.world.getBlockState(lvt_2_1_);
-            if (BlockRailBase.isRailBlock(iblockstate)) {
-               BlockRailBase var7 = BlockRailBase.this;
-               BlockRailBase.this.getClass();
-               return var7.new Rail(this.world, lvt_2_1_, iblockstate);
+            BlockPos var2 = var1.up();
+            var3 = this.world.getBlockState(var2);
+            if (BlockRailBase.isRailBlock(var3)) {
+               return BlockRailBase.this.new Rail(this.world, var2, var3);
             } else {
-               lvt_2_1_ = pos.down();
-               iblockstate = this.world.getBlockState(lvt_2_1_);
-               BlockRailBase.Rail var10000;
-               if (BlockRailBase.isRailBlock(iblockstate)) {
-                  BlockRailBase var10002 = BlockRailBase.this;
-                  BlockRailBase.this.getClass();
-                  var10000 = var10002.new Rail(this.world, lvt_2_1_, iblockstate);
-               } else {
-                  var10000 = null;
-               }
-
-               return var10000;
+               var2 = var1.down();
+               var3 = this.world.getBlockState(var2);
+               return BlockRailBase.isRailBlock(var3) ? BlockRailBase.this.new Rail(this.world, var2, var3) : null;
             }
          }
       }
 
       private boolean isConnectedToRail(BlockRailBase.Rail var1) {
-         return this.isConnectedTo(rail.pos);
+         return this.isConnectedTo(var1.pos);
       }
 
       private boolean isConnectedTo(BlockPos var1) {
-         for(int i = 0; i < this.connectedRails.size(); ++i) {
-            BlockPos blockpos = (BlockPos)this.connectedRails.get(i);
-            if (blockpos.getX() == posIn.getX() && blockpos.getZ() == posIn.getZ()) {
+         for(int var2 = 0; var2 < this.connectedRails.size(); ++var2) {
+            BlockPos var3 = (BlockPos)this.connectedRails.get(var2);
+            if (var3.getX() == var1.getX() && var3.getZ() == var1.getZ()) {
                return true;
             }
          }
@@ -350,213 +292,213 @@ public abstract class BlockRailBase extends Block {
       }
 
       protected int countAdjacentRails() {
-         int i = 0;
+         int var1 = 0;
 
-         for(EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-            if (this.hasRailAt(this.pos.offset(enumfacing))) {
-               ++i;
+         for(EnumFacing var3 : EnumFacing.Plane.HORIZONTAL) {
+            if (this.hasRailAt(this.pos.offset(var3))) {
+               ++var1;
             }
          }
 
-         return i;
+         return var1;
       }
 
       private boolean canConnectTo(BlockRailBase.Rail var1) {
-         return this.isConnectedToRail(rail) || this.connectedRails.size() != 2;
+         return this.isConnectedToRail(var1) || this.connectedRails.size() != 2;
       }
 
       private void connectTo(BlockRailBase.Rail var1) {
-         this.connectedRails.add(p_150645_1_.pos);
-         BlockPos blockpos = this.pos.north();
-         BlockPos blockpos1 = this.pos.south();
-         BlockPos blockpos2 = this.pos.west();
-         BlockPos blockpos3 = this.pos.east();
-         boolean flag = this.isConnectedTo(blockpos);
-         boolean flag1 = this.isConnectedTo(blockpos1);
-         boolean flag2 = this.isConnectedTo(blockpos2);
-         boolean flag3 = this.isConnectedTo(blockpos3);
-         BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = null;
-         if (flag || flag1) {
-            blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+         this.connectedRails.add(var1.pos);
+         BlockPos var2 = this.pos.north();
+         BlockPos var3 = this.pos.south();
+         BlockPos var4 = this.pos.west();
+         BlockPos var5 = this.pos.east();
+         boolean var6 = this.isConnectedTo(var2);
+         boolean var7 = this.isConnectedTo(var3);
+         boolean var8 = this.isConnectedTo(var4);
+         boolean var9 = this.isConnectedTo(var5);
+         BlockRailBase.EnumRailDirection var10 = null;
+         if (var6 || var7) {
+            var10 = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
          }
 
-         if (flag2 || flag3) {
-            blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.EAST_WEST;
+         if (var8 || var9) {
+            var10 = BlockRailBase.EnumRailDirection.EAST_WEST;
          }
 
          if (!this.isPowered) {
-            if (flag1 && flag3 && !flag && !flag2) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.SOUTH_EAST;
+            if (var7 && var9 && !var6 && !var8) {
+               var10 = BlockRailBase.EnumRailDirection.SOUTH_EAST;
             }
 
-            if (flag1 && flag2 && !flag && !flag3) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.SOUTH_WEST;
+            if (var7 && var8 && !var6 && !var9) {
+               var10 = BlockRailBase.EnumRailDirection.SOUTH_WEST;
             }
 
-            if (flag && flag2 && !flag1 && !flag3) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_WEST;
+            if (var6 && var8 && !var7 && !var9) {
+               var10 = BlockRailBase.EnumRailDirection.NORTH_WEST;
             }
 
-            if (flag && flag3 && !flag1 && !flag2) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_EAST;
-            }
-         }
-
-         if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.NORTH_SOUTH && this.canMakeSlopes) {
-            if (BlockRailBase.isRailBlock(this.world, blockpos.up())) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.ASCENDING_NORTH;
-            }
-
-            if (BlockRailBase.isRailBlock(this.world, blockpos1.up())) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.ASCENDING_SOUTH;
+            if (var6 && var9 && !var7 && !var8) {
+               var10 = BlockRailBase.EnumRailDirection.NORTH_EAST;
             }
          }
 
-         if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.EAST_WEST && this.canMakeSlopes) {
-            if (BlockRailBase.isRailBlock(this.world, blockpos3.up())) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.ASCENDING_EAST;
+         if (var10 == BlockRailBase.EnumRailDirection.NORTH_SOUTH) {
+            if (BlockRailBase.isRailBlock(this.world, var2.up())) {
+               var10 = BlockRailBase.EnumRailDirection.ASCENDING_NORTH;
             }
 
-            if (BlockRailBase.isRailBlock(this.world, blockpos2.up())) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.ASCENDING_WEST;
+            if (BlockRailBase.isRailBlock(this.world, var3.up())) {
+               var10 = BlockRailBase.EnumRailDirection.ASCENDING_SOUTH;
             }
          }
 
-         if (blockrailbase$enumraildirection == null) {
-            blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+         if (var10 == BlockRailBase.EnumRailDirection.EAST_WEST) {
+            if (BlockRailBase.isRailBlock(this.world, var5.up())) {
+               var10 = BlockRailBase.EnumRailDirection.ASCENDING_EAST;
+            }
+
+            if (BlockRailBase.isRailBlock(this.world, var4.up())) {
+               var10 = BlockRailBase.EnumRailDirection.ASCENDING_WEST;
+            }
          }
 
-         this.state = this.state.withProperty(this.block.getShapeProperty(), blockrailbase$enumraildirection);
+         if (var10 == null) {
+            var10 = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+         }
+
+         this.state = this.state.withProperty(this.block.getShapeProperty(), var10);
          this.world.setBlockState(this.pos, this.state, 3);
       }
 
       private boolean hasNeighborRail(BlockPos var1) {
-         BlockRailBase.Rail blockrailbase$rail = this.findRailAt(p_180361_1_);
-         if (blockrailbase$rail == null) {
+         BlockRailBase.Rail var2 = this.findRailAt(var1);
+         if (var2 == null) {
             return false;
          } else {
-            blockrailbase$rail.removeSoftConnections();
-            return blockrailbase$rail.canConnectTo(this);
+            var2.removeSoftConnections();
+            return var2.canConnectTo(this);
          }
       }
 
       public BlockRailBase.Rail place(boolean var1, boolean var2) {
-         BlockPos blockpos = this.pos.north();
-         BlockPos blockpos1 = this.pos.south();
-         BlockPos blockpos2 = this.pos.west();
-         BlockPos blockpos3 = this.pos.east();
-         boolean flag = this.hasNeighborRail(blockpos);
-         boolean flag1 = this.hasNeighborRail(blockpos1);
-         boolean flag2 = this.hasNeighborRail(blockpos2);
-         boolean flag3 = this.hasNeighborRail(blockpos3);
-         BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = null;
-         if ((flag || flag1) && !flag2 && !flag3) {
-            blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+         BlockPos var3 = this.pos.north();
+         BlockPos var4 = this.pos.south();
+         BlockPos var5 = this.pos.west();
+         BlockPos var6 = this.pos.east();
+         boolean var7 = this.hasNeighborRail(var3);
+         boolean var8 = this.hasNeighborRail(var4);
+         boolean var9 = this.hasNeighborRail(var5);
+         boolean var10 = this.hasNeighborRail(var6);
+         BlockRailBase.EnumRailDirection var11 = null;
+         if ((var7 || var8) && !var9 && !var10) {
+            var11 = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
          }
 
-         if ((flag2 || flag3) && !flag && !flag1) {
-            blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.EAST_WEST;
+         if ((var9 || var10) && !var7 && !var8) {
+            var11 = BlockRailBase.EnumRailDirection.EAST_WEST;
          }
 
          if (!this.isPowered) {
-            if (flag1 && flag3 && !flag && !flag2) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.SOUTH_EAST;
+            if (var8 && var10 && !var7 && !var9) {
+               var11 = BlockRailBase.EnumRailDirection.SOUTH_EAST;
             }
 
-            if (flag1 && flag2 && !flag && !flag3) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.SOUTH_WEST;
+            if (var8 && var9 && !var7 && !var10) {
+               var11 = BlockRailBase.EnumRailDirection.SOUTH_WEST;
             }
 
-            if (flag && flag2 && !flag1 && !flag3) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_WEST;
+            if (var7 && var9 && !var8 && !var10) {
+               var11 = BlockRailBase.EnumRailDirection.NORTH_WEST;
             }
 
-            if (flag && flag3 && !flag1 && !flag2) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_EAST;
+            if (var7 && var10 && !var8 && !var9) {
+               var11 = BlockRailBase.EnumRailDirection.NORTH_EAST;
             }
          }
 
-         if (blockrailbase$enumraildirection == null) {
-            if (flag || flag1) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+         if (var11 == null) {
+            if (var7 || var8) {
+               var11 = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
             }
 
-            if (flag2 || flag3) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.EAST_WEST;
+            if (var9 || var10) {
+               var11 = BlockRailBase.EnumRailDirection.EAST_WEST;
             }
 
             if (!this.isPowered) {
-               if (p_180364_1_) {
-                  if (flag1 && flag3) {
-                     blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.SOUTH_EAST;
+               if (var1) {
+                  if (var8 && var10) {
+                     var11 = BlockRailBase.EnumRailDirection.SOUTH_EAST;
                   }
 
-                  if (flag2 && flag1) {
-                     blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.SOUTH_WEST;
+                  if (var9 && var8) {
+                     var11 = BlockRailBase.EnumRailDirection.SOUTH_WEST;
                   }
 
-                  if (flag3 && flag) {
-                     blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_EAST;
+                  if (var10 && var7) {
+                     var11 = BlockRailBase.EnumRailDirection.NORTH_EAST;
                   }
 
-                  if (flag && flag2) {
-                     blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_WEST;
+                  if (var7 && var9) {
+                     var11 = BlockRailBase.EnumRailDirection.NORTH_WEST;
                   }
                } else {
-                  if (flag && flag2) {
-                     blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_WEST;
+                  if (var7 && var9) {
+                     var11 = BlockRailBase.EnumRailDirection.NORTH_WEST;
                   }
 
-                  if (flag3 && flag) {
-                     blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_EAST;
+                  if (var10 && var7) {
+                     var11 = BlockRailBase.EnumRailDirection.NORTH_EAST;
                   }
 
-                  if (flag2 && flag1) {
-                     blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.SOUTH_WEST;
+                  if (var9 && var8) {
+                     var11 = BlockRailBase.EnumRailDirection.SOUTH_WEST;
                   }
 
-                  if (flag1 && flag3) {
-                     blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.SOUTH_EAST;
+                  if (var8 && var10) {
+                     var11 = BlockRailBase.EnumRailDirection.SOUTH_EAST;
                   }
                }
             }
          }
 
-         if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.NORTH_SOUTH && this.canMakeSlopes) {
-            if (BlockRailBase.isRailBlock(this.world, blockpos.up())) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.ASCENDING_NORTH;
+         if (var11 == BlockRailBase.EnumRailDirection.NORTH_SOUTH) {
+            if (BlockRailBase.isRailBlock(this.world, var3.up())) {
+               var11 = BlockRailBase.EnumRailDirection.ASCENDING_NORTH;
             }
 
-            if (BlockRailBase.isRailBlock(this.world, blockpos1.up())) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.ASCENDING_SOUTH;
-            }
-         }
-
-         if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.EAST_WEST && this.canMakeSlopes) {
-            if (BlockRailBase.isRailBlock(this.world, blockpos3.up())) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.ASCENDING_EAST;
-            }
-
-            if (BlockRailBase.isRailBlock(this.world, blockpos2.up())) {
-               blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.ASCENDING_WEST;
+            if (BlockRailBase.isRailBlock(this.world, var4.up())) {
+               var11 = BlockRailBase.EnumRailDirection.ASCENDING_SOUTH;
             }
          }
 
-         if (blockrailbase$enumraildirection == null) {
-            blockrailbase$enumraildirection = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+         if (var11 == BlockRailBase.EnumRailDirection.EAST_WEST) {
+            if (BlockRailBase.isRailBlock(this.world, var6.up())) {
+               var11 = BlockRailBase.EnumRailDirection.ASCENDING_EAST;
+            }
+
+            if (BlockRailBase.isRailBlock(this.world, var5.up())) {
+               var11 = BlockRailBase.EnumRailDirection.ASCENDING_WEST;
+            }
          }
 
-         this.updateConnectedRails(blockrailbase$enumraildirection);
-         this.state = this.state.withProperty(this.block.getShapeProperty(), blockrailbase$enumraildirection);
-         if (p_180364_2_ || this.world.getBlockState(this.pos) != this.state) {
+         if (var11 == null) {
+            var11 = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+         }
+
+         this.updateConnectedRails(var11);
+         this.state = this.state.withProperty(this.block.getShapeProperty(), var11);
+         if (var2 || this.world.getBlockState(this.pos) != this.state) {
             this.world.setBlockState(this.pos, this.state, 3);
 
-            for(int i = 0; i < this.connectedRails.size(); ++i) {
-               BlockRailBase.Rail blockrailbase$rail = this.findRailAt((BlockPos)this.connectedRails.get(i));
-               if (blockrailbase$rail != null) {
-                  blockrailbase$rail.removeSoftConnections();
-                  if (blockrailbase$rail.canConnectTo(this)) {
-                     blockrailbase$rail.connectTo(this);
+            for(int var12 = 0; var12 < this.connectedRails.size(); ++var12) {
+               BlockRailBase.Rail var13 = this.findRailAt((BlockPos)this.connectedRails.get(var12));
+               if (var13 != null) {
+                  var13.removeSoftConnections();
+                  if (var13.canConnectTo(this)) {
+                     var13.connectTo(this);
                   }
                }
             }

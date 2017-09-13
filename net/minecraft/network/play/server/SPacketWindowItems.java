@@ -6,8 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketWindowItems implements Packet {
    private int windowId;
@@ -17,48 +15,38 @@ public class SPacketWindowItems implements Packet {
    }
 
    public SPacketWindowItems(int var1, List var2) {
-      this.windowId = windowIdIn;
-      this.itemStacks = new ItemStack[stacks.size()];
+      this.windowId = var1;
+      this.itemStacks = new ItemStack[var2.size()];
 
-      for(int i = 0; i < this.itemStacks.length; ++i) {
-         ItemStack itemstack = (ItemStack)stacks.get(i);
-         this.itemStacks[i] = itemstack == null ? null : itemstack.copy();
+      for(int var3 = 0; var3 < this.itemStacks.length; ++var3) {
+         ItemStack var4 = (ItemStack)var2.get(var3);
+         this.itemStacks[var3] = var4 == null ? null : var4.copy();
       }
 
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.windowId = buf.readUnsignedByte();
-      int i = buf.readShort();
-      this.itemStacks = new ItemStack[i];
+      this.windowId = var1.readUnsignedByte();
+      short var2 = var1.readShort();
+      this.itemStacks = new ItemStack[var2];
 
-      for(int j = 0; j < i; ++j) {
-         this.itemStacks[j] = buf.readItemStack();
+      for(int var3 = 0; var3 < var2; ++var3) {
+         this.itemStacks[var3] = var1.readItemStack();
       }
 
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeByte(this.windowId);
-      buf.writeShort(this.itemStacks.length);
+      var1.writeByte(this.windowId);
+      var1.writeShort(this.itemStacks.length);
 
-      for(ItemStack itemstack : this.itemStacks) {
-         buf.writeItemStack(itemstack);
+      for(ItemStack var5 : this.itemStacks) {
+         var1.writeItemStack(var5);
       }
 
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      handler.handleWindowItems(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getWindowId() {
-      return this.windowId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ItemStack[] getItemStacks() {
-      return this.itemStacks;
+      var1.handleWindowItems(this);
    }
 }

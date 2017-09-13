@@ -11,19 +11,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.EnumPlantType;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
-public class BlockReed extends Block implements IPlantable {
+public class BlockReed extends Block {
    public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 15);
    protected static final AxisAlignedBB REED_AABB = new AxisAlignedBB(0.125D, 0.0D, 0.125D, 0.875D, 1.0D, 0.875D);
 
@@ -33,49 +28,43 @@ public class BlockReed extends Block implements IPlantable {
       this.setTickRandomly(true);
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
       return REED_AABB;
    }
 
-   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
-      if ((worldIn.getBlockState(pos.down()).getBlock() == Blocks.REEDS || this.checkForDrop(worldIn, pos, state)) && worldIn.isAirBlock(pos.up())) {
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      if ((world.getBlockState(blockposition.down()).getBlock() == Blocks.REEDS || this.checkForDrop(world, blockposition, iblockdata)) && world.isAirBlock(blockposition.up())) {
          int i;
-         for(i = 1; worldIn.getBlockState(pos.down(i)).getBlock() == this; ++i) {
+         for(i = 1; world.getBlockState(blockposition.down(i)).getBlock() == this; ++i) {
             ;
          }
 
          if (i < 3) {
-            int j = ((Integer)state.getValue(AGE)).intValue();
-            if (ForgeHooks.onCropsGrowPre(worldIn, pos, state, true)) {
-               if (j == 15) {
-                  worldIn.setBlockState(pos.up(), this.getDefaultState());
-                  worldIn.setBlockState(pos, state.withProperty(AGE, Integer.valueOf(0)), 4);
-               } else {
-                  worldIn.setBlockState(pos, state.withProperty(AGE, Integer.valueOf(j + 1)), 4);
-               }
-
-               ForgeHooks.onCropsGrowPost(worldIn, pos, state, worldIn.getBlockState(pos));
+            int j = ((Integer)iblockdata.getValue(AGE)).intValue();
+            if (j == 15) {
+               BlockPos upPos = blockposition.up();
+               CraftEventFactory.handleBlockGrowEvent(world, upPos.getX(), upPos.getY(), upPos.getZ(), this, 0);
+               world.setBlockState(blockposition, iblockdata.withProperty(AGE, Integer.valueOf(0)), 4);
+            } else {
+               world.setBlockState(blockposition, iblockdata.withProperty(AGE, Integer.valueOf(j + 1)), 4);
             }
          }
       }
 
    }
 
-   public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      IBlockState state = worldIn.getBlockState(pos.down());
-      Block block = state.getBlock();
-      if (block.canSustainPlant(state, worldIn, pos.down(), EnumFacing.UP, this)) {
-         return true;
-      } else if (block == this) {
+   public boolean canPlaceBlockAt(World world, BlockPos blockposition) {
+      Block block = world.getBlockState(blockposition.down()).getBlock();
+      if (block == this) {
          return true;
       } else if (block != Blocks.GRASS && block != Blocks.DIRT && block != Blocks.SAND) {
          return false;
       } else {
-         BlockPos blockpos = pos.down();
+         BlockPos blockposition1 = blockposition.down();
 
-         for(EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-            IBlockState iblockstate = worldIn.getBlockState(blockpos.offset(enumfacing));
-            if (iblockstate.getMaterial() == Material.WATER || iblockstate.getBlock() == Blocks.FROSTED_ICE) {
+         for(EnumFacing enumdirection : EnumFacing.Plane.HORIZONTAL) {
+            IBlockState iblockdata = world.getBlockState(blockposition1.offset(enumdirection));
+            if (iblockdata.getMaterial() == Material.WATER || iblockdata.getBlock() == Blocks.FROSTED_ICE) {
                return true;
             }
          }
@@ -84,65 +73,52 @@ public class BlockReed extends Block implements IPlantable {
       }
    }
 
-   public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      this.checkForDrop(worldIn, pos, state);
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      this.checkForDrop(world, blockposition, iblockdata);
    }
 
-   protected final boolean checkForDrop(World var1, BlockPos var2, IBlockState var3) {
-      if (this.canBlockStay(worldIn, pos)) {
+   protected final boolean checkForDrop(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (this.canBlockStay(world, blockposition)) {
          return true;
       } else {
-         this.dropBlockAsItem(worldIn, pos, state, 0);
-         worldIn.setBlockToAir(pos);
+         this.dropBlockAsItem(world, blockposition, iblockdata, 0);
+         world.setBlockToAir(blockposition);
          return false;
       }
    }
 
-   public boolean canBlockStay(World var1, BlockPos var2) {
-      return this.canPlaceBlockAt(worldIn, pos);
+   public boolean canBlockStay(World world, BlockPos blockposition) {
+      return this.canPlaceBlockAt(world, blockposition);
    }
 
    @Nullable
-   public AxisAlignedBB getCollisionBoundingBox(IBlockState var1, World var2, BlockPos var3) {
+   public AxisAlignedBB getCollisionBoundingBox(IBlockState iblockdata, World world, BlockPos blockposition) {
       return NULL_AABB;
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
       return Items.REEDS;
    }
 
-   public boolean isOpaqueCube(IBlockState var1) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isFullCube(IBlockState var1) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return new ItemStack(Items.REEDS);
    }
 
-   public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(AGE, Integer.valueOf(meta));
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(AGE, Integer.valueOf(i));
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
-   }
-
-   public int getMetaFromState(IBlockState var1) {
-      return ((Integer)state.getValue(AGE)).intValue();
-   }
-
-   public EnumPlantType getPlantType(IBlockAccess var1, BlockPos var2) {
-      return EnumPlantType.Beach;
-   }
-
-   public IBlockState getPlant(IBlockAccess var1, BlockPos var2) {
-      return this.getDefaultState();
+   public int getMetaFromState(IBlockState iblockdata) {
+      return ((Integer)iblockdata.getValue(AGE)).intValue();
    }
 
    protected BlockStateContainer createBlockState() {

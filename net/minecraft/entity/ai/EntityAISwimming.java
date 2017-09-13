@@ -7,9 +7,9 @@ public class EntityAISwimming extends EntityAIBase {
    private final EntityLiving theEntity;
 
    public EntityAISwimming(EntityLiving var1) {
-      this.theEntity = entitylivingIn;
+      this.theEntity = var1;
       this.setMutexBits(4);
-      ((PathNavigateGround)entitylivingIn.getNavigator()).setCanSwim(true);
+      ((PathNavigateGround)var1.getNavigator()).setCanSwim(true);
    }
 
    public boolean shouldExecute() {

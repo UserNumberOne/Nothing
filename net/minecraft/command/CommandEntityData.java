@@ -6,7 +6,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 
 public class CommandEntityData extends CommandBase {
    public String getName() {
@@ -22,37 +22,37 @@ public class CommandEntityData extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length < 2) {
+      if (var3.length < 2) {
          throw new WrongUsageException("commands.entitydata.usage", new Object[0]);
       } else {
-         Entity entity = getEntity(server, sender, args[0]);
-         if (entity instanceof EntityPlayer) {
-            throw new CommandException("commands.entitydata.noPlayers", new Object[]{entity.getDisplayName()});
+         Entity var4 = b(var1, var2, var3[0]);
+         if (var4 instanceof EntityPlayer) {
+            throw new CommandException("commands.entitydata.noPlayers", new Object[]{var4.getDisplayName()});
          } else {
-            NBTTagCompound nbttagcompound = entityToNBT(entity);
-            NBTTagCompound nbttagcompound1 = nbttagcompound.copy();
+            NBTTagCompound var5 = entityToNBT(var4);
+            NBTTagCompound var6 = var5.copy();
 
-            NBTTagCompound nbttagcompound2;
+            NBTTagCompound var7;
             try {
-               nbttagcompound2 = JsonToNBT.getTagFromJson(getChatComponentFromNthArg(sender, args, 1).getUnformattedText());
+               var7 = JsonToNBT.getTagFromJson(getChatComponentFromNthArg(var2, var3, 1).getUnformattedText());
             } catch (NBTException var9) {
                throw new CommandException("commands.entitydata.tagError", new Object[]{var9.getMessage()});
             }
 
-            UUID uuid = entity.getUniqueID();
-            nbttagcompound.merge(nbttagcompound2);
-            entity.setUniqueId(uuid);
-            if (nbttagcompound.equals(nbttagcompound1)) {
-               throw new CommandException("commands.entitydata.failed", new Object[]{nbttagcompound.toString()});
+            UUID var8 = var4.getUniqueID();
+            var5.merge(var7);
+            var4.setUniqueId(var8);
+            if (var5.equals(var6)) {
+               throw new CommandException("commands.entitydata.failed", new Object[]{var5.toString()});
             } else {
-               entity.readFromNBT(nbttagcompound);
-               notifyCommandListener(sender, this, "commands.entitydata.success", new Object[]{nbttagcompound.toString()});
+               var4.readFromNBT(var5);
+               notifyCommandListener(var2, this, "commands.entitydata.success", new Object[]{var5.toString()});
             }
          }
       }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return index == 0;
+      return var2 == 0;
    }
 }

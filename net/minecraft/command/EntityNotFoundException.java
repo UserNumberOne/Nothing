@@ -6,6 +6,6 @@ public class EntityNotFoundException extends CommandException {
    }
 
    public EntityNotFoundException(String var1, Object... var2) {
-      super(message, args);
+      super(var1, var2);
    }
 }

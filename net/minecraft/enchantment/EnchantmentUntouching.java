@@ -5,7 +5,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentUntouching extends Enchantment {
    protected EnchantmentUntouching(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
-      super(rarityIn, EnumEnchantmentType.DIGGER, slots);
+      super(var1, EnumEnchantmentType.DIGGER, var2);
       this.setName("untouching");
    }
 
@@ -14,7 +14,7 @@ public class EnchantmentUntouching extends Enchantment {
    }
 
    public int getMaxEnchantability(int var1) {
-      return super.getMinEnchantability(enchantmentLevel) + 50;
+      return super.getMinEnchantability(var1) + 50;
    }
 
    public int getMaxLevel() {
@@ -22,6 +22,6 @@ public class EnchantmentUntouching extends Enchantment {
    }
 
    public boolean canApplyTogether(Enchantment var1) {
-      return super.canApplyTogether(ench) && ench != Enchantments.FORTUNE;
+      return super.canApplyTogether(var1) && var1 != Enchantments.FORTUNE;
    }
 }

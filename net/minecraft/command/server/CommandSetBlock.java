@@ -15,7 +15,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -34,79 +34,84 @@ public class CommandSetBlock extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length < 4) {
+      if (var3.length < 4) {
          throw new WrongUsageException("commands.setblock.usage", new Object[0]);
       } else {
-         sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 0);
-         BlockPos blockpos = parseBlockPos(sender, args, 0, false);
-         Block block = CommandBase.getBlockByText(sender, args[3]);
-         int i = 0;
-         if (args.length >= 5) {
-            i = parseInt(args[4], 0, 15);
+         var2.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 0);
+         BlockPos var4 = parseBlockPos(var2, var3, 0, false);
+         Block var5 = CommandBase.getBlockByText(var2, var3[3]);
+         int var6 = 0;
+         if (var3.length >= 5) {
+            var6 = parseInt(var3[4], 0, 15);
          }
 
-         IBlockState state = block.getStateFromMeta(i);
-         World world = sender.getEntityWorld();
-         if (!world.isBlockLoaded(blockpos)) {
+         World var7 = var2.getEntityWorld();
+         if (!var7.isBlockLoaded(var4)) {
             throw new CommandException("commands.setblock.outOfWorld", new Object[0]);
          } else {
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            boolean flag = false;
-            if (args.length >= 7 && block.hasTileEntity(state)) {
-               String s = getChatComponentFromNthArg(sender, args, 6).getUnformattedText();
+            NBTTagCompound var8 = new NBTTagCompound();
+            boolean var9 = false;
+            if (var3.length >= 7 && var5.hasTileEntity()) {
+               String var10 = getChatComponentFromNthArg(var2, var3, 6).getUnformattedText();
 
                try {
-                  nbttagcompound = JsonToNBT.getTagFromJson(s);
-                  flag = true;
-               } catch (NBTException var14) {
-                  throw new CommandException("commands.setblock.tagError", new Object[]{var14.getMessage()});
+                  var8 = JsonToNBT.getTagFromJson(var10);
+                  var9 = true;
+               } catch (NBTException var13) {
+                  throw new CommandException("commands.setblock.tagError", new Object[]{var13.getMessage()});
                }
             }
 
-            if (args.length >= 6) {
-               if ("destroy".equals(args[5])) {
-                  world.destroyBlock(blockpos, true);
-                  if (block == Blocks.AIR) {
-                     notifyCommandListener(sender, this, "commands.setblock.success", new Object[0]);
+            if (var3.length >= 6) {
+               if ("destroy".equals(var3[5])) {
+                  var7.destroyBlock(var4, true);
+                  if (var5 == Blocks.AIR) {
+                     notifyCommandListener(var2, this, "commands.setblock.success", new Object[0]);
                      return;
                   }
-               } else if ("keep".equals(args[5]) && !world.isAirBlock(blockpos)) {
+               } else if ("keep".equals(var3[5]) && !var7.isAirBlock(var4)) {
                   throw new CommandException("commands.setblock.noChange", new Object[0]);
                }
             }
 
-            TileEntity tileentity1 = world.getTileEntity(blockpos);
-            if (tileentity1 != null) {
-               if (tileentity1 instanceof IInventory) {
-                  ((IInventory)tileentity1).clear();
+            TileEntity var14 = var7.getTileEntity(var4);
+            if (var14 != null) {
+               if (var14 instanceof IInventory) {
+                  ((IInventory)var14).clear();
                }
 
-               world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), block == Blocks.AIR ? 2 : 4);
+               var7.setBlockState(var4, Blocks.AIR.getDefaultState(), var5 == Blocks.AIR ? 2 : 4);
             }
 
-            IBlockState iblockstate = block.getStateFromMeta(i);
-            if (!world.setBlockState(blockpos, iblockstate, 2)) {
+            IBlockState var11 = var5.getStateFromMeta(var6);
+            if (!var7.setBlockState(var4, var11, 2)) {
                throw new CommandException("commands.setblock.noChange", new Object[0]);
             } else {
-               if (flag) {
-                  TileEntity tileentity = world.getTileEntity(blockpos);
-                  if (tileentity != null) {
-                     nbttagcompound.setInteger("x", blockpos.getX());
-                     nbttagcompound.setInteger("y", blockpos.getY());
-                     nbttagcompound.setInteger("z", blockpos.getZ());
-                     tileentity.readFromNBT(nbttagcompound);
+               if (var9) {
+                  TileEntity var12 = var7.getTileEntity(var4);
+                  if (var12 != null) {
+                     var8.setInteger("x", var4.getX());
+                     var8.setInteger("y", var4.getY());
+                     var8.setInteger("z", var4.getZ());
+                     var12.readFromNBT(var8);
                   }
                }
 
-               world.notifyNeighborsRespectDebug(blockpos, iblockstate.getBlock());
-               sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 1);
-               notifyCommandListener(sender, this, "commands.setblock.success", new Object[0]);
+               var7.notifyNeighborsRespectDebug(var4, var11.getBlock());
+               var2.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 1);
+               notifyCommandListener(var2, this, "commands.setblock.success", new Object[0]);
             }
          }
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return args.length > 0 && args.length <= 3 ? getTabCompletionCoordinate(args, 0, pos) : (args.length == 4 ? getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys()) : (args.length == 6 ? getListOfStringsMatchingLastWord(args, new String[]{"replace", "destroy", "keep"}) : Collections.emptyList()));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length > 0 && var3.length <= 3) {
+         return getTabCompletionCoordinate(var3, 0, var4);
+      } else if (var3.length == 4) {
+         return getListOfStringsMatchingLastWord(var3, Block.REGISTRY.getKeys());
+      } else {
+         return var3.length == 6 ? getListOfStringsMatchingLastWord(var3, new String[]{"replace", "destroy", "keep"}) : Collections.emptyList();
+      }
    }
 }

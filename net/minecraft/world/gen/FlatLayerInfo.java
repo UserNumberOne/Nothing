@@ -11,19 +11,19 @@ public class FlatLayerInfo {
    private int layerMinimumY;
 
    public FlatLayerInfo(int var1, Block var2) {
-      this(3, p_i45467_1_, layerMaterialIn);
+      this(3, var1, var2);
    }
 
    public FlatLayerInfo(int var1, int var2, Block var3) {
       this.layerCount = 1;
-      this.version = p_i45627_1_;
-      this.layerCount = height;
-      this.layerMaterial = layerMaterialIn.getDefaultState();
+      this.version = var1;
+      this.layerCount = var2;
+      this.layerMaterial = var3.getDefaultState();
    }
 
    public FlatLayerInfo(int var1, int var2, Block var3, int var4) {
-      this(p_i45628_1_, p_i45628_2_, layerMaterialIn);
-      this.layerMaterial = layerMaterialIn.getStateFromMeta(p_i45628_4_);
+      this(var1, var2, var3);
+      this.layerMaterial = var3.getStateFromMeta(var4);
    }
 
    public int getLayerCount() {
@@ -47,29 +47,29 @@ public class FlatLayerInfo {
    }
 
    public void setMinY(int var1) {
-      this.layerMinimumY = minY;
+      this.layerMinimumY = var1;
    }
 
    public String toString() {
-      String s;
+      String var2;
       if (this.version >= 3) {
-         ResourceLocation resourcelocation = (ResourceLocation)Block.REGISTRY.getNameForObject(this.getLayerMaterialBlock());
-         s = resourcelocation == null ? "null" : resourcelocation.toString();
+         ResourceLocation var1 = (ResourceLocation)Block.REGISTRY.getNameForObject(this.getLayerMaterialBlock());
+         var2 = var1 == null ? "null" : var1.toString();
          if (this.layerCount > 1) {
-            s = this.layerCount + "*" + s;
+            var2 = this.layerCount + "*" + var2;
          }
       } else {
-         s = Integer.toString(Block.getIdFromBlock(this.getLayerMaterialBlock()));
+         var2 = Integer.toString(Block.getIdFromBlock(this.getLayerMaterialBlock()));
          if (this.layerCount > 1) {
-            s = this.layerCount + "x" + s;
+            var2 = this.layerCount + "x" + var2;
          }
       }
 
-      int i = this.getFillBlockMeta();
-      if (i > 0) {
-         s = s + ":" + i;
+      int var3 = this.getFillBlockMeta();
+      if (var3 > 0) {
+         var2 = var2 + ":" + var3;
       }
 
-      return s;
+      return var2;
    }
 }

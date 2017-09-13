@@ -15,22 +15,27 @@ public class BlockStateMatcher implements Predicate {
       public boolean apply(@Nullable IBlockState var1) {
          return true;
       }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((IBlockState)var1);
+      }
    };
    private final BlockStateContainer blockstate;
    private final Map propertyPredicates = Maps.newHashMap();
 
    private BlockStateMatcher(BlockStateContainer var1) {
-      this.blockstate = blockStateIn;
+      this.blockstate = var1;
    }
 
    public static BlockStateMatcher forBlock(Block var0) {
-      return new BlockStateMatcher(blockIn.getBlockState());
+      return new BlockStateMatcher(var0.getBlockState());
    }
 
    public boolean apply(@Nullable IBlockState var1) {
-      if (p_apply_1_ != null && p_apply_1_.getBlock().equals(this.blockstate.getBlock())) {
-         for(Entry entry : this.propertyPredicates.entrySet()) {
-            if (!this.matches(p_apply_1_, (IProperty)entry.getKey(), (Predicate)entry.getValue())) {
+      if (var1 != null && var1.getBlock().equals(this.blockstate.getBlock())) {
+         for(Entry var3 : this.propertyPredicates.entrySet()) {
+            if (!this.matches(var1, (IProperty)var3.getKey(), (Predicate)var3.getValue())) {
                return false;
             }
          }
@@ -42,15 +47,20 @@ public class BlockStateMatcher implements Predicate {
    }
 
    protected boolean matches(IBlockState var1, IProperty var2, Predicate var3) {
-      return predicate.apply(blockState.getValue(property));
+      return var3.apply(var1.getValue(var2));
    }
 
    public BlockStateMatcher where(IProperty var1, Predicate var2) {
-      if (!this.blockstate.getProperties().contains(property)) {
-         throw new IllegalArgumentException(this.blockstate + " cannot support property " + property);
+      if (!this.blockstate.getProperties().contains(var1)) {
+         throw new IllegalArgumentException(this.blockstate + " cannot support property " + var1);
       } else {
-         this.propertyPredicates.put(property, is);
+         this.propertyPredicates.put(var1, var2);
          return this;
       }
+   }
+
+   // $FF: synthetic method
+   public boolean apply(Object var1) {
+      return this.apply((IBlockState)var1);
    }
 }

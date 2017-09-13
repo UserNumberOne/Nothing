@@ -13,49 +13,47 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.EnderTeleportEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 public class EntityEnderPearl extends EntityThrowable {
    private EntityLivingBase thrower;
 
-   public EntityEnderPearl(World var1) {
-      super(worldIn);
+   public EntityEnderPearl(World world) {
+      super(world);
    }
 
-   public EntityEnderPearl(World var1, EntityLivingBase var2) {
-      super(worldIn, throwerIn);
-      this.thrower = throwerIn;
+   public EntityEnderPearl(World world, EntityLivingBase entityliving) {
+      super(world, entityliving);
+      this.thrower = entityliving;
    }
 
-   @SideOnly(Side.CLIENT)
-   public EntityEnderPearl(World var1, double var2, double var4, double var6) {
-      super(worldIn, x, y, z);
+   public static void registerFixesEnderPearl(DataFixer dataconvertermanager) {
+      EntityThrowable.registerFixesThrowable(dataconvertermanager, "ThrownEnderpearl");
    }
 
-   public static void registerFixesEnderPearl(DataFixer var0) {
-      EntityThrowable.registerFixesThrowable(fixer, "ThrownEnderpearl");
-   }
-
-   protected void onImpact(RayTraceResult var1) {
-      EntityLivingBase entitylivingbase = this.getThrower();
-      if (result.entityHit != null) {
-         if (result.entityHit == this.thrower) {
+   protected void onImpact(RayTraceResult movingobjectposition) {
+      EntityLivingBase entityliving = this.getThrower();
+      if (movingobjectposition.entityHit != null) {
+         if (movingobjectposition.entityHit == this.thrower) {
             return;
          }
 
-         result.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, entitylivingbase), 0.0F);
+         movingobjectposition.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, entityliving), 0.0F);
       }
 
-      if (result.typeOfHit == RayTraceResult.Type.BLOCK) {
-         BlockPos blockpos = result.getBlockPos();
-         TileEntity tileentity = this.world.getTileEntity(blockpos);
+      if (movingobjectposition.typeOfHit == RayTraceResult.Type.BLOCK) {
+         BlockPos blockposition = movingobjectposition.getBlockPos();
+         TileEntity tileentity = this.world.getTileEntity(blockposition);
          if (tileentity instanceof TileEntityEndGateway) {
             TileEntityEndGateway tileentityendgateway = (TileEntityEndGateway)tileentity;
-            if (entitylivingbase != null) {
-               tileentityendgateway.teleportEntity(entitylivingbase);
+            if (entityliving != null) {
+               tileentityendgateway.teleportEntity(entityliving);
                this.setDead();
                return;
             }
@@ -70,30 +68,37 @@ public class EntityEnderPearl extends EntityThrowable {
       }
 
       if (!this.world.isRemote) {
-         if (entitylivingbase instanceof EntityPlayerMP) {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)entitylivingbase;
-            if (entityplayermp.connection.getNetworkManager().isChannelOpen() && entityplayermp.world == this.world && !entityplayermp.isPlayerSleeping()) {
-               EnderTeleportEvent event = new EnderTeleportEvent(entityplayermp, this.posX, this.posY, this.posZ, 5.0F);
-               if (!MinecraftForge.EVENT_BUS.post(event)) {
+         if (entityliving instanceof EntityPlayerMP) {
+            EntityPlayerMP entityplayer = (EntityPlayerMP)entityliving;
+            if (entityplayer.connection.getNetworkManager().isChannelOpen() && entityplayer.world == this.world && !entityplayer.isPlayerSleeping()) {
+               CraftPlayer player = entityplayer.getBukkitEntity();
+               Location location = this.getBukkitEntity().getLocation();
+               location.setPitch(player.getLocation().getPitch());
+               location.setYaw(player.getLocation().getYaw());
+               PlayerTeleportEvent teleEvent = new PlayerTeleportEvent(player, player.getLocation(), location, TeleportCause.ENDER_PEARL);
+               Bukkit.getPluginManager().callEvent(teleEvent);
+               if (!teleEvent.isCancelled() && !entityplayer.connection.isDisconnected()) {
                   if (this.rand.nextFloat() < 0.05F && this.world.getGameRules().getBoolean("doMobSpawning")) {
                      EntityEndermite entityendermite = new EntityEndermite(this.world);
                      entityendermite.setSpawnedByPlayer(true);
-                     entityendermite.setLocationAndAngles(entitylivingbase.posX, entitylivingbase.posY, entitylivingbase.posZ, entitylivingbase.rotationYaw, entitylivingbase.rotationPitch);
-                     this.world.spawnEntity(entityendermite);
+                     entityendermite.setLocationAndAngles(entityliving.posX, entityliving.posY, entityliving.posZ, entityliving.rotationYaw, entityliving.rotationPitch);
+                     this.world.addEntity(entityendermite, SpawnReason.ENDER_PEARL);
                   }
 
-                  if (entitylivingbase.isRiding()) {
-                     entitylivingbase.dismountRidingEntity();
+                  if (entityliving.isRiding()) {
+                     entityliving.dismountRidingEntity();
                   }
 
-                  entitylivingbase.setPositionAndUpdate(event.getTargetX(), event.getTargetY(), event.getTargetZ());
-                  entitylivingbase.fallDistance = 0.0F;
-                  entitylivingbase.attackEntityFrom(DamageSource.fall, event.getAttackDamage());
+                  entityplayer.connection.teleport(teleEvent.getTo());
+                  entityliving.fallDistance = 0.0F;
+                  CraftEventFactory.entityDamage = this;
+                  entityliving.attackEntityFrom(DamageSource.fall, 5.0F);
+                  CraftEventFactory.entityDamage = null;
                }
             }
-         } else if (entitylivingbase != null) {
-            entitylivingbase.setPositionAndUpdate(this.posX, this.posY, this.posZ);
-            entitylivingbase.fallDistance = 0.0F;
+         } else if (entityliving != null) {
+            entityliving.setPositionAndUpdate(this.posX, this.posY, this.posZ);
+            entityliving.fallDistance = 0.0F;
          }
 
          this.setDead();
@@ -102,8 +107,8 @@ public class EntityEnderPearl extends EntityThrowable {
    }
 
    public void onUpdate() {
-      EntityLivingBase entitylivingbase = this.getThrower();
-      if (entitylivingbase != null && entitylivingbase instanceof EntityPlayer && !entitylivingbase.isEntityAlive()) {
+      EntityLivingBase entityliving = this.getThrower();
+      if (entityliving != null && entityliving instanceof EntityPlayer && !entityliving.isEntityAlive()) {
          this.setDead();
       } else {
          super.onUpdate();

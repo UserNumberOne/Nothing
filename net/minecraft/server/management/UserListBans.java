@@ -6,39 +6,44 @@ import java.io.File;
 
 public class UserListBans extends UserList {
    public UserListBans(File var1) {
-      super(bansFile);
+      super(var1);
    }
 
    protected UserListEntry createEntry(JsonObject var1) {
-      return new UserListBansEntry(entryData);
+      return new UserListBansEntry(var1);
    }
 
    public boolean isBanned(GameProfile var1) {
-      return this.hasEntry(profile);
+      return this.hasEntry(var1);
    }
 
    public String[] getKeys() {
-      String[] astring = new String[this.getValues().size()];
-      int i = 0;
+      String[] var1 = new String[this.getValues().size()];
+      int var2 = 0;
 
-      for(UserListBansEntry userlistbansentry : this.getValues().values()) {
-         astring[i++] = ((GameProfile)userlistbansentry.getValue()).getName();
+      for(UserListBansEntry var4 : this.getValues().values()) {
+         var1[var2++] = ((GameProfile)var4.getValue()).getName();
       }
 
-      return astring;
+      return var1;
    }
 
    protected String getObjectKey(GameProfile var1) {
-      return obj.getId().toString();
+      return var1.getId().toString();
    }
 
    public GameProfile getBannedProfile(String var1) {
-      for(UserListBansEntry userlistbansentry : this.getValues().values()) {
-         if (username.equalsIgnoreCase(((GameProfile)userlistbansentry.getValue()).getName())) {
-            return (GameProfile)userlistbansentry.getValue();
+      for(UserListBansEntry var3 : this.getValues().values()) {
+         if (var1.equalsIgnoreCase(((GameProfile)var3.getValue()).getName())) {
+            return (GameProfile)var3.getValue();
          }
       }
 
       return null;
+   }
+
+   // $FF: synthetic method
+   protected String getObjectKey(Object var1) {
+      return this.getObjectKey((GameProfile)var1);
    }
 }

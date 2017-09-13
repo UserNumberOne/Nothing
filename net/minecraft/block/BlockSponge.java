@@ -1,9 +1,8 @@
 package net.minecraft.block;
 
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
@@ -11,16 +10,11 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockSponge extends Block {
    public static final PropertyBool WET = PropertyBool.create("wet");
@@ -36,113 +30,70 @@ public class BlockSponge extends Block {
    }
 
    public int damageDropped(IBlockState var1) {
-      return ((Boolean)state.getValue(WET)).booleanValue() ? 1 : 0;
+      return ((Boolean)var1.getValue(WET)).booleanValue() ? 1 : 0;
    }
 
    public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
-      this.tryAbsorb(worldIn, pos, state);
+      this.tryAbsorb(var1, var2, var3);
    }
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      this.tryAbsorb(worldIn, pos, state);
-      super.neighborChanged(state, worldIn, pos, blockIn);
+      this.tryAbsorb(var2, var3, var1);
+      super.neighborChanged(var1, var2, var3, var4);
    }
 
    protected void tryAbsorb(World var1, BlockPos var2, IBlockState var3) {
-      if (!((Boolean)state.getValue(WET)).booleanValue() && this.absorb(worldIn, pos)) {
-         worldIn.setBlockState(pos, state.withProperty(WET, Boolean.valueOf(true)), 2);
-         worldIn.playEvent(2001, pos, Block.getIdFromBlock(Blocks.WATER));
+      if (!((Boolean)var3.getValue(WET)).booleanValue() && this.absorb(var1, var2)) {
+         var1.setBlockState(var2, var3.withProperty(WET, Boolean.valueOf(true)), 2);
+         var1.playEvent(2001, var2, Block.getIdFromBlock(Blocks.WATER));
       }
 
    }
 
    private boolean absorb(World var1, BlockPos var2) {
-      Queue queue = Lists.newLinkedList();
-      List list = Lists.newArrayList();
-      queue.add(new Tuple(pos, Integer.valueOf(0)));
-      int i = 0;
+      LinkedList var3 = Lists.newLinkedList();
+      ArrayList var4 = Lists.newArrayList();
+      var3.add(new Tuple(var2, Integer.valueOf(0)));
+      int var5 = 0;
 
-      while(!((Queue)queue).isEmpty()) {
-         Tuple tuple = (Tuple)queue.poll();
-         BlockPos blockpos = (BlockPos)tuple.getFirst();
-         int j = ((Integer)tuple.getSecond()).intValue();
+      while(!var3.isEmpty()) {
+         Tuple var6 = (Tuple)var3.poll();
+         BlockPos var7 = (BlockPos)var6.getFirst();
+         int var8 = ((Integer)var6.getSecond()).intValue();
 
-         for(EnumFacing enumfacing : EnumFacing.values()) {
-            BlockPos blockpos1 = blockpos.offset(enumfacing);
-            if (worldIn.getBlockState(blockpos1).getMaterial() == Material.WATER) {
-               worldIn.setBlockState(blockpos1, Blocks.AIR.getDefaultState(), 2);
-               list.add(blockpos1);
-               ++i;
-               if (j < 6) {
-                  queue.add(new Tuple(blockpos1, j + 1));
+         for(EnumFacing var12 : EnumFacing.values()) {
+            BlockPos var13 = var7.offset(var12);
+            if (var1.getBlockState(var13).getMaterial() == Material.WATER) {
+               var1.setBlockState(var13, Blocks.AIR.getDefaultState(), 2);
+               var4.add(var13);
+               ++var5;
+               if (var8 < 6) {
+                  var3.add(new Tuple(var13, var8 + 1));
                }
             }
          }
 
-         if (i > 64) {
+         if (var5 > 64) {
             break;
          }
       }
 
-      for(BlockPos blockpos2 : list) {
-         worldIn.notifyNeighborsOfStateChange(blockpos2, Blocks.AIR);
+      for(BlockPos var15 : var4) {
+         var1.notifyNeighborsOfStateChange(var15, Blocks.AIR);
       }
 
-      return i > 0;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
-      list.add(new ItemStack(itemIn, 1, 0));
-      list.add(new ItemStack(itemIn, 1, 1));
+      return var5 > 0;
    }
 
    public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(WET, Boolean.valueOf((meta & 1) == 1));
+      return this.getDefaultState().withProperty(WET, Boolean.valueOf((var1 & 1) == 1));
    }
 
    public int getMetaFromState(IBlockState var1) {
-      return ((Boolean)state.getValue(WET)).booleanValue() ? 1 : 0;
+      return ((Boolean)var1.getValue(WET)).booleanValue() ? 1 : 0;
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{WET});
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      if (((Boolean)stateIn.getValue(WET)).booleanValue()) {
-         EnumFacing enumfacing = EnumFacing.random(rand);
-         if (enumfacing != EnumFacing.UP && !worldIn.getBlockState(pos.offset(enumfacing)).isFullyOpaque()) {
-            double d0 = (double)pos.getX();
-            double d1 = (double)pos.getY();
-            double d2 = (double)pos.getZ();
-            if (enumfacing == EnumFacing.DOWN) {
-               d1 = d1 - 0.05D;
-               d0 += rand.nextDouble();
-               d2 += rand.nextDouble();
-            } else {
-               d1 = d1 + rand.nextDouble() * 0.8D;
-               if (enumfacing.getAxis() == EnumFacing.Axis.X) {
-                  d2 += rand.nextDouble();
-                  if (enumfacing == EnumFacing.EAST) {
-                     ++d0;
-                  } else {
-                     d0 += 0.05D;
-                  }
-               } else {
-                  d0 += rand.nextDouble();
-                  if (enumfacing == EnumFacing.SOUTH) {
-                     ++d2;
-                  } else {
-                     d2 += 0.05D;
-                  }
-               }
-            }
-
-            worldIn.spawnParticle(EnumParticleTypes.DRIP_WATER, d0, d1, d2, 0.0D, 0.0D, 0.0D);
-         }
-      }
-
    }
 }

@@ -54,8 +54,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeSnow;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 
 public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
    private static final DataParameter SKELETON_VARIANT = EntityDataManager.createKey(EntitySkeleton.class, DataSerializers.VARINT);
@@ -73,8 +74,8 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
       }
    };
 
-   public EntitySkeleton(World var1) {
-      super(worldIn);
+   public EntitySkeleton(World world) {
+      super(world);
       this.setCombatTask();
    }
 
@@ -114,15 +115,15 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
       return this.getSkeletonType().getDeathSound();
    }
 
-   protected void playStepSound(BlockPos var1, Block var2) {
-      SoundEvent soundevent = this.getSkeletonType().getStepSound();
-      this.playSound(soundevent, 0.15F, 1.0F);
+   protected void playStepSound(BlockPos blockposition, Block block) {
+      SoundEvent soundeffect = this.getSkeletonType().getStepSound();
+      this.playSound(soundeffect, 0.15F, 1.0F);
    }
 
-   public boolean attackEntityAsMob(Entity var1) {
-      if (super.attackEntityAsMob(entityIn)) {
-         if (this.getSkeletonType() == SkeletonType.WITHER && entityIn instanceof EntityLivingBase) {
-            ((EntityLivingBase)entityIn).addPotionEffect(new PotionEffect(MobEffects.WITHER, 200));
+   public boolean attackEntityAsMob(Entity entity) {
+      if (super.attackEntityAsMob(entity)) {
+         if (this.getSkeletonType() == SkeletonType.WITHER && entity instanceof EntityLivingBase) {
+            ((EntityLivingBase)entity).addPotionEffect(new PotionEffect(MobEffects.WITHER, 200));
          }
 
          return true;
@@ -138,8 +139,8 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
    public void onLivingUpdate() {
       if (this.world.isDaytime() && !this.world.isRemote) {
          float f = this.getBrightness(1.0F);
-         BlockPos blockpos = this.getRidingEntity() instanceof EntityBoat ? (new BlockPos(this.posX, (double)Math.round(this.posY), this.posZ)).up() : new BlockPos(this.posX, (double)Math.round(this.posY), this.posZ);
-         if (f > 0.5F && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.world.canSeeSky(blockpos)) {
+         BlockPos blockposition = this.getRidingEntity() instanceof EntityBoat ? (new BlockPos(this.posX, (double)Math.round(this.posY), this.posZ)).up() : new BlockPos(this.posX, (double)Math.round(this.posY), this.posZ);
+         if (f > 0.5F && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.world.canSeeSky(blockposition)) {
             boolean flag = true;
             ItemStack itemstack = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
             if (itemstack != null) {
@@ -155,7 +156,11 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
             }
 
             if (flag) {
-               this.setFire(8);
+               EntityCombustEvent event = new EntityCombustEvent(this.getBukkitEntity(), 8);
+               this.world.getServer().getPluginManager().callEvent(event);
+               if (!event.isCancelled()) {
+                  this.setFire(event.getDuration());
+               }
             }
          }
       }
@@ -176,20 +181,20 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 
    }
 
-   public void onDeath(DamageSource var1) {
-      super.onDeath(cause);
-      if (cause.getSourceOfDamage() instanceof EntityArrow && cause.getEntity() instanceof EntityPlayer) {
-         EntityPlayer entityplayer = (EntityPlayer)cause.getEntity();
-         double d0 = entityplayer.posX - this.posX;
-         double d1 = entityplayer.posZ - this.posZ;
+   public void onDeath(DamageSource damagesource) {
+      if (damagesource.getSourceOfDamage() instanceof EntityArrow && damagesource.getEntity() instanceof EntityPlayer) {
+         EntityPlayer entityhuman = (EntityPlayer)damagesource.getEntity();
+         double d0 = entityhuman.posX - this.posX;
+         double d1 = entityhuman.posZ - this.posZ;
          if (d0 * d0 + d1 * d1 >= 2500.0D) {
-            entityplayer.addStat(AchievementList.SNIPE_SKELETON);
+            entityhuman.addStat(AchievementList.SNIPE_SKELETON);
          }
-      } else if (cause.getEntity() instanceof EntityCreeper && ((EntityCreeper)cause.getEntity()).getPowered() && ((EntityCreeper)cause.getEntity()).isAIEnabled()) {
-         ((EntityCreeper)cause.getEntity()).incrementDroppedSkulls();
+      } else if (damagesource.getEntity() instanceof EntityCreeper && ((EntityCreeper)damagesource.getEntity()).getPowered() && ((EntityCreeper)damagesource.getEntity()).isAIEnabled()) {
+         ((EntityCreeper)damagesource.getEntity()).incrementDroppedSkulls();
          this.entityDropItem(new ItemStack(Items.SKULL, 1, this.getSkeletonType() == SkeletonType.WITHER ? 1 : 0), 0.0F);
       }
 
+      super.onDeath(damagesource);
    }
 
    @Nullable
@@ -197,31 +202,31 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
       return this.getSkeletonType().getLootTable();
    }
 
-   protected void setEquipmentBasedOnDifficulty(DifficultyInstance var1) {
-      super.setEquipmentBasedOnDifficulty(difficulty);
+   protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficultydamagescaler) {
+      super.setEquipmentBasedOnDifficulty(difficultydamagescaler);
       this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
    }
 
    @Nullable
-   public IEntityLivingData onInitialSpawn(DifficultyInstance var1, @Nullable IEntityLivingData var2) {
-      livingdata = super.onInitialSpawn(difficulty, livingdata);
+   public IEntityLivingData onInitialSpawn(DifficultyInstance difficultydamagescaler, @Nullable IEntityLivingData groupdataentity) {
+      groupdataentity = super.onInitialSpawn(difficultydamagescaler, groupdataentity);
       if (this.world.provider instanceof WorldProviderHell && this.getRNG().nextInt(5) > 0) {
          this.tasks.addTask(4, this.aiAttackOnCollide);
          this.setSkeletonType(SkeletonType.WITHER);
          this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.STONE_SWORD));
          this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4.0D);
       } else {
-         Biome biome = this.world.getBiome(new BlockPos(this));
-         if (biome instanceof BiomeSnow && this.world.canSeeSky(new BlockPos(this)) && this.rand.nextInt(5) != 0) {
+         Biome biomebase = this.world.getBiome(new BlockPos(this));
+         if (biomebase instanceof BiomeSnow && this.world.canSeeSky(new BlockPos(this)) && this.rand.nextInt(5) != 0) {
             this.setSkeletonType(SkeletonType.STRAY);
          }
 
          this.tasks.addTask(4, this.aiArrowAttack);
-         this.setEquipmentBasedOnDifficulty(difficulty);
-         this.setEnchantmentBasedOnDifficulty(difficulty);
+         this.setEquipmentBasedOnDifficulty(difficultydamagescaler);
+         this.setEnchantmentBasedOnDifficulty(difficultydamagescaler);
       }
 
-      this.setCanPickUpLoot(this.rand.nextFloat() < 0.55F * difficulty.getClampedAdditionalDifficulty());
+      this.setCanPickUpLoot(this.rand.nextFloat() < 0.55F * difficultydamagescaler.getClampedAdditionalDifficulty());
       if (this.getItemStackFromSlot(EntityEquipmentSlot.HEAD) == null) {
          Calendar calendar = this.world.getCurrentDate();
          if (calendar.get(2) + 1 == 10 && calendar.get(5) == 31 && this.rand.nextFloat() < 0.25F) {
@@ -230,7 +235,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
          }
       }
 
-      return livingdata;
+      return groupdataentity;
    }
 
    public void setCombatTask() {
@@ -239,12 +244,12 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
          this.tasks.removeTask(this.aiArrowAttack);
          ItemStack itemstack = this.getHeldItemMainhand();
          if (itemstack != null && itemstack.getItem() == Items.BOW) {
-            int i = 20;
+            byte b0 = 20;
             if (this.world.getDifficulty() != EnumDifficulty.HARD) {
-               i = 40;
+               b0 = 40;
             }
 
-            this.aiArrowAttack.setAttackCooldown(i);
+            this.aiArrowAttack.setAttackCooldown(b0);
             this.tasks.addTask(4, this.aiArrowAttack);
          } else {
             this.tasks.addTask(4, this.aiAttackOnCollide);
@@ -253,17 +258,17 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 
    }
 
-   public void attackEntityWithRangedAttack(EntityLivingBase var1, float var2) {
+   public void attackEntityWithRangedAttack(EntityLivingBase entityliving, float f) {
       EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.world, this);
-      double d0 = target.posX - this.posX;
-      double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - entitytippedarrow.posY;
-      double d2 = target.posZ - this.posZ;
+      double d0 = entityliving.posX - this.posX;
+      double d1 = entityliving.getEntityBoundingBox().minY + (double)(entityliving.height / 3.0F) - entitytippedarrow.posY;
+      double d2 = entityliving.posZ - this.posZ;
       double d3 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
       entitytippedarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, (float)(14 - this.world.getDifficulty().getDifficultyId() * 4));
       int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.POWER, this);
       int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
-      DifficultyInstance difficultyinstance = this.world.getDifficultyForLocation(new BlockPos(this));
-      entitytippedarrow.setDamage((double)(distanceFactor * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.world.getDifficulty().getDifficultyId() * 0.11F));
+      DifficultyInstance difficultydamagescaler = this.world.getDifficultyForLocation(new BlockPos(this));
+      entitytippedarrow.setDamage((double)(f * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.world.getDifficulty().getDifficultyId() * 0.11F));
       if (i > 0) {
          entitytippedarrow.setDamage(entitytippedarrow.getDamage() + (double)i * 0.5D + 0.5D);
       }
@@ -272,10 +277,14 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
          entitytippedarrow.setKnockbackStrength(j);
       }
 
-      boolean flag = this.isBurning() && difficultyinstance.isHard() && this.rand.nextBoolean() || this.getSkeletonType() == SkeletonType.WITHER;
+      boolean flag = this.isBurning() && difficultydamagescaler.isHard() && this.rand.nextBoolean() || this.getSkeletonType() == SkeletonType.WITHER;
       flag = flag || EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this) > 0;
       if (flag) {
-         entitytippedarrow.setFire(100);
+         EntityCombustEvent event = new EntityCombustEvent(entitytippedarrow.getBukkitEntity(), 100);
+         this.world.getServer().getPluginManager().callEvent(event);
+         if (!event.isCancelled()) {
+            entitytippedarrow.setFire(event.getDuration());
+         }
       }
 
       ItemStack itemstack = this.getHeldItem(EnumHand.OFF_HAND);
@@ -285,22 +294,30 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
          entitytippedarrow.addEffect(new PotionEffect(MobEffects.SLOWNESS, 600));
       }
 
-      this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-      this.world.spawnEntity(entitytippedarrow);
+      EntityShootBowEvent event = CraftEventFactory.callEntityShootBowEvent(this, this.getHeldItemMainhand(), entitytippedarrow, 0.8F);
+      if (event.isCancelled()) {
+         event.getProjectile().remove();
+      } else {
+         if (event.getProjectile() == entitytippedarrow.getBukkitEntity()) {
+            this.world.spawnEntity(entitytippedarrow);
+         }
+
+         this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+      }
    }
 
    public SkeletonType getSkeletonType() {
       return SkeletonType.getByOrdinal(((Integer)this.dataManager.get(SKELETON_VARIANT)).intValue());
    }
 
-   public void setSkeletonType(SkeletonType var1) {
-      this.dataManager.set(SKELETON_VARIANT, Integer.valueOf(type.getId()));
-      this.isImmuneToFire = type == SkeletonType.WITHER;
-      this.updateSize(type);
+   public void setSkeletonType(SkeletonType enumskeletontype) {
+      this.dataManager.set(SKELETON_VARIANT, Integer.valueOf(enumskeletontype.getId()));
+      this.isImmuneToFire = enumskeletontype == SkeletonType.WITHER;
+      this.updateSize(enumskeletontype);
    }
 
-   private void updateSize(SkeletonType var1) {
-      if (p_189769_1_ == SkeletonType.WITHER) {
+   private void updateSize(SkeletonType enumskeletontype) {
+      if (enumskeletontype == SkeletonType.WITHER) {
          this.setSize(0.7F, 2.4F);
       } else {
          this.setSize(0.6F, 1.99F);
@@ -308,28 +325,28 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 
    }
 
-   public static void registerFixesSkeleton(DataFixer var0) {
-      EntityLiving.registerFixesMob(fixer, "Skeleton");
+   public static void registerFixesSkeleton(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "Skeleton");
    }
 
-   public void readEntityFromNBT(NBTTagCompound var1) {
-      super.readEntityFromNBT(compound);
-      if (compound.hasKey("SkeletonType", 99)) {
-         int i = compound.getByte("SkeletonType");
-         this.setSkeletonType(SkeletonType.getByOrdinal(i));
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      if (nbttagcompound.hasKey("SkeletonType", 99)) {
+         byte b0 = nbttagcompound.getByte("SkeletonType");
+         this.setSkeletonType(SkeletonType.getByOrdinal(b0));
       }
 
       this.setCombatTask();
    }
 
-   public void writeEntityToNBT(NBTTagCompound var1) {
-      super.writeEntityToNBT(compound);
-      compound.setByte("SkeletonType", (byte)this.getSkeletonType().getId());
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      nbttagcompound.setByte("SkeletonType", (byte)this.getSkeletonType().getId());
    }
 
-   public void setItemStackToSlot(EntityEquipmentSlot var1, @Nullable ItemStack var2) {
-      super.setItemStackToSlot(slotIn, stack);
-      if (!this.world.isRemote && slotIn == EntityEquipmentSlot.MAINHAND) {
+   public void setItemStackToSlot(EntityEquipmentSlot enumitemslot, @Nullable ItemStack itemstack) {
+      super.setItemStackToSlot(enumitemslot, itemstack);
+      if (!this.world.isRemote && enumitemslot == EntityEquipmentSlot.MAINHAND) {
          this.setCombatTask();
       }
 
@@ -343,12 +360,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
       return -0.35D;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isSwingingArms() {
-      return ((Boolean)this.dataManager.get(SWINGING_ARMS)).booleanValue();
-   }
-
-   public void setSwingingArms(boolean var1) {
-      this.dataManager.set(SWINGING_ARMS, Boolean.valueOf(swingingArms));
+   public void setSwingingArms(boolean flag) {
+      this.dataManager.set(SWINGING_ARMS, Boolean.valueOf(flag));
    }
 }

@@ -12,16 +12,16 @@ public class NBTTagDouble extends NBTPrimitive {
    }
 
    public NBTTagDouble(double var1) {
-      this.data = data;
+      this.data = var1;
    }
 
    void write(DataOutput var1) throws IOException {
-      output.writeDouble(this.data);
+      var1.writeDouble(this.data);
    }
 
    void read(DataInput var1, int var2, NBTSizeTracker var3) throws IOException {
-      sizeTracker.read(128L);
-      this.data = input.readDouble();
+      var3.read(128L);
+      this.data = var1.readDouble();
    }
 
    public byte getId() {
@@ -37,17 +37,17 @@ public class NBTTagDouble extends NBTPrimitive {
    }
 
    public boolean equals(Object var1) {
-      if (super.equals(p_equals_1_)) {
-         NBTTagDouble nbttagdouble = (NBTTagDouble)p_equals_1_;
-         return this.data == nbttagdouble.data;
+      if (super.equals(var1)) {
+         NBTTagDouble var2 = (NBTTagDouble)var1;
+         return this.data == var2.data;
       } else {
          return false;
       }
    }
 
    public int hashCode() {
-      long i = Double.doubleToLongBits(this.data);
-      return super.hashCode() ^ (int)(i ^ i >>> 32);
+      long var1 = Double.doubleToLongBits(this.data);
+      return super.hashCode() ^ (int)(var1 ^ var1 >>> 32);
    }
 
    public long getLong() {
@@ -72,5 +72,10 @@ public class NBTTagDouble extends NBTPrimitive {
 
    public float getFloat() {
       return (float)this.data;
+   }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
    }
 }

@@ -1,10 +1,10 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
-import net.minecraft.block.BlockSapling;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -14,37 +14,37 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
    protected final IBlockState leavesMetadata;
    protected int extraRandomHeight;
 
-   public WorldGenHugeTrees(boolean var1, int var2, int var3, IBlockState var4, IBlockState var5) {
-      super(notify);
-      this.baseHeight = baseHeightIn;
-      this.extraRandomHeight = extraRandomHeightIn;
-      this.woodMetadata = woodMetadataIn;
-      this.leavesMetadata = leavesMetadataIn;
+   public WorldGenHugeTrees(boolean flag, int i, int j, IBlockState iblockdata, IBlockState iblockdata1) {
+      super(flag);
+      this.baseHeight = i;
+      this.extraRandomHeight = j;
+      this.woodMetadata = iblockdata;
+      this.leavesMetadata = iblockdata1;
    }
 
-   protected int getHeight(Random var1) {
-      int i = rand.nextInt(3) + this.baseHeight;
+   protected int getHeight(Random random) {
+      int i = random.nextInt(3) + this.baseHeight;
       if (this.extraRandomHeight > 1) {
-         i += rand.nextInt(this.extraRandomHeight);
+         i += random.nextInt(this.extraRandomHeight);
       }
 
       return i;
    }
 
-   private boolean isSpaceAt(World var1, BlockPos var2, int var3) {
+   private boolean isSpaceAt(World world, BlockPos blockposition, int i) {
       boolean flag = true;
-      if (leavesPos.getY() >= 1 && leavesPos.getY() + height + 1 <= 256) {
-         for(int i = 0; i <= 1 + height; ++i) {
-            int j = 2;
-            if (i == 0) {
-               j = 1;
-            } else if (i >= 1 + height - 2) {
-               j = 2;
+      if (blockposition.getY() >= 1 && blockposition.getY() + i + 1 <= 256) {
+         for(int j = 0; j <= 1 + i; ++j) {
+            byte b0 = 2;
+            if (j == 0) {
+               b0 = 1;
+            } else if (j >= 1 + i - 2) {
+               b0 = 2;
             }
 
-            for(int k = -j; k <= j && flag; ++k) {
-               for(int l = -j; l <= j && flag; ++l) {
-                  if (leavesPos.getY() + i < 0 || leavesPos.getY() + i >= 256 || !this.isReplaceable(worldIn, leavesPos.add(k, i, l))) {
+            for(int k = -b0; k <= b0 && flag; ++k) {
+               for(int l = -b0; l <= b0 && flag; ++l) {
+                  if (blockposition.getY() + j < 0 || blockposition.getY() + j >= 256 || !this.canGrowInto(world.getBlockState(blockposition.add(k, j, l)).getBlock()) && world.getBlockState(blockposition.add(k, j, l)).getBlock() != Blocks.SAPLING) {
                      flag = false;
                   }
                }
@@ -57,37 +57,36 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
       }
    }
 
-   private boolean ensureDirtsUnderneath(BlockPos var1, World var2) {
-      BlockPos blockpos = pos.down();
-      IBlockState state = worldIn.getBlockState(blockpos);
-      boolean isSoil = state.getBlock().canSustainPlant(state, worldIn, blockpos, EnumFacing.UP, (BlockSapling)Blocks.SAPLING);
-      if (isSoil && pos.getY() >= 2) {
-         this.onPlantGrow(worldIn, blockpos, pos);
-         this.onPlantGrow(worldIn, blockpos.east(), pos);
-         this.onPlantGrow(worldIn, blockpos.south(), pos);
-         this.onPlantGrow(worldIn, blockpos.south().east(), pos);
+   private boolean ensureDirtsUnderneath(BlockPos blockposition, World world) {
+      BlockPos blockposition1 = blockposition.down();
+      Block block = world.getBlockState(blockposition1).getBlock();
+      if ((block == Blocks.GRASS || block == Blocks.DIRT) && blockposition.getY() >= 2) {
+         this.setDirtAt(world, blockposition1);
+         this.setDirtAt(world, blockposition1.east());
+         this.setDirtAt(world, blockposition1.south());
+         this.setDirtAt(world, blockposition1.south().east());
          return true;
       } else {
          return false;
       }
    }
 
-   protected boolean ensureGrowable(World var1, Random var2, BlockPos var3, int var4) {
-      return this.isSpaceAt(worldIn, treePos, p_175929_4_) && this.ensureDirtsUnderneath(treePos, worldIn);
+   protected boolean ensureGrowable(World world, Random random, BlockPos blockposition, int i) {
+      return this.isSpaceAt(world, blockposition, i) && this.ensureDirtsUnderneath(blockposition, world);
    }
 
-   protected void growLeavesLayerStrict(World var1, BlockPos var2, int var3) {
-      int i = width * width;
+   protected void growLeavesLayerStrict(World world, BlockPos blockposition, int i) {
+      int j = i * i;
 
-      for(int j = -width; j <= width + 1; ++j) {
-         for(int k = -width; k <= width + 1; ++k) {
-            int l = j - 1;
+      for(int k = -i; k <= i + 1; ++k) {
+         for(int l = -i; l <= i + 1; ++l) {
             int i1 = k - 1;
-            if (j * j + k * k <= i || l * l + i1 * i1 <= i || j * j + i1 * i1 <= i || l * l + k * k <= i) {
-               BlockPos blockpos = layerCenter.add(j, 0, k);
-               IBlockState state = worldIn.getBlockState(blockpos);
-               if (state.getBlock().isAir(state, worldIn, blockpos) || state.getBlock().isLeaves(state, worldIn, blockpos)) {
-                  this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
+            int j1 = l - 1;
+            if (k * k + l * l <= j || i1 * i1 + j1 * j1 <= j || k * k + j1 * j1 <= j || i1 * i1 + l * l <= j) {
+               BlockPos blockposition1 = blockposition.add(k, 0, l);
+               Material material = world.getBlockState(blockposition1).getMaterial();
+               if (material == Material.AIR || material == Material.LEAVES) {
+                  this.setBlockAndNotifyAdequately(world, blockposition1, this.leavesMetadata);
                }
             }
          }
@@ -95,25 +94,20 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
 
    }
 
-   protected void growLeavesLayer(World var1, BlockPos var2, int var3) {
-      int i = width * width;
+   protected void growLeavesLayer(World world, BlockPos blockposition, int i) {
+      int j = i * i;
 
-      for(int j = -width; j <= width; ++j) {
-         for(int k = -width; k <= width; ++k) {
-            if (j * j + k * k <= i) {
-               BlockPos blockpos = layerCenter.add(j, 0, k);
-               IBlockState state = worldIn.getBlockState(blockpos);
-               if (state.getBlock().isAir(state, worldIn, blockpos) || state.getBlock().isLeaves(state, worldIn, blockpos)) {
-                  this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
+      for(int k = -i; k <= i; ++k) {
+         for(int l = -i; l <= i; ++l) {
+            if (k * k + l * l <= j) {
+               BlockPos blockposition1 = blockposition.add(k, 0, l);
+               Material material = world.getBlockState(blockposition1).getMaterial();
+               if (material == Material.AIR || material == Material.LEAVES) {
+                  this.setBlockAndNotifyAdequately(world, blockposition1, this.leavesMetadata);
                }
             }
          }
       }
 
-   }
-
-   private void onPlantGrow(World var1, BlockPos var2, BlockPos var3) {
-      IBlockState state = world.getBlockState(pos);
-      state.getBlock().onPlantGrow(state, world, pos, source);
    }
 }

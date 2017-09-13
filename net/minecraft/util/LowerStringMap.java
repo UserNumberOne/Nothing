@@ -18,28 +18,28 @@ public class LowerStringMap implements Map {
    }
 
    public boolean containsKey(Object var1) {
-      return this.internalMap.containsKey(p_containsKey_1_.toString().toLowerCase());
+      return this.internalMap.containsKey(var1.toString().toLowerCase());
    }
 
    public boolean containsValue(Object var1) {
-      return this.internalMap.containsKey(p_containsValue_1_);
+      return this.internalMap.containsKey(var1);
    }
 
    public Object get(Object var1) {
-      return this.internalMap.get(p_get_1_.toString().toLowerCase());
+      return this.internalMap.get(var1.toString().toLowerCase());
    }
 
    public Object put(String var1, Object var2) {
-      return this.internalMap.put(p_put_1_.toLowerCase(), p_put_2_);
+      return this.internalMap.put(var1.toLowerCase(), var2);
    }
 
    public Object remove(Object var1) {
-      return this.internalMap.remove(p_remove_1_.toString().toLowerCase());
+      return this.internalMap.remove(var1.toString().toLowerCase());
    }
 
    public void putAll(Map var1) {
-      for(Entry entry : p_putAll_1_.entrySet()) {
-         this.put((String)entry.getKey(), entry.getValue());
+      for(Entry var3 : var1.entrySet()) {
+         this.put((String)var3.getKey(), var3.getValue());
       }
 
    }
@@ -58,5 +58,10 @@ public class LowerStringMap implements Map {
 
    public Set entrySet() {
       return this.internalMap.entrySet();
+   }
+
+   // $FF: synthetic method
+   public Object put(Object var1, Object var2) {
+      return this.put((String)var1, var2);
    }
 }

@@ -13,19 +13,19 @@ public class CPacketPlayerTryUseItem implements Packet {
    }
 
    public CPacketPlayerTryUseItem(EnumHand var1) {
-      this.hand = handIn;
+      this.hand = var1;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.hand = (EnumHand)buf.readEnumValue(EnumHand.class);
+      this.hand = (EnumHand)var1.readEnumValue(EnumHand.class);
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeEnumValue(this.hand);
+      var1.writeEnumValue(this.hand);
    }
 
    public void processPacket(INetHandlerPlayServer var1) {
-      handler.processTryUseItem(this);
+      var1.processTryUseItem(this);
    }
 
    public EnumHand getHand() {

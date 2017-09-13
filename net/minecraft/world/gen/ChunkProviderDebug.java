@@ -24,51 +24,51 @@ public class ChunkProviderDebug implements IChunkGenerator {
    private final World world;
 
    public ChunkProviderDebug(World var1) {
-      this.world = worldIn;
+      this.world = var1;
    }
 
    public Chunk provideChunk(int var1, int var2) {
-      ChunkPrimer chunkprimer = new ChunkPrimer();
+      ChunkPrimer var3 = new ChunkPrimer();
 
-      for(int i = 0; i < 16; ++i) {
-         for(int j = 0; j < 16; ++j) {
-            int k = x * 16 + i;
-            int l = z * 16 + j;
-            chunkprimer.setBlockState(i, 60, j, BARRIER);
-            IBlockState iblockstate = getBlockStateFor(k, l);
-            if (iblockstate != null) {
-               chunkprimer.setBlockState(i, 70, j, iblockstate);
+      for(int var4 = 0; var4 < 16; ++var4) {
+         for(int var5 = 0; var5 < 16; ++var5) {
+            int var6 = var1 * 16 + var4;
+            int var7 = var2 * 16 + var5;
+            var3.setBlockState(var4, 60, var5, BARRIER);
+            IBlockState var8 = getBlockStateFor(var6, var7);
+            if (var8 != null) {
+               var3.setBlockState(var4, 70, var5, var8);
             }
          }
       }
 
-      Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
-      chunk.generateSkylightMap();
-      Biome[] abiome = this.world.getBiomeProvider().getBiomes((Biome[])null, x * 16, z * 16, 16, 16);
-      byte[] abyte = chunk.getBiomeArray();
+      Chunk var9 = new Chunk(this.world, var3, var1, var2);
+      var9.generateSkylightMap();
+      Biome[] var10 = this.world.getBiomeProvider().getBiomes((Biome[])null, var1 * 16, var2 * 16, 16, 16);
+      byte[] var11 = var9.getBiomeArray();
 
-      for(int i1 = 0; i1 < abyte.length; ++i1) {
-         abyte[i1] = (byte)Biome.getIdForBiome(abiome[i1]);
+      for(int var12 = 0; var12 < var11.length; ++var12) {
+         var11[var12] = (byte)Biome.getIdForBiome(var10[var12]);
       }
 
-      chunk.generateSkylightMap();
-      return chunk;
+      var9.generateSkylightMap();
+      return var9;
    }
 
    public static IBlockState getBlockStateFor(int var0, int var1) {
-      IBlockState iblockstate = AIR;
-      if (p_177461_0_ > 0 && p_177461_1_ > 0 && p_177461_0_ % 2 != 0 && p_177461_1_ % 2 != 0) {
-         p_177461_0_ = p_177461_0_ / 2;
-         p_177461_1_ = p_177461_1_ / 2;
-         if (p_177461_0_ <= GRID_WIDTH && p_177461_1_ <= GRID_HEIGHT) {
-            int i = MathHelper.abs(p_177461_0_ * GRID_WIDTH + p_177461_1_);
-            if (i < ALL_VALID_STATES.size()) {
-               iblockstate = (IBlockState)ALL_VALID_STATES.get(i);
+      IBlockState var2 = AIR;
+      if (var0 > 0 && var1 > 0 && var0 % 2 != 0 && var1 % 2 != 0) {
+         var0 = var0 / 2;
+         var1 = var1 / 2;
+         if (var0 <= GRID_WIDTH && var1 <= GRID_HEIGHT) {
+            int var3 = MathHelper.abs(var0 * GRID_WIDTH + var1);
+            if (var3 < ALL_VALID_STATES.size()) {
+               var2 = (IBlockState)ALL_VALID_STATES.get(var3);
             }
          }
       }
 
-      return iblockstate;
+      return var2;
    }
 
    public void populate(int var1, int var2) {
@@ -79,8 +79,8 @@ public class ChunkProviderDebug implements IChunkGenerator {
    }
 
    public List getPossibleCreatures(EnumCreatureType var1, BlockPos var2) {
-      Biome biome = this.world.getBiome(pos);
-      return biome.getSpawnableList(creatureType);
+      Biome var3 = this.world.getBiome(var2);
+      return var3.getSpawnableList(var1);
    }
 
    @Nullable
@@ -92,8 +92,8 @@ public class ChunkProviderDebug implements IChunkGenerator {
    }
 
    static {
-      for(Block block : Block.REGISTRY) {
-         ALL_VALID_STATES.addAll(block.getBlockState().getValidStates());
+      for(Block var1 : Block.REGISTRY) {
+         ALL_VALID_STATES.addAll(var1.getBlockState().getValidStates());
       }
 
       GRID_WIDTH = MathHelper.ceil(MathHelper.sqrt((float)ALL_VALID_STATES.size()));

@@ -20,12 +20,12 @@ public abstract class BlockPurpurSlab extends BlockSlab {
 
    public BlockPurpurSlab() {
       super(Material.ROCK);
-      IBlockState iblockstate = this.blockState.getBaseState();
+      IBlockState var1 = this.blockState.getBaseState();
       if (!this.isDouble()) {
-         iblockstate = iblockstate.withProperty(HALF, BlockSlab.EnumBlockHalf.BOTTOM);
+         var1 = var1.withProperty(HALF, BlockSlab.EnumBlockHalf.BOTTOM);
       }
 
-      this.setDefaultState(iblockstate.withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT));
+      this.setDefaultState(var1.withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT));
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
@@ -39,21 +39,21 @@ public abstract class BlockPurpurSlab extends BlockSlab {
    }
 
    public IBlockState getStateFromMeta(int var1) {
-      IBlockState iblockstate = this.getDefaultState().withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT);
+      IBlockState var2 = this.getDefaultState().withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT);
       if (!this.isDouble()) {
-         iblockstate = iblockstate.withProperty(HALF, (meta & 8) == 0 ? BlockSlab.EnumBlockHalf.BOTTOM : BlockSlab.EnumBlockHalf.TOP);
+         var2 = var2.withProperty(HALF, (var1 & 8) == 0 ? BlockSlab.EnumBlockHalf.BOTTOM : BlockSlab.EnumBlockHalf.TOP);
       }
 
-      return iblockstate;
+      return var2;
    }
 
    public int getMetaFromState(IBlockState var1) {
-      int i = 0;
-      if (!this.isDouble() && state.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP) {
-         i |= 8;
+      int var2 = 0;
+      if (!this.isDouble() && var1.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP) {
+         var2 |= 8;
       }
 
-      return i;
+      return var2;
    }
 
    protected BlockStateContainer createBlockState() {

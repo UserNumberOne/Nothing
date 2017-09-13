@@ -6,7 +6,7 @@ public class ScoreCriteriaStat extends ScoreCriteria {
    private final StatBase stat;
 
    public ScoreCriteriaStat(StatBase var1) {
-      super(statIn.statId);
-      this.stat = statIn;
+      super(var1.statId);
+      this.stat = var1;
    }
 }

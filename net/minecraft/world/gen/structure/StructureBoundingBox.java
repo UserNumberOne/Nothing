@@ -18,13 +18,13 @@ public class StructureBoundingBox {
    }
 
    public StructureBoundingBox(int[] var1) {
-      if (coords.length == 6) {
-         this.minX = coords[0];
-         this.minY = coords[1];
-         this.minZ = coords[2];
-         this.maxX = coords[3];
-         this.maxY = coords[4];
-         this.maxZ = coords[5];
+      if (var1.length == 6) {
+         this.minX = var1[0];
+         this.minY = var1[1];
+         this.minZ = var1[2];
+         this.maxX = var1[3];
+         this.maxY = var1[4];
+         this.maxZ = var1[5];
       }
 
    }
@@ -34,88 +34,88 @@ public class StructureBoundingBox {
    }
 
    public static StructureBoundingBox getComponentToAddBoundingBox(int var0, int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, EnumFacing var9) {
-      switch(facing) {
+      switch(var9) {
       case NORTH:
-         return new StructureBoundingBox(structureMinX + xMin, structureMinY + yMin, structureMinZ - zMax + 1 + zMin, structureMinX + xMax - 1 + xMin, structureMinY + yMax - 1 + yMin, structureMinZ + zMin);
+         return new StructureBoundingBox(var0 + var3, var1 + var4, var2 - var8 + 1 + var5, var0 + var6 - 1 + var3, var1 + var7 - 1 + var4, var2 + var5);
       case SOUTH:
-         return new StructureBoundingBox(structureMinX + xMin, structureMinY + yMin, structureMinZ + zMin, structureMinX + xMax - 1 + xMin, structureMinY + yMax - 1 + yMin, structureMinZ + zMax - 1 + zMin);
+         return new StructureBoundingBox(var0 + var3, var1 + var4, var2 + var5, var0 + var6 - 1 + var3, var1 + var7 - 1 + var4, var2 + var8 - 1 + var5);
       case WEST:
-         return new StructureBoundingBox(structureMinX - zMax + 1 + zMin, structureMinY + yMin, structureMinZ + xMin, structureMinX + zMin, structureMinY + yMax - 1 + yMin, structureMinZ + xMax - 1 + xMin);
+         return new StructureBoundingBox(var0 - var8 + 1 + var5, var1 + var4, var2 + var3, var0 + var5, var1 + var7 - 1 + var4, var2 + var6 - 1 + var3);
       case EAST:
-         return new StructureBoundingBox(structureMinX + zMin, structureMinY + yMin, structureMinZ + xMin, structureMinX + zMax - 1 + zMin, structureMinY + yMax - 1 + yMin, structureMinZ + xMax - 1 + xMin);
+         return new StructureBoundingBox(var0 + var5, var1 + var4, var2 + var3, var0 + var8 - 1 + var5, var1 + var7 - 1 + var4, var2 + var6 - 1 + var3);
       default:
-         return new StructureBoundingBox(structureMinX + xMin, structureMinY + yMin, structureMinZ + zMin, structureMinX + xMax - 1 + xMin, structureMinY + yMax - 1 + yMin, structureMinZ + zMax - 1 + zMin);
+         return new StructureBoundingBox(var0 + var3, var1 + var4, var2 + var5, var0 + var6 - 1 + var3, var1 + var7 - 1 + var4, var2 + var8 - 1 + var5);
       }
    }
 
    public static StructureBoundingBox createProper(int var0, int var1, int var2, int var3, int var4, int var5) {
-      return new StructureBoundingBox(Math.min(p_175899_0_, p_175899_3_), Math.min(p_175899_1_, p_175899_4_), Math.min(p_175899_2_, p_175899_5_), Math.max(p_175899_0_, p_175899_3_), Math.max(p_175899_1_, p_175899_4_), Math.max(p_175899_2_, p_175899_5_));
+      return new StructureBoundingBox(Math.min(var0, var3), Math.min(var1, var4), Math.min(var2, var5), Math.max(var0, var3), Math.max(var1, var4), Math.max(var2, var5));
    }
 
    public StructureBoundingBox(StructureBoundingBox var1) {
-      this.minX = structurebb.minX;
-      this.minY = structurebb.minY;
-      this.minZ = structurebb.minZ;
-      this.maxX = structurebb.maxX;
-      this.maxY = structurebb.maxY;
-      this.maxZ = structurebb.maxZ;
+      this.minX = var1.minX;
+      this.minY = var1.minY;
+      this.minZ = var1.minZ;
+      this.maxX = var1.maxX;
+      this.maxY = var1.maxY;
+      this.maxZ = var1.maxZ;
    }
 
    public StructureBoundingBox(int var1, int var2, int var3, int var4, int var5, int var6) {
-      this.minX = xMin;
-      this.minY = yMin;
-      this.minZ = zMin;
-      this.maxX = xMax;
-      this.maxY = yMax;
-      this.maxZ = zMax;
+      this.minX = var1;
+      this.minY = var2;
+      this.minZ = var3;
+      this.maxX = var4;
+      this.maxY = var5;
+      this.maxZ = var6;
    }
 
    public StructureBoundingBox(Vec3i var1, Vec3i var2) {
-      this.minX = Math.min(vec1.getX(), vec2.getX());
-      this.minY = Math.min(vec1.getY(), vec2.getY());
-      this.minZ = Math.min(vec1.getZ(), vec2.getZ());
-      this.maxX = Math.max(vec1.getX(), vec2.getX());
-      this.maxY = Math.max(vec1.getY(), vec2.getY());
-      this.maxZ = Math.max(vec1.getZ(), vec2.getZ());
+      this.minX = Math.min(var1.getX(), var2.getX());
+      this.minY = Math.min(var1.getY(), var2.getY());
+      this.minZ = Math.min(var1.getZ(), var2.getZ());
+      this.maxX = Math.max(var1.getX(), var2.getX());
+      this.maxY = Math.max(var1.getY(), var2.getY());
+      this.maxZ = Math.max(var1.getZ(), var2.getZ());
    }
 
    public StructureBoundingBox(int var1, int var2, int var3, int var4) {
-      this.minX = xMin;
-      this.minZ = zMin;
-      this.maxX = xMax;
-      this.maxZ = zMax;
+      this.minX = var1;
+      this.minZ = var2;
+      this.maxX = var3;
+      this.maxZ = var4;
       this.minY = 1;
       this.maxY = 512;
    }
 
    public boolean intersectsWith(StructureBoundingBox var1) {
-      return this.maxX >= structurebb.minX && this.minX <= structurebb.maxX && this.maxZ >= structurebb.minZ && this.minZ <= structurebb.maxZ && this.maxY >= structurebb.minY && this.minY <= structurebb.maxY;
+      return this.maxX >= var1.minX && this.minX <= var1.maxX && this.maxZ >= var1.minZ && this.minZ <= var1.maxZ && this.maxY >= var1.minY && this.minY <= var1.maxY;
    }
 
    public boolean intersectsWith(int var1, int var2, int var3, int var4) {
-      return this.maxX >= minXIn && this.minX <= maxXIn && this.maxZ >= minZIn && this.minZ <= maxZIn;
+      return this.maxX >= var1 && this.minX <= var3 && this.maxZ >= var2 && this.minZ <= var4;
    }
 
    public void expandTo(StructureBoundingBox var1) {
-      this.minX = Math.min(this.minX, sbb.minX);
-      this.minY = Math.min(this.minY, sbb.minY);
-      this.minZ = Math.min(this.minZ, sbb.minZ);
-      this.maxX = Math.max(this.maxX, sbb.maxX);
-      this.maxY = Math.max(this.maxY, sbb.maxY);
-      this.maxZ = Math.max(this.maxZ, sbb.maxZ);
+      this.minX = Math.min(this.minX, var1.minX);
+      this.minY = Math.min(this.minY, var1.minY);
+      this.minZ = Math.min(this.minZ, var1.minZ);
+      this.maxX = Math.max(this.maxX, var1.maxX);
+      this.maxY = Math.max(this.maxY, var1.maxY);
+      this.maxZ = Math.max(this.maxZ, var1.maxZ);
    }
 
    public void offset(int var1, int var2, int var3) {
-      this.minX += x;
-      this.minY += y;
-      this.minZ += z;
-      this.maxX += x;
-      this.maxY += y;
-      this.maxZ += z;
+      this.minX += var1;
+      this.minY += var2;
+      this.minZ += var3;
+      this.maxX += var1;
+      this.maxY += var2;
+      this.maxZ += var3;
    }
 
    public boolean isVecInside(Vec3i var1) {
-      return vec.getX() >= this.minX && vec.getX() <= this.maxX && vec.getZ() >= this.minZ && vec.getZ() <= this.maxZ && vec.getY() >= this.minY && vec.getY() <= this.maxY;
+      return var1.getX() >= this.minX && var1.getX() <= this.maxX && var1.getZ() >= this.minZ && var1.getZ() <= this.maxZ && var1.getY() >= this.minY && var1.getY() <= this.maxY;
    }
 
    public Vec3i getLength() {

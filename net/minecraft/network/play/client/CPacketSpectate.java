@@ -16,23 +16,23 @@ public class CPacketSpectate implements Packet {
    }
 
    public CPacketSpectate(UUID var1) {
-      this.id = uniqueIdIn;
+      this.id = var1;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.id = buf.readUniqueId();
+      this.id = var1.readUniqueId();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeUniqueId(this.id);
+      var1.writeUniqueId(this.id);
    }
 
    public void processPacket(INetHandlerPlayServer var1) {
-      handler.handleSpectate(this);
+      var1.handleSpectate(this);
    }
 
    @Nullable
    public Entity getEntity(WorldServer var1) {
-      return worldIn.getEntityFromUuid(this.id);
+      return var1.getEntityFromUuid(this.id);
    }
 }

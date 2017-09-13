@@ -22,15 +22,15 @@ public class PhaseList {
    private final String name;
 
    private PhaseList(int var1, Class var2, String var3) {
-      this.id = idIn;
-      this.clazz = clazzIn;
-      this.name = nameIn;
+      this.id = var1;
+      this.clazz = var2;
+      this.name = var3;
    }
 
    public IPhase createPhase(EntityDragon var1) {
       try {
-         Constructor constructor = this.getConstructor();
-         return (IPhase)constructor.newInstance(dragon);
+         Constructor var2 = this.getConstructor();
+         return (IPhase)var2.newInstance(var1);
       } catch (Exception var3) {
          throw new Error(var3);
       }
@@ -49,7 +49,7 @@ public class PhaseList {
    }
 
    public static PhaseList getById(int var0) {
-      return p_188738_0_ >= 0 && p_188738_0_ < phases.length ? phases[p_188738_0_] : HOLDING_PATTERN;
+      return var0 >= 0 && var0 < phases.length ? phases[var0] : HOLDING_PATTERN;
    }
 
    public static int getTotalPhases() {
@@ -57,9 +57,9 @@ public class PhaseList {
    }
 
    private static PhaseList create(Class var0, String var1) {
-      PhaseList phaselist = new PhaseList(phases.length, phaseIn, nameIn);
+      PhaseList var2 = new PhaseList(phases.length, var0, var1);
       phases = (PhaseList[])Arrays.copyOf(phases, phases.length + 1);
-      phases[phaselist.getId()] = phaselist;
-      return phaselist;
+      phases[var2.getId()] = var2;
+      return var2;
    }
 }

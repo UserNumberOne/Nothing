@@ -11,35 +11,35 @@ public class NettyEncryptionTranslator {
    private byte[] outputBuffer = new byte[0];
 
    protected NettyEncryptionTranslator(Cipher var1) {
-      this.cipher = cipherIn;
+      this.cipher = var1;
    }
 
    private byte[] bufToBytes(ByteBuf var1) {
-      int i = buf.readableBytes();
-      if (this.inputBuffer.length < i) {
-         this.inputBuffer = new byte[i];
+      int var2 = var1.readableBytes();
+      if (this.inputBuffer.length < var2) {
+         this.inputBuffer = new byte[var2];
       }
 
-      buf.readBytes(this.inputBuffer, 0, i);
+      var1.readBytes(this.inputBuffer, 0, var2);
       return this.inputBuffer;
    }
 
    protected ByteBuf decipher(ChannelHandlerContext var1, ByteBuf var2) throws ShortBufferException {
-      int i = buffer.readableBytes();
-      byte[] abyte = this.bufToBytes(buffer);
-      ByteBuf bytebuf = ctx.alloc().heapBuffer(this.cipher.getOutputSize(i));
-      bytebuf.writerIndex(this.cipher.update(abyte, 0, i, bytebuf.array(), bytebuf.arrayOffset()));
-      return bytebuf;
+      int var3 = var2.readableBytes();
+      byte[] var4 = this.bufToBytes(var2);
+      ByteBuf var5 = var1.alloc().heapBuffer(this.cipher.getOutputSize(var3));
+      var5.writerIndex(this.cipher.update(var4, 0, var3, var5.array(), var5.arrayOffset()));
+      return var5;
    }
 
    protected void cipher(ByteBuf var1, ByteBuf var2) throws ShortBufferException {
-      int i = in.readableBytes();
-      byte[] abyte = this.bufToBytes(in);
-      int j = this.cipher.getOutputSize(i);
-      if (this.outputBuffer.length < j) {
-         this.outputBuffer = new byte[j];
+      int var3 = var1.readableBytes();
+      byte[] var4 = this.bufToBytes(var1);
+      int var5 = this.cipher.getOutputSize(var3);
+      if (this.outputBuffer.length < var5) {
+         this.outputBuffer = new byte[var5];
       }
 
-      out.writeBytes(this.outputBuffer, 0, this.cipher.update(abyte, 0, i, this.outputBuffer));
+      var2.writeBytes(this.outputBuffer, 0, this.cipher.update(var4, 0, var3, this.outputBuffer));
    }
 }

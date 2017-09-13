@@ -9,15 +9,15 @@ public class UserListOpsEntry extends UserListEntry {
    private final boolean bypassesPlayerLimit;
 
    public UserListOpsEntry(GameProfile var1, int var2, boolean var3) {
-      super(player);
-      this.permissionLevel = permissionLevelIn;
-      this.bypassesPlayerLimit = bypassesPlayerLimitIn;
+      super(var1);
+      this.permissionLevel = var2;
+      this.bypassesPlayerLimit = var3;
    }
 
    public UserListOpsEntry(JsonObject var1) {
-      super(constructProfile(p_i1150_1_), p_i1150_1_);
-      this.permissionLevel = p_i1150_1_.has("level") ? p_i1150_1_.get("level").getAsInt() : 0;
-      this.bypassesPlayerLimit = p_i1150_1_.has("bypassesPlayerLimit") && p_i1150_1_.get("bypassesPlayerLimit").getAsBoolean();
+      super(constructProfile(var1), var1);
+      this.permissionLevel = var1.has("level") ? var1.get("level").getAsInt() : 0;
+      this.bypassesPlayerLimit = var1.has("bypassesPlayerLimit") && var1.get("bypassesPlayerLimit").getAsBoolean();
    }
 
    public int getPermissionLevel() {
@@ -30,27 +30,26 @@ public class UserListOpsEntry extends UserListEntry {
 
    protected void onSerialization(JsonObject var1) {
       if (this.getValue() != null) {
-         data.addProperty("uuid", ((GameProfile)this.getValue()).getId() == null ? "" : ((GameProfile)this.getValue()).getId().toString());
-         data.addProperty("name", ((GameProfile)this.getValue()).getName());
-         super.onSerialization(data);
-         data.addProperty("level", Integer.valueOf(this.permissionLevel));
-         data.addProperty("bypassesPlayerLimit", Boolean.valueOf(this.bypassesPlayerLimit));
+         var1.addProperty("uuid", ((GameProfile)this.getValue()).getId() == null ? "" : ((GameProfile)this.getValue()).getId().toString());
+         var1.addProperty("name", ((GameProfile)this.getValue()).getName());
+         super.onSerialization(var1);
+         var1.addProperty("level", Integer.valueOf(this.permissionLevel));
+         var1.addProperty("bypassesPlayerLimit", Boolean.valueOf(this.bypassesPlayerLimit));
       }
-
    }
 
    private static GameProfile constructProfile(JsonObject var0) {
-      if (p_152643_0_.has("uuid") && p_152643_0_.has("name")) {
-         String s = p_152643_0_.get("uuid").getAsString();
+      if (var0.has("uuid") && var0.has("name")) {
+         String var1 = var0.get("uuid").getAsString();
 
-         UUID uuid;
+         UUID var2;
          try {
-            uuid = UUID.fromString(s);
+            var2 = UUID.fromString(var1);
          } catch (Throwable var4) {
             return null;
          }
 
-         return new GameProfile(uuid, p_152643_0_.get("name").getAsString());
+         return new GameProfile(var2, var0.get("name").getAsString());
       } else {
          return null;
       }

@@ -24,7 +24,7 @@ public class BlockWallSign extends BlockSign {
    }
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      switch((EnumFacing)state.getValue(FACING)) {
+      switch((EnumFacing)var1.getValue(FACING)) {
       case NORTH:
       default:
          return SIGN_NORTH_AABB;
@@ -38,34 +38,34 @@ public class BlockWallSign extends BlockSign {
    }
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
-      if (!worldIn.getBlockState(pos.offset(enumfacing.getOpposite())).getMaterial().isSolid()) {
-         this.dropBlockAsItem(worldIn, pos, state, 0);
-         worldIn.setBlockToAir(pos);
+      EnumFacing var5 = (EnumFacing)var1.getValue(FACING);
+      if (!var2.getBlockState(var3.offset(var5.getOpposite())).getMaterial().isSolid()) {
+         this.dropBlockAsItem(var2, var3, var1, 0);
+         var2.setBlockToAir(var3);
       }
 
-      super.neighborChanged(state, worldIn, pos, blockIn);
+      super.neighborChanged(var1, var2, var3, var4);
    }
 
    public IBlockState getStateFromMeta(int var1) {
-      EnumFacing enumfacing = EnumFacing.getFront(meta);
-      if (enumfacing.getAxis() == EnumFacing.Axis.Y) {
-         enumfacing = EnumFacing.NORTH;
+      EnumFacing var2 = EnumFacing.getFront(var1);
+      if (var2.getAxis() == EnumFacing.Axis.Y) {
+         var2 = EnumFacing.NORTH;
       }
 
-      return this.getDefaultState().withProperty(FACING, enumfacing);
+      return this.getDefaultState().withProperty(FACING, var2);
    }
 
    public int getMetaFromState(IBlockState var1) {
-      return ((EnumFacing)state.getValue(FACING)).getIndex();
+      return ((EnumFacing)var1.getValue(FACING)).getIndex();
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+      return var1.withProperty(FACING, var2.rotate((EnumFacing)var1.getValue(FACING)));
    }
 
    public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+      return var1.withRotation(var2.toRotation((EnumFacing)var1.getValue(FACING)));
    }
 
    protected BlockStateContainer createBlockState() {

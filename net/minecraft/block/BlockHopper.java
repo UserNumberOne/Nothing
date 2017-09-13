@@ -20,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityHopper;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -30,13 +29,16 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockHopper extends BlockContainer {
    public static final PropertyDirection FACING = PropertyDirection.create("facing", new Predicate() {
       public boolean apply(@Nullable EnumFacing var1) {
-         return p_apply_1_ != EnumFacing.UP;
+         return var1 != EnumFacing.UP;
+      }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((EnumFacing)var1);
       }
    });
    public static final PropertyBool ENABLED = PropertyBool.create("enabled");
@@ -57,20 +59,20 @@ public class BlockHopper extends BlockContainer {
    }
 
    public void addCollisionBoxToList(IBlockState var1, World var2, BlockPos var3, AxisAlignedBB var4, List var5, @Nullable Entity var6) {
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, BASE_AABB);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, EAST_AABB);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, WEST_AABB);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, SOUTH_AABB);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, NORTH_AABB);
+      addCollisionBoxToList(var3, var4, var5, BASE_AABB);
+      addCollisionBoxToList(var3, var4, var5, EAST_AABB);
+      addCollisionBoxToList(var3, var4, var5, WEST_AABB);
+      addCollisionBoxToList(var3, var4, var5, SOUTH_AABB);
+      addCollisionBoxToList(var3, var4, var5, NORTH_AABB);
    }
 
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
-      EnumFacing enumfacing = facing.getOpposite();
-      if (enumfacing == EnumFacing.UP) {
-         enumfacing = EnumFacing.DOWN;
+      EnumFacing var9 = var3.getOpposite();
+      if (var9 == EnumFacing.UP) {
+         var9 = EnumFacing.DOWN;
       }
 
-      return this.getDefaultState().withProperty(FACING, enumfacing).withProperty(ENABLED, Boolean.valueOf(true));
+      return this.getDefaultState().withProperty(FACING, var9).withProperty(ENABLED, Boolean.valueOf(true));
    }
 
    public TileEntity createNewTileEntity(World var1, int var2) {
@@ -78,11 +80,11 @@ public class BlockHopper extends BlockContainer {
    }
 
    public void onBlockPlacedBy(World var1, BlockPos var2, IBlockState var3, EntityLivingBase var4, ItemStack var5) {
-      super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-      if (stack.hasDisplayName()) {
-         TileEntity tileentity = worldIn.getTileEntity(pos);
-         if (tileentity instanceof TileEntityHopper) {
-            ((TileEntityHopper)tileentity).setCustomName(stack.getDisplayName());
+      super.onBlockPlacedBy(var1, var2, var3, var4, var5);
+      if (var5.hasDisplayName()) {
+         TileEntity var6 = var1.getTileEntity(var2);
+         if (var6 instanceof TileEntityHopper) {
+            ((TileEntityHopper)var6).setCustomName(var5.getDisplayName());
          }
       }
 
@@ -93,17 +95,17 @@ public class BlockHopper extends BlockContainer {
    }
 
    public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
-      this.updateState(worldIn, pos, state);
+      this.updateState(var1, var2, var3);
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
-      if (worldIn.isRemote) {
+      if (var1.isRemote) {
          return true;
       } else {
-         TileEntity tileentity = worldIn.getTileEntity(pos);
-         if (tileentity instanceof TileEntityHopper) {
-            playerIn.displayGUIChest((TileEntityHopper)tileentity);
-            playerIn.addStat(StatList.HOPPER_INSPECTED);
+         TileEntity var11 = var1.getTileEntity(var2);
+         if (var11 instanceof TileEntityHopper) {
+            var4.displayGUIChest((TileEntityHopper)var11);
+            var4.addStat(StatList.HOPPER_INSPECTED);
          }
 
          return true;
@@ -111,25 +113,25 @@ public class BlockHopper extends BlockContainer {
    }
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      this.updateState(worldIn, pos, state);
+      this.updateState(var2, var3, var1);
    }
 
    private void updateState(World var1, BlockPos var2, IBlockState var3) {
-      boolean flag = !worldIn.isBlockPowered(pos);
-      if (flag != ((Boolean)state.getValue(ENABLED)).booleanValue()) {
-         worldIn.setBlockState(pos, state.withProperty(ENABLED, Boolean.valueOf(flag)), 4);
+      boolean var4 = !var1.isBlockPowered(var2);
+      if (var4 != ((Boolean)var3.getValue(ENABLED)).booleanValue()) {
+         var1.setBlockState(var2, var3.withProperty(ENABLED, Boolean.valueOf(var4)), 4);
       }
 
    }
 
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      TileEntity tileentity = worldIn.getTileEntity(pos);
-      if (tileentity instanceof TileEntityHopper) {
-         InventoryHelper.dropInventoryItems(worldIn, pos, (TileEntityHopper)tileentity);
-         worldIn.updateComparatorOutputLevel(pos, this);
+      TileEntity var4 = var1.getTileEntity(var2);
+      if (var4 instanceof TileEntityHopper) {
+         InventoryHelper.dropInventoryItems(var1, var2, (TileEntityHopper)var4);
+         var1.updateComparatorOutputLevel(var2, this);
       }
 
-      super.breakBlock(worldIn, pos, state);
+      super.breakBlock(var1, var2, var3);
    }
 
    public EnumBlockRenderType getRenderType(IBlockState var1) {
@@ -144,17 +146,12 @@ public class BlockHopper extends BlockContainer {
       return false;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return true;
-   }
-
    public static EnumFacing getFacing(int var0) {
-      return EnumFacing.getFront(meta & 7);
+      return EnumFacing.getFront(var0 & 7);
    }
 
    public static boolean isEnabled(int var0) {
-      return (meta & 8) != 8;
+      return (var0 & 8) != 8;
    }
 
    public boolean hasComparatorInputOverride(IBlockState var1) {
@@ -162,34 +159,29 @@ public class BlockHopper extends BlockContainer {
    }
 
    public int getComparatorInputOverride(IBlockState var1, World var2, BlockPos var3) {
-      return Container.calcRedstone(worldIn.getTileEntity(pos));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT_MIPPED;
+      return Container.calcRedstone(var2.getTileEntity(var3));
    }
 
    public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(FACING, getFacing(meta)).withProperty(ENABLED, Boolean.valueOf(isEnabled(meta)));
+      return this.getDefaultState().withProperty(FACING, getFacing(var1)).withProperty(ENABLED, Boolean.valueOf(isEnabled(var1)));
    }
 
    public int getMetaFromState(IBlockState var1) {
-      int i = 0;
-      i = i | ((EnumFacing)state.getValue(FACING)).getIndex();
-      if (!((Boolean)state.getValue(ENABLED)).booleanValue()) {
-         i |= 8;
+      int var2 = 0;
+      var2 = var2 | ((EnumFacing)var1.getValue(FACING)).getIndex();
+      if (!((Boolean)var1.getValue(ENABLED)).booleanValue()) {
+         var2 |= 8;
       }
 
-      return i;
+      return var2;
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+      return var1.withProperty(FACING, var2.rotate((EnumFacing)var1.getValue(FACING)));
    }
 
    public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+      return var1.withRotation(var2.toRotation((EnumFacing)var1.getValue(FACING)));
    }
 
    protected BlockStateContainer createBlockState() {

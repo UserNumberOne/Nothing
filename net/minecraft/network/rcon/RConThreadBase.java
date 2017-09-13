@@ -6,10 +6,7 @@ import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.SERVER)
 public abstract class RConThreadBase implements Runnable {
    private static final AtomicInteger THREAD_ID = new AtomicInteger(0);
    protected boolean running;
@@ -21,8 +18,8 @@ public abstract class RConThreadBase implements Runnable {
    protected List serverSocketList = Lists.newArrayList();
 
    protected RConThreadBase(IServer var1, String var2) {
-      this.server = serverIn;
-      this.threadName = threadName;
+      this.server = var1;
+      this.threadName = var2;
       if (this.server.isDebuggingEnabled()) {
          this.logWarning("Debugging is enabled, performance maybe reduced!");
       }
@@ -40,19 +37,19 @@ public abstract class RConThreadBase implements Runnable {
    }
 
    protected void logDebug(String var1) {
-      this.server.logDebug(msg);
+      this.server.logDebug(var1);
    }
 
    protected void logInfo(String var1) {
-      this.server.logInfo(msg);
+      this.server.logInfo(var1);
    }
 
    protected void logWarning(String var1) {
-      this.server.logWarning(msg);
+      this.server.logWarning(var1);
    }
 
    protected void logSevere(String var1) {
-      this.server.logSevere(msg);
+      this.server.logSevere(var1);
    }
 
    protected int getNumberOfPlayers() {
@@ -60,54 +57,54 @@ public abstract class RConThreadBase implements Runnable {
    }
 
    protected void registerSocket(DatagramSocket var1) {
-      this.logDebug("registerSocket: " + socket);
-      this.socketList.add(socket);
+      this.logDebug("registerSocket: " + var1);
+      this.socketList.add(var1);
    }
 
    protected boolean closeSocket(DatagramSocket var1, boolean var2) {
-      this.logDebug("closeSocket: " + socket);
-      if (null == socket) {
+      this.logDebug("closeSocket: " + var1);
+      if (null == var1) {
          return false;
       } else {
-         boolean flag = false;
-         if (!socket.isClosed()) {
-            socket.close();
-            flag = true;
+         boolean var3 = false;
+         if (!var1.isClosed()) {
+            var1.close();
+            var3 = true;
          }
 
-         if (removeFromList) {
-            this.socketList.remove(socket);
+         if (var2) {
+            this.socketList.remove(var1);
          }
 
-         return flag;
+         return var3;
       }
    }
 
    protected boolean closeServerSocket(ServerSocket var1) {
-      return this.closeServerSocket_do(socket, true);
+      return this.closeServerSocket_do(var1, true);
    }
 
    protected boolean closeServerSocket_do(ServerSocket var1, boolean var2) {
-      this.logDebug("closeSocket: " + socket);
-      if (null == socket) {
+      this.logDebug("closeSocket: " + var1);
+      if (null == var1) {
          return false;
       } else {
-         boolean flag = false;
+         boolean var3 = false;
 
          try {
-            if (!socket.isClosed()) {
-               socket.close();
-               flag = true;
+            if (!var1.isClosed()) {
+               var1.close();
+               var3 = true;
             }
          } catch (IOException var5) {
             this.logWarning("IO: " + var5.getMessage());
          }
 
-         if (removeFromList) {
-            this.serverSocketList.remove(socket);
+         if (var2) {
+            this.serverSocketList.remove(var1);
          }
 
-         return flag;
+         return var3;
       }
    }
 
@@ -116,25 +113,25 @@ public abstract class RConThreadBase implements Runnable {
    }
 
    protected void closeAllSockets_do(boolean var1) {
-      int i = 0;
+      int var2 = 0;
 
-      for(DatagramSocket datagramsocket : this.socketList) {
-         if (this.closeSocket(datagramsocket, false)) {
-            ++i;
+      for(DatagramSocket var4 : this.socketList) {
+         if (this.closeSocket(var4, false)) {
+            ++var2;
          }
       }
 
       this.socketList.clear();
 
-      for(ServerSocket serversocket : this.serverSocketList) {
-         if (this.closeServerSocket_do(serversocket, false)) {
-            ++i;
+      for(ServerSocket var6 : this.serverSocketList) {
+         if (this.closeServerSocket_do(var6, false)) {
+            ++var2;
          }
       }
 
       this.serverSocketList.clear();
-      if (logWarning && 0 < i) {
-         this.logWarning("Force closed " + i + " sockets");
+      if (var1 && 0 < var2) {
+         this.logWarning("Force closed " + var2 + " sockets");
       }
 
    }

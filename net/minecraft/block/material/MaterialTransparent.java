@@ -2,7 +2,7 @@ package net.minecraft.block.material;
 
 public class MaterialTransparent extends Material {
    public MaterialTransparent(MapColor var1) {
-      super(color);
+      super(var1);
       this.setReplaceable();
    }
 

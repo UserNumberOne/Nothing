@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketTitle;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentUtils;
@@ -29,69 +29,68 @@ public class CommandTitle extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length < 2) {
+      if (var3.length < 2) {
          throw new WrongUsageException("commands.title.usage", new Object[0]);
       } else {
-         if (args.length < 3) {
-            if ("title".equals(args[1]) || "subtitle".equals(args[1])) {
+         if (var3.length < 3) {
+            if ("title".equals(var3[1]) || "subtitle".equals(var3[1])) {
                throw new WrongUsageException("commands.title.usage.title", new Object[0]);
             }
 
-            if ("times".equals(args[1])) {
+            if ("times".equals(var3[1])) {
                throw new WrongUsageException("commands.title.usage.times", new Object[0]);
             }
          }
 
-         EntityPlayerMP entityplayermp = getPlayer(server, sender, args[0]);
-         SPacketTitle.Type spackettitle$type = SPacketTitle.Type.byName(args[1]);
-         if (spackettitle$type != SPacketTitle.Type.CLEAR && spackettitle$type != SPacketTitle.Type.RESET) {
-            if (spackettitle$type == SPacketTitle.Type.TIMES) {
-               if (args.length != 5) {
+         EntityPlayerMP var4 = a(var1, var2, var3[0]);
+         SPacketTitle.Type var5 = SPacketTitle.Type.byName(var3[1]);
+         if (var5 != SPacketTitle.Type.CLEAR && var5 != SPacketTitle.Type.RESET) {
+            if (var5 == SPacketTitle.Type.TIMES) {
+               if (var3.length != 5) {
                   throw new WrongUsageException("commands.title.usage", new Object[0]);
+               } else {
+                  int var12 = parseInt(var3[2]);
+                  int var13 = parseInt(var3[3]);
+                  int var14 = parseInt(var3[4]);
+                  SPacketTitle var9 = new SPacketTitle(var12, var13, var14);
+                  var4.connection.sendPacket(var9);
+                  notifyCommandListener(var2, this, "commands.title.success", new Object[0]);
                }
-
-               int i = parseInt(args[2]);
-               int j = parseInt(args[3]);
-               int k = parseInt(args[4]);
-               SPacketTitle spackettitle2 = new SPacketTitle(i, j, k);
-               entityplayermp.connection.sendPacket(spackettitle2);
-               notifyCommandListener(sender, this, "commands.title.success", new Object[0]);
+            } else if (var3.length < 3) {
+               throw new WrongUsageException("commands.title.usage", new Object[0]);
             } else {
-               if (args.length < 3) {
-                  throw new WrongUsageException("commands.title.usage", new Object[0]);
-               }
+               String var11 = buildString(var3, 2);
 
-               String s = buildString(args, 2);
-
-               ITextComponent itextcomponent;
+               ITextComponent var7;
                try {
-                  itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
+                  var7 = ITextComponent.Serializer.jsonToComponent(var11);
                } catch (JsonParseException var10) {
                   throw toSyntaxException(var10);
                }
 
-               SPacketTitle spackettitle1 = new SPacketTitle(spackettitle$type, TextComponentUtils.processComponent(sender, itextcomponent, entityplayermp));
-               entityplayermp.connection.sendPacket(spackettitle1);
-               notifyCommandListener(sender, this, "commands.title.success", new Object[0]);
+               SPacketTitle var8 = new SPacketTitle(var5, TextComponentUtils.processComponent(var2, var7, var4));
+               var4.connection.sendPacket(var8);
+               notifyCommandListener(var2, this, "commands.title.success", new Object[0]);
             }
+         } else if (var3.length != 2) {
+            throw new WrongUsageException("commands.title.usage", new Object[0]);
          } else {
-            if (args.length != 2) {
-               throw new WrongUsageException("commands.title.usage", new Object[0]);
-            }
-
-            SPacketTitle spackettitle = new SPacketTitle(spackettitle$type, (ITextComponent)null);
-            entityplayermp.connection.sendPacket(spackettitle);
-            notifyCommandListener(sender, this, "commands.title.success", new Object[0]);
+            SPacketTitle var6 = new SPacketTitle(var5, (ITextComponent)null);
+            var4.connection.sendPacket(var6);
+            notifyCommandListener(var2, this, "commands.title.success", new Object[0]);
          }
-
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : (args.length == 2 ? getListOfStringsMatchingLastWord(args, SPacketTitle.Type.getNames()) : Collections.emptyList());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else {
+         return var3.length == 2 ? getListOfStringsMatchingLastWord(var3, SPacketTitle.Type.getNames()) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return index == 0;
+      return var2 == 0;
    }
 }

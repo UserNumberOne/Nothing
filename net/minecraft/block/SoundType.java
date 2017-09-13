@@ -25,13 +25,13 @@ public class SoundType {
    private final SoundEvent fallSound;
 
    public SoundType(float var1, float var2, SoundEvent var3, SoundEvent var4, SoundEvent var5, SoundEvent var6, SoundEvent var7) {
-      this.volume = volumeIn;
-      this.pitch = pitchIn;
-      this.breakSound = breakSoundIn;
-      this.stepSound = stepSoundIn;
-      this.placeSound = placeSoundIn;
-      this.hitSound = hitSoundIn;
-      this.fallSound = fallSoundIn;
+      this.volume = var1;
+      this.pitch = var2;
+      this.breakSound = var3;
+      this.stepSound = var4;
+      this.placeSound = var5;
+      this.hitSound = var6;
+      this.fallSound = var7;
    }
 
    public float getVolume() {
@@ -42,20 +42,12 @@ public class SoundType {
       return this.pitch;
    }
 
-   public SoundEvent getBreakSound() {
-      return this.breakSound;
-   }
-
    public SoundEvent getStepSound() {
       return this.stepSound;
    }
 
    public SoundEvent getPlaceSound() {
       return this.placeSound;
-   }
-
-   public SoundEvent getHitSound() {
-      return this.hitSound;
    }
 
    public SoundEvent getFallSound() {

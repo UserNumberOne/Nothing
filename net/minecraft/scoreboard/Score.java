@@ -5,7 +5,16 @@ import java.util.Comparator;
 public class Score {
    public static final Comparator SCORE_COMPARATOR = new Comparator() {
       public int compare(Score var1, Score var2) {
-         return p_compare_1_.getScorePoints() > p_compare_2_.getScorePoints() ? 1 : (p_compare_1_.getScorePoints() < p_compare_2_.getScorePoints() ? -1 : p_compare_2_.getPlayerName().compareToIgnoreCase(p_compare_1_.getPlayerName()));
+         if (var1.getScorePoints() > var2.getScorePoints()) {
+            return 1;
+         } else {
+            return var1.getScorePoints() < var2.getScorePoints() ? -1 : var2.getPlayerName().compareToIgnoreCase(var1.getPlayerName());
+         }
+      }
+
+      // $FF: synthetic method
+      public int compare(Object var1, Object var2) {
+         return this.compare((Score)var1, (Score)var2);
       }
    };
    private final Scoreboard theScoreboard;
@@ -16,9 +25,9 @@ public class Score {
    private boolean forceUpdate;
 
    public Score(Scoreboard var1, ScoreObjective var2, String var3) {
-      this.theScoreboard = theScoreboardIn;
-      this.theScoreObjective = theScoreObjectiveIn;
-      this.scorePlayerName = scorePlayerNameIn;
+      this.theScoreboard = var1;
+      this.theScoreObjective = var2;
+      this.scorePlayerName = var3;
       this.forceUpdate = true;
    }
 
@@ -26,7 +35,7 @@ public class Score {
       if (this.theScoreObjective.getCriteria().isReadOnly()) {
          throw new IllegalStateException("Cannot modify read-only score");
       } else {
-         this.setScorePoints(this.getScorePoints() + amount);
+         this.setScorePoints(this.getScorePoints() + var1);
       }
    }
 
@@ -34,7 +43,7 @@ public class Score {
       if (this.theScoreObjective.getCriteria().isReadOnly()) {
          throw new IllegalStateException("Cannot modify read-only score");
       } else {
-         this.setScorePoints(this.getScorePoints() - amount);
+         this.setScorePoints(this.getScorePoints() - var1);
       }
    }
 
@@ -51,9 +60,9 @@ public class Score {
    }
 
    public void setScorePoints(int var1) {
-      int i = this.scorePoints;
-      this.scorePoints = points;
-      if (i != points || this.forceUpdate) {
+      int var2 = this.scorePoints;
+      this.scorePoints = var1;
+      if (var2 != var1 || this.forceUpdate) {
          this.forceUpdate = false;
          this.getScoreScoreboard().onScoreUpdated(this);
       }
@@ -77,6 +86,6 @@ public class Score {
    }
 
    public void setLocked(boolean var1) {
-      this.locked = locked;
+      this.locked = var1;
    }
 }

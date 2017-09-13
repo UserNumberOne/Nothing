@@ -10,11 +10,11 @@ public enum Rotation {
    private static final String[] rotationNames = new String[values().length];
 
    private Rotation(String var3) {
-      this.name = nameIn;
+      this.name = var3;
    }
 
    public Rotation add(Rotation var1) {
-      switch(rotation) {
+      switch(var1) {
       case CLOCKWISE_180:
          switch(this) {
          case NONE:
@@ -54,18 +54,18 @@ public enum Rotation {
    }
 
    public EnumFacing rotate(EnumFacing var1) {
-      if (facing.getAxis() == EnumFacing.Axis.Y) {
-         return facing;
+      if (var1.getAxis() == EnumFacing.Axis.Y) {
+         return var1;
       } else {
          switch(this) {
          case CLOCKWISE_90:
-            return facing.rotateY();
+            return var1.rotateY();
          case CLOCKWISE_180:
-            return facing.getOpposite();
+            return var1.getOpposite();
          case COUNTERCLOCKWISE_90:
-            return facing.rotateYCCW();
+            return var1.rotateYCCW();
          default:
-            return facing;
+            return var1;
          }
       }
    }
@@ -73,21 +73,21 @@ public enum Rotation {
    public int rotate(int var1, int var2) {
       switch(this) {
       case CLOCKWISE_90:
-         return (p_185833_1_ + p_185833_2_ / 4) % p_185833_2_;
+         return (var1 + var2 / 4) % var2;
       case CLOCKWISE_180:
-         return (p_185833_1_ + p_185833_2_ / 2) % p_185833_2_;
+         return (var1 + var2 / 2) % var2;
       case COUNTERCLOCKWISE_90:
-         return (p_185833_1_ + p_185833_2_ * 3 / 4) % p_185833_2_;
+         return (var1 + var2 * 3 / 4) % var2;
       default:
-         return p_185833_1_;
+         return var1;
       }
    }
 
    static {
-      int i = 0;
+      int var0 = 0;
 
-      for(Rotation rotation : values()) {
-         rotationNames[i++] = rotation.name;
+      for(Rotation var4 : values()) {
+         rotationNames[var0++] = var4.name;
       }
 
    }

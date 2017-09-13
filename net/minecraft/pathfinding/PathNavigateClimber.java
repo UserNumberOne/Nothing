@@ -10,26 +10,26 @@ public class PathNavigateClimber extends PathNavigateGround {
    private BlockPos targetPosition;
 
    public PathNavigateClimber(EntityLiving var1, World var2) {
-      super(entityLivingIn, worldIn);
+      super(var1, var2);
    }
 
    public Path getPathToPos(BlockPos var1) {
-      this.targetPosition = pos;
-      return super.getPathToPos(pos);
+      this.targetPosition = var1;
+      return super.getPathToPos(var1);
    }
 
    public Path getPathToEntityLiving(Entity var1) {
-      this.targetPosition = new BlockPos(entityIn);
-      return super.getPathToEntityLiving(entityIn);
+      this.targetPosition = new BlockPos(var1);
+      return super.getPathToEntityLiving(var1);
    }
 
    public boolean tryMoveToEntityLiving(Entity var1, double var2) {
-      Path path = this.getPathToEntityLiving(entityIn);
-      if (path != null) {
-         return this.setPath(path, speedIn);
+      Path var4 = this.getPathToEntityLiving(var1);
+      if (var4 != null) {
+         return this.setPath(var4, var2);
       } else {
-         this.targetPosition = new BlockPos(entityIn);
-         this.speed = speedIn;
+         this.targetPosition = new BlockPos(var1);
+         this.speed = var2;
          return true;
       }
    }
@@ -37,14 +37,16 @@ public class PathNavigateClimber extends PathNavigateGround {
    public void onUpdateNavigation() {
       if (!this.noPath()) {
          super.onUpdateNavigation();
-      } else if (this.targetPosition != null) {
-         double d0 = (double)(this.theEntity.width * this.theEntity.width);
-         if (this.theEntity.getDistanceSqToCenter(this.targetPosition) < d0 || this.theEntity.posY > (double)this.targetPosition.getY() && this.theEntity.getDistanceSqToCenter(new BlockPos(this.targetPosition.getX(), MathHelper.floor(this.theEntity.posY), this.targetPosition.getZ())) < d0) {
-            this.targetPosition = null;
-         } else {
-            this.theEntity.getMoveHelper().setMoveTo((double)this.targetPosition.getX(), (double)this.targetPosition.getY(), (double)this.targetPosition.getZ(), this.speed);
+      } else {
+         if (this.targetPosition != null) {
+            double var1 = (double)(this.theEntity.width * this.theEntity.width);
+            if (this.theEntity.getDistanceSqToCenter(this.targetPosition) >= var1 && (this.theEntity.posY <= (double)this.targetPosition.getY() || this.theEntity.getDistanceSqToCenter(new BlockPos(this.targetPosition.getX(), MathHelper.floor(this.theEntity.posY), this.targetPosition.getZ())) >= var1)) {
+               this.theEntity.getMoveHelper().setMoveTo((double)this.targetPosition.getX(), (double)this.targetPosition.getY(), (double)this.targetPosition.getZ(), this.speed);
+            } else {
+               this.targetPosition = null;
+            }
          }
-      }
 
+      }
    }
 }

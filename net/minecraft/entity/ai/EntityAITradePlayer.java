@@ -8,7 +8,7 @@ public class EntityAITradePlayer extends EntityAIBase {
    private final EntityVillager villager;
 
    public EntityAITradePlayer(EntityVillager var1) {
-      this.villager = villagerIn;
+      this.villager = var1;
       this.setMutexBits(5);
    }
 
@@ -22,8 +22,14 @@ public class EntityAITradePlayer extends EntityAIBase {
       } else if (this.villager.velocityChanged) {
          return false;
       } else {
-         EntityPlayer entityplayer = this.villager.getCustomer();
-         return entityplayer == null ? false : (this.villager.getDistanceSqToEntity(entityplayer) > 16.0D ? false : entityplayer.openContainer instanceof Container);
+         EntityPlayer var1 = this.villager.getCustomer();
+         if (var1 == null) {
+            return false;
+         } else if (this.villager.getDistanceSqToEntity(var1) > 16.0D) {
+            return false;
+         } else {
+            return var1.openContainer instanceof Container;
+         }
       }
    }
 

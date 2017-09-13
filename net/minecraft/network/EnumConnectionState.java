@@ -259,34 +259,34 @@ public enum EnumConnectionState {
 
    private EnumConnectionState(int var3) {
       this.directionMaps = Maps.newEnumMap(EnumPacketDirection.class);
-      this.id = protocolId;
+      this.id = var3;
    }
 
    protected EnumConnectionState registerPacket(EnumPacketDirection var1, Class var2) {
-      BiMap bimap = (BiMap)this.directionMaps.get(direction);
-      if (bimap == null) {
-         bimap = HashBiMap.create();
-         this.directionMaps.put(direction, bimap);
+      Object var3 = (BiMap)this.directionMaps.get(var1);
+      if (var3 == null) {
+         var3 = HashBiMap.create();
+         this.directionMaps.put(var1, var3);
       }
 
-      if (bimap.containsValue(packetClass)) {
-         String s = direction + " packet " + packetClass + " is already known to ID " + bimap.inverse().get(packetClass);
-         LogManager.getLogger().fatal(s);
-         throw new IllegalArgumentException(s);
+      if (((BiMap)var3).containsValue(var2)) {
+         String var4 = var1 + " packet " + var2 + " is already known to ID " + ((BiMap)var3).inverse().get(var2);
+         LogManager.getLogger().fatal(var4);
+         throw new IllegalArgumentException(var4);
       } else {
-         bimap.put(Integer.valueOf(bimap.size()), packetClass);
+         ((BiMap)var3).put(Integer.valueOf(((BiMap)var3).size()), var2);
          return this;
       }
    }
 
    public Integer getPacketId(EnumPacketDirection var1, Packet var2) {
-      return (Integer)((BiMap)this.directionMaps.get(direction)).inverse().get(packetIn.getClass());
+      return (Integer)((BiMap)this.directionMaps.get(var1)).inverse().get(var2.getClass());
    }
 
    @Nullable
-   public Packet getPacket(EnumPacketDirection var1, int var2) throws InstantiationException, IllegalAccessException {
-      Class oclass = (Class)((BiMap)this.directionMaps.get(direction)).get(Integer.valueOf(packetId));
-      return oclass == null ? null : (Packet)oclass.newInstance();
+   public Packet getPacket(EnumPacketDirection var1, int var2) throws IllegalAccessException, InstantiationException {
+      Class var3 = (Class)((BiMap)this.directionMaps.get(var1)).get(Integer.valueOf(var2));
+      return var3 == null ? null : (Packet)var3.newInstance();
    }
 
    public int getId() {
@@ -294,35 +294,35 @@ public enum EnumConnectionState {
    }
 
    public static EnumConnectionState getById(int var0) {
-      return stateId >= -1 && stateId <= 2 ? STATES_BY_ID[stateId - -1] : null;
+      return var0 >= -1 && var0 <= 2 ? STATES_BY_ID[var0 - -1] : null;
    }
 
    public static EnumConnectionState getFromPacket(Packet var0) {
-      return (EnumConnectionState)STATES_BY_CLASS.get(packetIn.getClass());
+      return (EnumConnectionState)STATES_BY_CLASS.get(var0.getClass());
    }
 
    static {
-      for(EnumConnectionState enumconnectionstate : values()) {
-         int i = enumconnectionstate.getId();
-         if (i < -1 || i > 2) {
-            throw new Error("Invalid protocol ID " + Integer.toString(i));
+      for(EnumConnectionState var3 : values()) {
+         int var4 = var3.getId();
+         if (var4 < -1 || var4 > 2) {
+            throw new Error("Invalid protocol ID " + Integer.toString(var4));
          }
 
-         STATES_BY_ID[i - -1] = enumconnectionstate;
+         STATES_BY_ID[var4 - -1] = var3;
 
-         for(EnumPacketDirection enumpacketdirection : enumconnectionstate.directionMaps.keySet()) {
-            for(Class oclass : ((BiMap)enumconnectionstate.directionMaps.get(enumpacketdirection)).values()) {
-               if (STATES_BY_CLASS.containsKey(oclass) && STATES_BY_CLASS.get(oclass) != enumconnectionstate) {
-                  throw new Error("Packet " + oclass + " is already assigned to protocol " + STATES_BY_CLASS.get(oclass) + " - can't reassign to " + enumconnectionstate);
+         for(EnumPacketDirection var6 : var3.directionMaps.keySet()) {
+            for(Class var8 : ((BiMap)var3.directionMaps.get(var6)).values()) {
+               if (STATES_BY_CLASS.containsKey(var8) && STATES_BY_CLASS.get(var8) != var3) {
+                  throw new Error("Packet " + var8 + " is already assigned to protocol " + STATES_BY_CLASS.get(var8) + " - can't reassign to " + var3);
                }
 
                try {
-                  oclass.newInstance();
+                  var8.newInstance();
                } catch (Throwable var10) {
-                  throw new Error("Packet " + oclass + " fails instantiation checks! " + oclass);
+                  throw new Error("Packet " + var8 + " fails instantiation checks! " + var8);
                }
 
-               STATES_BY_CLASS.put(oclass, enumconnectionstate);
+               STATES_BY_CLASS.put(var8, var3);
             }
          }
       }

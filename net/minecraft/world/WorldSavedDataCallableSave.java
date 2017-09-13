@@ -4,7 +4,7 @@ public class WorldSavedDataCallableSave implements Runnable {
    private final WorldSavedData data;
 
    public WorldSavedDataCallableSave(WorldSavedData var1) {
-      this.data = dataIn;
+      this.data = var1;
    }
 
    public void run() {

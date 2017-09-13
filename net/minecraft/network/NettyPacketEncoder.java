@@ -15,27 +15,32 @@ public class NettyPacketEncoder extends MessageToByteEncoder {
    private final EnumPacketDirection direction;
 
    public NettyPacketEncoder(EnumPacketDirection var1) {
-      this.direction = direction;
+      this.direction = var1;
    }
 
-   protected void encode(ChannelHandlerContext var1, Packet var2, ByteBuf var3) throws IOException, Exception {
-      Integer integer = ((EnumConnectionState)p_encode_1_.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getPacketId(this.direction, p_encode_2_);
+   protected void encode(ChannelHandlerContext var1, Packet var2, ByteBuf var3) throws Exception {
+      Integer var4 = ((EnumConnectionState)var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getPacketId(this.direction, var2);
       if (LOGGER.isDebugEnabled()) {
-         LOGGER.debug(RECEIVED_PACKET_MARKER, "OUT: [{}:{}] {}", new Object[]{p_encode_1_.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), integer, p_encode_2_.getClass().getName()});
+         LOGGER.debug(RECEIVED_PACKET_MARKER, "OUT: [{}:{}] {}", new Object[]{var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), var4, var2.getClass().getName()});
       }
 
-      if (integer == null) {
+      if (var4 == null) {
          throw new IOException("Can't serialize unregistered packet");
       } else {
-         PacketBuffer packetbuffer = new PacketBuffer(p_encode_3_);
-         packetbuffer.writeVarInt(integer.intValue());
+         PacketBuffer var5 = new PacketBuffer(var3);
+         var5.writeVarInt(var4.intValue());
 
          try {
-            p_encode_2_.writePacketData(packetbuffer);
+            var2.writePacketData(var5);
          } catch (Throwable var7) {
             LOGGER.error(var7);
          }
 
       }
+   }
+
+   // $FF: synthetic method
+   protected void encode(ChannelHandlerContext var1, Object var2, ByteBuf var3) throws Exception {
+      this.encode(var1, (Packet)var2, var3);
    }
 }

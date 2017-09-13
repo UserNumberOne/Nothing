@@ -11,30 +11,30 @@ public class WorldGenIcePath extends WorldGenerator {
    private final int basePathWidth;
 
    public WorldGenIcePath(int var1) {
-      this.basePathWidth = basePathWidthIn;
+      this.basePathWidth = var1;
    }
 
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      while(worldIn.isAirBlock(position) && position.getY() > 2) {
-         position = position.down();
+      while(var1.isAirBlock(var3) && var3.getY() > 2) {
+         var3 = var3.down();
       }
 
-      if (worldIn.getBlockState(position).getBlock() != Blocks.SNOW) {
+      if (var1.getBlockState(var3).getBlock() != Blocks.SNOW) {
          return false;
       } else {
-         int i = rand.nextInt(this.basePathWidth - 2) + 2;
-         int j = 1;
+         int var4 = var2.nextInt(this.basePathWidth - 2) + 2;
+         boolean var5 = true;
 
-         for(int k = position.getX() - i; k <= position.getX() + i; ++k) {
-            for(int l = position.getZ() - i; l <= position.getZ() + i; ++l) {
-               int i1 = k - position.getX();
-               int j1 = l - position.getZ();
-               if (i1 * i1 + j1 * j1 <= i * i) {
-                  for(int k1 = position.getY() - 1; k1 <= position.getY() + 1; ++k1) {
-                     BlockPos blockpos = new BlockPos(k, k1, l);
-                     Block block = worldIn.getBlockState(blockpos).getBlock();
-                     if (block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE) {
-                        worldIn.setBlockState(blockpos, this.block.getDefaultState(), 2);
+         for(int var6 = var3.getX() - var4; var6 <= var3.getX() + var4; ++var6) {
+            for(int var7 = var3.getZ() - var4; var7 <= var3.getZ() + var4; ++var7) {
+               int var8 = var6 - var3.getX();
+               int var9 = var7 - var3.getZ();
+               if (var8 * var8 + var9 * var9 <= var4 * var4) {
+                  for(int var10 = var3.getY() - 1; var10 <= var3.getY() + 1; ++var10) {
+                     BlockPos var11 = new BlockPos(var6, var10, var7);
+                     Block var12 = var1.getBlockState(var11).getBlock();
+                     if (var12 == Blocks.DIRT || var12 == Blocks.SNOW || var12 == Blocks.ICE) {
+                        var1.setBlockState(var11, this.block.getDefaultState(), 2);
                      }
                   }
                }

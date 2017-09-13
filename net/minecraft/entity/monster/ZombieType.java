@@ -1,6 +1,5 @@
 package net.minecraft.entity.monster;
 
-import javax.annotation.Nullable;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -18,8 +17,8 @@ public enum ZombieType {
    private final TextComponentTranslation name;
 
    private ZombieType(String var3, boolean var4) {
-      this.villager = villagerIn;
-      this.name = new TextComponentTranslation("entity." + nameIn + ".name", new Object[0]);
+      this.villager = var4;
+      this.name = new TextComponentTranslation("entity." + var3 + ".name", new Object[0]);
    }
 
    public int getId() {
@@ -34,13 +33,12 @@ public enum ZombieType {
       return this.villager ? this.getId() - 1 : 0;
    }
 
-   @Nullable
    public static ZombieType getByOrdinal(int var0) {
-      return ordinal >= 0 && ordinal < values().length ? values()[ordinal] : null;
+      return values()[var0];
    }
 
    public static ZombieType getVillagerByOrdinal(int var0) {
-      return ordinal >= 0 && ordinal < 5 ? getByOrdinal(ordinal + 1) : VILLAGER_FARMER;
+      return var0 >= 0 && var0 < 5 ? getByOrdinal(var0 + 1) : VILLAGER_FARMER;
    }
 
    public TextComponentTranslation getName() {

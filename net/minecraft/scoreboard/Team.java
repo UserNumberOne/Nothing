@@ -5,25 +5,21 @@ import java.util.Collection;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class Team {
    public boolean isSameTeam(@Nullable Team var1) {
-      return other == null ? false : this == other;
+      if (var1 == null) {
+         return false;
+      } else {
+         return this == var1;
+      }
    }
 
    public abstract String getRegisteredName();
 
    public abstract String formatString(String var1);
 
-   @SideOnly(Side.CLIENT)
-   public abstract boolean getSeeFriendlyInvisiblesEnabled();
-
    public abstract boolean getAllowFriendlyFire();
-
-   @SideOnly(Side.CLIENT)
-   public abstract Team.EnumVisible getNameTagVisibility();
 
    public abstract TextFormatting getChatFormat();
 
@@ -48,17 +44,17 @@ public abstract class Team {
       }
 
       public static Team.CollisionRule getByName(String var0) {
-         return (Team.CollisionRule)nameMap.get(nameIn);
+         return (Team.CollisionRule)nameMap.get(var0);
       }
 
       private CollisionRule(String var3, int var4) {
-         this.name = nameIn;
-         this.id = idIn;
+         this.name = var3;
+         this.id = var4;
       }
 
       static {
-         for(Team.CollisionRule team$collisionrule : values()) {
-            nameMap.put(team$collisionrule.name, team$collisionrule);
+         for(Team.CollisionRule var3 : values()) {
+            nameMap.put(var3.name, var3);
          }
 
       }
@@ -79,17 +75,17 @@ public abstract class Team {
       }
 
       public static Team.EnumVisible getByName(String var0) {
-         return (Team.EnumVisible)nameMap.get(nameIn);
+         return (Team.EnumVisible)nameMap.get(var0);
       }
 
       private EnumVisible(String var3, int var4) {
-         this.internalName = nameIn;
-         this.id = idIn;
+         this.internalName = var3;
+         this.id = var4;
       }
 
       static {
-         for(Team.EnumVisible team$enumvisible : values()) {
-            nameMap.put(team$enumvisible.internalName, team$enumvisible);
+         for(Team.EnumVisible var3 : values()) {
+            nameMap.put(var3.internalName, var3);
          }
 
       }

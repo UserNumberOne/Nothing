@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class NBTTagEnd extends NBTBase {
    void read(DataInput var1, int var2, NBTSizeTracker var3) throws IOException {
-      sizeTracker.read(64L);
+      var3.read(64L);
    }
 
    void write(DataOutput var1) throws IOException {
@@ -22,5 +22,10 @@ public class NBTTagEnd extends NBTBase {
 
    public NBTTagEnd copy() {
       return new NBTTagEnd();
+   }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
    }
 }

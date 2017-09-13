@@ -6,7 +6,7 @@ public class ScoreCriteriaColored implements IScoreCriteria {
    private final String goalName;
 
    public ScoreCriteriaColored(String var1, TextFormatting var2) {
-      this.goalName = name + format.getFriendlyName();
+      this.goalName = var1 + var2.getFriendlyName();
       IScoreCriteria.INSTANCES.put(this.goalName, this);
    }
 

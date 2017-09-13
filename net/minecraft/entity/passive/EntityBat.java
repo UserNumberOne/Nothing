@@ -26,7 +26,7 @@ public class EntityBat extends EntityAmbientCreature {
    private BlockPos spawnPosition;
 
    public EntityBat(World var1) {
-      super(worldIn);
+      super(var1);
       this.setSize(0.5F, 0.9F);
       this.setIsBatHanging(true);
    }
@@ -77,11 +77,11 @@ public class EntityBat extends EntityAmbientCreature {
    }
 
    public void setIsBatHanging(boolean var1) {
-      byte b0 = ((Byte)this.dataManager.get(HANGING)).byteValue();
-      if (isHanging) {
-         this.dataManager.set(HANGING, Byte.valueOf((byte)(b0 | 1)));
+      byte var2 = ((Byte)this.dataManager.get(HANGING)).byteValue();
+      if (var1) {
+         this.dataManager.set(HANGING, Byte.valueOf((byte)(var2 | 1)));
       } else {
-         this.dataManager.set(HANGING, Byte.valueOf((byte)(b0 & -2)));
+         this.dataManager.set(HANGING, Byte.valueOf((byte)(var2 & -2)));
       }
 
    }
@@ -101,21 +101,21 @@ public class EntityBat extends EntityAmbientCreature {
 
    protected void updateAITasks() {
       super.updateAITasks();
-      BlockPos blockpos = new BlockPos(this);
-      BlockPos blockpos1 = blockpos.up();
+      BlockPos var1 = new BlockPos(this);
+      BlockPos var2 = var1.up();
       if (this.getIsBatHanging()) {
-         if (this.world.getBlockState(blockpos1).isNormalCube()) {
+         if (this.world.getBlockState(var2).isNormalCube()) {
             if (this.rand.nextInt(200) == 0) {
                this.rotationYawHead = (float)this.rand.nextInt(360);
             }
 
             if (this.world.getNearestPlayerNotCreative(this, 4.0D) != null) {
                this.setIsBatHanging(false);
-               this.world.playEvent((EntityPlayer)null, 1025, blockpos, 0);
+               this.world.playEvent((EntityPlayer)null, 1025, var1, 0);
             }
          } else {
             this.setIsBatHanging(false);
-            this.world.playEvent((EntityPlayer)null, 1025, blockpos, 0);
+            this.world.playEvent((EntityPlayer)null, 1025, var1, 0);
          }
       } else {
          if (this.spawnPosition != null && (!this.world.isAirBlock(this.spawnPosition) || this.spawnPosition.getY() < 1)) {
@@ -126,17 +126,17 @@ public class EntityBat extends EntityAmbientCreature {
             this.spawnPosition = new BlockPos((int)this.posX + this.rand.nextInt(7) - this.rand.nextInt(7), (int)this.posY + this.rand.nextInt(6) - 2, (int)this.posZ + this.rand.nextInt(7) - this.rand.nextInt(7));
          }
 
-         double d0 = (double)this.spawnPosition.getX() + 0.5D - this.posX;
-         double d1 = (double)this.spawnPosition.getY() + 0.1D - this.posY;
-         double d2 = (double)this.spawnPosition.getZ() + 0.5D - this.posZ;
-         this.motionX += (Math.signum(d0) * 0.5D - this.motionX) * 0.10000000149011612D;
-         this.motionY += (Math.signum(d1) * 0.699999988079071D - this.motionY) * 0.10000000149011612D;
-         this.motionZ += (Math.signum(d2) * 0.5D - this.motionZ) * 0.10000000149011612D;
-         float f = (float)(MathHelper.atan2(this.motionZ, this.motionX) * 57.29577951308232D) - 90.0F;
-         float f1 = MathHelper.wrapDegrees(f - this.rotationYaw);
+         double var3 = (double)this.spawnPosition.getX() + 0.5D - this.posX;
+         double var5 = (double)this.spawnPosition.getY() + 0.1D - this.posY;
+         double var7 = (double)this.spawnPosition.getZ() + 0.5D - this.posZ;
+         this.motionX += (Math.signum(var3) * 0.5D - this.motionX) * 0.10000000149011612D;
+         this.motionY += (Math.signum(var5) * 0.699999988079071D - this.motionY) * 0.10000000149011612D;
+         this.motionZ += (Math.signum(var7) * 0.5D - this.motionZ) * 0.10000000149011612D;
+         float var9 = (float)(MathHelper.atan2(this.motionZ, this.motionX) * 57.2957763671875D) - 90.0F;
+         float var10 = MathHelper.wrapDegrees(var9 - this.rotationYaw);
          this.moveForward = 0.5F;
-         this.rotationYaw += f1;
-         if (this.rand.nextInt(100) == 0 && this.world.getBlockState(blockpos1).isNormalCube()) {
+         this.rotationYaw += var10;
+         if (this.rand.nextInt(100) == 0 && this.world.getBlockState(var2).isNormalCube()) {
             this.setIsBatHanging(true);
          }
       }
@@ -158,50 +158,50 @@ public class EntityBat extends EntityAmbientCreature {
    }
 
    public boolean attackEntityFrom(DamageSource var1, float var2) {
-      if (this.isEntityInvulnerable(source)) {
+      if (this.isEntityInvulnerable(var1)) {
          return false;
       } else {
          if (!this.world.isRemote && this.getIsBatHanging()) {
             this.setIsBatHanging(false);
          }
 
-         return super.attackEntityFrom(source, amount);
+         return super.attackEntityFrom(var1, var2);
       }
    }
 
    public static void registerFixesBat(DataFixer var0) {
-      EntityLiving.registerFixesMob(fixer, "Bat");
+      EntityLiving.registerFixesMob(var0, "Bat");
    }
 
    public void readEntityFromNBT(NBTTagCompound var1) {
-      super.readEntityFromNBT(compound);
-      this.dataManager.set(HANGING, Byte.valueOf(compound.getByte("BatFlags")));
+      super.readEntityFromNBT(var1);
+      this.dataManager.set(HANGING, Byte.valueOf(var1.getByte("BatFlags")));
    }
 
    public void writeEntityToNBT(NBTTagCompound var1) {
-      super.writeEntityToNBT(compound);
-      compound.setByte("BatFlags", ((Byte)this.dataManager.get(HANGING)).byteValue());
+      super.writeEntityToNBT(var1);
+      var1.setByte("BatFlags", ((Byte)this.dataManager.get(HANGING)).byteValue());
    }
 
    public boolean getCanSpawnHere() {
-      BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
-      if (blockpos.getY() >= this.world.getSeaLevel()) {
+      BlockPos var1 = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+      if (var1.getY() >= this.world.getSeaLevel()) {
          return false;
       } else {
-         int i = this.world.getLightFromNeighbors(blockpos);
-         int j = 4;
+         int var2 = this.world.getLightFromNeighbors(var1);
+         byte var3 = 4;
          if (this.isDateAroundHalloween(this.world.getCurrentDate())) {
-            j = 7;
+            var3 = 7;
          } else if (this.rand.nextBoolean()) {
             return false;
          }
 
-         return i > this.rand.nextInt(j) ? false : super.getCanSpawnHere();
+         return var2 > this.rand.nextInt(var3) ? false : super.getCanSpawnHere();
       }
    }
 
    private boolean isDateAroundHalloween(Calendar var1) {
-      return p_175569_1_.get(2) + 1 == 10 && p_175569_1_.get(5) >= 20 || p_175569_1_.get(2) + 1 == 11 && p_175569_1_.get(5) <= 3;
+      return var1.get(2) + 1 == 10 && var1.get(5) >= 20 || var1.get(2) + 1 == 11 && var1.get(5) <= 3;
    }
 
    public float getEyeHeight() {

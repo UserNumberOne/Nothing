@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 
 public abstract class EntityGolem extends EntityCreature implements IAnimals {
    public EntityGolem(World var1) {
-      super(worldIn);
+      super(var1);
    }
 
    public void fall(float var1, float var2) {

@@ -1,6 +1,5 @@
 package net.minecraft.tileentity;
 
-import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.EnumPushReaction;
@@ -14,9 +13,6 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityPiston extends TileEntity implements ITickable {
    private IBlockState pistonState;
@@ -29,11 +25,11 @@ public class TileEntityPiston extends TileEntity implements ITickable {
    public TileEntityPiston() {
    }
 
-   public TileEntityPiston(IBlockState var1, EnumFacing var2, boolean var3, boolean var4) {
-      this.pistonState = pistonStateIn;
-      this.pistonFacing = pistonFacingIn;
-      this.extending = extendingIn;
-      this.shouldHeadBeRendered = shouldHeadBeRenderedIn;
+   public TileEntityPiston(IBlockState iblockdata, EnumFacing enumdirection, boolean flag, boolean flag1) {
+      this.pistonState = iblockdata;
+      this.pistonFacing = enumdirection;
+      this.extending = flag;
+      this.shouldHeadBeRendered = flag1;
    }
 
    public IBlockState getPistonState() {
@@ -52,67 +48,38 @@ public class TileEntityPiston extends TileEntity implements ITickable {
       return this.pistonFacing;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean shouldPistonHeadBeRendered() {
-      return this.shouldHeadBeRendered;
+   private float getExtendedProgress(float f) {
+      return this.extending ? f - 1.0F : 1.0F - f;
    }
 
-   @SideOnly(Side.CLIENT)
-   public float getProgress(float var1) {
-      if (ticks > 1.0F) {
-         ticks = 1.0F;
-      }
-
-      return this.lastProgress + (this.progress - this.lastProgress) * ticks;
+   public AxisAlignedBB getAABB(IBlockAccess iblockaccess, BlockPos blockposition) {
+      return this.getAABB(iblockaccess, blockposition, this.progress).union(this.getAABB(iblockaccess, blockposition, this.lastProgress));
    }
 
-   @SideOnly(Side.CLIENT)
-   public float getOffsetX(float var1) {
-      return (float)this.pistonFacing.getFrontOffsetX() * this.getExtendedProgress(this.getProgress(ticks));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getOffsetY(float var1) {
-      return (float)this.pistonFacing.getFrontOffsetY() * this.getExtendedProgress(this.getProgress(ticks));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getOffsetZ(float var1) {
-      return (float)this.pistonFacing.getFrontOffsetZ() * this.getExtendedProgress(this.getProgress(ticks));
-   }
-
-   private float getExtendedProgress(float var1) {
-      return this.extending ? p_184320_1_ - 1.0F : 1.0F - p_184320_1_;
-   }
-
-   public AxisAlignedBB getAABB(IBlockAccess var1, BlockPos var2) {
-      return this.getAABB(p_184321_1_, p_184321_2_, this.progress).union(this.getAABB(p_184321_1_, p_184321_2_, this.lastProgress));
-   }
-
-   public AxisAlignedBB getAABB(IBlockAccess var1, BlockPos var2, float var3) {
-      p_184319_3_ = this.getExtendedProgress(p_184319_3_);
-      return this.pistonState.getBoundingBox(p_184319_1_, p_184319_2_).offset((double)(p_184319_3_ * (float)this.pistonFacing.getFrontOffsetX()), (double)(p_184319_3_ * (float)this.pistonFacing.getFrontOffsetY()), (double)(p_184319_3_ * (float)this.pistonFacing.getFrontOffsetZ()));
+   public AxisAlignedBB getAABB(IBlockAccess iblockaccess, BlockPos blockposition, float f) {
+      f = this.getExtendedProgress(f);
+      return this.pistonState.getBoundingBox(iblockaccess, blockposition).offset((double)(f * (float)this.pistonFacing.getFrontOffsetX()), (double)(f * (float)this.pistonFacing.getFrontOffsetY()), (double)(f * (float)this.pistonFacing.getFrontOffsetZ()));
    }
 
    private void moveCollidedEntities() {
       AxisAlignedBB axisalignedbb = this.getAABB(this.world, this.pos).offset(this.pos);
       List list = this.world.getEntitiesWithinAABBExcludingEntity((Entity)null, axisalignedbb);
       if (!list.isEmpty()) {
-         EnumFacing enumfacing = this.extending ? this.pistonFacing : this.pistonFacing.getOpposite();
+         EnumFacing enumdirection = this.extending ? this.pistonFacing : this.pistonFacing.getOpposite();
 
          for(int i = 0; i < list.size(); ++i) {
             Entity entity = (Entity)list.get(i);
             if (entity.getPushReaction() != EnumPushReaction.IGNORE) {
                if (this.pistonState.getBlock() == Blocks.SLIME_BLOCK) {
-                  switch(enumfacing.getAxis()) {
-                  case X:
-                     entity.motionX = (double)enumfacing.getFrontOffsetX();
+                  switch(TileEntityPiston.SyntheticClass_1.a[enumdirection.getAxis().ordinal()]) {
+                  case 1:
+                     entity.motionX = (double)enumdirection.getFrontOffsetX();
                      break;
-                  case Y:
-                     entity.motionY = (double)enumfacing.getFrontOffsetY();
+                  case 2:
+                     entity.motionY = (double)enumdirection.getFrontOffsetY();
                      break;
-                  case Z:
-                     entity.motionZ = (double)enumfacing.getFrontOffsetZ();
+                  case 3:
+                     entity.motionZ = (double)enumdirection.getFrontOffsetZ();
                   }
                }
 
@@ -120,9 +87,9 @@ public class TileEntityPiston extends TileEntity implements ITickable {
                double d1 = 0.0D;
                double d2 = 0.0D;
                AxisAlignedBB axisalignedbb1 = entity.getEntityBoundingBox();
-               switch(enumfacing.getAxis()) {
-               case X:
-                  if (enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) {
+               switch(TileEntityPiston.SyntheticClass_1.a[enumdirection.getAxis().ordinal()]) {
+               case 1:
+                  if (enumdirection.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) {
                      d0 = axisalignedbb.maxX - axisalignedbb1.minX;
                   } else {
                      d0 = axisalignedbb1.maxX - axisalignedbb.minX;
@@ -130,8 +97,8 @@ public class TileEntityPiston extends TileEntity implements ITickable {
 
                   d0 = d0 + 0.01D;
                   break;
-               case Y:
-                  if (enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) {
+               case 2:
+                  if (enumdirection.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) {
                      d1 = axisalignedbb.maxY - axisalignedbb1.minY;
                   } else {
                      d1 = axisalignedbb1.maxY - axisalignedbb.minY;
@@ -139,8 +106,8 @@ public class TileEntityPiston extends TileEntity implements ITickable {
 
                   d1 = d1 + 0.01D;
                   break;
-               case Z:
-                  if (enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) {
+               case 3:
+                  if (enumdirection.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) {
                      d2 = axisalignedbb.maxZ - axisalignedbb1.minZ;
                   } else {
                      d2 = axisalignedbb1.maxZ - axisalignedbb.minZ;
@@ -149,7 +116,7 @@ public class TileEntityPiston extends TileEntity implements ITickable {
                   d2 = d2 + 0.01D;
                }
 
-               entity.move(d0 * (double)enumfacing.getFrontOffsetX(), d1 * (double)enumfacing.getFrontOffsetY(), d2 * (double)enumfacing.getFrontOffsetZ());
+               entity.move(d0 * (double)enumdirection.getFrontOffsetX(), d1 * (double)enumdirection.getFrontOffsetY(), d2 * (double)enumdirection.getFrontOffsetZ());
             }
          }
       }
@@ -164,56 +131,79 @@ public class TileEntityPiston extends TileEntity implements ITickable {
          this.invalidate();
          if (this.world.getBlockState(this.pos).getBlock() == Blocks.PISTON_EXTENSION) {
             this.world.setBlockState(this.pos, this.pistonState, 3);
-            if (!ForgeEventFactory.onNeighborNotify(this.world, this.pos, this.world.getBlockState(this.pos), EnumSet.of(this.pistonFacing.getOpposite())).isCanceled()) {
-               this.world.notifyBlockOfStateChange(this.pos, this.pistonState.getBlock());
-            }
+            this.world.notifyBlockOfStateChange(this.pos, this.pistonState.getBlock());
          }
       }
 
    }
 
    public void update() {
-      this.lastProgress = this.progress;
-      if (this.lastProgress >= 1.0F) {
-         this.moveCollidedEntities();
-         this.world.removeTileEntity(this.pos);
-         this.invalidate();
-         if (this.world.getBlockState(this.pos).getBlock() == Blocks.PISTON_EXTENSION) {
-            this.world.setBlockState(this.pos, this.pistonState, 3);
-            if (!ForgeEventFactory.onNeighborNotify(this.world, this.pos, this.world.getBlockState(this.pos), EnumSet.of(this.pistonFacing.getOpposite())).isCanceled()) {
+      if (this.world != null) {
+         this.lastProgress = this.progress;
+         if (this.lastProgress >= 1.0F) {
+            this.moveCollidedEntities();
+            this.world.removeTileEntity(this.pos);
+            this.invalidate();
+            if (this.world.getBlockState(this.pos).getBlock() == Blocks.PISTON_EXTENSION) {
+               this.world.setBlockState(this.pos, this.pistonState, 3);
                this.world.notifyBlockOfStateChange(this.pos, this.pistonState.getBlock());
             }
-         }
-      } else {
-         this.progress += 0.5F;
-         if (this.progress >= 1.0F) {
-            this.progress = 1.0F;
+         } else {
+            this.progress += 0.5F;
+            if (this.progress >= 1.0F) {
+               this.progress = 1.0F;
+            }
+
+            this.moveCollidedEntities();
          }
 
-         this.moveCollidedEntities();
       }
-
    }
 
-   public static void registerFixesPiston(DataFixer var0) {
+   public static void registerFixesPiston(DataFixer dataconvertermanager) {
    }
 
-   public void readFromNBT(NBTTagCompound var1) {
-      super.readFromNBT(compound);
-      this.pistonState = Block.getBlockById(compound.getInteger("blockId")).getStateFromMeta(compound.getInteger("blockData"));
-      this.pistonFacing = EnumFacing.getFront(compound.getInteger("facing"));
-      this.progress = compound.getFloat("progress");
+   public void readFromNBT(NBTTagCompound nbttagcompound) {
+      super.readFromNBT(nbttagcompound);
+      this.pistonState = Block.getBlockById(nbttagcompound.getInteger("blockId")).getStateFromMeta(nbttagcompound.getInteger("blockData"));
+      this.pistonFacing = EnumFacing.getFront(nbttagcompound.getInteger("facing"));
+      this.progress = nbttagcompound.getFloat("progress");
       this.lastProgress = this.progress;
-      this.extending = compound.getBoolean("extending");
+      this.extending = nbttagcompound.getBoolean("extending");
    }
 
-   public NBTTagCompound writeToNBT(NBTTagCompound var1) {
-      super.writeToNBT(compound);
-      compound.setInteger("blockId", Block.getIdFromBlock(this.pistonState.getBlock()));
-      compound.setInteger("blockData", this.pistonState.getBlock().getMetaFromState(this.pistonState));
-      compound.setInteger("facing", this.pistonFacing.getIndex());
-      compound.setFloat("progress", this.lastProgress);
-      compound.setBoolean("extending", this.extending);
-      return compound;
+   public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
+      super.writeToNBT(nbttagcompound);
+      nbttagcompound.setInteger("blockId", Block.getIdFromBlock(this.pistonState.getBlock()));
+      nbttagcompound.setInteger("blockData", this.pistonState.getBlock().getMetaFromState(this.pistonState));
+      nbttagcompound.setInteger("facing", this.pistonFacing.getIndex());
+      nbttagcompound.setFloat("progress", this.lastProgress);
+      nbttagcompound.setBoolean("extending", this.extending);
+      return nbttagcompound;
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.Axis.values().length];
+
+      static {
+         try {
+            a[EnumFacing.Axis.X.ordinal()] = 1;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.Axis.Y.ordinal()] = 2;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.Axis.Z.ordinal()] = 3;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

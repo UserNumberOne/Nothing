@@ -11,16 +11,16 @@ public class NBTTagLong extends NBTPrimitive {
    }
 
    public NBTTagLong(long var1) {
-      this.data = data;
+      this.data = var1;
    }
 
    void write(DataOutput var1) throws IOException {
-      output.writeLong(this.data);
+      var1.writeLong(this.data);
    }
 
    void read(DataInput var1, int var2, NBTSizeTracker var3) throws IOException {
-      sizeTracker.read(128L);
-      this.data = input.readLong();
+      var3.read(128L);
+      this.data = var1.readLong();
    }
 
    public byte getId() {
@@ -36,9 +36,9 @@ public class NBTTagLong extends NBTPrimitive {
    }
 
    public boolean equals(Object var1) {
-      if (super.equals(p_equals_1_)) {
-         NBTTagLong nbttaglong = (NBTTagLong)p_equals_1_;
-         return this.data == nbttaglong.data;
+      if (super.equals(var1)) {
+         NBTTagLong var2 = (NBTTagLong)var1;
+         return this.data == var2.data;
       } else {
          return false;
       }
@@ -70,5 +70,10 @@ public class NBTTagLong extends NBTPrimitive {
 
    public float getFloat() {
       return (float)this.data;
+   }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
    }
 }

@@ -5,8 +5,8 @@ public class DataParameter {
    private final DataSerializer serializer;
 
    public DataParameter(int var1, DataSerializer var2) {
-      this.id = idIn;
-      this.serializer = serializerIn;
+      this.id = var1;
+      this.serializer = var2;
    }
 
    public int getId() {
@@ -18,11 +18,11 @@ public class DataParameter {
    }
 
    public boolean equals(Object var1) {
-      if (this == p_equals_1_) {
+      if (this == var1) {
          return true;
-      } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-         DataParameter dataparameter = (DataParameter)p_equals_1_;
-         return this.id == dataparameter.id;
+      } else if (var1 != null && this.getClass() == var1.getClass()) {
+         DataParameter var2 = (DataParameter)var1;
+         return this.id == var2.id;
       } else {
          return false;
       }

@@ -8,7 +8,7 @@ public class PropertyBool extends PropertyHelper {
    private final ImmutableSet allowedValues = ImmutableSet.of(Boolean.valueOf(true), Boolean.valueOf(false));
 
    protected PropertyBool(String var1) {
-      super(name, Boolean.class);
+      super(var1, Boolean.class);
    }
 
    public Collection getAllowedValues() {
@@ -16,23 +16,23 @@ public class PropertyBool extends PropertyHelper {
    }
 
    public static PropertyBool create(String var0) {
-      return new PropertyBool(name);
+      return new PropertyBool(var0);
    }
 
    public Optional parseValue(String var1) {
-      return !"true".equals(value) && !"false".equals(value) ? Optional.absent() : Optional.of(Boolean.valueOf(value));
+      return !"true".equals(var1) && !"false".equals(var1) ? Optional.absent() : Optional.of(Boolean.valueOf(var1));
    }
 
    public String getName(Boolean var1) {
-      return value.toString();
+      return var1.toString();
    }
 
    public boolean equals(Object var1) {
-      if (this == p_equals_1_) {
+      if (this == var1) {
          return true;
-      } else if (p_equals_1_ instanceof PropertyBool && super.equals(p_equals_1_)) {
-         PropertyBool propertybool = (PropertyBool)p_equals_1_;
-         return this.allowedValues.equals(propertybool.allowedValues);
+      } else if (var1 instanceof PropertyBool && super.equals(var1)) {
+         PropertyBool var2 = (PropertyBool)var1;
+         return this.allowedValues.equals(var2.allowedValues);
       } else {
          return false;
       }

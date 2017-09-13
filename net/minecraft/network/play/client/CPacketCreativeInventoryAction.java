@@ -5,34 +5,23 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketCreativeInventoryAction implements Packet {
    private int slotId;
    private ItemStack stack;
 
-   public CPacketCreativeInventoryAction() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketCreativeInventoryAction(int var1, ItemStack var2) {
-      this.slotId = slotIdIn;
-      this.stack = stackIn != null ? stackIn.copy() : null;
-   }
-
    public void processPacket(INetHandlerPlayServer var1) {
-      handler.processCreativeInventoryAction(this);
+      var1.processCreativeInventoryAction(this);
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.slotId = buf.readShort();
-      this.stack = buf.readItemStack();
+      this.slotId = var1.readShort();
+      this.stack = var1.readItemStack();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeShort(this.slotId);
-      buf.writeItemStack(this.stack);
+      var1.writeShort(this.slotId);
+      var1.writeItemStack(this.stack);
    }
 
    public int getSlotId() {

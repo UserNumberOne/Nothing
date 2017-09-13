@@ -7,12 +7,12 @@ import net.minecraft.world.World;
 
 public class WorldGenWaterlily extends WorldGenerator {
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      for(int i = 0; i < 10; ++i) {
-         int j = position.getX() + rand.nextInt(8) - rand.nextInt(8);
-         int k = position.getY() + rand.nextInt(4) - rand.nextInt(4);
-         int l = position.getZ() + rand.nextInt(8) - rand.nextInt(8);
-         if (worldIn.isAirBlock(new BlockPos(j, k, l)) && Blocks.WATERLILY.canPlaceBlockAt(worldIn, new BlockPos(j, k, l))) {
-            worldIn.setBlockState(new BlockPos(j, k, l), Blocks.WATERLILY.getDefaultState(), 2);
+      for(int var4 = 0; var4 < 10; ++var4) {
+         int var5 = var3.getX() + var2.nextInt(8) - var2.nextInt(8);
+         int var6 = var3.getY() + var2.nextInt(4) - var2.nextInt(4);
+         int var7 = var3.getZ() + var2.nextInt(8) - var2.nextInt(8);
+         if (var1.isAirBlock(new BlockPos(var5, var6, var7)) && Blocks.WATERLILY.canPlaceBlockAt(var1, new BlockPos(var5, var6, var7))) {
+            var1.setBlockState(new BlockPos(var5, var6, var7), Blocks.WATERLILY.getDefaultState(), 2);
          }
       }
 

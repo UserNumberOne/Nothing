@@ -4,8 +4,8 @@ public class ScoreCriteria implements IScoreCriteria {
    private final String dummyName;
 
    public ScoreCriteria(String var1) {
-      this.dummyName = name;
-      IScoreCriteria.INSTANCES.put(name, this);
+      this.dummyName = var1;
+      IScoreCriteria.INSTANCES.put(var1, this);
    }
 
    public String getName() {

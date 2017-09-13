@@ -15,7 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -36,140 +36,150 @@ public class CommandReplaceItem extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length < 1) {
+      if (var3.length < 1) {
          throw new WrongUsageException("commands.replaceitem.usage", new Object[0]);
       } else {
-         boolean flag;
-         if ("entity".equals(args[0])) {
-            flag = false;
+         boolean var4;
+         if ("entity".equals(var3[0])) {
+            var4 = false;
          } else {
-            if (!"block".equals(args[0])) {
+            if (!"block".equals(var3[0])) {
                throw new WrongUsageException("commands.replaceitem.usage", new Object[0]);
             }
 
-            flag = true;
+            var4 = true;
          }
 
-         int i;
-         if (flag) {
-            if (args.length < 6) {
+         int var5;
+         if (var4) {
+            if (var3.length < 6) {
                throw new WrongUsageException("commands.replaceitem.block.usage", new Object[0]);
             }
 
-            i = 4;
+            var5 = 4;
          } else {
-            if (args.length < 4) {
+            if (var3.length < 4) {
                throw new WrongUsageException("commands.replaceitem.entity.usage", new Object[0]);
             }
 
-            i = 2;
+            var5 = 2;
          }
 
-         String s = args[i];
-         int j = this.getSlotForShortcut(args[i++]);
+         String var6 = var3[var5];
+         int var7 = this.getSlotForShortcut(var3[var5++]);
 
-         Item item;
+         Item var8;
          try {
-            item = getItemByText(sender, args[i]);
+            var8 = getItemByText(var2, var3[var5]);
          } catch (NumberInvalidException var17) {
-            if (Block.getBlockFromName(args[i]) != Blocks.AIR) {
+            if (Block.getBlockFromName(var3[var5]) != Blocks.AIR) {
                throw var17;
             }
 
-            item = null;
+            var8 = null;
          }
 
-         ++i;
-         int k = args.length > i ? parseInt(args[i++], 1, 64) : 1;
-         int l = args.length > i ? parseInt(args[i++]) : 0;
-         ItemStack itemstack = new ItemStack(item, k, l);
-         if (args.length > i) {
-            String s1 = getChatComponentFromNthArg(sender, args, i).getUnformattedText();
+         ++var5;
+         int var9 = var3.length > var5 ? parseInt(var3[var5++], 1, 64) : 1;
+         int var10 = var3.length > var5 ? parseInt(var3[var5++]) : 0;
+         ItemStack var11 = new ItemStack(var8, var9, var10);
+         if (var3.length > var5) {
+            String var12 = getChatComponentFromNthArg(var2, var3, var5).getUnformattedText();
 
             try {
-               itemstack.setTagCompound(JsonToNBT.getTagFromJson(s1));
+               var11.setTagCompound(JsonToNBT.getTagFromJson(var12));
             } catch (NBTException var16) {
                throw new CommandException("commands.replaceitem.tagError", new Object[]{var16.getMessage()});
             }
          }
 
-         if (itemstack.getItem() == null) {
-            itemstack = null;
+         if (var11.getItem() == null) {
+            var11 = null;
          }
 
-         if (flag) {
-            sender.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 0);
-            BlockPos blockpos = parseBlockPos(sender, args, 1, false);
-            World world = sender.getEntityWorld();
-            TileEntity tileentity = world.getTileEntity(blockpos);
-            if (tileentity == null || !(tileentity instanceof IInventory)) {
-               throw new CommandException("commands.replaceitem.noContainer", new Object[]{blockpos.getX(), blockpos.getY(), blockpos.getZ()});
+         if (var4) {
+            var2.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 0);
+            BlockPos var20 = parseBlockPos(var2, var3, 1, false);
+            World var13 = var2.getEntityWorld();
+            TileEntity var14 = var13.getTileEntity(var20);
+            if (var14 == null || !(var14 instanceof IInventory)) {
+               throw new CommandException("commands.replaceitem.noContainer", new Object[]{var20.getX(), var20.getY(), var20.getZ()});
             }
 
-            IInventory iinventory = (IInventory)tileentity;
-            if (j >= 0 && j < iinventory.getSizeInventory()) {
-               iinventory.setInventorySlotContents(j, itemstack);
+            IInventory var15 = (IInventory)var14;
+            if (var7 >= 0 && var7 < var15.getSizeInventory()) {
+               var15.setInventorySlotContents(var7, var11);
             }
          } else {
-            Entity entity = getEntity(server, sender, args[1]);
-            sender.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 0);
-            if (entity instanceof EntityPlayer) {
-               ((EntityPlayer)entity).inventoryContainer.detectAndSendChanges();
+            Entity var21 = b(var1, var2, var3[1]);
+            var2.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 0);
+            if (var21 instanceof EntityPlayer) {
+               ((EntityPlayer)var21).inventoryContainer.detectAndSendChanges();
             }
 
-            if (!entity.replaceItemInInventory(j, itemstack)) {
-               throw new CommandException("commands.replaceitem.failed", new Object[]{s, k, itemstack == null ? "Air" : itemstack.getTextComponent()});
+            if (!var21.replaceItemInInventory(var7, var11)) {
+               throw new CommandException("commands.replaceitem.failed", new Object[]{var6, var9, var11 == null ? "Air" : var11.getTextComponent()});
             }
 
-            if (entity instanceof EntityPlayer) {
-               ((EntityPlayer)entity).inventoryContainer.detectAndSendChanges();
+            if (var21 instanceof EntityPlayer) {
+               ((EntityPlayer)var21).inventoryContainer.detectAndSendChanges();
             }
          }
 
-         sender.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, k);
-         notifyCommandListener(sender, this, "commands.replaceitem.success", new Object[]{s, k, itemstack == null ? "Air" : itemstack.getTextComponent()});
+         var2.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, var9);
+         notifyCommandListener(var2, this, "commands.replaceitem.success", new Object[]{var6, var9, var11 == null ? "Air" : var11.getTextComponent()});
       }
    }
 
    private int getSlotForShortcut(String var1) throws CommandException {
-      if (!SHORTCUTS.containsKey(shortcut)) {
-         throw new CommandException("commands.generic.parameter.invalid", new Object[]{shortcut});
+      if (!SHORTCUTS.containsKey(var1)) {
+         throw new CommandException("commands.generic.parameter.invalid", new Object[]{var1});
       } else {
-         return ((Integer)SHORTCUTS.get(shortcut)).intValue();
+         return ((Integer)SHORTCUTS.get(var1)).intValue();
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[]{"entity", "block"}) : (args.length == 2 && "entity".equals(args[0]) ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : (args.length >= 2 && args.length <= 4 && "block".equals(args[0]) ? getTabCompletionCoordinate(args, 1, pos) : ((args.length != 3 || !"entity".equals(args[0])) && (args.length != 5 || !"block".equals(args[0])) ? (args.length == 4 && "entity".equals(args[0]) || args.length == 6 && "block".equals(args[0]) ? getListOfStringsMatchingLastWord(args, Item.REGISTRY.getKeys()) : Collections.emptyList()) : getListOfStringsMatchingLastWord(args, SHORTCUTS.keySet()))));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"entity", "block"});
+      } else if (var3.length == 2 && "entity".equals(var3[0])) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else if (var3.length >= 2 && var3.length <= 4 && "block".equals(var3[0])) {
+         return getTabCompletionCoordinate(var3, 1, var4);
+      } else if ((var3.length != 3 || !"entity".equals(var3[0])) && (var3.length != 5 || !"block".equals(var3[0]))) {
+         return (var3.length != 4 || !"entity".equals(var3[0])) && (var3.length != 6 || !"block".equals(var3[0])) ? Collections.emptyList() : getListOfStringsMatchingLastWord(var3, Item.REGISTRY.getKeys());
+      } else {
+         return getListOfStringsMatchingLastWord(var3, SHORTCUTS.keySet());
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return args.length > 0 && "entity".equals(args[0]) && index == 1;
+      return var1.length > 0 && "entity".equals(var1[0]) && var2 == 1;
    }
 
    static {
-      for(int i = 0; i < 54; ++i) {
-         SHORTCUTS.put("slot.container." + i, Integer.valueOf(i));
+      for(int var0 = 0; var0 < 54; ++var0) {
+         SHORTCUTS.put("slot.container." + var0, Integer.valueOf(var0));
       }
 
-      for(int j = 0; j < 9; ++j) {
-         SHORTCUTS.put("slot.hotbar." + j, Integer.valueOf(j));
+      for(int var1 = 0; var1 < 9; ++var1) {
+         SHORTCUTS.put("slot.hotbar." + var1, Integer.valueOf(var1));
       }
 
-      for(int k = 0; k < 27; ++k) {
-         SHORTCUTS.put("slot.inventory." + k, Integer.valueOf(9 + k));
+      for(int var2 = 0; var2 < 27; ++var2) {
+         SHORTCUTS.put("slot.inventory." + var2, Integer.valueOf(9 + var2));
       }
 
-      for(int l = 0; l < 27; ++l) {
-         SHORTCUTS.put("slot.enderchest." + l, Integer.valueOf(200 + l));
+      for(int var3 = 0; var3 < 27; ++var3) {
+         SHORTCUTS.put("slot.enderchest." + var3, Integer.valueOf(200 + var3));
       }
 
-      for(int i1 = 0; i1 < 8; ++i1) {
-         SHORTCUTS.put("slot.villager." + i1, Integer.valueOf(300 + i1));
+      for(int var4 = 0; var4 < 8; ++var4) {
+         SHORTCUTS.put("slot.villager." + var4, Integer.valueOf(300 + var4));
       }
 
-      for(int j1 = 0; j1 < 15; ++j1) {
-         SHORTCUTS.put("slot.horse." + j1, Integer.valueOf(500 + j1));
+      for(int var5 = 0; var5 < 15; ++var5) {
+         SHORTCUTS.put("slot.horse." + var5, Integer.valueOf(500 + var5));
       }
 
       SHORTCUTS.put("slot.weapon", Integer.valueOf(98));

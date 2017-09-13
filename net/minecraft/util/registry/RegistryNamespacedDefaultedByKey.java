@@ -10,15 +10,15 @@ public class RegistryNamespacedDefaultedByKey extends RegistryNamespaced {
    private Object defaultValue;
 
    public RegistryNamespacedDefaultedByKey(Object var1) {
-      this.defaultValueKey = defaultValueKeyIn;
+      this.defaultValueKey = var1;
    }
 
    public void register(int var1, Object var2, Object var3) {
-      if (this.defaultValueKey.equals(key)) {
-         this.defaultValue = value;
+      if (this.defaultValueKey.equals(var2)) {
+         this.defaultValue = var3;
       }
 
-      super.register(id, key, value);
+      super.register(var1, var2, var3);
    }
 
    public void validateKey() {
@@ -26,47 +26,31 @@ public class RegistryNamespacedDefaultedByKey extends RegistryNamespaced {
    }
 
    public int getIDForObject(Object var1) {
-      int i = super.getIDForObject(value);
-      return i == -1 ? super.getIDForObject(this.defaultValue) : i;
+      int var2 = super.getIDForObject(var1);
+      return var2 == -1 ? super.getIDForObject(this.defaultValue) : var2;
    }
 
    @Nonnull
    public Object getNameForObject(Object var1) {
-      Object k = (K)super.getNameForObject(value);
-      return k == null ? this.defaultValueKey : k;
+      Object var2 = super.getNameForObject(var1);
+      return var2 == null ? this.defaultValueKey : var2;
    }
 
    @Nonnull
    public Object getObject(@Nullable Object var1) {
-      Object v = (V)super.getObject(name);
-      return v == null ? this.defaultValue : v;
+      Object var2 = super.getObject(var1);
+      return var2 == null ? this.defaultValue : var2;
    }
 
    @Nonnull
    public Object getObjectById(int var1) {
-      Object v = (V)super.getObjectById(id);
-      return v == null ? this.defaultValue : v;
+      Object var2 = super.getObjectById(var1);
+      return var2 == null ? this.defaultValue : var2;
    }
 
    @Nonnull
    public Object getRandomObject(Random var1) {
-      Object v = (V)super.getRandomObject(random);
-      return v == null ? this.defaultValue : v;
-   }
-
-   public int getIDForObjectBypass(Object var1) {
-      return super.getIDForObject(bypass);
-   }
-
-   public Object getNameForObjectBypass(Object var1) {
-      return super.getNameForObject(value);
-   }
-
-   public Object getObjectBypass(Object var1) {
-      return super.getObject(name);
-   }
-
-   public Object getObjectByIdBypass(int var1) {
-      return super.getObjectById(id);
+      Object var2 = super.getRandomObject(var1);
+      return var2 == null ? this.defaultValue : var2;
    }
 }

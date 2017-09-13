@@ -1,52 +1,39 @@
 package net.minecraft.potion;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.UnmodifiableIterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.init.MobEffects;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
-import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry.Impl;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class PotionType extends Impl {
-   /** @deprecated */
-   @Deprecated
+public class PotionType {
    private static final ResourceLocation WATER = new ResourceLocation("water");
-   public static final RegistryNamespacedDefaultedByKey REGISTRY = GameData.getPotionTypesRegistry();
+   public static final RegistryNamespacedDefaultedByKey REGISTRY = new RegistryNamespacedDefaultedByKey(WATER);
    private static int nextPotionTypeId;
    private final String baseName;
    private final ImmutableList effects;
 
-   @Nullable
-   @SideOnly(Side.CLIENT)
-   public static PotionType getPotionTypeForID(int var0) {
-      return (PotionType)REGISTRY.getObjectById(p_185169_0_);
-   }
-
    public static int getID(PotionType var0) {
-      return REGISTRY.getIDForObject(p_185171_0_);
+      return REGISTRY.getIDForObject(var0);
    }
 
    @Nullable
    public static PotionType getPotionTypeForName(String var0) {
-      return (PotionType)REGISTRY.getObject(new ResourceLocation(p_185168_0_));
+      return (PotionType)REGISTRY.getObject(new ResourceLocation(var0));
    }
 
    public PotionType(PotionEffect... var1) {
-      this((String)null, p_i46739_1_);
+      this((String)null, var1);
    }
 
    public PotionType(@Nullable String var1, PotionEffect... var2) {
-      this.baseName = p_i46740_1_;
-      this.effects = ImmutableList.copyOf(p_i46740_2_);
+      this.baseName = var1;
+      this.effects = ImmutableList.copyOf(var2);
    }
 
    public String getNamePrefixed(String var1) {
-      return this.baseName == null ? p_185174_1_ + ((ResourceLocation)REGISTRY.getNameForObject(this)).getResourcePath() : p_185174_1_ + this.baseName;
+      return this.baseName == null ? var1 + ((ResourceLocation)REGISTRY.getNameForObject(this)).getResourcePath() : var1 + this.baseName;
    }
 
    public List getEffects() {
@@ -95,22 +82,6 @@ public class PotionType extends Impl {
    }
 
    protected static void registerPotionType(String var0, PotionType var1) {
-      REGISTRY.register(nextPotionTypeId++, new ResourceLocation(p_185173_0_), p_185173_1_);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasInstantEffect() {
-      if (!this.effects.isEmpty()) {
-         UnmodifiableIterator var1 = this.effects.iterator();
-
-         while(var1.hasNext()) {
-            PotionEffect potioneffect = (PotionEffect)var1.next();
-            if (potioneffect.getPotion().isInstant()) {
-               return true;
-            }
-         }
-      }
-
-      return false;
+      REGISTRY.register(nextPotionTypeId++, new ResourceLocation(var0), var1);
    }
 }

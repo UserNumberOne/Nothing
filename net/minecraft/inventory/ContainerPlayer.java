@@ -3,12 +3,13 @@ package net.minecraft.inventory;
 import javax.annotation.Nullable;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.play.server.SPacketSetSlot;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryCrafting;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerPlayer extends Container {
    private static final EntityEquipmentSlot[] VALID_EQUIPMENT_SLOTS = new EntityEquipmentSlot[]{EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET};
@@ -16,11 +17,17 @@ public class ContainerPlayer extends Container {
    public IInventory craftResult = new InventoryCraftResult();
    public boolean isLocalWorld;
    private final EntityPlayer player;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
 
-   public ContainerPlayer(InventoryPlayer var1, boolean var2, EntityPlayer var3) {
-      this.isLocalWorld = localWorld;
-      this.player = playerIn;
-      this.addSlotToContainer(new SlotCrafting(playerInventory.player, this.craftMatrix, this.craftResult, 0, 154, 28));
+   public ContainerPlayer(InventoryPlayer playerinventory, boolean flag, EntityPlayer entityhuman) {
+      this.isLocalWorld = flag;
+      this.player = entityhuman;
+      this.craftResult = new InventoryCraftResult();
+      this.craftMatrix = new InventoryCrafting(this, 2, 2, playerinventory.player);
+      this.craftMatrix.resultInventory = this.craftResult;
+      this.player = playerinventory;
+      this.addSlotToContainer(new SlotCrafting(playerinventory.player, this.craftMatrix, this.craftResult, 0, 154, 28));
 
       for(int i = 0; i < 2; ++i) {
          for(int j = 0; j < 2; ++j) {
@@ -28,106 +35,104 @@ public class ContainerPlayer extends Container {
          }
       }
 
-      for(int k = 0; k < 4; ++k) {
-         final EntityEquipmentSlot entityequipmentslot = VALID_EQUIPMENT_SLOTS[k];
-         this.addSlotToContainer(new Slot(playerInventory, 36 + (3 - k), 8, 8 + k * 18) {
+      for(int var7 = 0; var7 < 4; ++var7) {
+         final EntityEquipmentSlot enumitemslot1 = VALID_EQUIPMENT_SLOTS[var7];
+         this.addSlotToContainer(new Slot(playerinventory, 36 + (3 - var7), 8, 8 + var7 * 18) {
             public int getSlotStackLimit() {
                return 1;
             }
 
-            public boolean isItemValid(@Nullable ItemStack var1) {
-               return stack == null ? false : stack.getItem().isValidArmor(stack, entityequipmentslot, ContainerPlayer.this.player);
-            }
-
-            @Nullable
-            @SideOnly(Side.CLIENT)
-            public String getSlotTexture() {
-               return ItemArmor.EMPTY_SLOT_NAMES[entityequipmentslot.getIndex()];
+            public boolean isItemValid(@Nullable ItemStack itemstack) {
+               if (itemstack == null) {
+                  return false;
+               } else {
+                  EntityEquipmentSlot enumitemslot = EntityLiving.getSlotForItemStack(itemstack);
+                  return enumitemslot == enumitemslot1;
+               }
             }
          });
       }
 
-      for(int l = 0; l < 3; ++l) {
-         for(int j1 = 0; j1 < 9; ++j1) {
-            this.addSlotToContainer(new Slot(playerInventory, j1 + (l + 1) * 9, 8 + j1 * 18, 84 + l * 18));
+      for(int var8 = 0; var8 < 3; ++var8) {
+         for(int j = 0; j < 9; ++j) {
+            this.addSlotToContainer(new Slot(playerinventory, j + (var8 + 1) * 9, 8 + j * 18, 84 + var8 * 18));
          }
       }
 
-      for(int i1 = 0; i1 < 9; ++i1) {
-         this.addSlotToContainer(new Slot(playerInventory, i1, 8 + i1 * 18, 142));
+      for(int var9 = 0; var9 < 9; ++var9) {
+         this.addSlotToContainer(new Slot(playerinventory, var9, 8 + var9 * 18, 142));
       }
 
-      this.addSlotToContainer(new Slot(playerInventory, 40, 77, 62) {
-         public boolean isItemValid(@Nullable ItemStack var1) {
-            return super.isItemValid(stack);
-         }
-
-         @Nullable
-         @SideOnly(Side.CLIENT)
-         public String getSlotTexture() {
-            return "minecraft:items/empty_armor_slot_shield";
+      this.addSlotToContainer(new Slot(playerinventory, 40, 77, 62) {
+         public boolean isItemValid(@Nullable ItemStack itemstack) {
+            return super.isItemValid(itemstack);
          }
       });
-      this.onCraftMatrixChanged(this.craftMatrix);
    }
 
-   public void onCraftMatrixChanged(IInventory var1) {
-      this.craftResult.setInventorySlotContents(0, CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.player.world));
+   public void onCraftMatrixChanged(IInventory iinventory) {
+      CraftingManager.getInstance().lastCraftView = this.getBukkitView();
+      ItemStack craftResult = CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.player.world);
+      this.craftResult.setInventorySlotContents(0, craftResult);
+      if (super.listeners.size() >= 1) {
+         EntityPlayerMP player = (EntityPlayerMP)super.listeners.get(0);
+         player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, 0, craftResult));
+      }
    }
 
-   public void onContainerClosed(EntityPlayer var1) {
-      super.onContainerClosed(playerIn);
+   public void onContainerClosed(EntityPlayer entityhuman) {
+      super.onContainerClosed(entityhuman);
 
       for(int i = 0; i < 4; ++i) {
          ItemStack itemstack = this.craftMatrix.removeStackFromSlot(i);
          if (itemstack != null) {
-            playerIn.dropItem(itemstack, false);
+            entityhuman.dropItem(itemstack, false);
          }
       }
 
       this.craftResult.setInventorySlotContents(0, (ItemStack)null);
    }
 
-   public boolean canInteractWith(EntityPlayer var1) {
+   public boolean canInteractWith(EntityPlayer entityhuman) {
       return true;
    }
 
    @Nullable
-   public ItemStack transferStackInSlot(EntityPlayer var1, int var2) {
+   public ItemStack transferStackInSlot(EntityPlayer entityhuman, int i) {
       ItemStack itemstack = null;
-      Slot slot = (Slot)this.inventorySlots.get(index);
+      Slot slot = (Slot)this.inventorySlots.get(i);
       if (slot != null && slot.getHasStack()) {
          ItemStack itemstack1 = slot.getStack();
          itemstack = itemstack1.copy();
-         EntityEquipmentSlot entityequipmentslot = EntityLiving.getSlotForItemStack(itemstack);
-         if (index == 0) {
+         EntityEquipmentSlot enumitemslot = EntityLiving.getSlotForItemStack(itemstack);
+         if (i == 0) {
             if (!this.mergeItemStack(itemstack1, 9, 45, true)) {
                return null;
             }
 
             slot.onSlotChange(itemstack1, itemstack);
-         } else if (index >= 1 && index < 5) {
+         } else if (i >= 1 && i < 5) {
             if (!this.mergeItemStack(itemstack1, 9, 45, false)) {
                return null;
             }
-         } else if (index >= 5 && index < 9) {
+         } else if (i >= 5 && i < 9) {
             if (!this.mergeItemStack(itemstack1, 9, 45, false)) {
                return null;
             }
-         } else if (entityequipmentslot.getSlotType() == EntityEquipmentSlot.Type.ARMOR && !((Slot)this.inventorySlots.get(8 - entityequipmentslot.getIndex())).getHasStack()) {
-            int i = 8 - entityequipmentslot.getIndex();
-            if (!this.mergeItemStack(itemstack1, i, i + 1, false)) {
+         } else if (enumitemslot.getSlotType() == EntityEquipmentSlot.Type.ARMOR && !((Slot)this.inventorySlots.get(8 - enumitemslot.getIndex())).getHasStack()) {
+            int j = 8 - enumitemslot.getIndex();
+            if (!this.mergeItemStack(itemstack1, j, j + 1, false)) {
                return null;
             }
-         } else if (entityequipmentslot == EntityEquipmentSlot.OFFHAND && !((Slot)this.inventorySlots.get(45)).getHasStack()) {
+         } else if (enumitemslot == EntityEquipmentSlot.OFFHAND && !((Slot)this.inventorySlots.get(45)).getHasStack()) {
             if (!this.mergeItemStack(itemstack1, 45, 46, false)) {
                return null;
             }
-         } else if (index >= 9 && index < 36) {
+         } else if (i >= 9 && i < 36) {
             if (!this.mergeItemStack(itemstack1, 36, 45, false)) {
                return null;
             }
-         } else if (index >= 36 && index < 45) {
+         } else if (i >= 36 && i < 45) {
             if (!this.mergeItemStack(itemstack1, 9, 36, false)) {
                return null;
             }
@@ -145,13 +150,23 @@ public class ContainerPlayer extends Container {
             return null;
          }
 
-         slot.onPickupFromSlot(playerIn, itemstack1);
+         slot.onPickupFromSlot(entityhuman, itemstack1);
       }
 
       return itemstack;
    }
 
-   public boolean canMergeSlot(ItemStack var1, Slot var2) {
-      return slotIn.inventory != this.craftResult && super.canMergeSlot(stack, slotIn);
+   public boolean canMergeSlot(ItemStack itemstack, Slot slot) {
+      return slot.inventory != this.craftResult && super.canMergeSlot(itemstack, slot);
+   }
+
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventoryCrafting inventory = new CraftInventoryCrafting(this.craftMatrix, this.craftResult);
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
+         return this.bukkitEntity;
+      }
    }
 }

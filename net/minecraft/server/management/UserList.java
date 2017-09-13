@@ -20,11 +20,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,10 +48,10 @@ public class UserList {
       }
    };
 
-   public UserList(File var1) {
-      this.saveFile = saveFile;
+   public UserList(File file) {
+      this.saveFile = file;
       GsonBuilder gsonbuilder = (new GsonBuilder()).setPrettyPrinting();
-      gsonbuilder.registerTypeHierarchyAdapter(UserListEntry.class, new UserList.Serializer());
+      gsonbuilder.registerTypeHierarchyAdapter(UserListEntry.class, new UserList.Serializer((Object)null));
       this.gson = gsonbuilder.create();
    }
 
@@ -60,12 +59,16 @@ public class UserList {
       return this.lanServer;
    }
 
-   public void setLanServer(boolean var1) {
-      this.lanServer = state;
+   public void setLanServer(boolean flag) {
+      this.lanServer = flag;
    }
 
-   public void addEntry(UserListEntry var1) {
-      this.values.put(this.getObjectKey(entry.getValue()), entry);
+   public File getSaveFile() {
+      return this.saveFile;
+   }
+
+   public void addEntry(UserListEntry v0) {
+      this.values.put(this.getObjectKey(v0.getValue()), v0);
 
       try {
          this.writeChanges();
@@ -75,13 +78,13 @@ public class UserList {
 
    }
 
-   public UserListEntry getEntry(Object var1) {
+   public UserListEntry getEntry(Object k0) {
       this.removeExpired();
-      return (UserListEntry)this.values.get(this.getObjectKey(obj));
+      return (UserListEntry)this.values.get(this.getObjectKey(k0));
    }
 
-   public void removeEntry(Object var1) {
-      this.values.remove(this.getObjectKey(entry));
+   public void removeEntry(Object k0) {
+      this.values.remove(this.getObjectKey(k0));
 
       try {
          this.writeChanges();
@@ -91,40 +94,43 @@ public class UserList {
 
    }
 
-   @SideOnly(Side.SERVER)
-   public File getSaveFile() {
-      return this.saveFile;
-   }
-
    public String[] getKeys() {
       return (String[])this.values.keySet().toArray(new String[this.values.size()]);
    }
 
-   protected String getObjectKey(Object var1) {
-      return obj.toString();
+   public Collection getValues() {
+      return this.values.values();
    }
 
-   protected boolean hasEntry(Object var1) {
-      return this.values.containsKey(this.getObjectKey(entry));
+   public boolean isEmpty() {
+      return this.values.size() < 1;
+   }
+
+   protected String getObjectKey(Object k0) {
+      return k0.toString();
+   }
+
+   protected boolean hasEntry(Object k0) {
+      return this.values.containsKey(this.getObjectKey(k0));
    }
 
    private void removeExpired() {
-      List list = Lists.newArrayList();
+      ArrayList arraylist = Lists.newArrayList();
 
-      for(UserListEntry v : this.values.values()) {
-         if (v.hasBanExpired()) {
-            list.add(v.getValue());
+      for(UserListEntry jsonlistentry : this.values.values()) {
+         if (jsonlistentry.hasBanExpired()) {
+            arraylist.add(jsonlistentry.getValue());
          }
       }
 
-      for(Object k : list) {
-         this.values.remove(k);
+      for(Object object : arraylist) {
+         this.values.remove(object);
       }
 
    }
 
-   protected UserListEntry createEntry(JsonObject var1) {
-      return new UserListEntry((Object)null, entryData);
+   protected UserListEntry createEntry(JsonObject jsonobject) {
+      return new UserListEntry((Object)null, jsonobject);
    }
 
    protected Map getValues() {
@@ -145,13 +151,7 @@ public class UserList {
 
    }
 
-   @SideOnly(Side.SERVER)
-   public boolean isEmpty() {
-      return this.values.size() < 1;
-   }
-
-   @SideOnly(Side.SERVER)
-   public void readSavedFile() throws IOException, FileNotFoundException {
+   public void readSavedFile() throws FileNotFoundException {
       Collection collection = null;
       BufferedReader bufferedreader = null;
 
@@ -165,9 +165,9 @@ public class UserList {
       if (collection != null) {
          this.values.clear();
 
-         for(UserListEntry userlistentry : collection) {
-            if (userlistentry.getValue() != null) {
-               this.values.put(this.getObjectKey(userlistentry.getValue()), userlistentry);
+         for(UserListEntry jsonlistentry : collection) {
+            if (jsonlistentry.getValue() != null) {
+               this.values.put(this.getObjectKey(jsonlistentry.getValue()), jsonlistentry);
             }
          }
       }
@@ -178,19 +178,24 @@ public class UserList {
       private Serializer() {
       }
 
-      public JsonElement serialize(UserListEntry var1, Type var2, JsonSerializationContext var3) {
-         JsonObject jsonobject = new JsonObject();
-         p_serialize_1_.onSerialization(jsonobject);
-         return jsonobject;
+      public JsonElement serialize(UserListEntry param1, Type param2, JsonSerializationContext param3) {
+         // $FF: Couldn't be decompiled
       }
 
-      public UserListEntry deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-         if (p_deserialize_1_.isJsonObject()) {
-            JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
-            return UserList.this.createEntry(jsonobject);
-         } else {
-            return null;
-         }
+      public UserListEntry deserialize(JsonElement param1, Type param2, JsonDeserializationContext param3) throws JsonParseException {
+         // $FF: Couldn't be decompiled
+      }
+
+      public JsonElement serialize(UserListEntry param1, Type param2, JsonSerializationContext param3) {
+         // $FF: Couldn't be decompiled
+      }
+
+      public UserListEntry deserialize(JsonElement param1, Type param2, JsonDeserializationContext param3) throws JsonParseException {
+         // $FF: Couldn't be decompiled
+      }
+
+      Serializer(Object object) {
+         this();
       }
    }
 }

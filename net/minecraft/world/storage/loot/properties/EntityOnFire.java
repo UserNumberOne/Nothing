@@ -13,11 +13,11 @@ public class EntityOnFire implements EntityProperty {
    private final boolean onFire;
 
    public EntityOnFire(boolean var1) {
-      this.onFire = onFireIn;
+      this.onFire = var1;
    }
 
    public boolean testProperty(Random var1, Entity var2) {
-      return entityIn.isBurning() == this.onFire;
+      return var2.isBurning() == this.onFire;
    }
 
    public static class Serializer extends EntityProperty.Serializer {
@@ -26,11 +26,16 @@ public class EntityOnFire implements EntityProperty {
       }
 
       public JsonElement serialize(EntityOnFire var1, JsonSerializationContext var2) {
-         return new JsonPrimitive(property.onFire);
+         return new JsonPrimitive(var1.onFire);
       }
 
       public EntityOnFire deserialize(JsonElement var1, JsonDeserializationContext var2) {
-         return new EntityOnFire(JsonUtils.getBoolean(element, "on_fire"));
+         return new EntityOnFire(JsonUtils.getBoolean(var1, "on_fire"));
+      }
+
+      // $FF: synthetic method
+      public EntityProperty deserialize(JsonElement var1, JsonDeserializationContext var2) {
+         return this.deserialize(var1, var2);
       }
    }
 }

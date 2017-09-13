@@ -1,52 +1,25 @@
 package net.minecraft.world.gen.layer;
 
-import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.init.Biomes;
-import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.ChunkProviderSettings;
-import net.minecraftforge.common.BiomeManager;
-import net.minecraftforge.common.BiomeManager.BiomeEntry;
-import net.minecraftforge.common.BiomeManager.BiomeType;
 
 public class GenLayerBiome extends GenLayer {
-   private List[] biomes = new ArrayList[BiomeType.values().length];
+   private Biome[] warmBiomes = new Biome[]{Biomes.DESERT, Biomes.DESERT, Biomes.DESERT, Biomes.SAVANNA, Biomes.SAVANNA, Biomes.PLAINS};
+   private final Biome[] mediumBiomes = new Biome[]{Biomes.FOREST, Biomes.ROOFED_FOREST, Biomes.EXTREME_HILLS, Biomes.PLAINS, Biomes.BIRCH_FOREST, Biomes.SWAMPLAND};
+   private final Biome[] coldBiomes = new Biome[]{Biomes.FOREST, Biomes.EXTREME_HILLS, Biomes.TAIGA, Biomes.PLAINS};
+   private final Biome[] iceBiomes = new Biome[]{Biomes.ICE_PLAINS, Biomes.ICE_PLAINS, Biomes.ICE_PLAINS, Biomes.COLD_TAIGA};
    private final ChunkProviderSettings settings;
 
    public GenLayerBiome(long var1, GenLayer var3, WorldType var4, String var5) {
-      super(p_i45560_1_);
-      this.parent = p_i45560_3_;
-
-      for(BiomeType type : BiomeType.values()) {
-         ImmutableList biomesToAdd = BiomeManager.getBiomes(type);
-         int idx = type.ordinal();
-         if (this.biomes[idx] == null) {
-            this.biomes[idx] = new ArrayList();
-         }
-
-         if (biomesToAdd != null) {
-            this.biomes[idx].addAll(biomesToAdd);
-         }
-      }
-
-      int desertIdx = BiomeType.DESERT.ordinal();
-      this.biomes[desertIdx].add(new BiomeEntry(Biomes.DESERT, 30));
-      this.biomes[desertIdx].add(new BiomeEntry(Biomes.SAVANNA, 20));
-      this.biomes[desertIdx].add(new BiomeEntry(Biomes.PLAINS, 10));
-      if (p_i45560_4_ == WorldType.DEFAULT_1_1) {
-         this.biomes[desertIdx].clear();
-         this.biomes[desertIdx].add(new BiomeEntry(Biomes.DESERT, 10));
-         this.biomes[desertIdx].add(new BiomeEntry(Biomes.FOREST, 10));
-         this.biomes[desertIdx].add(new BiomeEntry(Biomes.EXTREME_HILLS, 10));
-         this.biomes[desertIdx].add(new BiomeEntry(Biomes.SWAMPLAND, 10));
-         this.biomes[desertIdx].add(new BiomeEntry(Biomes.PLAINS, 10));
-         this.biomes[desertIdx].add(new BiomeEntry(Biomes.TAIGA, 10));
+      super(var1);
+      this.parent = var3;
+      if (var4 == WorldType.DEFAULT_1_1) {
+         this.warmBiomes = new Biome[]{Biomes.DESERT, Biomes.FOREST, Biomes.EXTREME_HILLS, Biomes.SWAMPLAND, Biomes.PLAINS, Biomes.TAIGA};
          this.settings = null;
-      } else if (p_i45560_4_ == WorldType.CUSTOMIZED) {
-         this.settings = ChunkProviderSettings.Factory.jsonToFactory(p_i45560_5_).build();
+      } else if (var4 == WorldType.CUSTOMIZED) {
+         this.settings = ChunkProviderSettings.Factory.jsonToFactory(var5).build();
       } else {
          this.settings = null;
       }
@@ -54,58 +27,51 @@ public class GenLayerBiome extends GenLayer {
    }
 
    public int[] getInts(int var1, int var2, int var3, int var4) {
-      int[] aint = this.parent.getInts(areaX, areaY, areaWidth, areaHeight);
-      int[] aint1 = IntCache.getIntCache(areaWidth * areaHeight);
+      int[] var5 = this.parent.getInts(var1, var2, var3, var4);
+      int[] var6 = IntCache.getIntCache(var3 * var4);
 
-      for(int i = 0; i < areaHeight; ++i) {
-         for(int j = 0; j < areaWidth; ++j) {
-            this.initChunkSeed((long)(j + areaX), (long)(i + areaY));
-            int k = aint[j + i * areaWidth];
-            int l = (k & 3840) >> 8;
-            k = k & -3841;
+      for(int var7 = 0; var7 < var4; ++var7) {
+         for(int var8 = 0; var8 < var3; ++var8) {
+            this.initChunkSeed((long)(var8 + var1), (long)(var7 + var2));
+            int var9 = var5[var8 + var7 * var3];
+            int var10 = (var9 & 3840) >> 8;
+            var9 = var9 & -3841;
             if (this.settings != null && this.settings.fixedBiome >= 0) {
-               aint1[j + i * areaWidth] = this.settings.fixedBiome;
-            } else if (isBiomeOceanic(k)) {
-               aint1[j + i * areaWidth] = k;
-            } else if (k == Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND)) {
-               aint1[j + i * areaWidth] = k;
-            } else if (k == 1) {
-               if (l > 0) {
+               var6[var8 + var7 * var3] = this.settings.fixedBiome;
+            } else if (isBiomeOceanic(var9)) {
+               var6[var8 + var7 * var3] = var9;
+            } else if (var9 == Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND)) {
+               var6[var8 + var7 * var3] = var9;
+            } else if (var9 == 1) {
+               if (var10 > 0) {
                   if (this.nextInt(3) == 0) {
-                     aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.MESA_CLEAR_ROCK);
+                     var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.MESA_CLEAR_ROCK);
                   } else {
-                     aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.MESA_ROCK);
+                     var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.MESA_ROCK);
                   }
                } else {
-                  aint1[j + i * areaWidth] = Biome.getIdForBiome(this.getWeightedBiomeEntry(BiomeType.DESERT).biome);
+                  var6[var8 + var7 * var3] = Biome.getIdForBiome(this.warmBiomes[this.nextInt(this.warmBiomes.length)]);
                }
-            } else if (k == 2) {
-               if (l > 0) {
-                  aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.JUNGLE);
+            } else if (var9 == 2) {
+               if (var10 > 0) {
+                  var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.JUNGLE);
                } else {
-                  aint1[j + i * areaWidth] = Biome.getIdForBiome(this.getWeightedBiomeEntry(BiomeType.WARM).biome);
+                  var6[var8 + var7 * var3] = Biome.getIdForBiome(this.mediumBiomes[this.nextInt(this.mediumBiomes.length)]);
                }
-            } else if (k == 3) {
-               if (l > 0) {
-                  aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.REDWOOD_TAIGA);
+            } else if (var9 == 3) {
+               if (var10 > 0) {
+                  var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.REDWOOD_TAIGA);
                } else {
-                  aint1[j + i * areaWidth] = Biome.getIdForBiome(this.getWeightedBiomeEntry(BiomeType.COOL).biome);
+                  var6[var8 + var7 * var3] = Biome.getIdForBiome(this.coldBiomes[this.nextInt(this.coldBiomes.length)]);
                }
-            } else if (k == 4) {
-               aint1[j + i * areaWidth] = Biome.getIdForBiome(this.getWeightedBiomeEntry(BiomeType.ICY).biome);
+            } else if (var9 == 4) {
+               var6[var8 + var7 * var3] = Biome.getIdForBiome(this.iceBiomes[this.nextInt(this.iceBiomes.length)]);
             } else {
-               aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND);
+               var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND);
             }
          }
       }
 
-      return aint1;
-   }
-
-   protected BiomeEntry getWeightedBiomeEntry(BiomeType var1) {
-      List biomeList = this.biomes[type.ordinal()];
-      int totalWeight = WeightedRandom.getTotalWeight(biomeList);
-      int weight = BiomeManager.isTypeListModded(type) ? this.nextInt(totalWeight) : this.nextInt(totalWeight / 10) * 10;
-      return (BiomeEntry)WeightedRandom.getRandomItem(biomeList, weight);
+      return var6;
    }
 }

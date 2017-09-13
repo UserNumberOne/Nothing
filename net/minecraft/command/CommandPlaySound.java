@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketCustomSound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -25,79 +25,87 @@ public class CommandPlaySound extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length < 2) {
-         throw new WrongUsageException(this.getUsage(sender), new Object[0]);
+      if (var3.length < 2) {
+         throw new WrongUsageException(this.getUsage(var2), new Object[0]);
       } else {
-         int i = 0;
-         String s = args[i++];
-         String s1 = args[i++];
-         SoundCategory soundcategory = SoundCategory.getByName(s1);
-         if (soundcategory == null) {
-            throw new CommandException("commands.playsound.unknownSoundSource", new Object[]{s1});
+         int var4 = 0;
+         String var5 = var3[var4++];
+         String var6 = var3[var4++];
+         SoundCategory var7 = SoundCategory.getByName(var6);
+         if (var7 == null) {
+            throw new CommandException("commands.playsound.unknownSoundSource", new Object[]{var6});
          } else {
-            EntityPlayerMP entityplayermp = getPlayer(server, sender, args[i++]);
-            Vec3d vec3d = sender.getPositionVector();
-            double d0 = vec3d.xCoord;
-            if (args.length > i) {
-               d0 = parseDouble(d0, args[i++], true);
+            EntityPlayerMP var8 = a(var1, var2, var3[var4++]);
+            Vec3d var9 = var2.getPositionVector();
+            double var10 = var9.xCoord;
+            if (var3.length > var4) {
+               var10 = parseDouble(var10, var3[var4++], true);
             }
 
-            double d1 = vec3d.yCoord;
-            if (args.length > i) {
-               d1 = parseDouble(d1, args[i++], 0, 0, false);
+            double var12 = var9.yCoord;
+            if (var3.length > var4) {
+               var12 = parseDouble(var12, var3[var4++], 0, 0, false);
             }
 
-            double d2 = vec3d.zCoord;
-            if (args.length > i) {
-               d2 = parseDouble(d2, args[i++], true);
+            double var14 = var9.zCoord;
+            if (var3.length > var4) {
+               var14 = parseDouble(var14, var3[var4++], true);
             }
 
-            double d3 = 1.0D;
-            if (args.length > i) {
-               d3 = parseDouble(args[i++], 0.0D, 3.4028234663852886E38D);
+            double var16 = 1.0D;
+            if (var3.length > var4) {
+               var16 = parseDouble(var3[var4++], 0.0D, 3.4028234663852886E38D);
             }
 
-            double d4 = 1.0D;
-            if (args.length > i) {
-               d4 = parseDouble(args[i++], 0.0D, 2.0D);
+            double var18 = 1.0D;
+            if (var3.length > var4) {
+               var18 = parseDouble(var3[var4++], 0.0D, 2.0D);
             }
 
-            double d5 = 0.0D;
-            if (args.length > i) {
-               d5 = parseDouble(args[i], 0.0D, 1.0D);
+            double var20 = 0.0D;
+            if (var3.length > var4) {
+               var20 = parseDouble(var3[var4], 0.0D, 1.0D);
             }
 
-            double d6 = d3 > 1.0D ? d3 * 16.0D : 16.0D;
-            double d7 = entityplayermp.getDistance(d0, d1, d2);
-            if (d7 > d6) {
-               if (d5 <= 0.0D) {
-                  throw new CommandException("commands.playsound.playerTooFar", new Object[]{entityplayermp.getName()});
+            double var22 = var16 > 1.0D ? var16 * 16.0D : 16.0D;
+            double var24 = var8.getDistance(var10, var12, var14);
+            if (var24 > var22) {
+               if (var20 <= 0.0D) {
+                  throw new CommandException("commands.playsound.playerTooFar", new Object[]{var8.getName()});
                }
 
-               double d8 = d0 - entityplayermp.posX;
-               double d9 = d1 - entityplayermp.posY;
-               double d10 = d2 - entityplayermp.posZ;
-               double d11 = Math.sqrt(d8 * d8 + d9 * d9 + d10 * d10);
-               if (d11 > 0.0D) {
-                  d0 = entityplayermp.posX + d8 / d11 * 2.0D;
-                  d1 = entityplayermp.posY + d9 / d11 * 2.0D;
-                  d2 = entityplayermp.posZ + d10 / d11 * 2.0D;
+               double var26 = var10 - var8.posX;
+               double var28 = var12 - var8.posY;
+               double var30 = var14 - var8.posZ;
+               double var32 = Math.sqrt(var26 * var26 + var28 * var28 + var30 * var30);
+               if (var32 > 0.0D) {
+                  var10 = var8.posX + var26 / var32 * 2.0D;
+                  var12 = var8.posY + var28 / var32 * 2.0D;
+                  var14 = var8.posZ + var30 / var32 * 2.0D;
                }
 
-               d3 = d5;
+               var16 = var20;
             }
 
-            entityplayermp.connection.sendPacket(new SPacketCustomSound(s, soundcategory, d0, d1, d2, (float)d3, (float)d4));
-            notifyCommandListener(sender, this, "commands.playsound.success", new Object[]{s, entityplayermp.getName()});
+            var8.connection.sendPacket(new SPacketCustomSound(var5, var7, var10, var12, var14, (float)var16, (float)var18));
+            notifyCommandListener(var2, this, "commands.playsound.success", new Object[]{var5, var8.getName()});
          }
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return args.length == 1 ? getListOfStringsMatchingLastWord(args, SoundEvent.REGISTRY.getKeys()) : (args.length == 2 ? getListOfStringsMatchingLastWord(args, SoundCategory.getSoundCategoryNames()) : (args.length == 3 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : (args.length > 3 && args.length <= 6 ? getTabCompletionCoordinate(args, 3, pos) : Collections.emptyList())));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, SoundEvent.REGISTRY.getKeys());
+      } else if (var3.length == 2) {
+         return getListOfStringsMatchingLastWord(var3, SoundCategory.getSoundCategoryNames());
+      } else if (var3.length == 3) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else {
+         return var3.length > 3 && var3.length <= 6 ? getTabCompletionCoordinate(var3, 3, var4) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return index == 2;
+      return var2 == 2;
    }
 }

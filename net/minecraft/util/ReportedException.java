@@ -6,7 +6,7 @@ public class ReportedException extends RuntimeException {
    private final CrashReport crashReport;
 
    public ReportedException(CrashReport var1) {
-      this.crashReport = report;
+      this.crashReport = var1;
    }
 
    public CrashReport getCrashReport() {

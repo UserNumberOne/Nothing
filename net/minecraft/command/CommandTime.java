@@ -3,7 +3,7 @@ package net.minecraft.command;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 
@@ -21,48 +21,48 @@ public class CommandTime extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length > 1) {
-         if ("set".equals(args[0])) {
-            int i1;
-            if ("day".equals(args[1])) {
-               i1 = 1000;
-            } else if ("night".equals(args[1])) {
-               i1 = 13000;
+      if (var3.length > 1) {
+         if ("set".equals(var3[0])) {
+            int var8;
+            if ("day".equals(var3[1])) {
+               var8 = 1000;
+            } else if ("night".equals(var3[1])) {
+               var8 = 13000;
             } else {
-               i1 = parseInt(args[1], 0);
+               var8 = parseInt(var3[1], 0);
             }
 
-            this.setAllWorldTimes(server, i1);
-            notifyCommandListener(sender, this, "commands.time.set", new Object[]{i1});
+            this.a(var1, var8);
+            notifyCommandListener(var2, this, "commands.time.set", new Object[]{var8});
             return;
          }
 
-         if ("add".equals(args[0])) {
-            int l = parseInt(args[1], 0);
-            this.incrementAllWorldTimes(server, l);
-            notifyCommandListener(sender, this, "commands.time.added", new Object[]{l});
+         if ("add".equals(var3[0])) {
+            int var7 = parseInt(var3[1], 0);
+            this.b(var1, var7);
+            notifyCommandListener(var2, this, "commands.time.added", new Object[]{var7});
             return;
          }
 
-         if ("query".equals(args[0])) {
-            if ("daytime".equals(args[1])) {
-               int k = (int)(sender.getEntityWorld().getWorldTime() % 24000L);
-               sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, k);
-               notifyCommandListener(sender, this, "commands.time.query", new Object[]{k});
+         if ("query".equals(var3[0])) {
+            if ("daytime".equals(var3[1])) {
+               int var6 = (int)(var2.getEntityWorld().getWorldTime() % 24000L);
+               var2.setCommandStat(CommandResultStats.Type.QUERY_RESULT, var6);
+               notifyCommandListener(var2, this, "commands.time.query", new Object[]{var6});
                return;
             }
 
-            if ("day".equals(args[1])) {
-               int j = (int)(sender.getEntityWorld().getWorldTime() / 24000L % 2147483647L);
-               sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, j);
-               notifyCommandListener(sender, this, "commands.time.query", new Object[]{j});
+            if ("day".equals(var3[1])) {
+               int var5 = (int)(var2.getEntityWorld().getWorldTime() / 24000L % 2147483647L);
+               var2.setCommandStat(CommandResultStats.Type.QUERY_RESULT, var5);
+               notifyCommandListener(var2, this, "commands.time.query", new Object[]{var5});
                return;
             }
 
-            if ("gametime".equals(args[1])) {
-               int i = (int)(sender.getEntityWorld().getTotalWorldTime() % 2147483647L);
-               sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, i);
-               notifyCommandListener(sender, this, "commands.time.query", new Object[]{i});
+            if ("gametime".equals(var3[1])) {
+               int var4 = (int)(var2.getEntityWorld().getTotalWorldTime() % 2147483647L);
+               var2.setCommandStat(CommandResultStats.Type.QUERY_RESULT, var4);
+               notifyCommandListener(var2, this, "commands.time.query", new Object[]{var4});
                return;
             }
          }
@@ -71,21 +71,27 @@ public class CommandTime extends CommandBase {
       throw new WrongUsageException("commands.time.usage", new Object[0]);
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[]{"set", "add", "query"}) : (args.length == 2 && "set".equals(args[0]) ? getListOfStringsMatchingLastWord(args, new String[]{"day", "night"}) : (args.length == 2 && "query".equals(args[0]) ? getListOfStringsMatchingLastWord(args, new String[]{"daytime", "gametime", "day"}) : Collections.emptyList()));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"set", "add", "query"});
+      } else if (var3.length == 2 && "set".equals(var3[0])) {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"day", "night"});
+      } else {
+         return var3.length == 2 && "query".equals(var3[0]) ? getListOfStringsMatchingLastWord(var3, new String[]{"daytime", "gametime", "day"}) : Collections.emptyList();
+      }
    }
 
-   protected void setAllWorldTimes(MinecraftServer var1, int var2) {
-      for(int i = 0; i < server.worlds.length; ++i) {
-         server.worlds[i].setWorldTime((long)time);
+   protected void a(MinecraftServer var1, int var2) {
+      for(int var3 = 0; var3 < var1.worldServer.length; ++var3) {
+         var1.worldServer[var3].setWorldTime((long)var2);
       }
 
    }
 
-   protected void incrementAllWorldTimes(MinecraftServer var1, int var2) {
-      for(int i = 0; i < server.worlds.length; ++i) {
-         WorldServer worldserver = server.worlds[i];
-         worldserver.setWorldTime(worldserver.getWorldTime() + (long)amount);
+   protected void b(MinecraftServer var1, int var2) {
+      for(int var3 = 0; var3 < var1.worldServer.length; ++var3) {
+         WorldServer var4 = var1.worldServer[var3];
+         var4.setWorldTime(var4.getWorldTime() + (long)var2);
       }
 
    }

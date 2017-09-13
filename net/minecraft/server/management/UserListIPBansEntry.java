@@ -5,26 +5,25 @@ import java.util.Date;
 
 public class UserListIPBansEntry extends UserListEntryBan {
    public UserListIPBansEntry(String var1) {
-      this(valueIn, (Date)null, (String)null, (Date)null, (String)null);
+      this(var1, (Date)null, (String)null, (Date)null, (String)null);
    }
 
    public UserListIPBansEntry(String var1, Date var2, String var3, Date var4, String var5) {
-      super(valueIn, startDate, banner, endDate, banReason);
+      super(var1, var2, var3, var4, var5);
    }
 
    public UserListIPBansEntry(JsonObject var1) {
-      super(getIPFromJson(json), json);
+      super(getIPFromJson(var1), var1);
    }
 
    private static String getIPFromJson(JsonObject var0) {
-      return json.has("ip") ? json.get("ip").getAsString() : null;
+      return var0.has("ip") ? var0.get("ip").getAsString() : null;
    }
 
    protected void onSerialization(JsonObject var1) {
       if (this.getValue() != null) {
-         data.addProperty("ip", (String)this.getValue());
-         super.onSerialization(data);
+         var1.addProperty("ip", (String)this.getValue());
+         super.onSerialization(var1);
       }
-
    }
 }

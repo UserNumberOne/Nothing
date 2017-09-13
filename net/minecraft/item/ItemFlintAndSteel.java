@@ -1,5 +1,6 @@
 package net.minecraft.item;
 
+import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -10,6 +11,8 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 
 public class ItemFlintAndSteel extends Item {
    public ItemFlintAndSteel() {
@@ -18,17 +21,22 @@ public class ItemFlintAndSteel extends Item {
       this.setCreativeTab(CreativeTabs.TOOLS);
    }
 
-   public EnumActionResult onItemUse(ItemStack var1, EntityPlayer var2, World var3, BlockPos var4, EnumHand var5, EnumFacing var6, float var7, float var8, float var9) {
-      pos = pos.offset(facing);
-      if (!playerIn.canPlayerEdit(pos, facing, stack)) {
+   public EnumActionResult onItemUse(ItemStack itemstack, EntityPlayer entityhuman, World world, BlockPos blockposition, EnumHand enumhand, EnumFacing enumdirection, float f, float f1, float f2) {
+      blockposition = blockposition.offset(enumdirection);
+      if (!entityhuman.canPlayerEdit(blockposition, enumdirection, itemstack)) {
          return EnumActionResult.FAIL;
       } else {
-         if (worldIn.isAirBlock(pos)) {
-            worldIn.playSound(playerIn, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
-            worldIn.setBlockState(pos, Blocks.FIRE.getDefaultState(), 11);
+         if (world.getBlockState(blockposition).getMaterial() == Material.AIR) {
+            if (CraftEventFactory.callBlockIgniteEvent(world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), IgniteCause.FLINT_AND_STEEL, entityhuman).isCancelled()) {
+               itemstack.damageItem(1, entityhuman);
+               return EnumActionResult.PASS;
+            }
+
+            world.playSound(entityhuman, blockposition, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
+            world.setBlockState(blockposition, Blocks.FIRE.getDefaultState(), 11);
          }
 
-         stack.damageItem(1, playerIn);
+         itemstack.damageItem(1, entityhuman);
          return EnumActionResult.SUCCESS;
       }
    }

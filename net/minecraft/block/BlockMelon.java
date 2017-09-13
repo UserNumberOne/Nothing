@@ -21,10 +21,10 @@ public class BlockMelon extends Block {
    }
 
    public int quantityDropped(Random var1) {
-      return 3 + random.nextInt(5);
+      return 3 + var1.nextInt(5);
    }
 
    public int quantityDroppedWithBonus(int var1, Random var2) {
-      return Math.min(9, this.quantityDropped(random) + random.nextInt(1 + fortune));
+      return Math.min(9, this.quantityDropped(var2) + var2.nextInt(1 + var1));
    }
 }

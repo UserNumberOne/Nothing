@@ -7,16 +7,16 @@ import net.minecraft.item.ItemStack;
 
 public class EnchantmentDurability extends Enchantment {
    protected EnchantmentDurability(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
-      super(rarityIn, EnumEnchantmentType.BREAKABLE, slots);
+      super(var1, EnumEnchantmentType.BREAKABLE, var2);
       this.setName("durability");
    }
 
    public int getMinEnchantability(int var1) {
-      return 5 + (enchantmentLevel - 1) * 8;
+      return 5 + (var1 - 1) * 8;
    }
 
    public int getMaxEnchantability(int var1) {
-      return super.getMinEnchantability(enchantmentLevel) + 50;
+      return super.getMinEnchantability(var1) + 50;
    }
 
    public int getMaxLevel() {
@@ -24,10 +24,14 @@ public class EnchantmentDurability extends Enchantment {
    }
 
    public boolean canApply(ItemStack var1) {
-      return stack.isItemStackDamageable() ? true : super.canApply(stack);
+      return var1.isItemStackDamageable() ? true : super.canApply(var1);
    }
 
    public static boolean negateDamage(ItemStack var0, int var1, Random var2) {
-      return p_92097_0_.getItem() instanceof ItemArmor && p_92097_2_.nextFloat() < 0.6F ? false : p_92097_2_.nextInt(p_92097_1_ + 1) > 0;
+      if (var0.getItem() instanceof ItemArmor && var2.nextFloat() < 0.6F) {
+         return false;
+      } else {
+         return var2.nextInt(var1 + 1) > 0;
+      }
    }
 }

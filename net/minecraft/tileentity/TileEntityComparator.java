@@ -6,14 +6,14 @@ public class TileEntityComparator extends TileEntity {
    private int outputSignal;
 
    public NBTTagCompound writeToNBT(NBTTagCompound var1) {
-      super.writeToNBT(compound);
-      compound.setInteger("OutputSignal", this.outputSignal);
-      return compound;
+      super.writeToNBT(var1);
+      var1.setInteger("OutputSignal", this.outputSignal);
+      return var1;
    }
 
    public void readFromNBT(NBTTagCompound var1) {
-      super.readFromNBT(compound);
-      this.outputSignal = compound.getInteger("OutputSignal");
+      super.readFromNBT(var1);
+      this.outputSignal = var1.getInteger("OutputSignal");
    }
 
    public int getOutputSignal() {
@@ -21,6 +21,6 @@ public class TileEntityComparator extends TileEntity {
    }
 
    public void setOutputSignal(int var1) {
-      this.outputSignal = outputSignalIn;
+      this.outputSignal = var1;
    }
 }

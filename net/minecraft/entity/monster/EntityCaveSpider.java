@@ -17,12 +17,12 @@ import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityCaveSpider extends EntitySpider {
    public EntityCaveSpider(World var1) {
-      super(worldIn);
+      super(var1);
       this.setSize(0.7F, 0.5F);
    }
 
    public static void registerFixesCaveSpider(DataFixer var0) {
-      EntityLiving.registerFixesMob(fixer, "CaveSpider");
+      EntityLiving.registerFixesMob(var0, "CaveSpider");
    }
 
    protected void applyEntityAttributes() {
@@ -31,17 +31,17 @@ public class EntityCaveSpider extends EntitySpider {
    }
 
    public boolean attackEntityAsMob(Entity var1) {
-      if (super.attackEntityAsMob(entityIn)) {
-         if (entityIn instanceof EntityLivingBase) {
-            int i = 0;
+      if (super.attackEntityAsMob(var1)) {
+         if (var1 instanceof EntityLivingBase) {
+            byte var2 = 0;
             if (this.world.getDifficulty() == EnumDifficulty.NORMAL) {
-               i = 7;
+               var2 = 7;
             } else if (this.world.getDifficulty() == EnumDifficulty.HARD) {
-               i = 15;
+               var2 = 15;
             }
 
-            if (i > 0) {
-               ((EntityLivingBase)entityIn).addPotionEffect(new PotionEffect(MobEffects.POISON, i * 20, 0));
+            if (var2 > 0) {
+               ((EntityLivingBase)var1).addPotionEffect(new PotionEffect(MobEffects.POISON, var2 * 20, 0));
             }
          }
 
@@ -53,7 +53,7 @@ public class EntityCaveSpider extends EntitySpider {
 
    @Nullable
    public IEntityLivingData onInitialSpawn(DifficultyInstance var1, @Nullable IEntityLivingData var2) {
-      return livingdata;
+      return var2;
    }
 
    public float getEyeHeight() {

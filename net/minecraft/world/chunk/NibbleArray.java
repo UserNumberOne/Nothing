@@ -8,45 +8,45 @@ public class NibbleArray {
    }
 
    public NibbleArray(byte[] var1) {
-      this.data = storageArray;
-      if (storageArray.length != 2048) {
-         throw new IllegalArgumentException("ChunkNibbleArrays should be 2048 bytes not: " + storageArray.length);
+      this.data = var1;
+      if (var1.length != 2048) {
+         throw new IllegalArgumentException("ChunkNibbleArrays should be 2048 bytes not: " + var1.length);
       }
    }
 
    public int get(int var1, int var2, int var3) {
-      return this.getFromIndex(this.getCoordinateIndex(x, y, z));
+      return this.getFromIndex(this.getCoordinateIndex(var1, var2, var3));
    }
 
    public void set(int var1, int var2, int var3, int var4) {
-      this.setIndex(this.getCoordinateIndex(x, y, z), value);
+      this.setIndex(this.getCoordinateIndex(var1, var2, var3), var4);
    }
 
    private int getCoordinateIndex(int var1, int var2, int var3) {
-      return y << 8 | z << 4 | x;
+      return var2 << 8 | var3 << 4 | var1;
    }
 
    public int getFromIndex(int var1) {
-      int i = this.getNibbleIndex(index);
-      return this.isLowerNibble(index) ? this.data[i] & 15 : this.data[i] >> 4 & 15;
+      int var2 = this.getNibbleIndex(var1);
+      return this.isLowerNibble(var1) ? this.data[var2] & 15 : this.data[var2] >> 4 & 15;
    }
 
    public void setIndex(int var1, int var2) {
-      int i = this.getNibbleIndex(index);
-      if (this.isLowerNibble(index)) {
-         this.data[i] = (byte)(this.data[i] & 240 | value & 15);
+      int var3 = this.getNibbleIndex(var1);
+      if (this.isLowerNibble(var1)) {
+         this.data[var3] = (byte)(this.data[var3] & 240 | var2 & 15);
       } else {
-         this.data[i] = (byte)(this.data[i] & 15 | (value & 15) << 4);
+         this.data[var3] = (byte)(this.data[var3] & 15 | (var2 & 15) << 4);
       }
 
    }
 
    private boolean isLowerNibble(int var1) {
-      return (index & 1) == 0;
+      return (var1 & 1) == 0;
    }
 
    private int getNibbleIndex(int var1) {
-      return index >> 1;
+      return var1 >> 1;
    }
 
    public byte[] getData() {

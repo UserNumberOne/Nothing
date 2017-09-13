@@ -15,8 +15,8 @@ public enum SkeletonType {
    private final ResourceLocation lootTable;
 
    private SkeletonType(String var3, ResourceLocation var4) {
-      this.name = new TextComponentTranslation("entity." + p_i47153_3_ + ".name", new Object[0]);
-      this.lootTable = lootTableIn;
+      this.name = new TextComponentTranslation("entity." + var3 + ".name", new Object[0]);
+      this.lootTable = var4;
    }
 
    public int getId() {
@@ -24,7 +24,7 @@ public enum SkeletonType {
    }
 
    public static SkeletonType getByOrdinal(int var0) {
-      return values()[ordinal];
+      return values()[var0];
    }
 
    public ResourceLocation getLootTable() {

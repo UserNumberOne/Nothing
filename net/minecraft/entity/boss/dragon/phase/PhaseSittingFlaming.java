@@ -15,28 +15,28 @@ public class PhaseSittingFlaming extends PhaseSittingBase {
    private EntityAreaEffectCloud areaEffectCloud;
 
    public PhaseSittingFlaming(EntityDragon var1) {
-      super(dragonIn);
+      super(var1);
    }
 
    public void doClientRenderEffects() {
       ++this.flameTicks;
       if (this.flameTicks % 2 == 0 && this.flameTicks < 10) {
-         Vec3d vec3d = this.dragon.getHeadLookVec(1.0F).normalize();
-         vec3d.rotateYaw(-0.7853982F);
-         double d0 = this.dragon.dragonPartHead.posX;
-         double d1 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F);
-         double d2 = this.dragon.dragonPartHead.posZ;
+         Vec3d var1 = this.dragon.getHeadLookVec(1.0F).normalize();
+         var1.rotateYaw(-0.7853982F);
+         double var2 = this.dragon.dragonPartHead.posX;
+         double var4 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F);
+         double var6 = this.dragon.dragonPartHead.posZ;
 
-         for(int i = 0; i < 8; ++i) {
-            double d3 = d0 + this.dragon.getRNG().nextGaussian() / 2.0D;
-            double d4 = d1 + this.dragon.getRNG().nextGaussian() / 2.0D;
-            double d5 = d2 + this.dragon.getRNG().nextGaussian() / 2.0D;
+         for(int var8 = 0; var8 < 8; ++var8) {
+            double var9 = var2 + this.dragon.getRNG().nextGaussian() / 2.0D;
+            double var11 = var4 + this.dragon.getRNG().nextGaussian() / 2.0D;
+            double var13 = var6 + this.dragon.getRNG().nextGaussian() / 2.0D;
 
-            for(int j = 0; j < 6; ++j) {
-               this.dragon.world.spawnParticle(EnumParticleTypes.DRAGON_BREATH, d3, d4, d5, -vec3d.xCoord * 0.07999999821186066D * (double)j, -vec3d.yCoord * 0.6000000238418579D, -vec3d.zCoord * 0.07999999821186066D * (double)j);
+            for(int var15 = 0; var15 < 6; ++var15) {
+               this.dragon.world.spawnParticle(EnumParticleTypes.DRAGON_BREATH, var9, var11, var13, -var1.xCoord * 0.07999999821186066D * (double)var15, -var1.yCoord * 0.6000000238418579D, -var1.zCoord * 0.07999999821186066D * (double)var15);
             }
 
-            vec3d.rotateYaw(0.19634955F);
+            var1.rotateYaw(0.19634955F);
          }
       }
 
@@ -51,20 +51,20 @@ public class PhaseSittingFlaming extends PhaseSittingBase {
             this.dragon.getPhaseManager().setPhase(PhaseList.SITTING_SCANNING);
          }
       } else if (this.flameTicks == 10) {
-         Vec3d vec3d = (new Vec3d(this.dragon.dragonPartHead.posX - this.dragon.posX, 0.0D, this.dragon.dragonPartHead.posZ - this.dragon.posZ)).normalize();
-         float f = 5.0F;
-         double d0 = this.dragon.dragonPartHead.posX + vec3d.xCoord * 5.0D / 2.0D;
-         double d1 = this.dragon.dragonPartHead.posZ + vec3d.zCoord * 5.0D / 2.0D;
-         double d2 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F);
-         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(MathHelper.floor(d0), MathHelper.floor(d2), MathHelper.floor(d1));
+         Vec3d var1 = (new Vec3d(this.dragon.dragonPartHead.posX - this.dragon.posX, 0.0D, this.dragon.dragonPartHead.posZ - this.dragon.posZ)).normalize();
+         float var2 = 5.0F;
+         double var3 = this.dragon.dragonPartHead.posX + var1.xCoord * 5.0D / 2.0D;
+         double var5 = this.dragon.dragonPartHead.posZ + var1.zCoord * 5.0D / 2.0D;
+         double var7 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F);
+         BlockPos.MutableBlockPos var9 = new BlockPos.MutableBlockPos(MathHelper.floor(var3), MathHelper.floor(var7), MathHelper.floor(var5));
 
-         while(this.dragon.world.isAirBlock(blockpos$mutableblockpos) && d2 >= 0.0D) {
-            --d2;
-            blockpos$mutableblockpos.setPos(MathHelper.floor(d0), MathHelper.floor(d2), MathHelper.floor(d1));
+         while(this.dragon.world.isAirBlock(var9)) {
+            --var7;
+            var9.setPos(MathHelper.floor(var3), MathHelper.floor(var7), MathHelper.floor(var5));
          }
 
-         d2 = (double)(MathHelper.floor(d2) + 1);
-         this.areaEffectCloud = new EntityAreaEffectCloud(this.dragon.world, d0, d2, d1);
+         var7 = (double)(MathHelper.floor(var7) + 1);
+         this.areaEffectCloud = new EntityAreaEffectCloud(this.dragon.world, var3, var7, var5);
          this.areaEffectCloud.setOwner(this.dragon);
          this.areaEffectCloud.setRadius(5.0F);
          this.areaEffectCloud.setDuration(200);

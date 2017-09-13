@@ -6,9 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.Vec4b;
-import net.minecraft.world.storage.MapData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketMaps implements Packet {
    private int mapId;
@@ -25,92 +22,68 @@ public class SPacketMaps implements Packet {
    }
 
    public SPacketMaps(int var1, byte var2, boolean var3, Collection var4, byte[] var5, int var6, int var7, int var8, int var9) {
-      this.mapId = mapIdIn;
-      this.mapScale = mapScaleIn;
-      this.trackingPosition = trackingPositionIn;
-      this.icons = (Vec4b[])iconsIn.toArray(new Vec4b[iconsIn.size()]);
-      this.minX = minXIn;
-      this.minZ = minZIn;
-      this.columns = columnsIn;
-      this.rows = rowsIn;
-      this.mapDataBytes = new byte[columnsIn * rowsIn];
+      this.mapId = var1;
+      this.mapScale = var2;
+      this.trackingPosition = var3;
+      this.icons = (Vec4b[])var4.toArray(new Vec4b[var4.size()]);
+      this.minX = var6;
+      this.minZ = var7;
+      this.columns = var8;
+      this.rows = var9;
+      this.mapDataBytes = new byte[var8 * var9];
 
-      for(int i = 0; i < columnsIn; ++i) {
-         for(int j = 0; j < rowsIn; ++j) {
-            this.mapDataBytes[i + j * columnsIn] = p_i46937_5_[minXIn + i + (minZIn + j) * 128];
+      for(int var10 = 0; var10 < var8; ++var10) {
+         for(int var11 = 0; var11 < var9; ++var11) {
+            this.mapDataBytes[var10 + var11 * var8] = var5[var6 + var10 + (var7 + var11) * 128];
          }
       }
 
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.mapId = buf.readVarInt();
-      this.mapScale = buf.readByte();
-      this.trackingPosition = buf.readBoolean();
-      this.icons = new Vec4b[buf.readVarInt()];
+      this.mapId = var1.readVarInt();
+      this.mapScale = var1.readByte();
+      this.trackingPosition = var1.readBoolean();
+      this.icons = new Vec4b[var1.readVarInt()];
 
-      for(int i = 0; i < this.icons.length; ++i) {
-         short short1 = (short)buf.readByte();
-         this.icons[i] = new Vec4b((byte)(short1 >> 4 & 15), buf.readByte(), buf.readByte(), (byte)(short1 & 15));
+      for(int var2 = 0; var2 < this.icons.length; ++var2) {
+         short var3 = (short)var1.readByte();
+         this.icons[var2] = new Vec4b((byte)(var3 >> 4 & 15), var1.readByte(), var1.readByte(), (byte)(var3 & 15));
       }
 
-      this.columns = buf.readUnsignedByte();
+      this.columns = var1.readUnsignedByte();
       if (this.columns > 0) {
-         this.rows = buf.readUnsignedByte();
-         this.minX = buf.readUnsignedByte();
-         this.minZ = buf.readUnsignedByte();
-         this.mapDataBytes = buf.readByteArray();
+         this.rows = var1.readUnsignedByte();
+         this.minX = var1.readUnsignedByte();
+         this.minZ = var1.readUnsignedByte();
+         this.mapDataBytes = var1.readByteArray();
       }
 
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeVarInt(this.mapId);
-      buf.writeByte(this.mapScale);
-      buf.writeBoolean(this.trackingPosition);
-      buf.writeVarInt(this.icons.length);
+      var1.writeVarInt(this.mapId);
+      var1.writeByte(this.mapScale);
+      var1.writeBoolean(this.trackingPosition);
+      var1.writeVarInt(this.icons.length);
 
-      for(Vec4b vec4b : this.icons) {
-         buf.writeByte((vec4b.getType() & 15) << 4 | vec4b.getRotation() & 15);
-         buf.writeByte(vec4b.getX());
-         buf.writeByte(vec4b.getY());
+      for(Vec4b var5 : this.icons) {
+         var1.writeByte((var5.getType() & 15) << 4 | var5.getRotation() & 15);
+         var1.writeByte(var5.getX());
+         var1.writeByte(var5.getY());
       }
 
-      buf.writeByte(this.columns);
+      var1.writeByte(this.columns);
       if (this.columns > 0) {
-         buf.writeByte(this.rows);
-         buf.writeByte(this.minX);
-         buf.writeByte(this.minZ);
-         buf.writeByteArray(this.mapDataBytes);
+         var1.writeByte(this.rows);
+         var1.writeByte(this.minX);
+         var1.writeByte(this.minZ);
+         var1.writeByteArray(this.mapDataBytes);
       }
 
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      handler.handleMaps(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getMapId() {
-      return this.mapId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setMapdataTo(MapData var1) {
-      mapdataIn.scale = this.mapScale;
-      mapdataIn.trackingPosition = this.trackingPosition;
-      mapdataIn.mapDecorations.clear();
-
-      for(int i = 0; i < this.icons.length; ++i) {
-         Vec4b vec4b = this.icons[i];
-         mapdataIn.mapDecorations.put("icon-" + i, vec4b);
-      }
-
-      for(int j = 0; j < this.columns; ++j) {
-         for(int k = 0; k < this.rows; ++k) {
-            mapdataIn.colors[this.minX + j + (this.minZ + k) * 128] = this.mapDataBytes[j + k * this.columns];
-         }
-      }
-
+      var1.handleMaps(this);
    }
 }

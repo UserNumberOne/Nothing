@@ -13,22 +13,22 @@ public class CPacketSteerBoat implements Packet {
    }
 
    public CPacketSteerBoat(boolean var1, boolean var2) {
-      this.left = p_i46873_1_;
-      this.right = p_i46873_2_;
+      this.left = var1;
+      this.right = var2;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.left = buf.readBoolean();
-      this.right = buf.readBoolean();
+      this.left = var1.readBoolean();
+      this.right = var1.readBoolean();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeBoolean(this.left);
-      buf.writeBoolean(this.right);
+      var1.writeBoolean(this.left);
+      var1.writeBoolean(this.right);
    }
 
    public void processPacket(INetHandlerPlayServer var1) {
-      handler.processSteerBoat(this);
+      var1.processSteerBoat(this);
    }
 
    public boolean getLeft() {

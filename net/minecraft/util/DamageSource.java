@@ -43,43 +43,43 @@ public class DamageSource {
    public String damageType;
 
    public static DamageSource causeMobDamage(EntityLivingBase var0) {
-      return new EntityDamageSource("mob", mob);
+      return new EntityDamageSource("mob", var0);
    }
 
    public static DamageSource causeIndirectDamage(Entity var0, EntityLivingBase var1) {
-      return new EntityDamageSourceIndirect("mob", source, indirectEntityIn);
+      return new EntityDamageSourceIndirect("mob", var0, var1);
    }
 
    public static DamageSource causePlayerDamage(EntityPlayer var0) {
-      return new EntityDamageSource("player", player);
+      return new EntityDamageSource("player", var0);
    }
 
    public static DamageSource causeArrowDamage(EntityArrow var0, @Nullable Entity var1) {
-      return (new EntityDamageSourceIndirect("arrow", arrow, indirectEntityIn)).setProjectile();
+      return (new EntityDamageSourceIndirect("arrow", var0, var1)).setProjectile();
    }
 
    public static DamageSource causeFireballDamage(EntityFireball var0, @Nullable Entity var1) {
-      return indirectEntityIn == null ? (new EntityDamageSourceIndirect("onFire", fireball, fireball)).setFireDamage().setProjectile() : (new EntityDamageSourceIndirect("fireball", fireball, indirectEntityIn)).setFireDamage().setProjectile();
+      return var1 == null ? (new EntityDamageSourceIndirect("onFire", var0, var0)).setFireDamage().setProjectile() : (new EntityDamageSourceIndirect("fireball", var0, var1)).setFireDamage().setProjectile();
    }
 
    public static DamageSource causeThrownDamage(Entity var0, @Nullable Entity var1) {
-      return (new EntityDamageSourceIndirect("thrown", source, indirectEntityIn)).setProjectile();
+      return (new EntityDamageSourceIndirect("thrown", var0, var1)).setProjectile();
    }
 
    public static DamageSource causeIndirectMagicDamage(Entity var0, @Nullable Entity var1) {
-      return (new EntityDamageSourceIndirect("indirectMagic", source, indirectEntityIn)).setDamageBypassesArmor().setMagicDamage();
+      return (new EntityDamageSourceIndirect("indirectMagic", var0, var1)).setDamageBypassesArmor().setMagicDamage();
    }
 
    public static DamageSource causeThornsDamage(Entity var0) {
-      return (new EntityDamageSource("thorns", source)).setIsThornsDamage().setMagicDamage();
+      return (new EntityDamageSource("thorns", var0)).setIsThornsDamage().setMagicDamage();
    }
 
    public static DamageSource causeExplosionDamage(@Nullable Explosion var0) {
-      return explosionIn != null && explosionIn.getExplosivePlacedBy() != null ? (new EntityDamageSource("explosion.player", explosionIn.getExplosivePlacedBy())).setDifficultyScaled().setExplosion() : (new DamageSource("explosion")).setDifficultyScaled().setExplosion();
+      return var0 != null && var0.getExplosivePlacedBy() != null ? (new EntityDamageSource("explosion.player", var0.getExplosivePlacedBy())).setDifficultyScaled().setExplosion() : (new DamageSource("explosion")).setDifficultyScaled().setExplosion();
    }
 
    public static DamageSource causeExplosionDamage(@Nullable EntityLivingBase var0) {
-      return entityLivingBaseIn != null ? (new EntityDamageSource("explosion.player", entityLivingBaseIn)).setDifficultyScaled().setExplosion() : (new DamageSource("explosion")).setDifficultyScaled().setExplosion();
+      return var0 != null ? (new EntityDamageSource("explosion.player", var0)).setDifficultyScaled().setExplosion() : (new DamageSource("explosion")).setDifficultyScaled().setExplosion();
    }
 
    public boolean isProjectile() {
@@ -116,8 +116,8 @@ public class DamageSource {
       return this.damageIsAbsolute;
    }
 
-   public DamageSource(String var1) {
-      this.damageType = damageTypeIn;
+   protected DamageSource(String var1) {
+      this.damageType = var1;
    }
 
    @Nullable
@@ -130,33 +130,33 @@ public class DamageSource {
       return null;
    }
 
-   public DamageSource setDamageBypassesArmor() {
+   protected DamageSource setDamageBypassesArmor() {
       this.isUnblockable = true;
       this.hungerDamage = 0.0F;
       return this;
    }
 
-   public DamageSource setDamageAllowedInCreativeMode() {
+   protected DamageSource setDamageAllowedInCreativeMode() {
       this.isDamageAllowedInCreativeMode = true;
       return this;
    }
 
-   public DamageSource setDamageIsAbsolute() {
+   protected DamageSource setDamageIsAbsolute() {
       this.damageIsAbsolute = true;
       this.hungerDamage = 0.0F;
       return this;
    }
 
-   public DamageSource setFireDamage() {
+   protected DamageSource setFireDamage() {
       this.fireDamage = true;
       return this;
    }
 
    public ITextComponent getDeathMessage(EntityLivingBase var1) {
-      EntityLivingBase entitylivingbase = entityLivingBaseIn.getAttackingEntity();
-      String s = "death.attack." + this.damageType;
-      String s1 = s + ".player";
-      return entitylivingbase != null && I18n.canTranslate(s1) ? new TextComponentTranslation(s1, new Object[]{entityLivingBaseIn.getDisplayName(), entitylivingbase.getDisplayName()}) : new TextComponentTranslation(s, new Object[]{entityLivingBaseIn.getDisplayName()});
+      EntityLivingBase var2 = var1.getAttackingEntity();
+      String var3 = "death.attack." + this.damageType;
+      String var4 = var3 + ".player";
+      return var2 != null && I18n.canTranslate(var4) ? new TextComponentTranslation(var4, new Object[]{var1.getDisplayName(), var2.getDisplayName()}) : new TextComponentTranslation(var3, new Object[]{var1.getDisplayName()});
    }
 
    public boolean isFireDamage() {
@@ -186,8 +186,8 @@ public class DamageSource {
    }
 
    public boolean isCreativePlayer() {
-      Entity entity = this.getEntity();
-      return entity instanceof EntityPlayer && ((EntityPlayer)entity).capabilities.isCreativeMode;
+      Entity var1 = this.getEntity();
+      return var1 instanceof EntityPlayer && ((EntityPlayer)var1).capabilities.isCreativeMode;
    }
 
    @Nullable

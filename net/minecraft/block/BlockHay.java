@@ -16,6 +16,6 @@ public class BlockHay extends BlockRotatedPillar {
    }
 
    public void onFallenUpon(World var1, BlockPos var2, Entity var3, float var4) {
-      entityIn.fall(fallDistance, 0.2F);
+      var3.fall(var4, 0.2F);
    }
 }

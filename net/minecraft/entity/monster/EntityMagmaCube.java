@@ -11,18 +11,15 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityMagmaCube extends EntitySlime {
    public EntityMagmaCube(World var1) {
-      super(worldIn);
+      super(var1);
       this.isImmuneToFire = true;
    }
 
    public static void registerFixesMagmaCube(DataFixer var0) {
-      EntityLiving.registerFixesMob(fixer, "LavaSlime");
+      EntityLiving.registerFixesMob(var0, "LavaSlime");
    }
 
    protected void applyEntityAttributes() {
@@ -39,13 +36,8 @@ public class EntityMagmaCube extends EntitySlime {
    }
 
    protected void setSlimeSize(int var1) {
-      super.setSlimeSize(size);
-      this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)(size * 3));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return 15728880;
+      super.setSlimeSize(var1);
+      this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)(var1 * 3));
    }
 
    public float getBrightness(float var1) {
@@ -80,7 +72,6 @@ public class EntityMagmaCube extends EntitySlime {
    protected void jump() {
       this.motionY = (double)(0.42F + (float)this.getSlimeSize() * 0.1F);
       this.isAirBorne = true;
-      ForgeHooks.onLivingJump(this);
    }
 
    protected void handleJumpLava() {

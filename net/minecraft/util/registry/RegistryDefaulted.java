@@ -7,12 +7,12 @@ public class RegistryDefaulted extends RegistrySimple {
    private final Object defaultObject;
 
    public RegistryDefaulted(Object var1) {
-      this.defaultObject = defaultObjectIn;
+      this.defaultObject = var1;
    }
 
    @Nonnull
    public Object getObject(@Nullable Object var1) {
-      Object v = (V)super.getObject(name);
-      return v == null ? this.defaultObject : v;
+      Object var2 = super.getObject(var1);
+      return var2 == null ? this.defaultObject : var2;
    }
 }

@@ -13,10 +13,10 @@ public class BlockButtonStone extends BlockButton {
    }
 
    protected void playClickSound(@Nullable EntityPlayer var1, World var2, BlockPos var3) {
-      worldIn.playSound(player, pos, SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.6F);
+      var2.playSound(var1, var3, SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.6F);
    }
 
    protected void playReleaseSound(World var1, BlockPos var2) {
-      worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_STONE_BUTTON_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.5F);
+      var1.playSound((EntityPlayer)null, var2, SoundEvents.BLOCK_STONE_BUTTON_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.5F);
    }
 }

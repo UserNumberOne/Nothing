@@ -262,11 +262,11 @@ public class Blocks {
 
    @Nullable
    private static Block getRegisteredBlock(String var0) {
-      Block block = (Block)Block.REGISTRY.getObject(new ResourceLocation(blockName));
-      if (!CACHE.add(block)) {
-         throw new IllegalStateException("Invalid Block requested: " + blockName);
+      Block var1 = (Block)Block.REGISTRY.getObject(new ResourceLocation(var0));
+      if (!CACHE.add(var1)) {
+         throw new IllegalStateException("Invalid Block requested: " + var0);
       } else {
-         return block;
+         return var1;
       }
    }
 

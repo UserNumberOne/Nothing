@@ -12,7 +12,7 @@ public enum EnumRarity {
    public final String rarityName;
 
    private EnumRarity(TextFormatting var3, String var4) {
-      this.rarityColor = color;
-      this.rarityName = name;
+      this.rarityColor = var3;
+      this.rarityName = var4;
    }
 }

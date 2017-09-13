@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketChat implements Packet {
    private ITextComponent chatComponent;
@@ -16,39 +14,29 @@ public class SPacketChat implements Packet {
    }
 
    public SPacketChat(ITextComponent var1) {
-      this(componentIn, (byte)1);
+      this(var1, (byte)1);
    }
 
    public SPacketChat(ITextComponent var1, byte var2) {
-      this.chatComponent = componentIn;
-      this.type = typeIn;
+      this.chatComponent = var1;
+      this.type = var2;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.chatComponent = buf.readTextComponent();
-      this.type = buf.readByte();
+      this.chatComponent = var1.readTextComponent();
+      this.type = var1.readByte();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeTextComponent(this.chatComponent);
-      buf.writeByte(this.type);
+      var1.writeTextComponent(this.chatComponent);
+      var1.writeByte(this.type);
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      handler.handleChat(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getChatComponent() {
-      return this.chatComponent;
+      var1.handleChat(this);
    }
 
    public boolean isSystem() {
       return this.type == 1 || this.type == 2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getType() {
-      return this.type;
    }
 }

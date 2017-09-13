@@ -13,17 +13,17 @@ public class MinecartEntityTypes implements IFixableData {
    }
 
    public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
-      if ("Minecart".equals(compound.getString("id"))) {
-         String s = "MinecartRideable";
-         int i = compound.getInteger("Type");
-         if (i > 0 && i < MINECART_TYPE_LIST.size()) {
-            s = (String)MINECART_TYPE_LIST.get(i);
+      if ("Minecart".equals(var1.getString("id"))) {
+         String var2 = "MinecartRideable";
+         int var3 = var1.getInteger("Type");
+         if (var3 > 0 && var3 < MINECART_TYPE_LIST.size()) {
+            var2 = (String)MINECART_TYPE_LIST.get(var3);
          }
 
-         compound.setString("id", s);
-         compound.removeTag("Type");
+         var1.setString("id", var2);
+         var1.removeTag("Type");
       }
 
-      return compound;
+      return var1;
    }
 }

@@ -22,7 +22,7 @@ public enum PathNodeType {
    private final float priority;
 
    private PathNodeType(float var3) {
-      this.priority = priorityIn;
+      this.priority = var3;
    }
 
    public float getPriority() {

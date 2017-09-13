@@ -1,6 +1,7 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -8,30 +9,30 @@ import net.minecraft.world.World;
 
 public class WorldGenGlowStone2 extends WorldGenerator {
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      if (!worldIn.isAirBlock(position)) {
+      if (!var1.isAirBlock(var3)) {
          return false;
-      } else if (worldIn.getBlockState(position.up()).getBlock() != Blocks.NETHERRACK) {
+      } else if (var1.getBlockState(var3.up()).getBlock() != Blocks.NETHERRACK) {
          return false;
       } else {
-         worldIn.setBlockState(position, Blocks.GLOWSTONE.getDefaultState(), 2);
+         var1.setBlockState(var3, Blocks.GLOWSTONE.getDefaultState(), 2);
 
-         for(int i = 0; i < 1500; ++i) {
-            BlockPos blockpos = position.add(rand.nextInt(8) - rand.nextInt(8), -rand.nextInt(12), rand.nextInt(8) - rand.nextInt(8));
-            if (worldIn.isAirBlock(blockpos)) {
-               int j = 0;
+         for(int var4 = 0; var4 < 1500; ++var4) {
+            BlockPos var5 = var3.add(var2.nextInt(8) - var2.nextInt(8), -var2.nextInt(12), var2.nextInt(8) - var2.nextInt(8));
+            if (var1.getBlockState(var5).getMaterial() == Material.AIR) {
+               int var6 = 0;
 
-               for(EnumFacing enumfacing : EnumFacing.values()) {
-                  if (worldIn.getBlockState(blockpos.offset(enumfacing)).getBlock() == Blocks.GLOWSTONE) {
-                     ++j;
+               for(EnumFacing var10 : EnumFacing.values()) {
+                  if (var1.getBlockState(var5.offset(var10)).getBlock() == Blocks.GLOWSTONE) {
+                     ++var6;
                   }
 
-                  if (j > 1) {
+                  if (var6 > 1) {
                      break;
                   }
                }
 
-               if (j == 1) {
-                  worldIn.setBlockState(blockpos, Blocks.GLOWSTONE.getDefaultState(), 2);
+               if (var6 == 1) {
+                  var1.setBlockState(var5, Blocks.GLOWSTONE.getDefaultState(), 2);
                }
             }
          }

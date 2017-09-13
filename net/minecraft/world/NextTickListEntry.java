@@ -13,16 +13,16 @@ public class NextTickListEntry implements Comparable {
 
    public NextTickListEntry(BlockPos var1, Block var2) {
       this.tickEntryID = (long)(nextTickEntryID++);
-      this.position = positionIn;
-      this.block = blockIn;
+      this.position = var1;
+      this.block = var2;
    }
 
    public boolean equals(Object var1) {
-      if (!(p_equals_1_ instanceof NextTickListEntry)) {
+      if (!(var1 instanceof NextTickListEntry)) {
          return false;
       } else {
-         NextTickListEntry nextticklistentry = (NextTickListEntry)p_equals_1_;
-         return this.position.equals(nextticklistentry.position) && Block.isEqualTo(this.block, nextticklistentry.block);
+         NextTickListEntry var2 = (NextTickListEntry)var1;
+         return this.position.equals(var2.position) && Block.isEqualTo(this.block, var2.block);
       }
    }
 
@@ -31,16 +31,26 @@ public class NextTickListEntry implements Comparable {
    }
 
    public NextTickListEntry setScheduledTime(long var1) {
-      this.scheduledTime = scheduledTimeIn;
+      this.scheduledTime = var1;
       return this;
    }
 
    public void setPriority(int var1) {
-      this.priority = priorityIn;
+      this.priority = var1;
    }
 
    public int compareTo(NextTickListEntry var1) {
-      return this.scheduledTime < p_compareTo_1_.scheduledTime ? -1 : (this.scheduledTime > p_compareTo_1_.scheduledTime ? 1 : (this.priority != p_compareTo_1_.priority ? this.priority - p_compareTo_1_.priority : (this.tickEntryID < p_compareTo_1_.tickEntryID ? -1 : (this.tickEntryID > p_compareTo_1_.tickEntryID ? 1 : 0))));
+      if (this.scheduledTime < var1.scheduledTime) {
+         return -1;
+      } else if (this.scheduledTime > var1.scheduledTime) {
+         return 1;
+      } else if (this.priority != var1.priority) {
+         return this.priority - var1.priority;
+      } else if (this.tickEntryID < var1.tickEntryID) {
+         return -1;
+      } else {
+         return this.tickEntryID > var1.tickEntryID ? 1 : 0;
+      }
    }
 
    public String toString() {
@@ -49,5 +59,10 @@ public class NextTickListEntry implements Comparable {
 
    public Block getBlock() {
       return this.block;
+   }
+
+   // $FF: synthetic method
+   public int compareTo(Object var1) {
+      return this.compareTo((NextTickListEntry)var1);
    }
 }

@@ -11,27 +11,37 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 
 public class ItemFireball extends Item {
    public ItemFireball() {
       this.setCreativeTab(CreativeTabs.MISC);
    }
 
-   public EnumActionResult onItemUse(ItemStack var1, EntityPlayer var2, World var3, BlockPos var4, EnumHand var5, EnumFacing var6, float var7, float var8, float var9) {
-      if (worldIn.isRemote) {
+   public EnumActionResult onItemUse(ItemStack itemstack, EntityPlayer entityhuman, World world, BlockPos blockposition, EnumHand enumhand, EnumFacing enumdirection, float f, float f1, float f2) {
+      if (world.isRemote) {
          return EnumActionResult.SUCCESS;
       } else {
-         pos = pos.offset(facing);
-         if (!playerIn.canPlayerEdit(pos, facing, stack)) {
+         blockposition = blockposition.offset(enumdirection);
+         if (!entityhuman.canPlayerEdit(blockposition, enumdirection, itemstack)) {
             return EnumActionResult.FAIL;
          } else {
-            if (worldIn.getBlockState(pos).getMaterial() == Material.AIR) {
-               worldIn.playSound((EntityPlayer)null, pos, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.BLOCKS, 1.0F, (itemRand.nextFloat() - itemRand.nextFloat()) * 0.2F + 1.0F);
-               worldIn.setBlockState(pos, Blocks.FIRE.getDefaultState());
+            if (world.getBlockState(blockposition).getMaterial() == Material.AIR) {
+               if (CraftEventFactory.callBlockIgniteEvent(world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), IgniteCause.FIREBALL, entityhuman).isCancelled()) {
+                  if (!entityhuman.capabilities.isCreativeMode) {
+                     --itemstack.stackSize;
+                  }
+
+                  return EnumActionResult.PASS;
+               }
+
+               world.playSound((EntityPlayer)null, blockposition, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.BLOCKS, 1.0F, (itemRand.nextFloat() - itemRand.nextFloat()) * 0.2F + 1.0F);
+               world.setBlockState(blockposition, Blocks.FIRE.getDefaultState());
             }
 
-            if (!playerIn.capabilities.isCreativeMode) {
-               --stack.stackSize;
+            if (!entityhuman.capabilities.isCreativeMode) {
+               --itemstack.stackSize;
             }
 
             return EnumActionResult.SUCCESS;

@@ -9,21 +9,21 @@ public class IntHashMap {
    private final float growFactor = 0.75F;
 
    private static int computeHash(int var0) {
-      integer = integer ^ integer >>> 20 ^ integer >>> 12;
-      return integer ^ integer >>> 7 ^ integer >>> 4;
+      var0 = var0 ^ var0 >>> 20 ^ var0 >>> 12;
+      return var0 ^ var0 >>> 7 ^ var0 >>> 4;
    }
 
    private static int getSlotIndex(int var0, int var1) {
-      return hash & slotCount - 1;
+      return var0 & var1 - 1;
    }
 
    @Nullable
    public Object lookup(int var1) {
-      int i = computeHash(hashEntry);
+      int var2 = computeHash(var1);
 
-      for(IntHashMap.Entry entry = this.slots[getSlotIndex(i, this.slots.length)]; entry != null; entry = entry.nextEntry) {
-         if (entry.hashEntry == hashEntry) {
-            return entry.valueEntry;
+      for(IntHashMap.Entry var3 = this.slots[getSlotIndex(var2, this.slots.length)]; var3 != null; var3 = var3.nextEntry) {
+         if (var3.hashEntry == var1) {
+            return var3.valueEntry;
          }
       }
 
@@ -31,16 +31,16 @@ public class IntHashMap {
    }
 
    public boolean containsItem(int var1) {
-      return this.lookupEntry(hashEntry) != null;
+      return this.lookupEntry(var1) != null;
    }
 
    @Nullable
    final IntHashMap.Entry lookupEntry(int var1) {
-      int i = computeHash(hashEntry);
+      int var2 = computeHash(var1);
 
-      for(IntHashMap.Entry entry = this.slots[getSlotIndex(i, this.slots.length)]; entry != null; entry = entry.nextEntry) {
-         if (entry.hashEntry == hashEntry) {
-            return entry;
+      for(IntHashMap.Entry var3 = this.slots[getSlotIndex(var2, this.slots.length)]; var3 != null; var3 = var3.nextEntry) {
+         if (var3.hashEntry == var1) {
+            return var3;
          }
       }
 
@@ -48,51 +48,48 @@ public class IntHashMap {
    }
 
    public void addKey(int var1, Object var2) {
-      int i = computeHash(hashEntry);
-      int j = getSlotIndex(i, this.slots.length);
+      int var3 = computeHash(var1);
+      int var4 = getSlotIndex(var3, this.slots.length);
 
-      for(IntHashMap.Entry entry = this.slots[j]; entry != null; entry = entry.nextEntry) {
-         if (entry.hashEntry == hashEntry) {
-            entry.valueEntry = valueEntry;
+      for(IntHashMap.Entry var5 = this.slots[var4]; var5 != null; var5 = var5.nextEntry) {
+         if (var5.hashEntry == var1) {
+            var5.valueEntry = var2;
             return;
          }
       }
 
-      this.insert(i, hashEntry, valueEntry, j);
+      this.insert(var3, var1, var2, var4);
    }
 
    private void grow(int var1) {
-      IntHashMap.Entry[] entry = this.slots;
-      int i = entry.length;
-      if (i == 1073741824) {
+      IntHashMap.Entry[] var2 = this.slots;
+      int var3 = var2.length;
+      if (var3 == 1073741824) {
          this.threshold = Integer.MAX_VALUE;
       } else {
-         IntHashMap.Entry[] entry1 = new IntHashMap.Entry[p_76047_1_];
-         this.copyTo(entry1);
-         this.slots = entry1;
-         float var10001 = (float)p_76047_1_;
-         this.getClass();
-         this.threshold = (int)(var10001 * 0.75F);
+         IntHashMap.Entry[] var4 = new IntHashMap.Entry[var1];
+         this.copyTo(var4);
+         this.slots = var4;
+         this.threshold = (int)((float)var1 * this.growFactor);
       }
-
    }
 
    private void copyTo(IntHashMap.Entry[] var1) {
-      IntHashMap.Entry[] entry = this.slots;
-      int i = p_76048_1_.length;
+      IntHashMap.Entry[] var2 = this.slots;
+      int var3 = var1.length;
 
-      for(int j = 0; j < entry.length; ++j) {
-         IntHashMap.Entry entry1 = entry[j];
-         if (entry1 != null) {
-            entry[j] = null;
+      for(int var4 = 0; var4 < var2.length; ++var4) {
+         IntHashMap.Entry var5 = var2[var4];
+         if (var5 != null) {
+            var2[var4] = null;
 
             while(true) {
-               IntHashMap.Entry entry2 = entry1.nextEntry;
-               int k = getSlotIndex(entry1.slotHash, i);
-               entry1.nextEntry = p_76048_1_[k];
-               p_76048_1_[k] = entry1;
-               entry1 = entry2;
-               if (entry2 == null) {
+               IntHashMap.Entry var6 = var5.nextEntry;
+               int var7 = getSlotIndex(var5.slotHash, var3);
+               var5.nextEntry = var1[var7];
+               var1[var7] = var5;
+               var5 = var6;
+               if (var6 == null) {
                   break;
                }
             }
@@ -103,50 +100,50 @@ public class IntHashMap {
 
    @Nullable
    public Object removeObject(int var1) {
-      IntHashMap.Entry entry = this.removeEntry(p_76049_1_);
-      return entry == null ? null : entry.valueEntry;
+      IntHashMap.Entry var2 = this.removeEntry(var1);
+      return var2 == null ? null : var2.valueEntry;
    }
 
    @Nullable
    final IntHashMap.Entry removeEntry(int var1) {
-      int i = computeHash(p_76036_1_);
-      int j = getSlotIndex(i, this.slots.length);
-      IntHashMap.Entry entry = this.slots[j];
+      int var2 = computeHash(var1);
+      int var3 = getSlotIndex(var2, this.slots.length);
+      IntHashMap.Entry var4 = this.slots[var3];
 
-      IntHashMap.Entry entry1;
-      IntHashMap.Entry entry2;
-      for(entry1 = entry; entry1 != null; entry1 = entry2) {
-         entry2 = entry1.nextEntry;
-         if (entry1.hashEntry == p_76036_1_) {
+      IntHashMap.Entry var5;
+      IntHashMap.Entry var6;
+      for(var5 = var4; var5 != null; var5 = var6) {
+         var6 = var5.nextEntry;
+         if (var5.hashEntry == var1) {
             --this.count;
-            if (entry == entry1) {
-               this.slots[j] = entry2;
+            if (var4 == var5) {
+               this.slots[var3] = var6;
             } else {
-               entry.nextEntry = entry2;
+               var4.nextEntry = var6;
             }
 
-            return entry1;
+            return var5;
          }
 
-         entry = entry1;
+         var4 = var5;
       }
 
-      return entry1;
+      return var5;
    }
 
    public void clearMap() {
-      IntHashMap.Entry[] entry = this.slots;
+      IntHashMap.Entry[] var1 = this.slots;
 
-      for(int i = 0; i < entry.length; ++i) {
-         entry[i] = null;
+      for(int var2 = 0; var2 < var1.length; ++var2) {
+         var1[var2] = null;
       }
 
       this.count = 0;
    }
 
    private void insert(int var1, int var2, Object var3, int var4) {
-      IntHashMap.Entry entry = this.slots[p_76040_4_];
-      this.slots[p_76040_4_] = new IntHashMap.Entry(p_76040_1_, p_76040_2_, p_76040_3_, entry);
+      IntHashMap.Entry var5 = this.slots[var4];
+      this.slots[var4] = new IntHashMap.Entry(var1, var2, var3, var5);
       if (this.count++ >= this.threshold) {
          this.grow(2 * this.slots.length);
       }
@@ -160,10 +157,10 @@ public class IntHashMap {
       final int slotHash;
 
       Entry(int var1, int var2, Object var3, IntHashMap.Entry var4) {
-         this.valueEntry = p_i1552_3_;
-         this.nextEntry = p_i1552_4_;
-         this.hashEntry = p_i1552_2_;
-         this.slotHash = p_i1552_1_;
+         this.valueEntry = var3;
+         this.nextEntry = var4;
+         this.hashEntry = var2;
+         this.slotHash = var1;
       }
 
       public final int getHash() {
@@ -175,14 +172,14 @@ public class IntHashMap {
       }
 
       public final boolean equals(Object var1) {
-         if (!(p_equals_1_ instanceof IntHashMap.Entry)) {
+         if (!(var1 instanceof IntHashMap.Entry)) {
             return false;
          } else {
-            IntHashMap.Entry entry = (IntHashMap.Entry)p_equals_1_;
-            if (this.hashEntry == entry.hashEntry) {
-               Object object = this.getValue();
-               Object object1 = entry.getValue();
-               if (object == object1 || object != null && object.equals(object1)) {
+            IntHashMap.Entry var2 = (IntHashMap.Entry)var1;
+            if (this.hashEntry == var2.hashEntry) {
+               Object var3 = this.getValue();
+               Object var4 = var2.getValue();
+               if (var3 == var4 || var3 != null && var3.equals(var4)) {
                   return true;
                }
             }

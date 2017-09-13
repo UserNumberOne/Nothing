@@ -15,9 +15,9 @@ public class EntityAIBeg extends EntityAIBase {
    private int timeoutCounter;
 
    public EntityAIBeg(EntityWolf var1, float var2) {
-      this.theWolf = wolf;
-      this.world = wolf.world;
-      this.minPlayerDistance = minDistance;
+      this.theWolf = var1;
+      this.world = var1.world;
+      this.minPlayerDistance = var2;
       this.setMutexBits(2);
    }
 
@@ -27,7 +27,13 @@ public class EntityAIBeg extends EntityAIBase {
    }
 
    public boolean continueExecuting() {
-      return !this.player.isEntityAlive() ? false : (this.theWolf.getDistanceSqToEntity(this.player) > (double)(this.minPlayerDistance * this.minPlayerDistance) ? false : this.timeoutCounter > 0 && this.hasTemptationItemInHand(this.player));
+      if (!this.player.isEntityAlive()) {
+         return false;
+      } else if (this.theWolf.getDistanceSqToEntity(this.player) > (double)(this.minPlayerDistance * this.minPlayerDistance)) {
+         return false;
+      } else {
+         return this.timeoutCounter > 0 && this.hasTemptationItemInHand(this.player);
+      }
    }
 
    public void startExecuting() {
@@ -46,14 +52,14 @@ public class EntityAIBeg extends EntityAIBase {
    }
 
    private boolean hasTemptationItemInHand(EntityPlayer var1) {
-      for(EnumHand enumhand : EnumHand.values()) {
-         ItemStack itemstack = player.getHeldItem(enumhand);
-         if (itemstack != null) {
-            if (this.theWolf.isTamed() && itemstack.getItem() == Items.BONE) {
+      for(EnumHand var5 : EnumHand.values()) {
+         ItemStack var6 = var1.getHeldItem(var5);
+         if (var6 != null) {
+            if (this.theWolf.isTamed() && var6.getItem() == Items.BONE) {
                return true;
             }
 
-            if (this.theWolf.isBreedingItem(itemstack)) {
+            if (this.theWolf.isBreedingItem(var6)) {
                return true;
             }
          }

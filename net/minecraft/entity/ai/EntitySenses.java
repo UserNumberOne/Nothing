@@ -11,7 +11,7 @@ public class EntitySenses {
    List unseenEntities = Lists.newArrayList();
 
    public EntitySenses(EntityLiving var1) {
-      this.entityObj = entityObjIn;
+      this.entityObj = var1;
    }
 
    public void clearSensingCache() {
@@ -20,21 +20,21 @@ public class EntitySenses {
    }
 
    public boolean canSee(Entity var1) {
-      if (this.seenEntities.contains(entityIn)) {
+      if (this.seenEntities.contains(var1)) {
          return true;
-      } else if (this.unseenEntities.contains(entityIn)) {
+      } else if (this.unseenEntities.contains(var1)) {
          return false;
       } else {
          this.entityObj.world.theProfiler.startSection("canSee");
-         boolean flag = this.entityObj.canEntityBeSeen(entityIn);
+         boolean var2 = this.entityObj.canEntityBeSeen(var1);
          this.entityObj.world.theProfiler.endSection();
-         if (flag) {
-            this.seenEntities.add(entityIn);
+         if (var2) {
+            this.seenEntities.add(var1);
          } else {
-            this.unseenEntities.add(entityIn);
+            this.unseenEntities.add(var1);
          }
 
-         return flag;
+         return var2;
       }
    }
 }

@@ -8,19 +8,19 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 
 public class BlockCake extends Block {
    public static final PropertyInteger BITES = PropertyInteger.create("bites", 0, 6);
@@ -32,92 +32,88 @@ public class BlockCake extends Block {
       this.setTickRandomly(true);
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return CAKE_AABB[((Integer)state.getValue(BITES)).intValue()];
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
+      return CAKE_AABB[((Integer)iblockdata.getValue(BITES)).intValue()];
    }
 
-   @SideOnly(Side.CLIENT)
-   public AxisAlignedBB getSelectedBoundingBox(IBlockState var1, World var2, BlockPos var3) {
-      return state.getCollisionBoundingBox(worldIn, pos);
-   }
-
-   public boolean isFullCube(IBlockState var1) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isOpaqueCube(IBlockState var1) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
-      this.eatCake(worldIn, pos, state, playerIn);
+   public boolean onBlockActivated(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack, EnumFacing enumdirection, float f, float f1, float f2) {
+      this.eatCake(world, blockposition, iblockdata, entityhuman);
       return true;
    }
 
-   private void eatCake(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4) {
-      if (player.canEat(false)) {
-         player.addStat(StatList.CAKE_SLICES_EATEN);
-         player.getFoodStats().addStats(2, 0.1F);
-         int i = ((Integer)state.getValue(BITES)).intValue();
+   private void eatCake(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman) {
+      if (entityhuman.canEat(false)) {
+         entityhuman.addStat(StatList.CAKE_SLICES_EATEN);
+         int oldFoodLevel = entityhuman.getFoodStats().foodLevel;
+         FoodLevelChangeEvent event = CraftEventFactory.callFoodLevelChangeEvent(entityhuman, 2 + oldFoodLevel);
+         if (!event.isCancelled()) {
+            entityhuman.getFoodStats().addStats(event.getFoodLevel() - oldFoodLevel, 0.1F);
+         }
+
+         ((EntityPlayerMP)entityhuman).getBukkitEntity().sendHealthUpdate();
+         int i = ((Integer)iblockdata.getValue(BITES)).intValue();
          if (i < 6) {
-            worldIn.setBlockState(pos, state.withProperty(BITES, Integer.valueOf(i + 1)), 3);
+            world.setBlockState(blockposition, iblockdata.withProperty(BITES, Integer.valueOf(i + 1)), 3);
          } else {
-            worldIn.setBlockToAir(pos);
+            world.setBlockToAir(blockposition);
          }
       }
 
    }
 
-   public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      return super.canPlaceBlockAt(worldIn, pos) ? this.canBlockStay(worldIn, pos) : false;
+   public boolean canPlaceBlockAt(World world, BlockPos blockposition) {
+      return super.canPlaceBlockAt(world, blockposition) ? this.canBlockStay(world, blockposition) : false;
    }
 
-   public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      if (!this.canBlockStay(worldIn, pos)) {
-         worldIn.setBlockToAir(pos);
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      if (!this.canBlockStay(world, blockposition)) {
+         world.setBlockToAir(blockposition);
       }
 
    }
 
-   private boolean canBlockStay(World var1, BlockPos var2) {
-      return worldIn.getBlockState(pos.down()).getMaterial().isSolid();
+   private boolean canBlockStay(World world, BlockPos blockposition) {
+      return world.getBlockState(blockposition.down()).getMaterial().isSolid();
    }
 
-   public int quantityDropped(Random var1) {
+   public int quantityDropped(Random random) {
       return 0;
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
       return null;
    }
 
-   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return new ItemStack(Items.CAKE);
    }
 
-   public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(BITES, Integer.valueOf(meta));
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(BITES, Integer.valueOf(i));
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
-   }
-
-   public int getMetaFromState(IBlockState var1) {
-      return ((Integer)state.getValue(BITES)).intValue();
+   public int getMetaFromState(IBlockState iblockdata) {
+      return ((Integer)iblockdata.getValue(BITES)).intValue();
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{BITES});
    }
 
-   public int getComparatorInputOverride(IBlockState var1, World var2, BlockPos var3) {
-      return (7 - ((Integer)blockState.getValue(BITES)).intValue()) * 2;
+   public int getComparatorInputOverride(IBlockState iblockdata, World world, BlockPos blockposition) {
+      return (7 - ((Integer)iblockdata.getValue(BITES)).intValue()) * 2;
    }
 
-   public boolean hasComparatorInputOverride(IBlockState var1) {
+   public boolean hasComparatorInputOverride(IBlockState iblockdata) {
       return true;
    }
 }

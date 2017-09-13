@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 public class TileEntityMobSpawner extends TileEntity implements ITickable {
    private final MobSpawnerBaseLogic spawnerLogic = new MobSpawnerBaseLogic() {
       public void broadcastEvent(int var1) {
-         TileEntityMobSpawner.this.world.addBlockEvent(TileEntityMobSpawner.this.pos, Blocks.MOB_SPAWNER, id, 0);
+         TileEntityMobSpawner.this.world.addBlockEvent(TileEntityMobSpawner.this.pos, Blocks.MOB_SPAWNER, var1, 0);
       }
 
       public World getSpawnerWorld() {
@@ -30,45 +30,45 @@ public class TileEntityMobSpawner extends TileEntity implements ITickable {
       }
 
       public void setNextSpawnData(WeightedSpawnerEntity var1) {
-         super.setNextSpawnData(p_184993_1_);
+         super.setNextSpawnData(var1);
          if (this.getSpawnerWorld() != null) {
-            IBlockState iblockstate = this.getSpawnerWorld().getBlockState(this.getSpawnerPosition());
-            this.getSpawnerWorld().notifyBlockUpdate(TileEntityMobSpawner.this.pos, iblockstate, iblockstate, 4);
+            IBlockState var2 = this.getSpawnerWorld().getBlockState(this.getSpawnerPosition());
+            this.getSpawnerWorld().notifyBlockUpdate(TileEntityMobSpawner.this.pos, var2, var2, 4);
          }
 
       }
    };
 
    public static void registerFixesMobSpawner(DataFixer var0) {
-      fixer.registerWalker(FixTypes.BLOCK_ENTITY, new IDataWalker() {
+      var0.registerWalker(FixTypes.BLOCK_ENTITY, new IDataWalker() {
          public NBTTagCompound process(IDataFixer var1, NBTTagCompound var2, int var3) {
-            if ("MobSpawner".equals(compound.getString("id"))) {
-               if (compound.hasKey("SpawnPotentials", 9)) {
-                  NBTTagList nbttaglist = compound.getTagList("SpawnPotentials", 10);
+            if ("MobSpawner".equals(var2.getString("id"))) {
+               if (var2.hasKey("SpawnPotentials", 9)) {
+                  NBTTagList var4 = var2.getTagList("SpawnPotentials", 10);
 
-                  for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-                     NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-                     nbttagcompound.setTag("Entity", fixer.process(FixTypes.ENTITY, nbttagcompound.getCompoundTag("Entity"), versionIn));
+                  for(int var5 = 0; var5 < var4.tagCount(); ++var5) {
+                     NBTTagCompound var6 = var4.getCompoundTagAt(var5);
+                     var6.setTag("Entity", var1.process(FixTypes.ENTITY, var6.getCompoundTag("Entity"), var3));
                   }
                }
 
-               compound.setTag("SpawnData", fixer.process(FixTypes.ENTITY, compound.getCompoundTag("SpawnData"), versionIn));
+               var2.setTag("SpawnData", var1.process(FixTypes.ENTITY, var2.getCompoundTag("SpawnData"), var3));
             }
 
-            return compound;
+            return var2;
          }
       });
    }
 
    public void readFromNBT(NBTTagCompound var1) {
-      super.readFromNBT(compound);
-      this.spawnerLogic.readFromNBT(compound);
+      super.readFromNBT(var1);
+      this.spawnerLogic.readFromNBT(var1);
    }
 
    public NBTTagCompound writeToNBT(NBTTagCompound var1) {
-      super.writeToNBT(compound);
-      this.spawnerLogic.writeToNBT(compound);
-      return compound;
+      super.writeToNBT(var1);
+      this.spawnerLogic.writeToNBT(var1);
+      return var1;
    }
 
    public void update() {
@@ -81,13 +81,13 @@ public class TileEntityMobSpawner extends TileEntity implements ITickable {
    }
 
    public NBTTagCompound getUpdateTag() {
-      NBTTagCompound nbttagcompound = this.writeToNBT(new NBTTagCompound());
-      nbttagcompound.removeTag("SpawnPotentials");
-      return nbttagcompound;
+      NBTTagCompound var1 = this.writeToNBT(new NBTTagCompound());
+      var1.removeTag("SpawnPotentials");
+      return var1;
    }
 
    public boolean receiveClientEvent(int var1, int var2) {
-      return this.spawnerLogic.setDelayToMin(id) ? true : super.receiveClientEvent(id, type);
+      return this.spawnerLogic.setDelayToMin(var1) ? true : super.receiveClientEvent(var1, var2);
    }
 
    public boolean onlyOpsCanSetNbt() {

@@ -13,253 +13,253 @@ public class JsonToNBT {
    private static final Pattern INT_ARRAY_MATCHER = Pattern.compile("\\[[-+\\d|,\\s]+\\]");
 
    public static NBTTagCompound getTagFromJson(String var0) throws NBTException {
-      jsonString = jsonString.trim();
-      if (!jsonString.startsWith("{")) {
+      var0 = var0.trim();
+      if (!var0.startsWith("{")) {
          throw new NBTException("Invalid tag encountered, expected '{' as first char.");
-      } else if (topTagsCount(jsonString) != 1) {
+      } else if (topTagsCount(var0) != 1) {
          throw new NBTException("Encountered multiple top tags, only one expected");
       } else {
-         return (NBTTagCompound)nameValueToNBT("tag", jsonString).parse();
+         return (NBTTagCompound)nameValueToNBT("tag", var0).parse();
       }
    }
 
    static int topTagsCount(String var0) throws NBTException {
-      int i = 0;
-      boolean flag = false;
-      Stack stack = new Stack();
+      int var1 = 0;
+      boolean var2 = false;
+      Stack var3 = new Stack();
 
-      for(int j = 0; j < str.length(); ++j) {
-         char c0 = str.charAt(j);
-         if (c0 == '"') {
-            if (isCharEscaped(str, j)) {
-               if (!flag) {
-                  throw new NBTException("Illegal use of \\\": " + str);
+      for(int var4 = 0; var4 < var0.length(); ++var4) {
+         char var5 = var0.charAt(var4);
+         if (var5 == '"') {
+            if (isCharEscaped(var0, var4)) {
+               if (!var2) {
+                  throw new NBTException("Illegal use of \\\": " + var0);
                }
             } else {
-               flag = !flag;
+               var2 = !var2;
             }
-         } else if (!flag) {
-            if (c0 != '{' && c0 != '[') {
-               if (c0 == '}' && (stack.isEmpty() || ((Character)stack.pop()).charValue() != '{')) {
-                  throw new NBTException("Unbalanced curly brackets {}: " + str);
+         } else if (!var2) {
+            if (var5 != '{' && var5 != '[') {
+               if (var5 == '}' && (var3.isEmpty() || ((Character)var3.pop()).charValue() != '{')) {
+                  throw new NBTException("Unbalanced curly brackets {}: " + var0);
                }
 
-               if (c0 == ']' && (stack.isEmpty() || ((Character)stack.pop()).charValue() != '[')) {
-                  throw new NBTException("Unbalanced square brackets []: " + str);
+               if (var5 == ']' && (var3.isEmpty() || ((Character)var3.pop()).charValue() != '[')) {
+                  throw new NBTException("Unbalanced square brackets []: " + var0);
                }
             } else {
-               if (stack.isEmpty()) {
-                  ++i;
+               if (var3.isEmpty()) {
+                  ++var1;
                }
 
-               stack.push(Character.valueOf(c0));
+               var3.push(Character.valueOf(var5));
             }
          }
       }
 
-      if (flag) {
-         throw new NBTException("Unbalanced quotation: " + str);
-      } else if (!stack.isEmpty()) {
-         throw new NBTException("Unbalanced brackets: " + str);
+      if (var2) {
+         throw new NBTException("Unbalanced quotation: " + var0);
+      } else if (!var3.isEmpty()) {
+         throw new NBTException("Unbalanced brackets: " + var0);
       } else {
-         if (i == 0 && !str.isEmpty()) {
-            i = 1;
+         if (var1 == 0 && !var0.isEmpty()) {
+            var1 = 1;
          }
 
-         return i;
+         return var1;
       }
    }
 
    static JsonToNBT.Any joinStrToNBT(String... var0) throws NBTException {
-      return nameValueToNBT(args[0], args[1]);
+      return nameValueToNBT(var0[0], var0[1]);
    }
 
    static JsonToNBT.Any nameValueToNBT(String var0, String var1) throws NBTException {
-      value = value.trim();
-      if (value.startsWith("{")) {
-         value = value.substring(1, value.length() - 1);
+      var1 = var1.trim();
+      if (var1.startsWith("{")) {
+         var1 = var1.substring(1, var1.length() - 1);
 
-         JsonToNBT.Compound jsontonbt$compound;
-         String s1;
-         for(jsontonbt$compound = new JsonToNBT.Compound(key); value.length() > 0; value = value.substring(s1.length() + 1)) {
-            s1 = nextNameValuePair(value, true);
-            if (s1.length() > 0) {
-               boolean flag1 = false;
-               jsontonbt$compound.tagList.add(getTagFromNameValue(s1, false));
+         JsonToNBT.Compound var8;
+         String var9;
+         for(var8 = new JsonToNBT.Compound(var0); var1.length() > 0; var1 = var1.substring(var9.length() + 1)) {
+            var9 = nextNameValuePair(var1, true);
+            if (var9.length() > 0) {
+               boolean var11 = false;
+               var8.tagList.add(getTagFromNameValue(var9, false));
             }
 
-            if (value.length() < s1.length() + 1) {
+            if (var1.length() < var9.length() + 1) {
                break;
             }
 
-            char c1 = value.charAt(s1.length());
-            if (c1 != ',' && c1 != '{' && c1 != '}' && c1 != '[' && c1 != ']') {
-               throw new NBTException("Unexpected token '" + c1 + "' at: " + value.substring(s1.length()));
+            char var12 = var1.charAt(var9.length());
+            if (var12 != ',' && var12 != '{' && var12 != '}' && var12 != '[' && var12 != ']') {
+               throw new NBTException("Unexpected token '" + var12 + "' at: " + var1.substring(var9.length()));
             }
          }
 
-         return jsontonbt$compound;
-      } else if (value.startsWith("[") && !INT_ARRAY_MATCHER.matcher(value).matches()) {
-         value = value.substring(1, value.length() - 1);
+         return var8;
+      } else if (var1.startsWith("[") && !INT_ARRAY_MATCHER.matcher(var1).matches()) {
+         var1 = var1.substring(1, var1.length() - 1);
 
-         JsonToNBT.List jsontonbt$list;
-         String s;
-         for(jsontonbt$list = new JsonToNBT.List(key); value.length() > 0; value = value.substring(s.length() + 1)) {
-            s = nextNameValuePair(value, false);
-            if (s.length() > 0) {
-               boolean flag = true;
-               jsontonbt$list.tagList.add(getTagFromNameValue(s, true));
+         JsonToNBT.List var2;
+         String var3;
+         for(var2 = new JsonToNBT.List(var0); var1.length() > 0; var1 = var1.substring(var3.length() + 1)) {
+            var3 = nextNameValuePair(var1, false);
+            if (var3.length() > 0) {
+               boolean var4 = true;
+               var2.tagList.add(getTagFromNameValue(var3, true));
             }
 
-            if (value.length() < s.length() + 1) {
+            if (var1.length() < var3.length() + 1) {
                break;
             }
 
-            char c0 = value.charAt(s.length());
-            if (c0 != ',' && c0 != '{' && c0 != '}' && c0 != '[' && c0 != ']') {
-               throw new NBTException("Unexpected token '" + c0 + "' at: " + value.substring(s.length()));
+            char var10 = var1.charAt(var3.length());
+            if (var10 != ',' && var10 != '{' && var10 != '}' && var10 != '[' && var10 != ']') {
+               throw new NBTException("Unexpected token '" + var10 + "' at: " + var1.substring(var3.length()));
             }
          }
 
-         return jsontonbt$list;
+         return var2;
       } else {
-         return new JsonToNBT.Primitive(key, value);
+         return new JsonToNBT.Primitive(var0, var1);
       }
    }
 
    private static JsonToNBT.Any getTagFromNameValue(String var0, boolean var1) throws NBTException {
-      String s = locateName(str, isArray);
-      String s1 = locateValue(str, isArray);
-      return joinStrToNBT(s, s1);
+      String var2 = locateName(var0, var1);
+      String var3 = locateValue(var0, var1);
+      return joinStrToNBT(var2, var3);
    }
 
    private static String nextNameValuePair(String var0, boolean var1) throws NBTException {
-      int i = getNextCharIndex(str, ':');
-      int j = getNextCharIndex(str, ',');
-      if (isCompound) {
-         if (i == -1) {
-            throw new NBTException("Unable to locate name/value separator for string: " + str);
+      int var2 = getNextCharIndex(var0, ':');
+      int var3 = getNextCharIndex(var0, ',');
+      if (var1) {
+         if (var2 == -1) {
+            throw new NBTException("Unable to locate name/value separator for string: " + var0);
          }
 
-         if (j != -1 && j < i) {
-            throw new NBTException("Name error at: " + str);
+         if (var3 != -1 && var3 < var2) {
+            throw new NBTException("Name error at: " + var0);
          }
-      } else if (i == -1 || i > j) {
-         i = -1;
+      } else if (var2 == -1 || var2 > var3) {
+         var2 = -1;
       }
 
-      return locateValueAt(str, i);
+      return locateValueAt(var0, var2);
    }
 
    private static String locateValueAt(String var0, int var1) throws NBTException {
-      Stack stack = new Stack();
-      int i = index + 1;
-      boolean flag = false;
-      boolean flag1 = false;
-      boolean flag2 = false;
+      Stack var2 = new Stack();
+      int var3 = var1 + 1;
+      boolean var4 = false;
+      boolean var5 = false;
+      boolean var6 = false;
 
-      for(int j = 0; i < str.length(); ++i) {
-         char c0 = str.charAt(i);
-         if (c0 == '"') {
-            if (isCharEscaped(str, i)) {
-               if (!flag) {
-                  throw new NBTException("Illegal use of \\\": " + str);
+      for(int var7 = 0; var3 < var0.length(); ++var3) {
+         char var8 = var0.charAt(var3);
+         if (var8 == '"') {
+            if (isCharEscaped(var0, var3)) {
+               if (!var4) {
+                  throw new NBTException("Illegal use of \\\": " + var0);
                }
             } else {
-               flag = !flag;
-               if (flag && !flag2) {
-                  flag1 = true;
+               var4 = !var4;
+               if (var4 && !var6) {
+                  var5 = true;
                }
 
-               if (!flag) {
-                  j = i;
+               if (!var4) {
+                  var7 = var3;
                }
             }
-         } else if (!flag) {
-            if (c0 != '{' && c0 != '[') {
-               if (c0 == '}' && (stack.isEmpty() || ((Character)stack.pop()).charValue() != '{')) {
-                  throw new NBTException("Unbalanced curly brackets {}: " + str);
+         } else if (!var4) {
+            if (var8 != '{' && var8 != '[') {
+               if (var8 == '}' && (var2.isEmpty() || ((Character)var2.pop()).charValue() != '{')) {
+                  throw new NBTException("Unbalanced curly brackets {}: " + var0);
                }
 
-               if (c0 == ']' && (stack.isEmpty() || ((Character)stack.pop()).charValue() != '[')) {
-                  throw new NBTException("Unbalanced square brackets []: " + str);
+               if (var8 == ']' && (var2.isEmpty() || ((Character)var2.pop()).charValue() != '[')) {
+                  throw new NBTException("Unbalanced square brackets []: " + var0);
                }
 
-               if (c0 == ',' && stack.isEmpty()) {
-                  return str.substring(0, i);
+               if (var8 == ',' && var2.isEmpty()) {
+                  return var0.substring(0, var3);
                }
             } else {
-               stack.push(Character.valueOf(c0));
+               var2.push(Character.valueOf(var8));
             }
          }
 
-         if (!Character.isWhitespace(c0)) {
-            if (!flag && flag1 && j != i) {
-               return str.substring(0, j + 1);
+         if (!Character.isWhitespace(var8)) {
+            if (!var4 && var5 && var7 != var3) {
+               return var0.substring(0, var7 + 1);
             }
 
-            flag2 = true;
+            var6 = true;
          }
       }
 
-      return str.substring(0, i);
+      return var0.substring(0, var3);
    }
 
    private static String locateName(String var0, boolean var1) throws NBTException {
-      if (isArray) {
-         str = str.trim();
-         if (str.startsWith("{") || str.startsWith("[")) {
+      if (var1) {
+         var0 = var0.trim();
+         if (var0.startsWith("{") || var0.startsWith("[")) {
             return "";
          }
       }
 
-      int i = getNextCharIndex(str, ':');
-      if (i == -1) {
-         if (isArray) {
+      int var2 = getNextCharIndex(var0, ':');
+      if (var2 == -1) {
+         if (var1) {
             return "";
          } else {
-            throw new NBTException("Unable to locate name/value separator for string: " + str);
+            throw new NBTException("Unable to locate name/value separator for string: " + var0);
          }
       } else {
-         return str.substring(0, i).trim();
+         return var0.substring(0, var2).trim();
       }
    }
 
    private static String locateValue(String var0, boolean var1) throws NBTException {
-      if (isArray) {
-         str = str.trim();
-         if (str.startsWith("{") || str.startsWith("[")) {
-            return str;
+      if (var1) {
+         var0 = var0.trim();
+         if (var0.startsWith("{") || var0.startsWith("[")) {
+            return var0;
          }
       }
 
-      int i = getNextCharIndex(str, ':');
-      if (i == -1) {
-         if (isArray) {
-            return str;
+      int var2 = getNextCharIndex(var0, ':');
+      if (var2 == -1) {
+         if (var1) {
+            return var0;
          } else {
-            throw new NBTException("Unable to locate name/value separator for string: " + str);
+            throw new NBTException("Unable to locate name/value separator for string: " + var0);
          }
       } else {
-         return str.substring(i + 1).trim();
+         return var0.substring(var2 + 1).trim();
       }
    }
 
    private static int getNextCharIndex(String var0, char var1) {
-      int i = 0;
+      int var2 = 0;
 
-      for(boolean flag = true; i < str.length(); ++i) {
-         char c0 = str.charAt(i);
-         if (c0 == '"') {
-            if (!isCharEscaped(str, i)) {
-               flag = !flag;
+      for(boolean var3 = true; var2 < var0.length(); ++var2) {
+         char var4 = var0.charAt(var2);
+         if (var4 == '"') {
+            if (!isCharEscaped(var0, var2)) {
+               var3 = !var3;
             }
-         } else if (flag) {
-            if (c0 == targetChar) {
-               return i;
+         } else if (var3) {
+            if (var4 == var1) {
+               return var2;
             }
 
-            if (c0 == '{' || c0 == '[') {
+            if (var4 == '{' || var4 == '[') {
                return -1;
             }
          }
@@ -269,7 +269,7 @@ public class JsonToNBT {
    }
 
    private static boolean isCharEscaped(String var0, int var1) {
-      return index > 0 && str.charAt(index - 1) == '\\' && !isCharEscaped(str, index - 1);
+      return var1 > 0 && var0.charAt(var1 - 1) == '\\' && !isCharEscaped(var0, var1 - 1);
    }
 
    abstract static class Any {
@@ -282,17 +282,17 @@ public class JsonToNBT {
       protected java.util.List tagList = Lists.newArrayList();
 
       public Compound(String var1) {
-         this.json = jsonIn;
+         this.json = var1;
       }
 
       public NBTBase parse() throws NBTException {
-         NBTTagCompound nbttagcompound = new NBTTagCompound();
+         NBTTagCompound var1 = new NBTTagCompound();
 
-         for(JsonToNBT.Any jsontonbt$any : this.tagList) {
-            nbttagcompound.setTag(jsontonbt$any.json, jsontonbt$any.parse());
+         for(JsonToNBT.Any var3 : this.tagList) {
+            var1.setTag(var3.json, var3.parse());
          }
 
-         return nbttagcompound;
+         return var1;
       }
    }
 
@@ -300,17 +300,17 @@ public class JsonToNBT {
       protected java.util.List tagList = Lists.newArrayList();
 
       public List(String var1) {
-         this.json = json;
+         this.json = var1;
       }
 
       public NBTBase parse() throws NBTException {
-         NBTTagList nbttaglist = new NBTTagList();
+         NBTTagList var1 = new NBTTagList();
 
-         for(JsonToNBT.Any jsontonbt$any : this.tagList) {
-            nbttaglist.appendTag(jsontonbt$any.parse());
+         for(JsonToNBT.Any var3 : this.tagList) {
+            var1.appendTag(var3.parse());
          }
 
-         return nbttaglist;
+         return var1;
       }
    }
 
@@ -326,8 +326,8 @@ public class JsonToNBT {
       protected String jsonValue;
 
       public Primitive(String var1, String var2) {
-         this.json = jsonIn;
-         this.jsonValue = valueIn;
+         this.json = var1;
+         this.jsonValue = var2;
       }
 
       public NBTBase parse() throws NBTException {
@@ -369,17 +369,17 @@ public class JsonToNBT {
          }
 
          if (this.jsonValue.startsWith("[") && this.jsonValue.endsWith("]")) {
-            String s = this.jsonValue.substring(1, this.jsonValue.length() - 1);
-            String[] astring = (String[])Iterables.toArray(SPLITTER.split(s), String.class);
+            String var7 = this.jsonValue.substring(1, this.jsonValue.length() - 1);
+            String[] var8 = (String[])Iterables.toArray(SPLITTER.split(var7), String.class);
 
             try {
-               int[] aint = new int[astring.length];
+               int[] var3 = new int[var8.length];
 
-               for(int j = 0; j < astring.length; ++j) {
-                  aint[j] = Integer.parseInt(astring[j].trim());
+               for(int var4 = 0; var4 < var8.length; ++var4) {
+                  var3[var4] = Integer.parseInt(var8[var4].trim());
                }
 
-               return new NBTTagIntArray(aint);
+               return new NBTTagIntArray(var3);
             } catch (NumberFormatException var5) {
                return new NBTTagString(this.jsonValue);
             }
@@ -389,18 +389,18 @@ public class JsonToNBT {
             }
 
             this.jsonValue = this.jsonValue.replaceAll("\\\\\"", "\"");
-            StringBuilder stringbuilder = new StringBuilder();
+            StringBuilder var1 = new StringBuilder();
 
-            for(int i = 0; i < this.jsonValue.length(); ++i) {
-               if (i < this.jsonValue.length() - 1 && this.jsonValue.charAt(i) == '\\' && this.jsonValue.charAt(i + 1) == '\\') {
-                  stringbuilder.append('\\');
-                  ++i;
+            for(int var2 = 0; var2 < this.jsonValue.length(); ++var2) {
+               if (var2 < this.jsonValue.length() - 1 && this.jsonValue.charAt(var2) == '\\' && this.jsonValue.charAt(var2 + 1) == '\\') {
+                  var1.append('\\');
+                  ++var2;
                } else {
-                  stringbuilder.append(this.jsonValue.charAt(i));
+                  var1.append(this.jsonValue.charAt(var2));
                }
             }
 
-            return new NBTTagString(stringbuilder.toString());
+            return new NBTTagString(var1.toString());
          }
       }
    }

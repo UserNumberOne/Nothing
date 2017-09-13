@@ -8,8 +8,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketTeams implements Packet {
    private String name = "";
@@ -35,20 +33,20 @@ public class SPacketTeams implements Packet {
       this.collisionRule = Team.CollisionRule.ALWAYS.name;
       this.color = -1;
       this.players = Lists.newArrayList();
-      this.name = teamIn.getRegisteredName();
-      this.action = actionIn;
-      if (actionIn == 0 || actionIn == 2) {
-         this.displayName = teamIn.getTeamName();
-         this.prefix = teamIn.getColorPrefix();
-         this.suffix = teamIn.getColorSuffix();
-         this.friendlyFlags = teamIn.getFriendlyFlags();
-         this.nameTagVisibility = teamIn.getNameTagVisibility().internalName;
-         this.collisionRule = teamIn.getCollisionRule().name;
-         this.color = teamIn.getChatFormat().getColorIndex();
+      this.name = var1.getRegisteredName();
+      this.action = var2;
+      if (var2 == 0 || var2 == 2) {
+         this.displayName = var1.getTeamName();
+         this.prefix = var1.getColorPrefix();
+         this.suffix = var1.getColorSuffix();
+         this.friendlyFlags = var1.getFriendlyFlags();
+         this.nameTagVisibility = var1.getNameTagVisibility().internalName;
+         this.collisionRule = var1.getCollisionRule().name;
+         this.color = var1.getChatFormat().getColorIndex();
       }
 
-      if (actionIn == 0) {
-         this.players.addAll(teamIn.getMembershipCollection());
+      if (var2 == 0) {
+         this.players.addAll(var1.getMembershipCollection());
       }
 
    }
@@ -58,114 +56,64 @@ public class SPacketTeams implements Packet {
       this.collisionRule = Team.CollisionRule.ALWAYS.name;
       this.color = -1;
       this.players = Lists.newArrayList();
-      if (actionIn != 3 && actionIn != 4) {
+      if (var3 != 3 && var3 != 4) {
          throw new IllegalArgumentException("Method must be join or leave for player constructor");
-      } else if (playersIn != null && !playersIn.isEmpty()) {
-         this.action = actionIn;
-         this.name = teamIn.getRegisteredName();
-         this.players.addAll(playersIn);
+      } else if (var2 != null && !var2.isEmpty()) {
+         this.action = var3;
+         this.name = var1.getRegisteredName();
+         this.players.addAll(var2);
       } else {
          throw new IllegalArgumentException("Players cannot be null/empty");
       }
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.name = buf.readString(16);
-      this.action = buf.readByte();
+      this.name = var1.readString(16);
+      this.action = var1.readByte();
       if (this.action == 0 || this.action == 2) {
-         this.displayName = buf.readString(32);
-         this.prefix = buf.readString(16);
-         this.suffix = buf.readString(16);
-         this.friendlyFlags = buf.readByte();
-         this.nameTagVisibility = buf.readString(32);
-         this.collisionRule = buf.readString(32);
-         this.color = buf.readByte();
+         this.displayName = var1.readString(32);
+         this.prefix = var1.readString(16);
+         this.suffix = var1.readString(16);
+         this.friendlyFlags = var1.readByte();
+         this.nameTagVisibility = var1.readString(32);
+         this.collisionRule = var1.readString(32);
+         this.color = var1.readByte();
       }
 
       if (this.action == 0 || this.action == 3 || this.action == 4) {
-         int i = buf.readVarInt();
+         int var2 = var1.readVarInt();
 
-         for(int j = 0; j < i; ++j) {
-            this.players.add(buf.readString(40));
+         for(int var3 = 0; var3 < var2; ++var3) {
+            this.players.add(var1.readString(40));
          }
       }
 
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeString(this.name);
-      buf.writeByte(this.action);
+      var1.writeString(this.name);
+      var1.writeByte(this.action);
       if (this.action == 0 || this.action == 2) {
-         buf.writeString(this.displayName);
-         buf.writeString(this.prefix);
-         buf.writeString(this.suffix);
-         buf.writeByte(this.friendlyFlags);
-         buf.writeString(this.nameTagVisibility);
-         buf.writeString(this.collisionRule);
-         buf.writeByte(this.color);
+         var1.writeString(this.displayName);
+         var1.writeString(this.prefix);
+         var1.writeString(this.suffix);
+         var1.writeByte(this.friendlyFlags);
+         var1.writeString(this.nameTagVisibility);
+         var1.writeString(this.collisionRule);
+         var1.writeByte(this.color);
       }
 
       if (this.action == 0 || this.action == 3 || this.action == 4) {
-         buf.writeVarInt(this.players.size());
+         var1.writeVarInt(this.players.size());
 
-         for(String s : this.players) {
-            buf.writeString(s);
+         for(String var3 : this.players) {
+            var1.writeString(var3);
          }
       }
 
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      handler.handleTeams(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getName() {
-      return this.name;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getDisplayName() {
-      return this.displayName;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getPrefix() {
-      return this.prefix;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getSuffix() {
-      return this.suffix;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Collection getPlayers() {
-      return this.players;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getAction() {
-      return this.action;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFriendlyFlags() {
-      return this.friendlyFlags;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getColor() {
-      return this.color;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getNameTagVisibility() {
-      return this.nameTagVisibility;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getCollisionRule() {
-      return this.collisionRule;
+      var1.handleTeams(this);
    }
 }

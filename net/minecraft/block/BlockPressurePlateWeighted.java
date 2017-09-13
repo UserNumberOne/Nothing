@@ -9,27 +9,50 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityInteractEvent;
 
 public class BlockPressurePlateWeighted extends BlockBasePressurePlate {
    public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
    private final int maxWeight;
 
-   protected BlockPressurePlateWeighted(Material var1, int var2) {
-      this(materialIn, p_i46379_2_, materialIn.getMaterialMapColor());
+   protected BlockPressurePlateWeighted(Material material, int i) {
+      this(material, i, material.getMaterialMapColor());
    }
 
-   protected BlockPressurePlateWeighted(Material var1, int var2, MapColor var3) {
-      super(materialIn, color);
+   protected BlockPressurePlateWeighted(Material material, int i, MapColor materialmapcolor) {
+      super(material, materialmapcolor);
       this.setDefaultState(this.blockState.getBaseState().withProperty(POWER, Integer.valueOf(0)));
-      this.maxWeight = p_i46380_2_;
+      this.maxWeight = i;
    }
 
-   protected int computeRedstoneStrength(World var1, BlockPos var2) {
-      int i = Math.min(worldIn.getEntitiesWithinAABB(Entity.class, PRESSURE_AABB.offset(pos)).size(), this.maxWeight);
+   protected int computeRedstoneStrength(World world, BlockPos blockposition) {
+      int i = 0;
+
+      for(Entity entity : world.getEntitiesWithinAABB(Entity.class, PRESSURE_AABB.offset(blockposition))) {
+         Cancellable cancellable;
+         if (entity instanceof EntityPlayer) {
+            cancellable = CraftEventFactory.callPlayerInteractEvent((EntityPlayer)entity, Action.PHYSICAL, blockposition, (EnumFacing)null, (ItemStack)null, (EnumHand)null);
+         } else {
+            cancellable = new EntityInteractEvent(entity.getBukkitEntity(), world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()));
+            world.getServer().getPluginManager().callEvent((EntityInteractEvent)cancellable);
+         }
+
+         if (!cancellable.isCancelled()) {
+            ++i;
+         }
+      }
+
+      i = Math.min(i, this.maxWeight);
       if (i > 0) {
          float f = (float)Math.min(this.maxWeight, i) / (float)this.maxWeight;
          return MathHelper.ceil(f * 15.0F);
@@ -38,32 +61,32 @@ public class BlockPressurePlateWeighted extends BlockBasePressurePlate {
       }
    }
 
-   protected void playClickOnSound(World var1, BlockPos var2) {
-      worldIn.playSound((EntityPlayer)null, color, SoundEvents.BLOCK_METAL_PRESSPLATE_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.90000004F);
+   protected void playClickOnSound(World world, BlockPos blockposition) {
+      world.playSound((EntityPlayer)null, blockposition, SoundEvents.BLOCK_METAL_PRESSPLATE_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.90000004F);
    }
 
-   protected void playClickOffSound(World var1, BlockPos var2) {
-      worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_METAL_PRESSPLATE_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.75F);
+   protected void playClickOffSound(World world, BlockPos blockposition) {
+      world.playSound((EntityPlayer)null, blockposition, SoundEvents.BLOCK_METAL_PRESSPLATE_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.75F);
    }
 
-   protected int getRedstoneStrength(IBlockState var1) {
-      return ((Integer)state.getValue(POWER)).intValue();
+   protected int getRedstoneStrength(IBlockState iblockdata) {
+      return ((Integer)iblockdata.getValue(POWER)).intValue();
    }
 
-   protected IBlockState setRedstoneStrength(IBlockState var1, int var2) {
-      return state.withProperty(POWER, Integer.valueOf(strength));
+   protected IBlockState setRedstoneStrength(IBlockState iblockdata, int i) {
+      return iblockdata.withProperty(POWER, Integer.valueOf(i));
    }
 
-   public int tickRate(World var1) {
+   public int tickRate(World world) {
       return 10;
    }
 
-   public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(POWER, Integer.valueOf(meta));
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(POWER, Integer.valueOf(i));
    }
 
-   public int getMetaFromState(IBlockState var1) {
-      return ((Integer)state.getValue(POWER)).intValue();
+   public int getMetaFromState(IBlockState iblockdata) {
+      return ((Integer)iblockdata.getValue(POWER)).intValue();
    }
 
    protected BlockStateContainer createBlockState() {

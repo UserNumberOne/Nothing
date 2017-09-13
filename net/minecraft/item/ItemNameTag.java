@@ -12,16 +12,16 @@ public class ItemNameTag extends Item {
    }
 
    public boolean itemInteractionForEntity(ItemStack var1, EntityPlayer var2, EntityLivingBase var3, EnumHand var4) {
-      if (!stack.hasDisplayName()) {
+      if (!var1.hasDisplayName()) {
          return false;
-      } else if (target instanceof EntityLiving) {
-         EntityLiving entityliving = (EntityLiving)target;
-         entityliving.setCustomNameTag(stack.getDisplayName());
-         entityliving.enablePersistence();
-         --stack.stackSize;
+      } else if (var3 instanceof EntityLiving) {
+         EntityLiving var5 = (EntityLiving)var3;
+         var5.setCustomNameTag(var1.getDisplayName());
+         var5.enablePersistence();
+         --var1.stackSize;
          return true;
       } else {
-         return super.itemInteractionForEntity(stack, playerIn, target, hand);
+         return super.itemInteractionForEntity(var1, var2, var3, var4);
       }
    }
 }

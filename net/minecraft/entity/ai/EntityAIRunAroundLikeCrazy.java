@@ -4,6 +4,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityAIRunAroundLikeCrazy extends EntityAIBase {
    private final EntityHorse horseHost;
@@ -12,9 +14,9 @@ public class EntityAIRunAroundLikeCrazy extends EntityAIBase {
    private double targetY;
    private double targetZ;
 
-   public EntityAIRunAroundLikeCrazy(EntityHorse var1, double var2) {
-      this.horseHost = horse;
-      this.speed = speedIn;
+   public EntityAIRunAroundLikeCrazy(EntityHorse entityhorse, double d0) {
+      this.horseHost = entityhorse;
+      this.speed = d0;
       this.setMutexBits(1);
    }
 
@@ -52,7 +54,7 @@ public class EntityAIRunAroundLikeCrazy extends EntityAIBase {
          if (entity instanceof EntityPlayer) {
             int i = this.horseHost.getTemper();
             int j = this.horseHost.getMaxTemper();
-            if (j > 0 && this.horseHost.getRNG().nextInt(j) < i) {
+            if (j > 0 && this.horseHost.getRNG().nextInt(j) < i && !CraftEventFactory.callEntityTameEvent(this.horseHost, ((CraftHumanEntity)this.horseHost.getBukkitEntity().getPassenger()).getHandle()).isCancelled()) {
                this.horseHost.setTamedBy((EntityPlayer)entity);
                this.horseHost.world.setEntityState(this.horseHost, (byte)7);
                return;

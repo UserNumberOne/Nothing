@@ -1,6 +1,7 @@
 package net.minecraft.world.gen.structure;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.entity.item.EntityItemFrame;
@@ -9,7 +10,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
@@ -32,23 +33,23 @@ public class StructureEndCityPieces {
       }
 
       public boolean generate(int var1, StructureEndCityPieces.CityTemplate var2, BlockPos var3, List var4, Random var5) {
-         if (p_186185_1_ > 8) {
+         if (var1 > 8) {
             return false;
          } else {
-            Rotation rotation = p_186185_2_.placeSettings.getRotation();
-            StructureEndCityPieces.CityTemplate structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(p_186185_2_, p_186185_3_, "base_floor", rotation, true));
-            int i = rand.nextInt(3);
-            if (i == 0) {
-               StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(-1, 4, -1), "base_roof", rotation, true));
-            } else if (i == 1) {
-               structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(-1, 0, -1), "second_floor_2", rotation, false));
-               structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(-1, 8, -1), "second_roof", rotation, false));
-               StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.TOWER_GENERATOR, p_186185_1_ + 1, structureendcitypieces$citytemplate, (BlockPos)null, p_186185_4_, rand);
-            } else if (i == 2) {
-               structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(-1, 0, -1), "second_floor_2", rotation, false));
-               structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(-1, 4, -1), "third_floor_c", rotation, false));
-               structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(-1, 8, -1), "third_roof", rotation, true));
-               StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.TOWER_GENERATOR, p_186185_1_ + 1, structureendcitypieces$citytemplate, (BlockPos)null, p_186185_4_, rand);
+            Rotation var6 = var2.placeSettings.getRotation();
+            StructureEndCityPieces.CityTemplate var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var2, var3, "base_floor", var6, true));
+            int var8 = var5.nextInt(3);
+            if (var8 == 0) {
+               StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(-1, 4, -1), "base_roof", var6, true));
+            } else if (var8 == 1) {
+               var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(-1, 0, -1), "second_floor_2", var6, false));
+               var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(-1, 8, -1), "second_roof", var6, false));
+               StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.TOWER_GENERATOR, var1 + 1, var7, (BlockPos)null, var4, var5);
+            } else if (var8 == 2) {
+               var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(-1, 0, -1), "second_floor_2", var6, false));
+               var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(-1, 4, -1), "third_floor_c", var6, false));
+               var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(-1, 8, -1), "third_roof", var6, true));
+               StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.TOWER_GENERATOR, var1 + 1, var7, (BlockPos)null, var4, var5);
             }
 
             return true;
@@ -61,34 +62,34 @@ public class StructureEndCityPieces {
       }
 
       public boolean generate(int var1, StructureEndCityPieces.CityTemplate var2, BlockPos var3, List var4, Random var5) {
-         Rotation rotation = p_186185_2_.placeSettings.getRotation();
-         StructureEndCityPieces.CityTemplate lvt_7_1_ = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(p_186185_2_, new BlockPos(3 + rand.nextInt(2), -3, 3 + rand.nextInt(2)), "tower_base", rotation, true));
-         lvt_7_1_ = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(lvt_7_1_, new BlockPos(0, 7, 0), "tower_piece", rotation, true));
-         StructureEndCityPieces.CityTemplate structureendcitypieces$citytemplate1 = rand.nextInt(3) == 0 ? lvt_7_1_ : null;
-         int i = 1 + rand.nextInt(3);
+         Rotation var6 = var2.placeSettings.getRotation();
+         StructureEndCityPieces.CityTemplate var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var2, new BlockPos(3 + var5.nextInt(2), -3, 3 + var5.nextInt(2)), "tower_base", var6, true));
+         var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(0, 7, 0), "tower_piece", var6, true));
+         StructureEndCityPieces.CityTemplate var8 = var5.nextInt(3) == 0 ? var7 : null;
+         int var9 = 1 + var5.nextInt(3);
 
-         for(int j = 0; j < i; ++j) {
-            lvt_7_1_ = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(lvt_7_1_, new BlockPos(0, 4, 0), "tower_piece", rotation, true));
-            if (j < i - 1 && rand.nextBoolean()) {
-               structureendcitypieces$citytemplate1 = lvt_7_1_;
+         for(int var10 = 0; var10 < var9; ++var10) {
+            var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(0, 4, 0), "tower_piece", var6, true));
+            if (var10 < var9 - 1 && var5.nextBoolean()) {
+               var8 = var7;
             }
          }
 
-         if (structureendcitypieces$citytemplate1 != null) {
-            for(Tuple tuple : StructureEndCityPieces.TOWER_BRIDGES) {
-               if (rand.nextBoolean()) {
-                  StructureEndCityPieces.CityTemplate structureendcitypieces$citytemplate2 = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate1, (BlockPos)tuple.getSecond(), "bridge_end", rotation.add((Rotation)tuple.getFirst()), true));
-                  StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.TOWER_BRIDGE_GENERATOR, p_186185_1_ + 1, structureendcitypieces$citytemplate2, (BlockPos)null, p_186185_4_, rand);
+         if (var8 != null) {
+            for(Tuple var11 : StructureEndCityPieces.TOWER_BRIDGES) {
+               if (var5.nextBoolean()) {
+                  StructureEndCityPieces.CityTemplate var12 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var8, (BlockPos)var11.getSecond(), "bridge_end", var6.add((Rotation)var11.getFirst()), true));
+                  StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.TOWER_BRIDGE_GENERATOR, var1 + 1, var12, (BlockPos)null, var4, var5);
                }
             }
 
-            StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(lvt_7_1_, new BlockPos(-1, 4, -1), "tower_top", rotation, true));
+            StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(-1, 4, -1), "tower_top", var6, true));
          } else {
-            if (p_186185_1_ != 7) {
-               return StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.FAT_TOWER_GENERATOR, p_186185_1_ + 1, lvt_7_1_, (BlockPos)null, p_186185_4_, rand);
+            if (var1 != 7) {
+               return StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.FAT_TOWER_GENERATOR, var1 + 1, var7, (BlockPos)null, var4, var5);
             }
 
-            StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(lvt_7_1_, new BlockPos(-1, 4, -1), "tower_top", rotation, true));
+            StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(-1, 4, -1), "tower_top", var6, true));
          }
 
          return true;
@@ -102,36 +103,36 @@ public class StructureEndCityPieces {
       }
 
       public boolean generate(int var1, StructureEndCityPieces.CityTemplate var2, BlockPos var3, List var4, Random var5) {
-         Rotation rotation = p_186185_2_.placeSettings.getRotation();
-         int i = rand.nextInt(4) + 1;
-         StructureEndCityPieces.CityTemplate structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(p_186185_2_, new BlockPos(0, 0, -4), "bridge_piece", rotation, true));
-         structureendcitypieces$citytemplate.componentType = -1;
-         int j = 0;
+         Rotation var6 = var2.placeSettings.getRotation();
+         int var7 = var5.nextInt(4) + 1;
+         StructureEndCityPieces.CityTemplate var8 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var2, new BlockPos(0, 0, -4), "bridge_piece", var6, true));
+         var8.componentType = -1;
+         byte var9 = 0;
 
-         for(int k = 0; k < i; ++k) {
-            if (rand.nextBoolean()) {
-               structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(0, j, -4), "bridge_piece", rotation, true));
-               j = 0;
+         for(int var10 = 0; var10 < var7; ++var10) {
+            if (var5.nextBoolean()) {
+               var8 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var8, new BlockPos(0, var9, -4), "bridge_piece", var6, true));
+               var9 = 0;
             } else {
-               if (rand.nextBoolean()) {
-                  structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(0, j, -4), "bridge_steep_stairs", rotation, true));
+               if (var5.nextBoolean()) {
+                  var8 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var8, new BlockPos(0, var9, -4), "bridge_steep_stairs", var6, true));
                } else {
-                  structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(0, j, -8), "bridge_gentle_stairs", rotation, true));
+                  var8 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var8, new BlockPos(0, var9, -8), "bridge_gentle_stairs", var6, true));
                }
 
-               j = 4;
+               var9 = 4;
             }
          }
 
-         if (!this.shipCreated && rand.nextInt(10 - p_186185_1_) == 0) {
-            StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(-8 + rand.nextInt(8), j, -70 + rand.nextInt(10)), "ship", rotation, true));
+         if (!this.shipCreated && var5.nextInt(10 - var1) == 0) {
+            StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var8, new BlockPos(-8 + var5.nextInt(8), var9, -70 + var5.nextInt(10)), "ship", var6, true));
             this.shipCreated = true;
-         } else if (!StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.HOUSE_TOWER_GENERATOR, p_186185_1_ + 1, structureendcitypieces$citytemplate, new BlockPos(-3, j + 1, -11), p_186185_4_, rand)) {
+         } else if (!StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.HOUSE_TOWER_GENERATOR, var1 + 1, var8, new BlockPos(-3, var9 + 1, -11), var4, var5)) {
             return false;
          }
 
-         structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(4, j, 0), "bridge_end", rotation.add(Rotation.CLOCKWISE_180), true));
-         structureendcitypieces$citytemplate.componentType = -1;
+         var8 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var8, new BlockPos(4, var9, 0), "bridge_end", var6.add(Rotation.CLOCKWISE_180), true));
+         var8.componentType = -1;
          return true;
       }
    };
@@ -141,22 +142,22 @@ public class StructureEndCityPieces {
       }
 
       public boolean generate(int var1, StructureEndCityPieces.CityTemplate var2, BlockPos var3, List var4, Random var5) {
-         Rotation rotation = p_186185_2_.placeSettings.getRotation();
-         StructureEndCityPieces.CityTemplate structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(p_186185_2_, new BlockPos(-3, 4, -3), "fat_tower_base", rotation, true));
-         structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(0, 4, 0), "fat_tower_middle", rotation, true));
+         Rotation var6 = var2.placeSettings.getRotation();
+         StructureEndCityPieces.CityTemplate var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var2, new BlockPos(-3, 4, -3), "fat_tower_base", var6, true));
+         var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(0, 4, 0), "fat_tower_middle", var6, true));
 
-         for(int i = 0; i < 2 && rand.nextInt(3) != 0; ++i) {
-            structureendcitypieces$citytemplate = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(0, 8, 0), "fat_tower_middle", rotation, true));
+         for(int var8 = 0; var8 < 2 && var5.nextInt(3) != 0; ++var8) {
+            var7 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(0, 8, 0), "fat_tower_middle", var6, true));
 
-            for(Tuple tuple : StructureEndCityPieces.FAT_TOWER_BRIDGES) {
-               if (rand.nextBoolean()) {
-                  StructureEndCityPieces.CityTemplate structureendcitypieces$citytemplate1 = StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, (BlockPos)tuple.getSecond(), "bridge_end", rotation.add((Rotation)tuple.getFirst()), true));
-                  StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.TOWER_BRIDGE_GENERATOR, p_186185_1_ + 1, structureendcitypieces$citytemplate1, (BlockPos)null, p_186185_4_, rand);
+            for(Tuple var10 : StructureEndCityPieces.FAT_TOWER_BRIDGES) {
+               if (var5.nextBoolean()) {
+                  StructureEndCityPieces.CityTemplate var11 = StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, (BlockPos)var10.getSecond(), "bridge_end", var6.add((Rotation)var10.getFirst()), true));
+                  StructureEndCityPieces.recursiveChildren(StructureEndCityPieces.TOWER_BRIDGE_GENERATOR, var1 + 1, var11, (BlockPos)null, var4, var5);
                }
             }
          }
 
-         StructureEndCityPieces.func_189935_b(p_186185_4_, StructureEndCityPieces.addPiece(structureendcitypieces$citytemplate, new BlockPos(-2, 8, -2), "fat_tower_top", rotation, true));
+         StructureEndCityPieces.func_189935_b(var4, StructureEndCityPieces.addPiece(var7, new BlockPos(-2, 8, -2), "fat_tower_top", var6, true));
          return true;
       }
    };
@@ -166,10 +167,10 @@ public class StructureEndCityPieces {
    }
 
    private static StructureEndCityPieces.CityTemplate addPiece(StructureEndCityPieces.CityTemplate var0, BlockPos var1, String var2, Rotation var3, boolean var4) {
-      StructureEndCityPieces.CityTemplate structureendcitypieces$citytemplate = new StructureEndCityPieces.CityTemplate(p_186189_2_, p_186189_0_.templatePosition, p_186189_3_, p_186189_4_);
-      BlockPos blockpos = p_186189_0_.template.calculateConnectedPos(p_186189_0_.placeSettings, p_186189_1_, structureendcitypieces$citytemplate.placeSettings, BlockPos.ORIGIN);
-      structureendcitypieces$citytemplate.offset(blockpos.getX(), blockpos.getY(), blockpos.getZ());
-      return structureendcitypieces$citytemplate;
+      StructureEndCityPieces.CityTemplate var5 = new StructureEndCityPieces.CityTemplate(var2, var0.templatePosition, var3, var4);
+      BlockPos var6 = var0.template.calculateConnectedPos(var0.placeSettings, var1, var5.placeSettings, BlockPos.ORIGIN);
+      var5.offset(var6.getX(), var6.getY(), var6.getZ());
+      return var5;
    }
 
    public static void beginHouseTower(BlockPos var0, Rotation var1, List var2, Random var3) {
@@ -177,38 +178,38 @@ public class StructureEndCityPieces {
       HOUSE_TOWER_GENERATOR.init();
       TOWER_BRIDGE_GENERATOR.init();
       TOWER_GENERATOR.init();
-      StructureEndCityPieces.CityTemplate structureendcitypieces$citytemplate = func_189935_b(p_186190_2_, new StructureEndCityPieces.CityTemplate("base_floor", p_186190_0_, p_186190_1_, true));
-      structureendcitypieces$citytemplate = func_189935_b(p_186190_2_, addPiece(structureendcitypieces$citytemplate, new BlockPos(-1, 0, -1), "second_floor", p_186190_1_, false));
-      structureendcitypieces$citytemplate = func_189935_b(p_186190_2_, addPiece(structureendcitypieces$citytemplate, new BlockPos(-1, 4, -1), "third_floor", p_186190_1_, false));
-      structureendcitypieces$citytemplate = func_189935_b(p_186190_2_, addPiece(structureendcitypieces$citytemplate, new BlockPos(-1, 8, -1), "third_roof", p_186190_1_, true));
-      recursiveChildren(TOWER_GENERATOR, 1, structureendcitypieces$citytemplate, (BlockPos)null, p_186190_2_, p_186190_3_);
+      StructureEndCityPieces.CityTemplate var4 = func_189935_b(var2, new StructureEndCityPieces.CityTemplate("base_floor", var0, var1, true));
+      var4 = func_189935_b(var2, addPiece(var4, new BlockPos(-1, 0, -1), "second_floor", var1, false));
+      var4 = func_189935_b(var2, addPiece(var4, new BlockPos(-1, 4, -1), "third_floor", var1, false));
+      var4 = func_189935_b(var2, addPiece(var4, new BlockPos(-1, 8, -1), "third_roof", var1, true));
+      recursiveChildren(TOWER_GENERATOR, 1, var4, (BlockPos)null, var2, var3);
    }
 
    private static StructureEndCityPieces.CityTemplate func_189935_b(List var0, StructureEndCityPieces.CityTemplate var1) {
-      p_189935_0_.add(p_189935_1_);
-      return p_189935_1_;
+      var0.add(var1);
+      return var1;
    }
 
    private static boolean recursiveChildren(StructureEndCityPieces.IGenerator var0, int var1, StructureEndCityPieces.CityTemplate var2, BlockPos var3, List var4, Random var5) {
-      if (p_186187_1_ > 8) {
+      if (var1 > 8) {
          return false;
       } else {
-         List list = Lists.newArrayList();
-         if (generator.generate(p_186187_1_, p_186187_2_, p_186187_3_, list, p_186187_5_)) {
-            boolean flag = false;
-            int i = p_186187_5_.nextInt();
+         ArrayList var6 = Lists.newArrayList();
+         if (var0.generate(var1, var2, var3, var6, var5)) {
+            boolean var7 = false;
+            int var8 = var5.nextInt();
 
-            for(StructureComponent structurecomponent : list) {
-               structurecomponent.componentType = i;
-               StructureComponent structurecomponent1 = StructureComponent.findIntersecting(p_186187_4_, structurecomponent.getBoundingBox());
-               if (structurecomponent1 != null && structurecomponent1.componentType != p_186187_2_.componentType) {
-                  flag = true;
+            for(StructureComponent var10 : var6) {
+               var10.componentType = var8;
+               StructureComponent var11 = StructureComponent.findIntersecting(var4, var10.getBoundingBox());
+               if (var11 != null && var11.componentType != var2.componentType) {
+                  var7 = true;
                   break;
                }
             }
 
-            if (!flag) {
-               p_186187_4_.addAll(list);
+            if (!var7) {
+               var4.addAll(var6);
                return true;
             }
          }
@@ -227,57 +228,57 @@ public class StructureEndCityPieces {
 
       public CityTemplate(String var1, BlockPos var2, Rotation var3, boolean var4) {
          super(0);
-         this.pieceName = pieceNameIn;
-         this.rotation = rot;
-         this.overwrite = p_i46634_4_;
-         this.loadAndSetup(pos);
+         this.pieceName = var1;
+         this.rotation = var3;
+         this.overwrite = var4;
+         this.loadAndSetup(var2);
       }
 
       private void loadAndSetup(BlockPos var1) {
-         Template template = StructureEndCityPieces.MANAGER.getTemplate((MinecraftServer)null, new ResourceLocation("endcity/" + this.pieceName));
-         PlacementSettings placementsettings;
+         Template var2 = StructureEndCityPieces.MANAGER.a((MinecraftServer)null, new ResourceLocation("endcity/" + this.pieceName));
+         PlacementSettings var3;
          if (this.overwrite) {
-            placementsettings = StructureEndCityPieces.OVERWRITE.copy().setRotation(this.rotation);
+            var3 = StructureEndCityPieces.OVERWRITE.copy().setRotation(this.rotation);
          } else {
-            placementsettings = StructureEndCityPieces.INSERT.copy().setRotation(this.rotation);
+            var3 = StructureEndCityPieces.INSERT.copy().setRotation(this.rotation);
          }
 
-         this.setup(template, p_186180_1_, placementsettings);
+         this.setup(var2, var1, var3);
       }
 
       protected void writeStructureToNBT(NBTTagCompound var1) {
-         super.writeStructureToNBT(tagCompound);
-         tagCompound.setString("Template", this.pieceName);
-         tagCompound.setString("Rot", this.rotation.name());
-         tagCompound.setBoolean("OW", this.overwrite);
+         super.writeStructureToNBT(var1);
+         var1.setString("Template", this.pieceName);
+         var1.setString("Rot", this.rotation.name());
+         var1.setBoolean("OW", this.overwrite);
       }
 
       protected void readStructureFromNBT(NBTTagCompound var1) {
-         super.readStructureFromNBT(tagCompound);
-         this.pieceName = tagCompound.getString("Template");
-         this.rotation = Rotation.valueOf(tagCompound.getString("Rot"));
-         this.overwrite = tagCompound.getBoolean("OW");
+         super.readStructureFromNBT(var1);
+         this.pieceName = var1.getString("Template");
+         this.rotation = Rotation.valueOf(var1.getString("Rot"));
+         this.overwrite = var1.getBoolean("OW");
          this.loadAndSetup(this.templatePosition);
       }
 
       protected void handleDataMarker(String var1, BlockPos var2, World var3, Random var4, StructureBoundingBox var5) {
-         if (p_186175_1_.startsWith("Chest")) {
-            BlockPos blockpos = p_186175_2_.down();
-            if (p_186175_5_.isVecInside(blockpos)) {
-               TileEntity tileentity = p_186175_3_.getTileEntity(blockpos);
-               if (tileentity instanceof TileEntityChest) {
-                  ((TileEntityChest)tileentity).setLootTable(LootTableList.CHESTS_END_CITY_TREASURE, p_186175_4_.nextLong());
+         if (var1.startsWith("Chest")) {
+            BlockPos var6 = var2.down();
+            if (var5.isVecInside(var6)) {
+               TileEntity var7 = var3.getTileEntity(var6);
+               if (var7 instanceof TileEntityChest) {
+                  ((TileEntityChest)var7).setLootTable(LootTableList.CHESTS_END_CITY_TREASURE, var4.nextLong());
                }
             }
-         } else if (p_186175_1_.startsWith("Sentry")) {
-            EntityShulker entityshulker = new EntityShulker(p_186175_3_);
-            entityshulker.setPosition((double)p_186175_2_.getX() + 0.5D, (double)p_186175_2_.getY() + 0.5D, (double)p_186175_2_.getZ() + 0.5D);
-            entityshulker.setAttachmentPos(p_186175_2_);
-            p_186175_3_.spawnEntity(entityshulker);
-         } else if (p_186175_1_.startsWith("Elytra")) {
-            EntityItemFrame entityitemframe = new EntityItemFrame(p_186175_3_, p_186175_2_, this.rotation.rotate(EnumFacing.SOUTH));
-            entityitemframe.setDisplayedItem(new ItemStack(Items.ELYTRA));
-            p_186175_3_.spawnEntity(entityitemframe);
+         } else if (var1.startsWith("Sentry")) {
+            EntityShulker var8 = new EntityShulker(var3);
+            var8.setPosition((double)var2.getX() + 0.5D, (double)var2.getY() + 0.5D, (double)var2.getZ() + 0.5D);
+            var8.setAttachmentPos(var2);
+            var3.spawnEntity(var8);
+         } else if (var1.startsWith("Elytra")) {
+            EntityItemFrame var9 = new EntityItemFrame(var3, var2, this.rotation.rotate(EnumFacing.SOUTH));
+            var9.setDisplayedItem(new ItemStack(Items.ELYTRA));
+            var3.spawnEntity(var9);
          }
 
       }

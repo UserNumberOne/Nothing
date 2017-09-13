@@ -1,13 +1,14 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntityAIVillagerMate extends EntityAIBase {
    private final EntityVillager villagerObj;
@@ -16,9 +17,9 @@ public class EntityAIVillagerMate extends EntityAIBase {
    private int matingTimeout;
    Village villageObj;
 
-   public EntityAIVillagerMate(EntityVillager var1) {
-      this.villagerObj = villagerIn;
-      this.world = villagerIn.world;
+   public EntityAIVillagerMate(EntityVillager entityvillager) {
+      this.villagerObj = entityvillager;
+      this.world = entityvillager.world;
       this.setMutexBits(3);
    }
 
@@ -85,17 +86,15 @@ public class EntityAIVillagerMate extends EntityAIBase {
    }
 
    private void giveBirth() {
-      EntityAgeable entityvillager = this.villagerObj.createChild(this.mate);
-      this.mate.setGrowingAge(6000);
-      this.villagerObj.setGrowingAge(6000);
-      this.mate.setIsWillingToMate(false);
-      this.villagerObj.setIsWillingToMate(false);
-      BabyEntitySpawnEvent event = new BabyEntitySpawnEvent(this.villagerObj, this.mate, entityvillager);
-      if (!MinecraftForge.EVENT_BUS.post(event) && event.getChild() != null) {
-         entityvillager = event.getChild();
+      EntityVillager entityvillager = this.villagerObj.createChild(this.mate);
+      if (!CraftEventFactory.callEntityBreedEvent(entityvillager, this.villagerObj, this.mate, (EntityLivingBase)null, (ItemStack)null, 0).isCancelled()) {
+         this.mate.setGrowingAge(6000);
+         this.villagerObj.setGrowingAge(6000);
+         this.mate.setIsWillingToMate(false);
+         this.villagerObj.setIsWillingToMate(false);
          entityvillager.setGrowingAge(-24000);
          entityvillager.setLocationAndAngles(this.villagerObj.posX, this.villagerObj.posY, this.villagerObj.posZ, 0.0F, 0.0F);
-         this.world.spawnEntity(entityvillager);
+         this.world.addEntity(entityvillager, SpawnReason.BREEDING);
          this.world.setEntityState(entityvillager, (byte)12);
       }
    }

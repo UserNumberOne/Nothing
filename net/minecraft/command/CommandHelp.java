@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -38,65 +38,65 @@ public class CommandHelp extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (sender instanceof CommandBlockBaseLogic) {
-         sender.sendMessage((new TextComponentString("Searge says: ")).appendText(seargeSays[this.rand.nextInt(seargeSays.length) % seargeSays.length]));
+      if (var2 instanceof CommandBlockBaseLogic) {
+         var2.sendMessage((new TextComponentString("Searge says: ")).appendText(seargeSays[this.rand.nextInt(seargeSays.length) % seargeSays.length]));
       } else {
-         List list = this.getSortedPossibleCommands(sender, server);
-         int i = 7;
-         int j = (list.size() - 1) / 7;
-         int k = 0;
+         List var4 = this.a(var2, var1);
+         boolean var5 = true;
+         int var6 = (var4.size() - 1) / 7;
+         int var7 = 0;
 
          try {
-            k = args.length == 0 ? 0 : parseInt(args[0], 1, j + 1) - 1;
+            var7 = var3.length == 0 ? 0 : parseInt(var3[0], 1, var6 + 1) - 1;
          } catch (NumberInvalidException var13) {
-            Map map = this.getCommandMap(server);
-            ICommand icommand = (ICommand)map.get(args[0]);
-            if (icommand != null) {
-               throw new WrongUsageException(icommand.getUsage(sender), new Object[0]);
+            Map var9 = this.a(var1);
+            ICommand var10 = (ICommand)var9.get(var3[0]);
+            if (var10 != null) {
+               throw new WrongUsageException(var10.getUsage(var2), new Object[0]);
             }
 
-            if (MathHelper.getInt(args[0], -1) != -1) {
+            if (MathHelper.getInt(var3[0], -1) != -1) {
                throw var13;
             }
 
             throw new CommandNotFoundException();
          }
 
-         int l = Math.min((k + 1) * 7, list.size());
-         TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.help.header", new Object[]{k + 1, j + 1});
-         textcomponenttranslation1.getStyle().setColor(TextFormatting.DARK_GREEN);
-         sender.sendMessage(textcomponenttranslation1);
+         int var8 = Math.min((var7 + 1) * 7, var4.size());
+         TextComponentTranslation var15 = new TextComponentTranslation("commands.help.header", new Object[]{var7 + 1, var6 + 1});
+         var15.getStyle().setColor(TextFormatting.DARK_GREEN);
+         var2.sendMessage(var15);
 
-         for(int i1 = k * 7; i1 < l; ++i1) {
-            ICommand icommand1 = (ICommand)list.get(i1);
-            TextComponentTranslation textcomponenttranslation = new TextComponentTranslation(icommand1.getUsage(sender), new Object[0]);
-            textcomponenttranslation.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + icommand1.getName() + " "));
-            sender.sendMessage(textcomponenttranslation);
+         for(int var16 = var7 * 7; var16 < var8; ++var16) {
+            ICommand var11 = (ICommand)var4.get(var16);
+            TextComponentTranslation var12 = new TextComponentTranslation(var11.getUsage(var2), new Object[0]);
+            var12.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + var11.getName() + " "));
+            var2.sendMessage(var12);
          }
 
-         if (k == 0 && sender instanceof EntityPlayer) {
-            TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.help.footer", new Object[0]);
-            textcomponenttranslation2.getStyle().setColor(TextFormatting.GREEN);
-            sender.sendMessage(textcomponenttranslation2);
+         if (var7 == 0 && var2 instanceof EntityPlayer) {
+            TextComponentTranslation var17 = new TextComponentTranslation("commands.help.footer", new Object[0]);
+            var17.getStyle().setColor(TextFormatting.GREEN);
+            var2.sendMessage(var17);
          }
+
       }
-
    }
 
-   protected List getSortedPossibleCommands(ICommandSender var1, MinecraftServer var2) {
-      List list = server.getCommandManager().getPossibleCommands(sender);
-      Collections.sort(list);
-      return list;
+   protected List a(ICommandSender var1, MinecraftServer var2) {
+      List var3 = var2.getCommandHandler().getPossibleCommands(var1);
+      Collections.sort(var3);
+      return var3;
    }
 
-   protected Map getCommandMap(MinecraftServer var1) {
-      return server.getCommandManager().getCommands();
+   protected Map a(MinecraftServer var1) {
+      return var1.getCommandHandler().getCommands();
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      if (args.length == 1) {
-         Set set = this.getCommandMap(server).keySet();
-         return getListOfStringsMatchingLastWord(args, (String[])set.toArray(new String[set.size()]));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         Set var5 = this.a(var1).keySet();
+         return getListOfStringsMatchingLastWord(var3, (String[])var5.toArray(new String[var5.size()]));
       } else {
          return Collections.emptyList();
       }

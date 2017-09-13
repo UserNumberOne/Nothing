@@ -11,28 +11,21 @@ import com.google.gson.JsonSerializer;
 import com.mojang.authlib.GameProfile;
 import java.lang.reflect.Type;
 import java.util.UUID;
-import java.util.concurrent.Semaphore;
-import net.minecraft.network.status.server.SPacketServerInfo;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 
 public class ServerStatusResponse {
    private ITextComponent description;
    private ServerStatusResponse.Players players;
    private ServerStatusResponse.Version version;
    private String favicon;
-   private Semaphore mutex = new Semaphore(1);
-   private String json = null;
 
    public ITextComponent getServerDescription() {
       return this.description;
    }
 
    public void setServerDescription(ITextComponent var1) {
-      this.description = descriptionIn;
-      this.invalidateJson();
+      this.description = var1;
    }
 
    public ServerStatusResponse.Players getPlayers() {
@@ -40,8 +33,7 @@ public class ServerStatusResponse {
    }
 
    public void setPlayers(ServerStatusResponse.Players var1) {
-      this.players = playersIn;
-      this.invalidateJson();
+      this.players = var1;
    }
 
    public ServerStatusResponse.Version getVersion() {
@@ -49,37 +41,15 @@ public class ServerStatusResponse {
    }
 
    public void setVersion(ServerStatusResponse.Version var1) {
-      this.version = versionIn;
-      this.invalidateJson();
+      this.version = var1;
    }
 
    public void setFavicon(String var1) {
-      this.favicon = faviconBlob;
-      this.invalidateJson();
+      this.favicon = var1;
    }
 
    public String getFavicon() {
       return this.favicon;
-   }
-
-   public String getJson() {
-      String ret = this.json;
-      if (ret == null) {
-         this.mutex.acquireUninterruptibly();
-         ret = this.json;
-         if (ret == null) {
-            ret = SPacketServerInfo.GSON.toJson(this);
-            this.json = ret;
-         }
-
-         this.mutex.release();
-      }
-
-      return ret;
-   }
-
-   public void invalidateJson() {
-      this.json = null;
    }
 
    public static class Players {
@@ -88,8 +58,8 @@ public class ServerStatusResponse {
       private GameProfile[] players;
 
       public Players(int var1, int var2) {
-         this.maxPlayers = maxOnlinePlayers;
-         this.onlinePlayerCount = onlinePlayers;
+         this.maxPlayers = var1;
+         this.onlinePlayerCount = var2;
       }
 
       public int getMaxPlayers() {
@@ -105,98 +75,116 @@ public class ServerStatusResponse {
       }
 
       public void setPlayers(GameProfile[] var1) {
-         this.players = playersIn;
+         this.players = var1;
       }
 
       public static class Serializer implements JsonDeserializer, JsonSerializer {
          public ServerStatusResponse.Players deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-            JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "players");
-            ServerStatusResponse.Players serverstatusresponse$players = new ServerStatusResponse.Players(JsonUtils.getInt(jsonobject, "max"), JsonUtils.getInt(jsonobject, "online"));
-            if (JsonUtils.isJsonArray(jsonobject, "sample")) {
-               JsonArray jsonarray = JsonUtils.getJsonArray(jsonobject, "sample");
-               if (jsonarray.size() > 0) {
-                  GameProfile[] agameprofile = new GameProfile[jsonarray.size()];
+            JsonObject var4 = JsonUtils.getJsonObject(var1, "players");
+            ServerStatusResponse.Players var5 = new ServerStatusResponse.Players(JsonUtils.getInt(var4, "max"), JsonUtils.getInt(var4, "online"));
+            if (JsonUtils.isJsonArray(var4, "sample")) {
+               JsonArray var6 = JsonUtils.getJsonArray(var4, "sample");
+               if (var6.size() > 0) {
+                  GameProfile[] var7 = new GameProfile[var6.size()];
 
-                  for(int i = 0; i < agameprofile.length; ++i) {
-                     JsonObject jsonobject1 = JsonUtils.getJsonObject(jsonarray.get(i), "player[" + i + "]");
-                     String s = JsonUtils.getString(jsonobject1, "id");
-                     agameprofile[i] = new GameProfile(UUID.fromString(s), JsonUtils.getString(jsonobject1, "name"));
+                  for(int var8 = 0; var8 < var7.length; ++var8) {
+                     JsonObject var9 = JsonUtils.getJsonObject(var6.get(var8), "player[" + var8 + "]");
+                     String var10 = JsonUtils.getString(var9, "id");
+                     var7[var8] = new GameProfile(UUID.fromString(var10), JsonUtils.getString(var9, "name"));
                   }
 
-                  serverstatusresponse$players.setPlayers(agameprofile);
+                  var5.setPlayers(var7);
                }
             }
 
-            return serverstatusresponse$players;
+            return var5;
          }
 
          public JsonElement serialize(ServerStatusResponse.Players var1, Type var2, JsonSerializationContext var3) {
-            JsonObject jsonobject = new JsonObject();
-            jsonobject.addProperty("max", Integer.valueOf(p_serialize_1_.getMaxPlayers()));
-            jsonobject.addProperty("online", Integer.valueOf(p_serialize_1_.getOnlinePlayerCount()));
-            if (p_serialize_1_.getPlayers() != null && p_serialize_1_.getPlayers().length > 0) {
-               JsonArray jsonarray = new JsonArray();
+            JsonObject var4 = new JsonObject();
+            var4.addProperty("max", Integer.valueOf(var1.getMaxPlayers()));
+            var4.addProperty("online", Integer.valueOf(var1.getOnlinePlayerCount()));
+            if (var1.getPlayers() != null && var1.getPlayers().length > 0) {
+               JsonArray var5 = new JsonArray();
 
-               for(int i = 0; i < p_serialize_1_.getPlayers().length; ++i) {
-                  JsonObject jsonobject1 = new JsonObject();
-                  UUID uuid = p_serialize_1_.getPlayers()[i].getId();
-                  jsonobject1.addProperty("id", uuid == null ? "" : uuid.toString());
-                  jsonobject1.addProperty("name", p_serialize_1_.getPlayers()[i].getName());
-                  jsonarray.add(jsonobject1);
+               for(int var6 = 0; var6 < var1.getPlayers().length; ++var6) {
+                  JsonObject var7 = new JsonObject();
+                  UUID var8 = var1.getPlayers()[var6].getId();
+                  var7.addProperty("id", var8 == null ? "" : var8.toString());
+                  var7.addProperty("name", var1.getPlayers()[var6].getName());
+                  var5.add(var7);
                }
 
-               jsonobject.add("sample", jsonarray);
+               var4.add("sample", var5);
             }
 
-            return jsonobject;
+            return var4;
+         }
+
+         // $FF: synthetic method
+         public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+            return this.serialize((ServerStatusResponse.Players)var1, var2, var3);
+         }
+
+         // $FF: synthetic method
+         public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+            return this.deserialize(var1, var2, var3);
          }
       }
    }
 
    public static class Serializer implements JsonDeserializer, JsonSerializer {
       public ServerStatusResponse deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-         JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "status");
-         ServerStatusResponse serverstatusresponse = new ServerStatusResponse();
-         if (jsonobject.has("description")) {
-            serverstatusresponse.setServerDescription((ITextComponent)p_deserialize_3_.deserialize(jsonobject.get("description"), ITextComponent.class));
+         JsonObject var4 = JsonUtils.getJsonObject(var1, "status");
+         ServerStatusResponse var5 = new ServerStatusResponse();
+         if (var4.has("description")) {
+            var5.setServerDescription((ITextComponent)var3.deserialize(var4.get("description"), ITextComponent.class));
          }
 
-         if (jsonobject.has("players")) {
-            serverstatusresponse.setPlayers((ServerStatusResponse.Players)p_deserialize_3_.deserialize(jsonobject.get("players"), ServerStatusResponse.Players.class));
+         if (var4.has("players")) {
+            var5.setPlayers((ServerStatusResponse.Players)var3.deserialize(var4.get("players"), ServerStatusResponse.Players.class));
          }
 
-         if (jsonobject.has("version")) {
-            serverstatusresponse.setVersion((ServerStatusResponse.Version)p_deserialize_3_.deserialize(jsonobject.get("version"), ServerStatusResponse.Version.class));
+         if (var4.has("version")) {
+            var5.setVersion((ServerStatusResponse.Version)var3.deserialize(var4.get("version"), ServerStatusResponse.Version.class));
          }
 
-         if (jsonobject.has("favicon")) {
-            serverstatusresponse.setFavicon(JsonUtils.getString(jsonobject, "favicon"));
+         if (var4.has("favicon")) {
+            var5.setFavicon(JsonUtils.getString(var4, "favicon"));
          }
 
-         FMLClientHandler.instance().captureAdditionalData(serverstatusresponse, jsonobject);
-         return serverstatusresponse;
+         return var5;
       }
 
       public JsonElement serialize(ServerStatusResponse var1, Type var2, JsonSerializationContext var3) {
-         JsonObject jsonobject = new JsonObject();
-         if (p_serialize_1_.getServerDescription() != null) {
-            jsonobject.add("description", p_serialize_3_.serialize(p_serialize_1_.getServerDescription()));
+         JsonObject var4 = new JsonObject();
+         if (var1.getServerDescription() != null) {
+            var4.add("description", var3.serialize(var1.getServerDescription()));
          }
 
-         if (p_serialize_1_.getPlayers() != null) {
-            jsonobject.add("players", p_serialize_3_.serialize(p_serialize_1_.getPlayers()));
+         if (var1.getPlayers() != null) {
+            var4.add("players", var3.serialize(var1.getPlayers()));
          }
 
-         if (p_serialize_1_.getVersion() != null) {
-            jsonobject.add("version", p_serialize_3_.serialize(p_serialize_1_.getVersion()));
+         if (var1.getVersion() != null) {
+            var4.add("version", var3.serialize(var1.getVersion()));
          }
 
-         if (p_serialize_1_.getFavicon() != null) {
-            jsonobject.addProperty("favicon", p_serialize_1_.getFavicon());
+         if (var1.getFavicon() != null) {
+            var4.addProperty("favicon", var1.getFavicon());
          }
 
-         FMLNetworkHandler.enhanceStatusQuery(jsonobject);
-         return jsonobject;
+         return var4;
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((ServerStatusResponse)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
    }
 
@@ -205,8 +193,8 @@ public class ServerStatusResponse {
       private final int protocol;
 
       public Version(String var1, int var2) {
-         this.name = nameIn;
-         this.protocol = protocolIn;
+         this.name = var1;
+         this.protocol = var2;
       }
 
       public String getName() {
@@ -219,15 +207,25 @@ public class ServerStatusResponse {
 
       public static class Serializer implements JsonDeserializer, JsonSerializer {
          public ServerStatusResponse.Version deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-            JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "version");
-            return new ServerStatusResponse.Version(JsonUtils.getString(jsonobject, "name"), JsonUtils.getInt(jsonobject, "protocol"));
+            JsonObject var4 = JsonUtils.getJsonObject(var1, "version");
+            return new ServerStatusResponse.Version(JsonUtils.getString(var4, "name"), JsonUtils.getInt(var4, "protocol"));
          }
 
          public JsonElement serialize(ServerStatusResponse.Version var1, Type var2, JsonSerializationContext var3) {
-            JsonObject jsonobject = new JsonObject();
-            jsonobject.addProperty("name", p_serialize_1_.getName());
-            jsonobject.addProperty("protocol", Integer.valueOf(p_serialize_1_.getProtocol()));
-            return jsonobject;
+            JsonObject var4 = new JsonObject();
+            var4.addProperty("name", var1.getName());
+            var4.addProperty("protocol", Integer.valueOf(var1.getProtocol()));
+            return var4;
+         }
+
+         // $FF: synthetic method
+         public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+            return this.serialize((ServerStatusResponse.Version)var1, var2, var3);
+         }
+
+         // $FF: synthetic method
+         public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+            return this.deserialize(var1, var2, var3);
          }
       }
    }

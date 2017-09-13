@@ -7,6 +7,6 @@ public abstract class BlockDirectional extends Block {
    public static final PropertyDirection FACING = PropertyDirection.create("facing");
 
    protected BlockDirectional(Material var1) {
-      super(materialIn);
+      super(var1);
    }
 }

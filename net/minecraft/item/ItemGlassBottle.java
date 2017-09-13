@@ -25,49 +25,54 @@ public class ItemGlassBottle extends Item {
    }
 
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      List list = worldIn.getEntitiesWithinAABB(EntityAreaEffectCloud.class, playerIn.getEntityBoundingBox().expandXyz(2.0D), new Predicate() {
+      List var5 = var2.getEntitiesWithinAABB(EntityAreaEffectCloud.class, var3.getEntityBoundingBox().expandXyz(2.0D), new Predicate() {
          public boolean apply(@Nullable EntityAreaEffectCloud var1) {
-            return p_apply_1_ != null && p_apply_1_.isEntityAlive() && p_apply_1_.getOwner() instanceof EntityDragon;
+            return var1 != null && var1.isEntityAlive() && var1.getOwner() instanceof EntityDragon;
+         }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1) {
+            return this.apply((EntityAreaEffectCloud)var1);
          }
       });
-      if (!list.isEmpty()) {
-         EntityAreaEffectCloud entityareaeffectcloud = (EntityAreaEffectCloud)list.get(0);
-         entityareaeffectcloud.setRadius(entityareaeffectcloud.getRadius() - 0.5F);
-         worldIn.playSound((EntityPlayer)null, playerIn.posX, playerIn.posY, playerIn.posZ, SoundEvents.ITEM_BOTTLE_FILL_DRAGONBREATH, SoundCategory.NEUTRAL, 1.0F, 1.0F);
-         return new ActionResult(EnumActionResult.SUCCESS, this.turnBottleIntoItem(itemStackIn, playerIn, new ItemStack(Items.DRAGON_BREATH)));
+      if (!var5.isEmpty()) {
+         EntityAreaEffectCloud var8 = (EntityAreaEffectCloud)var5.get(0);
+         var8.setRadius(var8.getRadius() - 0.5F);
+         var2.playSound((EntityPlayer)null, var3.posX, var3.posY, var3.posZ, SoundEvents.ITEM_BOTTLE_FILL_DRAGONBREATH, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+         return new ActionResult(EnumActionResult.SUCCESS, this.turnBottleIntoItem(var1, var3, new ItemStack(Items.DRAGON_BREATH)));
       } else {
-         RayTraceResult raytraceresult = this.rayTrace(worldIn, playerIn, true);
-         if (raytraceresult == null) {
-            return new ActionResult(EnumActionResult.PASS, itemStackIn);
+         RayTraceResult var6 = this.rayTrace(var2, var3, true);
+         if (var6 == null) {
+            return new ActionResult(EnumActionResult.PASS, var1);
          } else {
-            if (raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK) {
-               BlockPos blockpos = raytraceresult.getBlockPos();
-               if (!worldIn.isBlockModifiable(playerIn, blockpos) || !playerIn.canPlayerEdit(blockpos.offset(raytraceresult.sideHit), raytraceresult.sideHit, itemStackIn)) {
-                  return new ActionResult(EnumActionResult.PASS, itemStackIn);
+            if (var6.typeOfHit == RayTraceResult.Type.BLOCK) {
+               BlockPos var7 = var6.getBlockPos();
+               if (!var2.isBlockModifiable(var3, var7) || !var3.canPlayerEdit(var7.offset(var6.sideHit), var6.sideHit, var1)) {
+                  return new ActionResult(EnumActionResult.PASS, var1);
                }
 
-               if (worldIn.getBlockState(blockpos).getMaterial() == Material.WATER) {
-                  worldIn.playSound(playerIn, playerIn.posX, playerIn.posY, playerIn.posZ, SoundEvents.ITEM_BOTTLE_FILL, SoundCategory.NEUTRAL, 1.0F, 1.0F);
-                  return new ActionResult(EnumActionResult.SUCCESS, this.turnBottleIntoItem(itemStackIn, playerIn, new ItemStack(Items.POTIONITEM)));
+               if (var2.getBlockState(var7).getMaterial() == Material.WATER) {
+                  var2.playSound(var3, var3.posX, var3.posY, var3.posZ, SoundEvents.ITEM_BOTTLE_FILL, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+                  return new ActionResult(EnumActionResult.SUCCESS, this.turnBottleIntoItem(var1, var3, new ItemStack(Items.POTIONITEM)));
                }
             }
 
-            return new ActionResult(EnumActionResult.PASS, itemStackIn);
+            return new ActionResult(EnumActionResult.PASS, var1);
          }
       }
    }
 
    protected ItemStack turnBottleIntoItem(ItemStack var1, EntityPlayer var2, ItemStack var3) {
-      --p_185061_1_.stackSize;
-      player.addStat(StatList.getObjectUseStats(this));
-      if (p_185061_1_.stackSize <= 0) {
-         return stack;
+      --var1.stackSize;
+      var2.addStat(StatList.getObjectUseStats(this));
+      if (var1.stackSize <= 0) {
+         return var3;
       } else {
-         if (!player.inventory.addItemStackToInventory(stack)) {
-            player.dropItem(stack, false);
+         if (!var2.inventory.addItemStackToInventory(var3)) {
+            var2.dropItem(var3, false);
          }
 
-         return p_185061_1_;
+         return var1;
       }
    }
 }

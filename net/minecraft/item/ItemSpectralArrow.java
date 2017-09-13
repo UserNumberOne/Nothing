@@ -7,6 +7,6 @@ import net.minecraft.world.World;
 
 public class ItemSpectralArrow extends ItemArrow {
    public EntityArrow createArrow(World var1, ItemStack var2, EntityLivingBase var3) {
-      return new EntitySpectralArrow(worldIn, shooter);
+      return new EntitySpectralArrow(var1, var3);
    }
 }

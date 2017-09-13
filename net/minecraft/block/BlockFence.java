@@ -22,8 +22,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockFence extends Block {
    public static final PropertyBool NORTH = PropertyBool.create("north");
@@ -38,56 +36,56 @@ public class BlockFence extends Block {
    public static final AxisAlignedBB EAST_AABB = new AxisAlignedBB(0.625D, 0.0D, 0.375D, 1.0D, 1.5D, 0.625D);
 
    public BlockFence(Material var1, MapColor var2) {
-      super(p_i46395_1_, p_i46395_2_);
+      super(var1, var2);
       this.setDefaultState(this.blockState.getBaseState().withProperty(NORTH, Boolean.valueOf(false)).withProperty(EAST, Boolean.valueOf(false)).withProperty(SOUTH, Boolean.valueOf(false)).withProperty(WEST, Boolean.valueOf(false)));
       this.setCreativeTab(CreativeTabs.DECORATIONS);
    }
 
    public void addCollisionBoxToList(IBlockState var1, World var2, BlockPos var3, AxisAlignedBB var4, List var5, @Nullable Entity var6) {
-      state = state.getActualState(worldIn, pos);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, PILLAR_AABB);
-      if (((Boolean)state.getValue(NORTH)).booleanValue()) {
-         addCollisionBoxToList(pos, entityBox, collidingBoxes, NORTH_AABB);
+      var1 = var1.getActualState(var2, var3);
+      addCollisionBoxToList(var3, var4, var5, PILLAR_AABB);
+      if (((Boolean)var1.getValue(NORTH)).booleanValue()) {
+         addCollisionBoxToList(var3, var4, var5, NORTH_AABB);
       }
 
-      if (((Boolean)state.getValue(EAST)).booleanValue()) {
-         addCollisionBoxToList(pos, entityBox, collidingBoxes, EAST_AABB);
+      if (((Boolean)var1.getValue(EAST)).booleanValue()) {
+         addCollisionBoxToList(var3, var4, var5, EAST_AABB);
       }
 
-      if (((Boolean)state.getValue(SOUTH)).booleanValue()) {
-         addCollisionBoxToList(pos, entityBox, collidingBoxes, SOUTH_AABB);
+      if (((Boolean)var1.getValue(SOUTH)).booleanValue()) {
+         addCollisionBoxToList(var3, var4, var5, SOUTH_AABB);
       }
 
-      if (((Boolean)state.getValue(WEST)).booleanValue()) {
-         addCollisionBoxToList(pos, entityBox, collidingBoxes, WEST_AABB);
+      if (((Boolean)var1.getValue(WEST)).booleanValue()) {
+         addCollisionBoxToList(var3, var4, var5, WEST_AABB);
       }
 
    }
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      state = this.getActualState(state, source, pos);
-      return BOUNDING_BOXES[getBoundingBoxIdx(state)];
+      var1 = this.getActualState(var1, var2, var3);
+      return BOUNDING_BOXES[getBoundingBoxIdx(var1)];
    }
 
    private static int getBoundingBoxIdx(IBlockState var0) {
-      int i = 0;
-      if (((Boolean)state.getValue(NORTH)).booleanValue()) {
-         i |= 1 << EnumFacing.NORTH.getHorizontalIndex();
+      int var1 = 0;
+      if (((Boolean)var0.getValue(NORTH)).booleanValue()) {
+         var1 |= 1 << EnumFacing.NORTH.getHorizontalIndex();
       }
 
-      if (((Boolean)state.getValue(EAST)).booleanValue()) {
-         i |= 1 << EnumFacing.EAST.getHorizontalIndex();
+      if (((Boolean)var0.getValue(EAST)).booleanValue()) {
+         var1 |= 1 << EnumFacing.EAST.getHorizontalIndex();
       }
 
-      if (((Boolean)state.getValue(SOUTH)).booleanValue()) {
-         i |= 1 << EnumFacing.SOUTH.getHorizontalIndex();
+      if (((Boolean)var0.getValue(SOUTH)).booleanValue()) {
+         var1 |= 1 << EnumFacing.SOUTH.getHorizontalIndex();
       }
 
-      if (((Boolean)state.getValue(WEST)).booleanValue()) {
-         i |= 1 << EnumFacing.WEST.getHorizontalIndex();
+      if (((Boolean)var0.getValue(WEST)).booleanValue()) {
+         var1 |= 1 << EnumFacing.WEST.getHorizontalIndex();
       }
 
-      return i;
+      return var1;
    }
 
    public boolean isOpaqueCube(IBlockState var1) {
@@ -103,18 +101,23 @@ public class BlockFence extends Block {
    }
 
    public boolean canConnectTo(IBlockAccess var1, BlockPos var2) {
-      IBlockState iblockstate = worldIn.getBlockState(pos);
-      Block block = iblockstate.getBlock();
-      return block == Blocks.BARRIER ? false : ((!(block instanceof BlockFence) || block.blockMaterial != this.blockMaterial) && !(block instanceof BlockFenceGate) ? (block.blockMaterial.isOpaque() && iblockstate.isFullCube() ? block.blockMaterial != Material.GOURD : false) : true);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return true;
+      IBlockState var3 = var1.getBlockState(var2);
+      Block var4 = var3.getBlock();
+      if (var4 == Blocks.BARRIER) {
+         return false;
+      } else if ((!(var4 instanceof BlockFence) || var4.blockMaterial != this.blockMaterial) && !(var4 instanceof BlockFenceGate)) {
+         if (var4.blockMaterial.isOpaque() && var3.isFullCube()) {
+            return var4.blockMaterial != Material.GOURD;
+         } else {
+            return false;
+         }
+      } else {
+         return true;
+      }
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
-      return worldIn.isRemote ? true : ItemLead.attachToFence(playerIn, worldIn, pos);
+      return var1.isRemote ? true : ItemLead.attachToFence(var4, var1, var2);
    }
 
    public int getMetaFromState(IBlockState var1) {
@@ -122,30 +125,30 @@ public class BlockFence extends Block {
    }
 
    public IBlockState getActualState(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return state.withProperty(NORTH, Boolean.valueOf(this.canConnectTo(worldIn, pos.north()))).withProperty(EAST, Boolean.valueOf(this.canConnectTo(worldIn, pos.east()))).withProperty(SOUTH, Boolean.valueOf(this.canConnectTo(worldIn, pos.south()))).withProperty(WEST, Boolean.valueOf(this.canConnectTo(worldIn, pos.west())));
+      return var1.withProperty(NORTH, Boolean.valueOf(this.canConnectTo(var2, var3.north()))).withProperty(EAST, Boolean.valueOf(this.canConnectTo(var2, var3.east()))).withProperty(SOUTH, Boolean.valueOf(this.canConnectTo(var2, var3.south()))).withProperty(WEST, Boolean.valueOf(this.canConnectTo(var2, var3.west())));
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      switch(rot) {
+      switch(var2) {
       case CLOCKWISE_180:
-         return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(EAST, state.getValue(WEST)).withProperty(SOUTH, state.getValue(NORTH)).withProperty(WEST, state.getValue(EAST));
+         return var1.withProperty(NORTH, var1.getValue(SOUTH)).withProperty(EAST, var1.getValue(WEST)).withProperty(SOUTH, var1.getValue(NORTH)).withProperty(WEST, var1.getValue(EAST));
       case COUNTERCLOCKWISE_90:
-         return state.withProperty(NORTH, state.getValue(EAST)).withProperty(EAST, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(WEST)).withProperty(WEST, state.getValue(NORTH));
+         return var1.withProperty(NORTH, var1.getValue(EAST)).withProperty(EAST, var1.getValue(SOUTH)).withProperty(SOUTH, var1.getValue(WEST)).withProperty(WEST, var1.getValue(NORTH));
       case CLOCKWISE_90:
-         return state.withProperty(NORTH, state.getValue(WEST)).withProperty(EAST, state.getValue(NORTH)).withProperty(SOUTH, state.getValue(EAST)).withProperty(WEST, state.getValue(SOUTH));
+         return var1.withProperty(NORTH, var1.getValue(WEST)).withProperty(EAST, var1.getValue(NORTH)).withProperty(SOUTH, var1.getValue(EAST)).withProperty(WEST, var1.getValue(SOUTH));
       default:
-         return state;
+         return var1;
       }
    }
 
    public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      switch(mirrorIn) {
+      switch(var2) {
       case LEFT_RIGHT:
-         return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(NORTH));
+         return var1.withProperty(NORTH, var1.getValue(SOUTH)).withProperty(SOUTH, var1.getValue(NORTH));
       case FRONT_BACK:
-         return state.withProperty(EAST, state.getValue(WEST)).withProperty(WEST, state.getValue(EAST));
+         return var1.withProperty(EAST, var1.getValue(WEST)).withProperty(WEST, var1.getValue(EAST));
       default:
-         return super.withMirror(state, mirrorIn);
+         return super.withMirror(var1, var2);
       }
    }
 

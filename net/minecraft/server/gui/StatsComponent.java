@@ -8,11 +8,8 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import javax.swing.JComponent;
 import javax.swing.Timer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.src.MinecraftServer;
 
-@SideOnly(Side.SERVER)
 public class StatsComponent extends JComponent {
    private static final DecimalFormat FORMATTER = new DecimalFormat("########0.000");
    private final int[] values = new int[256];
@@ -21,7 +18,7 @@ public class StatsComponent extends JComponent {
    private final MinecraftServer server;
 
    public StatsComponent(MinecraftServer var1) {
-      this.server = serverIn;
+      this.server = var1;
       this.setPreferredSize(new Dimension(456, 246));
       this.setMinimumSize(new Dimension(456, 246));
       this.setMaximumSize(new Dimension(456, 246));
@@ -34,39 +31,39 @@ public class StatsComponent extends JComponent {
    }
 
    private void tick() {
-      long i = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+      long var1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
       System.gc();
-      this.msgs[0] = "Memory use: " + i / 1024L / 1024L + " mb (" + Runtime.getRuntime().freeMemory() * 100L / Runtime.getRuntime().maxMemory() + "% free)";
-      this.msgs[1] = "Avg tick: " + FORMATTER.format(this.mean(this.server.tickTimeArray) * 1.0E-6D) + " ms";
+      this.msgs[0] = "Memory use: " + var1 / 1024L / 1024L + " mb (" + Runtime.getRuntime().freeMemory() * 100L / Runtime.getRuntime().maxMemory() + "% free)";
+      this.msgs[1] = "Avg tick: " + FORMATTER.format(this.mean(this.server.h) * 1.0E-6D) + " ms";
       this.repaint();
    }
 
    private double mean(long[] var1) {
-      long i = 0L;
+      long var2 = 0L;
 
-      for(long j : values) {
-         i += j;
+      for(long var7 : var1) {
+         var2 += var7;
       }
 
-      return (double)i / (double)values.length;
+      return (double)var2 / (double)var1.length;
    }
 
    public void paint(Graphics var1) {
-      p_paint_1_.setColor(new Color(16777215));
-      p_paint_1_.fillRect(0, 0, 456, 246);
+      var1.setColor(new Color(16777215));
+      var1.fillRect(0, 0, 456, 246);
 
-      for(int i = 0; i < 256; ++i) {
-         int j = this.values[i + this.vp & 255];
-         p_paint_1_.setColor(new Color(j + 28 << 16));
-         p_paint_1_.fillRect(i, 100 - j, 1, j);
+      for(int var2 = 0; var2 < 256; ++var2) {
+         int var3 = this.values[var2 + this.vp & 255];
+         var1.setColor(new Color(var3 + 28 << 16));
+         var1.fillRect(var2, 100 - var3, 1, var3);
       }
 
-      p_paint_1_.setColor(Color.BLACK);
+      var1.setColor(Color.BLACK);
 
-      for(int k = 0; k < this.msgs.length; ++k) {
-         String s = this.msgs[k];
-         if (s != null) {
-            p_paint_1_.drawString(s, 32, 116 + k * 16);
+      for(int var4 = 0; var4 < this.msgs.length; ++var4) {
+         String var5 = this.msgs[var4];
+         if (var5 != null) {
+            var1.drawString(var5, 32, 116 + var4 * 16);
          }
       }
 

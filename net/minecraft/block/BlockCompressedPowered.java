@@ -9,7 +9,7 @@ import net.minecraft.world.IBlockAccess;
 
 public class BlockCompressedPowered extends Block {
    public BlockCompressedPowered(Material var1, MapColor var2) {
-      super(materialIn, color);
+      super(var1, var2);
    }
 
    public boolean canProvidePower(IBlockState var1) {

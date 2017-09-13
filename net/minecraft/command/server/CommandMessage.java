@@ -9,7 +9,8 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -33,29 +34,29 @@ public class CommandMessage extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length < 2) {
+      if (var3.length < 2) {
          throw new WrongUsageException("commands.message.usage", new Object[0]);
       } else {
-         EntityPlayer entityplayer = getPlayer(server, sender, args[0]);
-         if (entityplayer == sender) {
+         EntityPlayerMP var4 = a(var1, var2, var3[0]);
+         if (var4 == var2) {
             throw new PlayerNotFoundException("commands.message.sameTarget", new Object[0]);
          } else {
-            ITextComponent itextcomponent = getChatComponentFromNthArg(sender, args, 1, !(sender instanceof EntityPlayer));
-            TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("commands.message.display.incoming", new Object[]{sender.getDisplayName(), itextcomponent.createCopy()});
-            TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.message.display.outgoing", new Object[]{entityplayer.getDisplayName(), itextcomponent.createCopy()});
-            textcomponenttranslation.getStyle().setColor(TextFormatting.GRAY).setItalic(Boolean.valueOf(true));
-            textcomponenttranslation1.getStyle().setColor(TextFormatting.GRAY).setItalic(Boolean.valueOf(true));
-            entityplayer.sendMessage(textcomponenttranslation);
-            sender.sendMessage(textcomponenttranslation1);
+            ITextComponent var5 = getChatComponentFromNthArg(var2, var3, 1, !(var2 instanceof EntityPlayer));
+            TextComponentTranslation var6 = new TextComponentTranslation("commands.message.display.incoming", new Object[]{var2.getDisplayName(), var5.createCopy()});
+            TextComponentTranslation var7 = new TextComponentTranslation("commands.message.display.outgoing", new Object[]{var4.getDisplayName(), var5.createCopy()});
+            var6.getStyle().setColor(TextFormatting.GRAY).setItalic(Boolean.valueOf(true));
+            var7.getStyle().setColor(TextFormatting.GRAY).setItalic(Boolean.valueOf(true));
+            var4.sendMessage(var6);
+            var2.sendMessage(var7);
          }
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return index == 0;
+      return var2 == 0;
    }
 }

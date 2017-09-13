@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
@@ -18,7 +17,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFlowerPot;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -30,8 +28,6 @@ import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockFlowerPot extends BlockContainer {
    public static final PropertyInteger LEGACY_DATA = PropertyInteger.create("legacy_data", 0, 15);
@@ -64,23 +60,23 @@ public class BlockFlowerPot extends BlockContainer {
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
-      if (heldItem != null && heldItem.getItem() instanceof ItemBlock) {
-         TileEntityFlowerPot tileentityflowerpot = this.getTileEntity(worldIn, pos);
-         if (tileentityflowerpot == null) {
+      if (var6 != null && var6.getItem() instanceof ItemBlock) {
+         TileEntityFlowerPot var11 = this.getTileEntity(var1, var2);
+         if (var11 == null) {
             return false;
-         } else if (tileentityflowerpot.getFlowerPotItem() != null) {
+         } else if (var11.getFlowerPotItem() != null) {
             return false;
          } else {
-            Block block = Block.getBlockFromItem(heldItem.getItem());
-            if (!this.canContain(block, heldItem.getMetadata())) {
+            Block var12 = Block.getBlockFromItem(var6.getItem());
+            if (!this.canContain(var12, var6.getMetadata())) {
                return false;
             } else {
-               tileentityflowerpot.setFlowerPotData(heldItem.getItem(), heldItem.getMetadata());
-               tileentityflowerpot.markDirty();
-               worldIn.notifyBlockUpdate(pos, state, state, 3);
-               playerIn.addStat(StatList.FLOWER_POTTED);
-               if (!playerIn.capabilities.isCreativeMode) {
-                  --heldItem.stackSize;
+               var11.setFlowerPotData(var6.getItem(), var6.getMetadata());
+               var11.markDirty();
+               var1.notifyBlockUpdate(var2, var3, var3, 3);
+               var4.addStat(StatList.FLOWER_POTTED);
+               if (!var4.capabilities.isCreativeMode) {
+                  --var6.stackSize;
                }
 
                return true;
@@ -92,15 +88,19 @@ public class BlockFlowerPot extends BlockContainer {
    }
 
    private boolean canContain(@Nullable Block var1, int var2) {
-      return blockIn != Blocks.YELLOW_FLOWER && blockIn != Blocks.RED_FLOWER && blockIn != Blocks.CACTUS && blockIn != Blocks.BROWN_MUSHROOM && blockIn != Blocks.RED_MUSHROOM && blockIn != Blocks.SAPLING && blockIn != Blocks.DEADBUSH ? blockIn == Blocks.TALLGRASS && meta == BlockTallGrass.EnumType.FERN.getMeta() : true;
+      if (var1 != Blocks.YELLOW_FLOWER && var1 != Blocks.RED_FLOWER && var1 != Blocks.CACTUS && var1 != Blocks.BROWN_MUSHROOM && var1 != Blocks.RED_MUSHROOM && var1 != Blocks.SAPLING && var1 != Blocks.DEADBUSH) {
+         return var1 == Blocks.TALLGRASS && var2 == BlockTallGrass.EnumType.FERN.getMeta();
+      } else {
+         return true;
+      }
    }
 
    public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
-      TileEntityFlowerPot tileentityflowerpot = this.getTileEntity(worldIn, pos);
-      if (tileentityflowerpot != null) {
-         ItemStack itemstack = tileentityflowerpot.getFlowerItemStack();
-         if (itemstack != null) {
-            return itemstack;
+      TileEntityFlowerPot var4 = this.getTileEntity(var1, var2);
+      if (var4 != null) {
+         ItemStack var5 = var4.getFlowerItemStack();
+         if (var5 != null) {
+            return var5;
          }
       }
 
@@ -108,27 +108,32 @@ public class BlockFlowerPot extends BlockContainer {
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      return super.canPlaceBlockAt(worldIn, pos) && worldIn.getBlockState(pos.down()).isFullyOpaque();
+      return super.canPlaceBlockAt(var1, var2) && var1.getBlockState(var2.down()).isFullyOpaque();
    }
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      if (!worldIn.getBlockState(pos.down()).isFullyOpaque()) {
-         this.dropBlockAsItem(worldIn, pos, state, 0);
-         worldIn.setBlockToAir(pos);
+      if (!var2.getBlockState(var3.down()).isFullyOpaque()) {
+         this.dropBlockAsItem(var2, var3, var1, 0);
+         var2.setBlockToAir(var3);
       }
 
    }
 
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      super.breakBlock(worldIn, pos, state);
+      TileEntityFlowerPot var4 = this.getTileEntity(var1, var2);
+      if (var4 != null && var4.getFlowerPotItem() != null) {
+         spawnAsEntity(var1, var2, new ItemStack(var4.getFlowerPotItem(), 1, var4.getFlowerPotData()));
+      }
+
+      super.breakBlock(var1, var2, var3);
    }
 
    public void onBlockHarvested(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4) {
-      super.onBlockHarvested(worldIn, pos, state, player);
-      if (player.capabilities.isCreativeMode) {
-         TileEntityFlowerPot tileentityflowerpot = this.getTileEntity(worldIn, pos);
-         if (tileentityflowerpot != null) {
-            tileentityflowerpot.setFlowerPotData((Item)null, 0);
+      super.onBlockHarvested(var1, var2, var3, var4);
+      if (var4.capabilities.isCreativeMode) {
+         TileEntityFlowerPot var5 = this.getTileEntity(var1, var2);
+         if (var5 != null) {
+            var5.setFlowerPotData((Item)null, 0);
          }
       }
 
@@ -141,63 +146,63 @@ public class BlockFlowerPot extends BlockContainer {
 
    @Nullable
    private TileEntityFlowerPot getTileEntity(World var1, BlockPos var2) {
-      TileEntity tileentity = worldIn.getTileEntity(pos);
-      return tileentity instanceof TileEntityFlowerPot ? (TileEntityFlowerPot)tileentity : null;
+      TileEntity var3 = var1.getTileEntity(var2);
+      return var3 instanceof TileEntityFlowerPot ? (TileEntityFlowerPot)var3 : null;
    }
 
    public TileEntity createNewTileEntity(World var1, int var2) {
-      Block block = null;
-      int i = 0;
-      switch(meta) {
+      Object var3 = null;
+      int var4 = 0;
+      switch(var2) {
       case 1:
-         block = Blocks.RED_FLOWER;
-         i = BlockFlower.EnumFlowerType.POPPY.getMeta();
+         var3 = Blocks.RED_FLOWER;
+         var4 = BlockFlower.EnumFlowerType.POPPY.getMeta();
          break;
       case 2:
-         block = Blocks.YELLOW_FLOWER;
+         var3 = Blocks.YELLOW_FLOWER;
          break;
       case 3:
-         block = Blocks.SAPLING;
-         i = BlockPlanks.EnumType.OAK.getMetadata();
+         var3 = Blocks.SAPLING;
+         var4 = BlockPlanks.EnumType.OAK.getMetadata();
          break;
       case 4:
-         block = Blocks.SAPLING;
-         i = BlockPlanks.EnumType.SPRUCE.getMetadata();
+         var3 = Blocks.SAPLING;
+         var4 = BlockPlanks.EnumType.SPRUCE.getMetadata();
          break;
       case 5:
-         block = Blocks.SAPLING;
-         i = BlockPlanks.EnumType.BIRCH.getMetadata();
+         var3 = Blocks.SAPLING;
+         var4 = BlockPlanks.EnumType.BIRCH.getMetadata();
          break;
       case 6:
-         block = Blocks.SAPLING;
-         i = BlockPlanks.EnumType.JUNGLE.getMetadata();
+         var3 = Blocks.SAPLING;
+         var4 = BlockPlanks.EnumType.JUNGLE.getMetadata();
          break;
       case 7:
-         block = Blocks.RED_MUSHROOM;
+         var3 = Blocks.RED_MUSHROOM;
          break;
       case 8:
-         block = Blocks.BROWN_MUSHROOM;
+         var3 = Blocks.BROWN_MUSHROOM;
          break;
       case 9:
-         block = Blocks.CACTUS;
+         var3 = Blocks.CACTUS;
          break;
       case 10:
-         block = Blocks.DEADBUSH;
+         var3 = Blocks.DEADBUSH;
          break;
       case 11:
-         block = Blocks.TALLGRASS;
-         i = BlockTallGrass.EnumType.FERN.getMeta();
+         var3 = Blocks.TALLGRASS;
+         var4 = BlockTallGrass.EnumType.FERN.getMeta();
          break;
       case 12:
-         block = Blocks.SAPLING;
-         i = BlockPlanks.EnumType.ACACIA.getMetadata();
+         var3 = Blocks.SAPLING;
+         var4 = BlockPlanks.EnumType.ACACIA.getMetadata();
          break;
       case 13:
-         block = Blocks.SAPLING;
-         i = BlockPlanks.EnumType.DARK_OAK.getMetadata();
+         var3 = Blocks.SAPLING;
+         var4 = BlockPlanks.EnumType.DARK_OAK.getMetadata();
       }
 
-      return new TileEntityFlowerPot(Item.getItemFromBlock(block), i);
+      return new TileEntityFlowerPot(Item.getItemFromBlock((Block)var3), var4);
    }
 
    protected BlockStateContainer createBlockState() {
@@ -205,123 +210,99 @@ public class BlockFlowerPot extends BlockContainer {
    }
 
    public int getMetaFromState(IBlockState var1) {
-      return ((Integer)state.getValue(LEGACY_DATA)).intValue();
+      return ((Integer)var1.getValue(LEGACY_DATA)).intValue();
    }
 
    public IBlockState getActualState(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      BlockFlowerPot.EnumFlowerType blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
-      TileEntity tileentity = worldIn instanceof ChunkCache ? ((ChunkCache)worldIn).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK) : worldIn.getTileEntity(pos);
-      if (tileentity instanceof TileEntityFlowerPot) {
-         TileEntityFlowerPot tileentityflowerpot = (TileEntityFlowerPot)tileentity;
-         Item item = tileentityflowerpot.getFlowerPotItem();
-         if (item instanceof ItemBlock) {
-            int i = tileentityflowerpot.getFlowerPotData();
-            Block block = Block.getBlockFromItem(item);
-            if (block == Blocks.SAPLING) {
-               switch(BlockPlanks.EnumType.byMetadata(i)) {
+      BlockFlowerPot.EnumFlowerType var4 = BlockFlowerPot.EnumFlowerType.EMPTY;
+      TileEntity var5 = var2 instanceof ChunkCache ? ((ChunkCache)var2).getTileEntity(var3, Chunk.EnumCreateEntityType.CHECK) : var2.getTileEntity(var3);
+      if (var5 instanceof TileEntityFlowerPot) {
+         TileEntityFlowerPot var6 = (TileEntityFlowerPot)var5;
+         Item var7 = var6.getFlowerPotItem();
+         if (var7 instanceof ItemBlock) {
+            int var8 = var6.getFlowerPotData();
+            Block var9 = Block.getBlockFromItem(var7);
+            if (var9 == Blocks.SAPLING) {
+               switch(BlockPlanks.EnumType.byMetadata(var8)) {
                case OAK:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.OAK_SAPLING;
+                  var4 = BlockFlowerPot.EnumFlowerType.OAK_SAPLING;
                   break;
                case SPRUCE:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.SPRUCE_SAPLING;
+                  var4 = BlockFlowerPot.EnumFlowerType.SPRUCE_SAPLING;
                   break;
                case BIRCH:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.BIRCH_SAPLING;
+                  var4 = BlockFlowerPot.EnumFlowerType.BIRCH_SAPLING;
                   break;
                case JUNGLE:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.JUNGLE_SAPLING;
+                  var4 = BlockFlowerPot.EnumFlowerType.JUNGLE_SAPLING;
                   break;
                case ACACIA:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.ACACIA_SAPLING;
+                  var4 = BlockFlowerPot.EnumFlowerType.ACACIA_SAPLING;
                   break;
                case DARK_OAK:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DARK_OAK_SAPLING;
+                  var4 = BlockFlowerPot.EnumFlowerType.DARK_OAK_SAPLING;
                   break;
                default:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
+                  var4 = BlockFlowerPot.EnumFlowerType.EMPTY;
                }
-            } else if (block == Blocks.TALLGRASS) {
-               switch(i) {
+            } else if (var9 == Blocks.TALLGRASS) {
+               switch(var8) {
                case 0:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DEAD_BUSH;
+                  var4 = BlockFlowerPot.EnumFlowerType.DEAD_BUSH;
                   break;
                case 2:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.FERN;
+                  var4 = BlockFlowerPot.EnumFlowerType.FERN;
                   break;
                default:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
+                  var4 = BlockFlowerPot.EnumFlowerType.EMPTY;
                }
-            } else if (block == Blocks.YELLOW_FLOWER) {
-               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DANDELION;
-            } else if (block == Blocks.RED_FLOWER) {
-               switch(BlockFlower.EnumFlowerType.getType(BlockFlower.EnumFlowerColor.RED, i)) {
+            } else if (var9 == Blocks.YELLOW_FLOWER) {
+               var4 = BlockFlowerPot.EnumFlowerType.DANDELION;
+            } else if (var9 == Blocks.RED_FLOWER) {
+               switch(BlockFlower.EnumFlowerType.getType(BlockFlower.EnumFlowerColor.RED, var8)) {
                case POPPY:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.POPPY;
+                  var4 = BlockFlowerPot.EnumFlowerType.POPPY;
                   break;
                case BLUE_ORCHID:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.BLUE_ORCHID;
+                  var4 = BlockFlowerPot.EnumFlowerType.BLUE_ORCHID;
                   break;
                case ALLIUM:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.ALLIUM;
+                  var4 = BlockFlowerPot.EnumFlowerType.ALLIUM;
                   break;
                case HOUSTONIA:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.HOUSTONIA;
+                  var4 = BlockFlowerPot.EnumFlowerType.HOUSTONIA;
                   break;
                case RED_TULIP:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.RED_TULIP;
+                  var4 = BlockFlowerPot.EnumFlowerType.RED_TULIP;
                   break;
                case ORANGE_TULIP:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.ORANGE_TULIP;
+                  var4 = BlockFlowerPot.EnumFlowerType.ORANGE_TULIP;
                   break;
                case WHITE_TULIP:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.WHITE_TULIP;
+                  var4 = BlockFlowerPot.EnumFlowerType.WHITE_TULIP;
                   break;
                case PINK_TULIP:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.PINK_TULIP;
+                  var4 = BlockFlowerPot.EnumFlowerType.PINK_TULIP;
                   break;
                case OXEYE_DAISY:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.OXEYE_DAISY;
+                  var4 = BlockFlowerPot.EnumFlowerType.OXEYE_DAISY;
                   break;
                default:
-                  blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.EMPTY;
+                  var4 = BlockFlowerPot.EnumFlowerType.EMPTY;
                }
-            } else if (block == Blocks.RED_MUSHROOM) {
-               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.MUSHROOM_RED;
-            } else if (block == Blocks.BROWN_MUSHROOM) {
-               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.MUSHROOM_BROWN;
-            } else if (block == Blocks.DEADBUSH) {
-               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.DEAD_BUSH;
-            } else if (block == Blocks.CACTUS) {
-               blockflowerpot$enumflowertype = BlockFlowerPot.EnumFlowerType.CACTUS;
+            } else if (var9 == Blocks.RED_MUSHROOM) {
+               var4 = BlockFlowerPot.EnumFlowerType.MUSHROOM_RED;
+            } else if (var9 == Blocks.BROWN_MUSHROOM) {
+               var4 = BlockFlowerPot.EnumFlowerType.MUSHROOM_BROWN;
+            } else if (var9 == Blocks.DEADBUSH) {
+               var4 = BlockFlowerPot.EnumFlowerType.DEAD_BUSH;
+            } else if (var9 == Blocks.CACTUS) {
+               var4 = BlockFlowerPot.EnumFlowerType.CACTUS;
             }
          }
       }
 
-      return state.withProperty(CONTENTS, blockflowerpot$enumflowertype);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
-   }
-
-   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
-      List ret = super.getDrops(world, pos, state, fortune);
-      TileEntityFlowerPot te = world.getTileEntity(pos) instanceof TileEntityFlowerPot ? (TileEntityFlowerPot)world.getTileEntity(pos) : null;
-      if (te != null && te.getFlowerPotItem() != null) {
-         ret.add(new ItemStack(te.getFlowerPotItem(), 1, te.getFlowerPotData()));
-      }
-
-      return ret;
-   }
-
-   public boolean removedByPlayer(IBlockState var1, World var2, BlockPos var3, EntityPlayer var4, boolean var5) {
-      return willHarvest ? true : super.removedByPlayer(state, world, pos, player, willHarvest);
-   }
-
-   public void harvestBlock(World var1, EntityPlayer var2, BlockPos var3, IBlockState var4, TileEntity var5, ItemStack var6) {
-      super.harvestBlock(world, player, pos, state, te, tool);
-      world.setBlockToAir(pos);
+      return var1.withProperty(CONTENTS, var4);
    }
 
    public static enum EnumFlowerType implements IStringSerializable {
@@ -351,7 +332,7 @@ public class BlockFlowerPot extends BlockContainer {
       private final String name;
 
       private EnumFlowerType(String var3) {
-         this.name = name;
+         this.name = var3;
       }
 
       public String toString() {

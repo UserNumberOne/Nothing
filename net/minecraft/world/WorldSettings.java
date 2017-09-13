@@ -1,8 +1,6 @@
 package net.minecraft.world;
 
 import net.minecraft.world.storage.WorldInfo;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public final class WorldSettings {
    private final long seed;
@@ -16,15 +14,15 @@ public final class WorldSettings {
 
    public WorldSettings(long var1, GameType var3, boolean var4, boolean var5, WorldType var6) {
       this.generatorOptions = "";
-      this.seed = seedIn;
-      this.theGameType = gameType;
-      this.mapFeaturesEnabled = enableMapFeatures;
-      this.hardcoreEnabled = hardcoreMode;
-      this.terrainType = worldTypeIn;
+      this.seed = var1;
+      this.theGameType = var3;
+      this.mapFeaturesEnabled = var4;
+      this.hardcoreEnabled = var5;
+      this.terrainType = var6;
    }
 
    public WorldSettings(WorldInfo var1) {
-      this(info.getSeed(), info.getGameType(), info.isMapFeaturesEnabled(), info.isHardcoreModeEnabled(), info.getTerrainType());
+      this(var1.getSeed(), var1.getGameType(), var1.isMapFeaturesEnabled(), var1.isHardcoreModeEnabled(), var1.getTerrainType());
    }
 
    public WorldSettings enableBonusChest() {
@@ -33,13 +31,7 @@ public final class WorldSettings {
    }
 
    public WorldSettings setGeneratorOptions(String var1) {
-      this.generatorOptions = options;
-      return this;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public WorldSettings enableCommands() {
-      this.commandsAllowed = true;
+      this.generatorOptions = var1;
       return this;
    }
 
@@ -72,7 +64,7 @@ public final class WorldSettings {
    }
 
    public static GameType getGameTypeById(int var0) {
-      return GameType.getByID(id);
+      return GameType.getByID(var0);
    }
 
    public String getGeneratorOptions() {

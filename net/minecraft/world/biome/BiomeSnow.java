@@ -10,8 +10,6 @@ import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenIcePath;
 import net.minecraft.world.gen.feature.WorldGenIceSpike;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate.EventType;
 
 public class BiomeSnow extends Biome {
    private final boolean superIcy;
@@ -19,9 +17,9 @@ public class BiomeSnow extends Biome {
    private final WorldGenIcePath icePatch = new WorldGenIcePath(4);
 
    public BiomeSnow(boolean var1, Biome.BiomeProperties var2) {
-      super(properties);
-      this.superIcy = superIcyIn;
-      if (superIcyIn) {
+      super(var2);
+      this.superIcy = var1;
+      if (var1) {
          this.topBlock = Blocks.SNOW.getDefaultState();
       }
 
@@ -35,21 +33,21 @@ public class BiomeSnow extends Biome {
    }
 
    public void decorate(World var1, Random var2, BlockPos var3) {
-      if (this.superIcy && TerrainGen.decorate(worldIn, rand, pos, EventType.ICE)) {
-         for(int i = 0; i < 3; ++i) {
-            int j = rand.nextInt(16) + 8;
-            int k = rand.nextInt(16) + 8;
-            this.iceSpike.generate(worldIn, rand, worldIn.getHeight(pos.add(j, 0, k)));
+      if (this.superIcy) {
+         for(int var4 = 0; var4 < 3; ++var4) {
+            int var5 = var2.nextInt(16) + 8;
+            int var6 = var2.nextInt(16) + 8;
+            this.iceSpike.generate(var1, var2, var1.getHeight(var3.add(var5, 0, var6)));
          }
 
-         for(int l = 0; l < 2; ++l) {
-            int i1 = rand.nextInt(16) + 8;
-            int j1 = rand.nextInt(16) + 8;
-            this.icePatch.generate(worldIn, rand, worldIn.getHeight(pos.add(i1, 0, j1)));
+         for(int var7 = 0; var7 < 2; ++var7) {
+            int var8 = var2.nextInt(16) + 8;
+            int var9 = var2.nextInt(16) + 8;
+            this.icePatch.generate(var1, var2, var1.getHeight(var3.add(var8, 0, var9)));
          }
       }
 
-      super.decorate(worldIn, rand, pos);
+      super.decorate(var1, var2, var3);
    }
 
    public WorldGenAbstractTree genBigTreeChance(Random var1) {

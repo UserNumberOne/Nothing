@@ -26,32 +26,32 @@ public class ItemEnderEye extends Item {
    }
 
    public EnumActionResult onItemUse(ItemStack var1, EntityPlayer var2, World var3, BlockPos var4, EnumHand var5, EnumFacing var6, float var7, float var8, float var9) {
-      IBlockState iblockstate = worldIn.getBlockState(pos);
-      if (playerIn.canPlayerEdit(pos.offset(facing), facing, stack) && iblockstate.getBlock() == Blocks.END_PORTAL_FRAME && !((Boolean)iblockstate.getValue(BlockEndPortalFrame.EYE)).booleanValue()) {
-         if (worldIn.isRemote) {
+      IBlockState var10 = var3.getBlockState(var4);
+      if (var2.canPlayerEdit(var4.offset(var6), var6, var1) && var10.getBlock() == Blocks.END_PORTAL_FRAME && !((Boolean)var10.getValue(BlockEndPortalFrame.EYE)).booleanValue()) {
+         if (var3.isRemote) {
             return EnumActionResult.SUCCESS;
          } else {
-            worldIn.setBlockState(pos, iblockstate.withProperty(BlockEndPortalFrame.EYE, Boolean.valueOf(true)), 2);
-            worldIn.updateComparatorOutputLevel(pos, Blocks.END_PORTAL_FRAME);
-            --stack.stackSize;
+            var3.setBlockState(var4, var10.withProperty(BlockEndPortalFrame.EYE, Boolean.valueOf(true)), 2);
+            var3.updateComparatorOutputLevel(var4, Blocks.END_PORTAL_FRAME);
+            --var1.stackSize;
 
-            for(int i = 0; i < 16; ++i) {
-               double d0 = (double)((float)pos.getX() + (5.0F + itemRand.nextFloat() * 6.0F) / 16.0F);
-               double d1 = (double)((float)pos.getY() + 0.8125F);
-               double d2 = (double)((float)pos.getZ() + (5.0F + itemRand.nextFloat() * 6.0F) / 16.0F);
-               double d3 = 0.0D;
-               double d4 = 0.0D;
-               double d5 = 0.0D;
-               worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D);
+            for(int var11 = 0; var11 < 16; ++var11) {
+               double var12 = (double)((float)var4.getX() + (5.0F + itemRand.nextFloat() * 6.0F) / 16.0F);
+               double var14 = (double)((float)var4.getY() + 0.8125F);
+               double var16 = (double)((float)var4.getZ() + (5.0F + itemRand.nextFloat() * 6.0F) / 16.0F);
+               double var18 = 0.0D;
+               double var20 = 0.0D;
+               double var22 = 0.0D;
+               var3.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var12, var14, var16, 0.0D, 0.0D, 0.0D);
             }
 
-            BlockPattern.PatternHelper blockpattern$patternhelper = BlockEndPortalFrame.getOrCreatePortalShape().match(worldIn, pos);
-            if (blockpattern$patternhelper != null) {
-               BlockPos blockpos = blockpattern$patternhelper.getFrontTopLeft().add(-3, 0, -3);
+            BlockPattern.PatternHelper var27 = BlockEndPortalFrame.getOrCreatePortalShape().match(var3, var4);
+            if (var27 != null) {
+               BlockPos var24 = var27.getFrontTopLeft().add(-3, 0, -3);
 
-               for(int j = 0; j < 3; ++j) {
-                  for(int k = 0; k < 3; ++k) {
-                     worldIn.setBlockState(blockpos.add(j, 0, k), Blocks.END_PORTAL.getDefaultState(), 2);
+               for(int var25 = 0; var25 < 3; ++var25) {
+                  for(int var26 = 0; var26 < 3; ++var26) {
+                     var3.setBlockState(var24.add(var25, 0, var26), Blocks.END_PORTAL.getDefaultState(), 2);
                   }
                }
             }
@@ -64,28 +64,28 @@ public class ItemEnderEye extends Item {
    }
 
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      RayTraceResult raytraceresult = this.rayTrace(worldIn, playerIn, false);
-      if (raytraceresult != null && raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK && worldIn.getBlockState(raytraceresult.getBlockPos()).getBlock() == Blocks.END_PORTAL_FRAME) {
-         return new ActionResult(EnumActionResult.PASS, itemStackIn);
+      RayTraceResult var5 = this.rayTrace(var2, var3, false);
+      if (var5 != null && var5.typeOfHit == RayTraceResult.Type.BLOCK && var2.getBlockState(var5.getBlockPos()).getBlock() == Blocks.END_PORTAL_FRAME) {
+         return new ActionResult(EnumActionResult.PASS, var1);
       } else {
-         if (!worldIn.isRemote) {
-            BlockPos blockpos = ((WorldServer)worldIn).getChunkProvider().getStrongholdGen(worldIn, "Stronghold", new BlockPos(playerIn));
-            if (blockpos != null) {
-               EntityEnderEye entityendereye = new EntityEnderEye(worldIn, playerIn.posX, playerIn.posY + (double)(playerIn.height / 2.0F), playerIn.posZ);
-               entityendereye.moveTowards(blockpos);
-               worldIn.spawnEntity(entityendereye);
-               worldIn.playSound((EntityPlayer)null, playerIn.posX, playerIn.posY, playerIn.posZ, SoundEvents.ENTITY_ENDEREYE_LAUNCH, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
-               worldIn.playEvent((EntityPlayer)null, 1003, new BlockPos(playerIn), 0);
-               if (!playerIn.capabilities.isCreativeMode) {
-                  --itemStackIn.stackSize;
+         if (!var2.isRemote) {
+            BlockPos var6 = ((WorldServer)var2).getChunkProvider().getStrongholdGen(var2, "Stronghold", new BlockPos(var3));
+            if (var6 != null) {
+               EntityEnderEye var7 = new EntityEnderEye(var2, var3.posX, var3.posY + (double)(var3.height / 2.0F), var3.posZ);
+               var7.moveTowards(var6);
+               var2.spawnEntity(var7);
+               var2.playSound((EntityPlayer)null, var3.posX, var3.posY, var3.posZ, SoundEvents.ENTITY_ENDEREYE_LAUNCH, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+               var2.playEvent((EntityPlayer)null, 1003, new BlockPos(var3), 0);
+               if (!var3.capabilities.isCreativeMode) {
+                  --var1.stackSize;
                }
 
-               playerIn.addStat(StatList.getObjectUseStats(this));
-               return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
+               var3.addStat(StatList.getObjectUseStats(this));
+               return new ActionResult(EnumActionResult.SUCCESS, var1);
             }
          }
 
-         return new ActionResult(EnumActionResult.FAIL, itemStackIn);
+         return new ActionResult(EnumActionResult.FAIL, var1);
       }
    }
 }

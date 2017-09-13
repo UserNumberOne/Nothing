@@ -13,39 +13,39 @@ public class WorldGenEndPodium extends WorldGenerator {
    private final boolean activePortal;
 
    public WorldGenEndPodium(boolean var1) {
-      this.activePortal = activePortalIn;
+      this.activePortal = var1;
    }
 
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      for(BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(new BlockPos(position.getX() - 4, position.getY() - 1, position.getZ() - 4), new BlockPos(position.getX() + 4, position.getY() + 32, position.getZ() + 4))) {
-         double d0 = blockpos$mutableblockpos.getDistance(position.getX(), blockpos$mutableblockpos.getY(), position.getZ());
-         if (d0 <= 3.5D) {
-            if (blockpos$mutableblockpos.getY() < position.getY()) {
-               if (d0 <= 2.5D) {
-                  this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.BEDROCK.getDefaultState());
-               } else if (blockpos$mutableblockpos.getY() < position.getY()) {
-                  this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.END_STONE.getDefaultState());
+      for(BlockPos.MutableBlockPos var5 : BlockPos.getAllInBoxMutable(new BlockPos(var3.getX() - 4, var3.getY() - 1, var3.getZ() - 4), new BlockPos(var3.getX() + 4, var3.getY() + 32, var3.getZ() + 4))) {
+         double var6 = var5.getDistance(var3.getX(), var5.getY(), var3.getZ());
+         if (var6 <= 3.5D) {
+            if (var5.getY() < var3.getY()) {
+               if (var6 <= 2.5D) {
+                  this.setBlockAndNotifyAdequately(var1, var5, Blocks.BEDROCK.getDefaultState());
+               } else if (var5.getY() < var3.getY()) {
+                  this.setBlockAndNotifyAdequately(var1, var5, Blocks.END_STONE.getDefaultState());
                }
-            } else if (blockpos$mutableblockpos.getY() > position.getY()) {
-               this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.AIR.getDefaultState());
-            } else if (d0 > 2.5D) {
-               this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.BEDROCK.getDefaultState());
+            } else if (var5.getY() > var3.getY()) {
+               this.setBlockAndNotifyAdequately(var1, var5, Blocks.AIR.getDefaultState());
+            } else if (var6 > 2.5D) {
+               this.setBlockAndNotifyAdequately(var1, var5, Blocks.BEDROCK.getDefaultState());
             } else if (this.activePortal) {
-               this.setBlockAndNotifyAdequately(worldIn, new BlockPos(blockpos$mutableblockpos), Blocks.END_PORTAL.getDefaultState());
+               this.setBlockAndNotifyAdequately(var1, new BlockPos(var5), Blocks.END_PORTAL.getDefaultState());
             } else {
-               this.setBlockAndNotifyAdequately(worldIn, new BlockPos(blockpos$mutableblockpos), Blocks.AIR.getDefaultState());
+               this.setBlockAndNotifyAdequately(var1, new BlockPos(var5), Blocks.AIR.getDefaultState());
             }
          }
       }
 
-      for(int i = 0; i < 4; ++i) {
-         this.setBlockAndNotifyAdequately(worldIn, position.up(i), Blocks.BEDROCK.getDefaultState());
+      for(int var9 = 0; var9 < 4; ++var9) {
+         this.setBlockAndNotifyAdequately(var1, var3.up(var9), Blocks.BEDROCK.getDefaultState());
       }
 
-      BlockPos blockpos = position.up(2);
+      BlockPos var10 = var3.up(2);
 
-      for(EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-         this.setBlockAndNotifyAdequately(worldIn, blockpos.offset(enumfacing), Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, enumfacing));
+      for(EnumFacing var8 : EnumFacing.Plane.HORIZONTAL) {
+         this.setBlockAndNotifyAdequately(var1, var10.offset(var8), Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, var8));
       }
 
       return true;

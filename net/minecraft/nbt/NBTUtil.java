@@ -1,7 +1,6 @@
 package net.minecraft.nbt;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.UnmodifiableIterator;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.util.UUID;
@@ -19,123 +18,123 @@ import net.minecraft.util.math.BlockPos;
 public final class NBTUtil {
    @Nullable
    public static GameProfile readGameProfileFromNBT(NBTTagCompound var0) {
-      String s = null;
-      String s1 = null;
-      if (compound.hasKey("Name", 8)) {
-         s = compound.getString("Name");
+      String var1 = null;
+      String var2 = null;
+      if (var0.hasKey("Name", 8)) {
+         var1 = var0.getString("Name");
       }
 
-      if (compound.hasKey("Id", 8)) {
-         s1 = compound.getString("Id");
+      if (var0.hasKey("Id", 8)) {
+         var2 = var0.getString("Id");
       }
 
-      if (StringUtils.isNullOrEmpty(s) && StringUtils.isNullOrEmpty(s1)) {
+      if (StringUtils.isNullOrEmpty(var1) && StringUtils.isNullOrEmpty(var2)) {
          return null;
       } else {
-         UUID uuid;
+         UUID var3;
          try {
-            uuid = UUID.fromString(s1);
+            var3 = UUID.fromString(var2);
          } catch (Throwable var12) {
-            uuid = null;
+            var3 = null;
          }
 
-         GameProfile gameprofile = new GameProfile(uuid, s);
-         if (compound.hasKey("Properties", 10)) {
-            NBTTagCompound nbttagcompound = compound.getCompoundTag("Properties");
+         GameProfile var4 = new GameProfile(var3, var1);
+         if (var0.hasKey("Properties", 10)) {
+            NBTTagCompound var5 = var0.getCompoundTag("Properties");
 
-            for(String s2 : nbttagcompound.getKeySet()) {
-               NBTTagList nbttaglist = nbttagcompound.getTagList(s2, 10);
+            for(String var7 : var5.getKeySet()) {
+               NBTTagList var8 = var5.getTagList(var7, 10);
 
-               for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-                  NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
-                  String s3 = nbttagcompound1.getString("Value");
-                  if (nbttagcompound1.hasKey("Signature", 8)) {
-                     gameprofile.getProperties().put(s2, new Property(s2, s3, nbttagcompound1.getString("Signature")));
+               for(int var9 = 0; var9 < var8.tagCount(); ++var9) {
+                  NBTTagCompound var10 = var8.getCompoundTagAt(var9);
+                  String var11 = var10.getString("Value");
+                  if (var10.hasKey("Signature", 8)) {
+                     var4.getProperties().put(var7, new Property(var7, var11, var10.getString("Signature")));
                   } else {
-                     gameprofile.getProperties().put(s2, new Property(s2, s3));
+                     var4.getProperties().put(var7, new Property(var7, var11));
                   }
                }
             }
          }
 
-         return gameprofile;
+         return var4;
       }
    }
 
    public static NBTTagCompound writeGameProfile(NBTTagCompound var0, GameProfile var1) {
-      if (!StringUtils.isNullOrEmpty(profile.getName())) {
-         tagCompound.setString("Name", profile.getName());
+      if (!StringUtils.isNullOrEmpty(var1.getName())) {
+         var0.setString("Name", var1.getName());
       }
 
-      if (profile.getId() != null) {
-         tagCompound.setString("Id", profile.getId().toString());
+      if (var1.getId() != null) {
+         var0.setString("Id", var1.getId().toString());
       }
 
-      if (!profile.getProperties().isEmpty()) {
-         NBTTagCompound nbttagcompound = new NBTTagCompound();
+      if (!var1.getProperties().isEmpty()) {
+         NBTTagCompound var2 = new NBTTagCompound();
 
-         for(String s : profile.getProperties().keySet()) {
-            NBTTagList nbttaglist = new NBTTagList();
+         for(String var4 : var1.getProperties().keySet()) {
+            NBTTagList var5 = new NBTTagList();
 
-            for(Property property : profile.getProperties().get(s)) {
-               NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-               nbttagcompound1.setString("Value", property.getValue());
-               if (property.hasSignature()) {
-                  nbttagcompound1.setString("Signature", property.getSignature());
+            for(Property var7 : var1.getProperties().get(var4)) {
+               NBTTagCompound var8 = new NBTTagCompound();
+               var8.setString("Value", var7.getValue());
+               if (var7.hasSignature()) {
+                  var8.setString("Signature", var7.getSignature());
                }
 
-               nbttaglist.appendTag(nbttagcompound1);
+               var5.appendTag(var8);
             }
 
-            nbttagcompound.setTag(s, nbttaglist);
+            var2.setTag(var4, var5);
          }
 
-         tagCompound.setTag("Properties", nbttagcompound);
+         var0.setTag("Properties", var2);
       }
 
-      return tagCompound;
+      return var0;
    }
 
    @VisibleForTesting
    public static boolean areNBTEquals(NBTBase var0, NBTBase var1, boolean var2) {
-      if (nbt1 == nbt2) {
+      if (var0 == var1) {
          return true;
-      } else if (nbt1 == null) {
+      } else if (var0 == null) {
          return true;
-      } else if (nbt2 == null) {
+      } else if (var1 == null) {
          return false;
-      } else if (!nbt1.getClass().equals(nbt2.getClass())) {
+      } else if (!var0.getClass().equals(var1.getClass())) {
          return false;
-      } else if (nbt1 instanceof NBTTagCompound) {
-         NBTTagCompound nbttagcompound = (NBTTagCompound)nbt1;
-         NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbt2;
+      } else if (var0 instanceof NBTTagCompound) {
+         NBTTagCompound var9 = (NBTTagCompound)var0;
+         NBTTagCompound var10 = (NBTTagCompound)var1;
 
-         for(String s : nbttagcompound.getKeySet()) {
-            NBTBase nbtbase1 = nbttagcompound.getTag(s);
-            if (!areNBTEquals(nbtbase1, nbttagcompound1.getTag(s), compareTagList)) {
+         for(String var12 : var9.getKeySet()) {
+            NBTBase var13 = var9.getTag(var12);
+            if (!areNBTEquals(var13, var10.getTag(var12), var2)) {
                return false;
             }
          }
 
          return true;
-      } else if (nbt1 instanceof NBTTagList && compareTagList) {
-         NBTTagList nbttaglist = (NBTTagList)nbt1;
-         NBTTagList nbttaglist1 = (NBTTagList)nbt2;
-         if (nbttaglist.tagCount() == 0) {
-            return nbttaglist1.tagCount() == 0;
+      } else if (var0 instanceof NBTTagList && var2) {
+         NBTTagList var3 = (NBTTagList)var0;
+         NBTTagList var4 = (NBTTagList)var1;
+         if (var3.tagCount() == 0) {
+            return var4.tagCount() == 0;
          } else {
-            for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-               NBTBase nbtbase = nbttaglist.get(i);
-               boolean flag = false;
+            for(int var5 = 0; var5 < var3.tagCount(); ++var5) {
+               NBTBase var6 = var3.get(var5);
+               boolean var7 = false;
 
-               for(int j = 0; j < nbttaglist1.tagCount(); ++j) {
-                  if (areNBTEquals(nbtbase, nbttaglist1.get(j), compareTagList)) {
-                     flag = true;
+               for(int var8 = 0; var8 < var4.tagCount(); ++var8) {
+                  if (areNBTEquals(var6, var4.get(var8), var2)) {
+                     var7 = true;
                      break;
                   }
                }
 
-               if (!flag) {
+               if (!var7) {
                   return false;
                }
             }
@@ -143,78 +142,76 @@ public final class NBTUtil {
             return true;
          }
       } else {
-         return nbt1.equals(nbt2);
+         return var0.equals(var1);
       }
    }
 
    public static NBTTagCompound createUUIDTag(UUID var0) {
-      NBTTagCompound nbttagcompound = new NBTTagCompound();
-      nbttagcompound.setLong("M", uuid.getMostSignificantBits());
-      nbttagcompound.setLong("L", uuid.getLeastSignificantBits());
-      return nbttagcompound;
+      NBTTagCompound var1 = new NBTTagCompound();
+      var1.setLong("M", var0.getMostSignificantBits());
+      var1.setLong("L", var0.getLeastSignificantBits());
+      return var1;
    }
 
    public static UUID getUUIDFromTag(NBTTagCompound var0) {
-      return new UUID(tag.getLong("M"), tag.getLong("L"));
+      return new UUID(var0.getLong("M"), var0.getLong("L"));
    }
 
    public static BlockPos getPosFromTag(NBTTagCompound var0) {
-      return new BlockPos(tag.getInteger("X"), tag.getInteger("Y"), tag.getInteger("Z"));
+      return new BlockPos(var0.getInteger("X"), var0.getInteger("Y"), var0.getInteger("Z"));
    }
 
    public static NBTTagCompound createPosTag(BlockPos var0) {
-      NBTTagCompound nbttagcompound = new NBTTagCompound();
-      nbttagcompound.setInteger("X", pos.getX());
-      nbttagcompound.setInteger("Y", pos.getY());
-      nbttagcompound.setInteger("Z", pos.getZ());
-      return nbttagcompound;
+      NBTTagCompound var1 = new NBTTagCompound();
+      var1.setInteger("X", var0.getX());
+      var1.setInteger("Y", var0.getY());
+      var1.setInteger("Z", var0.getZ());
+      return var1;
    }
 
    public static IBlockState readBlockState(NBTTagCompound var0) {
-      if (!tag.hasKey("Name", 8)) {
+      if (!var0.hasKey("Name", 8)) {
          return Blocks.AIR.getDefaultState();
       } else {
-         Block block = (Block)Block.REGISTRY.getObject(new ResourceLocation(tag.getString("Name")));
-         IBlockState iblockstate = block.getDefaultState();
-         if (tag.hasKey("Properties", 10)) {
-            NBTTagCompound nbttagcompound = tag.getCompoundTag("Properties");
-            BlockStateContainer blockstatecontainer = block.getBlockState();
+         Block var1 = (Block)Block.REGISTRY.getObject(new ResourceLocation(var0.getString("Name")));
+         IBlockState var2 = var1.getDefaultState();
+         if (var0.hasKey("Properties", 10)) {
+            NBTTagCompound var3 = var0.getCompoundTag("Properties");
+            BlockStateContainer var4 = var1.getBlockState();
 
-            for(String s : nbttagcompound.getKeySet()) {
-               IProperty iproperty = blockstatecontainer.getProperty(s);
-               if (iproperty != null) {
-                  iblockstate = setValueHelper(iblockstate, iproperty, nbttagcompound.getString(s));
+            for(String var6 : var3.getKeySet()) {
+               IProperty var7 = var4.getProperty(var6);
+               if (var7 != null) {
+                  var2 = setValueHelper(var2, var7, var3.getString(var6));
                }
             }
          }
 
-         return iblockstate;
+         return var2;
       }
    }
 
    private static IBlockState setValueHelper(IBlockState var0, IProperty var1, String var2) {
-      return p_190007_0_.withProperty(p_190007_1_, (Comparable)p_190007_1_.parseValue(p_190007_2_).get());
+      return var0.withProperty(var1, (Comparable)var1.parseValue(var2).get());
    }
 
    public static NBTTagCompound writeBlockState(NBTTagCompound var0, IBlockState var1) {
-      tag.setString("Name", ((ResourceLocation)Block.REGISTRY.getNameForObject(state.getBlock())).toString());
-      if (!state.getProperties().isEmpty()) {
-         NBTTagCompound nbttagcompound = new NBTTagCompound();
-         UnmodifiableIterator var3 = state.getProperties().entrySet().iterator();
+      var0.setString("Name", ((ResourceLocation)Block.REGISTRY.getNameForObject(var1.getBlock())).toString());
+      if (!var1.getProperties().isEmpty()) {
+         NBTTagCompound var2 = new NBTTagCompound();
 
-         while(var3.hasNext()) {
-            Entry entry = (Entry)var3.next();
-            IProperty iproperty = (IProperty)entry.getKey();
-            nbttagcompound.setString(iproperty.getName(), getName(iproperty, (Comparable)entry.getValue()));
+         for(Entry var4 : var1.getProperties().entrySet()) {
+            IProperty var5 = (IProperty)var4.getKey();
+            var2.setString(var5.getName(), getName(var5, (Comparable)var4.getValue()));
          }
 
-         tag.setTag("Properties", nbttagcompound);
+         var0.setTag("Properties", var2);
       }
 
-      return tag;
+      return var0;
    }
 
    private static String getName(IProperty var0, Comparable var1) {
-      return p_190010_0_.getName(p_190010_1_);
+      return var0.getName(var1);
    }
 }

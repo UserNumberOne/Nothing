@@ -20,15 +20,17 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import org.bukkit.Bukkit;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
 
 public abstract class EntityMob extends EntityCreature implements IMob {
-   public EntityMob(World var1) {
-      super(worldIn);
+   public EntityMob(World world) {
+      super(world);
       this.experienceValue = 5;
    }
 
-   public static void registerFixesMonster(DataFixer var0) {
-      EntityLiving.registerFixesMob(fixer, "Monster");
+   public static void registerFixesMonster(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "Monster");
    }
 
    public SoundCategory getSoundCategory() {
@@ -61,8 +63,8 @@ public abstract class EntityMob extends EntityCreature implements IMob {
       return SoundEvents.ENTITY_HOSTILE_SPLASH;
    }
 
-   public boolean attackEntityFrom(DamageSource var1, float var2) {
-      return this.isEntityInvulnerable(source) ? false : super.attackEntityFrom(source, amount);
+   public boolean attackEntityFrom(DamageSource damagesource, float f) {
+      return this.isEntityInvulnerable(damagesource) ? false : super.attackEntityFrom(damagesource, f);
    }
 
    protected SoundEvent getHurtSound() {
@@ -73,64 +75,68 @@ public abstract class EntityMob extends EntityCreature implements IMob {
       return SoundEvents.ENTITY_HOSTILE_DEATH;
    }
 
-   protected SoundEvent getFallSound(int var1) {
-      return heightIn > 4 ? SoundEvents.ENTITY_HOSTILE_BIG_FALL : SoundEvents.ENTITY_HOSTILE_SMALL_FALL;
+   protected SoundEvent getFallSound(int i) {
+      return i > 4 ? SoundEvents.ENTITY_HOSTILE_BIG_FALL : SoundEvents.ENTITY_HOSTILE_SMALL_FALL;
    }
 
-   public boolean attackEntityAsMob(Entity var1) {
+   public boolean attackEntityAsMob(Entity entity) {
       float f = (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
       int i = 0;
-      if (entityIn instanceof EntityLivingBase) {
-         f += EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), ((EntityLivingBase)entityIn).getCreatureAttribute());
+      if (entity instanceof EntityLivingBase) {
+         f += EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), ((EntityLivingBase)entity).getCreatureAttribute());
          i += EnchantmentHelper.getKnockbackModifier(this);
       }
 
-      boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
+      boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), f);
       if (flag) {
-         if (i > 0 && entityIn instanceof EntityLivingBase) {
-            ((EntityLivingBase)entityIn).knockBack(this, (float)i * 0.5F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
+         if (i > 0 && entity instanceof EntityLivingBase) {
+            ((EntityLivingBase)entity).knockBack(this, (float)i * 0.5F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
             this.motionX *= 0.6D;
             this.motionZ *= 0.6D;
          }
 
          int j = EnchantmentHelper.getFireAspectModifier(this);
          if (j > 0) {
-            entityIn.setFire(j * 4);
+            EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), entity.getBukkitEntity(), j * 4);
+            Bukkit.getPluginManager().callEvent(combustEvent);
+            if (!combustEvent.isCancelled()) {
+               entity.setFire(combustEvent.getDuration());
+            }
          }
 
-         if (entityIn instanceof EntityPlayer) {
-            EntityPlayer entityplayer = (EntityPlayer)entityIn;
+         if (entity instanceof EntityPlayer) {
+            EntityPlayer entityhuman = (EntityPlayer)entity;
             ItemStack itemstack = this.getHeldItemMainhand();
-            ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : null;
+            ItemStack itemstack1 = entityhuman.isHandActive() ? entityhuman.getActiveItemStack() : null;
             if (itemstack != null && itemstack1 != null && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.SHIELD) {
                float f1 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier(this) * 0.05F;
                if (this.rand.nextFloat() < f1) {
-                  entityplayer.getCooldownTracker().setCooldown(Items.SHIELD, 100);
-                  this.world.setEntityState(entityplayer, (byte)30);
+                  entityhuman.getCooldownTracker().setCooldown(Items.SHIELD, 100);
+                  this.world.setEntityState(entityhuman, (byte)30);
                }
             }
          }
 
-         this.applyEnchantments(this, entityIn);
+         this.applyEnchantments(this, entity);
       }
 
       return flag;
    }
 
-   public float getBlockPathWeight(BlockPos var1) {
-      return 0.5F - this.world.getLightBrightness(pos);
+   public float getBlockPathWeight(BlockPos blockposition) {
+      return 0.5F - this.world.getLightBrightness(blockposition);
    }
 
    protected boolean isValidLightLevel() {
-      BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
-      if (this.world.getLightFor(EnumSkyBlock.SKY, blockpos) > this.rand.nextInt(32)) {
+      BlockPos blockposition = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+      if (this.world.getLightFor(EnumSkyBlock.SKY, blockposition) > this.rand.nextInt(32)) {
          return false;
       } else {
-         int i = this.world.getLightFromNeighbors(blockpos);
+         int i = this.world.getLightFromNeighbors(blockposition);
          if (this.world.isThundering()) {
             int j = this.world.getSkylightSubtracted();
             this.world.setSkylightSubtracted(10);
-            i = this.world.getLightFromNeighbors(blockpos);
+            i = this.world.getLightFromNeighbors(blockposition);
             this.world.setSkylightSubtracted(j);
          }
 

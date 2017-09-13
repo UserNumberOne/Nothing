@@ -2,8 +2,6 @@ package net.minecraft.world.biome;
 
 import java.util.Random;
 import net.minecraft.block.BlockSilverfish;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -12,81 +10,60 @@ import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenerator;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.OreGenEvent.Post;
-import net.minecraftforge.event.terraingen.OreGenEvent.Pre;
-import net.minecraftforge.event.terraingen.OreGenEvent.GenerateMinable.EventType;
 
 public class BiomeHills extends Biome {
    private final WorldGenerator theWorldGenerator = new WorldGenMinable(Blocks.MONSTER_EGG.getDefaultState().withProperty(BlockSilverfish.VARIANT, BlockSilverfish.EnumType.STONE), 9);
    private final WorldGenTaiga2 spruceGenerator = new WorldGenTaiga2(false);
    private final BiomeHills.Type type;
 
-   public BiomeHills(BiomeHills.Type var1, Biome.BiomeProperties var2) {
-      super(properties);
-      if (p_i46710_1_ == BiomeHills.Type.EXTRA_TREES) {
+   protected BiomeHills(BiomeHills.Type var1, Biome.BiomeProperties var2) {
+      super(var2);
+      if (var1 == BiomeHills.Type.EXTRA_TREES) {
          this.theBiomeDecorator.treesPerChunk = 3;
       }
 
-      this.type = p_i46710_1_;
+      this.type = var1;
    }
 
    public WorldGenAbstractTree genBigTreeChance(Random var1) {
-      return (WorldGenAbstractTree)(rand.nextInt(3) > 0 ? this.spruceGenerator : super.genBigTreeChance(rand));
+      return (WorldGenAbstractTree)(var1.nextInt(3) > 0 ? this.spruceGenerator : super.genBigTreeChance(var1));
    }
 
    public void decorate(World var1, Random var2, BlockPos var3) {
-      super.decorate(worldIn, rand, pos);
-      MinecraftForge.ORE_GEN_BUS.post(new Pre(worldIn, rand, pos));
-      WorldGenerator emeralds = new BiomeHills.EmeraldGenerator();
-      if (TerrainGen.generateOre(worldIn, rand, emeralds, pos, EventType.EMERALD)) {
-         emeralds.generate(worldIn, rand, pos);
-      }
+      super.decorate(var1, var2, var3);
+      int var4 = 3 + var2.nextInt(6);
 
-      for(int i = 0; i < 7; ++i) {
-         int j1 = rand.nextInt(16);
-         int k1 = rand.nextInt(64);
-         int l1 = rand.nextInt(16);
-         if (TerrainGen.generateOre(worldIn, rand, this.theWorldGenerator, pos.add(j1, k1, l1), EventType.SILVERFISH)) {
-            this.theWorldGenerator.generate(worldIn, rand, pos.add(j1, k1, l1));
+      for(int var5 = 0; var5 < var4; ++var5) {
+         int var6 = var2.nextInt(16);
+         int var7 = var2.nextInt(28) + 4;
+         int var8 = var2.nextInt(16);
+         BlockPos var9 = var3.add(var6, var7, var8);
+         if (var1.getBlockState(var9).getBlock() == Blocks.STONE) {
+            var1.setBlockState(var9, Blocks.EMERALD_ORE.getDefaultState(), 2);
          }
       }
 
-      MinecraftForge.ORE_GEN_BUS.post(new Post(worldIn, rand, pos));
+      for(int var10 = 0; var10 < 7; ++var10) {
+         int var11 = var2.nextInt(16);
+         int var12 = var2.nextInt(64);
+         int var13 = var2.nextInt(16);
+         this.theWorldGenerator.generate(var1, var2, var3.add(var11, var12, var13));
+      }
+
    }
 
    public void genTerrainBlocks(World var1, Random var2, ChunkPrimer var3, int var4, int var5, double var6) {
       this.topBlock = Blocks.GRASS.getDefaultState();
       this.fillerBlock = Blocks.DIRT.getDefaultState();
-      if ((noiseVal < -1.0D || noiseVal > 2.0D) && this.type == BiomeHills.Type.MUTATED) {
+      if ((var6 < -1.0D || var6 > 2.0D) && this.type == BiomeHills.Type.MUTATED) {
          this.topBlock = Blocks.GRAVEL.getDefaultState();
          this.fillerBlock = Blocks.GRAVEL.getDefaultState();
-      } else if (noiseVal > 1.0D && this.type != BiomeHills.Type.EXTRA_TREES) {
+      } else if (var6 > 1.0D && this.type != BiomeHills.Type.EXTRA_TREES) {
          this.topBlock = Blocks.STONE.getDefaultState();
          this.fillerBlock = Blocks.STONE.getDefaultState();
       }
 
-      this.generateBiomeTerrain(worldIn, rand, chunkPrimerIn, x, z, noiseVal);
-   }
-
-   private static class EmeraldGenerator extends WorldGenerator {
-      private EmeraldGenerator() {
-      }
-
-      public boolean generate(World var1, Random var2, BlockPos var3) {
-         int count = 3 + rand.nextInt(6);
-
-         for(int i = 0; i < count; ++i) {
-            BlockPos blockpos = pos.add(rand.nextInt(16), rand.nextInt(28) + 4, rand.nextInt(16));
-            IBlockState state = worldIn.getBlockState(blockpos);
-            if (state.getBlock().isReplaceableOreGen(state, worldIn, blockpos, BlockMatcher.forBlock(Blocks.STONE))) {
-               worldIn.setBlockState(blockpos, Blocks.EMERALD_ORE.getDefaultState(), 2);
-            }
-         }
-
-         return true;
-      }
+      this.generateBiomeTerrain(var1, var2, var3, var4, var5, var6);
    }
 
    public static enum Type {

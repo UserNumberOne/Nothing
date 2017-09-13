@@ -9,31 +9,31 @@ public class Rotations {
    protected final float z;
 
    public Rotations(float var1, float var2, float var3) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
+      this.x = var1;
+      this.y = var2;
+      this.z = var3;
    }
 
    public Rotations(NBTTagList var1) {
-      this.x = nbt.getFloatAt(0);
-      this.y = nbt.getFloatAt(1);
-      this.z = nbt.getFloatAt(2);
+      this.x = var1.getFloatAt(0);
+      this.y = var1.getFloatAt(1);
+      this.z = var1.getFloatAt(2);
    }
 
    public NBTTagList writeToNBT() {
-      NBTTagList nbttaglist = new NBTTagList();
-      nbttaglist.appendTag(new NBTTagFloat(this.x));
-      nbttaglist.appendTag(new NBTTagFloat(this.y));
-      nbttaglist.appendTag(new NBTTagFloat(this.z));
-      return nbttaglist;
+      NBTTagList var1 = new NBTTagList();
+      var1.appendTag(new NBTTagFloat(this.x));
+      var1.appendTag(new NBTTagFloat(this.y));
+      var1.appendTag(new NBTTagFloat(this.z));
+      return var1;
    }
 
    public boolean equals(Object var1) {
-      if (!(p_equals_1_ instanceof Rotations)) {
+      if (!(var1 instanceof Rotations)) {
          return false;
       } else {
-         Rotations rotations = (Rotations)p_equals_1_;
-         return this.x == rotations.x && this.y == rotations.y && this.z == rotations.z;
+         Rotations var2 = (Rotations)var1;
+         return this.x == var2.x && this.y == var2.y && this.z == var2.z;
       }
    }
 

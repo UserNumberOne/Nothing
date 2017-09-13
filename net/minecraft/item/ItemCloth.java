@@ -4,16 +4,16 @@ import net.minecraft.block.Block;
 
 public class ItemCloth extends ItemBlock {
    public ItemCloth(Block var1) {
-      super(block);
+      super(var1);
       this.setMaxDamage(0);
       this.setHasSubtypes(true);
    }
 
    public int getMetadata(int var1) {
-      return damage;
+      return var1;
    }
 
    public String getUnlocalizedName(ItemStack var1) {
-      return super.getUnlocalizedName() + "." + EnumDyeColor.byMetadata(stack.getMetadata()).getUnlocalizedName();
+      return super.getUnlocalizedName() + "." + EnumDyeColor.byMetadata(var1.getMetadata()).getUnlocalizedName();
    }
 }

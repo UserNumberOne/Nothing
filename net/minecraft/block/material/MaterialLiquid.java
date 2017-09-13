@@ -2,7 +2,7 @@ package net.minecraft.block.material;
 
 public class MaterialLiquid extends Material {
    public MaterialLiquid(MapColor var1) {
-      super(color);
+      super(var1);
       this.setReplaceable();
       this.setNoPushMobility();
    }

@@ -6,8 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityMetadata implements Packet {
    private int entityId;
@@ -17,36 +15,26 @@ public class SPacketEntityMetadata implements Packet {
    }
 
    public SPacketEntityMetadata(int var1, EntityDataManager var2, boolean var3) {
-      this.entityId = entityIdIn;
-      if (sendAll) {
-         this.dataManagerEntries = dataManagerIn.getAll();
+      this.entityId = var1;
+      if (var3) {
+         this.dataManagerEntries = var2.getAll();
       } else {
-         this.dataManagerEntries = dataManagerIn.getDirty();
+         this.dataManagerEntries = var2.getDirty();
       }
 
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.entityId = buf.readVarInt();
-      this.dataManagerEntries = EntityDataManager.readEntries(buf);
+      this.entityId = var1.readVarInt();
+      this.dataManagerEntries = EntityDataManager.readEntries(var1);
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeVarInt(this.entityId);
-      EntityDataManager.writeEntries(this.dataManagerEntries, buf);
+      var1.writeVarInt(this.entityId);
+      EntityDataManager.writeEntries(this.dataManagerEntries, var1);
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      handler.handleEntityMetadata(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getDataManagerEntries() {
-      return this.dataManagerEntries;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
+      var1.handleEntityMetadata(this);
    }
 }

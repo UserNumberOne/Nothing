@@ -18,20 +18,20 @@ public class SetNBT extends LootFunction {
    private final NBTTagCompound tag;
 
    public SetNBT(LootCondition[] var1, NBTTagCompound var2) {
-      super(conditionsIn);
-      this.tag = tagIn;
+      super(var1);
+      this.tag = var2;
    }
 
    public ItemStack apply(ItemStack var1, Random var2, LootContext var3) {
-      NBTTagCompound nbttagcompound = stack.getTagCompound();
-      if (nbttagcompound == null) {
-         nbttagcompound = this.tag.copy();
+      NBTTagCompound var4 = var1.getTagCompound();
+      if (var4 == null) {
+         var4 = this.tag.copy();
       } else {
-         nbttagcompound.merge(this.tag);
+         var4.merge(this.tag);
       }
 
-      stack.setTagCompound(nbttagcompound);
-      return stack;
+      var1.setTagCompound(var4);
+      return var1;
    }
 
    public static class Serializer extends LootFunction.Serializer {
@@ -40,16 +40,21 @@ public class SetNBT extends LootFunction {
       }
 
       public void serialize(JsonObject var1, SetNBT var2, JsonSerializationContext var3) {
-         object.addProperty("tag", functionClazz.tag.toString());
+         var1.addProperty("tag", var2.tag.toString());
       }
 
       public SetNBT deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
          try {
-            NBTTagCompound nbttagcompound = JsonToNBT.getTagFromJson(JsonUtils.getString(object, "tag"));
-            return new SetNBT(conditionsIn, nbttagcompound);
+            NBTTagCompound var4 = JsonToNBT.getTagFromJson(JsonUtils.getString(var1, "tag"));
+            return new SetNBT(var3, var4);
          } catch (NBTException var5) {
             throw new JsonSyntaxException(var5);
          }
+      }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

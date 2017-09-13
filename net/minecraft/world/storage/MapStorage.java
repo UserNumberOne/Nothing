@@ -23,60 +23,60 @@ public class MapStorage {
    private final Map idCounts = Maps.newHashMap();
 
    public MapStorage(ISaveHandler var1) {
-      this.saveHandler = saveHandlerIn;
+      this.saveHandler = var1;
       this.loadIdCounts();
    }
 
    @Nullable
    public WorldSavedData getOrLoadData(Class var1, String var2) {
-      WorldSavedData worldsaveddata = (WorldSavedData)this.loadedDataMap.get(dataIdentifier);
-      if (worldsaveddata != null) {
-         return worldsaveddata;
+      WorldSavedData var3 = (WorldSavedData)this.loadedDataMap.get(var2);
+      if (var3 != null) {
+         return var3;
       } else {
          if (this.saveHandler != null) {
             try {
-               File file1 = this.saveHandler.getMapFileFromName(dataIdentifier);
-               if (file1 != null && file1.exists()) {
+               File var4 = this.saveHandler.getMapFileFromName(var2);
+               if (var4 != null && var4.exists()) {
                   try {
-                     worldsaveddata = (WorldSavedData)clazz.getConstructor(String.class).newInstance(dataIdentifier);
+                     var3 = (WorldSavedData)var1.getConstructor(String.class).newInstance(var2);
                   } catch (Exception var7) {
-                     throw new RuntimeException("Failed to instantiate " + clazz, var7);
+                     throw new RuntimeException("Failed to instantiate " + var1, var7);
                   }
 
-                  FileInputStream fileinputstream = new FileInputStream(file1);
-                  NBTTagCompound nbttagcompound = CompressedStreamTools.readCompressed(fileinputstream);
-                  fileinputstream.close();
-                  worldsaveddata.readFromNBT(nbttagcompound.getCompoundTag("data"));
+                  FileInputStream var5 = new FileInputStream(var4);
+                  NBTTagCompound var6 = CompressedStreamTools.readCompressed(var5);
+                  var5.close();
+                  var3.readFromNBT(var6.getCompoundTag("data"));
                }
             } catch (Exception var8) {
                var8.printStackTrace();
             }
          }
 
-         if (worldsaveddata != null) {
-            this.loadedDataMap.put(dataIdentifier, worldsaveddata);
-            this.loadedDataList.add(worldsaveddata);
+         if (var3 != null) {
+            this.loadedDataMap.put(var2, var3);
+            this.loadedDataList.add(var3);
          }
 
-         return worldsaveddata;
+         return var3;
       }
    }
 
    public void setData(String var1, WorldSavedData var2) {
-      if (this.loadedDataMap.containsKey(dataIdentifier)) {
-         this.loadedDataList.remove(this.loadedDataMap.remove(dataIdentifier));
+      if (this.loadedDataMap.containsKey(var1)) {
+         this.loadedDataList.remove(this.loadedDataMap.remove(var1));
       }
 
-      this.loadedDataMap.put(dataIdentifier, data);
-      this.loadedDataList.add(data);
+      this.loadedDataMap.put(var1, var2);
+      this.loadedDataList.add(var2);
    }
 
    public void saveAllData() {
-      for(int i = 0; i < this.loadedDataList.size(); ++i) {
-         WorldSavedData worldsaveddata = (WorldSavedData)this.loadedDataList.get(i);
-         if (worldsaveddata.isDirty()) {
-            this.saveData(worldsaveddata);
-            worldsaveddata.setDirty(false);
+      for(int var1 = 0; var1 < this.loadedDataList.size(); ++var1) {
+         WorldSavedData var2 = (WorldSavedData)this.loadedDataList.get(var1);
+         if (var2.isDirty()) {
+            this.saveData(var2);
+            var2.setDirty(false);
          }
       }
 
@@ -85,19 +85,19 @@ public class MapStorage {
    private void saveData(WorldSavedData var1) {
       if (this.saveHandler != null) {
          try {
-            File file1 = this.saveHandler.getMapFileFromName(data.mapName);
-            if (file1 != null) {
-               NBTTagCompound nbttagcompound = new NBTTagCompound();
-               nbttagcompound.setTag("data", data.writeToNBT(new NBTTagCompound()));
-               FileOutputStream fileoutputstream = new FileOutputStream(file1);
-               CompressedStreamTools.writeCompressed(nbttagcompound, fileoutputstream);
-               fileoutputstream.close();
+            File var2 = this.saveHandler.getMapFileFromName(var1.mapName);
+            if (var2 != null) {
+               NBTTagCompound var3 = new NBTTagCompound();
+               var3.setTag("data", var1.writeToNBT(new NBTTagCompound()));
+               FileOutputStream var4 = new FileOutputStream(var2);
+               CompressedStreamTools.writeCompressed(var3, var4);
+               var4.close();
             }
          } catch (Exception var5) {
             var5.printStackTrace();
          }
-      }
 
+      }
    }
 
    private void loadIdCounts() {
@@ -107,18 +107,18 @@ public class MapStorage {
             return;
          }
 
-         File file1 = this.saveHandler.getMapFileFromName("idcounts");
-         if (file1 != null && file1.exists()) {
-            DataInputStream datainputstream = new DataInputStream(new FileInputStream(file1));
-            NBTTagCompound nbttagcompound = CompressedStreamTools.read(datainputstream);
-            datainputstream.close();
+         File var1 = this.saveHandler.getMapFileFromName("idcounts");
+         if (var1 != null && var1.exists()) {
+            DataInputStream var2 = new DataInputStream(new FileInputStream(var1));
+            NBTTagCompound var3 = CompressedStreamTools.read(var2);
+            var2.close();
 
-            for(String s : nbttagcompound.getKeySet()) {
-               NBTBase nbtbase = nbttagcompound.getTag(s);
-               if (nbtbase instanceof NBTTagShort) {
-                  NBTTagShort nbttagshort = (NBTTagShort)nbtbase;
-                  short short1 = nbttagshort.getShort();
-                  this.idCounts.put(s, Short.valueOf(short1));
+            for(String var5 : var3.getKeySet()) {
+               NBTBase var6 = var3.getTag(var5);
+               if (var6 instanceof NBTTagShort) {
+                  NBTTagShort var7 = (NBTTagShort)var6;
+                  short var8 = var7.getShort();
+                  this.idCounts.put(var5, Short.valueOf(var8));
                }
             }
          }
@@ -129,35 +129,35 @@ public class MapStorage {
    }
 
    public int getUniqueDataId(String var1) {
-      Short oshort = (Short)this.idCounts.get(key);
-      if (oshort == null) {
-         oshort = 0;
+      Short var2 = (Short)this.idCounts.get(var1);
+      if (var2 == null) {
+         var2 = 0;
       } else {
-         oshort = (short)(oshort.shortValue() + 1);
+         var2 = (short)(var2.shortValue() + 1);
       }
 
-      this.idCounts.put(key, oshort);
+      this.idCounts.put(var1, var2);
       if (this.saveHandler == null) {
-         return oshort.shortValue();
+         return var2.shortValue();
       } else {
          try {
-            File file1 = this.saveHandler.getMapFileFromName("idcounts");
-            if (file1 != null) {
-               NBTTagCompound nbttagcompound = new NBTTagCompound();
+            File var3 = this.saveHandler.getMapFileFromName("idcounts");
+            if (var3 != null) {
+               NBTTagCompound var4 = new NBTTagCompound();
 
-               for(String s : this.idCounts.keySet()) {
-                  nbttagcompound.setShort(s, ((Short)this.idCounts.get(s)).shortValue());
+               for(String var6 : this.idCounts.keySet()) {
+                  var4.setShort(var6, ((Short)this.idCounts.get(var6)).shortValue());
                }
 
-               DataOutputStream dataoutputstream = new DataOutputStream(new FileOutputStream(file1));
-               CompressedStreamTools.write(nbttagcompound, dataoutputstream);
-               dataoutputstream.close();
+               DataOutputStream var9 = new DataOutputStream(new FileOutputStream(var3));
+               CompressedStreamTools.write(var4, var9);
+               var9.close();
             }
          } catch (Exception var7) {
             var7.printStackTrace();
          }
 
-         return oshort.shortValue();
+         return var2.shortValue();
       }
    }
 }

@@ -26,72 +26,72 @@ public class SharedMonsterAttributes {
    public static final IAttribute LUCK = (new RangedAttribute((IAttribute)null, "generic.luck", 0.0D, -1024.0D, 1024.0D)).setShouldWatch(true);
 
    public static NBTTagList writeBaseAttributeMapToNBT(AbstractAttributeMap var0) {
-      NBTTagList nbttaglist = new NBTTagList();
+      NBTTagList var1 = new NBTTagList();
 
-      for(IAttributeInstance iattributeinstance : map.getAllAttributes()) {
-         nbttaglist.appendTag(writeAttributeInstanceToNBT(iattributeinstance));
+      for(IAttributeInstance var3 : var0.getAllAttributes()) {
+         var1.appendTag(writeAttributeInstanceToNBT(var3));
       }
 
-      return nbttaglist;
+      return var1;
    }
 
    private static NBTTagCompound writeAttributeInstanceToNBT(IAttributeInstance var0) {
-      NBTTagCompound nbttagcompound = new NBTTagCompound();
-      IAttribute iattribute = instance.getAttribute();
-      nbttagcompound.setString("Name", iattribute.getName());
-      nbttagcompound.setDouble("Base", instance.getBaseValue());
-      Collection collection = instance.getModifiers();
-      if (collection != null && !collection.isEmpty()) {
-         NBTTagList nbttaglist = new NBTTagList();
+      NBTTagCompound var1 = new NBTTagCompound();
+      IAttribute var2 = var0.getAttribute();
+      var1.setString("Name", var2.getName());
+      var1.setDouble("Base", var0.getBaseValue());
+      Collection var3 = var0.getModifiers();
+      if (var3 != null && !var3.isEmpty()) {
+         NBTTagList var4 = new NBTTagList();
 
-         for(AttributeModifier attributemodifier : collection) {
-            if (attributemodifier.isSaved()) {
-               nbttaglist.appendTag(writeAttributeModifierToNBT(attributemodifier));
+         for(AttributeModifier var6 : var3) {
+            if (var6.isSaved()) {
+               var4.appendTag(writeAttributeModifierToNBT(var6));
             }
          }
 
-         nbttagcompound.setTag("Modifiers", nbttaglist);
+         var1.setTag("Modifiers", var4);
       }
 
-      return nbttagcompound;
+      return var1;
    }
 
    public static NBTTagCompound writeAttributeModifierToNBT(AttributeModifier var0) {
-      NBTTagCompound nbttagcompound = new NBTTagCompound();
-      nbttagcompound.setString("Name", modifier.getName());
-      nbttagcompound.setDouble("Amount", modifier.getAmount());
-      nbttagcompound.setInteger("Operation", modifier.getOperation());
-      nbttagcompound.setUniqueId("UUID", modifier.getID());
-      return nbttagcompound;
+      NBTTagCompound var1 = new NBTTagCompound();
+      var1.setString("Name", var0.getName());
+      var1.setDouble("Amount", var0.getAmount());
+      var1.setInteger("Operation", var0.getOperation());
+      var1.setUniqueId("UUID", var0.getID());
+      return var1;
    }
 
    public static void setAttributeModifiers(AbstractAttributeMap var0, NBTTagList var1) {
-      for(int i = 0; i < list.tagCount(); ++i) {
-         NBTTagCompound nbttagcompound = list.getCompoundTagAt(i);
-         IAttributeInstance iattributeinstance = map.getAttributeInstanceByName(nbttagcompound.getString("Name"));
-         if (iattributeinstance != null) {
-            applyModifiersToAttributeInstance(iattributeinstance, nbttagcompound);
+      for(int var2 = 0; var2 < var1.tagCount(); ++var2) {
+         NBTTagCompound var3 = var1.getCompoundTagAt(var2);
+         IAttributeInstance var4 = var0.getAttributeInstanceByName(var3.getString("Name"));
+         if (var4 != null) {
+            applyModifiersToAttributeInstance(var4, var3);
          } else {
-            LOGGER.warn("Ignoring unknown attribute '{}'", new Object[]{nbttagcompound.getString("Name")});
+            LOGGER.warn("Ignoring unknown attribute '{}'", new Object[]{var3.getString("Name")});
          }
       }
 
    }
 
    private static void applyModifiersToAttributeInstance(IAttributeInstance var0, NBTTagCompound var1) {
-      instance.setBaseValue(compound.getDouble("Base"));
-      if (compound.hasKey("Modifiers", 9)) {
-         NBTTagList nbttaglist = compound.getTagList("Modifiers", 10);
+      var0.setBaseValue(var1.getDouble("Base"));
+      if (var1.hasKey("Modifiers", 9)) {
+         NBTTagList var2 = var1.getTagList("Modifiers", 10);
 
-         for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-            AttributeModifier attributemodifier = readAttributeModifierFromNBT(nbttaglist.getCompoundTagAt(i));
-            if (attributemodifier != null) {
-               AttributeModifier attributemodifier1 = instance.getModifier(attributemodifier.getID());
-               if (attributemodifier1 != null) {
-                  instance.removeModifier(attributemodifier1);
+         for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
+            AttributeModifier var4 = readAttributeModifierFromNBT(var2.getCompoundTagAt(var3));
+            if (var4 != null) {
+               AttributeModifier var5 = var0.getModifier(var4.getID());
+               if (var5 != null) {
+                  var0.removeModifier(var5);
                }
 
-               instance.applyModifier(attributemodifier);
+               var0.applyModifier(var4);
             }
          }
       }
@@ -100,10 +100,10 @@ public class SharedMonsterAttributes {
 
    @Nullable
    public static AttributeModifier readAttributeModifierFromNBT(NBTTagCompound var0) {
-      UUID uuid = compound.getUniqueId("UUID");
+      UUID var1 = var0.getUniqueId("UUID");
 
       try {
-         return new AttributeModifier(uuid, compound.getString("Name"), compound.getDouble("Amount"), compound.getInteger("Operation"));
+         return new AttributeModifier(var1, var0.getString("Name"), var0.getDouble("Amount"), var0.getInteger("Operation"));
       } catch (Exception var3) {
          LOGGER.warn("Unable to create attribute: {}", new Object[]{var3.getMessage()});
          return null;

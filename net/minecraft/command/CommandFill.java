@@ -1,6 +1,7 @@
 package net.minecraft.command;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -11,7 +12,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -30,108 +31,107 @@ public class CommandFill extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (args.length < 7) {
+      if (var3.length < 7) {
          throw new WrongUsageException("commands.fill.usage", new Object[0]);
       } else {
-         sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 0);
-         BlockPos blockpos = parseBlockPos(sender, args, 0, false);
-         BlockPos blockpos1 = parseBlockPos(sender, args, 3, false);
-         Block block = CommandBase.getBlockByText(sender, args[6]);
-         int i = 0;
-         if (args.length >= 8) {
-            i = parseInt(args[7], 0, 15);
+         var2.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 0);
+         BlockPos var4 = parseBlockPos(var2, var3, 0, false);
+         BlockPos var5 = parseBlockPos(var2, var3, 3, false);
+         Block var6 = CommandBase.getBlockByText(var2, var3[6]);
+         int var7 = 0;
+         if (var3.length >= 8) {
+            var7 = parseInt(var3[7], 0, 15);
          }
 
-         IBlockState state = block.getStateFromMeta(i);
-         BlockPos blockpos2 = new BlockPos(Math.min(blockpos.getX(), blockpos1.getX()), Math.min(blockpos.getY(), blockpos1.getY()), Math.min(blockpos.getZ(), blockpos1.getZ()));
-         BlockPos blockpos3 = new BlockPos(Math.max(blockpos.getX(), blockpos1.getX()), Math.max(blockpos.getY(), blockpos1.getY()), Math.max(blockpos.getZ(), blockpos1.getZ()));
-         int j = (blockpos3.getX() - blockpos2.getX() + 1) * (blockpos3.getY() - blockpos2.getY() + 1) * (blockpos3.getZ() - blockpos2.getZ() + 1);
-         if (j > 32768) {
-            throw new CommandException("commands.fill.tooManyBlocks", new Object[]{j, Integer.valueOf(32768)});
-         } else if (blockpos2.getY() >= 0 && blockpos3.getY() < 256) {
-            World world = sender.getEntityWorld();
+         BlockPos var8 = new BlockPos(Math.min(var4.getX(), var5.getX()), Math.min(var4.getY(), var5.getY()), Math.min(var4.getZ(), var5.getZ()));
+         BlockPos var9 = new BlockPos(Math.max(var4.getX(), var5.getX()), Math.max(var4.getY(), var5.getY()), Math.max(var4.getZ(), var5.getZ()));
+         int var10 = (var9.getX() - var8.getX() + 1) * (var9.getY() - var8.getY() + 1) * (var9.getZ() - var8.getZ() + 1);
+         if (var10 > 32768) {
+            throw new CommandException("commands.fill.tooManyBlocks", new Object[]{var10, Integer.valueOf(32768)});
+         } else if (var8.getY() >= 0 && var9.getY() < 256) {
+            World var11 = var2.getEntityWorld();
 
-            for(int k = blockpos2.getZ(); k <= blockpos3.getZ(); k += 16) {
-               for(int l = blockpos2.getX(); l <= blockpos3.getX(); l += 16) {
-                  if (!world.isBlockLoaded(new BlockPos(l, blockpos3.getY() - blockpos2.getY(), k))) {
+            for(int var12 = var8.getZ(); var12 <= var9.getZ(); var12 += 16) {
+               for(int var13 = var8.getX(); var13 <= var9.getX(); var13 += 16) {
+                  if (!var11.isBlockLoaded(new BlockPos(var13, var9.getY() - var8.getY(), var12))) {
                      throw new CommandException("commands.fill.outOfWorld", new Object[0]);
                   }
                }
             }
 
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            boolean flag = false;
-            if (args.length >= 10 && block.hasTileEntity(state)) {
-               String s = getChatComponentFromNthArg(sender, args, 9).getUnformattedText();
+            NBTTagCompound var24 = new NBTTagCompound();
+            boolean var25 = false;
+            if (var3.length >= 10 && var6.hasTileEntity()) {
+               String var14 = getChatComponentFromNthArg(var2, var3, 9).getUnformattedText();
 
                try {
-                  nbttagcompound = JsonToNBT.getTagFromJson(s);
-                  flag = true;
-               } catch (NBTException var23) {
-                  throw new CommandException("commands.fill.tagError", new Object[]{var23.getMessage()});
+                  var24 = JsonToNBT.getTagFromJson(var14);
+                  var25 = true;
+               } catch (NBTException var22) {
+                  throw new CommandException("commands.fill.tagError", new Object[]{var22.getMessage()});
                }
             }
 
-            List list = Lists.newArrayList();
-            j = 0;
+            ArrayList var26 = Lists.newArrayList();
+            var10 = 0;
 
-            for(int i1 = blockpos2.getZ(); i1 <= blockpos3.getZ(); ++i1) {
-               for(int j1 = blockpos2.getY(); j1 <= blockpos3.getY(); ++j1) {
-                  for(int k1 = blockpos2.getX(); k1 <= blockpos3.getX(); ++k1) {
-                     BlockPos blockpos4 = new BlockPos(k1, j1, i1);
-                     if (args.length >= 9) {
-                        if (!"outline".equals(args[8]) && !"hollow".equals(args[8])) {
-                           if ("destroy".equals(args[8])) {
-                              world.destroyBlock(blockpos4, true);
-                           } else if ("keep".equals(args[8])) {
-                              if (!world.isAirBlock(blockpos4)) {
+            for(int var15 = var8.getZ(); var15 <= var9.getZ(); ++var15) {
+               for(int var16 = var8.getY(); var16 <= var9.getY(); ++var16) {
+                  for(int var17 = var8.getX(); var17 <= var9.getX(); ++var17) {
+                     BlockPos var18 = new BlockPos(var17, var16, var15);
+                     if (var3.length >= 9) {
+                        if (!"outline".equals(var3[8]) && !"hollow".equals(var3[8])) {
+                           if ("destroy".equals(var3[8])) {
+                              var11.destroyBlock(var18, true);
+                           } else if ("keep".equals(var3[8])) {
+                              if (!var11.isAirBlock(var18)) {
                                  continue;
                               }
-                           } else if ("replace".equals(args[8]) && !block.hasTileEntity(state)) {
-                              if (args.length > 9) {
-                                 Block block1 = CommandBase.getBlockByText(sender, args[9]);
-                                 if (world.getBlockState(blockpos4).getBlock() != block1) {
+                           } else if ("replace".equals(var3[8]) && !var6.hasTileEntity()) {
+                              if (var3.length > 9) {
+                                 Block var19 = CommandBase.getBlockByText(var2, var3[9]);
+                                 if (var11.getBlockState(var18).getBlock() != var19) {
                                     continue;
                                  }
                               }
 
-                              if (args.length > 10) {
-                                 int l1 = CommandBase.parseInt(args[10]);
-                                 IBlockState iblockstate = world.getBlockState(blockpos4);
-                                 if (iblockstate.getBlock().getMetaFromState(iblockstate) != l1) {
+                              if (var3.length > 10) {
+                                 int var30 = CommandBase.parseInt(var3[10]);
+                                 IBlockState var20 = var11.getBlockState(var18);
+                                 if (var20.getBlock().getMetaFromState(var20) != var30) {
                                     continue;
                                  }
                               }
                            }
-                        } else if (k1 != blockpos2.getX() && k1 != blockpos3.getX() && j1 != blockpos2.getY() && j1 != blockpos3.getY() && i1 != blockpos2.getZ() && i1 != blockpos3.getZ()) {
-                           if ("hollow".equals(args[8])) {
-                              world.setBlockState(blockpos4, Blocks.AIR.getDefaultState(), 2);
-                              list.add(blockpos4);
+                        } else if (var17 != var8.getX() && var17 != var9.getX() && var16 != var8.getY() && var16 != var9.getY() && var15 != var8.getZ() && var15 != var9.getZ()) {
+                           if ("hollow".equals(var3[8])) {
+                              var11.setBlockState(var18, Blocks.AIR.getDefaultState(), 2);
+                              var26.add(var18);
                            }
                            continue;
                         }
                      }
 
-                     TileEntity tileentity1 = world.getTileEntity(blockpos4);
-                     if (tileentity1 != null) {
-                        if (tileentity1 instanceof IInventory) {
-                           ((IInventory)tileentity1).clear();
+                     TileEntity var31 = var11.getTileEntity(var18);
+                     if (var31 != null) {
+                        if (var31 instanceof IInventory) {
+                           ((IInventory)var31).clear();
                         }
 
-                        world.setBlockState(blockpos4, Blocks.BARRIER.getDefaultState(), block == Blocks.BARRIER ? 2 : 4);
+                        var11.setBlockState(var18, Blocks.BARRIER.getDefaultState(), var6 == Blocks.BARRIER ? 2 : 4);
                      }
 
-                     IBlockState iblockstate1 = block.getStateFromMeta(i);
-                     if (world.setBlockState(blockpos4, iblockstate1, 2)) {
-                        list.add(blockpos4);
-                        ++j;
-                        if (flag) {
-                           TileEntity tileentity = world.getTileEntity(blockpos4);
-                           if (tileentity != null) {
-                              nbttagcompound.setInteger("x", blockpos4.getX());
-                              nbttagcompound.setInteger("y", blockpos4.getY());
-                              nbttagcompound.setInteger("z", blockpos4.getZ());
-                              tileentity.readFromNBT(nbttagcompound);
+                     IBlockState var32 = var6.getStateFromMeta(var7);
+                     if (var11.setBlockState(var18, var32, 2)) {
+                        var26.add(var18);
+                        ++var10;
+                        if (var25) {
+                           TileEntity var21 = var11.getTileEntity(var18);
+                           if (var21 != null) {
+                              var24.setInteger("x", var18.getX());
+                              var24.setInteger("y", var18.getY());
+                              var24.setInteger("z", var18.getZ());
+                              var21.readFromNBT(var24);
                            }
                         }
                      }
@@ -139,16 +139,16 @@ public class CommandFill extends CommandBase {
                }
             }
 
-            for(BlockPos blockpos5 : list) {
-               Block block2 = world.getBlockState(blockpos5).getBlock();
-               world.notifyNeighborsRespectDebug(blockpos5, block2);
+            for(BlockPos var28 : var26) {
+               Block var29 = var11.getBlockState(var28).getBlock();
+               var11.notifyNeighborsRespectDebug(var28, var29);
             }
 
-            if (j <= 0) {
+            if (var10 <= 0) {
                throw new CommandException("commands.fill.failed", new Object[0]);
             } else {
-               sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, j);
-               notifyCommandListener(sender, this, "commands.fill.success", new Object[]{j});
+               var2.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, var10);
+               notifyCommandListener(var2, this, "commands.fill.success", new Object[]{var10});
             }
          } else {
             throw new CommandException("commands.fill.outOfWorld", new Object[0]);
@@ -156,7 +156,17 @@ public class CommandFill extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return args.length > 0 && args.length <= 3 ? getTabCompletionCoordinate(args, 0, pos) : (args.length > 3 && args.length <= 6 ? getTabCompletionCoordinate(args, 3, pos) : (args.length == 7 ? getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys()) : (args.length == 9 ? getListOfStringsMatchingLastWord(args, new String[]{"replace", "destroy", "keep", "hollow", "outline"}) : (args.length == 10 && "replace".equals(args[8]) ? getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys()) : Collections.emptyList()))));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length > 0 && var3.length <= 3) {
+         return getTabCompletionCoordinate(var3, 0, var4);
+      } else if (var3.length > 3 && var3.length <= 6) {
+         return getTabCompletionCoordinate(var3, 3, var4);
+      } else if (var3.length == 7) {
+         return getListOfStringsMatchingLastWord(var3, Block.REGISTRY.getKeys());
+      } else if (var3.length == 9) {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"replace", "destroy", "keep", "hollow", "outline"});
+      } else {
+         return var3.length == 10 && "replace".equals(var3[8]) ? getListOfStringsMatchingLastWord(var3, Block.REGISTRY.getKeys()) : Collections.emptyList();
+      }
    }
 }

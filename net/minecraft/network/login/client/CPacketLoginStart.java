@@ -14,19 +14,19 @@ public class CPacketLoginStart implements Packet {
    }
 
    public CPacketLoginStart(GameProfile var1) {
-      this.profile = profileIn;
+      this.profile = var1;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.profile = new GameProfile((UUID)null, buf.readString(16));
+      this.profile = new GameProfile((UUID)null, var1.readString(16));
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeString(this.profile.getName());
+      var1.writeString(this.profile.getName());
    }
 
    public void processPacket(INetHandlerLoginServer var1) {
-      handler.processLoginStart(this);
+      var1.processLoginStart(this);
    }
 
    public GameProfile getProfile() {

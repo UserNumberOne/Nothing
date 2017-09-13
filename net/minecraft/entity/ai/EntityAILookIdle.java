@@ -9,7 +9,7 @@ public class EntityAILookIdle extends EntityAIBase {
    private int idleTime;
 
    public EntityAILookIdle(EntityLiving var1) {
-      this.idleEntity = entitylivingIn;
+      this.idleEntity = var1;
       this.setMutexBits(3);
    }
 
@@ -22,9 +22,9 @@ public class EntityAILookIdle extends EntityAIBase {
    }
 
    public void startExecuting() {
-      double d0 = 6.283185307179586D * this.idleEntity.getRNG().nextDouble();
-      this.lookX = Math.cos(d0);
-      this.lookZ = Math.sin(d0);
+      double var1 = 6.283185307179586D * this.idleEntity.getRNG().nextDouble();
+      this.lookX = Math.cos(var1);
+      this.lookZ = Math.sin(var1);
       this.idleTime = 20 + this.idleEntity.getRNG().nextInt(20);
    }
 

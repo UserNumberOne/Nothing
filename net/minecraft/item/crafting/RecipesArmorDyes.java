@@ -1,7 +1,8 @@
 package net.minecraft.item.crafting;
 
 import com.google.common.collect.Lists;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.init.Items;
@@ -10,15 +11,18 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 
-public class RecipesArmorDyes implements IRecipe {
-   public boolean matches(InventoryCrafting var1, World var2) {
+public class RecipesArmorDyes extends ShapelessRecipes implements IRecipe {
+   public RecipesArmorDyes() {
+      super(new ItemStack(Items.LEATHER_HELMET, 0, 0), Arrays.asList(new ItemStack(Items.DYE, 0, 5)));
+   }
+
+   public boolean matches(InventoryCrafting inventorycrafting, World world) {
       ItemStack itemstack = null;
-      List list = Lists.newArrayList();
+      ArrayList arraylist = Lists.newArrayList();
 
-      for(int i = 0; i < inv.getSizeInventory(); ++i) {
-         ItemStack itemstack1 = inv.getStackInSlot(i);
+      for(int i = 0; i < inventorycrafting.getSizeInventory(); ++i) {
+         ItemStack itemstack1 = inventorycrafting.getStackInSlot(i);
          if (itemstack1 != null) {
             if (itemstack1.getItem() instanceof ItemArmor) {
                ItemArmor itemarmor = (ItemArmor)itemstack1.getItem();
@@ -32,24 +36,28 @@ public class RecipesArmorDyes implements IRecipe {
                   return false;
                }
 
-               list.add(itemstack1);
+               arraylist.add(itemstack1);
             }
          }
       }
 
-      return itemstack != null && !list.isEmpty();
+      if (itemstack != null && !arraylist.isEmpty()) {
+         return true;
+      } else {
+         return false;
+      }
    }
 
    @Nullable
-   public ItemStack getCraftingResult(InventoryCrafting var1) {
+   public ItemStack getCraftingResult(InventoryCrafting inventorycrafting) {
       ItemStack itemstack = null;
       int[] aint = new int[3];
       int i = 0;
       int j = 0;
       ItemArmor itemarmor = null;
 
-      for(int k = 0; k < inv.getSizeInventory(); ++k) {
-         ItemStack itemstack1 = inv.getStackInSlot(k);
+      for(int k = 0; k < inventorycrafting.getSizeInventory(); ++k) {
+         ItemStack itemstack1 = inventorycrafting.getStackInSlot(k);
          if (itemstack1 != null) {
             if (itemstack1.getItem() instanceof ItemArmor) {
                itemarmor = (ItemArmor)itemstack1.getItem();
@@ -76,13 +84,13 @@ public class RecipesArmorDyes implements IRecipe {
                }
 
                float[] afloat = EntitySheep.getDyeRgb(EnumDyeColor.byDyeDamage(itemstack1.getMetadata()));
-               int l1 = (int)(afloat[0] * 255.0F);
-               int i2 = (int)(afloat[1] * 255.0F);
-               int j2 = (int)(afloat[2] * 255.0F);
-               i += Math.max(l1, Math.max(i2, j2));
-               aint[0] += l1;
-               aint[1] += i2;
-               aint[2] += j2;
+               int j1 = (int)(afloat[0] * 255.0F);
+               int k1 = (int)(afloat[1] * 255.0F);
+               int i1 = (int)(afloat[2] * 255.0F);
+               i += Math.max(j1, Math.max(k1, i1));
+               aint[0] += j1;
+               aint[1] += k1;
+               aint[2] += i1;
                ++j;
             }
          }
@@ -91,17 +99,17 @@ public class RecipesArmorDyes implements IRecipe {
       if (itemarmor == null) {
          return null;
       } else {
-         int i1 = aint[0] / j;
-         int j1 = aint[1] / j;
-         int k1 = aint[2] / j;
-         float f3 = (float)i / (float)j;
-         float f4 = (float)Math.max(i1, Math.max(j1, k1));
-         i1 = (int)((float)i1 * f3 / f4);
-         j1 = (int)((float)j1 * f3 / f4);
-         k1 = (int)((float)k1 * f3 / f4);
-         int lvt_12_3_ = (i1 << 8) + j1;
-         lvt_12_3_ = (lvt_12_3_ << 8) + k1;
-         itemarmor.setColor(itemstack, lvt_12_3_);
+         int var16 = aint[0] / j;
+         int l1 = aint[1] / j;
+         int l = aint[2] / j;
+         float f = (float)i / (float)j;
+         float f1 = (float)Math.max(var16, Math.max(l1, l));
+         var16 = (int)((float)var16 * f / f1);
+         l1 = (int)((float)l1 * f / f1);
+         l = (int)((float)l * f / f1);
+         int i1 = (var16 << 8) + l1;
+         i1 = (i1 << 8) + l;
+         itemarmor.setColor(itemstack, i1);
          return itemstack;
       }
    }
@@ -115,12 +123,14 @@ public class RecipesArmorDyes implements IRecipe {
       return null;
    }
 
-   public ItemStack[] getRemainingItems(InventoryCrafting var1) {
-      ItemStack[] aitemstack = new ItemStack[inv.getSizeInventory()];
+   public ItemStack[] getRemainingItems(InventoryCrafting inventorycrafting) {
+      ItemStack[] aitemstack = new ItemStack[inventorycrafting.getSizeInventory()];
 
       for(int i = 0; i < aitemstack.length; ++i) {
-         ItemStack itemstack = inv.getStackInSlot(i);
-         aitemstack[i] = ForgeHooks.getContainerItem(itemstack);
+         ItemStack itemstack = inventorycrafting.getStackInSlot(i);
+         if (itemstack != null && itemstack.getItem().hasContainerItem()) {
+            aitemstack[i] = new ItemStack(itemstack.getItem().getContainerItem());
+         }
       }
 
       return aitemstack;

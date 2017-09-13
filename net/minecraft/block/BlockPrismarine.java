@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -8,12 +7,8 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockPrismarine extends Block {
    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockPrismarine.EnumType.class);
@@ -32,15 +27,15 @@ public class BlockPrismarine extends Block {
    }
 
    public MapColor getMapColor(IBlockState var1) {
-      return state.getValue(VARIANT) == BlockPrismarine.EnumType.ROUGH ? MapColor.CYAN : MapColor.DIAMOND;
+      return var1.getValue(VARIANT) == BlockPrismarine.EnumType.ROUGH ? MapColor.CYAN : MapColor.DIAMOND;
    }
 
    public int damageDropped(IBlockState var1) {
-      return ((BlockPrismarine.EnumType)state.getValue(VARIANT)).getMetadata();
+      return ((BlockPrismarine.EnumType)var1.getValue(VARIANT)).getMetadata();
    }
 
    public int getMetaFromState(IBlockState var1) {
-      return ((BlockPrismarine.EnumType)state.getValue(VARIANT)).getMetadata();
+      return ((BlockPrismarine.EnumType)var1.getValue(VARIANT)).getMetadata();
    }
 
    protected BlockStateContainer createBlockState() {
@@ -48,14 +43,7 @@ public class BlockPrismarine extends Block {
    }
 
    public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(VARIANT, BlockPrismarine.EnumType.byMetadata(meta));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
-      list.add(new ItemStack(itemIn, 1, ROUGH_META));
-      list.add(new ItemStack(itemIn, 1, BRICKS_META));
-      list.add(new ItemStack(itemIn, 1, DARK_META));
+      return this.getDefaultState().withProperty(VARIANT, BlockPrismarine.EnumType.byMetadata(var1));
    }
 
    public static enum EnumType implements IStringSerializable {
@@ -69,9 +57,9 @@ public class BlockPrismarine extends Block {
       private final String unlocalizedName;
 
       private EnumType(int var3, String var4, String var5) {
-         this.meta = meta;
-         this.name = name;
-         this.unlocalizedName = unlocalizedName;
+         this.meta = var3;
+         this.name = var4;
+         this.unlocalizedName = var5;
       }
 
       public int getMetadata() {
@@ -83,11 +71,11 @@ public class BlockPrismarine extends Block {
       }
 
       public static BlockPrismarine.EnumType byMetadata(int var0) {
-         if (meta < 0 || meta >= META_LOOKUP.length) {
-            meta = 0;
+         if (var0 < 0 || var0 >= META_LOOKUP.length) {
+            var0 = 0;
          }
 
-         return META_LOOKUP[meta];
+         return META_LOOKUP[var0];
       }
 
       public String getName() {
@@ -99,8 +87,8 @@ public class BlockPrismarine extends Block {
       }
 
       static {
-         for(BlockPrismarine.EnumType blockprismarine$enumtype : values()) {
-            META_LOOKUP[blockprismarine$enumtype.getMetadata()] = blockprismarine$enumtype;
+         for(BlockPrismarine.EnumType var3 : values()) {
+            META_LOOKUP[var3.getMetadata()] = var3;
          }
 
       }

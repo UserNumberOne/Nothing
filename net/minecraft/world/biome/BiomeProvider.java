@@ -13,11 +13,8 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.IntCache;
 import net.minecraft.world.storage.WorldInfo;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.terraingen.WorldTypeEvent.InitBiomeGens;
 
 public class BiomeProvider {
-   public static List allowedBiomes = Lists.newArrayList(new Biome[]{Biomes.FOREST, Biomes.PLAINS, Biomes.TAIGA, Biomes.TAIGA_HILLS, Biomes.FOREST_HILLS, Biomes.JUNGLE, Biomes.JUNGLE_HILLS});
    private GenLayer genBiomes;
    private GenLayer biomeIndexLayer;
    private final BiomeCache biomeCache;
@@ -25,19 +22,18 @@ public class BiomeProvider {
 
    protected BiomeProvider() {
       this.biomeCache = new BiomeCache(this);
-      this.biomesToSpawnIn = Lists.newArrayList(allowedBiomes);
+      this.biomesToSpawnIn = Lists.newArrayList(new Biome[]{Biomes.FOREST, Biomes.PLAINS, Biomes.TAIGA, Biomes.TAIGA_HILLS, Biomes.FOREST_HILLS, Biomes.JUNGLE, Biomes.JUNGLE_HILLS});
    }
 
    private BiomeProvider(long var1, WorldType var3, String var4) {
       this();
-      GenLayer[] agenlayer = GenLayer.initializeAllBiomeGenerators(seed, worldTypeIn, options);
-      agenlayer = this.getModdedBiomeGenerators(worldTypeIn, seed, agenlayer);
-      this.genBiomes = agenlayer[0];
-      this.biomeIndexLayer = agenlayer[1];
+      GenLayer[] var5 = GenLayer.initializeAllBiomeGenerators(var1, var3, var4);
+      this.genBiomes = var5[0];
+      this.biomeIndexLayer = var5[1];
    }
 
    public BiomeProvider(WorldInfo var1) {
-      this(info.getSeed(), info.getTerrainType(), info.getGeneratorOptions());
+      this(var1.getSeed(), var1.getTerrainType(), var1.getGeneratorOptions());
    }
 
    public List getBiomesToSpawnIn() {
@@ -45,132 +41,126 @@ public class BiomeProvider {
    }
 
    public Biome getBiome(BlockPos var1) {
-      return this.getBiome(pos, (Biome)null);
+      return this.getBiome(var1, (Biome)null);
    }
 
    public Biome getBiome(BlockPos var1, Biome var2) {
-      return this.biomeCache.getBiome(pos.getX(), pos.getZ(), defaultBiome);
+      return this.biomeCache.getBiome(var1.getX(), var1.getZ(), var2);
    }
 
    public float getTemperatureAtHeight(float var1, int var2) {
-      return p_76939_1_;
+      return var1;
    }
 
    public Biome[] getBiomesForGeneration(Biome[] var1, int var2, int var3, int var4, int var5) {
       IntCache.resetIntCache();
-      if (biomes == null || biomes.length < width * height) {
-         biomes = new Biome[width * height];
+      if (var1 == null || var1.length < var4 * var5) {
+         var1 = new Biome[var4 * var5];
       }
 
-      int[] aint = this.genBiomes.getInts(x, z, width, height);
+      int[] var6 = this.genBiomes.getInts(var2, var3, var4, var5);
 
       try {
-         for(int i = 0; i < width * height; ++i) {
-            biomes[i] = Biome.getBiome(aint[i], Biomes.DEFAULT);
+         for(int var7 = 0; var7 < var4 * var5; ++var7) {
+            var1[var7] = Biome.getBiome(var6[var7], Biomes.DEFAULT);
          }
 
-         return biomes;
+         return var1;
       } catch (Throwable var10) {
-         CrashReport crashreport = CrashReport.makeCrashReport(var10, "Invalid Biome id");
-         CrashReportCategory crashreportcategory = crashreport.makeCategory("RawBiomeBlock");
-         crashreportcategory.addCrashSection("biomes[] size", Integer.valueOf(biomes.length));
-         crashreportcategory.addCrashSection("x", Integer.valueOf(x));
-         crashreportcategory.addCrashSection("z", Integer.valueOf(z));
-         crashreportcategory.addCrashSection("w", Integer.valueOf(width));
-         crashreportcategory.addCrashSection("h", Integer.valueOf(height));
-         throw new ReportedException(crashreport);
+         CrashReport var8 = CrashReport.makeCrashReport(var10, "Invalid Biome id");
+         CrashReportCategory var9 = var8.makeCategory("RawBiomeBlock");
+         var9.addCrashSection("biomes[] size", Integer.valueOf(var1.length));
+         var9.addCrashSection("x", Integer.valueOf(var2));
+         var9.addCrashSection("z", Integer.valueOf(var3));
+         var9.addCrashSection("w", Integer.valueOf(var4));
+         var9.addCrashSection("h", Integer.valueOf(var5));
+         throw new ReportedException(var8);
       }
    }
 
    public Biome[] getBiomes(@Nullable Biome[] var1, int var2, int var3, int var4, int var5) {
-      return this.getBiomes(oldBiomeList, x, z, width, depth, true);
+      return this.getBiomes(var1, var2, var3, var4, var5, true);
    }
 
    public Biome[] getBiomes(@Nullable Biome[] var1, int var2, int var3, int var4, int var5, boolean var6) {
       IntCache.resetIntCache();
-      if (listToReuse == null || listToReuse.length < width * length) {
-         listToReuse = new Biome[width * length];
+      if (var1 == null || var1.length < var4 * var5) {
+         var1 = new Biome[var4 * var5];
       }
 
-      if (cacheFlag && width == 16 && length == 16 && (x & 15) == 0 && (z & 15) == 0) {
-         Biome[] abiome = this.biomeCache.getCachedBiomes(x, z);
-         System.arraycopy(abiome, 0, listToReuse, 0, width * length);
-         return listToReuse;
+      if (var6 && var4 == 16 && var5 == 16 && (var2 & 15) == 0 && (var3 & 15) == 0) {
+         Biome[] var9 = this.biomeCache.getCachedBiomes(var2, var3);
+         System.arraycopy(var9, 0, var1, 0, var4 * var5);
+         return var1;
       } else {
-         int[] aint = this.biomeIndexLayer.getInts(x, z, width, length);
+         int[] var7 = this.biomeIndexLayer.getInts(var2, var3, var4, var5);
 
-         for(int i = 0; i < width * length; ++i) {
-            listToReuse[i] = Biome.getBiome(aint[i], Biomes.DEFAULT);
+         for(int var8 = 0; var8 < var4 * var5; ++var8) {
+            var1[var8] = Biome.getBiome(var7[var8], Biomes.DEFAULT);
          }
 
-         return listToReuse;
+         return var1;
       }
    }
 
    public boolean areBiomesViable(int var1, int var2, int var3, List var4) {
       IntCache.resetIntCache();
-      int i = x - radius >> 2;
-      int j = z - radius >> 2;
-      int k = x + radius >> 2;
-      int l = z + radius >> 2;
-      int i1 = k - i + 1;
-      int j1 = l - j + 1;
-      int[] aint = this.genBiomes.getInts(i, j, i1, j1);
+      int var5 = var1 - var3 >> 2;
+      int var6 = var2 - var3 >> 2;
+      int var7 = var1 + var3 >> 2;
+      int var8 = var2 + var3 >> 2;
+      int var9 = var7 - var5 + 1;
+      int var10 = var8 - var6 + 1;
+      int[] var11 = this.genBiomes.getInts(var5, var6, var9, var10);
 
       try {
-         for(int k1 = 0; k1 < i1 * j1; ++k1) {
-            Biome biome = Biome.getBiome(aint[k1]);
-            if (!allowed.contains(biome)) {
+         for(int var12 = 0; var12 < var9 * var10; ++var12) {
+            Biome var16 = Biome.getBiome(var11[var12]);
+            if (!var4.contains(var16)) {
                return false;
             }
          }
 
          return true;
       } catch (Throwable var15) {
-         CrashReport crashreport = CrashReport.makeCrashReport(var15, "Invalid Biome id");
-         CrashReportCategory crashreportcategory = crashreport.makeCategory("Layer");
-         crashreportcategory.addCrashSection("Layer", this.genBiomes.toString());
-         crashreportcategory.addCrashSection("x", Integer.valueOf(x));
-         crashreportcategory.addCrashSection("z", Integer.valueOf(z));
-         crashreportcategory.addCrashSection("radius", Integer.valueOf(radius));
-         crashreportcategory.addCrashSection("allowed", allowed);
-         throw new ReportedException(crashreport);
+         CrashReport var13 = CrashReport.makeCrashReport(var15, "Invalid Biome id");
+         CrashReportCategory var14 = var13.makeCategory("Layer");
+         var14.addCrashSection("Layer", this.genBiomes.toString());
+         var14.addCrashSection("x", Integer.valueOf(var1));
+         var14.addCrashSection("z", Integer.valueOf(var2));
+         var14.addCrashSection("radius", Integer.valueOf(var3));
+         var14.addCrashSection("allowed", var4);
+         throw new ReportedException(var13);
       }
    }
 
    @Nullable
    public BlockPos findBiomePosition(int var1, int var2, int var3, List var4, Random var5) {
       IntCache.resetIntCache();
-      int i = x - range >> 2;
-      int j = z - range >> 2;
-      int k = x + range >> 2;
-      int l = z + range >> 2;
-      int i1 = k - i + 1;
-      int j1 = l - j + 1;
-      int[] aint = this.genBiomes.getInts(i, j, i1, j1);
-      BlockPos blockpos = null;
-      int k1 = 0;
+      int var6 = var1 - var3 >> 2;
+      int var7 = var2 - var3 >> 2;
+      int var8 = var1 + var3 >> 2;
+      int var9 = var2 + var3 >> 2;
+      int var10 = var8 - var6 + 1;
+      int var11 = var9 - var7 + 1;
+      int[] var12 = this.genBiomes.getInts(var6, var7, var10, var11);
+      BlockPos var13 = null;
+      int var14 = 0;
 
-      for(int l1 = 0; l1 < i1 * j1; ++l1) {
-         int i2 = i + l1 % i1 << 2;
-         int j2 = j + l1 / i1 << 2;
-         Biome biome = Biome.getBiome(aint[l1]);
-         if (biomes.contains(biome) && (blockpos == null || random.nextInt(k1 + 1) == 0)) {
-            blockpos = new BlockPos(i2, 0, j2);
-            ++k1;
+      for(int var15 = 0; var15 < var10 * var11; ++var15) {
+         int var16 = var6 + var15 % var10 << 2;
+         int var17 = var7 + var15 / var10 << 2;
+         Biome var18 = Biome.getBiome(var12[var15]);
+         if (var4.contains(var18) && (var13 == null || var5.nextInt(var14 + 1) == 0)) {
+            var13 = new BlockPos(var16, 0, var17);
+            ++var14;
          }
       }
 
-      return blockpos;
+      return var13;
    }
 
    public void cleanupCache() {
       this.biomeCache.cleanupCache();
-   }
-
-   public GenLayer[] getModdedBiomeGenerators(WorldType var1, long var2, GenLayer[] var4) {
-      InitBiomeGens event = new InitBiomeGens(worldType, seed, original);
-      MinecraftForge.TERRAIN_GEN_BUS.post(event);
-      return event.getNewBiomeGens();
    }
 }

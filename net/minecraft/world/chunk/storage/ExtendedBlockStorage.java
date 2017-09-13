@@ -5,7 +5,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.NibbleArray;
-import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class ExtendedBlockStorage {
    private final int yBase;
@@ -15,28 +14,43 @@ public class ExtendedBlockStorage {
    private NibbleArray blocklightArray;
    private NibbleArray skylightArray;
 
-   public ExtendedBlockStorage(int var1, boolean var2) {
-      this.yBase = y;
+   public ExtendedBlockStorage(int i, boolean flag) {
+      this.yBase = i;
       this.data = new BlockStateContainer();
       this.blocklightArray = new NibbleArray();
-      if (storeSkylight) {
+      if (flag) {
          this.skylightArray = new NibbleArray();
       }
 
    }
 
-   public IBlockState get(int var1, int var2, int var3) {
-      return this.data.get(x, y, z);
-   }
+   public ExtendedBlockStorage(int y, boolean flag, char[] blockIds) {
+      this.yBase = y;
+      this.data = new BlockStateContainer();
 
-   public void set(int var1, int var2, int var3, IBlockState var4) {
-      if (state instanceof IExtendedBlockState) {
-         state = ((IExtendedBlockState)state).getClean();
+      for(int i = 0; i < blockIds.length; ++i) {
+         int xx = i & 15;
+         int yy = i >> 8 & 15;
+         int zz = i >> 4 & 15;
+         this.data.set(xx, yy, zz, (IBlockState)Block.BLOCK_STATE_IDS.getByValue(blockIds[i]));
       }
 
-      IBlockState iblockstate = this.get(x, y, z);
-      Block block = iblockstate.getBlock();
-      Block block1 = state.getBlock();
+      this.blocklightArray = new NibbleArray();
+      if (flag) {
+         this.skylightArray = new NibbleArray();
+      }
+
+      this.removeInvalidBlocks();
+   }
+
+   public IBlockState get(int i, int j, int k) {
+      return this.data.get(i, j, k);
+   }
+
+   public void set(int i, int j, int k, IBlockState iblockdata) {
+      IBlockState iblockdata1 = this.get(i, j, k);
+      Block block = iblockdata1.getBlock();
+      Block block1 = iblockdata.getBlock();
       if (block != Blocks.AIR) {
          --this.blockRefCount;
          if (block.getTickRandomly()) {
@@ -51,11 +65,11 @@ public class ExtendedBlockStorage {
          }
       }
 
-      this.data.set(x, y, z, state);
+      this.data.set(i, j, k, iblockdata);
    }
 
    public boolean isEmpty() {
-      return this.blockRefCount == 0;
+      return false;
    }
 
    public boolean getNeedsRandomTick() {
@@ -66,20 +80,20 @@ public class ExtendedBlockStorage {
       return this.yBase;
    }
 
-   public void setExtSkylightValue(int var1, int var2, int var3, int var4) {
-      this.skylightArray.set(x, y, z, value);
+   public void setExtSkylightValue(int i, int j, int k, int l) {
+      this.skylightArray.set(i, j, k, l);
    }
 
-   public int getExtSkylightValue(int var1, int var2, int var3) {
-      return this.skylightArray.get(x, y, z);
+   public int getExtSkylightValue(int i, int j, int k) {
+      return this.skylightArray.get(i, j, k);
    }
 
-   public void setExtBlocklightValue(int var1, int var2, int var3, int var4) {
-      this.blocklightArray.set(x, y, z, value);
+   public void setExtBlocklightValue(int i, int j, int k, int l) {
+      this.blocklightArray.set(i, j, k, l);
    }
 
-   public int getExtBlocklightValue(int var1, int var2, int var3) {
-      return this.blocklightArray.get(x, y, z);
+   public int getExtBlocklightValue(int i, int j, int k) {
+      return this.blocklightArray.get(i, j, k);
    }
 
    public void removeInvalidBlocks() {
@@ -114,11 +128,11 @@ public class ExtendedBlockStorage {
       return this.skylightArray;
    }
 
-   public void setBlocklightArray(NibbleArray var1) {
-      this.blocklightArray = newBlocklightArray;
+   public void setBlocklightArray(NibbleArray nibblearray) {
+      this.blocklightArray = nibblearray;
    }
 
-   public void setSkylightArray(NibbleArray var1) {
-      this.skylightArray = newSkylightArray;
+   public void setSkylightArray(NibbleArray nibblearray) {
+      this.skylightArray = nibblearray;
    }
 }

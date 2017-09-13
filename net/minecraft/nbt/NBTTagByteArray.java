@@ -12,20 +12,20 @@ public class NBTTagByteArray extends NBTBase {
    }
 
    public NBTTagByteArray(byte[] var1) {
-      this.data = data;
+      this.data = var1;
    }
 
    void write(DataOutput var1) throws IOException {
-      output.writeInt(this.data.length);
-      output.write(this.data);
+      var1.writeInt(this.data.length);
+      var1.write(this.data);
    }
 
    void read(DataInput var1, int var2, NBTSizeTracker var3) throws IOException {
-      sizeTracker.read(192L);
-      int i = input.readInt();
-      sizeTracker.read((long)(8 * i));
-      this.data = new byte[i];
-      input.readFully(this.data);
+      var3.read(192L);
+      int var4 = var1.readInt();
+      var3.read((long)(8 * var4));
+      this.data = new byte[var4];
+      var1.readFully(this.data);
    }
 
    public byte getId() {
@@ -37,13 +37,13 @@ public class NBTTagByteArray extends NBTBase {
    }
 
    public NBTBase copy() {
-      byte[] abyte = new byte[this.data.length];
-      System.arraycopy(this.data, 0, abyte, 0, this.data.length);
-      return new NBTTagByteArray(abyte);
+      byte[] var1 = new byte[this.data.length];
+      System.arraycopy(this.data, 0, var1, 0, this.data.length);
+      return new NBTTagByteArray(var1);
    }
 
    public boolean equals(Object var1) {
-      return super.equals(p_equals_1_) ? Arrays.equals(this.data, ((NBTTagByteArray)p_equals_1_).data) : false;
+      return super.equals(var1) ? Arrays.equals(this.data, ((NBTTagByteArray)var1).data) : false;
    }
 
    public int hashCode() {

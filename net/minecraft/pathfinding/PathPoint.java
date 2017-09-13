@@ -1,9 +1,6 @@
 package net.minecraft.pathfinding;
 
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class PathPoint {
    public final int xCoord;
@@ -22,58 +19,58 @@ public class PathPoint {
    public PathNodeType nodeType = PathNodeType.BLOCKED;
 
    public PathPoint(int var1, int var2, int var3) {
-      this.xCoord = x;
-      this.yCoord = y;
-      this.zCoord = z;
-      this.hash = makeHash(x, y, z);
+      this.xCoord = var1;
+      this.yCoord = var2;
+      this.zCoord = var3;
+      this.hash = makeHash(var1, var2, var3);
    }
 
    public PathPoint cloneMove(int var1, int var2, int var3) {
-      PathPoint pathpoint = new PathPoint(x, y, z);
-      pathpoint.index = this.index;
-      pathpoint.totalPathDistance = this.totalPathDistance;
-      pathpoint.distanceToNext = this.distanceToNext;
-      pathpoint.distanceToTarget = this.distanceToTarget;
-      pathpoint.previous = this.previous;
-      pathpoint.visited = this.visited;
-      pathpoint.distanceFromOrigin = this.distanceFromOrigin;
-      pathpoint.cost = this.cost;
-      pathpoint.costMalus = this.costMalus;
-      pathpoint.nodeType = this.nodeType;
-      return pathpoint;
+      PathPoint var4 = new PathPoint(var1, var2, var3);
+      var4.index = this.index;
+      var4.totalPathDistance = this.totalPathDistance;
+      var4.distanceToNext = this.distanceToNext;
+      var4.distanceToTarget = this.distanceToTarget;
+      var4.previous = this.previous;
+      var4.visited = this.visited;
+      var4.distanceFromOrigin = this.distanceFromOrigin;
+      var4.cost = this.cost;
+      var4.costMalus = this.costMalus;
+      var4.nodeType = this.nodeType;
+      return var4;
    }
 
    public static int makeHash(int var0, int var1, int var2) {
-      return y & 255 | (x & 32767) << 8 | (z & 32767) << 24 | (x < 0 ? Integer.MIN_VALUE : 0) | (z < 0 ? '耀' : 0);
+      return var1 & 255 | (var0 & 32767) << 8 | (var2 & 32767) << 24 | (var0 < 0 ? Integer.MIN_VALUE : 0) | (var2 < 0 ? '耀' : 0);
    }
 
    public float distanceTo(PathPoint var1) {
-      float f = (float)(pathpointIn.xCoord - this.xCoord);
-      float f1 = (float)(pathpointIn.yCoord - this.yCoord);
-      float f2 = (float)(pathpointIn.zCoord - this.zCoord);
-      return MathHelper.sqrt(f * f + f1 * f1 + f2 * f2);
+      float var2 = (float)(var1.xCoord - this.xCoord);
+      float var3 = (float)(var1.yCoord - this.yCoord);
+      float var4 = (float)(var1.zCoord - this.zCoord);
+      return MathHelper.sqrt(var2 * var2 + var3 * var3 + var4 * var4);
    }
 
    public float distanceToSquared(PathPoint var1) {
-      float f = (float)(pathpointIn.xCoord - this.xCoord);
-      float f1 = (float)(pathpointIn.yCoord - this.yCoord);
-      float f2 = (float)(pathpointIn.zCoord - this.zCoord);
-      return f * f + f1 * f1 + f2 * f2;
+      float var2 = (float)(var1.xCoord - this.xCoord);
+      float var3 = (float)(var1.yCoord - this.yCoord);
+      float var4 = (float)(var1.zCoord - this.zCoord);
+      return var2 * var2 + var3 * var3 + var4 * var4;
    }
 
    public float distanceManhattan(PathPoint var1) {
-      float f = (float)Math.abs(p_186281_1_.xCoord - this.xCoord);
-      float f1 = (float)Math.abs(p_186281_1_.yCoord - this.yCoord);
-      float f2 = (float)Math.abs(p_186281_1_.zCoord - this.zCoord);
-      return f + f1 + f2;
+      float var2 = (float)Math.abs(var1.xCoord - this.xCoord);
+      float var3 = (float)Math.abs(var1.yCoord - this.yCoord);
+      float var4 = (float)Math.abs(var1.zCoord - this.zCoord);
+      return var2 + var3 + var4;
    }
 
    public boolean equals(Object var1) {
-      if (!(p_equals_1_ instanceof PathPoint)) {
+      if (!(var1 instanceof PathPoint)) {
          return false;
       } else {
-         PathPoint pathpoint = (PathPoint)p_equals_1_;
-         return this.hash == pathpoint.hash && this.xCoord == pathpoint.xCoord && this.yCoord == pathpoint.yCoord && this.zCoord == pathpoint.zCoord;
+         PathPoint var2 = (PathPoint)var1;
+         return this.hash == var2.hash && this.xCoord == var2.xCoord && this.yCoord == var2.yCoord && this.zCoord == var2.zCoord;
       }
    }
 
@@ -87,17 +84,5 @@ public class PathPoint {
 
    public String toString() {
       return this.xCoord + ", " + this.yCoord + ", " + this.zCoord;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static PathPoint createFromBuffer(PacketBuffer var0) {
-      PathPoint pathpoint = new PathPoint(buf.readInt(), buf.readInt(), buf.readInt());
-      pathpoint.distanceFromOrigin = buf.readFloat();
-      pathpoint.cost = buf.readFloat();
-      pathpoint.costMalus = buf.readFloat();
-      pathpoint.visited = buf.readBoolean();
-      pathpoint.nodeType = PathNodeType.values()[buf.readInt()];
-      pathpoint.distanceToTarget = buf.readFloat();
-      return pathpoint;
    }
 }

@@ -24,17 +24,35 @@ public enum EnumEnchantmentType {
    public boolean canEnchantItem(Item var1) {
       if (this == ALL) {
          return true;
-      } else if (this == BREAKABLE && itemIn.isDamageable()) {
+      } else if (this == BREAKABLE && var1.isDamageable()) {
          return true;
-      } else if (itemIn instanceof ItemArmor) {
+      } else if (var1 instanceof ItemArmor) {
          if (this == ARMOR) {
             return true;
          } else {
-            ItemArmor itemarmor = (ItemArmor)itemIn;
-            return itemarmor.armorType == EntityEquipmentSlot.HEAD ? this == ARMOR_HEAD : (itemarmor.armorType == EntityEquipmentSlot.LEGS ? this == ARMOR_LEGS : (itemarmor.armorType == EntityEquipmentSlot.CHEST ? this == ARMOR_CHEST : (itemarmor.armorType == EntityEquipmentSlot.FEET ? this == ARMOR_FEET : false)));
+            ItemArmor var2 = (ItemArmor)var1;
+            if (var2.armorType == EntityEquipmentSlot.HEAD) {
+               return this == ARMOR_HEAD;
+            } else if (var2.armorType == EntityEquipmentSlot.LEGS) {
+               return this == ARMOR_LEGS;
+            } else if (var2.armorType == EntityEquipmentSlot.CHEST) {
+               return this == ARMOR_CHEST;
+            } else if (var2.armorType == EntityEquipmentSlot.FEET) {
+               return this == ARMOR_FEET;
+            } else {
+               return false;
+            }
          }
+      } else if (var1 instanceof ItemSword) {
+         return this == WEAPON;
+      } else if (var1 instanceof ItemTool) {
+         return this == DIGGER;
+      } else if (var1 instanceof ItemBow) {
+         return this == BOW;
+      } else if (var1 instanceof ItemFishingRod) {
+         return this == FISHING_ROD;
       } else {
-         return itemIn instanceof ItemSword ? this == WEAPON : (itemIn instanceof ItemTool ? this == DIGGER : (itemIn instanceof ItemBow ? this == BOW : (itemIn instanceof ItemFishingRod ? this == FISHING_ROD : false)));
+         return false;
       }
    }
 }

@@ -10,10 +10,10 @@ public class EntityDragonPart extends Entity {
    public final String partName;
 
    public EntityDragonPart(IEntityMultiPart var1, String var2, float var3, float var4) {
-      super(parent.getWorld());
-      this.setSize(base, sizeHeight);
-      this.entityDragonObj = parent;
-      this.partName = partName;
+      super(var1.getWorld());
+      this.setSize(var3, var4);
+      this.entityDragonObj = var1;
+      this.partName = var2;
    }
 
    protected void entityInit() {
@@ -30,10 +30,10 @@ public class EntityDragonPart extends Entity {
    }
 
    public boolean attackEntityFrom(DamageSource var1, float var2) {
-      return this.isEntityInvulnerable(source) ? false : this.entityDragonObj.attackEntityFromPart(this, source, amount);
+      return this.isEntityInvulnerable(var1) ? false : this.entityDragonObj.attackEntityFromPart(this, var1, var2);
    }
 
    public boolean isEntityEqual(Entity var1) {
-      return this == entityIn || this.entityDragonObj == entityIn;
+      return this == var1 || this.entityDragonObj == var1;
    }
 }

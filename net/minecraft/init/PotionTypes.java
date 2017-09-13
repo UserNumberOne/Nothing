@@ -45,11 +45,11 @@ public class PotionTypes {
    public static final PotionType LONG_WEAKNESS;
 
    private static PotionType getRegisteredPotionType(String var0) {
-      PotionType potiontype = (PotionType)PotionType.REGISTRY.getObject(new ResourceLocation(id));
-      if (!CACHE.add(potiontype)) {
-         throw new IllegalStateException("Invalid Potion requested: " + id);
+      PotionType var1 = (PotionType)PotionType.REGISTRY.getObject(new ResourceLocation(var0));
+      if (!CACHE.add(var1)) {
+         throw new IllegalStateException("Invalid Potion requested: " + var0);
       } else {
-         return potiontype;
+         return var1;
       }
    }
 

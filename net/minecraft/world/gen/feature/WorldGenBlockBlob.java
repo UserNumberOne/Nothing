@@ -12,49 +12,49 @@ public class WorldGenBlockBlob extends WorldGenerator {
 
    public WorldGenBlockBlob(Block var1, int var2) {
       super(false);
-      this.block = blockIn;
-      this.startRadius = startRadiusIn;
+      this.block = var1;
+      this.startRadius = var2;
    }
 
    public boolean generate(World var1, Random var2, BlockPos var3) {
       while(true) {
-         label51: {
-            if (position.getY() > 3) {
-               if (worldIn.isAirBlock(position.down())) {
-                  break label51;
+         label50: {
+            if (var3.getY() > 3) {
+               if (var1.isAirBlock(var3.down())) {
+                  break label50;
                }
 
-               Block block = worldIn.getBlockState(position.down()).getBlock();
-               if (block != Blocks.GRASS && block != Blocks.DIRT && block != Blocks.STONE) {
-                  break label51;
+               Block var4 = var1.getBlockState(var3.down()).getBlock();
+               if (var4 != Blocks.GRASS && var4 != Blocks.DIRT && var4 != Blocks.STONE) {
+                  break label50;
                }
             }
 
-            if (position.getY() <= 3) {
+            if (var3.getY() <= 3) {
                return false;
             }
 
-            int i1 = this.startRadius;
+            int var12 = this.startRadius;
 
-            for(int i = 0; i1 >= 0 && i < 3; ++i) {
-               int j = i1 + rand.nextInt(2);
-               int k = i1 + rand.nextInt(2);
-               int l = i1 + rand.nextInt(2);
-               float f = (float)(j + k + l) * 0.333F + 0.5F;
+            for(int var5 = 0; var12 >= 0 && var5 < 3; ++var5) {
+               int var6 = var12 + var2.nextInt(2);
+               int var7 = var12 + var2.nextInt(2);
+               int var8 = var12 + var2.nextInt(2);
+               float var9 = (float)(var6 + var7 + var8) * 0.333F + 0.5F;
 
-               for(BlockPos blockpos : BlockPos.getAllInBox(position.add(-j, -k, -l), position.add(j, k, l))) {
-                  if (blockpos.distanceSq(position) <= (double)(f * f)) {
-                     worldIn.setBlockState(blockpos, this.block.getDefaultState(), 4);
+               for(BlockPos var11 : BlockPos.getAllInBox(var3.add(-var6, -var7, -var8), var3.add(var6, var7, var8))) {
+                  if (var11.distanceSq(var3) <= (double)(var9 * var9)) {
+                     var1.setBlockState(var11, this.block.getDefaultState(), 4);
                   }
                }
 
-               position = position.add(-(i1 + 1) + rand.nextInt(2 + i1 * 2), 0 - rand.nextInt(2), -(i1 + 1) + rand.nextInt(2 + i1 * 2));
+               var3 = var3.add(-(var12 + 1) + var2.nextInt(2 + var12 * 2), 0 - var2.nextInt(2), -(var12 + 1) + var2.nextInt(2 + var12 * 2));
             }
 
             return true;
          }
 
-         position = position.down();
+         var3 = var3.down();
       }
    }
 }

@@ -13,17 +13,17 @@ public class AttributeModifier {
    private boolean isSaved;
 
    public AttributeModifier(String var1, double var2, int var4) {
-      this(MathHelper.getRandomUUID(ThreadLocalRandom.current()), nameIn, amountIn, operationIn);
+      this(MathHelper.getRandomUUID(ThreadLocalRandom.current()), var1, var2, var4);
    }
 
    public AttributeModifier(UUID var1, String var2, double var3, int var5) {
       this.isSaved = true;
-      this.id = idIn;
-      this.name = nameIn;
-      this.amount = amountIn;
-      this.operation = operationIn;
-      Validate.notEmpty(nameIn, "Modifier name cannot be empty", new Object[0]);
-      Validate.inclusiveBetween(0L, 2L, (long)operationIn, "Invalid operation");
+      this.id = var1;
+      this.name = var2;
+      this.amount = var3;
+      this.operation = var5;
+      Validate.notEmpty(var2, "Modifier name cannot be empty", new Object[0]);
+      Validate.inclusiveBetween(0L, 2L, (long)var5, "Invalid operation");
    }
 
    public UUID getID() {
@@ -47,20 +47,20 @@ public class AttributeModifier {
    }
 
    public AttributeModifier setSaved(boolean var1) {
-      this.isSaved = saved;
+      this.isSaved = var1;
       return this;
    }
 
    public boolean equals(Object var1) {
-      if (this == p_equals_1_) {
+      if (this == var1) {
          return true;
-      } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-         AttributeModifier attributemodifier = (AttributeModifier)p_equals_1_;
+      } else if (var1 != null && this.getClass() == var1.getClass()) {
+         AttributeModifier var2 = (AttributeModifier)var1;
          if (this.id != null) {
-            if (!this.id.equals(attributemodifier.id)) {
+            if (!this.id.equals(var2.id)) {
                return false;
             }
-         } else if (attributemodifier.id != null) {
+         } else if (var2.id != null) {
             return false;
          }
 

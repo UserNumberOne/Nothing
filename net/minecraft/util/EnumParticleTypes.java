@@ -62,14 +62,14 @@ public enum EnumParticleTypes {
    private static final Map BY_NAME = Maps.newHashMap();
 
    private EnumParticleTypes(String var3, int var4, boolean var5, int var6) {
-      this.particleName = particleNameIn;
-      this.particleID = particleIDIn;
-      this.shouldIgnoreRange = shouldIgnoreRangeIn;
-      this.argumentCount = argumentCountIn;
+      this.particleName = var3;
+      this.particleID = var4;
+      this.shouldIgnoreRange = var5;
+      this.argumentCount = var6;
    }
 
    private EnumParticleTypes(String var3, int var4, boolean var5) {
-      this(particleNameIn, particleIDIn, shouldIgnoreRangeIn, 0);
+      this(var3, var4, var5, 0);
    }
 
    public static Set getParticleNames() {
@@ -94,18 +94,18 @@ public enum EnumParticleTypes {
 
    @Nullable
    public static EnumParticleTypes getParticleFromId(int var0) {
-      return (EnumParticleTypes)PARTICLES.get(Integer.valueOf(particleId));
+      return (EnumParticleTypes)PARTICLES.get(Integer.valueOf(var0));
    }
 
    @Nullable
    public static EnumParticleTypes getByName(String var0) {
-      return (EnumParticleTypes)BY_NAME.get(nameIn);
+      return (EnumParticleTypes)BY_NAME.get(var0);
    }
 
    static {
-      for(EnumParticleTypes enumparticletypes : values()) {
-         PARTICLES.put(Integer.valueOf(enumparticletypes.getParticleID()), enumparticletypes);
-         BY_NAME.put(enumparticletypes.getParticleName(), enumparticletypes);
+      for(EnumParticleTypes var3 : values()) {
+         PARTICLES.put(Integer.valueOf(var3.getParticleID()), var3);
+         BY_NAME.put(var3.getParticleName(), var3);
       }
 
    }

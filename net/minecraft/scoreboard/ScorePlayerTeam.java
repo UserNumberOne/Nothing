@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ScorePlayerTeam extends Team {
    private final Scoreboard theScoreboard;
@@ -23,9 +21,9 @@ public class ScorePlayerTeam extends Team {
    private Team.CollisionRule collisionRule = Team.CollisionRule.ALWAYS;
 
    public ScorePlayerTeam(Scoreboard var1, String var2) {
-      this.theScoreboard = theScoreboardIn;
-      this.registeredName = name;
-      this.teamNameSPT = name;
+      this.theScoreboard = var1;
+      this.registeredName = var2;
+      this.teamNameSPT = var2;
    }
 
    public String getRegisteredName() {
@@ -37,10 +35,10 @@ public class ScorePlayerTeam extends Team {
    }
 
    public void setTeamName(String var1) {
-      if (name == null) {
+      if (var1 == null) {
          throw new IllegalArgumentException("Name cannot be null");
       } else {
-         this.teamNameSPT = name;
+         this.teamNameSPT = var1;
          this.theScoreboard.broadcastTeamInfoUpdate(this);
       }
    }
@@ -54,10 +52,10 @@ public class ScorePlayerTeam extends Team {
    }
 
    public void setNamePrefix(String var1) {
-      if (prefix == null) {
+      if (var1 == null) {
          throw new IllegalArgumentException("Prefix cannot be null");
       } else {
-         this.namePrefixSPT = prefix;
+         this.namePrefixSPT = var1;
          this.theScoreboard.broadcastTeamInfoUpdate(this);
       }
    }
@@ -67,16 +65,16 @@ public class ScorePlayerTeam extends Team {
    }
 
    public void setNameSuffix(String var1) {
-      this.colorSuffix = suffix;
+      this.colorSuffix = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
    public String formatString(String var1) {
-      return this.getColorPrefix() + input + this.getColorSuffix();
+      return this.getColorPrefix() + var1 + this.getColorSuffix();
    }
 
    public static String formatPlayerName(@Nullable Team var0, String var1) {
-      return teamIn == null ? string : teamIn.formatString(string);
+      return var0 == null ? var1 : var0.formatString(var1);
    }
 
    public boolean getAllowFriendlyFire() {
@@ -84,7 +82,7 @@ public class ScorePlayerTeam extends Team {
    }
 
    public void setAllowFriendlyFire(boolean var1) {
-      this.allowFriendlyFire = friendlyFire;
+      this.allowFriendlyFire = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
@@ -93,7 +91,7 @@ public class ScorePlayerTeam extends Team {
    }
 
    public void setSeeFriendlyInvisiblesEnabled(boolean var1) {
-      this.canSeeFriendlyInvisibles = friendlyInvisibles;
+      this.canSeeFriendlyInvisibles = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
@@ -106,12 +104,12 @@ public class ScorePlayerTeam extends Team {
    }
 
    public void setNameTagVisibility(Team.EnumVisible var1) {
-      this.nameTagVisibility = visibility;
+      this.nameTagVisibility = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
    public void setDeathMessageVisibility(Team.EnumVisible var1) {
-      this.deathMessageVisibility = visibility;
+      this.deathMessageVisibility = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
@@ -120,31 +118,25 @@ public class ScorePlayerTeam extends Team {
    }
 
    public void setCollisionRule(Team.CollisionRule var1) {
-      this.collisionRule = rule;
+      this.collisionRule = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
    public int getFriendlyFlags() {
-      int i = 0;
+      int var1 = 0;
       if (this.getAllowFriendlyFire()) {
-         i |= 1;
+         var1 |= 1;
       }
 
       if (this.getSeeFriendlyInvisiblesEnabled()) {
-         i |= 2;
+         var1 |= 2;
       }
 
-      return i;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setFriendlyFlags(int var1) {
-      this.setAllowFriendlyFire((flags & 1) > 0);
-      this.setSeeFriendlyInvisiblesEnabled((flags & 2) > 0);
+      return var1;
    }
 
    public void setChatFormat(TextFormatting var1) {
-      this.chatFormat = format;
+      this.chatFormat = var1;
    }
 
    public TextFormatting getChatFormat() {

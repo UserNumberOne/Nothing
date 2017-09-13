@@ -1,23 +1,14 @@
 package net.minecraft.util;
 
 import net.minecraft.util.registry.RegistryNamespaced;
-import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry.Impl;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class SoundEvent extends Impl {
-   public static final RegistryNamespaced REGISTRY = GameData.getSoundEventRegistry();
+public class SoundEvent {
+   public static final RegistryNamespaced REGISTRY = new RegistryNamespaced();
    private final ResourceLocation soundName;
    private static int soundEventId;
 
    public SoundEvent(ResourceLocation var1) {
-      this.soundName = soundNameIn;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ResourceLocation getSoundName() {
-      return this.soundName;
+      this.soundName = var1;
    }
 
    public static void registerSounds() {
@@ -487,7 +478,7 @@ public class SoundEvent extends Impl {
    }
 
    private static void registerSound(String var0) {
-      ResourceLocation resourcelocation = new ResourceLocation(soundNameIn);
-      REGISTRY.register(soundEventId++, resourcelocation, new SoundEvent(resourcelocation));
+      ResourceLocation var1 = new ResourceLocation(var0);
+      REGISTRY.register(soundEventId++, var1, new SoundEvent(var1));
    }
 }

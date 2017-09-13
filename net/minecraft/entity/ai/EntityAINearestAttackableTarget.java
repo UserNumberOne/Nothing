@@ -9,17 +9,11 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.EntityCreeper;
-import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.monster.SkeletonType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAINearestAttackableTarget extends EntityAITarget {
    protected final Class targetClass;
@@ -28,23 +22,27 @@ public class EntityAINearestAttackableTarget extends EntityAITarget {
    protected final Predicate targetEntitySelector;
    protected EntityLivingBase targetEntity;
 
-   public EntityAINearestAttackableTarget(EntityCreature var1, Class var2, boolean var3) {
-      this(creature, classTarget, checkSight, false);
+   public EntityAINearestAttackableTarget(EntityCreature entitycreature, Class oclass, boolean flag) {
+      this(entitycreature, oclass, flag, false);
    }
 
-   public EntityAINearestAttackableTarget(EntityCreature var1, Class var2, boolean var3, boolean var4) {
-      this(creature, classTarget, 10, checkSight, onlyNearby, (Predicate)null);
+   public EntityAINearestAttackableTarget(EntityCreature entitycreature, Class oclass, boolean flag, boolean flag1) {
+      this(entitycreature, oclass, 10, flag, flag1, (Predicate)null);
    }
 
-   public EntityAINearestAttackableTarget(EntityCreature var1, Class var2, int var3, boolean var4, boolean var5, @Nullable final Predicate var6) {
-      super(creature, checkSight, onlyNearby);
-      this.targetClass = classTarget;
-      this.targetChance = chance;
-      this.theNearestAttackableTargetSorter = new EntityAINearestAttackableTarget.Sorter(creature);
+   public EntityAINearestAttackableTarget(EntityCreature entitycreature, Class oclass, int i, boolean flag, boolean flag1, @Nullable final Predicate predicate) {
+      super(entitycreature, flag, flag1);
+      this.targetClass = oclass;
+      this.targetChance = i;
+      this.theNearestAttackableTargetSorter = new EntityAINearestAttackableTarget.Sorter(entitycreature);
       this.setMutexBits(1);
       this.targetEntitySelector = new Predicate() {
-         public boolean apply(@Nullable EntityLivingBase var1) {
-            return p_apply_1_ == null ? false : (targetSelector != null && !targetSelector.apply(p_apply_1_) ? false : (!EntitySelectors.NOT_SPECTATING.apply(p_apply_1_) ? false : EntityAINearestAttackableTarget.this.isSuitableTarget(p_apply_1_, false)));
+         public boolean apply(@Nullable EntityLivingBase t0) {
+            return t0 == null ? false : (predicate != null && !predicate.apply(t0) ? false : (!EntitySelectors.NOT_SPECTATING.apply(t0) ? false : EntityAINearestAttackableTarget.this.isSuitableTarget(t0, false)));
+         }
+
+         public boolean apply(Object object) {
+            return this.apply((EntityLivingBase)object);
          }
       };
    }
@@ -64,45 +62,40 @@ public class EntityAINearestAttackableTarget extends EntityAITarget {
       } else {
          this.targetEntity = this.taskOwner.world.getNearestAttackablePlayer(this.taskOwner.posX, this.taskOwner.posY + (double)this.taskOwner.getEyeHeight(), this.taskOwner.posZ, this.getTargetDistance(), this.getTargetDistance(), new Function() {
             @Nullable
-            public Double apply(@Nullable EntityPlayer var1) {
-               ItemStack itemstack = p_apply_1_.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
-               if (itemstack != null && itemstack.getItem() == Items.SKULL) {
-                  int i = itemstack.getItemDamage();
-                  boolean flag = EntityAINearestAttackableTarget.this.taskOwner instanceof EntitySkeleton && ((EntitySkeleton)EntityAINearestAttackableTarget.this.taskOwner).getSkeletonType() == SkeletonType.NORMAL && i == 0;
-                  boolean flag1 = EntityAINearestAttackableTarget.this.taskOwner instanceof EntityZombie && i == 2;
-                  boolean flag2 = EntityAINearestAttackableTarget.this.taskOwner instanceof EntityCreeper && i == 4;
-                  if (flag || flag1 || flag2) {
-                     return 0.5D;
-                  }
-               }
+            public Double apply(@Nullable EntityPlayer param1) {
+               // $FF: Couldn't be decompiled
+            }
 
-               return 1.0D;
+            public Double apply(EntityPlayer param1) {
+               // $FF: Couldn't be decompiled
             }
          }, this.targetEntitySelector);
          return this.targetEntity != null;
       }
    }
 
-   protected AxisAlignedBB getTargetableArea(double var1) {
-      return this.taskOwner.getEntityBoundingBox().expand(targetDistance, 4.0D, targetDistance);
+   protected AxisAlignedBB getTargetableArea(double d0) {
+      return this.taskOwner.getEntityBoundingBox().expand(d0, 4.0D, d0);
    }
 
    public void startExecuting() {
-      this.taskOwner.setAttackTarget(this.targetEntity);
+      this.taskOwner.setGoalTarget(this.targetEntity, this.targetEntity instanceof EntityPlayerMP ? TargetReason.CLOSEST_PLAYER : TargetReason.CLOSEST_ENTITY, true);
       super.startExecuting();
    }
 
    public static class Sorter implements Comparator {
       private final Entity theEntity;
 
-      public Sorter(Entity var1) {
-         this.theEntity = theEntityIn;
+      public Sorter(Entity entity) {
+         this.theEntity = entity;
       }
 
-      public int compare(Entity var1, Entity var2) {
-         double d0 = this.theEntity.getDistanceSqToEntity(p_compare_1_);
-         double d1 = this.theEntity.getDistanceSqToEntity(p_compare_2_);
-         return d0 < d1 ? -1 : (d0 > d1 ? 1 : 0);
+      public int compare(Entity param1, Entity param2) {
+         // $FF: Couldn't be decompiled
+      }
+
+      public int compare(Entity param1, Entity param2) {
+         // $FF: Couldn't be decompiled
       }
    }
 }

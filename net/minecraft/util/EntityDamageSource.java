@@ -15,8 +15,8 @@ public class EntityDamageSource extends DamageSource {
    private boolean isThornsDamage;
 
    public EntityDamageSource(String var1, Entity var2) {
-      super(damageTypeIn);
-      this.damageSourceEntity = damageSourceEntityIn;
+      super(var1);
+      this.damageSourceEntity = var2;
    }
 
    public EntityDamageSource setIsThornsDamage() {
@@ -34,10 +34,10 @@ public class EntityDamageSource extends DamageSource {
    }
 
    public ITextComponent getDeathMessage(EntityLivingBase var1) {
-      ItemStack itemstack = this.damageSourceEntity instanceof EntityLivingBase ? ((EntityLivingBase)this.damageSourceEntity).getHeldItemMainhand() : null;
-      String s = "death.attack." + this.damageType;
-      String s1 = s + ".item";
-      return itemstack != null && itemstack.hasDisplayName() && I18n.canTranslate(s1) ? new TextComponentTranslation(s1, new Object[]{entityLivingBaseIn.getDisplayName(), this.damageSourceEntity.getDisplayName(), itemstack.getTextComponent()}) : new TextComponentTranslation(s, new Object[]{entityLivingBaseIn.getDisplayName(), this.damageSourceEntity.getDisplayName()});
+      ItemStack var2 = this.damageSourceEntity instanceof EntityLivingBase ? ((EntityLivingBase)this.damageSourceEntity).getHeldItemMainhand() : null;
+      String var3 = "death.attack." + this.damageType;
+      String var4 = var3 + ".item";
+      return var2 != null && var2.hasDisplayName() && I18n.canTranslate(var4) ? new TextComponentTranslation(var4, new Object[]{var1.getDisplayName(), this.damageSourceEntity.getDisplayName(), var2.getTextComponent()}) : new TextComponentTranslation(var3, new Object[]{var1.getDisplayName(), this.damageSourceEntity.getDisplayName()});
    }
 
    public boolean isDifficultyScaled() {

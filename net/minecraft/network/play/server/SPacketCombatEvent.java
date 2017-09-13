@@ -20,22 +20,22 @@ public class SPacketCombatEvent implements Packet {
    }
 
    public SPacketCombatEvent(CombatTracker var1, SPacketCombatEvent.Event var2) {
-      this(tracker, eventIn, true);
+      this(var1, var2, true);
    }
 
    public SPacketCombatEvent(CombatTracker var1, SPacketCombatEvent.Event var2, boolean var3) {
-      this.eventType = eventIn;
-      EntityLivingBase entitylivingbase = tracker.getBestAttacker();
-      switch(eventIn) {
+      this.eventType = var2;
+      EntityLivingBase var4 = var1.getBestAttacker();
+      switch(var2) {
       case END_COMBAT:
-         this.duration = tracker.getCombatDuration();
-         this.entityId = entitylivingbase == null ? -1 : entitylivingbase.getEntityId();
+         this.duration = var1.getCombatDuration();
+         this.entityId = var4 == null ? -1 : var4.getEntityId();
          break;
       case ENTITY_DIED:
-         this.playerId = tracker.getFighter().getEntityId();
-         this.entityId = entitylivingbase == null ? -1 : entitylivingbase.getEntityId();
-         if (p_i46932_3_) {
-            this.deathMessage = tracker.getDeathMessage();
+         this.playerId = var1.getFighter().getEntityId();
+         this.entityId = var4 == null ? -1 : var4.getEntityId();
+         if (var3) {
+            this.deathMessage = var1.getDeathMessage();
          } else {
             this.deathMessage = new TextComponentString("");
          }
@@ -44,33 +44,33 @@ public class SPacketCombatEvent implements Packet {
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.eventType = (SPacketCombatEvent.Event)buf.readEnumValue(SPacketCombatEvent.Event.class);
+      this.eventType = (SPacketCombatEvent.Event)var1.readEnumValue(SPacketCombatEvent.Event.class);
       if (this.eventType == SPacketCombatEvent.Event.END_COMBAT) {
-         this.duration = buf.readVarInt();
-         this.entityId = buf.readInt();
+         this.duration = var1.readVarInt();
+         this.entityId = var1.readInt();
       } else if (this.eventType == SPacketCombatEvent.Event.ENTITY_DIED) {
-         this.playerId = buf.readVarInt();
-         this.entityId = buf.readInt();
-         this.deathMessage = buf.readTextComponent();
+         this.playerId = var1.readVarInt();
+         this.entityId = var1.readInt();
+         this.deathMessage = var1.readTextComponent();
       }
 
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeEnumValue(this.eventType);
+      var1.writeEnumValue(this.eventType);
       if (this.eventType == SPacketCombatEvent.Event.END_COMBAT) {
-         buf.writeVarInt(this.duration);
-         buf.writeInt(this.entityId);
+         var1.writeVarInt(this.duration);
+         var1.writeInt(this.entityId);
       } else if (this.eventType == SPacketCombatEvent.Event.ENTITY_DIED) {
-         buf.writeVarInt(this.playerId);
-         buf.writeInt(this.entityId);
-         buf.writeTextComponent(this.deathMessage);
+         var1.writeVarInt(this.playerId);
+         var1.writeInt(this.entityId);
+         var1.writeTextComponent(this.deathMessage);
       }
 
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      handler.handleCombatEvent(this);
+      var1.handleCombatEvent(this);
    }
 
    public static enum Event {

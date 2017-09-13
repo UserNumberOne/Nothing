@@ -13,8 +13,8 @@ public class EntityAIVillagerInteract extends EntityAIWatchClosest2 {
    private final EntityVillager villager;
 
    public EntityAIVillagerInteract(EntityVillager var1) {
-      super(villagerIn, EntityVillager.class, 3.0F, 0.02F);
-      this.villager = villagerIn;
+      super(var1, EntityVillager.class, 3.0F, 0.02F);
+      this.villager = var1;
    }
 
    public void startExecuting() {
@@ -32,40 +32,40 @@ public class EntityAIVillagerInteract extends EntityAIWatchClosest2 {
       if (this.interactionDelay > 0) {
          --this.interactionDelay;
          if (this.interactionDelay == 0) {
-            InventoryBasic inventorybasic = this.villager.getVillagerInventory();
+            InventoryBasic var1 = this.villager.getVillagerInventory();
 
-            for(int i = 0; i < inventorybasic.getSizeInventory(); ++i) {
-               ItemStack itemstack = inventorybasic.getStackInSlot(i);
-               ItemStack itemstack1 = null;
-               if (itemstack != null) {
-                  Item item = itemstack.getItem();
-                  if ((item == Items.BREAD || item == Items.POTATO || item == Items.CARROT || item == Items.BEETROOT) && itemstack.stackSize > 3) {
-                     int l = itemstack.stackSize / 2;
-                     itemstack.stackSize -= l;
-                     itemstack1 = new ItemStack(item, l, itemstack.getMetadata());
-                  } else if (item == Items.WHEAT && itemstack.stackSize > 5) {
-                     int j = itemstack.stackSize / 2 / 3 * 3;
-                     int k = j / 3;
-                     itemstack.stackSize -= j;
-                     itemstack1 = new ItemStack(Items.BREAD, k, 0);
+            for(int var2 = 0; var2 < var1.getSizeInventory(); ++var2) {
+               ItemStack var3 = var1.getStackInSlot(var2);
+               ItemStack var4 = null;
+               if (var3 != null) {
+                  Item var5 = var3.getItem();
+                  if ((var5 == Items.BREAD || var5 == Items.POTATO || var5 == Items.CARROT || var5 == Items.BEETROOT) && var3.stackSize > 3) {
+                     int var13 = var3.stackSize / 2;
+                     var3.stackSize -= var13;
+                     var4 = new ItemStack(var5, var13, var3.getMetadata());
+                  } else if (var5 == Items.WHEAT && var3.stackSize > 5) {
+                     int var6 = var3.stackSize / 2 / 3 * 3;
+                     int var7 = var6 / 3;
+                     var3.stackSize -= var6;
+                     var4 = new ItemStack(Items.BREAD, var7, 0);
                   }
 
-                  if (itemstack.stackSize <= 0) {
-                     inventorybasic.setInventorySlotContents(i, (ItemStack)null);
+                  if (var3.stackSize <= 0) {
+                     var1.setInventorySlotContents(var2, (ItemStack)null);
                   }
                }
 
-               if (itemstack1 != null) {
-                  double d0 = this.villager.posY - 0.30000001192092896D + (double)this.villager.getEyeHeight();
-                  EntityItem entityitem = new EntityItem(this.villager.world, this.villager.posX, d0, this.villager.posZ, itemstack1);
-                  float f = 0.3F;
-                  float f1 = this.villager.rotationYawHead;
-                  float f2 = this.villager.rotationPitch;
-                  entityitem.motionX = (double)(-MathHelper.sin(f1 * 0.017453292F) * MathHelper.cos(f2 * 0.017453292F) * 0.3F);
-                  entityitem.motionZ = (double)(MathHelper.cos(f1 * 0.017453292F) * MathHelper.cos(f2 * 0.017453292F) * 0.3F);
-                  entityitem.motionY = (double)(-MathHelper.sin(f2 * 0.017453292F) * 0.3F + 0.1F);
-                  entityitem.setDefaultPickupDelay();
-                  this.villager.world.spawnEntity(entityitem);
+               if (var4 != null) {
+                  double var8 = this.villager.posY - 0.30000001192092896D + (double)this.villager.getEyeHeight();
+                  EntityItem var14 = new EntityItem(this.villager.world, this.villager.posX, var8, this.villager.posZ, var4);
+                  float var10 = 0.3F;
+                  float var11 = this.villager.rotationYawHead;
+                  float var12 = this.villager.rotationPitch;
+                  var14.motionX = (double)(-MathHelper.sin(var11 * 0.017453292F) * MathHelper.cos(var12 * 0.017453292F) * 0.3F);
+                  var14.motionZ = (double)(MathHelper.cos(var11 * 0.017453292F) * MathHelper.cos(var12 * 0.017453292F) * 0.3F);
+                  var14.motionY = (double)(-MathHelper.sin(var12 * 0.017453292F) * 0.3F + 0.1F);
+                  var14.setDefaultPickupDelay();
+                  this.villager.world.spawnEntity(var14);
                   break;
                }
             }

@@ -7,21 +7,21 @@ public class EntityAISit extends EntityAIBase {
    private final EntityTameable theEntity;
    private boolean isSitting;
 
-   public EntityAISit(EntityTameable var1) {
-      this.theEntity = entityIn;
+   public EntityAISit(EntityTameable entitytameableanimal) {
+      this.theEntity = entitytameableanimal;
       this.setMutexBits(5);
    }
 
    public boolean shouldExecute() {
       if (!this.theEntity.isTamed()) {
-         return false;
+         return this.isSitting && this.theEntity.getAttackTarget() == null;
       } else if (this.theEntity.isInWater()) {
          return false;
       } else if (!this.theEntity.onGround) {
          return false;
       } else {
-         EntityLivingBase entitylivingbase = this.theEntity.getOwner();
-         return entitylivingbase == null ? true : (this.theEntity.getDistanceSqToEntity(entitylivingbase) < 144.0D && entitylivingbase.getAITarget() != null ? false : this.isSitting);
+         EntityLivingBase entityliving = this.theEntity.getOwner();
+         return entityliving == null ? true : (this.theEntity.getDistanceSqToEntity(entityliving) < 144.0D && entityliving.getAITarget() != null ? false : this.isSitting);
       }
    }
 
@@ -34,7 +34,7 @@ public class EntityAISit extends EntityAIBase {
       this.theEntity.setSitting(false);
    }
 
-   public void setSitting(boolean var1) {
-      this.isSitting = sitting;
+   public void setSitting(boolean flag) {
+      this.isSitting = flag;
    }
 }

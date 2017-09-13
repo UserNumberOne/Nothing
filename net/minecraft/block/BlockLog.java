@@ -9,7 +9,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public abstract class BlockLog extends BlockRotatedPillar {
@@ -23,46 +22,38 @@ public abstract class BlockLog extends BlockRotatedPillar {
    }
 
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      int i = 4;
-      int j = 5;
-      if (worldIn.isAreaLoaded(pos.add(-5, -5, -5), pos.add(5, 5, 5))) {
-         for(BlockPos blockpos : BlockPos.getAllInBox(pos.add(-4, -4, -4), pos.add(4, 4, 4))) {
-            IBlockState iblockstate = worldIn.getBlockState(blockpos);
-            if (iblockstate.getBlock().isLeaves(iblockstate, worldIn, blockpos)) {
-               iblockstate.getBlock().beginLeavesDecay(iblockstate, worldIn, blockpos);
+      boolean var4 = true;
+      boolean var5 = true;
+      if (var1.isAreaLoaded(var2.add(-5, -5, -5), var2.add(5, 5, 5))) {
+         for(BlockPos var7 : BlockPos.getAllInBox(var2.add(-4, -4, -4), var2.add(4, 4, 4))) {
+            IBlockState var8 = var1.getBlockState(var7);
+            if (var8.getMaterial() == Material.LEAVES && !((Boolean)var8.getValue(BlockLeaves.CHECK_DECAY)).booleanValue()) {
+               var1.setBlockState(var7, var8.withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(true)), 4);
             }
          }
-      }
 
+      }
    }
 
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
-      return this.getStateFromMeta(meta).withProperty(LOG_AXIS, BlockLog.EnumAxis.fromFacingAxis(facing.getAxis()));
+      return this.getStateFromMeta(var7).withProperty(LOG_AXIS, BlockLog.EnumAxis.fromFacingAxis(var3.getAxis()));
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      switch(rot) {
+      switch(var2) {
       case COUNTERCLOCKWISE_90:
       case CLOCKWISE_90:
-         switch((BlockLog.EnumAxis)state.getValue(LOG_AXIS)) {
+         switch((BlockLog.EnumAxis)var1.getValue(LOG_AXIS)) {
          case X:
-            return state.withProperty(LOG_AXIS, BlockLog.EnumAxis.Z);
+            return var1.withProperty(LOG_AXIS, BlockLog.EnumAxis.Z);
          case Z:
-            return state.withProperty(LOG_AXIS, BlockLog.EnumAxis.X);
+            return var1.withProperty(LOG_AXIS, BlockLog.EnumAxis.X);
          default:
-            return state;
+            return var1;
          }
       default:
-         return state;
+         return var1;
       }
-   }
-
-   public boolean canSustainLeaves(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return true;
-   }
-
-   public boolean isWood(IBlockAccess var1, BlockPos var2) {
-      return true;
    }
 
    public static enum EnumAxis implements IStringSerializable {
@@ -74,7 +65,7 @@ public abstract class BlockLog extends BlockRotatedPillar {
       private final String name;
 
       private EnumAxis(String var3) {
-         this.name = name;
+         this.name = var3;
       }
 
       public String toString() {
@@ -82,7 +73,7 @@ public abstract class BlockLog extends BlockRotatedPillar {
       }
 
       public static BlockLog.EnumAxis fromFacingAxis(EnumFacing.Axis var0) {
-         switch(axis) {
+         switch(var0) {
          case X:
             return X;
          case Y:

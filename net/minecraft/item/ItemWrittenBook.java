@@ -1,6 +1,5 @@
 package net.minecraft.item;
 
-import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Slot;
@@ -16,11 +15,7 @@ import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentUtils;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemWrittenBook extends Item {
    public ItemWrittenBook() {
@@ -28,91 +23,72 @@ public class ItemWrittenBook extends Item {
    }
 
    public static boolean validBookTagContents(NBTTagCompound var0) {
-      if (!ItemWritableBook.isNBTValid(nbt)) {
+      if (!ItemWritableBook.isNBTValid(var0)) {
          return false;
-      } else if (!nbt.hasKey("title", 8)) {
+      } else if (!var0.hasKey("title", 8)) {
          return false;
       } else {
-         String s = nbt.getString("title");
-         return s != null && s.length() <= 32 ? nbt.hasKey("author", 8) : false;
+         String var1 = var0.getString("title");
+         return var1 != null && var1.length() <= 32 ? var0.hasKey("author", 8) : false;
       }
    }
 
    public static int getGeneration(ItemStack var0) {
-      return book.getTagCompound().getInteger("generation");
+      return var0.getTagCompound().getInteger("generation");
    }
 
    public String getItemStackDisplayName(ItemStack var1) {
-      if (stack.hasTagCompound()) {
-         NBTTagCompound nbttagcompound = stack.getTagCompound();
-         String s = nbttagcompound.getString("title");
-         if (!StringUtils.isNullOrEmpty(s)) {
-            return s;
+      if (var1.hasTagCompound()) {
+         NBTTagCompound var2 = var1.getTagCompound();
+         String var3 = var2.getString("title");
+         if (!StringUtils.isNullOrEmpty(var3)) {
+            return var3;
          }
       }
 
-      return super.getItemStackDisplayName(stack);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void addInformation(ItemStack var1, EntityPlayer var2, List var3, boolean var4) {
-      if (stack.hasTagCompound()) {
-         NBTTagCompound nbttagcompound = stack.getTagCompound();
-         String s = nbttagcompound.getString("author");
-         if (!StringUtils.isNullOrEmpty(s)) {
-            tooltip.add(TextFormatting.GRAY + I18n.translateToLocalFormatted("book.byAuthor", s));
-         }
-
-         tooltip.add(TextFormatting.GRAY + I18n.translateToLocal("book.generation." + nbttagcompound.getInteger("generation")));
-      }
-
+      return super.getItemStackDisplayName(var1);
    }
 
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      if (!worldIn.isRemote) {
-         this.resolveContents(itemStackIn, playerIn);
+      if (!var2.isRemote) {
+         this.resolveContents(var1, var3);
       }
 
-      playerIn.openBook(itemStackIn, hand);
-      playerIn.addStat(StatList.getObjectUseStats(this));
-      return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
+      var3.openBook(var1, var4);
+      var3.addStat(StatList.getObjectUseStats(this));
+      return new ActionResult(EnumActionResult.SUCCESS, var1);
    }
 
    private void resolveContents(ItemStack var1, EntityPlayer var2) {
-      if (stack != null && stack.getTagCompound() != null) {
-         NBTTagCompound nbttagcompound = stack.getTagCompound();
-         if (!nbttagcompound.getBoolean("resolved")) {
-            nbttagcompound.setBoolean("resolved", true);
-            if (validBookTagContents(nbttagcompound)) {
-               NBTTagList nbttaglist = nbttagcompound.getTagList("pages", 8);
+      if (var1 != null && var1.getTagCompound() != null) {
+         NBTTagCompound var3 = var1.getTagCompound();
+         if (!var3.getBoolean("resolved")) {
+            var3.setBoolean("resolved", true);
+            if (validBookTagContents(var3)) {
+               NBTTagList var4 = var3.getTagList("pages", 8);
 
-               for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-                  String s = nbttaglist.getStringTagAt(i);
+               for(int var5 = 0; var5 < var4.tagCount(); ++var5) {
+                  String var6 = var4.getStringTagAt(var5);
 
-                  ITextComponent lvt_7_1_;
+                  ITextComponent var7;
                   try {
-                     lvt_7_1_ = ITextComponent.Serializer.fromJsonLenient(s);
-                     lvt_7_1_ = TextComponentUtils.processComponent(player, lvt_7_1_, player);
+                     var7 = ITextComponent.Serializer.fromJsonLenient(var6);
+                     var7 = TextComponentUtils.processComponent(var2, var7, var2);
                   } catch (Exception var9) {
-                     lvt_7_1_ = new TextComponentString(s);
+                     var7 = new TextComponentString(var6);
                   }
 
-                  nbttaglist.set(i, new NBTTagString(ITextComponent.Serializer.componentToJson(lvt_7_1_)));
+                  var4.set(var5, new NBTTagString(ITextComponent.Serializer.componentToJson(var7)));
                }
 
-               nbttagcompound.setTag("pages", nbttaglist);
-               if (player instanceof EntityPlayerMP && player.getHeldItemMainhand() == stack) {
-                  Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
-                  ((EntityPlayerMP)player).connection.sendPacket(new SPacketSetSlot(0, slot.slotNumber, stack));
+               var3.setTag("pages", var4);
+               if (var2 instanceof EntityPlayerMP && var2.getHeldItemMainhand() == var1) {
+                  Slot var10 = var2.openContainer.getSlotFromInventory(var2.inventory, var2.inventory.currentItem);
+                  ((EntityPlayerMP)var2).connection.sendPacket(new SPacketSetSlot(0, var10.slotNumber, var1));
                }
+
             }
          }
       }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasEffect(ItemStack var1) {
-      return true;
    }
 }

@@ -14,26 +14,26 @@ public abstract class AbstractAttributeMap {
    protected final Multimap descendantsByParent = HashMultimap.create();
 
    public IAttributeInstance getAttributeInstance(IAttribute var1) {
-      return (IAttributeInstance)this.attributes.get(attribute);
+      return (IAttributeInstance)this.attributes.get(var1);
    }
 
    public IAttributeInstance getAttributeInstanceByName(String var1) {
-      return (IAttributeInstance)this.attributesByName.get(attributeName);
+      return (IAttributeInstance)this.attributesByName.get(var1);
    }
 
    public IAttributeInstance registerAttribute(IAttribute var1) {
-      if (this.attributesByName.containsKey(attribute.getName())) {
+      if (this.attributesByName.containsKey(var1.getName())) {
          throw new IllegalArgumentException("Attribute is already registered!");
       } else {
-         IAttributeInstance iattributeinstance = this.createInstance(attribute);
-         this.attributesByName.put(attribute.getName(), iattributeinstance);
-         this.attributes.put(attribute, iattributeinstance);
+         IAttributeInstance var2 = this.createInstance(var1);
+         this.attributesByName.put(var1.getName(), var2);
+         this.attributes.put(var1, var2);
 
-         for(IAttribute iattribute = attribute.getParent(); iattribute != null; iattribute = iattribute.getParent()) {
-            this.descendantsByParent.put(iattribute, attribute);
+         for(IAttribute var3 = var1.getParent(); var3 != null; var3 = var3.getParent()) {
+            this.descendantsByParent.put(var3, var1);
          }
 
-         return iattributeinstance;
+         return var2;
       }
    }
 
@@ -47,21 +47,21 @@ public abstract class AbstractAttributeMap {
    }
 
    public void removeAttributeModifiers(Multimap var1) {
-      for(Entry entry : modifiers.entries()) {
-         IAttributeInstance iattributeinstance = this.getAttributeInstanceByName((String)entry.getKey());
-         if (iattributeinstance != null) {
-            iattributeinstance.removeModifier((AttributeModifier)entry.getValue());
+      for(Entry var3 : var1.entries()) {
+         IAttributeInstance var4 = this.getAttributeInstanceByName((String)var3.getKey());
+         if (var4 != null) {
+            var4.removeModifier((AttributeModifier)var3.getValue());
          }
       }
 
    }
 
    public void applyAttributeModifiers(Multimap var1) {
-      for(Entry entry : modifiers.entries()) {
-         IAttributeInstance iattributeinstance = this.getAttributeInstanceByName((String)entry.getKey());
-         if (iattributeinstance != null) {
-            iattributeinstance.removeModifier((AttributeModifier)entry.getValue());
-            iattributeinstance.applyModifier((AttributeModifier)entry.getValue());
+      for(Entry var3 : var1.entries()) {
+         IAttributeInstance var4 = this.getAttributeInstanceByName((String)var3.getKey());
+         if (var4 != null) {
+            var4.removeModifier((AttributeModifier)var3.getValue());
+            var4.applyModifier((AttributeModifier)var3.getValue());
          }
       }
 

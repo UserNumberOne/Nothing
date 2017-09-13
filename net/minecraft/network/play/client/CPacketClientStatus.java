@@ -12,19 +12,19 @@ public class CPacketClientStatus implements Packet {
    }
 
    public CPacketClientStatus(CPacketClientStatus.State var1) {
-      this.status = p_i46886_1_;
+      this.status = var1;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.status = (CPacketClientStatus.State)buf.readEnumValue(CPacketClientStatus.State.class);
+      this.status = (CPacketClientStatus.State)var1.readEnumValue(CPacketClientStatus.State.class);
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      buf.writeEnumValue(this.status);
+      var1.writeEnumValue(this.status);
    }
 
    public void processPacket(INetHandlerPlayServer var1) {
-      handler.processClientStatus(this);
+      var1.processClientStatus(this);
    }
 
    public CPacketClientStatus.State getStatus() {

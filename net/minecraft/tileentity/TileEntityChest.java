@@ -1,10 +1,13 @@
 package net.minecraft.tileentity;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
@@ -22,10 +25,8 @@ import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.VanillaDoubleChestItemHandler;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class TileEntityChest extends TileEntityLockableLoot implements ITickable, IInventory {
    private ItemStack[] chestContents = new ItemStack[27];
@@ -40,13 +41,34 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
    private int ticksSinceSync;
    private BlockChest.Type cachedChestType;
    private String customName;
-   public VanillaDoubleChestItemHandler doubleChestHandler;
+   public List transaction = new ArrayList();
+   private int maxStack = 64;
 
    public TileEntityChest() {
    }
 
-   public TileEntityChest(BlockChest.Type var1) {
-      this.cachedChestType = typeIn;
+   public ItemStack[] getContents() {
+      return this.chestContents;
+   }
+
+   public void onOpen(CraftHumanEntity who) {
+      this.transaction.add(who);
+   }
+
+   public void onClose(CraftHumanEntity who) {
+      this.transaction.remove(who);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public void setMaxStackSize(int size) {
+      this.maxStack = size;
+   }
+
+   public TileEntityChest(BlockChest.Type blockchest_type) {
+      this.cachedChestType = blockchest_type;
    }
 
    public int getSizeInventory() {
@@ -54,15 +76,15 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
    }
 
    @Nullable
-   public ItemStack getStackInSlot(int var1) {
+   public ItemStack getStackInSlot(int i) {
       this.fillWithLoot((EntityPlayer)null);
-      return this.chestContents[index];
+      return this.chestContents[i];
    }
 
    @Nullable
-   public ItemStack decrStackSize(int var1, int var2) {
+   public ItemStack decrStackSize(int i, int j) {
       this.fillWithLoot((EntityPlayer)null);
-      ItemStack itemstack = ItemStackHelper.getAndSplit(this.chestContents, index, count);
+      ItemStack itemstack = ItemStackHelper.getAndSplit(this.chestContents, i, j);
       if (itemstack != null) {
          this.markDirty();
       }
@@ -71,16 +93,16 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
    }
 
    @Nullable
-   public ItemStack removeStackFromSlot(int var1) {
+   public ItemStack removeStackFromSlot(int i) {
       this.fillWithLoot((EntityPlayer)null);
-      return ItemStackHelper.getAndRemove(this.chestContents, index);
+      return ItemStackHelper.getAndRemove(this.chestContents, i);
    }
 
-   public void setInventorySlotContents(int var1, @Nullable ItemStack var2) {
+   public void setInventorySlotContents(int i, @Nullable ItemStack itemstack) {
       this.fillWithLoot((EntityPlayer)null);
-      this.chestContents[index] = stack;
-      if (stack != null && stack.stackSize > this.getInventoryStackLimit()) {
-         stack.stackSize = this.getInventoryStackLimit();
+      this.chestContents[i] = itemstack;
+      if (itemstack != null && itemstack.stackSize > this.getInventoryStackLimit()) {
+         itemstack.stackSize = this.getInventoryStackLimit();
       }
 
       this.markDirty();
@@ -94,95 +116,98 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
       return this.customName != null && !this.customName.isEmpty();
    }
 
-   public void setCustomName(String var1) {
-      this.customName = name;
+   public void setCustomName(String s) {
+      this.customName = s;
    }
 
-   public static void registerFixesChest(DataFixer var0) {
-      fixer.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists("Chest", new String[]{"Items"}));
+   public static void registerFixesChest(DataFixer dataconvertermanager) {
+      dataconvertermanager.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists("Chest", new String[]{"Items"}));
    }
 
-   public void readFromNBT(NBTTagCompound var1) {
-      super.readFromNBT(compound);
+   public void readFromNBT(NBTTagCompound nbttagcompound) {
+      super.readFromNBT(nbttagcompound);
       this.chestContents = new ItemStack[this.getSizeInventory()];
-      if (compound.hasKey("CustomName", 8)) {
-         this.customName = compound.getString("CustomName");
+      if (nbttagcompound.hasKey("CustomName", 8)) {
+         this.customName = nbttagcompound.getString("CustomName");
       }
 
-      if (!this.checkLootAndRead(compound)) {
-         NBTTagList nbttaglist = compound.getTagList("Items", 10);
+      if (!this.checkLootAndRead(nbttagcompound)) {
+         NBTTagList nbttaglist = nbttagcompound.getTagList("Items", 10);
 
          for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-            int j = nbttagcompound.getByte("Slot") & 255;
+            NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
+            int j = nbttagcompound1.getByte("Slot") & 255;
             if (j >= 0 && j < this.chestContents.length) {
-               this.chestContents[j] = ItemStack.loadItemStackFromNBT(nbttagcompound);
+               this.chestContents[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
             }
          }
       }
 
    }
 
-   public NBTTagCompound writeToNBT(NBTTagCompound var1) {
-      super.writeToNBT(compound);
-      if (!this.checkLootAndWrite(compound)) {
+   public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
+      super.writeToNBT(nbttagcompound);
+      if (!this.checkLootAndWrite(nbttagcompound)) {
          NBTTagList nbttaglist = new NBTTagList();
 
          for(int i = 0; i < this.chestContents.length; ++i) {
             if (this.chestContents[i] != null) {
-               NBTTagCompound nbttagcompound = new NBTTagCompound();
-               nbttagcompound.setByte("Slot", (byte)i);
-               this.chestContents[i].writeToNBT(nbttagcompound);
-               nbttaglist.appendTag(nbttagcompound);
+               NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+               nbttagcompound1.setByte("Slot", (byte)i);
+               this.chestContents[i].writeToNBT(nbttagcompound1);
+               nbttaglist.appendTag(nbttagcompound1);
             }
          }
 
-         compound.setTag("Items", nbttaglist);
+         nbttagcompound.setTag("Items", nbttaglist);
       }
 
       if (this.hasCustomName()) {
-         compound.setString("CustomName", this.customName);
+         nbttagcompound.setString("CustomName", this.customName);
       }
 
-      return compound;
+      return nbttagcompound;
    }
 
    public int getInventoryStackLimit() {
-      return 64;
+      return this.maxStack;
    }
 
-   public boolean isUsableByPlayer(EntityPlayer var1) {
-      return this.world.getTileEntity(this.pos) != this ? false : player.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+   public boolean isUsableByPlayer(EntityPlayer entityhuman) {
+      if (this.world == null) {
+         return true;
+      } else {
+         return this.world.getTileEntity(this.pos) != this ? false : entityhuman.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+      }
    }
 
    public void updateContainingBlockInfo() {
       super.updateContainingBlockInfo();
       this.adjacentChestChecked = false;
-      this.doubleChestHandler = null;
    }
 
-   private void setNeighbor(TileEntityChest var1, EnumFacing var2) {
-      if (chestTe.isInvalid()) {
+   private void setNeighbor(TileEntityChest tileentitychest, EnumFacing enumdirection) {
+      if (tileentitychest.isInvalid()) {
          this.adjacentChestChecked = false;
       } else if (this.adjacentChestChecked) {
-         switch(side) {
-         case NORTH:
-            if (this.adjacentChestZNeg != chestTe) {
+         switch(TileEntityChest.SyntheticClass_1.a[enumdirection.ordinal()]) {
+         case 1:
+            if (this.adjacentChestZNeg != tileentitychest) {
                this.adjacentChestChecked = false;
             }
             break;
-         case SOUTH:
-            if (this.adjacentChestZPos != chestTe) {
+         case 2:
+            if (this.adjacentChestZPos != tileentitychest) {
                this.adjacentChestChecked = false;
             }
             break;
-         case EAST:
-            if (this.adjacentChestXPos != chestTe) {
+         case 3:
+            if (this.adjacentChestXPos != tileentitychest) {
                this.adjacentChestChecked = false;
             }
             break;
-         case WEST:
-            if (this.adjacentChestXNeg != chestTe) {
+         case 4:
+            if (this.adjacentChestXNeg != tileentitychest) {
                this.adjacentChestChecked = false;
             }
          }
@@ -202,13 +227,13 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
    }
 
    @Nullable
-   protected TileEntityChest getAdjacentChest(EnumFacing var1) {
-      BlockPos blockpos = this.pos.offset(side);
-      if (this.isChestAt(blockpos)) {
-         TileEntity tileentity = this.world.getTileEntity(blockpos);
+   protected TileEntityChest getAdjacentChest(EnumFacing enumdirection) {
+      BlockPos blockposition = this.pos.offset(enumdirection);
+      if (this.isChestAt(blockposition)) {
+         TileEntity tileentity = this.world.getTileEntity(blockposition);
          if (tileentity instanceof TileEntityChest) {
             TileEntityChest tileentitychest = (TileEntityChest)tileentity;
-            tileentitychest.setNeighbor(this, side.getOpposite());
+            tileentitychest.setNeighbor(this, enumdirection.getOpposite());
             return tileentitychest;
          }
       }
@@ -216,11 +241,11 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
       return null;
    }
 
-   private boolean isChestAt(BlockPos var1) {
+   private boolean isChestAt(BlockPos blockposition) {
       if (this.world == null) {
          return false;
       } else {
-         Block block = this.world.getBlockState(posIn).getBlock();
+         Block block = this.world.getBlockState(blockposition).getBlock();
          return block instanceof BlockChest && ((BlockChest)block).chestType == this.getChestType();
       }
    }
@@ -233,11 +258,10 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
       ++this.ticksSinceSync;
       if (!this.world.isRemote && this.numPlayersUsing != 0 && (this.ticksSinceSync + i + j + k) % 200 == 0) {
          this.numPlayersUsing = 0;
-         float f = 5.0F;
 
-         for(EntityPlayer entityplayer : this.world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB((double)((float)i - 5.0F), (double)((float)j - 5.0F), (double)((float)k - 5.0F), (double)((float)(i + 1) + 5.0F), (double)((float)(j + 1) + 5.0F), (double)((float)(k + 1) + 5.0F)))) {
-            if (entityplayer.openContainer instanceof ContainerChest) {
-               IInventory iinventory = ((ContainerChest)entityplayer.openContainer).getLowerChestInventory();
+         for(EntityPlayer entityhuman : this.world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB((double)((float)i - 5.0F), (double)((float)j - 5.0F), (double)((float)k - 5.0F), (double)((float)(i + 1) + 5.0F), (double)((float)(j + 1) + 5.0F), (double)((float)(k + 1) + 5.0F)))) {
+            if (entityhuman.openContainer instanceof ContainerChest) {
+               IInventory iinventory = ((ContainerChest)entityhuman.openContainer).getLowerChestInventory();
                if (iinventory == this || iinventory instanceof InventoryLargeChest && ((InventoryLargeChest)iinventory).isPartOfLargeChest(this)) {
                   ++this.numPlayersUsing;
                }
@@ -246,23 +270,22 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
       }
 
       this.prevLidAngle = this.lidAngle;
-      float f1 = 0.1F;
       if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
          double d1 = (double)i + 0.5D;
-         double d2 = (double)k + 0.5D;
+         double d0 = (double)k + 0.5D;
          if (this.adjacentChestZPos != null) {
-            d2 += 0.5D;
+            d0 += 0.5D;
          }
 
          if (this.adjacentChestXPos != null) {
             d1 += 0.5D;
          }
 
-         this.world.playSound((EntityPlayer)null, d1, (double)j + 0.5D, d2, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+         this.world.playSound((EntityPlayer)null, d1, (double)j + 0.5D, d0, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
       }
 
       if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F) {
-         float f2 = this.lidAngle;
+         float f1 = this.lidAngle;
          if (this.numPlayersUsing > 0) {
             this.lidAngle += 0.1F;
          } else {
@@ -273,19 +296,18 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
             this.lidAngle = 1.0F;
          }
 
-         float f3 = 0.5F;
-         if (this.lidAngle < 0.5F && f2 >= 0.5F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
-            double d3 = (double)i + 0.5D;
-            double d0 = (double)k + 0.5D;
+         if (this.lidAngle < 0.5F && f1 >= 0.5F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
+            double d0 = (double)i + 0.5D;
+            double d2 = (double)k + 0.5D;
             if (this.adjacentChestZPos != null) {
-               d0 += 0.5D;
+               d2 += 0.5D;
             }
 
             if (this.adjacentChestXPos != null) {
-               d3 += 0.5D;
+               d0 += 0.5D;
             }
 
-            this.world.playSound((EntityPlayer)null, d3, (double)j + 0.5D, d0, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound((EntityPlayer)null, d0, (double)j + 0.5D, d2, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
          }
 
          if (this.lidAngle < 0.0F) {
@@ -295,40 +317,64 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
 
    }
 
-   public boolean receiveClientEvent(int var1, int var2) {
-      if (id == 1) {
-         this.numPlayersUsing = type;
+   public boolean receiveClientEvent(int i, int j) {
+      if (i == 1) {
+         this.numPlayersUsing = j;
          return true;
       } else {
-         return super.receiveClientEvent(id, type);
+         return super.receiveClientEvent(i, j);
       }
    }
 
-   public void openInventory(EntityPlayer var1) {
-      if (!player.isSpectator()) {
+   public void openInventory(EntityPlayer entityhuman) {
+      if (!entityhuman.isSpectator()) {
          if (this.numPlayersUsing < 0) {
             this.numPlayersUsing = 0;
          }
 
+         int oldPower = Math.max(0, Math.min(15, this.numPlayersUsing));
          ++this.numPlayersUsing;
+         if (this.world == null) {
+            return;
+         }
+
          this.world.addBlockEvent(this.pos, this.getBlockType(), 1, this.numPlayersUsing);
+         if (this.getBlockType() == Blocks.TRAPPED_CHEST) {
+            int newPower = Math.max(0, Math.min(15, this.numPlayersUsing));
+            if (oldPower != newPower) {
+               CraftEventFactory.callRedstoneChange(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), oldPower, newPower);
+            }
+         }
+
          this.world.notifyNeighborsOfStateChange(this.pos, this.getBlockType());
          this.world.notifyNeighborsOfStateChange(this.pos.down(), this.getBlockType());
       }
 
    }
 
-   public void closeInventory(EntityPlayer var1) {
-      if (!player.isSpectator() && this.getBlockType() instanceof BlockChest) {
+   public void closeInventory(EntityPlayer entityhuman) {
+      if (!entityhuman.isSpectator() && this.getBlockType() instanceof BlockChest) {
+         int oldPower = Math.max(0, Math.min(15, this.numPlayersUsing));
          --this.numPlayersUsing;
+         if (this.world == null) {
+            return;
+         }
+
          this.world.addBlockEvent(this.pos, this.getBlockType(), 1, this.numPlayersUsing);
+         if (this.getBlockType() == Blocks.TRAPPED_CHEST) {
+            int newPower = Math.max(0, Math.min(15, this.numPlayersUsing));
+            if (oldPower != newPower) {
+               CraftEventFactory.callRedstoneChange(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), oldPower, newPower);
+            }
+         }
+
          this.world.notifyNeighborsOfStateChange(this.pos, this.getBlockType());
          this.world.notifyNeighborsOfStateChange(this.pos.down(), this.getBlockType());
       }
 
    }
 
-   public boolean isItemValidForSlot(int var1, ItemStack var2) {
+   public boolean isItemValidForSlot(int i, ItemStack itemstack) {
       return true;
    }
 
@@ -354,16 +400,16 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
       return "minecraft:chest";
    }
 
-   public Container createContainer(InventoryPlayer var1, EntityPlayer var2) {
-      this.fillWithLoot(playerIn);
-      return new ContainerChest(playerInventory, this, playerIn);
+   public Container createContainer(InventoryPlayer playerinventory, EntityPlayer entityhuman) {
+      this.fillWithLoot(entityhuman);
+      return new ContainerChest(playerinventory, this, entityhuman);
    }
 
-   public int getField(int var1) {
+   public int getField(int i) {
       return 0;
    }
 
-   public void setField(int var1, int var2) {
+   public void setField(int i, int j) {
    }
 
    public int getFieldCount() {
@@ -379,21 +425,38 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
 
    }
 
-   public Object getCapability(Capability var1, EnumFacing var2) {
-      if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-         if (this.doubleChestHandler == null || this.doubleChestHandler.needsRefresh()) {
-            this.doubleChestHandler = VanillaDoubleChestItemHandler.get(this);
-         }
-
-         if (this.doubleChestHandler != null && this.doubleChestHandler != VanillaDoubleChestItemHandler.NO_ADJACENT_CHESTS_INSTANCE) {
-            return this.doubleChestHandler;
-         }
-      }
-
-      return super.getCapability(capability, facing);
+   public boolean onlyOpsCanSetNbt() {
+      return true;
    }
 
-   public IItemHandler getSingleChestHandler() {
-      return (IItemHandler)super.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, (EnumFacing)null);
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 1;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 2;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.EAST.ordinal()] = 3;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 4;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

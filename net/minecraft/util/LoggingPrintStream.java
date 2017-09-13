@@ -10,21 +10,21 @@ public class LoggingPrintStream extends PrintStream {
    private final String domain;
 
    public LoggingPrintStream(String var1, OutputStream var2) {
-      super(outStream);
-      this.domain = domainIn;
+      super(var2);
+      this.domain = var1;
    }
 
    public void println(String var1) {
-      this.logString(p_println_1_);
+      this.logString(var1);
    }
 
    public void println(Object var1) {
-      this.logString(String.valueOf(p_println_1_));
+      this.logString(String.valueOf(var1));
    }
 
    private void logString(String var1) {
-      StackTraceElement[] astacktraceelement = Thread.currentThread().getStackTrace();
-      StackTraceElement stacktraceelement = astacktraceelement[Math.min(3, astacktraceelement.length)];
-      LOGGER.info("[{}]@.({}:{}): {}", new Object[]{this.domain, stacktraceelement.getFileName(), stacktraceelement.getLineNumber(), string});
+      StackTraceElement[] var2 = Thread.currentThread().getStackTrace();
+      StackTraceElement var3 = var2[Math.min(3, var2.length)];
+      LOGGER.info("[{}]@.({}:{}): {}", new Object[]{this.domain, var3.getFileName(), var3.getLineNumber(), var1});
    }
 }
