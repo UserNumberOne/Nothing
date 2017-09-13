@@ -1,58 +1,58 @@
 package net.minecraft.entity.projectile;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.entity.Explosive;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 public class EntityLargeFireball extends EntityFireball {
    public int explosionPower = 1;
 
-   public EntityLargeFireball(World worldIn) {
-      super(worldIn);
+   public EntityLargeFireball(World world) {
+      super(world);
    }
 
-   @SideOnly(Side.CLIENT)
-   public EntityLargeFireball(World worldIn, double x, double y, double z, double accelX, double accelY, double accelZ) {
-      super(worldIn, x, y, z, accelX, accelY, accelZ);
+   public EntityLargeFireball(World world, EntityLivingBase entityliving, double d0, double d1, double d2) {
+      super(world, entityliving, d0, d1, d2);
    }
 
-   public EntityLargeFireball(World worldIn, EntityLivingBase shooter, double accelX, double accelY, double accelZ) {
-      super(worldIn, shooter, accelX, accelY, accelZ);
-   }
-
-   protected void onImpact(RayTraceResult result) {
+   protected void onImpact(RayTraceResult movingobjectposition) {
       if (!this.world.isRemote) {
-         if (result.entityHit != null) {
-            result.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 6.0F);
-            this.applyEnchantments(this.shootingEntity, result.entityHit);
+         if (movingobjectposition.entityHit != null) {
+            movingobjectposition.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 6.0F);
+            this.applyEnchantments(this.shootingEntity, movingobjectposition.entityHit);
          }
 
          boolean flag = this.world.getGameRules().getBoolean("mobGriefing");
-         this.world.newExplosion((Entity)null, this.posX, this.posY, this.posZ, (float)this.explosionPower, flag, flag);
+         ExplosionPrimeEvent event = new ExplosionPrimeEvent((Explosive)CraftEntity.getEntity(this.world.getServer(), this));
+         this.world.getServer().getPluginManager().callEvent(event);
+         if (!event.isCancelled()) {
+            this.world.newExplosion(this, this.posX, this.posY, this.posZ, event.getRadius(), event.getFire(), flag);
+         }
+
          this.setDead();
       }
 
    }
 
-   public static void registerFixesLargeFireball(DataFixer fixer) {
-      EntityFireball.registerFixesFireball(fixer, "Fireball");
+   public static void registerFixesLargeFireball(DataFixer dataconvertermanager) {
+      EntityFireball.registerFixesFireball(dataconvertermanager, "Fireball");
    }
 
-   public void writeEntityToNBT(NBTTagCompound compound) {
-      super.writeEntityToNBT(compound);
-      compound.setInteger("ExplosionPower", this.explosionPower);
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      nbttagcompound.setInteger("ExplosionPower", this.explosionPower);
    }
 
-   public void readEntityFromNBT(NBTTagCompound compound) {
-      super.readEntityFromNBT(compound);
-      if (compound.hasKey("ExplosionPower", 99)) {
-         this.explosionPower = compound.getInteger("ExplosionPower");
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      if (nbttagcompound.hasKey("ExplosionPower", 99)) {
+         this.bukkitYield = (float)(this.explosionPower = nbttagcompound.getInteger("ExplosionPower"));
       }
 
    }

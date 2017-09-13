@@ -1,5 +1,6 @@
 package net.minecraft.item.crafting;
 
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -11,21 +12,22 @@ import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.world.World;
 
 public class ShieldRecipes {
-   public void addRecipes(CraftingManager manager) {
-      manager.addRecipe(new ItemStack(Items.SHIELD), "WoW", "WWW", " W ", 'W', Blocks.PLANKS, 'o', Items.IRON_INGOT);
-      manager.addRecipe(new ShieldRecipes.Decoration());
+   public void addRecipes(CraftingManager craftingmanager) {
+      craftingmanager.addRecipe(new ItemStack(Items.SHIELD), "WoW", "WWW", " W ", 'W', Blocks.PLANKS, 'o', Items.IRON_INGOT);
+      craftingmanager.addRecipe(new ShieldRecipes.Decoration((ShieldRecipes.SyntheticClass_1)null));
    }
 
-   public static class Decoration implements IRecipe {
+   static class Decoration extends ShapelessRecipes implements IRecipe {
       private Decoration() {
+         super(new ItemStack(Items.SHIELD, 0, 0), Arrays.asList(new ItemStack(Items.BANNER, 0, 0)));
       }
 
-      public boolean matches(InventoryCrafting inv, World worldIn) {
+      public boolean matches(InventoryCrafting inventorycrafting, World world) {
          ItemStack itemstack = null;
          ItemStack itemstack1 = null;
 
-         for(int i = 0; i < inv.getSizeInventory(); ++i) {
-            ItemStack itemstack2 = inv.getStackInSlot(i);
+         for(int i = 0; i < inventorycrafting.getSizeInventory(); ++i) {
+            ItemStack itemstack2 = inventorycrafting.getStackInSlot(i);
             if (itemstack2 != null) {
                if (itemstack2.getItem() == Items.BANNER) {
                   if (itemstack1 != null) {
@@ -59,11 +61,11 @@ public class ShieldRecipes {
       }
 
       @Nullable
-      public ItemStack getCraftingResult(InventoryCrafting inv) {
+      public ItemStack getCraftingResult(InventoryCrafting inventorycrafting) {
          ItemStack itemstack = null;
 
-         for(int i = 0; i < inv.getSizeInventory(); ++i) {
-            ItemStack itemstack1 = inv.getStackInSlot(i);
+         for(int i = 0; i < inventorycrafting.getSizeInventory(); ++i) {
+            ItemStack itemstack1 = inventorycrafting.getStackInSlot(i);
             if (itemstack1 != null && itemstack1.getItem() == Items.BANNER) {
                itemstack = itemstack1;
             }
@@ -71,17 +73,17 @@ public class ShieldRecipes {
 
          ItemStack itemstack2 = new ItemStack(Items.SHIELD, 1, 0);
          NBTTagCompound nbttagcompound;
-         EnumDyeColor enumdyecolor;
+         EnumDyeColor enumcolor;
          if (itemstack.hasTagCompound()) {
             nbttagcompound = itemstack.getTagCompound().copy();
-            enumdyecolor = EnumDyeColor.byDyeDamage(TileEntityBanner.getBaseColor(itemstack));
+            enumcolor = EnumDyeColor.byDyeDamage(TileEntityBanner.getBaseColor(itemstack));
          } else {
             nbttagcompound = new NBTTagCompound();
-            enumdyecolor = EnumDyeColor.byDyeDamage(itemstack.getItemDamage());
+            enumcolor = EnumDyeColor.byDyeDamage(itemstack.getItemDamage());
          }
 
          itemstack2.setTagCompound(nbttagcompound);
-         TileEntityBanner.addBaseColorTag(itemstack2, enumdyecolor);
+         TileEntityBanner.addBaseColorTag(itemstack2, enumcolor);
          return itemstack2;
       }
 
@@ -94,11 +96,11 @@ public class ShieldRecipes {
          return null;
       }
 
-      public ItemStack[] getRemainingItems(InventoryCrafting inv) {
-         ItemStack[] aitemstack = new ItemStack[inv.getSizeInventory()];
+      public ItemStack[] getRemainingItems(InventoryCrafting inventorycrafting) {
+         ItemStack[] aitemstack = new ItemStack[inventorycrafting.getSizeInventory()];
 
          for(int i = 0; i < aitemstack.length; ++i) {
-            ItemStack itemstack = inv.getStackInSlot(i);
+            ItemStack itemstack = inventorycrafting.getStackInSlot(i);
             if (itemstack != null && itemstack.getItem().hasContainerItem()) {
                aitemstack[i] = new ItemStack(itemstack.getItem().getContainerItem());
             }
@@ -106,5 +108,12 @@ public class ShieldRecipes {
 
          return aitemstack;
       }
+
+      Decoration(ShieldRecipes.SyntheticClass_1 recipiesshield_syntheticclass_1) {
+         this();
+      }
+   }
+
+   static class SyntheticClass_1 {
    }
 }

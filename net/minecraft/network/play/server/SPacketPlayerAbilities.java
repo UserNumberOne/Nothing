@@ -5,8 +5,6 @@ import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketPlayerAbilities implements Packet {
    private boolean invulnerable;
@@ -19,99 +17,89 @@ public class SPacketPlayerAbilities implements Packet {
    public SPacketPlayerAbilities() {
    }
 
-   public SPacketPlayerAbilities(PlayerCapabilities capabilities) {
-      this.setInvulnerable(capabilities.disableDamage);
-      this.setFlying(capabilities.isFlying);
-      this.setAllowFlying(capabilities.allowFlying);
-      this.setCreativeMode(capabilities.isCreativeMode);
-      this.setFlySpeed(capabilities.getFlySpeed());
-      this.setWalkSpeed(capabilities.getWalkSpeed());
+   public SPacketPlayerAbilities(PlayerCapabilities var1) {
+      this.setInvulnerable(var1.disableDamage);
+      this.setFlying(var1.isFlying);
+      this.setAllowFlying(var1.allowFlying);
+      this.setCreativeMode(var1.isCreativeMode);
+      this.setFlySpeed(var1.getFlySpeed());
+      this.setWalkSpeed(var1.getWalkSpeed());
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      byte b0 = buf.readByte();
-      this.setInvulnerable((b0 & 1) > 0);
-      this.setFlying((b0 & 2) > 0);
-      this.setAllowFlying((b0 & 4) > 0);
-      this.setCreativeMode((b0 & 8) > 0);
-      this.setFlySpeed(buf.readFloat());
-      this.setWalkSpeed(buf.readFloat());
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      byte var2 = var1.readByte();
+      this.setInvulnerable((var2 & 1) > 0);
+      this.setFlying((var2 & 2) > 0);
+      this.setAllowFlying((var2 & 4) > 0);
+      this.setCreativeMode((var2 & 8) > 0);
+      this.setFlySpeed(var1.readFloat());
+      this.setWalkSpeed(var1.readFloat());
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      byte b0 = 0;
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      byte var2 = 0;
       if (this.isInvulnerable()) {
-         b0 = (byte)(b0 | 1);
+         var2 = (byte)(var2 | 1);
       }
 
       if (this.isFlying()) {
-         b0 = (byte)(b0 | 2);
+         var2 = (byte)(var2 | 2);
       }
 
       if (this.isAllowFlying()) {
-         b0 = (byte)(b0 | 4);
+         var2 = (byte)(var2 | 4);
       }
 
       if (this.isCreativeMode()) {
-         b0 = (byte)(b0 | 8);
+         var2 = (byte)(var2 | 8);
       }
 
-      buf.writeByte(b0);
-      buf.writeFloat(this.flySpeed);
-      buf.writeFloat(this.walkSpeed);
+      var1.writeByte(var2);
+      var1.writeFloat(this.flySpeed);
+      var1.writeFloat(this.walkSpeed);
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handlePlayerAbilities(this);
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handlePlayerAbilities(this);
    }
 
    public boolean isInvulnerable() {
       return this.invulnerable;
    }
 
-   public void setInvulnerable(boolean isInvulnerable) {
-      this.invulnerable = isInvulnerable;
+   public void setInvulnerable(boolean var1) {
+      this.invulnerable = var1;
    }
 
    public boolean isFlying() {
       return this.flying;
    }
 
-   public void setFlying(boolean isFlying) {
-      this.flying = isFlying;
+   public void setFlying(boolean var1) {
+      this.flying = var1;
    }
 
    public boolean isAllowFlying() {
       return this.allowFlying;
    }
 
-   public void setAllowFlying(boolean isAllowFlying) {
-      this.allowFlying = isAllowFlying;
+   public void setAllowFlying(boolean var1) {
+      this.allowFlying = var1;
    }
 
    public boolean isCreativeMode() {
       return this.creativeMode;
    }
 
-   public void setCreativeMode(boolean isCreativeMode) {
-      this.creativeMode = isCreativeMode;
+   public void setCreativeMode(boolean var1) {
+      this.creativeMode = var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public float getFlySpeed() {
-      return this.flySpeed;
+   public void setFlySpeed(float var1) {
+      this.flySpeed = var1;
    }
 
-   public void setFlySpeed(float flySpeedIn) {
-      this.flySpeed = flySpeedIn;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getWalkSpeed() {
-      return this.walkSpeed;
-   }
-
-   public void setWalkSpeed(float walkSpeedIn) {
-      this.walkSpeed = walkSpeedIn;
+   public void setWalkSpeed(float var1) {
+      this.walkSpeed = var1;
    }
 }

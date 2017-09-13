@@ -16,15 +16,15 @@ public class BlockMelon extends Block {
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Items.MELON;
    }
 
-   public int quantityDropped(Random random) {
-      return 3 + random.nextInt(5);
+   public int quantityDropped(Random var1) {
+      return 3 + var1.nextInt(5);
    }
 
-   public int quantityDroppedWithBonus(int fortune, Random random) {
-      return Math.min(9, this.quantityDropped(random) + random.nextInt(1 + fortune));
+   public int quantityDroppedWithBonus(int var1, Random var2) {
+      return Math.min(9, this.quantityDropped(var2) + var2.nextInt(1 + var1));
    }
 }

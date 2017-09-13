@@ -4,34 +4,23 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketEnchantItem implements Packet {
    private int windowId;
    private int button;
 
-   public CPacketEnchantItem() {
+   public void processPacket(INetHandlerPlayServer var1) {
+      var1.processEnchantItem(this);
    }
 
-   @SideOnly(Side.CLIENT)
-   public CPacketEnchantItem(int windowIdIn, int buttonIn) {
-      this.windowId = windowIdIn;
-      this.button = buttonIn;
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.windowId = var1.readByte();
+      this.button = var1.readByte();
    }
 
-   public void processPacket(INetHandlerPlayServer handler) {
-      handler.processEnchantItem(this);
-   }
-
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.windowId = buf.readByte();
-      this.button = buf.readByte();
-   }
-
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeByte(this.windowId);
-      buf.writeByte(this.button);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeByte(this.windowId);
+      var1.writeByte(this.button);
    }
 
    public int getWindowId() {

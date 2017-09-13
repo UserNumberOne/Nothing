@@ -18,7 +18,6 @@ import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.conditions.LootConditionManager;
 import net.minecraft.world.storage.loot.functions.LootFunction;
 import net.minecraft.world.storage.loot.functions.LootFunctionManager;
-import net.minecraftforge.common.ForgeHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,20 +27,20 @@ public class LootTableManager {
    private final LoadingCache registeredLootTables = CacheBuilder.newBuilder().build(new LootTableManager.Loader());
    private final File baseFolder;
 
-   public LootTableManager(File folder) {
-      this.baseFolder = folder;
+   public LootTableManager(File var1) {
+      this.baseFolder = var1;
       this.reloadLootTables();
    }
 
-   public LootTable getLootTableFromLocation(ResourceLocation ressources) {
-      return (LootTable)this.registeredLootTables.getUnchecked(ressources);
+   public LootTable getLootTableFromLocation(ResourceLocation var1) {
+      return (LootTable)this.registeredLootTables.getUnchecked(var1);
    }
 
    public void reloadLootTables() {
       this.registeredLootTables.invalidateAll();
 
-      for(ResourceLocation resourcelocation : LootTableList.getAll()) {
-         this.getLootTableFromLocation(resourcelocation);
+      for(ResourceLocation var2 : LootTableList.getAll()) {
+         this.getLootTableFromLocation(var2);
       }
 
    }
@@ -50,46 +49,46 @@ public class LootTableManager {
       private Loader() {
       }
 
-      public LootTable load(ResourceLocation p_load_1_) throws Exception {
-         if (p_load_1_.getResourcePath().contains(".")) {
-            LootTableManager.LOGGER.debug("Invalid loot table name '{}' (can't contain periods)", new Object[]{p_load_1_});
+      public LootTable load(ResourceLocation var1) throws Exception {
+         if (var1.getResourcePath().contains(".")) {
+            LootTableManager.LOGGER.debug("Invalid loot table name '{}' (can't contain periods)", new Object[]{var1});
             return LootTable.EMPTY_LOOT_TABLE;
          } else {
-            LootTable loottable = this.loadLootTable(p_load_1_);
-            if (loottable == null) {
-               loottable = this.loadBuiltinLootTable(p_load_1_);
+            LootTable var2 = this.loadLootTable(var1);
+            if (var2 == null) {
+               var2 = this.loadBuiltinLootTable(var1);
             }
 
-            if (loottable == null) {
-               loottable = LootTable.EMPTY_LOOT_TABLE;
-               LootTableManager.LOGGER.warn("Couldn't find resource table {}", new Object[]{p_load_1_});
+            if (var2 == null) {
+               var2 = LootTable.EMPTY_LOOT_TABLE;
+               LootTableManager.LOGGER.warn("Couldn't find resource table {}", new Object[]{var1});
             }
 
-            return loottable;
+            return var2;
          }
       }
 
       @Nullable
-      private LootTable loadLootTable(ResourceLocation resource) {
-         File file1 = new File(new File(LootTableManager.this.baseFolder, resource.getResourceDomain()), resource.getResourcePath() + ".json");
-         if (file1.exists()) {
-            if (file1.isFile()) {
-               String s;
+      private LootTable loadLootTable(ResourceLocation var1) {
+         File var2 = new File(new File(LootTableManager.this.baseFolder, var1.getResourceDomain()), var1.getResourcePath() + ".json");
+         if (var2.exists()) {
+            if (var2.isFile()) {
+               String var3;
                try {
-                  s = Files.toString(file1, Charsets.UTF_8);
+                  var3 = Files.toString(var2, Charsets.UTF_8);
                } catch (IOException var6) {
-                  LootTableManager.LOGGER.warn("Couldn't load loot table {} from {}", new Object[]{resource, file1, var6});
+                  LootTableManager.LOGGER.warn("Couldn't load loot table {} from {}", new Object[]{var1, var2, var6});
                   return LootTable.EMPTY_LOOT_TABLE;
                }
 
                try {
-                  return ForgeHooks.loadLootTable(LootTableManager.GSON_INSTANCE, resource, s, true);
+                  return (LootTable)LootTableManager.GSON_INSTANCE.fromJson(var3, LootTable.class);
                } catch (JsonParseException var5) {
-                  LootTableManager.LOGGER.error("Couldn't load loot table {} from {}", new Object[]{resource, file1, var5});
+                  LootTableManager.LOGGER.error("Couldn't load loot table {} from {}", new Object[]{var1, var2, var5});
                   return LootTable.EMPTY_LOOT_TABLE;
                }
             } else {
-               LootTableManager.LOGGER.warn("Expected to find loot table {} at {} but it was a folder.", new Object[]{resource, file1});
+               LootTableManager.LOGGER.warn("Expected to find loot table {} at {} but it was a folder.", new Object[]{var1, var2});
                return LootTable.EMPTY_LOOT_TABLE;
             }
          } else {
@@ -98,26 +97,31 @@ public class LootTableManager {
       }
 
       @Nullable
-      private LootTable loadBuiltinLootTable(ResourceLocation resource) {
-         URL url = LootTableManager.class.getResource("/assets/" + resource.getResourceDomain() + "/loot_tables/" + resource.getResourcePath() + ".json");
-         if (url != null) {
-            String s;
+      private LootTable loadBuiltinLootTable(ResourceLocation var1) {
+         URL var2 = LootTableManager.class.getResource("/assets/" + var1.getResourceDomain() + "/loot_tables/" + var1.getResourcePath() + ".json");
+         if (var2 != null) {
+            String var3;
             try {
-               s = Resources.toString(url, Charsets.UTF_8);
+               var3 = Resources.toString(var2, Charsets.UTF_8);
             } catch (IOException var6) {
-               LootTableManager.LOGGER.warn("Couldn't load loot table {} from {}", new Object[]{resource, url, var6});
+               LootTableManager.LOGGER.warn("Couldn't load loot table {} from {}", new Object[]{var1, var2, var6});
                return LootTable.EMPTY_LOOT_TABLE;
             }
 
             try {
-               return ForgeHooks.loadLootTable(LootTableManager.GSON_INSTANCE, resource, s, false);
+               return (LootTable)LootTableManager.GSON_INSTANCE.fromJson(var3, LootTable.class);
             } catch (JsonParseException var5) {
-               LootTableManager.LOGGER.error("Couldn't load loot table {} from {}", new Object[]{resource, url, var5});
+               LootTableManager.LOGGER.error("Couldn't load loot table {} from {}", new Object[]{var1, var2, var5});
                return LootTable.EMPTY_LOOT_TABLE;
             }
          } else {
             return null;
          }
+      }
+
+      // $FF: synthetic method
+      public Object load(Object var1) throws Exception {
+         return this.load((ResourceLocation)var1);
       }
    }
 }

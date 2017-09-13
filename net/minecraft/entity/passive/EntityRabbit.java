@@ -50,8 +50,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeDesert;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityRabbit extends EntityAnimal {
    private static final DataParameter RABBIT_TYPE = EntityDataManager.createKey(EntityRabbit.class, DataSerializers.VARINT);
@@ -61,11 +60,15 @@ public class EntityRabbit extends EntityAnimal {
    private int currentMoveTypeDuration;
    private int carrotTicks;
 
-   public EntityRabbit(World worldIn) {
-      super(worldIn);
+   public EntityRabbit(World world) {
+      super(world);
       this.setSize(0.4F, 0.5F);
       this.jumpHelper = new EntityRabbit.RabbitJumpHelper(this);
       this.moveHelper = new EntityRabbit.RabbitMoveHelper(this);
+      this.initializePathFinderGoals();
+   }
+
+   public void initializePathFinderGoals() {
       this.setMovementSpeed(0.0D);
    }
 
@@ -86,9 +89,9 @@ public class EntityRabbit extends EntityAnimal {
 
    protected float getJumpUpwardsMotion() {
       if (!this.isCollidedHorizontally && (!this.moveHelper.isUpdating() || this.moveHelper.getY() <= this.posY + 0.5D)) {
-         Path path = this.navigator.getPath();
-         if (path != null && path.getCurrentPathIndex() < path.getCurrentPathLength()) {
-            Vec3d vec3d = path.getPosition(this);
+         Path pathentity = this.navigator.getPath();
+         if (pathentity != null && pathentity.getCurrentPathIndex() < pathentity.getCurrentPathLength()) {
+            Vec3d vec3d = pathentity.getPosition(this);
             if (vec3d.yCoord > this.posY) {
                return 0.5F;
             }
@@ -116,19 +119,14 @@ public class EntityRabbit extends EntityAnimal {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public float setJumpCompletion(float p_175521_1_) {
-      return this.jumpDuration == 0 ? 0.0F : ((float)this.jumpTicks + p_175521_1_) / (float)this.jumpDuration;
+   public void setMovementSpeed(double d0) {
+      this.getNavigator().setSpeed(d0);
+      this.moveHelper.setMoveTo(this.moveHelper.getX(), this.moveHelper.getY(), this.moveHelper.getZ(), d0);
    }
 
-   public void setMovementSpeed(double newSpeed) {
-      this.getNavigator().setSpeed(newSpeed);
-      this.moveHelper.setMoveTo(this.moveHelper.getX(), this.moveHelper.getY(), this.moveHelper.getZ(), newSpeed);
-   }
-
-   public void setJumping(boolean jumping) {
-      super.setJumping(jumping);
-      if (jumping) {
+   public void setJumping(boolean flag) {
+      super.setJumping(flag);
+      if (flag) {
          this.playSound(this.getJumpSound(), this.getSoundVolume(), ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.8F);
       }
 
@@ -164,28 +162,28 @@ public class EntityRabbit extends EntityAnimal {
          }
 
          if (this.getRabbitType() == 99 && this.currentMoveTypeDuration == 0) {
-            EntityLivingBase entitylivingbase = this.getAttackTarget();
-            if (entitylivingbase != null && this.getDistanceSqToEntity(entitylivingbase) < 16.0D) {
-               this.calculateRotationYaw(entitylivingbase.posX, entitylivingbase.posZ);
-               this.moveHelper.setMoveTo(entitylivingbase.posX, entitylivingbase.posY, entitylivingbase.posZ, this.moveHelper.getSpeed());
+            EntityLivingBase entityliving = this.getAttackTarget();
+            if (entityliving != null && this.getDistanceSqToEntity(entityliving) < 16.0D) {
+               this.calculateRotationYaw(entityliving.posX, entityliving.posZ);
+               this.moveHelper.setMoveTo(entityliving.posX, entityliving.posY, entityliving.posZ, this.moveHelper.getSpeed());
                this.startJumping();
                this.wasOnGround = true;
             }
          }
 
-         EntityRabbit.RabbitJumpHelper entityrabbit$rabbitjumphelper = (EntityRabbit.RabbitJumpHelper)this.jumpHelper;
-         if (!entityrabbit$rabbitjumphelper.getIsJumping()) {
+         EntityRabbit.RabbitJumpHelper entityrabbit_controllerjumprabbit = (EntityRabbit.RabbitJumpHelper)this.jumpHelper;
+         if (!entityrabbit_controllerjumprabbit.getIsJumping()) {
             if (this.moveHelper.isUpdating() && this.currentMoveTypeDuration == 0) {
-               Path path = this.navigator.getPath();
+               Path pathentity = this.navigator.getPath();
                Vec3d vec3d = new Vec3d(this.moveHelper.getX(), this.moveHelper.getY(), this.moveHelper.getZ());
-               if (path != null && path.getCurrentPathIndex() < path.getCurrentPathLength()) {
-                  vec3d = path.getPosition(this);
+               if (pathentity != null && pathentity.getCurrentPathIndex() < pathentity.getCurrentPathLength()) {
+                  vec3d = pathentity.getPosition(this);
                }
 
                this.calculateRotationYaw(vec3d.xCoord, vec3d.zCoord);
                this.startJumping();
             }
-         } else if (!entityrabbit$rabbitjumphelper.canJump()) {
+         } else if (!entityrabbit_controllerjumprabbit.canJump()) {
             this.enableJumpControl();
          }
       }
@@ -196,8 +194,8 @@ public class EntityRabbit extends EntityAnimal {
    public void spawnRunningParticles() {
    }
 
-   private void calculateRotationYaw(double x, double z) {
-      this.rotationYaw = (float)(MathHelper.atan2(z - this.posZ, x - this.posX) * 57.29577951308232D) - 90.0F;
+   private void calculateRotationYaw(double d0, double d1) {
+      this.rotationYaw = (float)(MathHelper.atan2(d1 - this.posZ, d0 - this.posX) * 57.2957763671875D) - 90.0F;
    }
 
    private void enableJumpControl() {
@@ -240,20 +238,20 @@ public class EntityRabbit extends EntityAnimal {
       this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.30000001192092896D);
    }
 
-   public static void registerFixesRabbit(DataFixer fixer) {
-      EntityLiving.registerFixesMob(fixer, "Rabbit");
+   public static void registerFixesRabbit(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "Rabbit");
    }
 
-   public void writeEntityToNBT(NBTTagCompound compound) {
-      super.writeEntityToNBT(compound);
-      compound.setInteger("RabbitType", this.getRabbitType());
-      compound.setInteger("MoreCarrotTicks", this.carrotTicks);
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      nbttagcompound.setInteger("RabbitType", this.getRabbitType());
+      nbttagcompound.setInteger("MoreCarrotTicks", this.carrotTicks);
    }
 
-   public void readEntityFromNBT(NBTTagCompound compound) {
-      super.readEntityFromNBT(compound);
-      this.setRabbitType(compound.getInteger("RabbitType"));
-      this.carrotTicks = compound.getInteger("MoreCarrotTicks");
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      this.setRabbitType(nbttagcompound.getInteger("RabbitType"));
+      this.carrotTicks = nbttagcompound.getInteger("MoreCarrotTicks");
    }
 
    protected SoundEvent getJumpSound() {
@@ -272,12 +270,12 @@ public class EntityRabbit extends EntityAnimal {
       return SoundEvents.ENTITY_RABBIT_DEATH;
    }
 
-   public boolean attackEntityAsMob(Entity entityIn) {
+   public boolean attackEntityAsMob(Entity entity) {
       if (this.getRabbitType() == 99) {
          this.playSound(SoundEvents.ENTITY_RABBIT_ATTACK, 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
-         return entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), 8.0F);
+         return entity.attackEntityFrom(DamageSource.causeMobDamage(this), 8.0F);
       } else {
-         return entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), 3.0F);
+         return entity.attackEntityFrom(DamageSource.causeMobDamage(this), 3.0F);
       }
    }
 
@@ -285,8 +283,8 @@ public class EntityRabbit extends EntityAnimal {
       return this.getRabbitType() == 99 ? SoundCategory.HOSTILE : SoundCategory.NEUTRAL;
    }
 
-   public boolean attackEntityFrom(DamageSource source, float amount) {
-      return this.isEntityInvulnerable(source) ? false : super.attackEntityFrom(source, amount);
+   public boolean attackEntityFrom(DamageSource damagesource, float f) {
+      return this.isEntityInvulnerable(damagesource) ? false : super.attackEntityFrom(damagesource, f);
    }
 
    @Nullable
@@ -294,16 +292,16 @@ public class EntityRabbit extends EntityAnimal {
       return LootTableList.ENTITIES_RABBIT;
    }
 
-   private boolean isRabbitBreedingItem(Item itemIn) {
-      return itemIn == Items.CARROT || itemIn == Items.GOLDEN_CARROT || itemIn == Item.getItemFromBlock(Blocks.YELLOW_FLOWER);
+   private boolean isRabbitBreedingItem(Item item) {
+      return item == Items.CARROT || item == Items.GOLDEN_CARROT || item == Item.getItemFromBlock(Blocks.YELLOW_FLOWER);
    }
 
-   public EntityRabbit createChild(EntityAgeable ageable) {
+   public EntityRabbit createChild(EntityAgeable entityageable) {
       EntityRabbit entityrabbit = new EntityRabbit(this.world);
       int i = this.getRandomRabbitType();
       if (this.rand.nextInt(20) != 0) {
-         if (ageable instanceof EntityRabbit && this.rand.nextBoolean()) {
-            i = ((EntityRabbit)ageable).getRabbitType();
+         if (entityageable instanceof EntityRabbit && this.rand.nextBoolean()) {
+            i = ((EntityRabbit)entityageable).getRabbitType();
          } else {
             i = this.getRabbitType();
          }
@@ -313,16 +311,16 @@ public class EntityRabbit extends EntityAnimal {
       return entityrabbit;
    }
 
-   public boolean isBreedingItem(@Nullable ItemStack stack) {
-      return stack != null && this.isRabbitBreedingItem(stack.getItem());
+   public boolean isBreedingItem(@Nullable ItemStack itemstack) {
+      return itemstack != null && this.isRabbitBreedingItem(itemstack.getItem());
    }
 
    public int getRabbitType() {
       return ((Integer)this.dataManager.get(RABBIT_TYPE)).intValue();
    }
 
-   public void setRabbitType(int rabbitTypeId) {
-      if (rabbitTypeId == 99) {
+   public void setRabbitType(int i) {
+      if (i == 99) {
          this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(8.0D);
          this.tasks.addTask(4, new EntityRabbit.AIEvilAttack(this));
          this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
@@ -333,19 +331,19 @@ public class EntityRabbit extends EntityAnimal {
          }
       }
 
-      this.dataManager.set(RABBIT_TYPE, Integer.valueOf(rabbitTypeId));
+      this.dataManager.set(RABBIT_TYPE, Integer.valueOf(i));
    }
 
    @Nullable
-   public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
-      livingdata = super.onInitialSpawn(difficulty, livingdata);
+   public IEntityLivingData onInitialSpawn(DifficultyInstance difficultydamagescaler, @Nullable IEntityLivingData groupdataentity) {
+      Object object = super.onInitialSpawn(difficultydamagescaler, groupdataentity);
       int i = this.getRandomRabbitType();
       boolean flag = false;
-      if (livingdata instanceof EntityRabbit.RabbitTypeData) {
-         i = ((EntityRabbit.RabbitTypeData)livingdata).typeData;
+      if (object instanceof EntityRabbit.RabbitTypeData) {
+         i = ((EntityRabbit.RabbitTypeData)object).typeData;
          flag = true;
       } else {
-         livingdata = new EntityRabbit.RabbitTypeData(i);
+         object = new EntityRabbit.RabbitTypeData(i);
       }
 
       this.setRabbitType(i);
@@ -353,13 +351,13 @@ public class EntityRabbit extends EntityAnimal {
          this.setGrowingAge(-24000);
       }
 
-      return livingdata;
+      return (IEntityLivingData)object;
    }
 
    private int getRandomRabbitType() {
-      Biome biome = this.world.getBiome(new BlockPos(this));
+      Biome biomebase = this.world.getBiome(new BlockPos(this));
       int i = this.rand.nextInt(100);
-      return biome.isSnowyBiome() ? (i < 80 ? 1 : 3) : (biome instanceof BiomeDesert ? 4 : (i < 50 ? 0 : (i < 90 ? 5 : 2)));
+      return biomebase.isSnowyBiome() ? (i < 80 ? 1 : 3) : (biomebase instanceof BiomeDesert ? 4 : (i < 50 ? 0 : (i < 90 ? 5 : 2)));
    }
 
    private boolean isCarrotEaten() {
@@ -367,34 +365,26 @@ public class EntityRabbit extends EntityAnimal {
    }
 
    protected void createEatingParticles() {
-      BlockCarrot blockcarrot = (BlockCarrot)Blocks.CARROTS;
-      IBlockState iblockstate = blockcarrot.withAge(blockcarrot.getMaxAge());
-      this.world.spawnParticle(EnumParticleTypes.BLOCK_DUST, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, 0.0D, 0.0D, 0.0D, Block.getStateId(iblockstate));
+      BlockCarrot blockcarrots = (BlockCarrot)Blocks.CARROTS;
+      IBlockState iblockdata = blockcarrots.withAge(blockcarrots.getMaxAge());
+      this.world.spawnParticle(EnumParticleTypes.BLOCK_DUST, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, 0.0D, 0.0D, 0.0D, Block.getStateId(iblockdata));
       this.carrotTicks = 40;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte id) {
-      if (id == 1) {
-         this.createRunningParticles();
-         this.jumpDuration = 10;
-         this.jumpTicks = 0;
-      } else {
-         super.handleStatusUpdate(id);
-      }
-
+   public void notifyDataManagerChange(DataParameter datawatcherobject) {
+      super.notifyDataManagerChange(datawatcherobject);
    }
 
-   public void notifyDataManagerChange(DataParameter key) {
-      super.notifyDataManagerChange(key);
+   public EntityAgeable createChild(EntityAgeable entityageable) {
+      return this.createChild(entityageable);
    }
 
    static class AIAvoidEntity extends EntityAIAvoidEntity {
       private final EntityRabbit entityInstance;
 
-      public AIAvoidEntity(EntityRabbit rabbit, Class p_i46403_2_, float p_i46403_3_, double p_i46403_4_, double p_i46403_6_) {
-         super(rabbit, p_i46403_2_, p_i46403_3_, p_i46403_4_, p_i46403_6_);
-         this.entityInstance = rabbit;
+      public AIAvoidEntity(EntityRabbit entityrabbit, Class oclass, float f, double d0, double d1) {
+         super(entityrabbit, oclass, f, d0, d1);
+         this.entityInstance = entityrabbit;
       }
 
       public boolean shouldExecute() {
@@ -403,21 +393,21 @@ public class EntityRabbit extends EntityAnimal {
    }
 
    static class AIEvilAttack extends EntityAIAttackMelee {
-      public AIEvilAttack(EntityRabbit rabbit) {
-         super(rabbit, 1.4D, true);
+      public AIEvilAttack(EntityRabbit entityrabbit) {
+         super(entityrabbit, 1.4D, true);
       }
 
-      protected double getAttackReachSqr(EntityLivingBase attackTarget) {
-         return (double)(4.0F + attackTarget.width);
+      protected double getAttackReachSqr(EntityLivingBase entityliving) {
+         return (double)(4.0F + entityliving.width);
       }
    }
 
    static class AIPanic extends EntityAIPanic {
       private final EntityRabbit theEntity;
 
-      public AIPanic(EntityRabbit rabbit, double speedIn) {
-         super(rabbit, speedIn);
-         this.theEntity = rabbit;
+      public AIPanic(EntityRabbit entityrabbit, double d0) {
+         super(entityrabbit, d0);
+         this.theEntity = entityrabbit;
       }
 
       public void updateTask() {
@@ -431,9 +421,9 @@ public class EntityRabbit extends EntityAnimal {
       private boolean wantsToRaid;
       private boolean canRaid;
 
-      public AIRaidFarm(EntityRabbit rabbitIn) {
-         super(rabbitIn, 0.699999988079071D, 16);
-         this.rabbit = rabbitIn;
+      public AIRaidFarm(EntityRabbit entityrabbit) {
+         super(entityrabbit, 0.699999988079071D, 16);
+         this.rabbit = entityrabbit;
       }
 
       public boolean shouldExecute() {
@@ -467,17 +457,25 @@ public class EntityRabbit extends EntityAnimal {
          this.rabbit.getLookHelper().setLookPosition((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.rabbit.getVerticalFaceSpeed());
          if (this.getIsAboveDestination()) {
             World world = this.rabbit.world;
-            BlockPos blockpos = this.destinationBlock.up();
-            IBlockState iblockstate = world.getBlockState(blockpos);
-            Block block = iblockstate.getBlock();
+            BlockPos blockposition = this.destinationBlock.up();
+            IBlockState iblockdata = world.getBlockState(blockposition);
+            Block block = iblockdata.getBlock();
             if (this.canRaid && block instanceof BlockCarrot) {
-               Integer integer = (Integer)iblockstate.getValue(BlockCarrot.AGE);
+               Integer integer = (Integer)iblockdata.getValue(BlockCarrot.AGE);
                if (integer.intValue() == 0) {
-                  world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 2);
-                  world.destroyBlock(blockpos, true);
+                  if (CraftEventFactory.callEntityChangeBlockEvent(this.rabbit, blockposition, Blocks.AIR, 0).isCancelled()) {
+                     return;
+                  }
+
+                  world.setBlockState(blockposition, Blocks.AIR.getDefaultState(), 2);
+                  world.destroyBlock(blockposition, true);
                } else {
-                  world.setBlockState(blockpos, iblockstate.withProperty(BlockCarrot.AGE, Integer.valueOf(integer.intValue() - 1)), 2);
-                  world.playEvent(2001, blockpos, Block.getStateId(iblockstate));
+                  if (CraftEventFactory.callEntityChangeBlockEvent(this.rabbit, blockposition, block, block.getMetaFromState(iblockdata.withProperty(BlockCarrot.AGE, Integer.valueOf(integer.intValue() - 1)))).isCancelled()) {
+                     return;
+                  }
+
+                  world.setBlockState(blockposition, iblockdata.withProperty(BlockCarrot.AGE, Integer.valueOf(integer.intValue() - 1)), 2);
+                  world.playEvent(2001, blockposition, Block.getStateId(iblockdata));
                }
 
                this.rabbit.createEatingParticles();
@@ -489,13 +487,13 @@ public class EntityRabbit extends EntityAnimal {
 
       }
 
-      protected boolean shouldMoveTo(World worldIn, BlockPos pos) {
-         Block block = worldIn.getBlockState(pos).getBlock();
+      protected boolean shouldMoveTo(World world, BlockPos blockposition) {
+         Block block = world.getBlockState(blockposition).getBlock();
          if (block == Blocks.FARMLAND && this.wantsToRaid && !this.canRaid) {
-            pos = pos.up();
-            IBlockState iblockstate = worldIn.getBlockState(pos);
-            block = iblockstate.getBlock();
-            if (block instanceof BlockCarrot && ((BlockCarrot)block).isMaxAge(iblockstate)) {
+            blockposition = blockposition.up();
+            IBlockState iblockdata = world.getBlockState(blockposition);
+            block = iblockdata.getBlock();
+            if (block instanceof BlockCarrot && ((BlockCarrot)block).isMaxAge(iblockdata)) {
                this.canRaid = true;
                return true;
             }
@@ -509,9 +507,9 @@ public class EntityRabbit extends EntityAnimal {
       private final EntityRabbit theEntity;
       private boolean canJump;
 
-      public RabbitJumpHelper(EntityRabbit rabbit) {
-         super(rabbit);
-         this.theEntity = rabbit;
+      public RabbitJumpHelper(EntityRabbit entityrabbit) {
+         super(entityrabbit);
+         this.theEntity = entityrabbit;
       }
 
       public boolean getIsJumping() {
@@ -522,8 +520,8 @@ public class EntityRabbit extends EntityAnimal {
          return this.canJump;
       }
 
-      public void setCanJump(boolean canJumpIn) {
-         this.canJump = canJumpIn;
+      public void setCanJump(boolean flag) {
+         this.canJump = flag;
       }
 
       public void doJump() {
@@ -539,9 +537,9 @@ public class EntityRabbit extends EntityAnimal {
       private final EntityRabbit theEntity;
       private double nextJumpSpeed;
 
-      public RabbitMoveHelper(EntityRabbit rabbit) {
-         super(rabbit);
-         this.theEntity = rabbit;
+      public RabbitMoveHelper(EntityRabbit entityrabbit) {
+         super(entityrabbit);
+         this.theEntity = entityrabbit;
       }
 
       public void onUpdateMoveHelper() {
@@ -554,14 +552,14 @@ public class EntityRabbit extends EntityAnimal {
          super.onUpdateMoveHelper();
       }
 
-      public void setMoveTo(double x, double y, double z, double speedIn) {
+      public void setMoveTo(double d0, double d1, double d2, double d3) {
          if (this.theEntity.isInWater()) {
-            speedIn = 1.5D;
+            d3 = 1.5D;
          }
 
-         super.setMoveTo(x, y, z, speedIn);
-         if (speedIn > 0.0D) {
-            this.nextJumpSpeed = speedIn;
+         super.setMoveTo(d0, d1, d2, d3);
+         if (d3 > 0.0D) {
+            this.nextJumpSpeed = d3;
          }
 
       }
@@ -570,8 +568,8 @@ public class EntityRabbit extends EntityAnimal {
    public static class RabbitTypeData implements IEntityLivingData {
       public int typeData;
 
-      public RabbitTypeData(int type) {
-         this.typeData = type;
+      public RabbitTypeData(int i) {
+         this.typeData = i;
       }
    }
 }

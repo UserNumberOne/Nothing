@@ -5,16 +5,16 @@ public class NibbleArrayReader {
    private final int depthBits;
    private final int depthBitsPlusFour;
 
-   public NibbleArrayReader(byte[] dataIn, int depthBitsIn) {
-      this.data = dataIn;
-      this.depthBits = depthBitsIn;
-      this.depthBitsPlusFour = depthBitsIn + 4;
+   public NibbleArrayReader(byte[] var1, int var2) {
+      this.data = var1;
+      this.depthBits = var2;
+      this.depthBitsPlusFour = var2 + 4;
    }
 
-   public int get(int x, int y, int z) {
-      int i = x << this.depthBitsPlusFour | z << this.depthBits | y;
-      int j = i >> 1;
-      int k = i & 1;
-      return k == 0 ? this.data[j] & 15 : this.data[j] >> 4 & 15;
+   public int get(int var1, int var2, int var3) {
+      int var4 = var1 << this.depthBitsPlusFour | var3 << this.depthBits | var2;
+      int var5 = var4 >> 1;
+      int var6 = var4 & 1;
+      return var6 == 0 ? this.data[var5] & 15 : this.data[var5] >> 4 & 15;
    }
 }

@@ -14,9 +14,9 @@ public interface LootCondition {
       private final ResourceLocation lootTableLocation;
       private final Class conditionClass;
 
-      protected Serializer(ResourceLocation location, Class clazz) {
-         this.lootTableLocation = location;
-         this.conditionClass = clazz;
+      protected Serializer(ResourceLocation var1, Class var2) {
+         this.lootTableLocation = var1;
+         this.conditionClass = var2;
       }
 
       public ResourceLocation getLootTableLocation() {

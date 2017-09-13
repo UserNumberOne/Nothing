@@ -6,8 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityMetadata implements Packet {
    private int entityId;
@@ -16,37 +14,27 @@ public class SPacketEntityMetadata implements Packet {
    public SPacketEntityMetadata() {
    }
 
-   public SPacketEntityMetadata(int entityIdIn, EntityDataManager dataManagerIn, boolean sendAll) {
-      this.entityId = entityIdIn;
-      if (sendAll) {
-         this.dataManagerEntries = dataManagerIn.getAll();
+   public SPacketEntityMetadata(int var1, EntityDataManager var2, boolean var3) {
+      this.entityId = var1;
+      if (var3) {
+         this.dataManagerEntries = var2.getAll();
       } else {
-         this.dataManagerEntries = dataManagerIn.getDirty();
+         this.dataManagerEntries = var2.getDirty();
       }
 
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.entityId = buf.readVarInt();
-      this.dataManagerEntries = EntityDataManager.readEntries(buf);
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.entityId = var1.readVarInt();
+      this.dataManagerEntries = EntityDataManager.readEntries(var1);
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeVarInt(this.entityId);
-      EntityDataManager.writeEntries(this.dataManagerEntries, buf);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeVarInt(this.entityId);
+      EntityDataManager.writeEntries(this.dataManagerEntries, var1);
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleEntityMetadata(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getDataManagerEntries() {
-      return this.dataManagerEntries;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleEntityMetadata(this);
    }
 }

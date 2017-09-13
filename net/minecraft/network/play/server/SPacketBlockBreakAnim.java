@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketBlockBreakAnim implements Packet {
    private int breakerId;
@@ -16,40 +14,25 @@ public class SPacketBlockBreakAnim implements Packet {
    public SPacketBlockBreakAnim() {
    }
 
-   public SPacketBlockBreakAnim(int breakerIdIn, BlockPos positionIn, int progressIn) {
-      this.breakerId = breakerIdIn;
-      this.position = positionIn;
-      this.progress = progressIn;
+   public SPacketBlockBreakAnim(int var1, BlockPos var2, int var3) {
+      this.breakerId = var1;
+      this.position = var2;
+      this.progress = var3;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.breakerId = buf.readVarInt();
-      this.position = buf.readBlockPos();
-      this.progress = buf.readUnsignedByte();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.breakerId = var1.readVarInt();
+      this.position = var1.readBlockPos();
+      this.progress = var1.readUnsignedByte();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeVarInt(this.breakerId);
-      buf.writeBlockPos(this.position);
-      buf.writeByte(this.progress);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeVarInt(this.breakerId);
+      var1.writeBlockPos(this.position);
+      var1.writeByte(this.progress);
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleBlockBreakAnim(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getBreakerId() {
-      return this.breakerId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockPos getPosition() {
-      return this.position;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getProgress() {
-      return this.progress;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleBlockBreakAnim(this);
    }
 }

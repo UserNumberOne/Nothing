@@ -10,9 +10,9 @@ public class EntityAIRestrictOpenDoor extends EntityAIBase {
    private final EntityCreature entityObj;
    private VillageDoorInfo frontDoor;
 
-   public EntityAIRestrictOpenDoor(EntityCreature creatureIn) {
-      this.entityObj = creatureIn;
-      if (!(creatureIn.getNavigator() instanceof PathNavigateGround)) {
+   public EntityAIRestrictOpenDoor(EntityCreature var1) {
+      this.entityObj = var1;
+      if (!(var1.getNavigator() instanceof PathNavigateGround)) {
          throw new IllegalArgumentException("Unsupported mob type for RestrictOpenDoorGoal");
       }
    }
@@ -21,19 +21,27 @@ public class EntityAIRestrictOpenDoor extends EntityAIBase {
       if (this.entityObj.world.isDaytime()) {
          return false;
       } else {
-         BlockPos blockpos = new BlockPos(this.entityObj);
-         Village village = this.entityObj.world.getVillageCollection().getNearestVillage(blockpos, 16);
-         if (village == null) {
+         BlockPos var1 = new BlockPos(this.entityObj);
+         Village var2 = this.entityObj.world.getVillageCollection().getNearestVillage(var1, 16);
+         if (var2 == null) {
             return false;
          } else {
-            this.frontDoor = village.getNearestDoor(blockpos);
-            return this.frontDoor == null ? false : (double)this.frontDoor.getDistanceToInsideBlockSq(blockpos) < 2.25D;
+            this.frontDoor = var2.getNearestDoor(var1);
+            if (this.frontDoor == null) {
+               return false;
+            } else {
+               return (double)this.frontDoor.getDistanceToInsideBlockSq(var1) < 2.25D;
+            }
          }
       }
    }
 
    public boolean continueExecuting() {
-      return this.entityObj.world.isDaytime() ? false : !this.frontDoor.getIsDetachedFromVillageFlag() && this.frontDoor.isInsideSide(new BlockPos(this.entityObj));
+      if (this.entityObj.world.isDaytime()) {
+         return false;
+      } else {
+         return !this.frontDoor.getIsDetachedFromVillageFlag() && this.frontDoor.isInsideSide(new BlockPos(this.entityObj));
+      }
    }
 
    public void startExecuting() {

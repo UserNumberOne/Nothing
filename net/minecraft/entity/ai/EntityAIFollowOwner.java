@@ -23,31 +23,31 @@ public class EntityAIFollowOwner extends EntityAIBase {
    float minDist;
    private float oldWaterCost;
 
-   public EntityAIFollowOwner(EntityTameable thePetIn, double followSpeedIn, float minDistIn, float maxDistIn) {
-      this.thePet = thePetIn;
-      this.world = thePetIn.world;
-      this.followSpeed = followSpeedIn;
-      this.petPathfinder = thePetIn.getNavigator();
-      this.minDist = minDistIn;
-      this.maxDist = maxDistIn;
+   public EntityAIFollowOwner(EntityTameable var1, double var2, float var4, float var5) {
+      this.thePet = var1;
+      this.world = var1.world;
+      this.followSpeed = var2;
+      this.petPathfinder = var1.getNavigator();
+      this.minDist = var4;
+      this.maxDist = var5;
       this.setMutexBits(3);
-      if (!(thePetIn.getNavigator() instanceof PathNavigateGround)) {
+      if (!(var1.getNavigator() instanceof PathNavigateGround)) {
          throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
       }
    }
 
    public boolean shouldExecute() {
-      EntityLivingBase entitylivingbase = this.thePet.getOwner();
-      if (entitylivingbase == null) {
+      EntityLivingBase var1 = this.thePet.getOwner();
+      if (var1 == null) {
          return false;
-      } else if (entitylivingbase instanceof EntityPlayer && ((EntityPlayer)entitylivingbase).isSpectator()) {
+      } else if (var1 instanceof EntityPlayer && ((EntityPlayer)var1).isSpectator()) {
          return false;
       } else if (this.thePet.isSitting()) {
          return false;
-      } else if (this.thePet.getDistanceSqToEntity(entitylivingbase) < (double)(this.minDist * this.minDist)) {
+      } else if (this.thePet.getDistanceSqToEntity(var1) < (double)(this.minDist * this.minDist)) {
          return false;
       } else {
-         this.theOwner = entitylivingbase;
+         this.theOwner = var1;
          return true;
       }
    }
@@ -68,31 +68,41 @@ public class EntityAIFollowOwner extends EntityAIBase {
       this.thePet.setPathPriority(PathNodeType.WATER, this.oldWaterCost);
    }
 
-   private boolean isEmptyBlock(BlockPos pos) {
-      IBlockState iblockstate = this.world.getBlockState(pos);
-      return iblockstate.getMaterial() == Material.AIR ? true : !iblockstate.isFullCube();
+   private boolean isEmptyBlock(BlockPos var1) {
+      IBlockState var2 = this.world.getBlockState(var1);
+      if (var2.getMaterial() == Material.AIR) {
+         return true;
+      } else {
+         return !var2.isFullCube();
+      }
    }
 
    public void updateTask() {
       this.thePet.getLookHelper().setLookPositionWithEntity(this.theOwner, 10.0F, (float)this.thePet.getVerticalFaceSpeed());
-      if (!this.thePet.isSitting() && --this.timeToRecalcPath <= 0) {
-         this.timeToRecalcPath = 10;
-         if (!this.petPathfinder.tryMoveToEntityLiving(this.theOwner, this.followSpeed) && !this.thePet.getLeashed() && this.thePet.getDistanceSqToEntity(this.theOwner) >= 144.0D) {
-            int i = MathHelper.floor(this.theOwner.posX) - 2;
-            int j = MathHelper.floor(this.theOwner.posZ) - 2;
-            int k = MathHelper.floor(this.theOwner.getEntityBoundingBox().minY);
+      if (!this.thePet.isSitting()) {
+         if (--this.timeToRecalcPath <= 0) {
+            this.timeToRecalcPath = 10;
+            if (!this.petPathfinder.tryMoveToEntityLiving(this.theOwner, this.followSpeed)) {
+               if (!this.thePet.getLeashed()) {
+                  if (this.thePet.getDistanceSqToEntity(this.theOwner) >= 144.0D) {
+                     int var1 = MathHelper.floor(this.theOwner.posX) - 2;
+                     int var2 = MathHelper.floor(this.theOwner.posZ) - 2;
+                     int var3 = MathHelper.floor(this.theOwner.getEntityBoundingBox().minY);
 
-            for(int l = 0; l <= 4; ++l) {
-               for(int i1 = 0; i1 <= 4; ++i1) {
-                  if ((l < 1 || i1 < 1 || l > 3 || i1 > 3) && this.world.getBlockState(new BlockPos(i + l, k - 1, j + i1)).isFullyOpaque() && this.isEmptyBlock(new BlockPos(i + l, k, j + i1)) && this.isEmptyBlock(new BlockPos(i + l, k + 1, j + i1))) {
-                     this.thePet.setLocationAndAngles((double)((float)(i + l) + 0.5F), (double)k, (double)((float)(j + i1) + 0.5F), this.thePet.rotationYaw, this.thePet.rotationPitch);
-                     this.petPathfinder.clearPathEntity();
-                     return;
+                     for(int var4 = 0; var4 <= 4; ++var4) {
+                        for(int var5 = 0; var5 <= 4; ++var5) {
+                           if ((var4 < 1 || var5 < 1 || var4 > 3 || var5 > 3) && this.world.getBlockState(new BlockPos(var1 + var4, var3 - 1, var2 + var5)).isFullyOpaque() && this.isEmptyBlock(new BlockPos(var1 + var4, var3, var2 + var5)) && this.isEmptyBlock(new BlockPos(var1 + var4, var3 + 1, var2 + var5))) {
+                              this.thePet.setLocationAndAngles((double)((float)(var1 + var4) + 0.5F), (double)var3, (double)((float)(var2 + var5) + 0.5F), this.thePet.rotationYaw, this.thePet.rotationPitch);
+                              this.petPathfinder.clearPathEntity();
+                              return;
+                           }
+                        }
+                     }
+
                   }
                }
             }
          }
       }
-
    }
 }

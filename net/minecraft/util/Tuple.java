@@ -4,9 +4,9 @@ public class Tuple {
    private Object a;
    private Object b;
 
-   public Tuple(Object aIn, Object bIn) {
-      this.a = aIn;
-      this.b = bIn;
+   public Tuple(Object var1, Object var2) {
+      this.a = var1;
+      this.b = var2;
    }
 
    public Object getFirst() {

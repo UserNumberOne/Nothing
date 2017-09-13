@@ -5,11 +5,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockSlime extends BlockBreakable {
    public BlockSlime() {
@@ -18,39 +15,34 @@ public class BlockSlime extends BlockBreakable {
       this.slipperiness = 0.8F;
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.TRANSLUCENT;
-   }
-
-   public void onFallenUpon(World worldIn, BlockPos pos, Entity entityIn, float fallDistance) {
-      if (entityIn.isSneaking()) {
-         super.onFallenUpon(worldIn, pos, entityIn, fallDistance);
+   public void onFallenUpon(World var1, BlockPos var2, Entity var3, float var4) {
+      if (var3.isSneaking()) {
+         super.onFallenUpon(var1, var2, var3, var4);
       } else {
-         entityIn.fall(fallDistance, 0.0F);
+         var3.fall(var4, 0.0F);
       }
 
    }
 
-   public void onLanded(World worldIn, Entity entityIn) {
-      if (entityIn.isSneaking()) {
-         super.onLanded(worldIn, entityIn);
-      } else if (entityIn.motionY < 0.0D) {
-         entityIn.motionY = -entityIn.motionY;
-         if (!(entityIn instanceof EntityLivingBase)) {
-            entityIn.motionY *= 0.8D;
+   public void onLanded(World var1, Entity var2) {
+      if (var2.isSneaking()) {
+         super.onLanded(var1, var2);
+      } else if (var2.motionY < 0.0D) {
+         var2.motionY = -var2.motionY;
+         if (!(var2 instanceof EntityLivingBase)) {
+            var2.motionY *= 0.8D;
          }
       }
 
    }
 
-   public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn) {
-      if (Math.abs(entityIn.motionY) < 0.1D && !entityIn.isSneaking()) {
-         double d0 = 0.4D + Math.abs(entityIn.motionY) * 0.2D;
-         entityIn.motionX *= d0;
-         entityIn.motionZ *= d0;
+   public void onEntityWalk(World var1, BlockPos var2, Entity var3) {
+      if (Math.abs(var3.motionY) < 0.1D && !var3.isSneaking()) {
+         double var4 = 0.4D + Math.abs(var3.motionY) * 0.2D;
+         var3.motionX *= var4;
+         var3.motionZ *= var4;
       }
 
-      super.onEntityWalk(worldIn, pos, entityIn);
+      super.onEntityWalk(var1, var2, var3);
    }
 }

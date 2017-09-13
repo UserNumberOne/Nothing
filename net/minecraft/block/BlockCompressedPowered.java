@@ -8,15 +8,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 public class BlockCompressedPowered extends Block {
-   public BlockCompressedPowered(Material materialIn, MapColor color) {
-      super(materialIn, color);
+   public BlockCompressedPowered(Material var1, MapColor var2) {
+      super(var1, var2);
    }
 
-   public boolean canProvidePower(IBlockState state) {
+   public boolean canProvidePower(IBlockState var1) {
       return true;
    }
 
-   public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+   public int getWeakPower(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
       return 15;
    }
 }

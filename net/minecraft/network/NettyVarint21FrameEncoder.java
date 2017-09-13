@@ -7,16 +7,21 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 @Sharable
 public class NettyVarint21FrameEncoder extends MessageToByteEncoder {
-   protected void encode(ChannelHandlerContext p_encode_1_, ByteBuf p_encode_2_, ByteBuf p_encode_3_) throws Exception {
-      int i = p_encode_2_.readableBytes();
-      int j = PacketBuffer.getVarIntSize(i);
-      if (j > 3) {
-         throw new IllegalArgumentException("unable to fit " + i + " into " + 3);
+   protected void encode(ChannelHandlerContext var1, ByteBuf var2, ByteBuf var3) throws Exception {
+      int var4 = var2.readableBytes();
+      int var5 = PacketBuffer.getVarIntSize(var4);
+      if (var5 > 3) {
+         throw new IllegalArgumentException("unable to fit " + var4 + " into " + 3);
       } else {
-         PacketBuffer packetbuffer = new PacketBuffer(p_encode_3_);
-         packetbuffer.ensureWritable(j + i);
-         packetbuffer.writeVarInt(i);
-         packetbuffer.writeBytes(p_encode_2_, p_encode_2_.readerIndex(), i);
+         PacketBuffer var6 = new PacketBuffer(var3);
+         var6.ensureWritable(var5 + var4);
+         var6.writeVarInt(var4);
+         var6.writeBytes(var2, var2.readerIndex(), var4);
       }
+   }
+
+   // $FF: synthetic method
+   protected void encode(ChannelHandlerContext var1, Object var2, ByteBuf var3) throws Exception {
+      this.encode(var1, (ByteBuf)var2, var3);
    }
 }

@@ -8,60 +8,60 @@ public enum Mirror {
    private final String name;
    private static final String[] mirrorNames = new String[values().length];
 
-   private Mirror(String nameIn) {
-      this.name = nameIn;
+   private Mirror(String var3) {
+      this.name = var3;
    }
 
-   public int mirrorRotation(int rotationIn, int rotationCount) {
-      int i = rotationCount / 2;
-      int j = rotationIn > i ? rotationIn - rotationCount : rotationIn;
+   public int mirrorRotation(int var1, int var2) {
+      int var3 = var2 / 2;
+      int var4 = var1 > var3 ? var1 - var2 : var1;
       switch(this) {
       case FRONT_BACK:
-         return (rotationCount - j) % rotationCount;
+         return (var2 - var4) % var2;
       case LEFT_RIGHT:
-         return (i - j + rotationCount) % rotationCount;
+         return (var3 - var4 + var2) % var2;
       default:
-         return rotationIn;
+         return var1;
       }
    }
 
-   public Rotation toRotation(EnumFacing facing) {
-      EnumFacing.Axis enumfacing$axis = facing.getAxis();
-      return this == LEFT_RIGHT && enumfacing$axis == EnumFacing.Axis.Z || this == FRONT_BACK && enumfacing$axis == EnumFacing.Axis.X ? Rotation.CLOCKWISE_180 : Rotation.NONE;
+   public Rotation toRotation(EnumFacing var1) {
+      EnumFacing.Axis var2 = var1.getAxis();
+      return (this != LEFT_RIGHT || var2 != EnumFacing.Axis.Z) && (this != FRONT_BACK || var2 != EnumFacing.Axis.X) ? Rotation.NONE : Rotation.CLOCKWISE_180;
    }
 
-   public EnumFacing mirror(EnumFacing facing) {
+   public EnumFacing mirror(EnumFacing var1) {
       switch(this) {
       case FRONT_BACK:
-         if (facing == EnumFacing.WEST) {
+         if (var1 == EnumFacing.WEST) {
             return EnumFacing.EAST;
          } else {
-            if (facing == EnumFacing.EAST) {
+            if (var1 == EnumFacing.EAST) {
                return EnumFacing.WEST;
             }
 
-            return facing;
+            return var1;
          }
       case LEFT_RIGHT:
-         if (facing == EnumFacing.NORTH) {
+         if (var1 == EnumFacing.NORTH) {
             return EnumFacing.SOUTH;
          } else {
-            if (facing == EnumFacing.SOUTH) {
+            if (var1 == EnumFacing.SOUTH) {
                return EnumFacing.NORTH;
             }
 
-            return facing;
+            return var1;
          }
       default:
-         return facing;
+         return var1;
       }
    }
 
    static {
-      int i = 0;
+      int var0 = 0;
 
-      for(Mirror mirror : values()) {
-         mirrorNames[i++] = mirror.name;
+      for(Mirror var4 : values()) {
+         mirrorNames[var0++] = var4.name;
       }
 
    }

@@ -33,22 +33,22 @@ public interface IScoreCriteria {
       private static final Map BY_NAME = Maps.newHashMap();
       private final String renderType;
 
-      private EnumRenderType(String renderTypeIn) {
-         this.renderType = renderTypeIn;
+      private EnumRenderType(String var3) {
+         this.renderType = var3;
       }
 
       public String getRenderType() {
          return this.renderType;
       }
 
-      public static IScoreCriteria.EnumRenderType getByName(String name) {
-         IScoreCriteria.EnumRenderType iscorecriteria$enumrendertype = (IScoreCriteria.EnumRenderType)BY_NAME.get(name);
-         return iscorecriteria$enumrendertype == null ? INTEGER : iscorecriteria$enumrendertype;
+      public static IScoreCriteria.EnumRenderType getByName(String var0) {
+         IScoreCriteria.EnumRenderType var1 = (IScoreCriteria.EnumRenderType)BY_NAME.get(var0);
+         return var1 == null ? INTEGER : var1;
       }
 
       static {
-         for(IScoreCriteria.EnumRenderType iscorecriteria$enumrendertype : values()) {
-            BY_NAME.put(iscorecriteria$enumrendertype.getRenderType(), iscorecriteria$enumrendertype);
+         for(IScoreCriteria.EnumRenderType var3 : values()) {
+            BY_NAME.put(var3.getRenderType(), var3);
          }
 
       }

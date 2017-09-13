@@ -8,11 +8,11 @@ import net.minecraft.util.EnumFacing;
 public abstract class BlockHorizontal extends Block {
    public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
 
-   protected BlockHorizontal(Material materialIn) {
-      super(materialIn);
+   protected BlockHorizontal(Material var1) {
+      super(var1);
    }
 
-   protected BlockHorizontal(Material materialIn, MapColor colorIn) {
-      super(materialIn, colorIn);
+   protected BlockHorizontal(Material var1, MapColor var2) {
+      super(var1, var2);
    }
 }

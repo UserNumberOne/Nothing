@@ -1,7 +1,5 @@
 package net.minecraft.block;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.EnumPushReaction;
@@ -15,13 +13,10 @@ import net.minecraft.init.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockIce extends BlockBreakable {
    public BlockIce() {
@@ -31,39 +26,25 @@ public class BlockIce extends BlockBreakable {
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.TRANSLUCENT;
-   }
-
-   public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) {
-      player.addStat(StatList.getBlockStats(this));
-      player.addExhaustion(0.025F);
-      if (this.canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
-         List items = new ArrayList();
-         ItemStack itemstack = this.getSilkTouchDrop(state);
-         if (itemstack != null) {
-            items.add(itemstack);
-         }
-
-         ForgeEventFactory.fireBlockHarvesting(items, worldIn, pos, state, 0, 1.0F, true, player);
-
-         for(ItemStack is : items) {
-            spawnAsEntity(worldIn, pos, is);
+   public void harvestBlock(World world, EntityPlayer entityhuman, BlockPos blockposition, IBlockState iblockdata, @Nullable TileEntity tileentity, @Nullable ItemStack itemstack) {
+      entityhuman.addStat(StatList.getBlockStats(this));
+      entityhuman.addExhaustion(0.025F);
+      if (this.canSilkHarvest() && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, itemstack) > 0) {
+         ItemStack itemstack1 = this.getSilkTouchDrop(iblockdata);
+         if (itemstack1 != null) {
+            spawnAsEntity(world, blockposition, itemstack1);
          }
       } else {
-         if (worldIn.provider.doesWaterVaporize()) {
-            worldIn.setBlockToAir(pos);
+         if (world.provider.doesWaterVaporize()) {
+            world.setBlockToAir(blockposition);
             return;
          }
 
-         int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
-         this.harvesters.set(player);
-         this.dropBlockAsItem(worldIn, pos, state, i);
-         this.harvesters.set((Object)null);
-         Material material = worldIn.getBlockState(pos.down()).getMaterial();
+         int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, itemstack);
+         this.dropBlockAsItem(world, blockposition, iblockdata, i);
+         Material material = world.getBlockState(blockposition.down()).getMaterial();
          if (material.blocksMovement() || material.isLiquid()) {
-            worldIn.setBlockState(pos, Blocks.FLOWING_WATER.getDefaultState());
+            world.setBlockState(blockposition, Blocks.FLOWING_WATER.getDefaultState());
          }
       }
 
@@ -73,25 +54,27 @@ public class BlockIce extends BlockBreakable {
       return 0;
    }
 
-   public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-      if (worldIn.getLightFor(EnumSkyBlock.BLOCK, pos) > 11 - this.getDefaultState().getLightOpacity()) {
-         this.turnIntoWater(worldIn, pos);
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      if (world.getLightFor(EnumSkyBlock.BLOCK, blockposition) > 11 - this.getDefaultState().getLightOpacity()) {
+         this.turnIntoWater(world, blockposition);
       }
 
    }
 
-   protected void turnIntoWater(World worldIn, BlockPos pos) {
-      if (worldIn.provider.doesWaterVaporize()) {
-         worldIn.setBlockToAir(pos);
-      } else {
-         this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
-         worldIn.setBlockState(pos, Blocks.WATER.getDefaultState());
-         worldIn.notifyBlockOfStateChange(pos, Blocks.WATER);
-      }
+   protected void turnIntoWater(World world, BlockPos blockposition) {
+      if (!CraftEventFactory.callBlockFadeEvent(world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), (Block)(world.provider.doesWaterVaporize() ? Blocks.AIR : Blocks.WATER)).isCancelled()) {
+         if (world.provider.doesWaterVaporize()) {
+            world.setBlockToAir(blockposition);
+         } else {
+            this.dropBlockAsItem(world, blockposition, world.getBlockState(blockposition), 0);
+            world.setBlockState(blockposition, Blocks.WATER.getDefaultState());
+            world.notifyBlockOfStateChange(blockposition, Blocks.WATER);
+         }
 
+      }
    }
 
-   public EnumPushReaction getMobilityFlag(IBlockState state) {
+   public EnumPushReaction getMobilityFlag(IBlockState iblockdata) {
       return EnumPushReaction.NORMAL;
    }
 }

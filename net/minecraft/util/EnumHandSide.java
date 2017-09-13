@@ -2,8 +2,6 @@ package net.minecraft.util;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public enum EnumHandSide {
    LEFT(new TextComponentTranslation("options.mainHand.left", new Object[0])),
@@ -11,13 +9,8 @@ public enum EnumHandSide {
 
    private final ITextComponent handName;
 
-   private EnumHandSide(ITextComponent nameIn) {
-      this.handName = nameIn;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EnumHandSide opposite() {
-      return this == LEFT ? RIGHT : LEFT;
+   private EnumHandSide(ITextComponent var3) {
+      this.handName = var3;
    }
 
    public String toString() {

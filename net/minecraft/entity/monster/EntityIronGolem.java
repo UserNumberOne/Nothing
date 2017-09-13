@@ -36,8 +36,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityIronGolem extends EntityGolem {
    protected static final DataParameter PLAYER_CREATED = EntityDataManager.createKey(EntityIronGolem.class, DataSerializers.BYTE);
@@ -46,8 +45,8 @@ public class EntityIronGolem extends EntityGolem {
    private int attackTimer;
    private int holdRoseTick;
 
-   public EntityIronGolem(World worldIn) {
-      super(worldIn);
+   public EntityIronGolem(World world) {
+      super(world);
       this.setSize(1.4F, 2.7F);
    }
 
@@ -63,8 +62,12 @@ public class EntityIronGolem extends EntityGolem {
       this.targetTasks.addTask(1, new EntityAIDefendVillage(this));
       this.targetTasks.addTask(2, new EntityAIHurtByTarget(this, false, new Class[0]));
       this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 10, false, true, new Predicate() {
-         public boolean apply(@Nullable EntityLiving p_apply_1_) {
-            return p_apply_1_ != null && IMob.VISIBLE_MOB_SELECTOR.apply(p_apply_1_) && !(p_apply_1_ instanceof EntityCreeper);
+         public boolean apply(@Nullable EntityLiving entityinsentient) {
+            return entityinsentient != null && IMob.VISIBLE_MOB_SELECTOR.apply(entityinsentient) && !(entityinsentient instanceof EntityCreeper);
+         }
+
+         public boolean apply(Object object) {
+            return this.apply((EntityLiving)object);
          }
       }));
    }
@@ -81,8 +84,8 @@ public class EntityIronGolem extends EntityGolem {
          if (this.villageObj == null) {
             this.detachHome();
          } else {
-            BlockPos blockpos = this.villageObj.getCenter();
-            this.setHomePosAndDistance(blockpos, (int)((float)this.villageObj.getVillageRadius() * 0.6F));
+            BlockPos blockposition = this.villageObj.getCenter();
+            this.setHomePosAndDistance(blockposition, (int)((float)this.villageObj.getVillageRadius() * 0.6F));
          }
       }
 
@@ -96,16 +99,16 @@ public class EntityIronGolem extends EntityGolem {
       this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0D);
    }
 
-   protected int decreaseAirSupply(int air) {
-      return air;
+   protected int decreaseAirSupply(int i) {
+      return i;
    }
 
-   protected void collideWithEntity(Entity entityIn) {
-      if (entityIn instanceof IMob && !(entityIn instanceof EntityCreeper) && this.getRNG().nextInt(20) == 0) {
-         this.setAttackTarget((EntityLivingBase)entityIn);
+   protected void collideWithEntity(Entity entity) {
+      if (entity instanceof IMob && !(entity instanceof EntityCreeper) && this.getRNG().nextInt(20) == 0) {
+         this.setGoalTarget((EntityLivingBase)entity, TargetReason.COLLISION, true);
       }
 
-      super.collideWithEntity(entityIn);
+      super.collideWithEntity(entity);
    }
 
    public void onLivingUpdate() {
@@ -122,69 +125,51 @@ public class EntityIronGolem extends EntityGolem {
          int i = MathHelper.floor(this.posX);
          int j = MathHelper.floor(this.posY - 0.20000000298023224D);
          int k = MathHelper.floor(this.posZ);
-         IBlockState iblockstate = this.world.getBlockState(new BlockPos(i, j, k));
-         if (iblockstate.getMaterial() != Material.AIR) {
-            this.world.spawnParticle(EnumParticleTypes.BLOCK_CRACK, this.posX + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, this.getEntityBoundingBox().minY + 0.1D, this.posZ + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, 4.0D * ((double)this.rand.nextFloat() - 0.5D), 0.5D, ((double)this.rand.nextFloat() - 0.5D) * 4.0D, Block.getStateId(iblockstate));
+         IBlockState iblockdata = this.world.getBlockState(new BlockPos(i, j, k));
+         if (iblockdata.getMaterial() != Material.AIR) {
+            this.world.spawnParticle(EnumParticleTypes.BLOCK_CRACK, this.posX + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, this.getEntityBoundingBox().minY + 0.1D, this.posZ + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, 4.0D * ((double)this.rand.nextFloat() - 0.5D), 0.5D, ((double)this.rand.nextFloat() - 0.5D) * 4.0D, Block.getStateId(iblockdata));
          }
       }
 
    }
 
-   public boolean canAttackClass(Class cls) {
-      return this.isPlayerCreated() && EntityPlayer.class.isAssignableFrom(cls) ? false : (cls == EntityCreeper.class ? false : super.canAttackClass(cls));
+   public boolean canAttackClass(Class oclass) {
+      return this.isPlayerCreated() && EntityPlayer.class.isAssignableFrom(oclass) ? false : (oclass == EntityCreeper.class ? false : super.canAttackClass(oclass));
    }
 
-   public static void registerFixesIronGolem(DataFixer fixer) {
-      EntityLiving.registerFixesMob(fixer, "VillagerGolem");
+   public static void registerFixesIronGolem(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "VillagerGolem");
    }
 
-   public void writeEntityToNBT(NBTTagCompound compound) {
-      super.writeEntityToNBT(compound);
-      compound.setBoolean("PlayerCreated", this.isPlayerCreated());
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      nbttagcompound.setBoolean("PlayerCreated", this.isPlayerCreated());
    }
 
-   public void readEntityFromNBT(NBTTagCompound compound) {
-      super.readEntityFromNBT(compound);
-      this.setPlayerCreated(compound.getBoolean("PlayerCreated"));
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      this.setPlayerCreated(nbttagcompound.getBoolean("PlayerCreated"));
    }
 
-   public boolean attackEntityAsMob(Entity entityIn) {
+   public boolean attackEntityAsMob(Entity entity) {
       this.attackTimer = 10;
       this.world.setEntityState(this, (byte)4);
-      boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)(7 + this.rand.nextInt(15)));
+      boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), (float)(7 + this.rand.nextInt(15)));
       if (flag) {
-         entityIn.motionY += 0.4000000059604645D;
-         this.applyEnchantments(this, entityIn);
+         entity.motionY += 0.4000000059604645D;
+         this.applyEnchantments(this, entity);
       }
 
       this.playSound(SoundEvents.ENTITY_IRONGOLEM_ATTACK, 1.0F, 1.0F);
       return flag;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte id) {
-      if (id == 4) {
-         this.attackTimer = 10;
-         this.playSound(SoundEvents.ENTITY_IRONGOLEM_ATTACK, 1.0F, 1.0F);
-      } else if (id == 11) {
-         this.holdRoseTick = 400;
-      } else {
-         super.handleStatusUpdate(id);
-      }
-
-   }
-
    public Village getVillage() {
       return this.villageObj;
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getAttackTimer() {
-      return this.attackTimer;
-   }
-
-   public void setHoldingRose(boolean p_70851_1_) {
-      this.holdRoseTick = p_70851_1_ ? 400 : 0;
+   public void setHoldingRose(boolean flag) {
+      this.holdRoseTick = flag ? 400 : 0;
       this.world.setEntityState(this, (byte)11);
    }
 
@@ -196,7 +181,7 @@ public class EntityIronGolem extends EntityGolem {
       return SoundEvents.ENTITY_IRONGOLEM_DEATH;
    }
 
-   protected void playStepSound(BlockPos pos, Block blockIn) {
+   protected void playStepSound(BlockPos blockposition, Block block) {
       this.playSound(SoundEvents.ENTITY_IRONGOLEM_STEP, 1.0F, 1.0F);
    }
 
@@ -213,9 +198,9 @@ public class EntityIronGolem extends EntityGolem {
       return (((Byte)this.dataManager.get(PLAYER_CREATED)).byteValue() & 1) != 0;
    }
 
-   public void setPlayerCreated(boolean playerCreated) {
+   public void setPlayerCreated(boolean flag) {
       byte b0 = ((Byte)this.dataManager.get(PLAYER_CREATED)).byteValue();
-      if (playerCreated) {
+      if (flag) {
          this.dataManager.set(PLAYER_CREATED, Byte.valueOf((byte)(b0 | 1)));
       } else {
          this.dataManager.set(PLAYER_CREATED, Byte.valueOf((byte)(b0 & -2)));
@@ -223,11 +208,11 @@ public class EntityIronGolem extends EntityGolem {
 
    }
 
-   public void onDeath(DamageSource cause) {
+   public void onDeath(DamageSource damagesource) {
       if (!this.isPlayerCreated() && this.attackingPlayer != null && this.villageObj != null) {
          this.villageObj.modifyPlayerReputation(this.attackingPlayer.getName(), -5);
       }
 
-      super.onDeath(cause);
+      super.onDeath(damagesource);
    }
 }

@@ -15,8 +15,8 @@ public abstract class NBTBase {
 
    public abstract byte getId();
 
-   protected static NBTBase createNewByType(byte id) {
-      switch(id) {
+   protected static NBTBase createNewByType(byte var0) {
+      switch(var0) {
       case 0:
          return new NBTTagEnd();
       case 1:
@@ -52,12 +52,12 @@ public abstract class NBTBase {
       return false;
    }
 
-   public boolean equals(Object p_equals_1_) {
-      if (!(p_equals_1_ instanceof NBTBase)) {
+   public boolean equals(Object var1) {
+      if (!(var1 instanceof NBTBase)) {
          return false;
       } else {
-         NBTBase nbtbase = (NBTBase)p_equals_1_;
-         return this.getId() == nbtbase.getId();
+         NBTBase var2 = (NBTBase)var1;
+         return this.getId() == var2.getId();
       }
    }
 

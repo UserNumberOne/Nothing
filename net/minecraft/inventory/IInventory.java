@@ -1,11 +1,17 @@
 package net.minecraft.inventory;
 
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.IWorldNameable;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.inventory.InventoryHolder;
 
 public interface IInventory extends IWorldNameable {
+   int MAX_STACK = 64;
+
    int getSizeInventory();
 
    @Nullable
@@ -38,4 +44,18 @@ public interface IInventory extends IWorldNameable {
    int getFieldCount();
 
    void clear();
+
+   ItemStack[] getContents();
+
+   void onOpen(CraftHumanEntity var1);
+
+   void onClose(CraftHumanEntity var1);
+
+   List getViewers();
+
+   InventoryHolder getOwner();
+
+   void setMaxStackSize(int var1);
+
+   Location getLocation();
 }

@@ -6,7 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
@@ -23,149 +23,149 @@ public class CommandResultStats {
       this.objectives = STRING_RESULT_TYPES;
    }
 
-   public void setCommandStatForSender(MinecraftServer server, final ICommandSender sender, CommandResultStats.Type typeIn, int p_184932_4_) {
-      String s = this.entitiesID[typeIn.getTypeID()];
-      if (s != null) {
-         ICommandSender icommandsender = new ICommandSender() {
+   public void a(MinecraftServer var1, final ICommandSender var2, CommandResultStats.Type var3, int var4) {
+      String var5 = this.entitiesID[var3.getTypeID()];
+      if (var5 != null) {
+         ICommandSender var6 = new ICommandSender() {
             public String getName() {
-               return sender.getName();
+               return var2.getName();
             }
 
             public ITextComponent getDisplayName() {
-               return sender.getDisplayName();
+               return var2.getDisplayName();
             }
 
-            public void sendMessage(ITextComponent component) {
-               sender.sendMessage(component);
+            public void sendMessage(ITextComponent var1) {
+               var2.sendMessage(var1);
             }
 
-            public boolean canUseCommand(int permLevel, String commandName) {
+            public boolean canUseCommand(int var1, String var2x) {
                return true;
             }
 
             public BlockPos getPosition() {
-               return sender.getPosition();
+               return var2.getPosition();
             }
 
             public Vec3d getPositionVector() {
-               return sender.getPositionVector();
+               return var2.getPositionVector();
             }
 
             public World getEntityWorld() {
-               return sender.getEntityWorld();
+               return var2.getEntityWorld();
             }
 
             public Entity getCommandSenderEntity() {
-               return sender.getCommandSenderEntity();
+               return var2.getCommandSenderEntity();
             }
 
             public boolean sendCommandFeedback() {
-               return sender.sendCommandFeedback();
+               return var2.sendCommandFeedback();
             }
 
-            public void setCommandStat(CommandResultStats.Type type, int amount) {
-               sender.setCommandStat(type, amount);
+            public void setCommandStat(CommandResultStats.Type var1, int var2x) {
+               var2.setCommandStat(var1, var2x);
             }
 
-            public MinecraftServer getServer() {
-               return sender.getServer();
+            public MinecraftServer h() {
+               return var2.h();
             }
          };
 
-         String s1;
+         String var7;
          try {
-            s1 = CommandBase.getEntityName(server, icommandsender, s);
+            var7 = CommandBase.e(var1, var6, var5);
          } catch (EntityNotFoundException var12) {
             return;
          }
 
-         String s2 = this.objectives[typeIn.getTypeID()];
-         if (s2 != null) {
-            Scoreboard scoreboard = sender.getEntityWorld().getScoreboard();
-            ScoreObjective scoreobjective = scoreboard.getObjective(s2);
-            if (scoreobjective != null && scoreboard.entityHasObjective(s1, scoreobjective)) {
-               Score score = scoreboard.getOrCreateScore(s1, scoreobjective);
-               score.setScorePoints(p_184932_4_);
+         String var8 = this.objectives[var3.getTypeID()];
+         if (var8 != null) {
+            Scoreboard var9 = var2.getEntityWorld().getScoreboard();
+            ScoreObjective var10 = var9.getObjective(var8);
+            if (var10 != null) {
+               if (var9.entityHasObjective(var7, var10)) {
+                  Score var11 = var9.getOrCreateScore(var7, var10);
+                  var11.setScorePoints(var4);
+               }
             }
          }
       }
-
    }
 
-   public void readStatsFromNBT(NBTTagCompound tagcompound) {
-      if (tagcompound.hasKey("CommandStats", 10)) {
-         NBTTagCompound nbttagcompound = tagcompound.getCompoundTag("CommandStats");
+   public void readStatsFromNBT(NBTTagCompound var1) {
+      if (var1.hasKey("CommandStats", 10)) {
+         NBTTagCompound var2 = var1.getCompoundTag("CommandStats");
 
-         for(CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values()) {
-            String s = commandresultstats$type.getTypeName() + "Name";
-            String s1 = commandresultstats$type.getTypeName() + "Objective";
-            if (nbttagcompound.hasKey(s, 8) && nbttagcompound.hasKey(s1, 8)) {
-               String s2 = nbttagcompound.getString(s);
-               String s3 = nbttagcompound.getString(s1);
-               setScoreBoardStat(this, commandresultstats$type, s2, s3);
+         for(CommandResultStats.Type var6 : CommandResultStats.Type.values()) {
+            String var7 = var6.getTypeName() + "Name";
+            String var8 = var6.getTypeName() + "Objective";
+            if (var2.hasKey(var7, 8) && var2.hasKey(var8, 8)) {
+               String var9 = var2.getString(var7);
+               String var10 = var2.getString(var8);
+               setScoreBoardStat(this, var6, var9, var10);
             }
          }
+
+      }
+   }
+
+   public void writeStatsToNBT(NBTTagCompound var1) {
+      NBTTagCompound var2 = new NBTTagCompound();
+
+      for(CommandResultStats.Type var6 : CommandResultStats.Type.values()) {
+         String var7 = this.entitiesID[var6.getTypeID()];
+         String var8 = this.objectives[var6.getTypeID()];
+         if (var7 != null && var8 != null) {
+            var2.setString(var6.getTypeName() + "Name", var7);
+            var2.setString(var6.getTypeName() + "Objective", var8);
+         }
+      }
+
+      if (!var2.hasNoTags()) {
+         var1.setTag("CommandStats", var2);
       }
 
    }
 
-   public void writeStatsToNBT(NBTTagCompound tagcompound) {
-      NBTTagCompound nbttagcompound = new NBTTagCompound();
-
-      for(CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values()) {
-         String s = this.entitiesID[commandresultstats$type.getTypeID()];
-         String s1 = this.objectives[commandresultstats$type.getTypeID()];
-         if (s != null && s1 != null) {
-            nbttagcompound.setString(commandresultstats$type.getTypeName() + "Name", s);
-            nbttagcompound.setString(commandresultstats$type.getTypeName() + "Objective", s1);
-         }
-      }
-
-      if (!nbttagcompound.hasNoTags()) {
-         tagcompound.setTag("CommandStats", nbttagcompound);
-      }
-
-   }
-
-   public static void setScoreBoardStat(CommandResultStats stats, CommandResultStats.Type resultType, @Nullable String entityID, @Nullable String objectiveName) {
-      if (entityID != null && !entityID.isEmpty() && objectiveName != null && !objectiveName.isEmpty()) {
-         if (stats.entitiesID == STRING_RESULT_TYPES || stats.objectives == STRING_RESULT_TYPES) {
-            stats.entitiesID = new String[NUM_RESULT_TYPES];
-            stats.objectives = new String[NUM_RESULT_TYPES];
+   public static void setScoreBoardStat(CommandResultStats var0, CommandResultStats.Type var1, @Nullable String var2, @Nullable String var3) {
+      if (var2 != null && !var2.isEmpty() && var3 != null && !var3.isEmpty()) {
+         if (var0.entitiesID == STRING_RESULT_TYPES || var0.objectives == STRING_RESULT_TYPES) {
+            var0.entitiesID = new String[NUM_RESULT_TYPES];
+            var0.objectives = new String[NUM_RESULT_TYPES];
          }
 
-         stats.entitiesID[resultType.getTypeID()] = entityID;
-         stats.objectives[resultType.getTypeID()] = objectiveName;
+         var0.entitiesID[var1.getTypeID()] = var2;
+         var0.objectives[var1.getTypeID()] = var3;
       } else {
-         removeScoreBoardStat(stats, resultType);
+         removeScoreBoardStat(var0, var1);
       }
-
    }
 
-   private static void removeScoreBoardStat(CommandResultStats resultStatsIn, CommandResultStats.Type resultTypeIn) {
-      if (resultStatsIn.entitiesID != STRING_RESULT_TYPES && resultStatsIn.objectives != STRING_RESULT_TYPES) {
-         resultStatsIn.entitiesID[resultTypeIn.getTypeID()] = null;
-         resultStatsIn.objectives[resultTypeIn.getTypeID()] = null;
-         boolean flag = true;
+   private static void removeScoreBoardStat(CommandResultStats var0, CommandResultStats.Type var1) {
+      if (var0.entitiesID != STRING_RESULT_TYPES && var0.objectives != STRING_RESULT_TYPES) {
+         var0.entitiesID[var1.getTypeID()] = null;
+         var0.objectives[var1.getTypeID()] = null;
+         boolean var2 = true;
 
-         for(CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values()) {
-            if (resultStatsIn.entitiesID[commandresultstats$type.getTypeID()] != null && resultStatsIn.objectives[commandresultstats$type.getTypeID()] != null) {
-               flag = false;
+         for(CommandResultStats.Type var6 : CommandResultStats.Type.values()) {
+            if (var0.entitiesID[var6.getTypeID()] != null && var0.objectives[var6.getTypeID()] != null) {
+               var2 = false;
                break;
             }
          }
 
-         if (flag) {
-            resultStatsIn.entitiesID = STRING_RESULT_TYPES;
-            resultStatsIn.objectives = STRING_RESULT_TYPES;
+         if (var2) {
+            var0.entitiesID = STRING_RESULT_TYPES;
+            var0.objectives = STRING_RESULT_TYPES;
          }
-      }
 
+      }
    }
 
-   public void addAllStats(CommandResultStats resultStatsIn) {
-      for(CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values()) {
-         setScoreBoardStat(this, commandresultstats$type, resultStatsIn.entitiesID[commandresultstats$type.getTypeID()], resultStatsIn.objectives[commandresultstats$type.getTypeID()]);
+   public void addAllStats(CommandResultStats var1) {
+      for(CommandResultStats.Type var5 : CommandResultStats.Type.values()) {
+         setScoreBoardStat(this, var5, var1.entitiesID[var5.getTypeID()], var1.objectives[var5.getTypeID()]);
       }
 
    }
@@ -180,9 +180,9 @@ public class CommandResultStats {
       final int typeID;
       final String typeName;
 
-      private Type(int id, String name) {
-         this.typeID = id;
-         this.typeName = name;
+      private Type(int var3, String var4) {
+         this.typeID = var3;
+         this.typeName = var4;
       }
 
       public int getTypeID() {
@@ -194,21 +194,21 @@ public class CommandResultStats {
       }
 
       public static String[] getTypeNames() {
-         String[] astring = new String[values().length];
-         int i = 0;
+         String[] var0 = new String[values().length];
+         int var1 = 0;
 
-         for(CommandResultStats.Type commandresultstats$type : values()) {
-            astring[i++] = commandresultstats$type.getTypeName();
+         for(CommandResultStats.Type var5 : values()) {
+            var0[var1++] = var5.getTypeName();
          }
 
-         return astring;
+         return var0;
       }
 
       @Nullable
-      public static CommandResultStats.Type getTypeByName(String name) {
-         for(CommandResultStats.Type commandresultstats$type : values()) {
-            if (commandresultstats$type.getTypeName().equals(name)) {
-               return commandresultstats$type;
+      public static CommandResultStats.Type getTypeByName(String var0) {
+         for(CommandResultStats.Type var4 : values()) {
+            if (var4.getTypeName().equals(var0)) {
+               return var4;
             }
          }
 

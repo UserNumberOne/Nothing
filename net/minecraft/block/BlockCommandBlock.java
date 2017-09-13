@@ -25,137 +25,143 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.event.block.BlockRedstoneEvent;
 
 public class BlockCommandBlock extends BlockContainer {
    public static final PropertyDirection FACING = BlockDirectional.FACING;
    public static final PropertyBool CONDITIONAL = PropertyBool.create("conditional");
 
-   public BlockCommandBlock(MapColor color) {
-      super(Material.IRON, color);
+   public BlockCommandBlock(MapColor materialmapcolor) {
+      super(Material.IRON, materialmapcolor);
       this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(CONDITIONAL, Boolean.valueOf(false)));
    }
 
-   public TileEntity createNewTileEntity(World worldIn, int meta) {
-      TileEntityCommandBlock tileentitycommandblock = new TileEntityCommandBlock();
-      tileentitycommandblock.setAuto(this == Blocks.CHAIN_COMMAND_BLOCK);
-      return tileentitycommandblock;
+   public TileEntity createNewTileEntity(World world, int i) {
+      TileEntityCommandBlock tileentitycommand = new TileEntityCommandBlock();
+      tileentitycommand.setAuto(this == Blocks.CHAIN_COMMAND_BLOCK);
+      return tileentitycommand;
    }
 
-   public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn) {
-      if (!worldIn.isRemote) {
-         TileEntity tileentity = worldIn.getTileEntity(pos);
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      if (!world.isRemote) {
+         TileEntity tileentity = world.getTileEntity(blockposition);
          if (tileentity instanceof TileEntityCommandBlock) {
-            TileEntityCommandBlock tileentitycommandblock = (TileEntityCommandBlock)tileentity;
-            boolean flag = worldIn.isBlockPowered(pos);
-            boolean flag1 = tileentitycommandblock.isPowered();
-            boolean flag2 = tileentitycommandblock.isAuto();
-            if (flag && !flag1) {
-               tileentitycommandblock.setPowered(true);
-               if (tileentitycommandblock.getMode() != TileEntityCommandBlock.Mode.SEQUENCE && !flag2) {
-                  boolean flag3 = !tileentitycommandblock.isConditional() || this.isNextToSuccessfulCommandBlock(worldIn, pos, state);
-                  tileentitycommandblock.setConditionMet(flag3);
-                  worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+            TileEntityCommandBlock tileentitycommand = (TileEntityCommandBlock)tileentity;
+            boolean flag = world.isBlockPowered(blockposition);
+            boolean flag1 = tileentitycommand.isPowered();
+            boolean flag2 = tileentitycommand.isAuto();
+            org.bukkit.block.Block bukkitBlock = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+            int old = flag1 ? 15 : 0;
+            int current = flag ? 15 : 0;
+            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(bukkitBlock, old, current);
+            world.getServer().getPluginManager().callEvent(eventRedstone);
+            if (eventRedstone.getNewCurrent() > 0 && eventRedstone.getOldCurrent() <= 0) {
+               tileentitycommand.setPowered(true);
+               if (tileentitycommand.getMode() != TileEntityCommandBlock.Mode.SEQUENCE && !flag2) {
+                  boolean flag3 = !tileentitycommand.isConditional() || this.isNextToSuccessfulCommandBlock(world, blockposition, iblockdata);
+                  tileentitycommand.setConditionMet(flag3);
+                  world.scheduleUpdate(blockposition, this, this.tickRate(world));
                   if (flag3) {
-                     this.propagateUpdate(worldIn, pos);
+                     this.propagateUpdate(world, blockposition);
                   }
                }
-            } else if (!flag && flag1) {
-               tileentitycommandblock.setPowered(false);
+            } else if (eventRedstone.getNewCurrent() <= 0 && eventRedstone.getOldCurrent() > 0) {
+               tileentitycommand.setPowered(false);
             }
          }
       }
 
    }
 
-   public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-      if (!worldIn.isRemote) {
-         TileEntity tileentity = worldIn.getTileEntity(pos);
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      if (!world.isRemote) {
+         TileEntity tileentity = world.getTileEntity(blockposition);
          if (tileentity instanceof TileEntityCommandBlock) {
-            TileEntityCommandBlock tileentitycommandblock = (TileEntityCommandBlock)tileentity;
-            CommandBlockBaseLogic commandblockbaselogic = tileentitycommandblock.getCommandBlockLogic();
-            boolean flag = !StringUtils.isNullOrEmpty(commandblockbaselogic.getCommand());
-            TileEntityCommandBlock.Mode tileentitycommandblock$mode = tileentitycommandblock.getMode();
-            boolean flag1 = !tileentitycommandblock.isConditional() || this.isNextToSuccessfulCommandBlock(worldIn, pos, state);
-            boolean flag2 = tileentitycommandblock.isConditionMet();
+            TileEntityCommandBlock tileentitycommand = (TileEntityCommandBlock)tileentity;
+            CommandBlockBaseLogic commandblocklistenerabstract = tileentitycommand.getCommandBlockLogic();
+            boolean flag = !StringUtils.isNullOrEmpty(commandblocklistenerabstract.getCommand());
+            TileEntityCommandBlock.Mode tileentitycommand_type = tileentitycommand.getMode();
+            boolean flag1 = !tileentitycommand.isConditional() || this.isNextToSuccessfulCommandBlock(world, blockposition, iblockdata);
+            boolean flag2 = tileentitycommand.isConditionMet();
             boolean flag3 = false;
-            if (tileentitycommandblock$mode != TileEntityCommandBlock.Mode.SEQUENCE && flag2 && flag) {
-               commandblockbaselogic.trigger(worldIn);
+            if (tileentitycommand_type != TileEntityCommandBlock.Mode.SEQUENCE && flag2 && flag) {
+               commandblocklistenerabstract.trigger(world);
                flag3 = true;
             }
 
-            if (tileentitycommandblock.isPowered() || tileentitycommandblock.isAuto()) {
-               if (tileentitycommandblock$mode == TileEntityCommandBlock.Mode.SEQUENCE && flag1 && flag) {
-                  commandblockbaselogic.trigger(worldIn);
+            if (tileentitycommand.isPowered() || tileentitycommand.isAuto()) {
+               if (tileentitycommand_type == TileEntityCommandBlock.Mode.SEQUENCE && flag1 && flag) {
+                  commandblocklistenerabstract.trigger(world);
                   flag3 = true;
                }
 
-               if (tileentitycommandblock$mode == TileEntityCommandBlock.Mode.AUTO) {
-                  worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+               if (tileentitycommand_type == TileEntityCommandBlock.Mode.AUTO) {
+                  world.scheduleUpdate(blockposition, this, this.tickRate(world));
                   if (flag1) {
-                     this.propagateUpdate(worldIn, pos);
+                     this.propagateUpdate(world, blockposition);
                   }
                }
             }
 
             if (!flag3) {
-               commandblockbaselogic.setSuccessCount(0);
+               commandblocklistenerabstract.setSuccessCount(0);
             }
 
-            tileentitycommandblock.setConditionMet(flag1);
-            worldIn.updateComparatorOutputLevel(pos, this);
+            tileentitycommand.setConditionMet(flag1);
+            world.updateComparatorOutputLevel(blockposition, this);
          }
       }
 
    }
 
-   public boolean isNextToSuccessfulCommandBlock(World worldIn, BlockPos pos, IBlockState state) {
-      EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
-      TileEntity tileentity = worldIn.getTileEntity(pos.offset(enumfacing.getOpposite()));
+   public boolean isNextToSuccessfulCommandBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
+      EnumFacing enumdirection = (EnumFacing)iblockdata.getValue(FACING);
+      TileEntity tileentity = world.getTileEntity(blockposition.offset(enumdirection.getOpposite()));
       return tileentity instanceof TileEntityCommandBlock && ((TileEntityCommandBlock)tileentity).getCommandBlockLogic().getSuccessCount() > 0;
    }
 
-   public int tickRate(World worldIn) {
+   public int tickRate(World world) {
       return 1;
    }
 
-   public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-      TileEntity tileentity = worldIn.getTileEntity(pos);
-      if (tileentity instanceof TileEntityCommandBlock && playerIn.canUseCommandBlock()) {
-         playerIn.displayGuiCommandBlock((TileEntityCommandBlock)tileentity);
+   public boolean onBlockActivated(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack, EnumFacing enumdirection, float f, float f1, float f2) {
+      TileEntity tileentity = world.getTileEntity(blockposition);
+      if (tileentity instanceof TileEntityCommandBlock && entityhuman.canUseCommandBlock()) {
+         entityhuman.displayGuiCommandBlock((TileEntityCommandBlock)tileentity);
          return true;
       } else {
          return false;
       }
    }
 
-   public boolean hasComparatorInputOverride(IBlockState state) {
+   public boolean hasComparatorInputOverride(IBlockState iblockdata) {
       return true;
    }
 
-   public int getComparatorInputOverride(IBlockState blockState, World worldIn, BlockPos pos) {
-      TileEntity tileentity = worldIn.getTileEntity(pos);
+   public int getComparatorInputOverride(IBlockState iblockdata, World world, BlockPos blockposition) {
+      TileEntity tileentity = world.getTileEntity(blockposition);
       return tileentity instanceof TileEntityCommandBlock ? ((TileEntityCommandBlock)tileentity).getCommandBlockLogic().getSuccessCount() : 0;
    }
 
-   public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-      TileEntity tileentity = worldIn.getTileEntity(pos);
+   public void onBlockPlacedBy(World world, BlockPos blockposition, IBlockState iblockdata, EntityLivingBase entityliving, ItemStack itemstack) {
+      TileEntity tileentity = world.getTileEntity(blockposition);
       if (tileentity instanceof TileEntityCommandBlock) {
-         TileEntityCommandBlock tileentitycommandblock = (TileEntityCommandBlock)tileentity;
-         CommandBlockBaseLogic commandblockbaselogic = tileentitycommandblock.getCommandBlockLogic();
-         if (stack.hasDisplayName()) {
-            commandblockbaselogic.setName(stack.getDisplayName());
+         TileEntityCommandBlock tileentitycommand = (TileEntityCommandBlock)tileentity;
+         CommandBlockBaseLogic commandblocklistenerabstract = tileentitycommand.getCommandBlockLogic();
+         if (itemstack.hasDisplayName()) {
+            commandblocklistenerabstract.setName(itemstack.getDisplayName());
          }
 
-         if (!worldIn.isRemote) {
-            NBTTagCompound nbttagcompound = stack.getTagCompound();
+         if (!world.isRemote) {
+            NBTTagCompound nbttagcompound = itemstack.getTagCompound();
             if (nbttagcompound == null || !nbttagcompound.hasKey("BlockEntityTag", 10)) {
-               commandblockbaselogic.setTrackOutput(worldIn.getGameRules().getBoolean("sendCommandFeedback"));
-               tileentitycommandblock.setAuto(this == Blocks.CHAIN_COMMAND_BLOCK);
+               commandblocklistenerabstract.setTrackOutput(world.getGameRules().getBoolean("sendCommandFeedback"));
+               tileentitycommand.setAuto(this == Blocks.CHAIN_COMMAND_BLOCK);
             }
 
-            if (tileentitycommandblock.getMode() == TileEntityCommandBlock.Mode.SEQUENCE) {
-               boolean flag = worldIn.isBlockPowered(pos);
-               tileentitycommandblock.setPowered(flag);
+            if (tileentitycommand.getMode() == TileEntityCommandBlock.Mode.SEQUENCE) {
+               boolean flag = world.isBlockPowered(blockposition);
+               tileentitycommand.setPowered(flag);
             }
          }
       }
@@ -166,54 +172,54 @@ public class BlockCommandBlock extends BlockContainer {
       return 0;
    }
 
-   public EnumBlockRenderType getRenderType(IBlockState state) {
+   public EnumBlockRenderType getRenderType(IBlockState iblockdata) {
       return EnumBlockRenderType.MODEL;
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      return this.getDefaultState().withProperty(FACING, EnumFacing.getFront(meta & 7)).withProperty(CONDITIONAL, Boolean.valueOf((meta & 8) != 0));
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(FACING, EnumFacing.getFront(i & 7)).withProperty(CONDITIONAL, Boolean.valueOf((i & 8) != 0));
    }
 
-   public int getMetaFromState(IBlockState state) {
-      return ((EnumFacing)state.getValue(FACING)).getIndex() | (((Boolean)state.getValue(CONDITIONAL)).booleanValue() ? 8 : 0);
+   public int getMetaFromState(IBlockState iblockdata) {
+      return ((EnumFacing)iblockdata.getValue(FACING)).getIndex() | (((Boolean)iblockdata.getValue(CONDITIONAL)).booleanValue() ? 8 : 0);
    }
 
-   public IBlockState withRotation(IBlockState state, Rotation rot) {
-      return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+   public IBlockState withRotation(IBlockState iblockdata, Rotation enumblockrotation) {
+      return iblockdata.withProperty(FACING, enumblockrotation.rotate((EnumFacing)iblockdata.getValue(FACING)));
    }
 
-   public IBlockState withMirror(IBlockState state, Mirror mirrorIn) {
-      return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+   public IBlockState withMirror(IBlockState iblockdata, Mirror enumblockmirror) {
+      return iblockdata.withRotation(enumblockmirror.toRotation((EnumFacing)iblockdata.getValue(FACING)));
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, CONDITIONAL});
    }
 
-   public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
-      return this.getDefaultState().withProperty(FACING, BlockPistonBase.getFacingFromEntity(pos, placer)).withProperty(CONDITIONAL, Boolean.valueOf(false));
+   public IBlockState getStateForPlacement(World world, BlockPos blockposition, EnumFacing enumdirection, float f, float f1, float f2, int i, EntityLivingBase entityliving) {
+      return this.getDefaultState().withProperty(FACING, BlockPistonBase.getFacingFromEntity(blockposition, entityliving)).withProperty(CONDITIONAL, Boolean.valueOf(false));
    }
 
-   public void propagateUpdate(World worldIn, BlockPos pos) {
-      IBlockState iblockstate = worldIn.getBlockState(pos);
-      if (iblockstate.getBlock() == Blocks.COMMAND_BLOCK || iblockstate.getBlock() == Blocks.REPEATING_COMMAND_BLOCK) {
-         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(pos);
-         blockpos$mutableblockpos.move((EnumFacing)iblockstate.getValue(FACING));
+   public void propagateUpdate(World world, BlockPos blockposition) {
+      IBlockState iblockdata = world.getBlockState(blockposition);
+      if (iblockdata.getBlock() == Blocks.COMMAND_BLOCK || iblockdata.getBlock() == Blocks.REPEATING_COMMAND_BLOCK) {
+         BlockPos.MutableBlockPos blockposition_mutableblockposition = new BlockPos.MutableBlockPos(blockposition);
+         blockposition_mutableblockposition.move((EnumFacing)iblockdata.getValue(FACING));
 
-         for(TileEntity tileentity = worldIn.getTileEntity(blockpos$mutableblockpos); tileentity instanceof TileEntityCommandBlock; tileentity = worldIn.getTileEntity(blockpos$mutableblockpos)) {
-            TileEntityCommandBlock tileentitycommandblock = (TileEntityCommandBlock)tileentity;
-            if (tileentitycommandblock.getMode() != TileEntityCommandBlock.Mode.SEQUENCE) {
+         for(TileEntity tileentity = world.getTileEntity(blockposition_mutableblockposition); tileentity instanceof TileEntityCommandBlock; tileentity = world.getTileEntity(blockposition_mutableblockposition)) {
+            TileEntityCommandBlock tileentitycommand = (TileEntityCommandBlock)tileentity;
+            if (tileentitycommand.getMode() != TileEntityCommandBlock.Mode.SEQUENCE) {
                break;
             }
 
-            IBlockState iblockstate1 = worldIn.getBlockState(blockpos$mutableblockpos);
-            Block block = iblockstate1.getBlock();
-            if (block != Blocks.CHAIN_COMMAND_BLOCK || worldIn.isUpdateScheduled(blockpos$mutableblockpos, block)) {
+            IBlockState iblockdata1 = world.getBlockState(blockposition_mutableblockposition);
+            Block block = iblockdata1.getBlock();
+            if (block != Blocks.CHAIN_COMMAND_BLOCK || world.isUpdateScheduled(blockposition_mutableblockposition, block)) {
                break;
             }
 
-            worldIn.scheduleUpdate(new BlockPos(blockpos$mutableblockpos), block, this.tickRate(worldIn));
-            blockpos$mutableblockpos.move((EnumFacing)iblockstate1.getValue(FACING));
+            world.scheduleUpdate(new BlockPos(blockposition_mutableblockposition), block, this.tickRate(world));
+            blockposition_mutableblockposition.move((EnumFacing)iblockdata1.getValue(FACING));
          }
       }
 

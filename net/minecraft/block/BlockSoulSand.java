@@ -19,12 +19,12 @@ public class BlockSoulSand extends Block {
    }
 
    @Nullable
-   public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos) {
+   public AxisAlignedBB getCollisionBoundingBox(IBlockState var1, World var2, BlockPos var3) {
       return SOUL_SAND_AABB;
    }
 
-   public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
-      entityIn.motionX *= 0.4D;
-      entityIn.motionZ *= 0.4D;
+   public void onEntityCollidedWithBlock(World var1, BlockPos var2, IBlockState var3, Entity var4) {
+      var4.motionX *= 0.4D;
+      var4.motionZ *= 0.4D;
    }
 }

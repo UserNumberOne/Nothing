@@ -6,28 +6,28 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class BiomeVoidDecorator extends BiomeDecorator {
-   public void decorate(World worldIn, Random random, Biome biome, BlockPos pos) {
-      BlockPos blockpos = worldIn.getSpawnPoint();
-      int i = 16;
-      double d0 = blockpos.distanceSq(pos.add(8, blockpos.getY(), 8));
-      if (d0 <= 1024.0D) {
-         BlockPos blockpos1 = new BlockPos(blockpos.getX() - 16, blockpos.getY() - 1, blockpos.getZ() - 16);
-         BlockPos blockpos2 = new BlockPos(blockpos.getX() + 16, blockpos.getY() - 1, blockpos.getZ() + 16);
-         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(blockpos1);
+   public void decorate(World var1, Random var2, Biome var3, BlockPos var4) {
+      BlockPos var5 = var1.getSpawnPoint();
+      boolean var6 = true;
+      double var7 = var5.distanceSq(var4.add(8, var5.getY(), 8));
+      if (var7 <= 1024.0D) {
+         BlockPos var9 = new BlockPos(var5.getX() - 16, var5.getY() - 1, var5.getZ() - 16);
+         BlockPos var10 = new BlockPos(var5.getX() + 16, var5.getY() - 1, var5.getZ() + 16);
+         BlockPos.MutableBlockPos var11 = new BlockPos.MutableBlockPos(var9);
 
-         for(int j = pos.getZ(); j < pos.getZ() + 16; ++j) {
-            for(int k = pos.getX(); k < pos.getX() + 16; ++k) {
-               if (j >= blockpos1.getZ() && j <= blockpos2.getZ() && k >= blockpos1.getX() && k <= blockpos2.getX()) {
-                  blockpos$mutableblockpos.setPos(k, blockpos$mutableblockpos.getY(), j);
-                  if (blockpos.getX() == k && blockpos.getZ() == j) {
-                     worldIn.setBlockState(blockpos$mutableblockpos, Blocks.COBBLESTONE.getDefaultState(), 2);
+         for(int var12 = var4.getZ(); var12 < var4.getZ() + 16; ++var12) {
+            for(int var13 = var4.getX(); var13 < var4.getX() + 16; ++var13) {
+               if (var12 >= var9.getZ() && var12 <= var10.getZ() && var13 >= var9.getX() && var13 <= var10.getX()) {
+                  var11.setPos(var13, var11.getY(), var12);
+                  if (var5.getX() == var13 && var5.getZ() == var12) {
+                     var1.setBlockState(var11, Blocks.COBBLESTONE.getDefaultState(), 2);
                   } else {
-                     worldIn.setBlockState(blockpos$mutableblockpos, Blocks.STONE.getDefaultState(), 2);
+                     var1.setBlockState(var11, Blocks.STONE.getDefaultState(), 2);
                   }
                }
             }
          }
-      }
 
+      }
    }
 }

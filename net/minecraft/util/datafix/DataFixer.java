@@ -15,82 +15,84 @@ public class DataFixer implements IDataFixer {
    private final Map fixMap = Maps.newHashMap();
    private final int version;
 
-   public DataFixer(int versionIn) {
-      this.version = versionIn;
+   public DataFixer(int var1) {
+      this.version = var1;
    }
 
-   public NBTTagCompound process(IFixType type, NBTTagCompound compound) {
-      int i = compound.hasKey("DataVersion", 99) ? compound.getInteger("DataVersion") : -1;
-      return i >= 512 ? compound : this.process(type, compound, i);
+   public NBTTagCompound process(IFixType var1, NBTTagCompound var2) {
+      int var3 = var2.hasKey("DataVersion", 99) ? var2.getInteger("DataVersion") : -1;
+      return var3 >= 512 ? var2 : this.process(var1, var2, var3);
    }
 
-   public NBTTagCompound process(IFixType type, NBTTagCompound compound, int versionIn) {
-      if (versionIn < this.version) {
-         compound = this.processFixes(type, compound, versionIn);
-         compound = this.processWalkers(type, compound, versionIn);
+   public NBTTagCompound process(IFixType var1, NBTTagCompound var2, int var3) {
+      if (var3 < this.version) {
+         var2 = this.processFixes(var1, var2, var3);
+         var2 = this.processWalkers(var1, var2, var3);
       }
 
-      return compound;
+      return var2;
    }
 
-   private NBTTagCompound processFixes(IFixType type, NBTTagCompound compound, int versionIn) {
-      List list = (List)this.fixMap.get(type);
-      if (list != null) {
-         for(int i = 0; i < list.size(); ++i) {
-            IFixableData ifixabledata = (IFixableData)list.get(i);
-            if (ifixabledata.getFixVersion() > versionIn) {
-               compound = ifixabledata.fixTagCompound(compound);
+   private NBTTagCompound processFixes(IFixType var1, NBTTagCompound var2, int var3) {
+      List var4 = (List)this.fixMap.get(var1);
+      if (var4 != null) {
+         for(int var5 = 0; var5 < var4.size(); ++var5) {
+            IFixableData var6 = (IFixableData)var4.get(var5);
+            if (var6.getFixVersion() > var3) {
+               var2 = var6.fixTagCompound(var2);
             }
          }
       }
 
-      return compound;
+      return var2;
    }
 
-   private NBTTagCompound processWalkers(IFixType type, NBTTagCompound compound, int versionIn) {
-      List list = (List)this.walkerMap.get(type);
-      if (list != null) {
-         for(int i = 0; i < list.size(); ++i) {
-            compound = ((IDataWalker)list.get(i)).process(this, compound, versionIn);
+   private NBTTagCompound processWalkers(IFixType var1, NBTTagCompound var2, int var3) {
+      List var4 = (List)this.walkerMap.get(var1);
+      if (var4 != null) {
+         for(int var5 = 0; var5 < var4.size(); ++var5) {
+            var2 = ((IDataWalker)var4.get(var5)).process(this, var2, var3);
          }
       }
 
-      return compound;
+      return var2;
    }
 
-   public void registerWalker(FixTypes type, IDataWalker walker) {
-      this.registerWalkerAdd(type, walker);
+   public void registerWalker(FixTypes var1, IDataWalker var2) {
+      this.registerWalkerAdd(var1, var2);
    }
 
-   public void registerWalkerAdd(IFixType type, IDataWalker walker) {
-      this.getTypeList(this.walkerMap, type).add(walker);
+   public void registerWalkerAdd(IFixType var1, IDataWalker var2) {
+      this.getTypeList(this.walkerMap, var1).add(var2);
    }
 
-   public void registerFix(IFixType type, IFixableData fixable) {
-      List list = this.getTypeList(this.fixMap, type);
-      int i = fixable.getFixVersion();
-      if (i > this.version) {
-         LOGGER.warn("Ignored fix registered for version: {} as the DataVersion of the game is: {}", new Object[]{i, this.version});
-      } else if (!list.isEmpty() && ((IFixableData)Util.getLastElement(list)).getFixVersion() > i) {
-         for(int j = 0; j < list.size(); ++j) {
-            if (((IFixableData)list.get(j)).getFixVersion() > i) {
-               list.add(j, fixable);
-               break;
-            }
-         }
+   public void registerFix(IFixType var1, IFixableData var2) {
+      List var3 = this.getTypeList(this.fixMap, var1);
+      int var4 = var2.getFixVersion();
+      if (var4 > this.version) {
+         LOGGER.warn("Ignored fix registered for version: {} as the DataVersion of the game is: {}", new Object[]{var4, this.version});
       } else {
-         list.add(fixable);
-      }
+         if (!var3.isEmpty() && ((IFixableData)Util.getLastElement(var3)).getFixVersion() > var4) {
+            for(int var5 = 0; var5 < var3.size(); ++var5) {
+               if (((IFixableData)var3.get(var5)).getFixVersion() > var4) {
+                  var3.add(var5, var2);
+                  break;
+               }
+            }
+         } else {
+            var3.add(var2);
+         }
 
+      }
    }
 
-   private List getTypeList(Map map, IFixType type) {
-      List list = (List)map.get(type);
-      if (list == null) {
-         list = Lists.newArrayList();
-         map.put(type, list);
+   private List getTypeList(Map var1, IFixType var2) {
+      Object var3 = (List)var1.get(var2);
+      if (var3 == null) {
+         var3 = Lists.newArrayList();
+         var1.put(var2, var3);
       }
 
-      return list;
+      return (List)var3;
    }
 }

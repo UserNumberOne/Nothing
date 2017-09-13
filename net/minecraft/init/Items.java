@@ -219,12 +219,12 @@ public class Items {
    public static final Item BEETROOT;
    public static final Item BEETROOT_SOUP;
 
-   private static Item getRegisteredItem(String name) {
-      Item item = (Item)Item.REGISTRY.getObject(new ResourceLocation(name));
-      if (item == null) {
-         throw new IllegalStateException("Invalid Item requested: " + name);
+   private static Item getRegisteredItem(String var0) {
+      Item var1 = (Item)Item.REGISTRY.getObject(new ResourceLocation(var0));
+      if (var1 == null) {
+         throw new IllegalStateException("Invalid Item requested: " + var0);
       } else {
-         return item;
+         return var1;
       }
    }
 

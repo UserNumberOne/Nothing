@@ -7,7 +7,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -21,20 +21,20 @@ public class CommandEmote extends CommandBase {
       return 0;
    }
 
-   public String getUsage(ICommandSender sender) {
+   public String getUsage(ICommandSender var1) {
       return "commands.me.usage";
    }
 
-   public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-      if (args.length <= 0) {
+   public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
+      if (var3.length <= 0) {
          throw new WrongUsageException("commands.me.usage", new Object[0]);
       } else {
-         ITextComponent itextcomponent = getChatComponentFromNthArg(sender, args, 0, !(sender instanceof EntityPlayer));
-         server.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.emote", new Object[]{sender.getDisplayName(), itextcomponent}));
+         ITextComponent var4 = getChatComponentFromNthArg(var2, var3, 0, !(var2 instanceof EntityPlayer));
+         var1.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.emote", new Object[]{var2.getDisplayName(), var4}));
       }
    }
 
-   public List getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
-      return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
    }
 }

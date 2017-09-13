@@ -13,46 +13,50 @@ public class RecipesMapExtending extends ShapedRecipes {
       super(3, 3, new ItemStack[]{new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.FILLED_MAP, 0, 32767), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER), new ItemStack(Items.PAPER)}, new ItemStack(Items.MAP, 0, 0));
    }
 
-   public boolean matches(InventoryCrafting inv, World worldIn) {
-      if (!super.matches(inv, worldIn)) {
+   public boolean matches(InventoryCrafting var1, World var2) {
+      if (!super.matches(var1, var2)) {
          return false;
       } else {
-         ItemStack itemstack = null;
+         ItemStack var3 = null;
 
-         for(int i = 0; i < inv.getSizeInventory() && itemstack == null; ++i) {
-            ItemStack itemstack1 = inv.getStackInSlot(i);
-            if (itemstack1 != null && itemstack1.getItem() == Items.FILLED_MAP) {
-               itemstack = itemstack1;
+         for(int var4 = 0; var4 < var1.getSizeInventory() && var3 == null; ++var4) {
+            ItemStack var5 = var1.getStackInSlot(var4);
+            if (var5 != null && var5.getItem() == Items.FILLED_MAP) {
+               var3 = var5;
             }
          }
 
-         if (itemstack == null) {
+         if (var3 == null) {
             return false;
          } else {
-            MapData mapdata = Items.FILLED_MAP.getMapData(itemstack, worldIn);
-            return mapdata == null ? false : mapdata.scale < 4;
+            MapData var6 = Items.FILLED_MAP.getMapData(var3, var2);
+            if (var6 == null) {
+               return false;
+            } else {
+               return var6.scale < 4;
+            }
          }
       }
    }
 
    @Nullable
-   public ItemStack getCraftingResult(InventoryCrafting inv) {
-      ItemStack itemstack = null;
+   public ItemStack getCraftingResult(InventoryCrafting var1) {
+      ItemStack var2 = null;
 
-      for(int i = 0; i < inv.getSizeInventory() && itemstack == null; ++i) {
-         ItemStack itemstack1 = inv.getStackInSlot(i);
-         if (itemstack1 != null && itemstack1.getItem() == Items.FILLED_MAP) {
-            itemstack = itemstack1;
+      for(int var3 = 0; var3 < var1.getSizeInventory() && var2 == null; ++var3) {
+         ItemStack var4 = var1.getStackInSlot(var3);
+         if (var4 != null && var4.getItem() == Items.FILLED_MAP) {
+            var2 = var4;
          }
       }
 
-      itemstack = itemstack.copy();
-      itemstack.stackSize = 1;
-      if (itemstack.getTagCompound() == null) {
-         itemstack.setTagCompound(new NBTTagCompound());
+      var2 = var2.copy();
+      var2.stackSize = 1;
+      if (var2.getTagCompound() == null) {
+         var2.setTagCompound(new NBTTagCompound());
       }
 
-      itemstack.getTagCompound().setInteger("map_scale_direction", 1);
-      return itemstack;
+      var2.getTagCompound().setInteger("map_scale_direction", 1);
+      return var2;
    }
 }

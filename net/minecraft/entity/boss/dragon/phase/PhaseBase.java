@@ -13,8 +13,8 @@ import net.minecraft.util.math.Vec3d;
 public abstract class PhaseBase implements IPhase {
    protected final EntityDragon dragon;
 
-   public PhaseBase(EntityDragon dragonIn) {
-      this.dragon = dragonIn;
+   public PhaseBase(EntityDragon var1) {
+      this.dragon = var1;
    }
 
    public boolean getIsStationary() {
@@ -27,7 +27,7 @@ public abstract class PhaseBase implements IPhase {
    public void doLocalUpdate() {
    }
 
-   public void onCrystalDestroyed(EntityEnderCrystal crystal, BlockPos pos, DamageSource dmgSrc, @Nullable EntityPlayer plyr) {
+   public void onCrystalDestroyed(EntityEnderCrystal var1, BlockPos var2, DamageSource var3, @Nullable EntityPlayer var4) {
    }
 
    public void initPhase() {
@@ -45,13 +45,13 @@ public abstract class PhaseBase implements IPhase {
       return null;
    }
 
-   public float getAdjustedDamage(EntityDragonPart pt, DamageSource src, float damage) {
-      return damage;
+   public float getAdjustedDamage(EntityDragonPart var1, DamageSource var2, float var3) {
+      return var3;
    }
 
    public float getYawFactor() {
-      float f = MathHelper.sqrt(this.dragon.motionX * this.dragon.motionX + this.dragon.motionZ * this.dragon.motionZ) + 1.0F;
-      float f1 = Math.min(f, 40.0F);
-      return 0.7F / f1 / f;
+      float var1 = MathHelper.sqrt(this.dragon.motionX * this.dragon.motionX + this.dragon.motionZ * this.dragon.motionZ) + 1.0F;
+      float var2 = Math.min(var1, 40.0F);
+      return 0.7F / var2 / var1;
    }
 }

@@ -27,8 +27,8 @@ public class EntityEndermite extends EntityMob {
    private int lifetime;
    private boolean playerSpawned;
 
-   public EntityEndermite(World worldIn) {
-      super(worldIn);
+   public EntityEndermite(World var1) {
+      super(var1);
       this.experienceValue = 3;
       this.setSize(0.4F, 0.3F);
    }
@@ -70,7 +70,7 @@ public class EntityEndermite extends EntityMob {
       return SoundEvents.ENTITY_ENDERMITE_DEATH;
    }
 
-   protected void playStepSound(BlockPos pos, Block blockIn) {
+   protected void playStepSound(BlockPos var1, Block var2) {
       this.playSound(SoundEvents.ENTITY_ENDERMITE_STEP, 0.15F, 1.0F);
    }
 
@@ -79,20 +79,20 @@ public class EntityEndermite extends EntityMob {
       return LootTableList.ENTITIES_ENDERMITE;
    }
 
-   public static void registerFixesEndermite(DataFixer fixer) {
-      EntityLiving.registerFixesMob(fixer, "Endermite");
+   public static void registerFixesEndermite(DataFixer var0) {
+      EntityLiving.registerFixesMob(var0, "Endermite");
    }
 
-   public void readEntityFromNBT(NBTTagCompound compound) {
-      super.readEntityFromNBT(compound);
-      this.lifetime = compound.getInteger("Lifetime");
-      this.playerSpawned = compound.getBoolean("PlayerSpawned");
+   public void readEntityFromNBT(NBTTagCompound var1) {
+      super.readEntityFromNBT(var1);
+      this.lifetime = var1.getInteger("Lifetime");
+      this.playerSpawned = var1.getBoolean("PlayerSpawned");
    }
 
-   public void writeEntityToNBT(NBTTagCompound compound) {
-      super.writeEntityToNBT(compound);
-      compound.setInteger("Lifetime", this.lifetime);
-      compound.setBoolean("PlayerSpawned", this.playerSpawned);
+   public void writeEntityToNBT(NBTTagCompound var1) {
+      super.writeEntityToNBT(var1);
+      var1.setInteger("Lifetime", this.lifetime);
+      var1.setBoolean("PlayerSpawned", this.playerSpawned);
    }
 
    public void onUpdate() {
@@ -108,14 +108,14 @@ public class EntityEndermite extends EntityMob {
       return this.playerSpawned;
    }
 
-   public void setSpawnedByPlayer(boolean spawnedByPlayer) {
-      this.playerSpawned = spawnedByPlayer;
+   public void setSpawnedByPlayer(boolean var1) {
+      this.playerSpawned = var1;
    }
 
    public void onLivingUpdate() {
       super.onLivingUpdate();
       if (this.world.isRemote) {
-         for(int i = 0; i < 2; ++i) {
+         for(int var1 = 0; var1 < 2; ++var1) {
             this.world.spawnParticle(EnumParticleTypes.PORTAL, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, (this.rand.nextDouble() - 0.5D) * 2.0D, -this.rand.nextDouble(), (this.rand.nextDouble() - 0.5D) * 2.0D);
          }
       } else {
@@ -136,8 +136,8 @@ public class EntityEndermite extends EntityMob {
 
    public boolean getCanSpawnHere() {
       if (super.getCanSpawnHere()) {
-         EntityPlayer entityplayer = this.world.getClosestPlayerToEntity(this, 5.0D);
-         return entityplayer == null;
+         EntityPlayer var1 = this.world.getClosestPlayerToEntity(this, 5.0D);
+         return var1 == null;
       } else {
          return false;
       }

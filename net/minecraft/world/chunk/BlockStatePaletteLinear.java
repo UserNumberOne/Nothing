@@ -4,8 +4,6 @@ import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockStatePaletteLinear implements IBlockStatePalette {
    private final IBlockState[] states;
@@ -13,60 +11,50 @@ public class BlockStatePaletteLinear implements IBlockStatePalette {
    private final int bits;
    private int arraySize;
 
-   public BlockStatePaletteLinear(int p_i47088_1_, IBlockStatePaletteResizer p_i47088_2_) {
-      this.states = new IBlockState[1 << p_i47088_1_];
-      this.bits = p_i47088_1_;
-      this.resizeHandler = p_i47088_2_;
+   public BlockStatePaletteLinear(int var1, IBlockStatePaletteResizer var2) {
+      this.states = new IBlockState[1 << var1];
+      this.bits = var1;
+      this.resizeHandler = var2;
    }
 
-   public int idFor(IBlockState state) {
-      for(int i = 0; i < this.arraySize; ++i) {
-         if (this.states[i] == state) {
-            return i;
+   public int idFor(IBlockState var1) {
+      for(int var2 = 0; var2 < this.arraySize; ++var2) {
+         if (this.states[var2] == var1) {
+            return var2;
          }
       }
 
-      int j = this.arraySize;
-      if (j < this.states.length) {
-         this.states[j] = state;
+      int var3 = this.arraySize;
+      if (var3 < this.states.length) {
+         this.states[var3] = var1;
          ++this.arraySize;
-         return j;
+         return var3;
       } else {
-         return this.resizeHandler.onResize(this.bits + 1, state);
+         return this.resizeHandler.onResize(this.bits + 1, var1);
       }
    }
 
    @Nullable
-   public IBlockState getBlockState(int indexKey) {
-      return indexKey >= 0 && indexKey < this.arraySize ? this.states[indexKey] : null;
+   public IBlockState getBlockState(int var1) {
+      return var1 >= 0 && var1 < this.arraySize ? this.states[var1] : null;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void read(PacketBuffer buf) {
-      this.arraySize = buf.readVarInt();
+   public void write(PacketBuffer var1) {
+      var1.writeVarInt(this.arraySize);
 
-      for(int i = 0; i < this.arraySize; ++i) {
-         this.states[i] = (IBlockState)Block.BLOCK_STATE_IDS.getByValue(buf.readVarInt());
-      }
-
-   }
-
-   public void write(PacketBuffer buf) {
-      buf.writeVarInt(this.arraySize);
-
-      for(int i = 0; i < this.arraySize; ++i) {
-         buf.writeVarInt(Block.BLOCK_STATE_IDS.get(this.states[i]));
+      for(int var2 = 0; var2 < this.arraySize; ++var2) {
+         var1.writeVarInt(Block.BLOCK_STATE_IDS.get(this.states[var2]));
       }
 
    }
 
    public int getSerializedState() {
-      int i = PacketBuffer.getVarIntSize(this.arraySize);
+      int var1 = PacketBuffer.getVarIntSize(this.arraySize);
 
-      for(int j = 0; j < this.arraySize; ++j) {
-         i += PacketBuffer.getVarIntSize(Block.BLOCK_STATE_IDS.get(this.states[j]));
+      for(int var2 = 0; var2 < this.arraySize; ++var2) {
+         var1 += PacketBuffer.getVarIntSize(Block.BLOCK_STATE_IDS.get(this.states[var2]));
       }
 
-      return i;
+      return var1;
    }
 }

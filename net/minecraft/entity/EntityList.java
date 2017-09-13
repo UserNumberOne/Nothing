@@ -2,6 +2,7 @@ package net.minecraft.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,177 +79,164 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLLog;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class EntityList {
    private static final Logger LOGGER = LogManager.getLogger();
-   public static final Map NAME_TO_CLASS = Maps.newHashMap();
-   public static final Map CLASS_TO_NAME = Maps.newHashMap();
-   public static final Map ID_TO_CLASS = Maps.newHashMap();
+   private static final Map NAME_TO_CLASS = Maps.newHashMap();
+   private static final Map CLASS_TO_NAME = Maps.newHashMap();
+   private static final Map ID_TO_CLASS = Maps.newHashMap();
    private static final Map CLASS_TO_ID = Maps.newHashMap();
    private static final Map NAME_TO_ID = Maps.newHashMap();
    public static final Map ENTITY_EGGS = Maps.newLinkedHashMap();
 
-   public static void addMapping(Class entityClass, String entityName, int id) {
-      if (id >= 0 && id <= 255) {
-         if (NAME_TO_CLASS.containsKey(entityName)) {
-            throw new IllegalArgumentException("ID is already registered: " + entityName);
-         } else if (ID_TO_CLASS.containsKey(Integer.valueOf(id))) {
-            throw new IllegalArgumentException("ID is already registered: " + id);
-         } else if (id == 0) {
-            throw new IllegalArgumentException("Cannot register to reserved id: " + id);
-         } else if (entityClass == null) {
-            throw new IllegalArgumentException("Cannot register null clazz for id: " + id);
-         } else {
-            NAME_TO_CLASS.put(entityName, entityClass);
-            CLASS_TO_NAME.put(entityClass, entityName);
-            ID_TO_CLASS.put(Integer.valueOf(id), entityClass);
-            CLASS_TO_ID.put(entityClass, Integer.valueOf(id));
-            NAME_TO_ID.put(entityName, Integer.valueOf(id));
-         }
+   private static void addMapping(Class var0, String var1, int var2) {
+      if (NAME_TO_CLASS.containsKey(var1)) {
+         throw new IllegalArgumentException("ID is already registered: " + var1);
+      } else if (ID_TO_CLASS.containsKey(Integer.valueOf(var2))) {
+         throw new IllegalArgumentException("ID is already registered: " + var2);
+      } else if (var2 == 0) {
+         throw new IllegalArgumentException("Cannot register to reserved id: " + var2);
+      } else if (var0 == null) {
+         throw new IllegalArgumentException("Cannot register null clazz for id: " + var2);
       } else {
-         throw new IllegalArgumentException("Attempted to register a entity with invalid ID: " + id + " Name: " + entityName + " Class: " + entityClass);
+         NAME_TO_CLASS.put(var1, var0);
+         CLASS_TO_NAME.put(var0, var1);
+         ID_TO_CLASS.put(Integer.valueOf(var2), var0);
+         CLASS_TO_ID.put(var0, Integer.valueOf(var2));
+         NAME_TO_ID.put(var1, Integer.valueOf(var2));
       }
    }
 
-   public static void addMapping(Class entityClass, String entityName, int entityID, int baseColor, int spotColor) {
-      addMapping(entityClass, entityName, entityID);
-      ENTITY_EGGS.put(entityName, new EntityList.EntityEggInfo(entityName, baseColor, spotColor));
+   private static void addMapping(Class var0, String var1, int var2, int var3, int var4) {
+      addMapping(var0, var1, var2);
+      ENTITY_EGGS.put(var1, new EntityList.EntityEggInfo(var1, var3, var4));
    }
 
    @Nullable
-   public static Entity createEntityByName(String entityName, World worldIn) {
-      Entity entity = null;
+   public static Entity createEntityByName(String var0, World var1) {
+      Entity var2 = null;
 
       try {
-         Class oclass = (Class)NAME_TO_CLASS.get(entityName);
-         if (oclass != null) {
-            entity = (Entity)oclass.getConstructor(World.class).newInstance(worldIn);
+         Class var3 = (Class)NAME_TO_CLASS.get(var0);
+         if (var3 != null) {
+            var2 = (Entity)var3.getConstructor(World.class).newInstance(var1);
          }
       } catch (Exception var4) {
          var4.printStackTrace();
       }
 
-      return entity;
+      return var2;
    }
 
    @Nullable
-   public static Entity createEntityFromNBT(NBTTagCompound nbt, World worldIn) {
-      Entity entity = null;
-      Class oclass = null;
+   public static Entity createEntityFromNBT(NBTTagCompound var0, World var1) {
+      Entity var2 = null;
 
       try {
-         oclass = (Class)NAME_TO_CLASS.get(nbt.getString("id"));
-         if (oclass != null) {
-            entity = (Entity)oclass.getConstructor(World.class).newInstance(worldIn);
-         }
-      } catch (Exception var6) {
-         var6.printStackTrace();
-      }
-
-      if (entity != null) {
-         try {
-            entity.readFromNBT(nbt);
-         } catch (Exception var5) {
-            FMLLog.log(Level.ERROR, var5, "An Entity %s(%s) has thrown an exception during loading, its state cannot be restored. Report this to the mod author", new Object[]{nbt.getString("id"), oclass.getName()});
-            entity = null;
-         }
-      } else {
-         LOGGER.warn("Skipping Entity with id {}", new Object[]{nbt.getString("id")});
-      }
-
-      return entity;
-   }
-
-   @Nullable
-   public static Entity createEntityByID(int entityID, World worldIn) {
-      Entity entity = null;
-
-      try {
-         Class oclass = getClassFromID(entityID);
-         if (oclass != null) {
-            entity = (Entity)oclass.getConstructor(World.class).newInstance(worldIn);
+         Class var3 = (Class)NAME_TO_CLASS.get(var0.getString("id"));
+         if (var3 != null) {
+            var2 = (Entity)var3.getConstructor(World.class).newInstance(var1);
          }
       } catch (Exception var4) {
          var4.printStackTrace();
       }
 
-      if (entity == null) {
-         LOGGER.warn("Skipping Entity with id {}", new Object[]{entityID});
+      if (var2 != null) {
+         var2.readFromNBT(var0);
+      } else {
+         LOGGER.warn("Skipping Entity with id {}", new Object[]{var0.getString("id")});
       }
 
-      return entity;
+      return var2;
    }
 
    @Nullable
-   public static Entity createEntityByIDFromName(String name, World worldIn) {
-      Entity e = createEntityByName(name, worldIn);
-      return e == null ? createEntityByName("Pig", worldIn) : e;
-   }
+   public static Entity createEntityByID(int var0, World var1) {
+      Entity var2 = null;
 
-   public static int getEntityID(Entity entityIn) {
-      Integer integer = (Integer)CLASS_TO_ID.get(entityIn.getClass());
-      return integer == null ? 0 : integer.intValue();
+      try {
+         Class var3 = getClassFromID(var0);
+         if (var3 != null) {
+            var2 = (Entity)var3.getConstructor(World.class).newInstance(var1);
+         }
+      } catch (Exception var4) {
+         var4.printStackTrace();
+      }
+
+      if (var2 == null) {
+         LOGGER.warn("Skipping Entity with id {}", new Object[]{var0});
+      }
+
+      return var2;
    }
 
    @Nullable
-   public static Class getClassFromID(int entityID) {
-      return (Class)ID_TO_CLASS.get(Integer.valueOf(entityID));
+   public static Entity createEntityByIDFromName(String var0, World var1) {
+      return createEntityByID(getIDFromString(var0), var1);
    }
 
-   public static String getEntityString(Entity entityIn) {
-      return getEntityStringFromClass(entityIn.getClass());
+   public static int getEntityID(Entity var0) {
+      Integer var1 = (Integer)CLASS_TO_ID.get(var0.getClass());
+      return var1 == null ? 0 : var1.intValue();
    }
 
-   public static String getEntityStringFromClass(Class entityClass) {
-      return (String)CLASS_TO_NAME.get(entityClass);
+   @Nullable
+   public static Class getClassFromID(int var0) {
+      return (Class)ID_TO_CLASS.get(Integer.valueOf(var0));
    }
 
-   public static int getIDFromString(String entityName) {
-      Integer integer = (Integer)NAME_TO_ID.get(entityName);
-      return integer == null ? 90 : integer.intValue();
+   public static String getEntityString(Entity var0) {
+      return getEntityStringFromClass(var0.getClass());
+   }
+
+   public static String getEntityStringFromClass(Class var0) {
+      return (String)CLASS_TO_NAME.get(var0);
+   }
+
+   public static int getIDFromString(String var0) {
+      Integer var1 = (Integer)NAME_TO_ID.get(var0);
+      return var1 == null ? 90 : var1.intValue();
    }
 
    public static void init() {
    }
 
    public static List getEntityNameList() {
-      Set set = NAME_TO_CLASS.keySet();
-      List list = Lists.newArrayList();
+      Set var0 = NAME_TO_CLASS.keySet();
+      ArrayList var1 = Lists.newArrayList();
 
-      for(String s : set) {
-         Class oclass = (Class)NAME_TO_CLASS.get(s);
-         if ((oclass.getModifiers() & 1024) != 1024) {
-            list.add(s);
+      for(String var3 : var0) {
+         Class var4 = (Class)NAME_TO_CLASS.get(var3);
+         if ((var4.getModifiers() & 1024) != 1024) {
+            var1.add(var3);
          }
       }
 
-      list.add("LightningBolt");
-      return list;
+      var1.add("LightningBolt");
+      return var1;
    }
 
-   public static boolean isStringEntityName(Entity entityIn, String entityName) {
-      String s = getEntityString(entityIn);
-      if (s == null) {
-         if (entityIn instanceof EntityPlayer) {
-            s = "Player";
+   public static boolean isStringEntityName(Entity var0, String var1) {
+      String var2 = getEntityString(var0);
+      if (var2 == null) {
+         if (var0 instanceof EntityPlayer) {
+            var2 = "Player";
          } else {
-            if (!(entityIn instanceof EntityLightningBolt)) {
+            if (!(var0 instanceof EntityLightningBolt)) {
                return false;
             }
 
-            s = "LightningBolt";
+            var2 = "LightningBolt";
          }
       }
 
-      return entityName.equals(s);
+      return var1.equals(var2);
    }
 
-   public static boolean isStringValidEntityName(String entityName) {
-      return "Player".equals(entityName) || getEntityNameList().contains(entityName);
+   public static boolean isStringValidEntityName(String var0) {
+      return "Player".equals(var0) || getEntityNameList().contains(var0);
    }
 
    static {
@@ -329,10 +317,10 @@ public class EntityList {
       public final StatBase killEntityStat;
       public final StatBase entityKilledByStat;
 
-      public EntityEggInfo(String spawnedIDIn, int primColor, int secondColor) {
-         this.spawnedID = spawnedIDIn;
-         this.primaryColor = primColor;
-         this.secondaryColor = secondColor;
+      public EntityEggInfo(String var1, int var2, int var3) {
+         this.spawnedID = var1;
+         this.primaryColor = var2;
+         this.secondaryColor = var3;
          this.killEntityStat = StatList.getStatKillEntity(this);
          this.entityKilledByStat = StatList.getStatEntityKilledBy(this);
       }

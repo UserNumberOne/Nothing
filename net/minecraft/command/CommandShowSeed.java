@@ -1,13 +1,13 @@
 package net.minecraft.command;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 public class CommandShowSeed extends CommandBase {
-   public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
-      return server.isSinglePlayer() || super.checkPermission(server, sender);
+   public boolean canUse(MinecraftServer var1, ICommandSender var2) {
+      return var1.R() || super.canUse(var1, var2);
    }
 
    public String getName() {
@@ -18,12 +18,12 @@ public class CommandShowSeed extends CommandBase {
       return 2;
    }
 
-   public String getUsage(ICommandSender sender) {
+   public String getUsage(ICommandSender var1) {
       return "commands.seed.usage";
    }
 
-   public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-      World world = (World)(sender instanceof EntityPlayer ? ((EntityPlayer)sender).world : server.worldServerForDimension(0));
-      sender.sendMessage(new TextComponentTranslation("commands.seed.success", new Object[]{world.getSeed()}));
+   public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
+      Object var4 = var2 instanceof EntityPlayer ? ((EntityPlayer)var2).world : var1.getWorldServer(0);
+      var2.sendMessage(new TextComponentTranslation("commands.seed.success", new Object[]{((World)var4).getSeed()}));
    }
 }

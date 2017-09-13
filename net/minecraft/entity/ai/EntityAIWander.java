@@ -12,14 +12,14 @@ public class EntityAIWander extends EntityAIBase {
    private int executionChance;
    private boolean mustUpdate;
 
-   public EntityAIWander(EntityCreature creatureIn, double speedIn) {
-      this(creatureIn, speedIn, 120);
+   public EntityAIWander(EntityCreature var1, double var2) {
+      this(var1, var2, 120);
    }
 
-   public EntityAIWander(EntityCreature creatureIn, double speedIn, int chance) {
-      this.entity = creatureIn;
-      this.speed = speedIn;
-      this.executionChance = chance;
+   public EntityAIWander(EntityCreature var1, double var2, int var4) {
+      this.entity = var1;
+      this.speed = var2;
+      this.executionChance = var4;
       this.setMutexBits(1);
    }
 
@@ -34,13 +34,13 @@ public class EntityAIWander extends EntityAIBase {
          }
       }
 
-      Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
-      if (vec3d == null) {
+      Vec3d var1 = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+      if (var1 == null) {
          return false;
       } else {
-         this.xPosition = vec3d.xCoord;
-         this.yPosition = vec3d.yCoord;
-         this.zPosition = vec3d.zCoord;
+         this.xPosition = var1.xCoord;
+         this.yPosition = var1.yCoord;
+         this.zPosition = var1.zCoord;
          this.mustUpdate = false;
          return true;
       }
@@ -58,7 +58,7 @@ public class EntityAIWander extends EntityAIBase {
       this.mustUpdate = true;
    }
 
-   public void setExecutionChance(int newchance) {
-      this.executionChance = newchance;
+   public void setExecutionChance(int var1) {
+      this.executionChance = var1;
    }
 }

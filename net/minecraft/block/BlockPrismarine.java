@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -8,12 +7,8 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockPrismarine extends Block {
    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockPrismarine.EnumType.class);
@@ -31,31 +26,24 @@ public class BlockPrismarine extends Block {
       return I18n.translateToLocal(this.getUnlocalizedName() + "." + BlockPrismarine.EnumType.ROUGH.getUnlocalizedName() + ".name");
    }
 
-   public MapColor getMapColor(IBlockState state) {
-      return state.getValue(VARIANT) == BlockPrismarine.EnumType.ROUGH ? MapColor.CYAN : MapColor.DIAMOND;
+   public MapColor getMapColor(IBlockState var1) {
+      return var1.getValue(VARIANT) == BlockPrismarine.EnumType.ROUGH ? MapColor.CYAN : MapColor.DIAMOND;
    }
 
-   public int damageDropped(IBlockState state) {
-      return ((BlockPrismarine.EnumType)state.getValue(VARIANT)).getMetadata();
+   public int damageDropped(IBlockState var1) {
+      return ((BlockPrismarine.EnumType)var1.getValue(VARIANT)).getMetadata();
    }
 
-   public int getMetaFromState(IBlockState state) {
-      return ((BlockPrismarine.EnumType)state.getValue(VARIANT)).getMetadata();
+   public int getMetaFromState(IBlockState var1) {
+      return ((BlockPrismarine.EnumType)var1.getValue(VARIANT)).getMetadata();
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{VARIANT});
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      return this.getDefaultState().withProperty(VARIANT, BlockPrismarine.EnumType.byMetadata(meta));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
-      list.add(new ItemStack(itemIn, 1, ROUGH_META));
-      list.add(new ItemStack(itemIn, 1, BRICKS_META));
-      list.add(new ItemStack(itemIn, 1, DARK_META));
+   public IBlockState getStateFromMeta(int var1) {
+      return this.getDefaultState().withProperty(VARIANT, BlockPrismarine.EnumType.byMetadata(var1));
    }
 
    public static enum EnumType implements IStringSerializable {
@@ -68,10 +56,10 @@ public class BlockPrismarine extends Block {
       private final String name;
       private final String unlocalizedName;
 
-      private EnumType(int meta, String name, String unlocalizedName) {
-         this.meta = meta;
-         this.name = name;
-         this.unlocalizedName = unlocalizedName;
+      private EnumType(int var3, String var4, String var5) {
+         this.meta = var3;
+         this.name = var4;
+         this.unlocalizedName = var5;
       }
 
       public int getMetadata() {
@@ -82,12 +70,12 @@ public class BlockPrismarine extends Block {
          return this.name;
       }
 
-      public static BlockPrismarine.EnumType byMetadata(int meta) {
-         if (meta < 0 || meta >= META_LOOKUP.length) {
-            meta = 0;
+      public static BlockPrismarine.EnumType byMetadata(int var0) {
+         if (var0 < 0 || var0 >= META_LOOKUP.length) {
+            var0 = 0;
          }
 
-         return META_LOOKUP[meta];
+         return META_LOOKUP[var0];
       }
 
       public String getName() {
@@ -99,8 +87,8 @@ public class BlockPrismarine extends Block {
       }
 
       static {
-         for(BlockPrismarine.EnumType blockprismarine$enumtype : values()) {
-            META_LOOKUP[blockprismarine$enumtype.getMetadata()] = blockprismarine$enumtype;
+         for(BlockPrismarine.EnumType var3 : values()) {
+            META_LOOKUP[var3.getMetadata()] = var3;
          }
 
       }

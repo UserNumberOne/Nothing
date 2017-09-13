@@ -34,12 +34,12 @@ public class Enchantments {
    public static final Enchantment MENDING = getRegisteredEnchantment("mending");
 
    @Nullable
-   private static Enchantment getRegisteredEnchantment(String id) {
-      Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getObject(new ResourceLocation(id));
-      if (enchantment == null) {
-         throw new IllegalStateException("Invalid Enchantment requested: " + id);
+   private static Enchantment getRegisteredEnchantment(String var0) {
+      Enchantment var1 = (Enchantment)Enchantment.REGISTRY.getObject(new ResourceLocation(var0));
+      if (var1 == null) {
+         throw new IllegalStateException("Invalid Enchantment requested: " + var0);
       } else {
-         return enchantment;
+         return var1;
       }
    }
 

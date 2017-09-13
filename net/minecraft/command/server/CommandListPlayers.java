@@ -4,7 +4,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -17,14 +17,14 @@ public class CommandListPlayers extends CommandBase {
       return 0;
    }
 
-   public String getUsage(ICommandSender sender) {
+   public String getUsage(ICommandSender var1) {
       return "commands.players.usage";
    }
 
-   public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-      int i = server.getCurrentPlayerCount();
-      sender.sendMessage(new TextComponentTranslation("commands.players.list", new Object[]{i, server.getMaxPlayers()}));
-      sender.sendMessage(new TextComponentString(server.getPlayerList().getFormattedListOfPlayers(args.length > 0 && "uuids".equalsIgnoreCase(args[0]))));
-      sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, i);
+   public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
+      int var4 = var1.H();
+      var2.sendMessage(new TextComponentTranslation("commands.players.list", new Object[]{var4, var1.I()}));
+      var2.sendMessage(new TextComponentString(var1.getPlayerList().getFormattedListOfPlayers(var3.length > 0 && "uuids".equalsIgnoreCase(var3[0]))));
+      var2.setCommandStat(CommandResultStats.Type.QUERY_RESULT, var4);
    }
 }

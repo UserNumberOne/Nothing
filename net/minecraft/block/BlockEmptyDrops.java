@@ -7,16 +7,16 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 
 public class BlockEmptyDrops extends Block {
-   public BlockEmptyDrops(Material materialIn) {
-      super(materialIn);
+   public BlockEmptyDrops(Material var1) {
+      super(var1);
    }
 
-   public int quantityDropped(Random random) {
+   public int quantityDropped(Random var1) {
       return 0;
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return null;
    }
 }

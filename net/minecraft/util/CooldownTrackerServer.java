@@ -7,17 +7,17 @@ import net.minecraft.network.play.server.SPacketCooldown;
 public class CooldownTrackerServer extends CooldownTracker {
    private final EntityPlayerMP player;
 
-   public CooldownTrackerServer(EntityPlayerMP playerIn) {
-      this.player = playerIn;
+   public CooldownTrackerServer(EntityPlayerMP var1) {
+      this.player = var1;
    }
 
-   protected void notifyOnSet(Item itemIn, int ticksIn) {
-      super.notifyOnSet(itemIn, ticksIn);
-      this.player.connection.sendPacket(new SPacketCooldown(itemIn, ticksIn));
+   protected void notifyOnSet(Item var1, int var2) {
+      super.notifyOnSet(var1, var2);
+      this.player.connection.sendPacket(new SPacketCooldown(var1, var2));
    }
 
-   protected void notifyOnRemove(Item itemIn) {
-      super.notifyOnRemove(itemIn);
-      this.player.connection.sendPacket(new SPacketCooldown(itemIn, 0));
+   protected void notifyOnRemove(Item var1) {
+      super.notifyOnRemove(var1);
+      this.player.connection.sendPacket(new SPacketCooldown(var1, 0));
    }
 }

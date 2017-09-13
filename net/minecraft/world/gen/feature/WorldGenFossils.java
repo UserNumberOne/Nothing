@@ -1,7 +1,7 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
@@ -33,35 +33,35 @@ public class WorldGenFossils extends WorldGenerator {
    private static final ResourceLocation[] FOSSILS = new ResourceLocation[]{STRUCTURE_SPINE_01, STRUCTURE_SPINE_02, STRUCTURE_SPINE_03, STRUCTURE_SPINE_04, STRUCTURE_SKULL_01, STRUCTURE_SKULL_02, STRUCTURE_SKULL_03, STRUCTURE_SKULL_04};
    private static final ResourceLocation[] FOSSILS_COAL = new ResourceLocation[]{STRUCTURE_SPINE_01_COAL, STRUCTURE_SPINE_02_COAL, STRUCTURE_SPINE_03_COAL, STRUCTURE_SPINE_04_COAL, STRUCTURE_SKULL_01_COAL, STRUCTURE_SKULL_02_COAL, STRUCTURE_SKULL_03_COAL, STRUCTURE_SKULL_04_COAL};
 
-   public boolean generate(World worldIn, Random rand, BlockPos position) {
-      Random random = worldIn.getChunkFromChunkCoords(position.getX(), position.getZ()).getRandomWithSeed(987234911L);
-      MinecraftServer minecraftserver = worldIn.getMinecraftServer();
-      Rotation[] arotation = Rotation.values();
-      Rotation rotation = arotation[random.nextInt(arotation.length)];
-      int i = random.nextInt(FOSSILS.length);
-      TemplateManager templatemanager = worldIn.getSaveHandler().getStructureTemplateManager();
-      Template template = templatemanager.getTemplate(minecraftserver, FOSSILS[i]);
-      Template template1 = templatemanager.getTemplate(minecraftserver, FOSSILS_COAL[i]);
-      ChunkPos chunkpos = new ChunkPos(position);
-      StructureBoundingBox structureboundingbox = new StructureBoundingBox(chunkpos.getXStart(), 0, chunkpos.getZStart(), chunkpos.getXEnd(), 256, chunkpos.getZEnd());
-      PlacementSettings placementsettings = (new PlacementSettings()).setRotation(rotation).setBoundingBox(structureboundingbox).setRandom(random);
-      BlockPos blockpos = template.transformedSize(rotation);
-      int j = random.nextInt(16 - blockpos.getX());
-      int k = random.nextInt(16 - blockpos.getZ());
-      int l = 256;
+   public boolean generate(World var1, Random var2, BlockPos var3) {
+      Random var4 = var1.getChunkFromChunkCoords(var3.getX(), var3.getZ()).getRandomWithSeed(987234911L);
+      MinecraftServer var5 = var1.getMinecraftServer();
+      Rotation[] var6 = Rotation.values();
+      Rotation var7 = var6[var4.nextInt(var6.length)];
+      int var8 = var4.nextInt(FOSSILS.length);
+      TemplateManager var9 = var1.getSaveHandler().getStructureTemplateManager();
+      Template var10 = var9.a(var5, FOSSILS[var8]);
+      Template var11 = var9.a(var5, FOSSILS_COAL[var8]);
+      ChunkPos var12 = new ChunkPos(var3);
+      StructureBoundingBox var13 = new StructureBoundingBox(var12.getXStart(), 0, var12.getZStart(), var12.getXEnd(), 256, var12.getZEnd());
+      PlacementSettings var14 = (new PlacementSettings()).setRotation(var7).setBoundingBox(var13).setRandom(var4);
+      BlockPos var15 = var10.transformedSize(var7);
+      int var16 = var4.nextInt(16 - var15.getX());
+      int var17 = var4.nextInt(16 - var15.getZ());
+      int var18 = 256;
 
-      for(int i1 = 0; i1 < blockpos.getX(); ++i1) {
-         for(int j1 = 0; j1 < blockpos.getX(); ++j1) {
-            l = Math.min(l, worldIn.getHeight(position.getX() + i1 + j, position.getZ() + j1 + k));
+      for(int var19 = 0; var19 < var15.getX(); ++var19) {
+         for(int var20 = 0; var20 < var15.getX(); ++var20) {
+            var18 = Math.min(var18, var1.getHeight(var3.getX() + var19 + var16, var3.getZ() + var20 + var17));
          }
       }
 
-      int k1 = Math.max(l - 15 - random.nextInt(10), 10);
-      BlockPos blockpos1 = template.getZeroPositionWithTransform(position.add(j, k1, k), Mirror.NONE, rotation);
-      placementsettings.setIntegrity(0.9F);
-      template.addBlocksToWorld(worldIn, blockpos1, placementsettings, 4);
-      placementsettings.setIntegrity(0.1F);
-      template1.addBlocksToWorld(worldIn, blockpos1, placementsettings, 4);
+      int var21 = Math.max(var18 - 15 - var4.nextInt(10), 10);
+      BlockPos var22 = var10.getZeroPositionWithTransform(var3.add(var16, var21, var17), Mirror.NONE, var7);
+      var14.setIntegrity(0.9F);
+      var10.addBlocksToWorld(var1, var22, var14, 4);
+      var14.setIntegrity(0.1F);
+      var11.addBlocksToWorld(var1, var22, var14, 4);
       return true;
    }
 }

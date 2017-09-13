@@ -21,37 +21,37 @@ public abstract class StructureComponentTemplate extends StructureComponent {
       this.placeSettings = DEFAULT_PLACE_SETTINGS.setIgnoreEntities(true).setReplacedBlock(Blocks.AIR);
    }
 
-   public StructureComponentTemplate(int p_i46662_1_) {
-      super(p_i46662_1_);
+   public StructureComponentTemplate(int var1) {
+      super(var1);
       this.placeSettings = DEFAULT_PLACE_SETTINGS.setIgnoreEntities(true).setReplacedBlock(Blocks.AIR);
    }
 
-   protected void setup(Template p_186173_1_, BlockPos p_186173_2_, PlacementSettings p_186173_3_) {
-      this.template = p_186173_1_;
+   protected void setup(Template var1, BlockPos var2, PlacementSettings var3) {
+      this.template = var1;
       this.setCoordBaseMode(EnumFacing.NORTH);
-      this.templatePosition = p_186173_2_;
-      this.placeSettings = p_186173_3_;
+      this.templatePosition = var2;
+      this.placeSettings = var3;
       this.setBoundingBoxFromTemplate();
    }
 
-   protected void writeStructureToNBT(NBTTagCompound tagCompound) {
-      tagCompound.setInteger("TPX", this.templatePosition.getX());
-      tagCompound.setInteger("TPY", this.templatePosition.getY());
-      tagCompound.setInteger("TPZ", this.templatePosition.getZ());
+   protected void writeStructureToNBT(NBTTagCompound var1) {
+      var1.setInteger("TPX", this.templatePosition.getX());
+      var1.setInteger("TPY", this.templatePosition.getY());
+      var1.setInteger("TPZ", this.templatePosition.getZ());
    }
 
-   protected void readStructureFromNBT(NBTTagCompound tagCompound) {
-      this.templatePosition = new BlockPos(tagCompound.getInteger("TPX"), tagCompound.getInteger("TPY"), tagCompound.getInteger("TPZ"));
+   protected void readStructureFromNBT(NBTTagCompound var1) {
+      this.templatePosition = new BlockPos(var1.getInteger("TPX"), var1.getInteger("TPY"), var1.getInteger("TPZ"));
    }
 
-   public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn) {
-      this.placeSettings.setBoundingBox(structureBoundingBoxIn);
-      this.template.addBlocksToWorld(worldIn, this.templatePosition, this.placeSettings);
-      Map map = this.template.getDataBlocks(this.templatePosition, this.placeSettings);
+   public boolean addComponentParts(World var1, Random var2, StructureBoundingBox var3) {
+      this.placeSettings.setBoundingBox(var3);
+      this.template.addBlocksToWorld(var1, this.templatePosition, this.placeSettings);
+      Map var4 = this.template.getDataBlocks(this.templatePosition, this.placeSettings);
 
-      for(BlockPos blockpos : map.keySet()) {
-         String s = (String)map.get(blockpos);
-         this.handleDataMarker(s, blockpos, worldIn, randomIn, structureBoundingBoxIn);
+      for(BlockPos var6 : var4.keySet()) {
+         String var7 = (String)var4.get(var6);
+         this.handleDataMarker(var7, var6, var1, var2, var3);
       }
 
       return true;
@@ -60,28 +60,28 @@ public abstract class StructureComponentTemplate extends StructureComponent {
    protected abstract void handleDataMarker(String var1, BlockPos var2, World var3, Random var4, StructureBoundingBox var5);
 
    private void setBoundingBoxFromTemplate() {
-      Rotation rotation = this.placeSettings.getRotation();
-      BlockPos blockpos = this.template.transformedSize(rotation);
-      this.boundingBox = new StructureBoundingBox(0, 0, 0, blockpos.getX(), blockpos.getY() - 1, blockpos.getZ());
-      switch(rotation) {
+      Rotation var1 = this.placeSettings.getRotation();
+      BlockPos var2 = this.template.transformedSize(var1);
+      this.boundingBox = new StructureBoundingBox(0, 0, 0, var2.getX(), var2.getY() - 1, var2.getZ());
+      switch(var1) {
       case NONE:
       default:
          break;
       case CLOCKWISE_90:
-         this.boundingBox.offset(-blockpos.getX(), 0, 0);
+         this.boundingBox.offset(-var2.getX(), 0, 0);
          break;
       case COUNTERCLOCKWISE_90:
-         this.boundingBox.offset(0, 0, -blockpos.getZ());
+         this.boundingBox.offset(0, 0, -var2.getZ());
          break;
       case CLOCKWISE_180:
-         this.boundingBox.offset(-blockpos.getX(), 0, -blockpos.getZ());
+         this.boundingBox.offset(-var2.getX(), 0, -var2.getZ());
       }
 
       this.boundingBox.offset(this.templatePosition.getX(), this.templatePosition.getY(), this.templatePosition.getZ());
    }
 
-   public void offset(int x, int y, int z) {
-      super.offset(x, y, z);
-      this.templatePosition = this.templatePosition.add(x, y, z);
+   public void offset(int var1, int var2, int var3) {
+      super.offset(var1, var2, var3);
+      this.templatePosition = this.templatePosition.add(var1, var2, var3);
    }
 }

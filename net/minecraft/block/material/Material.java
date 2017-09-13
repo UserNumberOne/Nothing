@@ -49,8 +49,8 @@ public class Material {
    private EnumPushReaction mobilityFlag = EnumPushReaction.NORMAL;
    private boolean isAdventureModeExempt;
 
-   public Material(MapColor color) {
-      this.materialMapColor = color;
+   public Material(MapColor var1) {
+      this.materialMapColor = var1;
    }
 
    public boolean isLiquid() {

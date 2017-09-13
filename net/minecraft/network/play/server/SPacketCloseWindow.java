@@ -11,19 +11,19 @@ public class SPacketCloseWindow implements Packet {
    public SPacketCloseWindow() {
    }
 
-   public SPacketCloseWindow(int windowIdIn) {
-      this.windowId = windowIdIn;
+   public SPacketCloseWindow(int var1) {
+      this.windowId = var1;
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleCloseWindow(this);
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleCloseWindow(this);
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.windowId = buf.readUnsignedByte();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.windowId = var1.readUnsignedByte();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeByte(this.windowId);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeByte(this.windowId);
    }
 }

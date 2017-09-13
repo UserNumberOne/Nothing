@@ -28,6 +28,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.event.block.CauldronLevelChangeEvent;
+import org.bukkit.event.block.CauldronLevelChangeEvent.ChangeReason;
 
 public class BlockCauldron extends Block {
    public static final PropertyInteger LEVEL = PropertyInteger.create("level", 0, 3);
@@ -42,118 +44,132 @@ public class BlockCauldron extends Block {
       this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(0)));
    }
 
-   public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List collidingBoxes, @Nullable Entity entityIn) {
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_LEGS);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_WALL_WEST);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_WALL_NORTH);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_WALL_EAST);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_WALL_SOUTH);
+   public void addCollisionBoxToList(IBlockState iblockdata, World world, BlockPos blockposition, AxisAlignedBB axisalignedbb, List list, @Nullable Entity entity) {
+      addCollisionBoxToList(blockposition, axisalignedbb, list, AABB_LEGS);
+      addCollisionBoxToList(blockposition, axisalignedbb, list, AABB_WALL_WEST);
+      addCollisionBoxToList(blockposition, axisalignedbb, list, AABB_WALL_NORTH);
+      addCollisionBoxToList(blockposition, axisalignedbb, list, AABB_WALL_EAST);
+      addCollisionBoxToList(blockposition, axisalignedbb, list, AABB_WALL_SOUTH);
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
       return FULL_BLOCK_AABB;
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
-      int i = ((Integer)state.getValue(LEVEL)).intValue();
-      float f = (float)pos.getY() + (6.0F + (float)(3 * i)) / 16.0F;
-      if (!worldIn.isRemote && entityIn.isBurning() && i > 0 && entityIn.getEntityBoundingBox().minY <= (double)f) {
-         entityIn.extinguish();
-         this.setWaterLevel(worldIn, pos, state, i - 1);
+   public void onEntityCollidedWithBlock(World world, BlockPos blockposition, IBlockState iblockdata, Entity entity) {
+      int i = ((Integer)iblockdata.getValue(LEVEL)).intValue();
+      float f = (float)blockposition.getY() + (6.0F + (float)(3 * i)) / 16.0F;
+      if (!world.isRemote && entity.isBurning() && i > 0 && entity.getEntityBoundingBox().minY <= (double)f) {
+         if (!this.changeLevel(world, blockposition, iblockdata, i - 1, entity, ChangeReason.EXTINGUISH)) {
+            return;
+         }
+
+         entity.extinguish();
       }
 
    }
 
-   public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-      if (heldItem == null) {
+   public boolean onBlockActivated(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack, EnumFacing enumdirection, float f, float f1, float f2) {
+      if (itemstack == null) {
          return true;
       } else {
-         int i = ((Integer)state.getValue(LEVEL)).intValue();
-         Item item = heldItem.getItem();
+         int i = ((Integer)iblockdata.getValue(LEVEL)).intValue();
+         Item item = itemstack.getItem();
          if (item == Items.WATER_BUCKET) {
-            if (i < 3 && !worldIn.isRemote) {
-               if (!playerIn.capabilities.isCreativeMode) {
-                  playerIn.setHeldItem(hand, new ItemStack(Items.BUCKET));
+            if (i < 3 && !world.isRemote) {
+               if (!this.changeLevel(world, blockposition, iblockdata, 3, entityhuman, ChangeReason.BUCKET_EMPTY)) {
+                  return true;
                }
 
-               playerIn.addStat(StatList.CAULDRON_FILLED);
-               this.setWaterLevel(worldIn, pos, state, 3);
+               if (!entityhuman.capabilities.isCreativeMode) {
+                  entityhuman.setHeldItem(enumhand, new ItemStack(Items.BUCKET));
+               }
+
+               entityhuman.addStat(StatList.CAULDRON_FILLED);
             }
 
             return true;
          } else if (item == Items.BUCKET) {
-            if (i == 3 && !worldIn.isRemote) {
-               if (!playerIn.capabilities.isCreativeMode) {
-                  --heldItem.stackSize;
-                  if (heldItem.stackSize == 0) {
-                     playerIn.setHeldItem(hand, new ItemStack(Items.WATER_BUCKET));
-                  } else if (!playerIn.inventory.addItemStackToInventory(new ItemStack(Items.WATER_BUCKET))) {
-                     playerIn.dropItem(new ItemStack(Items.WATER_BUCKET), false);
+            if (i == 3 && !world.isRemote) {
+               if (!this.changeLevel(world, blockposition, iblockdata, 0, entityhuman, ChangeReason.BUCKET_FILL)) {
+                  return true;
+               }
+
+               if (!entityhuman.capabilities.isCreativeMode) {
+                  --itemstack.stackSize;
+                  if (itemstack.stackSize == 0) {
+                     entityhuman.setHeldItem(enumhand, new ItemStack(Items.WATER_BUCKET));
+                  } else if (!entityhuman.inventory.addItemStackToInventory(new ItemStack(Items.WATER_BUCKET))) {
+                     entityhuman.dropItem(new ItemStack(Items.WATER_BUCKET), false);
                   }
                }
 
-               playerIn.addStat(StatList.CAULDRON_USED);
-               this.setWaterLevel(worldIn, pos, state, 0);
+               entityhuman.addStat(StatList.CAULDRON_USED);
             }
 
             return true;
          } else if (item == Items.GLASS_BOTTLE) {
-            if (i > 0 && !worldIn.isRemote) {
-               if (!playerIn.capabilities.isCreativeMode) {
-                  ItemStack itemstack1 = PotionUtils.addPotionToItemStack(new ItemStack(Items.POTIONITEM), PotionTypes.WATER);
-                  playerIn.addStat(StatList.CAULDRON_USED);
-                  if (--heldItem.stackSize == 0) {
-                     playerIn.setHeldItem(hand, itemstack1);
-                  } else if (!playerIn.inventory.addItemStackToInventory(itemstack1)) {
-                     playerIn.dropItem(itemstack1, false);
-                  } else if (playerIn instanceof EntityPlayerMP) {
-                     ((EntityPlayerMP)playerIn).sendContainerToPlayer(playerIn.inventoryContainer);
-                  }
+            if (i > 0 && !world.isRemote) {
+               if (!this.changeLevel(world, blockposition, iblockdata, i - 1, entityhuman, ChangeReason.BOTTLE_FILL)) {
+                  return true;
                }
 
-               this.setWaterLevel(worldIn, pos, state, i - 1);
+               if (!entityhuman.capabilities.isCreativeMode) {
+                  ItemStack itemstack1 = PotionUtils.addPotionToItemStack(new ItemStack(Items.POTIONITEM), PotionTypes.WATER);
+                  entityhuman.addStat(StatList.CAULDRON_USED);
+                  if (--itemstack.stackSize == 0) {
+                     entityhuman.setHeldItem(enumhand, itemstack1);
+                  } else if (!entityhuman.inventory.addItemStackToInventory(itemstack1)) {
+                     entityhuman.dropItem(itemstack1, false);
+                  } else if (entityhuman instanceof EntityPlayerMP) {
+                     ((EntityPlayerMP)entityhuman).sendContainerToPlayer(entityhuman.inventoryContainer);
+                  }
+               }
             }
 
             return true;
          } else {
             if (i > 0 && item instanceof ItemArmor) {
                ItemArmor itemarmor = (ItemArmor)item;
-               if (itemarmor.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER && itemarmor.hasColor(heldItem) && !worldIn.isRemote) {
-                  itemarmor.removeColor(heldItem);
-                  this.setWaterLevel(worldIn, pos, state, i - 1);
-                  playerIn.addStat(StatList.ARMOR_CLEANED);
+               if (itemarmor.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER && itemarmor.hasColor(itemstack) && !world.isRemote) {
+                  if (!this.changeLevel(world, blockposition, iblockdata, i - 1, entityhuman, ChangeReason.ARMOR_WASH)) {
+                     return true;
+                  }
+
+                  itemarmor.removeColor(itemstack);
+                  entityhuman.addStat(StatList.ARMOR_CLEANED);
                   return true;
                }
             }
 
             if (i > 0 && item instanceof ItemBanner) {
-               if (TileEntityBanner.getPatterns(heldItem) > 0 && !worldIn.isRemote) {
-                  ItemStack itemstack = heldItem.copy();
-                  itemstack.stackSize = 1;
-                  TileEntityBanner.removeBannerData(itemstack);
-                  playerIn.addStat(StatList.BANNER_CLEANED);
-                  if (!playerIn.capabilities.isCreativeMode) {
-                     --heldItem.stackSize;
+               if (TileEntityBanner.getPatterns(itemstack) > 0 && !world.isRemote) {
+                  ItemStack itemstack1 = itemstack.copy();
+                  itemstack1.stackSize = 1;
+                  TileEntityBanner.removeBannerData(itemstack1);
+                  entityhuman.addStat(StatList.BANNER_CLEANED);
+                  if (!entityhuman.capabilities.isCreativeMode) {
+                     --itemstack.stackSize;
                   }
 
-                  if (heldItem.stackSize == 0) {
-                     playerIn.setHeldItem(hand, itemstack);
-                  } else if (!playerIn.inventory.addItemStackToInventory(itemstack)) {
-                     playerIn.dropItem(itemstack, false);
-                  } else if (playerIn instanceof EntityPlayerMP) {
-                     ((EntityPlayerMP)playerIn).sendContainerToPlayer(playerIn.inventoryContainer);
+                  if (itemstack.stackSize == 0) {
+                     entityhuman.setHeldItem(enumhand, itemstack1);
+                  } else if (!entityhuman.inventory.addItemStackToInventory(itemstack1)) {
+                     entityhuman.dropItem(itemstack1, false);
+                  } else if (entityhuman instanceof EntityPlayerMP) {
+                     ((EntityPlayerMP)entityhuman).sendContainerToPlayer(entityhuman.inventoryContainer);
                   }
 
-                  if (!playerIn.capabilities.isCreativeMode) {
-                     this.setWaterLevel(worldIn, pos, state, i - 1);
+                  if (!entityhuman.capabilities.isCreativeMode) {
+                     this.changeLevel(world, blockposition, iblockdata, i - 1, entityhuman, ChangeReason.BANNER_WASH);
                   }
                }
 
@@ -165,18 +181,30 @@ public class BlockCauldron extends Block {
       }
    }
 
-   public void setWaterLevel(World worldIn, BlockPos pos, IBlockState state, int level) {
-      worldIn.setBlockState(pos, state.withProperty(LEVEL, Integer.valueOf(MathHelper.clamp(level, 0, 3))), 2);
-      worldIn.updateComparatorOutputLevel(pos, this);
+   public void setWaterLevel(World world, BlockPos blockposition, IBlockState iblockdata, int i) {
+      this.changeLevel(world, blockposition, iblockdata, i, (Entity)null, ChangeReason.UNKNOWN);
    }
 
-   public void fillWithRain(World worldIn, BlockPos pos) {
-      if (worldIn.rand.nextInt(20) == 1) {
-         float f = worldIn.getBiome(pos).getFloatTemperature(pos);
-         if (worldIn.getBiomeProvider().getTemperatureAtHeight(f, pos.getY()) >= 0.15F) {
-            IBlockState iblockstate = worldIn.getBlockState(pos);
-            if (((Integer)iblockstate.getValue(LEVEL)).intValue() < 3) {
-               worldIn.setBlockState(pos, iblockstate.cycleProperty(LEVEL), 2);
+   private boolean changeLevel(World world, BlockPos blockposition, IBlockState iblockdata, int i, Entity entity, ChangeReason reason) {
+      int newLevel = MathHelper.clamp(i, 0, 3).intValue();
+      CauldronLevelChangeEvent event = new CauldronLevelChangeEvent(world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), entity == null ? null : entity.getBukkitEntity(), reason, ((Integer)iblockdata.getValue(LEVEL)).intValue(), newLevel);
+      world.getServer().getPluginManager().callEvent(event);
+      if (event.isCancelled()) {
+         return false;
+      } else {
+         world.setBlockState(blockposition, iblockdata.withProperty(LEVEL, Integer.valueOf(newLevel)), 2);
+         world.updateComparatorOutputLevel(blockposition, this);
+         return true;
+      }
+   }
+
+   public void fillWithRain(World world, BlockPos blockposition) {
+      if (world.rand.nextInt(20) == 1) {
+         float f = world.getBiome(blockposition).getFloatTemperature(blockposition);
+         if (world.getBiomeProvider().getTemperatureAtHeight(f, blockposition.getY()) >= 0.15F) {
+            IBlockState iblockdata = world.getBlockState(blockposition);
+            if (((Integer)iblockdata.getValue(LEVEL)).intValue() < 3) {
+               this.setWaterLevel(world, blockposition, iblockdata.cycleProperty(LEVEL), 2);
             }
          }
       }
@@ -184,35 +212,35 @@ public class BlockCauldron extends Block {
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
       return Items.CAULDRON;
    }
 
-   public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return new ItemStack(Items.CAULDRON);
    }
 
-   public boolean hasComparatorInputOverride(IBlockState state) {
+   public boolean hasComparatorInputOverride(IBlockState iblockdata) {
       return true;
    }
 
-   public int getComparatorInputOverride(IBlockState blockState, World worldIn, BlockPos pos) {
-      return ((Integer)blockState.getValue(LEVEL)).intValue();
+   public int getComparatorInputOverride(IBlockState iblockdata, World world, BlockPos blockposition) {
+      return ((Integer)iblockdata.getValue(LEVEL)).intValue();
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      return this.getDefaultState().withProperty(LEVEL, Integer.valueOf(meta));
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(LEVEL, Integer.valueOf(i));
    }
 
-   public int getMetaFromState(IBlockState state) {
-      return ((Integer)state.getValue(LEVEL)).intValue();
+   public int getMetaFromState(IBlockState iblockdata) {
+      return ((Integer)iblockdata.getValue(LEVEL)).intValue();
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{LEVEL});
    }
 
-   public boolean isPassable(IBlockAccess worldIn, BlockPos pos) {
+   public boolean isPassable(IBlockAccess iblockaccess, BlockPos blockposition) {
       return true;
    }
 }

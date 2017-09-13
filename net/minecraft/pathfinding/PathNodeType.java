@@ -21,8 +21,8 @@ public enum PathNodeType {
 
    private final float priority;
 
-   private PathNodeType(float priorityIn) {
-      this.priority = priorityIn;
+   private PathNodeType(float var3) {
+      this.priority = var3;
    }
 
    public float getPriority() {

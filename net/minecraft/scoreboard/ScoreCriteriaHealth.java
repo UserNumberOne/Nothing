@@ -1,8 +1,8 @@
 package net.minecraft.scoreboard;
 
 public class ScoreCriteriaHealth extends ScoreCriteria {
-   public ScoreCriteriaHealth(String name) {
-      super(name);
+   public ScoreCriteriaHealth(String var1) {
+      super(var1);
    }
 
    public boolean isReadOnly() {

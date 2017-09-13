@@ -3,21 +3,27 @@ package net.minecraft.network.rcon;
 import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class RConConsoleSource implements ICommandSender {
    private final StringBuffer buffer = new StringBuffer();
    private final MinecraftServer server;
 
-   public RConConsoleSource(MinecraftServer serverIn) {
-      this.server = serverIn;
+   public RConConsoleSource(MinecraftServer minecraftserver) {
+      this.server = minecraftserver;
+   }
+
+   public void resetLog() {
+      this.buffer.setLength(0);
+   }
+
+   public String getLogContents() {
+      return this.buffer.toString();
    }
 
    public String getName() {
@@ -28,11 +34,15 @@ public class RConConsoleSource implements ICommandSender {
       return new TextComponentString(this.getName());
    }
 
-   public void sendMessage(ITextComponent component) {
-      this.buffer.append(component.getUnformattedText());
+   public void sendMessage(String message) {
+      this.buffer.append(message);
    }
 
-   public boolean canUseCommand(int permLevel, String commandName) {
+   public void sendMessage(ITextComponent ichatbasecomponent) {
+      this.buffer.append(ichatbasecomponent.getUnformattedText());
+   }
+
+   public boolean canUseCommand(int i, String s) {
       return true;
    }
 
@@ -56,20 +66,10 @@ public class RConConsoleSource implements ICommandSender {
       return true;
    }
 
-   public void setCommandStat(CommandResultStats.Type type, int amount) {
+   public void setCommandStat(CommandResultStats.Type commandobjectiveexecutor_enumcommandresult, int i) {
    }
 
-   public MinecraftServer getServer() {
+   public MinecraftServer h() {
       return this.server;
-   }
-
-   @SideOnly(Side.SERVER)
-   public void resetLog() {
-      this.buffer.setLength(0);
-   }
-
-   @SideOnly(Side.SERVER)
-   public String getLogContents() {
-      return this.buffer.toString();
    }
 }

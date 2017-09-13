@@ -9,8 +9,6 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketMultiBlockChange implements Packet {
    private ChunkPos chunkPos;
@@ -19,59 +17,54 @@ public class SPacketMultiBlockChange implements Packet {
    public SPacketMultiBlockChange() {
    }
 
-   public SPacketMultiBlockChange(int p_i46959_1_, short[] p_i46959_2_, Chunk p_i46959_3_) {
-      this.chunkPos = new ChunkPos(p_i46959_3_.xPosition, p_i46959_3_.zPosition);
-      this.changedBlocks = new SPacketMultiBlockChange.BlockUpdateData[p_i46959_1_];
+   public SPacketMultiBlockChange(int var1, short[] var2, Chunk var3) {
+      this.chunkPos = new ChunkPos(var3.xPosition, var3.zPosition);
+      this.changedBlocks = new SPacketMultiBlockChange.BlockUpdateData[var1];
 
-      for(int i = 0; i < this.changedBlocks.length; ++i) {
-         this.changedBlocks[i] = new SPacketMultiBlockChange.BlockUpdateData(p_i46959_2_[i], p_i46959_3_);
+      for(int var4 = 0; var4 < this.changedBlocks.length; ++var4) {
+         this.changedBlocks[var4] = new SPacketMultiBlockChange.BlockUpdateData(var2[var4], var3);
       }
 
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.chunkPos = new ChunkPos(buf.readInt(), buf.readInt());
-      this.changedBlocks = new SPacketMultiBlockChange.BlockUpdateData[buf.readVarInt()];
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.chunkPos = new ChunkPos(var1.readInt(), var1.readInt());
+      this.changedBlocks = new SPacketMultiBlockChange.BlockUpdateData[var1.readVarInt()];
 
-      for(int i = 0; i < this.changedBlocks.length; ++i) {
-         this.changedBlocks[i] = new SPacketMultiBlockChange.BlockUpdateData(buf.readShort(), (IBlockState)Block.BLOCK_STATE_IDS.getByValue(buf.readVarInt()));
+      for(int var2 = 0; var2 < this.changedBlocks.length; ++var2) {
+         this.changedBlocks[var2] = new SPacketMultiBlockChange.BlockUpdateData(var1.readShort(), (IBlockState)Block.BLOCK_STATE_IDS.getByValue(var1.readVarInt()));
       }
 
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeInt(this.chunkPos.chunkXPos);
-      buf.writeInt(this.chunkPos.chunkZPos);
-      buf.writeVarInt(this.changedBlocks.length);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeInt(this.chunkPos.chunkXPos);
+      var1.writeInt(this.chunkPos.chunkZPos);
+      var1.writeVarInt(this.changedBlocks.length);
 
-      for(SPacketMultiBlockChange.BlockUpdateData spacketmultiblockchange$blockupdatedata : this.changedBlocks) {
-         buf.writeShort(spacketmultiblockchange$blockupdatedata.getOffset());
-         buf.writeVarInt(Block.BLOCK_STATE_IDS.get(spacketmultiblockchange$blockupdatedata.getBlockState()));
+      for(SPacketMultiBlockChange.BlockUpdateData var5 : this.changedBlocks) {
+         var1.writeShort(var5.getOffset());
+         var1.writeVarInt(Block.BLOCK_STATE_IDS.get(var5.getBlockState()));
       }
 
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleMultiBlockChange(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SPacketMultiBlockChange.BlockUpdateData[] getChangedBlocks() {
-      return this.changedBlocks;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleMultiBlockChange(this);
    }
 
    public class BlockUpdateData {
       private final short offset;
       private final IBlockState blockState;
 
-      public BlockUpdateData(short p_i46544_2_, IBlockState p_i46544_3_) {
-         this.offset = p_i46544_2_;
-         this.blockState = p_i46544_3_;
+      public BlockUpdateData(short var2, IBlockState var3) {
+         this.offset = var2;
+         this.blockState = var3;
       }
 
-      public BlockUpdateData(short p_i46545_2_, Chunk p_i46545_3_) {
-         this.offset = p_i46545_2_;
-         this.blockState = p_i46545_3_.getBlockState(this.getPos());
+      public BlockUpdateData(short var2, Chunk var3) {
+         this.offset = var2;
+         this.blockState = var3.getBlockState(this.getPos());
       }
 
       public BlockPos getPos() {

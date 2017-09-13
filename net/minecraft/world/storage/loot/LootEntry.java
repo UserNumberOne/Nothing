@@ -14,27 +14,20 @@ import java.util.Random;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
-import net.minecraftforge.common.ForgeHooks;
 
 public abstract class LootEntry {
-   protected final String entryName;
    protected final int weight;
    protected final int quality;
    protected final LootCondition[] conditions;
 
-   protected LootEntry(int weightIn, int qualityIn, LootCondition[] conditionsIn, String entryName) {
-      this.weight = weightIn;
-      this.quality = qualityIn;
-      this.conditions = conditionsIn;
-      this.entryName = entryName;
+   protected LootEntry(int var1, int var2, LootCondition[] var3) {
+      this.weight = var1;
+      this.quality = var2;
+      this.conditions = var3;
    }
 
-   public int getEffectiveWeight(float luck) {
-      return Math.max(MathHelper.floor((float)this.weight + (float)this.quality * luck), 0);
-   }
-
-   public String getEntryName() {
-      return this.entryName;
+   public int getEffectiveWeight(float var1) {
+      return Math.max(MathHelper.floor((float)this.weight + (float)this.quality * var1), 0);
    }
 
    public abstract void addLoot(Collection var1, Random var2, LootContext var3);
@@ -42,61 +35,61 @@ public abstract class LootEntry {
    protected abstract void serialize(JsonObject var1, JsonSerializationContext var2);
 
    public static class Serializer implements JsonDeserializer, JsonSerializer {
-      public LootEntry deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
-         JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "loot item");
-         String s = JsonUtils.getString(jsonobject, "type");
-         int i = JsonUtils.getInt(jsonobject, "weight", 1);
-         int j = JsonUtils.getInt(jsonobject, "quality", 0);
-         LootCondition[] alootcondition;
-         if (jsonobject.has("conditions")) {
-            alootcondition = (LootCondition[])JsonUtils.deserializeClass(jsonobject, "conditions", p_deserialize_3_, LootCondition[].class);
+      public LootEntry deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         JsonObject var4 = JsonUtils.getJsonObject(var1, "loot item");
+         String var5 = JsonUtils.getString(var4, "type");
+         int var6 = JsonUtils.getInt(var4, "weight", 1);
+         int var7 = JsonUtils.getInt(var4, "quality", 0);
+         LootCondition[] var8;
+         if (var4.has("conditions")) {
+            var8 = (LootCondition[])JsonUtils.deserializeClass(var4, "conditions", var3, LootCondition[].class);
          } else {
-            alootcondition = new LootCondition[0];
+            var8 = new LootCondition[0];
          }
 
-         LootEntry ret = ForgeHooks.deserializeJsonLootEntry(s, jsonobject, i, j, alootcondition);
-         if (ret != null) {
-            return ret;
-         } else if ("item".equals(s)) {
-            return LootEntryItem.deserialize(jsonobject, p_deserialize_3_, i, j, alootcondition);
-         } else if ("loot_table".equals(s)) {
-            return LootEntryTable.deserialize(jsonobject, p_deserialize_3_, i, j, alootcondition);
-         } else if ("empty".equals(s)) {
-            return LootEntryEmpty.deserialize(jsonobject, p_deserialize_3_, i, j, alootcondition);
+         if ("item".equals(var5)) {
+            return LootEntryItem.deserialize(var4, var3, var6, var7, var8);
+         } else if ("loot_table".equals(var5)) {
+            return LootEntryTable.deserialize(var4, var3, var6, var7, var8);
+         } else if ("empty".equals(var5)) {
+            return LootEntryEmpty.deserialize(var4, var3, var6, var7, var8);
          } else {
-            throw new JsonSyntaxException("Unknown loot entry type '" + s + "'");
+            throw new JsonSyntaxException("Unknown loot entry type '" + var5 + "'");
          }
       }
 
-      public JsonElement serialize(LootEntry p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
-         JsonObject jsonobject = new JsonObject();
-         if (p_serialize_1_.entryName != null && !p_serialize_1_.entryName.startsWith("custom#")) {
-            jsonobject.addProperty("entryName", p_serialize_1_.entryName);
+      public JsonElement serialize(LootEntry var1, Type var2, JsonSerializationContext var3) {
+         JsonObject var4 = new JsonObject();
+         var4.addProperty("weight", Integer.valueOf(var1.weight));
+         var4.addProperty("quality", Integer.valueOf(var1.quality));
+         if (var1.conditions.length > 0) {
+            var4.add("conditions", var3.serialize(var1.conditions));
          }
 
-         jsonobject.addProperty("weight", Integer.valueOf(p_serialize_1_.weight));
-         jsonobject.addProperty("quality", Integer.valueOf(p_serialize_1_.quality));
-         if (p_serialize_1_.conditions.length > 0) {
-            jsonobject.add("conditions", p_serialize_3_.serialize(p_serialize_1_.conditions));
-         }
-
-         String type = ForgeHooks.getLootEntryType(p_serialize_1_);
-         if (type != null) {
-            jsonobject.addProperty("type", type);
-         } else if (p_serialize_1_ instanceof LootEntryItem) {
-            jsonobject.addProperty("type", "item");
-         } else if (p_serialize_1_ instanceof LootEntryTable) {
-            jsonobject.addProperty("type", "item");
+         if (var1 instanceof LootEntryItem) {
+            var4.addProperty("type", "item");
+         } else if (var1 instanceof LootEntryTable) {
+            var4.addProperty("type", "item");
          } else {
-            if (!(p_serialize_1_ instanceof LootEntryEmpty)) {
-               throw new IllegalArgumentException("Don't know how to serialize " + p_serialize_1_);
+            if (!(var1 instanceof LootEntryEmpty)) {
+               throw new IllegalArgumentException("Don't know how to serialize " + var1);
             }
 
-            jsonobject.addProperty("type", "empty");
+            var4.addProperty("type", "empty");
          }
 
-         p_serialize_1_.serialize(jsonobject, p_serialize_3_);
-         return jsonobject;
+         var1.serialize(var4, var3);
+         return var4;
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((LootEntry)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

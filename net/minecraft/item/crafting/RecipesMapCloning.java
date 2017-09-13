@@ -1,19 +1,23 @@
 package net.minecraft.item.crafting;
 
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 
-public class RecipesMapCloning implements IRecipe {
-   public boolean matches(InventoryCrafting inv, World worldIn) {
+public class RecipesMapCloning extends ShapelessRecipes implements IRecipe {
+   public RecipesMapCloning() {
+      super(new ItemStack(Items.MAP, 0, -1), Arrays.asList(new ItemStack(Items.MAP, 0, 0)));
+   }
+
+   public boolean matches(InventoryCrafting inventorycrafting, World world) {
       int i = 0;
       ItemStack itemstack = null;
 
-      for(int j = 0; j < inv.getSizeInventory(); ++j) {
-         ItemStack itemstack1 = inv.getStackInSlot(j);
+      for(int j = 0; j < inventorycrafting.getSizeInventory(); ++j) {
+         ItemStack itemstack1 = inventorycrafting.getStackInSlot(j);
          if (itemstack1 != null) {
             if (itemstack1.getItem() == Items.FILLED_MAP) {
                if (itemstack != null) {
@@ -31,16 +35,20 @@ public class RecipesMapCloning implements IRecipe {
          }
       }
 
-      return itemstack != null && i > 0;
+      if (itemstack != null && i > 0) {
+         return true;
+      } else {
+         return false;
+      }
    }
 
    @Nullable
-   public ItemStack getCraftingResult(InventoryCrafting inv) {
+   public ItemStack getCraftingResult(InventoryCrafting inventorycrafting) {
       int i = 0;
       ItemStack itemstack = null;
 
-      for(int j = 0; j < inv.getSizeInventory(); ++j) {
-         ItemStack itemstack1 = inv.getStackInSlot(j);
+      for(int j = 0; j < inventorycrafting.getSizeInventory(); ++j) {
+         ItemStack itemstack1 = inventorycrafting.getStackInSlot(j);
          if (itemstack1 != null) {
             if (itemstack1.getItem() == Items.FILLED_MAP) {
                if (itemstack != null) {
@@ -79,12 +87,14 @@ public class RecipesMapCloning implements IRecipe {
       return null;
    }
 
-   public ItemStack[] getRemainingItems(InventoryCrafting inv) {
-      ItemStack[] aitemstack = new ItemStack[inv.getSizeInventory()];
+   public ItemStack[] getRemainingItems(InventoryCrafting inventorycrafting) {
+      ItemStack[] aitemstack = new ItemStack[inventorycrafting.getSizeInventory()];
 
       for(int i = 0; i < aitemstack.length; ++i) {
-         ItemStack itemstack = inv.getStackInSlot(i);
-         aitemstack[i] = ForgeHooks.getContainerItem(itemstack);
+         ItemStack itemstack = inventorycrafting.getStackInSlot(i);
+         if (itemstack != null && itemstack.getItem().hasContainerItem()) {
+            aitemstack[i] = new ItemStack(itemstack.getItem().getContainerItem());
+         }
       }
 
       return aitemstack;

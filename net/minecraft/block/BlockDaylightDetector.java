@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
@@ -24,17 +23,16 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockDaylightDetector extends BlockContainer {
    public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
    protected static final AxisAlignedBB DAYLIGHT_DETECTOR_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D);
    private final boolean inverted;
 
-   public BlockDaylightDetector(boolean inverted) {
+   public BlockDaylightDetector(boolean flag) {
       super(Material.WOOD);
-      this.inverted = inverted;
+      this.inverted = flag;
       this.setDefaultState(this.blockState.getBaseState().withProperty(POWER, Integer.valueOf(0)));
       this.setCreativeTab(CreativeTabs.REDSTONE);
       this.setHardness(0.2F);
@@ -42,19 +40,19 @@ public class BlockDaylightDetector extends BlockContainer {
       this.setUnlocalizedName("daylightDetector");
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
       return DAYLIGHT_DETECTOR_AABB;
    }
 
-   public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
-      return ((Integer)blockState.getValue(POWER)).intValue();
+   public int getWeakPower(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
+      return ((Integer)iblockdata.getValue(POWER)).intValue();
    }
 
-   public void updatePower(World worldIn, BlockPos pos) {
-      if (!worldIn.provider.hasNoSky()) {
-         IBlockState iblockstate = worldIn.getBlockState(pos);
-         int i = worldIn.getLightFor(EnumSkyBlock.SKY, pos) - worldIn.getSkylightSubtracted();
-         float f = worldIn.getCelestialAngleRadians(1.0F);
+   public void updatePower(World world, BlockPos blockposition) {
+      if (!world.provider.hasNoSky()) {
+         IBlockState iblockdata = world.getBlockState(blockposition);
+         int i = world.getLightFor(EnumSkyBlock.SKY, blockposition) - world.getSkylightSubtracted();
+         float f = world.getCelestialAngleRadians(1.0F);
          if (this.inverted) {
             i = 15 - i;
          }
@@ -66,79 +64,72 @@ public class BlockDaylightDetector extends BlockContainer {
          }
 
          i = MathHelper.clamp(i, 0, 15);
-         if (((Integer)iblockstate.getValue(POWER)).intValue() != i) {
-            worldIn.setBlockState(pos, iblockstate.withProperty(POWER, Integer.valueOf(i)), 3);
+         if (((Integer)iblockdata.getValue(POWER)).intValue() != i) {
+            i = CraftEventFactory.callRedstoneChange(world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), ((Integer)iblockdata.getValue(POWER)).intValue(), i).getNewCurrent();
+            world.setBlockState(blockposition, iblockdata.withProperty(POWER, Integer.valueOf(i)), 3);
          }
       }
 
    }
 
-   public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-      if (playerIn.isAllowEdit()) {
-         if (worldIn.isRemote) {
+   public boolean onBlockActivated(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack, EnumFacing enumdirection, float f, float f1, float f2) {
+      if (entityhuman.isAllowEdit()) {
+         if (world.isRemote) {
             return true;
          } else {
             if (this.inverted) {
-               worldIn.setBlockState(pos, Blocks.DAYLIGHT_DETECTOR.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
-               Blocks.DAYLIGHT_DETECTOR.updatePower(worldIn, pos);
+               world.setBlockState(blockposition, Blocks.DAYLIGHT_DETECTOR.getDefaultState().withProperty(POWER, (Integer)iblockdata.getValue(POWER)), 4);
+               Blocks.DAYLIGHT_DETECTOR.updatePower(world, blockposition);
             } else {
-               worldIn.setBlockState(pos, Blocks.DAYLIGHT_DETECTOR_INVERTED.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
-               Blocks.DAYLIGHT_DETECTOR_INVERTED.updatePower(worldIn, pos);
+               world.setBlockState(blockposition, Blocks.DAYLIGHT_DETECTOR_INVERTED.getDefaultState().withProperty(POWER, (Integer)iblockdata.getValue(POWER)), 4);
+               Blocks.DAYLIGHT_DETECTOR_INVERTED.updatePower(world, blockposition);
             }
 
             return true;
          }
       } else {
-         return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
+         return super.onBlockActivated(world, blockposition, iblockdata, entityhuman, enumhand, itemstack, enumdirection, f, f1, f2);
       }
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
       return Item.getItemFromBlock(Blocks.DAYLIGHT_DETECTOR);
    }
 
-   public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return new ItemStack(Blocks.DAYLIGHT_DETECTOR);
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public EnumBlockRenderType getRenderType(IBlockState state) {
+   public EnumBlockRenderType getRenderType(IBlockState iblockdata) {
       return EnumBlockRenderType.MODEL;
    }
 
-   public boolean canProvidePower(IBlockState state) {
+   public boolean canProvidePower(IBlockState iblockdata) {
       return true;
    }
 
-   public TileEntity createNewTileEntity(World worldIn, int meta) {
+   public TileEntity createNewTileEntity(World world, int i) {
       return new TileEntityDaylightDetector();
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      return this.getDefaultState().withProperty(POWER, Integer.valueOf(meta));
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(POWER, Integer.valueOf(i));
    }
 
-   public int getMetaFromState(IBlockState state) {
-      return ((Integer)state.getValue(POWER)).intValue();
+   public int getMetaFromState(IBlockState iblockdata) {
+      return ((Integer)iblockdata.getValue(POWER)).intValue();
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{POWER});
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
-      if (!this.inverted) {
-         super.getSubBlocks(itemIn, tab, list);
-      }
-
    }
 }

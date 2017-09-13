@@ -5,7 +5,7 @@ public class EntityNotFoundException extends CommandException {
       this("commands.generic.entity.notFound");
    }
 
-   public EntityNotFoundException(String message, Object... args) {
-      super(message, args);
+   public EntityNotFoundException(String var1, Object... var2) {
+      super(var1, var2);
    }
 }

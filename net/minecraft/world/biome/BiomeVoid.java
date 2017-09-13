@@ -1,8 +1,8 @@
 package net.minecraft.world.biome;
 
 public class BiomeVoid extends Biome {
-   public BiomeVoid(Biome.BiomeProperties properties) {
-      super(properties);
+   public BiomeVoid(Biome.BiomeProperties var1) {
+      super(var1);
       this.spawnableMonsterList.clear();
       this.spawnableCreatureList.clear();
       this.spawnableWaterCreatureList.clear();

@@ -79,15 +79,15 @@ public class LootTableList {
    public static final ResourceLocation GAMEPLAY_FISHING_TREASURE = register("gameplay/fishing/treasure");
    public static final ResourceLocation GAMEPLAY_FISHING_FISH = register("gameplay/fishing/fish");
 
-   private static ResourceLocation register(String id) {
-      return register(new ResourceLocation("minecraft", id));
+   private static ResourceLocation register(String var0) {
+      return register(new ResourceLocation("minecraft", var0));
    }
 
-   public static ResourceLocation register(ResourceLocation id) {
-      if (LOOT_TABLES.add(id)) {
-         return id;
+   public static ResourceLocation register(ResourceLocation var0) {
+      if (LOOT_TABLES.add(var0)) {
+         return var0;
       } else {
-         throw new IllegalArgumentException(id + " is already a registered built-in loot table");
+         throw new IllegalArgumentException(var0 + " is already a registered built-in loot table");
       }
    }
 

@@ -10,20 +10,20 @@ public class WorldGenFlowers extends WorldGenerator {
    private BlockFlower flower;
    private IBlockState state;
 
-   public WorldGenFlowers(BlockFlower flowerIn, BlockFlower.EnumFlowerType type) {
-      this.setGeneratedBlock(flowerIn, type);
+   public WorldGenFlowers(BlockFlower var1, BlockFlower.EnumFlowerType var2) {
+      this.setGeneratedBlock(var1, var2);
    }
 
-   public void setGeneratedBlock(BlockFlower flowerIn, BlockFlower.EnumFlowerType typeIn) {
-      this.flower = flowerIn;
-      this.state = flowerIn.getDefaultState().withProperty(flowerIn.getTypeProperty(), typeIn);
+   public void setGeneratedBlock(BlockFlower var1, BlockFlower.EnumFlowerType var2) {
+      this.flower = var1;
+      this.state = var1.getDefaultState().withProperty(var1.getTypeProperty(), var2);
    }
 
-   public boolean generate(World worldIn, Random rand, BlockPos position) {
-      for(int i = 0; i < 64; ++i) {
-         BlockPos blockpos = position.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
-         if (worldIn.isAirBlock(blockpos) && (!worldIn.provider.hasNoSky() || blockpos.getY() < 255) && this.flower.canBlockStay(worldIn, blockpos, this.state)) {
-            worldIn.setBlockState(blockpos, this.state, 2);
+   public boolean generate(World var1, Random var2, BlockPos var3) {
+      for(int var4 = 0; var4 < 64; ++var4) {
+         BlockPos var5 = var3.add(var2.nextInt(8) - var2.nextInt(8), var2.nextInt(4) - var2.nextInt(4), var2.nextInt(8) - var2.nextInt(8));
+         if (var1.isAirBlock(var5) && (!var1.provider.hasNoSky() || var5.getY() < 255) && this.flower.canBlockStay(var1, var5, this.state)) {
+            var1.setBlockState(var5, this.state, 2);
          }
       }
 

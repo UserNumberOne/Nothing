@@ -1,47 +1,29 @@
 package net.minecraft.network.play.client;
 
 import java.io.IOException;
-import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketEntityAction implements Packet {
    private int entityID;
    private CPacketEntityAction.Action action;
    private int auxData;
 
-   public CPacketEntityAction() {
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.entityID = var1.readVarInt();
+      this.action = (CPacketEntityAction.Action)var1.readEnumValue(CPacketEntityAction.Action.class);
+      this.auxData = var1.readVarInt();
    }
 
-   @SideOnly(Side.CLIENT)
-   public CPacketEntityAction(Entity entityIn, CPacketEntityAction.Action actionIn) {
-      this(entityIn, actionIn, 0);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeVarInt(this.entityID);
+      var1.writeEnumValue(this.action);
+      var1.writeVarInt(this.auxData);
    }
 
-   @SideOnly(Side.CLIENT)
-   public CPacketEntityAction(Entity entityIn, CPacketEntityAction.Action actionIn, int auxDataIn) {
-      this.entityID = entityIn.getEntityId();
-      this.action = actionIn;
-      this.auxData = auxDataIn;
-   }
-
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.entityID = buf.readVarInt();
-      this.action = (CPacketEntityAction.Action)buf.readEnumValue(CPacketEntityAction.Action.class);
-      this.auxData = buf.readVarInt();
-   }
-
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeVarInt(this.entityID);
-      buf.writeEnumValue(this.action);
-      buf.writeVarInt(this.auxData);
-   }
-
-   public void processPacket(INetHandlerPlayServer handler) {
-      handler.processEntityAction(this);
+   public void processPacket(INetHandlerPlayServer var1) {
+      var1.processEntityAction(this);
    }
 
    public CPacketEntityAction.Action getAction() {

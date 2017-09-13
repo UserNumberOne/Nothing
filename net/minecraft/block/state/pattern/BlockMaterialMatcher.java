@@ -8,15 +8,20 @@ import net.minecraft.block.state.IBlockState;
 public class BlockMaterialMatcher implements Predicate {
    private final Material material;
 
-   private BlockMaterialMatcher(Material materialIn) {
-      this.material = materialIn;
+   private BlockMaterialMatcher(Material var1) {
+      this.material = var1;
    }
 
-   public static BlockMaterialMatcher forMaterial(Material materialIn) {
-      return new BlockMaterialMatcher(materialIn);
+   public static BlockMaterialMatcher forMaterial(Material var0) {
+      return new BlockMaterialMatcher(var0);
    }
 
-   public boolean apply(@Nullable IBlockState p_apply_1_) {
-      return p_apply_1_ != null && p_apply_1_.getMaterial() == this.material;
+   public boolean apply(@Nullable IBlockState var1) {
+      return var1 != null && var1.getMaterial() == this.material;
+   }
+
+   // $FF: synthetic method
+   public boolean apply(Object var1) {
+      return this.apply((IBlockState)var1);
    }
 }

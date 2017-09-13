@@ -2,10 +2,11 @@ package net.minecraft.item.crafting;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPlanks;
@@ -20,16 +21,20 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.inventory.InventoryView;
 
 public class CraftingManager {
    private static final CraftingManager INSTANCE = new CraftingManager();
-   private final List recipes = Lists.newArrayList();
+   public List recipes = Lists.newArrayList();
+   public IRecipe lastRecipe;
+   public InventoryView lastCraftView;
 
    public static CraftingManager getInstance() {
       return INSTANCE;
    }
 
-   private CraftingManager() {
+   public CraftingManager() {
       (new RecipesTools()).addRecipes(this);
       (new RecipesWeapons()).addRecipes(this);
       (new RecipesIngots()).addRecipes(this);
@@ -188,112 +193,123 @@ public class CraftingManager {
       this.addRecipe(new ItemStack(Items.ARMOR_STAND, 1), "///", " / ", "/_/", '/', Items.STICK, '_', new ItemStack(Blocks.STONE_SLAB, 1, BlockStoneSlab.EnumType.STONE.getMetadata()));
       this.addRecipe(new ItemStack(Blocks.END_ROD, 4), "/", "#", '/', Items.BLAZE_ROD, '#', Items.CHORUS_FRUIT_POPPED);
       this.addRecipe(new ItemStack(Blocks.BONE_BLOCK, 1), "XXX", "XXX", "XXX", 'X', new ItemStack(Items.DYE, 1, EnumDyeColor.WHITE.getDyeDamage()));
+      this.sort();
+   }
+
+   public void sort() {
       Collections.sort(this.recipes, new Comparator() {
-         public int compare(IRecipe p_compare_1_, IRecipe p_compare_2_) {
-            return p_compare_1_ instanceof ShapelessRecipes && p_compare_2_ instanceof ShapedRecipes ? 1 : (p_compare_2_ instanceof ShapelessRecipes && p_compare_1_ instanceof ShapedRecipes ? -1 : (p_compare_2_.getRecipeSize() < p_compare_1_.getRecipeSize() ? -1 : (p_compare_2_.getRecipeSize() > p_compare_1_.getRecipeSize() ? 1 : 0)));
+         public int compare(IRecipe irecipe, IRecipe irecipe1) {
+            return irecipe instanceof ShapelessRecipes && irecipe1 instanceof ShapedRecipes ? 1 : (irecipe1 instanceof ShapelessRecipes && irecipe instanceof ShapedRecipes ? -1 : (irecipe1.getRecipeSize() < irecipe.getRecipeSize() ? -1 : (irecipe1.getRecipeSize() > irecipe.getRecipeSize() ? 1 : 0)));
+         }
+
+         public int compare(Object object, Object object1) {
+            return this.compare((IRecipe)object, (IRecipe)object1);
          }
       });
    }
 
-   public ShapedRecipes addRecipe(ItemStack stack, Object... recipeComponents) {
+   public ShapedRecipes addRecipe(ItemStack itemstack, Object... aobject) {
       String s = "";
       int i = 0;
       int j = 0;
       int k = 0;
-      if (recipeComponents[i] instanceof String[]) {
-         String[] astring = (String[])recipeComponents[i++];
+      if (aobject[i] instanceof String[]) {
+         String[] astring = (String[])aobject[i++];
 
-         for(String s2 : astring) {
-            ++k;
-            j = s2.length();
-            s = s + s2;
-         }
-      } else {
-         while(recipeComponents[i] instanceof String) {
-            String s1 = (String)recipeComponents[i++];
+         for(String s1 : astring) {
             ++k;
             j = s1.length();
             s = s + s1;
          }
+      } else {
+         while(aobject[i] instanceof String) {
+            String s2 = (String)aobject[i++];
+            ++k;
+            j = s2.length();
+            s = s + s2;
+         }
       }
 
-      Map map;
-      for(map = Maps.newHashMap(); i < recipeComponents.length; i += 2) {
-         Character character = (Character)recipeComponents[i];
-         ItemStack itemstack = null;
-         if (recipeComponents[i + 1] instanceof Item) {
-            itemstack = new ItemStack((Item)recipeComponents[i + 1]);
-         } else if (recipeComponents[i + 1] instanceof Block) {
-            itemstack = new ItemStack((Block)recipeComponents[i + 1], 1, 32767);
-         } else if (recipeComponents[i + 1] instanceof ItemStack) {
-            itemstack = (ItemStack)recipeComponents[i + 1];
+      HashMap hashmap;
+      for(hashmap = Maps.newHashMap(); i < aobject.length; i += 2) {
+         Character character = (Character)aobject[i];
+         ItemStack itemstack1 = null;
+         if (aobject[i + 1] instanceof Item) {
+            itemstack1 = new ItemStack((Item)aobject[i + 1]);
+         } else if (aobject[i + 1] instanceof Block) {
+            itemstack1 = new ItemStack((Block)aobject[i + 1], 1, 32767);
+         } else if (aobject[i + 1] instanceof ItemStack) {
+            itemstack1 = (ItemStack)aobject[i + 1];
          }
 
-         map.put(character, itemstack);
+         hashmap.put(character, itemstack1);
       }
 
       ItemStack[] aitemstack = new ItemStack[j * k];
 
       for(int l = 0; l < j * k; ++l) {
          char c0 = s.charAt(l);
-         if (map.containsKey(Character.valueOf(c0))) {
-            aitemstack[l] = ((ItemStack)map.get(Character.valueOf(c0))).copy();
+         if (hashmap.containsKey(Character.valueOf(c0))) {
+            aitemstack[l] = ((ItemStack)hashmap.get(Character.valueOf(c0))).copy();
          } else {
             aitemstack[l] = null;
          }
       }
 
-      ShapedRecipes shapedrecipes = new ShapedRecipes(j, k, aitemstack, stack);
+      ShapedRecipes shapedrecipes = new ShapedRecipes(j, k, aitemstack, itemstack);
       this.recipes.add(shapedrecipes);
       return shapedrecipes;
    }
 
-   public void addShapelessRecipe(ItemStack stack, Object... recipeComponents) {
-      List list = Lists.newArrayList();
+   public void addShapelessRecipe(ItemStack itemstack, Object... aobject) {
+      ArrayList arraylist = Lists.newArrayList();
 
-      for(Object object : recipeComponents) {
+      for(Object object : aobject) {
          if (object instanceof ItemStack) {
-            list.add(((ItemStack)object).copy());
+            arraylist.add(((ItemStack)object).copy());
          } else if (object instanceof Item) {
-            list.add(new ItemStack((Item)object));
+            arraylist.add(new ItemStack((Item)object));
          } else {
             if (!(object instanceof Block)) {
                throw new IllegalArgumentException("Invalid shapeless recipe: unknown type " + object.getClass().getName() + "!");
             }
 
-            list.add(new ItemStack((Block)object));
+            arraylist.add(new ItemStack((Block)object));
          }
       }
 
-      this.recipes.add(new ShapelessRecipes(stack, list));
+      this.recipes.add(new ShapelessRecipes(itemstack, arraylist));
    }
 
-   public void addRecipe(IRecipe recipe) {
-      this.recipes.add(recipe);
+   public void addRecipe(IRecipe irecipe) {
+      this.recipes.add(irecipe);
    }
 
    @Nullable
-   public ItemStack findMatchingRecipe(InventoryCrafting craftMatrix, World worldIn) {
+   public ItemStack findMatchingRecipe(InventoryCrafting inventorycrafting, World world) {
       for(IRecipe irecipe : this.recipes) {
-         if (irecipe.matches(craftMatrix, worldIn)) {
-            return irecipe.getCraftingResult(craftMatrix);
+         if (irecipe.matches(inventorycrafting, world)) {
+            inventorycrafting.currentRecipe = irecipe;
+            ItemStack result = irecipe.getCraftingResult(inventorycrafting);
+            return CraftEventFactory.callPreCraftEvent(inventorycrafting, result, this.lastCraftView, false);
          }
       }
 
+      inventorycrafting.currentRecipe = null;
       return null;
    }
 
-   public ItemStack[] getRemainingItems(InventoryCrafting craftMatrix, World worldIn) {
+   public ItemStack[] getRemainingItems(InventoryCrafting inventorycrafting, World world) {
       for(IRecipe irecipe : this.recipes) {
-         if (irecipe.matches(craftMatrix, worldIn)) {
-            return irecipe.getRemainingItems(craftMatrix);
+         if (irecipe.matches(inventorycrafting, world)) {
+            return irecipe.getRemainingItems(inventorycrafting);
          }
       }
 
-      ItemStack[] aitemstack = new ItemStack[craftMatrix.getSizeInventory()];
+      ItemStack[] aitemstack = new ItemStack[inventorycrafting.getSizeInventory()];
 
       for(int i = 0; i < aitemstack.length; ++i) {
-         aitemstack[i] = craftMatrix.getStackInSlot(i);
+         aitemstack[i] = inventorycrafting.getStackInSlot(i);
       }
 
       return aitemstack;

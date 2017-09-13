@@ -5,8 +5,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public enum HorseType {
    HORSE("EntityHorse", "horse_white", SoundEvents.ENTITY_HORSE_AMBIENT, SoundEvents.ENTITY_HORSE_HURT, SoundEvents.ENTITY_HORSE_DEATH, LootTableList.ENTITIES_HORSE),
@@ -22,13 +20,13 @@ public enum HorseType {
    private final SoundEvent deathSound;
    private final ResourceLocation lootTable;
 
-   private HorseType(String p_i46798_3_, String textureName, SoundEvent ambientSound, SoundEvent hurtSoundIn, SoundEvent deathSoundIn, ResourceLocation lootTableIn) {
-      this.name = new TextComponentTranslation("entity." + p_i46798_3_ + ".name", new Object[0]);
-      this.texture = new ResourceLocation("textures/entity/horse/" + textureName + ".png");
-      this.hurtSound = hurtSoundIn;
-      this.ambientSound = ambientSound;
-      this.deathSound = deathSoundIn;
-      this.lootTable = lootTableIn;
+   private HorseType(String var3, String var4, SoundEvent var5, SoundEvent var6, SoundEvent var7, ResourceLocation var8) {
+      this.name = new TextComponentTranslation("entity." + var3 + ".name", new Object[0]);
+      this.texture = new ResourceLocation("textures/entity/horse/" + var4 + ".png");
+      this.hurtSound = var6;
+      this.ambientSound = var5;
+      this.deathSound = var7;
+      this.lootTable = var8;
    }
 
    public SoundEvent getAmbientSound() {
@@ -45,11 +43,6 @@ public enum HorseType {
 
    public TextComponentTranslation getDefaultName() {
       return this.name;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ResourceLocation getTexture() {
-      return this.texture;
    }
 
    public boolean canBeChested() {
@@ -76,8 +69,8 @@ public enum HorseType {
       return this.ordinal();
    }
 
-   public static HorseType getArmorType(int armorID) {
-      return values()[armorID];
+   public static HorseType getArmorType(int var0) {
+      return values()[var0];
    }
 
    public ResourceLocation getLootTable() {

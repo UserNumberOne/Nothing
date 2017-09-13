@@ -468,12 +468,12 @@ public class SoundEvents {
    public static final SoundEvent ENTITY_ZOMBIE_VILLAGER_HURT;
    public static final SoundEvent ENTITY_ZOMBIE_VILLAGER_STEP;
 
-   private static SoundEvent getRegisteredSoundEvent(String id) {
-      SoundEvent soundevent = (SoundEvent)SoundEvent.REGISTRY.getObject(new ResourceLocation(id));
-      if (soundevent == null) {
-         throw new IllegalStateException("Invalid Sound requested: " + id);
+   private static SoundEvent getRegisteredSoundEvent(String var0) {
+      SoundEvent var1 = (SoundEvent)SoundEvent.REGISTRY.getObject(new ResourceLocation(var0));
+      if (var1 == null) {
+         throw new IllegalStateException("Invalid Sound requested: " + var0);
       } else {
-         return soundevent;
+         return var1;
       }
    }
 

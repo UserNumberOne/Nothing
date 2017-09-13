@@ -32,24 +32,24 @@ public class BlockBeetroot extends BlockCrops {
       return Items.BEETROOT;
    }
 
-   public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-      if (rand.nextInt(3) == 0) {
-         this.checkAndDropBlock(worldIn, pos, state);
+   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
+      if (var4.nextInt(3) == 0) {
+         this.checkAndDropBlock(var1, var2, var3);
       } else {
-         super.updateTick(worldIn, pos, state, rand);
+         super.updateTick(var1, var2, var3, var4);
       }
 
    }
 
-   protected int getBonemealAgeIncrease(World worldIn) {
-      return super.getBonemealAgeIncrease(worldIn) / 3;
+   protected int getBonemealAgeIncrease(World var1) {
+      return super.getBonemealAgeIncrease(var1) / 3;
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{BEETROOT_AGE});
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-      return BEETROOT_AABB[((Integer)state.getValue(this.getAgeProperty())).intValue()];
+   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return BEETROOT_AABB[((Integer)var1.getValue(this.getAgeProperty())).intValue()];
    }
 }

@@ -22,61 +22,61 @@ public class ItemFood extends Item {
    private PotionEffect potionId;
    private float potionEffectProbability;
 
-   public ItemFood(int amount, float saturation, boolean isWolfFood) {
+   public ItemFood(int var1, float var2, boolean var3) {
       this.itemUseDuration = 32;
-      this.healAmount = amount;
-      this.isWolfsFavoriteMeat = isWolfFood;
-      this.saturationModifier = saturation;
+      this.healAmount = var1;
+      this.isWolfsFavoriteMeat = var3;
+      this.saturationModifier = var2;
       this.setCreativeTab(CreativeTabs.FOOD);
    }
 
-   public ItemFood(int amount, boolean isWolfFood) {
-      this(amount, 0.6F, isWolfFood);
+   public ItemFood(int var1, boolean var2) {
+      this(var1, 0.6F, var2);
    }
 
    @Nullable
-   public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityLivingBase entityLiving) {
-      --stack.stackSize;
-      if (entityLiving instanceof EntityPlayer) {
-         EntityPlayer entityplayer = (EntityPlayer)entityLiving;
-         entityplayer.getFoodStats().addStats(this, stack);
-         worldIn.playSound((EntityPlayer)null, entityplayer.posX, entityplayer.posY, entityplayer.posZ, SoundEvents.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 0.5F, worldIn.rand.nextFloat() * 0.1F + 0.9F);
-         this.onFoodEaten(stack, worldIn, entityplayer);
-         entityplayer.addStat(StatList.getObjectUseStats(this));
+   public ItemStack onItemUseFinish(ItemStack var1, World var2, EntityLivingBase var3) {
+      --var1.stackSize;
+      if (var3 instanceof EntityPlayer) {
+         EntityPlayer var4 = (EntityPlayer)var3;
+         var4.getFoodStats().addStats(this, var1);
+         var2.playSound((EntityPlayer)null, var4.posX, var4.posY, var4.posZ, SoundEvents.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 0.5F, var2.rand.nextFloat() * 0.1F + 0.9F);
+         this.onFoodEaten(var1, var2, var4);
+         var4.addStat(StatList.getObjectUseStats(this));
       }
 
-      return stack;
+      return var1;
    }
 
-   protected void onFoodEaten(ItemStack stack, World worldIn, EntityPlayer player) {
-      if (!worldIn.isRemote && this.potionId != null && worldIn.rand.nextFloat() < this.potionEffectProbability) {
-         player.addPotionEffect(new PotionEffect(this.potionId));
+   protected void onFoodEaten(ItemStack var1, World var2, EntityPlayer var3) {
+      if (!var2.isRemote && this.potionId != null && var2.rand.nextFloat() < this.potionEffectProbability) {
+         var3.addPotionEffect(new PotionEffect(this.potionId));
       }
 
    }
 
-   public int getMaxItemUseDuration(ItemStack stack) {
+   public int getMaxItemUseDuration(ItemStack var1) {
       return 32;
    }
 
-   public EnumAction getItemUseAction(ItemStack stack) {
+   public EnumAction getItemUseAction(ItemStack var1) {
       return EnumAction.EAT;
    }
 
-   public ActionResult onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
-      if (playerIn.canEat(this.alwaysEdible)) {
-         playerIn.setActiveHand(hand);
-         return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
+   public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
+      if (var3.canEat(this.alwaysEdible)) {
+         var3.setActiveHand(var4);
+         return new ActionResult(EnumActionResult.SUCCESS, var1);
       } else {
-         return new ActionResult(EnumActionResult.FAIL, itemStackIn);
+         return new ActionResult(EnumActionResult.FAIL, var1);
       }
    }
 
-   public int getHealAmount(ItemStack stack) {
+   public int getHealAmount(ItemStack var1) {
       return this.healAmount;
    }
 
-   public float getSaturationModifier(ItemStack stack) {
+   public float getSaturationModifier(ItemStack var1) {
       return this.saturationModifier;
    }
 
@@ -84,9 +84,9 @@ public class ItemFood extends Item {
       return this.isWolfsFavoriteMeat;
    }
 
-   public ItemFood setPotionEffect(PotionEffect p_185070_1_, float p_185070_2_) {
-      this.potionId = p_185070_1_;
-      this.potionEffectProbability = p_185070_2_;
+   public ItemFood setPotionEffect(PotionEffect var1, float var2) {
+      this.potionId = var1;
+      this.potionEffectProbability = var2;
       return this;
    }
 

@@ -22,18 +22,18 @@ public class BlockHugeMushroom extends Block {
    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockHugeMushroom.EnumType.class);
    private final Block smallBlock;
 
-   public BlockHugeMushroom(Material materialIn, MapColor color, Block smallBlockIn) {
-      super(materialIn, color);
+   public BlockHugeMushroom(Material var1, MapColor var2, Block var3) {
+      super(var1, var2);
       this.setDefaultState(this.blockState.getBaseState().withProperty(VARIANT, BlockHugeMushroom.EnumType.ALL_OUTSIDE));
-      this.smallBlock = smallBlockIn;
+      this.smallBlock = var3;
    }
 
-   public int quantityDropped(Random random) {
-      return Math.max(0, random.nextInt(10) - 7);
+   public int quantityDropped(Random var1) {
+      return Math.max(0, var1.nextInt(10) - 7);
    }
 
-   public MapColor getMapColor(IBlockState state) {
-      switch((BlockHugeMushroom.EnumType)state.getValue(VARIANT)) {
+   public MapColor getMapColor(IBlockState var1) {
+      switch((BlockHugeMushroom.EnumType)var1.getValue(VARIANT)) {
       case ALL_STEM:
          return MapColor.CLOTH;
       case ALL_INSIDE:
@@ -41,168 +41,155 @@ public class BlockHugeMushroom extends Block {
       case STEM:
          return MapColor.SAND;
       default:
-         return super.getMapColor(state);
+         return super.getMapColor(var1);
       }
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Item.getItemFromBlock(this.smallBlock);
    }
 
-   public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
+   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
       return new ItemStack(this.smallBlock);
    }
 
-   public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
+   public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
       return this.getDefaultState();
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      return this.getDefaultState().withProperty(VARIANT, BlockHugeMushroom.EnumType.byMetadata(meta));
+   public IBlockState getStateFromMeta(int var1) {
+      return this.getDefaultState().withProperty(VARIANT, BlockHugeMushroom.EnumType.byMetadata(var1));
    }
 
-   public int getMetaFromState(IBlockState state) {
-      return ((BlockHugeMushroom.EnumType)state.getValue(VARIANT)).getMetadata();
+   public int getMetaFromState(IBlockState var1) {
+      return ((BlockHugeMushroom.EnumType)var1.getValue(VARIANT)).getMetadata();
    }
 
-   public IBlockState withRotation(IBlockState state, Rotation rot) {
-      switch(rot) {
+   public IBlockState withRotation(IBlockState var1, Rotation var2) {
+      switch(var2) {
       case CLOCKWISE_180:
-         switch((BlockHugeMushroom.EnumType)state.getValue(VARIANT)) {
+         switch((BlockHugeMushroom.EnumType)var1.getValue(VARIANT)) {
          case STEM:
             break;
          case NORTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
          case NORTH:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH);
          case NORTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
          case WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.EAST);
          case EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.WEST);
          case SOUTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
          case SOUTH:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH);
          case SOUTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
          default:
-            return state;
+            return var1;
          }
       case COUNTERCLOCKWISE_90:
-         switch((BlockHugeMushroom.EnumType)state.getValue(VARIANT)) {
+         switch((BlockHugeMushroom.EnumType)var1.getValue(VARIANT)) {
          case STEM:
             break;
          case NORTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
          case NORTH:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.WEST);
          case NORTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
          case WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH);
          case EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH);
          case SOUTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
          case SOUTH:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.EAST);
          case SOUTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
          default:
-            return state;
+            return var1;
          }
       case CLOCKWISE_90:
-         switch((BlockHugeMushroom.EnumType)state.getValue(VARIANT)) {
+         switch((BlockHugeMushroom.EnumType)var1.getValue(VARIANT)) {
          case STEM:
             break;
          case NORTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
          case NORTH:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.EAST);
          case NORTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
          case WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH);
          case EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH);
          case SOUTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
          case SOUTH:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.WEST);
          case SOUTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
          default:
-            return state;
+            return var1;
          }
       default:
-         return state;
+         return var1;
       }
    }
 
-   public IBlockState withMirror(IBlockState state, Mirror mirrorIn) {
-      BlockHugeMushroom.EnumType blockhugemushroom$enumtype = (BlockHugeMushroom.EnumType)state.getValue(VARIANT);
-      switch(mirrorIn) {
+   public IBlockState withMirror(IBlockState var1, Mirror var2) {
+      BlockHugeMushroom.EnumType var3 = (BlockHugeMushroom.EnumType)var1.getValue(VARIANT);
+      switch(var2) {
       case LEFT_RIGHT:
-         switch(blockhugemushroom$enumtype) {
+         switch(var3) {
          case NORTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
          case NORTH:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH);
          case NORTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
          case WEST:
          case EAST:
          default:
-            return super.withMirror(state, mirrorIn);
+            return super.withMirror(var1, var2);
          case SOUTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
          case SOUTH:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH);
          case SOUTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
          }
       case FRONT_BACK:
-         switch(blockhugemushroom$enumtype) {
+         switch(var3) {
          case NORTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_EAST);
          case NORTH:
          case SOUTH:
          default:
             break;
          case NORTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.NORTH_WEST);
          case WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.EAST);
          case EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.WEST);
          case SOUTH_WEST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_EAST);
          case SOUTH_EAST:
-            return state.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
+            return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
          }
-      default:
-         return super.withMirror(state, mirrorIn);
       }
+
+      return super.withMirror(var1, var2);
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{VARIANT});
-   }
-
-   public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis) {
-      IBlockState state = world.getBlockState(pos);
-
-      for(IProperty prop : state.getProperties().keySet()) {
-         if (prop.getName().equals("variant")) {
-            world.setBlockState(pos, state.cycleProperty(prop));
-            return true;
-         }
-      }
-
-      return false;
    }
 
    public static enum EnumType implements IStringSerializable {
@@ -224,9 +211,9 @@ public class BlockHugeMushroom extends Block {
       private final int meta;
       private final String name;
 
-      private EnumType(int meta, String name) {
-         this.meta = meta;
-         this.name = name;
+      private EnumType(int var3, String var4) {
+         this.meta = var3;
+         this.name = var4;
       }
 
       public int getMetadata() {
@@ -237,13 +224,13 @@ public class BlockHugeMushroom extends Block {
          return this.name;
       }
 
-      public static BlockHugeMushroom.EnumType byMetadata(int meta) {
-         if (meta < 0 || meta >= META_LOOKUP.length) {
-            meta = 0;
+      public static BlockHugeMushroom.EnumType byMetadata(int var0) {
+         if (var0 < 0 || var0 >= META_LOOKUP.length) {
+            var0 = 0;
          }
 
-         BlockHugeMushroom.EnumType blockhugemushroom$enumtype = META_LOOKUP[meta];
-         return blockhugemushroom$enumtype == null ? META_LOOKUP[0] : blockhugemushroom$enumtype;
+         BlockHugeMushroom.EnumType var1 = META_LOOKUP[var0];
+         return var1 == null ? META_LOOKUP[0] : var1;
       }
 
       public String getName() {
@@ -251,8 +238,8 @@ public class BlockHugeMushroom extends Block {
       }
 
       static {
-         for(BlockHugeMushroom.EnumType blockhugemushroom$enumtype : values()) {
-            META_LOOKUP[blockhugemushroom$enumtype.getMetadata()] = blockhugemushroom$enumtype;
+         for(BlockHugeMushroom.EnumType var3 : values()) {
+            META_LOOKUP[var3.getMetadata()] = var3;
          }
 
       }

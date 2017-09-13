@@ -1,9 +1,6 @@
 package net.minecraft.item;
 
-import java.util.List;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemCoal extends Item {
    public ItemCoal() {
@@ -12,13 +9,7 @@ public class ItemCoal extends Item {
       this.setCreativeTab(CreativeTabs.MATERIALS);
    }
 
-   public String getUnlocalizedName(ItemStack stack) {
-      return stack.getMetadata() == 1 ? "item.charcoal" : "item.coal";
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubItems(Item itemIn, CreativeTabs tab, List subItems) {
-      subItems.add(new ItemStack(itemIn, 1, 0));
-      subItems.add(new ItemStack(itemIn, 1, 1));
+   public String getUnlocalizedName(ItemStack var1) {
+      return var1.getMetadata() == 1 ? "item.charcoal" : "item.coal";
    }
 }

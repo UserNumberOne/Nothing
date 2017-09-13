@@ -4,38 +4,26 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketConfirmTransaction implements Packet {
    private int windowId;
    private short uid;
    private boolean accepted;
 
-   public CPacketConfirmTransaction() {
+   public void processPacket(INetHandlerPlayServer var1) {
+      var1.processConfirmTransaction(this);
    }
 
-   @SideOnly(Side.CLIENT)
-   public CPacketConfirmTransaction(int windowIdIn, short uidIn, boolean acceptedIn) {
-      this.windowId = windowIdIn;
-      this.uid = uidIn;
-      this.accepted = acceptedIn;
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.windowId = var1.readByte();
+      this.uid = var1.readShort();
+      this.accepted = var1.readByte() != 0;
    }
 
-   public void processPacket(INetHandlerPlayServer handler) {
-      handler.processConfirmTransaction(this);
-   }
-
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.windowId = buf.readByte();
-      this.uid = buf.readShort();
-      this.accepted = buf.readByte() != 0;
-   }
-
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeByte(this.windowId);
-      buf.writeShort(this.uid);
-      buf.writeByte(this.accepted ? 1 : 0);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeByte(this.windowId);
+      var1.writeShort(this.uid);
+      var1.writeByte(this.accepted ? 1 : 0);
    }
 
    public int getWindowId() {

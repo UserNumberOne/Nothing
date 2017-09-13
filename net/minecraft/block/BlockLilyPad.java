@@ -12,6 +12,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockLilyPad extends BlockBush {
    protected static final AxisAlignedBB LILY_PAD_AABB = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 0.09375D, 0.9375D);
@@ -20,40 +21,40 @@ public class BlockLilyPad extends BlockBush {
       this.setCreativeTab(CreativeTabs.DECORATIONS);
    }
 
-   public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List collidingBoxes, @Nullable Entity entityIn) {
-      if (!(entityIn instanceof EntityBoat)) {
-         addCollisionBoxToList(pos, entityBox, collidingBoxes, LILY_PAD_AABB);
+   public void addCollisionBoxToList(IBlockState iblockdata, World world, BlockPos blockposition, AxisAlignedBB axisalignedbb, List list, @Nullable Entity entity) {
+      if (!(entity instanceof EntityBoat)) {
+         addCollisionBoxToList(blockposition, axisalignedbb, list, LILY_PAD_AABB);
       }
 
    }
 
-   public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
-      super.onEntityCollidedWithBlock(worldIn, pos, state, entityIn);
-      if (entityIn instanceof EntityBoat) {
-         worldIn.destroyBlock(new BlockPos(pos), true);
+   public void onEntityCollidedWithBlock(World world, BlockPos blockposition, IBlockState iblockdata, Entity entity) {
+      super.onEntityCollidedWithBlock(world, blockposition, iblockdata, entity);
+      if (entity instanceof EntityBoat && !CraftEventFactory.callEntityChangeBlockEvent(entity, blockposition, Blocks.AIR, 0).isCancelled()) {
+         world.destroyBlock(new BlockPos(blockposition), true);
       }
 
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
       return LILY_PAD_AABB;
    }
 
-   protected boolean canSustainBush(IBlockState state) {
-      return state.getBlock() == Blocks.WATER || state.getMaterial() == Material.ICE;
+   protected boolean canSustainBush(IBlockState iblockdata) {
+      return iblockdata.getBlock() == Blocks.WATER || iblockdata.getMaterial() == Material.ICE;
    }
 
-   public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state) {
-      if (pos.getY() >= 0 && pos.getY() < 256) {
-         IBlockState iblockstate = worldIn.getBlockState(pos.down());
-         Material material = iblockstate.getMaterial();
-         return material == Material.WATER && ((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue() == 0 || material == Material.ICE;
+   public boolean canBlockStay(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (blockposition.getY() >= 0 && blockposition.getY() < 256) {
+         IBlockState iblockdata1 = world.getBlockState(blockposition.down());
+         Material material = iblockdata1.getMaterial();
+         return material == Material.WATER && ((Integer)iblockdata1.getValue(BlockLiquid.LEVEL)).intValue() == 0 || material == Material.ICE;
       } else {
          return false;
       }
    }
 
-   public int getMetaFromState(IBlockState state) {
+   public int getMetaFromState(IBlockState iblockdata) {
       return 0;
    }
 }

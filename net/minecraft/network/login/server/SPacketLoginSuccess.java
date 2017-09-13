@@ -6,8 +6,6 @@ import java.util.UUID;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketLoginSuccess implements Packet {
    private GameProfile profile;
@@ -15,29 +13,24 @@ public class SPacketLoginSuccess implements Packet {
    public SPacketLoginSuccess() {
    }
 
-   public SPacketLoginSuccess(GameProfile profileIn) {
-      this.profile = profileIn;
+   public SPacketLoginSuccess(GameProfile var1) {
+      this.profile = var1;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      String s = buf.readString(36);
-      String s1 = buf.readString(16);
-      UUID uuid = UUID.fromString(s);
-      this.profile = new GameProfile(uuid, s1);
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      String var2 = var1.readString(36);
+      String var3 = var1.readString(16);
+      UUID var4 = UUID.fromString(var2);
+      this.profile = new GameProfile(var4, var3);
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      UUID uuid = this.profile.getId();
-      buf.writeString(uuid == null ? "" : uuid.toString());
-      buf.writeString(this.profile.getName());
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      UUID var2 = this.profile.getId();
+      var1.writeString(var2 == null ? "" : var2.toString());
+      var1.writeString(this.profile.getName());
    }
 
-   public void processPacket(INetHandlerLoginClient handler) {
-      handler.handleLoginSuccess(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public GameProfile getProfile() {
-      return this.profile;
+   public void processPacket(INetHandlerLoginClient var1) {
+      var1.handleLoginSuccess(this);
    }
 }

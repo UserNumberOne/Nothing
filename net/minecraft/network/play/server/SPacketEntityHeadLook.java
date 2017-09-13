@@ -5,9 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityHeadLook implements Packet {
    private int entityId;
@@ -16,32 +13,22 @@ public class SPacketEntityHeadLook implements Packet {
    public SPacketEntityHeadLook() {
    }
 
-   public SPacketEntityHeadLook(Entity entityIn, byte yawIn) {
-      this.entityId = entityIn.getEntityId();
-      this.yaw = yawIn;
+   public SPacketEntityHeadLook(Entity var1, byte var2) {
+      this.entityId = var1.getEntityId();
+      this.yaw = var2;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.entityId = buf.readVarInt();
-      this.yaw = buf.readByte();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.entityId = var1.readVarInt();
+      this.yaw = var1.readByte();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeVarInt(this.entityId);
-      buf.writeByte(this.yaw);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeVarInt(this.entityId);
+      var1.writeByte(this.yaw);
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleEntityHeadLook(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Entity getEntity(World worldIn) {
-      return worldIn.getEntityByID(this.entityId);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getYaw() {
-      return this.yaw;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleEntityHeadLook(this);
    }
 }

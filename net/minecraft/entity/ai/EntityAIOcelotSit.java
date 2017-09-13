@@ -13,9 +13,9 @@ import net.minecraft.world.World;
 public class EntityAIOcelotSit extends EntityAIMoveToBlock {
    private final EntityOcelot ocelot;
 
-   public EntityAIOcelotSit(EntityOcelot ocelotIn, double p_i45315_2_) {
-      super(ocelotIn, p_i45315_2_, 8);
-      this.ocelot = ocelotIn;
+   public EntityAIOcelotSit(EntityOcelot var1, double var2) {
+      super(var1, var2, 8);
+      this.ocelot = var1;
    }
 
    public boolean shouldExecute() {
@@ -47,23 +47,23 @@ public class EntityAIOcelotSit extends EntityAIMoveToBlock {
 
    }
 
-   protected boolean shouldMoveTo(World worldIn, BlockPos pos) {
-      if (!worldIn.isAirBlock(pos.up())) {
+   protected boolean shouldMoveTo(World var1, BlockPos var2) {
+      if (!var1.isAirBlock(var2.up())) {
          return false;
       } else {
-         IBlockState iblockstate = worldIn.getBlockState(pos);
-         Block block = iblockstate.getBlock();
-         if (block == Blocks.CHEST) {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
-            if (tileentity instanceof TileEntityChest && ((TileEntityChest)tileentity).numPlayersUsing < 1) {
+         IBlockState var3 = var1.getBlockState(var2);
+         Block var4 = var3.getBlock();
+         if (var4 == Blocks.CHEST) {
+            TileEntity var5 = var1.getTileEntity(var2);
+            if (var5 instanceof TileEntityChest && ((TileEntityChest)var5).numPlayersUsing < 1) {
                return true;
             }
          } else {
-            if (block == Blocks.LIT_FURNACE) {
+            if (var4 == Blocks.LIT_FURNACE) {
                return true;
             }
 
-            if (block == Blocks.BED && iblockstate.getValue(BlockBed.PART) != BlockBed.EnumPartType.HEAD) {
+            if (var4 == Blocks.BED && var3.getValue(BlockBed.PART) != BlockBed.EnumPartType.HEAD) {
                return true;
             }
          }

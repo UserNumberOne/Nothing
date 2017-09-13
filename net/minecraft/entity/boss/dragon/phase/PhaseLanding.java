@@ -10,23 +10,23 @@ import net.minecraft.world.gen.feature.WorldGenEndPodium;
 public class PhaseLanding extends PhaseBase {
    private Vec3d targetLocation;
 
-   public PhaseLanding(EntityDragon dragonIn) {
-      super(dragonIn);
+   public PhaseLanding(EntityDragon var1) {
+      super(var1);
    }
 
    public void doClientRenderEffects() {
-      Vec3d vec3d = this.dragon.getHeadLookVec(1.0F).normalize();
-      vec3d.rotateYaw(-0.7853982F);
-      double d0 = this.dragon.dragonPartHead.posX;
-      double d1 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F);
-      double d2 = this.dragon.dragonPartHead.posZ;
+      Vec3d var1 = this.dragon.getHeadLookVec(1.0F).normalize();
+      var1.rotateYaw(-0.7853982F);
+      double var2 = this.dragon.dragonPartHead.posX;
+      double var4 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F);
+      double var6 = this.dragon.dragonPartHead.posZ;
 
-      for(int i = 0; i < 8; ++i) {
-         double d3 = d0 + this.dragon.getRNG().nextGaussian() / 2.0D;
-         double d4 = d1 + this.dragon.getRNG().nextGaussian() / 2.0D;
-         double d5 = d2 + this.dragon.getRNG().nextGaussian() / 2.0D;
-         this.dragon.world.spawnParticle(EnumParticleTypes.DRAGON_BREATH, d3, d4, d5, -vec3d.xCoord * 0.07999999821186066D + this.dragon.motionX, -vec3d.yCoord * 0.30000001192092896D + this.dragon.motionY, -vec3d.zCoord * 0.07999999821186066D + this.dragon.motionZ);
-         vec3d.rotateYaw(0.19634955F);
+      for(int var8 = 0; var8 < 8; ++var8) {
+         double var9 = var2 + this.dragon.getRNG().nextGaussian() / 2.0D;
+         double var11 = var4 + this.dragon.getRNG().nextGaussian() / 2.0D;
+         double var13 = var6 + this.dragon.getRNG().nextGaussian() / 2.0D;
+         this.dragon.world.spawnParticle(EnumParticleTypes.DRAGON_BREATH, var9, var11, var13, -var1.xCoord * 0.07999999821186066D + this.dragon.motionX, -var1.yCoord * 0.30000001192092896D + this.dragon.motionY, -var1.zCoord * 0.07999999821186066D + this.dragon.motionZ);
+         var1.rotateYaw(0.19634955F);
       }
 
    }
@@ -48,9 +48,9 @@ public class PhaseLanding extends PhaseBase {
    }
 
    public float getYawFactor() {
-      float f = MathHelper.sqrt(this.dragon.motionX * this.dragon.motionX + this.dragon.motionZ * this.dragon.motionZ) + 1.0F;
-      float f1 = Math.min(f, 40.0F);
-      return f1 / f;
+      float var1 = MathHelper.sqrt(this.dragon.motionX * this.dragon.motionX + this.dragon.motionZ * this.dragon.motionZ) + 1.0F;
+      float var2 = Math.min(var1, 40.0F);
+      return var2 / var1;
    }
 
    public void initPhase() {

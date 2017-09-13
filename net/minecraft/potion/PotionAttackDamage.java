@@ -5,12 +5,12 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 public class PotionAttackDamage extends Potion {
    protected final double bonusPerLevel;
 
-   protected PotionAttackDamage(boolean isBadEffectIn, int liquidColorIn, double bonusPerLevelIn) {
-      super(isBadEffectIn, liquidColorIn);
-      this.bonusPerLevel = bonusPerLevelIn;
+   protected PotionAttackDamage(boolean var1, int var2, double var3) {
+      super(var1, var2);
+      this.bonusPerLevel = var3;
    }
 
-   public double getAttributeModifierAmount(int amplifier, AttributeModifier modifier) {
-      return this.bonusPerLevel * (double)(amplifier + 1);
+   public double getAttributeModifierAmount(int var1, AttributeModifier var2) {
+      return this.bonusPerLevel * (double)(var1 + 1);
    }
 }

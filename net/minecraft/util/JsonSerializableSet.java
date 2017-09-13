@@ -10,23 +10,23 @@ import java.util.Set;
 public class JsonSerializableSet extends ForwardingSet implements IJsonSerializable {
    private final Set underlyingSet = Sets.newHashSet();
 
-   public void fromJson(JsonElement json) {
-      if (json.isJsonArray()) {
-         for(JsonElement jsonelement : json.getAsJsonArray()) {
-            this.add(jsonelement.getAsString());
+   public void fromJson(JsonElement var1) {
+      if (var1.isJsonArray()) {
+         for(JsonElement var3 : var1.getAsJsonArray()) {
+            this.add(var3.getAsString());
          }
       }
 
    }
 
    public JsonElement getSerializableElement() {
-      JsonArray jsonarray = new JsonArray();
+      JsonArray var1 = new JsonArray();
 
-      for(String s : this) {
-         jsonarray.add(new JsonPrimitive(s));
+      for(String var3 : this) {
+         var1.add(new JsonPrimitive(var3));
       }
 
-      return jsonarray;
+      return var1;
    }
 
    protected Set delegate() {

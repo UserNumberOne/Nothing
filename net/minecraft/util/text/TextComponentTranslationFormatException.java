@@ -1,15 +1,15 @@
 package net.minecraft.util.text;
 
 public class TextComponentTranslationFormatException extends IllegalArgumentException {
-   public TextComponentTranslationFormatException(TextComponentTranslation component, String message) {
-      super(String.format("Error parsing: %s: %s", component, message));
+   public TextComponentTranslationFormatException(TextComponentTranslation var1, String var2) {
+      super(String.format("Error parsing: %s: %s", var1, var2));
    }
 
-   public TextComponentTranslationFormatException(TextComponentTranslation component, int index) {
-      super(String.format("Invalid index %d requested for %s", index, component));
+   public TextComponentTranslationFormatException(TextComponentTranslation var1, int var2) {
+      super(String.format("Invalid index %d requested for %s", var2, var1));
    }
 
-   public TextComponentTranslationFormatException(TextComponentTranslation component, Throwable cause) {
-      super(String.format("Error while parsing: %s", component), cause);
+   public TextComponentTranslationFormatException(TextComponentTranslation var1, Throwable var2) {
+      super(String.format("Error while parsing: %s", var1), var2);
    }
 }

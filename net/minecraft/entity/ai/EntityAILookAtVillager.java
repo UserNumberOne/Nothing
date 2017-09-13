@@ -8,8 +8,8 @@ public class EntityAILookAtVillager extends EntityAIBase {
    private EntityVillager theVillager;
    private int lookTime;
 
-   public EntityAILookAtVillager(EntityIronGolem theGolemIn) {
-      this.theGolem = theGolemIn;
+   public EntityAILookAtVillager(EntityIronGolem var1) {
+      this.theGolem = var1;
       this.setMutexBits(3);
    }
 

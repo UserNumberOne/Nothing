@@ -4,41 +4,35 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 
 public class RayTraceResult {
-   public int subHit;
-   public Object hitInfo;
    private BlockPos blockPos;
    public RayTraceResult.Type typeOfHit;
    public EnumFacing sideHit;
    public Vec3d hitVec;
    public Entity entityHit;
 
-   public RayTraceResult(Vec3d hitVecIn, EnumFacing sideHitIn, BlockPos blockPosIn) {
-      this(RayTraceResult.Type.BLOCK, hitVecIn, sideHitIn, blockPosIn);
+   public RayTraceResult(Vec3d var1, EnumFacing var2, BlockPos var3) {
+      this(RayTraceResult.Type.BLOCK, var1, var2, var3);
    }
 
-   public RayTraceResult(Vec3d hitVecIn, EnumFacing sideHitIn) {
-      this(RayTraceResult.Type.BLOCK, hitVecIn, sideHitIn, BlockPos.ORIGIN);
+   public RayTraceResult(Vec3d var1, EnumFacing var2) {
+      this(RayTraceResult.Type.BLOCK, var1, var2, BlockPos.ORIGIN);
    }
 
-   public RayTraceResult(Entity entityIn) {
-      this(entityIn, new Vec3d(entityIn.posX, entityIn.posY, entityIn.posZ));
+   public RayTraceResult(Entity var1) {
+      this(var1, new Vec3d(var1.posX, var1.posY, var1.posZ));
    }
 
-   public RayTraceResult(RayTraceResult.Type typeIn, Vec3d hitVecIn, EnumFacing sideHitIn, BlockPos blockPosIn) {
-      this.subHit = -1;
-      this.hitInfo = null;
-      this.typeOfHit = typeIn;
-      this.blockPos = blockPosIn;
-      this.sideHit = sideHitIn;
-      this.hitVec = new Vec3d(hitVecIn.xCoord, hitVecIn.yCoord, hitVecIn.zCoord);
+   public RayTraceResult(RayTraceResult.Type var1, Vec3d var2, EnumFacing var3, BlockPos var4) {
+      this.typeOfHit = var1;
+      this.blockPos = var4;
+      this.sideHit = var3;
+      this.hitVec = new Vec3d(var2.xCoord, var2.yCoord, var2.zCoord);
    }
 
-   public RayTraceResult(Entity entityHitIn, Vec3d hitVecIn) {
-      this.subHit = -1;
-      this.hitInfo = null;
+   public RayTraceResult(Entity var1, Vec3d var2) {
       this.typeOfHit = RayTraceResult.Type.ENTITY;
-      this.entityHit = entityHitIn;
-      this.hitVec = hitVecIn;
+      this.entityHit = var1;
+      this.hitVec = var2;
    }
 
    public BlockPos getBlockPos() {

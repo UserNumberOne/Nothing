@@ -13,8 +13,8 @@ public class PhaseLandingApproach extends PhaseBase {
    private Path currentPath;
    private Vec3d targetLocation;
 
-   public PhaseLandingApproach(EntityDragon dragonIn) {
-      super(dragonIn);
+   public PhaseLandingApproach(EntityDragon var1) {
+      super(var1);
    }
 
    public PhaseList getPhaseList() {
@@ -27,8 +27,8 @@ public class PhaseLandingApproach extends PhaseBase {
    }
 
    public void doLocalUpdate() {
-      double d0 = this.targetLocation == null ? 0.0D : this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
-      if (d0 < 100.0D || d0 > 22500.0D || this.dragon.isCollidedHorizontally || this.dragon.isCollidedVertically) {
+      double var1 = this.targetLocation == null ? 0.0D : this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
+      if (var1 < 100.0D || var1 > 22500.0D || this.dragon.isCollidedHorizontally || this.dragon.isCollidedVertically) {
          this.findNewTarget();
       }
 
@@ -41,19 +41,19 @@ public class PhaseLandingApproach extends PhaseBase {
 
    private void findNewTarget() {
       if (this.currentPath == null || this.currentPath.isFinished()) {
-         int i = this.dragon.initPathPoints();
-         BlockPos blockpos = this.dragon.world.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
-         EntityPlayer entityplayer = this.dragon.world.getNearestAttackablePlayer(blockpos, 128.0D, 128.0D);
-         int j;
-         if (entityplayer != null) {
-            Vec3d vec3d = (new Vec3d(entityplayer.posX, 0.0D, entityplayer.posZ)).normalize();
-            j = this.dragon.getNearestPpIdx(-vec3d.xCoord * 40.0D, 105.0D, -vec3d.zCoord * 40.0D);
+         int var1 = this.dragon.initPathPoints();
+         BlockPos var2 = this.dragon.world.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
+         EntityPlayer var3 = this.dragon.world.getNearestAttackablePlayer(var2, 128.0D, 128.0D);
+         int var5;
+         if (var3 != null) {
+            Vec3d var4 = (new Vec3d(var3.posX, 0.0D, var3.posZ)).normalize();
+            var5 = this.dragon.getNearestPpIdx(-var4.xCoord * 40.0D, 105.0D, -var4.zCoord * 40.0D);
          } else {
-            j = this.dragon.getNearestPpIdx(40.0D, (double)blockpos.getY(), 0.0D);
+            var5 = this.dragon.getNearestPpIdx(40.0D, (double)var2.getY(), 0.0D);
          }
 
-         PathPoint pathpoint = new PathPoint(blockpos.getX(), blockpos.getY(), blockpos.getZ());
-         this.currentPath = this.dragon.findPath(i, j, pathpoint);
+         PathPoint var6 = new PathPoint(var2.getX(), var2.getY(), var2.getZ());
+         this.currentPath = this.dragon.findPath(var1, var5, var6);
          if (this.currentPath != null) {
             this.currentPath.incrementPathIndex();
          }
@@ -68,20 +68,20 @@ public class PhaseLandingApproach extends PhaseBase {
 
    private void navigateToNextPathNode() {
       if (this.currentPath != null && !this.currentPath.isFinished()) {
-         Vec3d vec3d = this.currentPath.getCurrentPos();
+         Vec3d var1 = this.currentPath.getCurrentPos();
          this.currentPath.incrementPathIndex();
-         double d0 = vec3d.xCoord;
-         double d1 = vec3d.zCoord;
+         double var2 = var1.xCoord;
+         double var4 = var1.zCoord;
 
-         double d2;
+         double var6;
          while(true) {
-            d2 = vec3d.yCoord + (double)(this.dragon.getRNG().nextFloat() * 20.0F);
-            if (d2 >= vec3d.yCoord) {
+            var6 = var1.yCoord + (double)(this.dragon.getRNG().nextFloat() * 20.0F);
+            if (var6 >= var1.yCoord) {
                break;
             }
          }
 
-         this.targetLocation = new Vec3d(d0, d2, d1);
+         this.targetLocation = new Vec3d(var2, var6, var4);
       }
 
    }

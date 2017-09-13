@@ -6,10 +6,10 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import net.minecraft.block.state.BlockWorldState;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,29 +24,29 @@ public class FactoryBlockPattern {
       this.symbolMap.put(Character.valueOf(' '), Predicates.alwaysTrue());
    }
 
-   public FactoryBlockPattern aisle(String... aisle) {
-      if (!ArrayUtils.isEmpty((Object[])aisle) && !StringUtils.isEmpty(aisle[0])) {
+   public FactoryBlockPattern aisle(String... var1) {
+      if (!ArrayUtils.isEmpty(var1) && !StringUtils.isEmpty(var1[0])) {
          if (this.depth.isEmpty()) {
-            this.aisleHeight = aisle.length;
-            this.rowWidth = aisle[0].length();
+            this.aisleHeight = var1.length;
+            this.rowWidth = var1[0].length();
          }
 
-         if (aisle.length != this.aisleHeight) {
-            throw new IllegalArgumentException("Expected aisle with height of " + this.aisleHeight + ", but was given one with a height of " + aisle.length + ")");
+         if (var1.length != this.aisleHeight) {
+            throw new IllegalArgumentException("Expected aisle with height of " + this.aisleHeight + ", but was given one with a height of " + var1.length + ")");
          } else {
-            for(String s : aisle) {
-               if (s.length() != this.rowWidth) {
-                  throw new IllegalArgumentException("Not all rows in the given aisle are the correct width (expected " + this.rowWidth + ", found one with " + s.length() + ")");
+            for(String var5 : var1) {
+               if (var5.length() != this.rowWidth) {
+                  throw new IllegalArgumentException("Not all rows in the given aisle are the correct width (expected " + this.rowWidth + ", found one with " + var5.length() + ")");
                }
 
-               for(char c0 : s.toCharArray()) {
-                  if (!this.symbolMap.containsKey(Character.valueOf(c0))) {
-                     this.symbolMap.put(Character.valueOf(c0), (Predicate)null);
+               for(char var9 : var5.toCharArray()) {
+                  if (!this.symbolMap.containsKey(Character.valueOf(var9))) {
+                     this.symbolMap.put(Character.valueOf(var9), (Object)null);
                   }
                }
             }
 
-            this.depth.add(aisle);
+            this.depth.add(var1);
             return this;
          }
       } else {
@@ -58,8 +58,8 @@ public class FactoryBlockPattern {
       return new FactoryBlockPattern();
    }
 
-   public FactoryBlockPattern where(char symbol, Predicate blockMatcher) {
-      this.symbolMap.put(Character.valueOf(symbol), blockMatcher);
+   public FactoryBlockPattern where(char var1, Predicate var2) {
+      this.symbolMap.put(Character.valueOf(var1), var2);
       return this;
    }
 
@@ -69,30 +69,30 @@ public class FactoryBlockPattern {
 
    private Predicate[][][] makePredicateArray() {
       this.checkMissingPredicates();
-      Predicate[][][] predicate = (Predicate[][][])((Predicate[][][])((Predicate[][][])Array.newInstance(Predicate.class, new int[]{this.depth.size(), this.aisleHeight, this.rowWidth})));
+      Predicate[][][] var1 = (Predicate[][][])Array.newInstance(Predicate.class, new int[]{this.depth.size(), this.aisleHeight, this.rowWidth});
 
-      for(int i = 0; i < this.depth.size(); ++i) {
-         for(int j = 0; j < this.aisleHeight; ++j) {
-            for(int k = 0; k < this.rowWidth; ++k) {
-               predicate[i][j][k] = (Predicate)this.symbolMap.get(Character.valueOf(((String[])((String[])this.depth.get(i)))[j].charAt(k)));
+      for(int var2 = 0; var2 < this.depth.size(); ++var2) {
+         for(int var3 = 0; var3 < this.aisleHeight; ++var3) {
+            for(int var4 = 0; var4 < this.rowWidth; ++var4) {
+               var1[var2][var3][var4] = (Predicate)this.symbolMap.get(Character.valueOf(((String[])this.depth.get(var2))[var3].charAt(var4)));
             }
          }
       }
 
-      return predicate;
+      return var1;
    }
 
    private void checkMissingPredicates() {
-      List list = Lists.newArrayList();
+      ArrayList var1 = Lists.newArrayList();
 
-      for(Entry entry : this.symbolMap.entrySet()) {
-         if (entry.getValue() == null) {
-            list.add(entry.getKey());
+      for(Entry var3 : this.symbolMap.entrySet()) {
+         if (var3.getValue() == null) {
+            var1.add(var3.getKey());
          }
       }
 
-      if (!list.isEmpty()) {
-         throw new IllegalStateException("Predicates for character(s) " + COMMA_JOIN.join(list) + " are missing");
+      if (!var1.isEmpty()) {
+         throw new IllegalStateException("Predicates for character(s) " + COMMA_JOIN.join(var1) + " are missing");
       }
    }
 }

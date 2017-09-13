@@ -15,29 +15,29 @@ public class NettyPacketDecoder extends ByteToMessageDecoder {
    private static final Marker RECEIVED_PACKET_MARKER = MarkerManager.getMarker("PACKET_RECEIVED", NetworkManager.NETWORK_PACKETS_MARKER);
    private final EnumPacketDirection direction;
 
-   public NettyPacketDecoder(EnumPacketDirection direction) {
-      this.direction = direction;
+   public NettyPacketDecoder(EnumPacketDirection var1) {
+      this.direction = var1;
    }
 
-   protected void decode(ChannelHandlerContext p_decode_1_, ByteBuf p_decode_2_, List p_decode_3_) throws IOException, InstantiationException, IllegalAccessException, Exception {
-      if (p_decode_2_.readableBytes() != 0) {
-         PacketBuffer packetbuffer = new PacketBuffer(p_decode_2_);
-         int i = packetbuffer.readVarInt();
-         Packet packet = ((EnumConnectionState)p_decode_1_.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getPacket(this.direction, i);
-         if (packet == null) {
-            throw new IOException("Bad packet id " + i);
-         }
+   protected void decode(ChannelHandlerContext var1, ByteBuf var2, List var3) throws Exception {
+      if (var2.readableBytes() != 0) {
+         PacketBuffer var4 = new PacketBuffer(var2);
+         int var5 = var4.readVarInt();
+         Packet var6 = ((EnumConnectionState)var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getPacket(this.direction, var5);
+         if (var6 == null) {
+            throw new IOException("Bad packet id " + var5);
+         } else {
+            var6.readPacketData(var4);
+            if (var4.readableBytes() > 0) {
+               throw new IOException("Packet " + ((EnumConnectionState)var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getId() + "/" + var5 + " (" + var6.getClass().getSimpleName() + ") was larger than I expected, found " + var4.readableBytes() + " bytes extra whilst reading packet " + var5);
+            } else {
+               var3.add(var6);
+               if (LOGGER.isDebugEnabled()) {
+                  LOGGER.debug(RECEIVED_PACKET_MARKER, " IN: [{}:{}] {}", new Object[]{var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), var5, var6.getClass().getName()});
+               }
 
-         packet.readPacketData(packetbuffer);
-         if (packetbuffer.readableBytes() > 0) {
-            throw new IOException("Packet " + ((EnumConnectionState)p_decode_1_.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getId() + "/" + i + " (" + packet.getClass().getSimpleName() + ") was larger than I expected, found " + packetbuffer.readableBytes() + " bytes extra whilst reading packet " + i);
-         }
-
-         p_decode_3_.add(packet);
-         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(RECEIVED_PACKET_MARKER, " IN: [{}:{}] {}", new Object[]{p_decode_1_.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), i, packet.getClass().getName()});
+            }
          }
       }
-
    }
 }

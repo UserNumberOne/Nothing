@@ -8,19 +8,19 @@ import java.util.Collection;
 import net.minecraft.util.EnumFacing;
 
 public class PropertyDirection extends PropertyEnum {
-   protected PropertyDirection(String name, Collection values) {
-      super(name, EnumFacing.class, values);
+   protected PropertyDirection(String var1, Collection var2) {
+      super(var1, EnumFacing.class, var2);
    }
 
-   public static PropertyDirection create(String name) {
-      return create(name, Predicates.alwaysTrue());
+   public static PropertyDirection create(String var0) {
+      return create(var0, Predicates.alwaysTrue());
    }
 
-   public static PropertyDirection create(String name, Predicate filter) {
-      return create(name, Collections2.filter(Lists.newArrayList(EnumFacing.values()), filter));
+   public static PropertyDirection create(String var0, Predicate var1) {
+      return create(var0, Collections2.filter(Lists.newArrayList(EnumFacing.values()), var1));
    }
 
-   public static PropertyDirection create(String name, Collection values) {
-      return new PropertyDirection(name, values);
+   public static PropertyDirection create(String var0, Collection var1) {
+      return new PropertyDirection(var0, var1);
    }
 }

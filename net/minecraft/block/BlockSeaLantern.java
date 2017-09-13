@@ -10,24 +10,24 @@ import net.minecraft.item.Item;
 import net.minecraft.util.math.MathHelper;
 
 public class BlockSeaLantern extends Block {
-   public BlockSeaLantern(Material materialIn) {
-      super(materialIn);
+   public BlockSeaLantern(Material var1) {
+      super(var1);
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
-   public int quantityDropped(Random random) {
-      return 2 + random.nextInt(2);
+   public int quantityDropped(Random var1) {
+      return 2 + var1.nextInt(2);
    }
 
-   public int quantityDroppedWithBonus(int fortune, Random random) {
-      return MathHelper.clamp(this.quantityDropped(random) + random.nextInt(fortune + 1), 1, 5);
+   public int quantityDroppedWithBonus(int var1, Random var2) {
+      return MathHelper.clamp(this.quantityDropped(var2) + var2.nextInt(var1 + 1), 1, 5);
    }
 
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Items.PRISMARINE_CRYSTALS;
    }
 
-   public MapColor getMapColor(IBlockState state) {
+   public MapColor getMapColor(IBlockState var1) {
       return MapColor.QUARTZ;
    }
 

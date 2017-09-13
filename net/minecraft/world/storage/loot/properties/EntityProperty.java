@@ -14,9 +14,9 @@ public interface EntityProperty {
       private final ResourceLocation name;
       private final Class propertyClass;
 
-      protected Serializer(ResourceLocation nameIn, Class propertyClassIn) {
-         this.name = nameIn;
-         this.propertyClass = propertyClassIn;
+      protected Serializer(ResourceLocation var1, Class var2) {
+         this.name = var1;
+         this.propertyClass = var2;
       }
 
       public ResourceLocation getName() {

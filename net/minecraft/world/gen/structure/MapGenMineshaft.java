@@ -17,31 +17,31 @@ public class MapGenMineshaft extends MapGenStructure {
       return "Mineshaft";
    }
 
-   public MapGenMineshaft(Map p_i2034_1_) {
-      for(Entry entry : p_i2034_1_.entrySet()) {
-         if (((String)entry.getKey()).equals("chance")) {
-            this.chance = MathHelper.getDouble((String)entry.getValue(), this.chance);
+   public MapGenMineshaft(Map var1) {
+      for(Entry var3 : var1.entrySet()) {
+         if (((String)var3.getKey()).equals("chance")) {
+            this.chance = MathHelper.getDouble((String)var3.getValue(), this.chance);
          }
       }
 
    }
 
-   protected boolean canSpawnStructureAtCoords(int chunkX, int chunkZ) {
-      return this.rand.nextDouble() < this.chance && this.rand.nextInt(80) < Math.max(Math.abs(chunkX), Math.abs(chunkZ));
+   protected boolean canSpawnStructureAtCoords(int var1, int var2) {
+      return this.rand.nextDouble() < this.chance && this.rand.nextInt(80) < Math.max(Math.abs(var1), Math.abs(var2));
    }
 
-   protected StructureStart getStructureStart(int chunkX, int chunkZ) {
-      Biome biome = this.world.getBiome(new BlockPos((chunkX << 4) + 8, 64, (chunkZ << 4) + 8));
-      MapGenMineshaft.Type mapgenmineshaft$type = biome instanceof BiomeMesa ? MapGenMineshaft.Type.MESA : MapGenMineshaft.Type.NORMAL;
-      return new StructureMineshaftStart(this.world, this.rand, chunkX, chunkZ, mapgenmineshaft$type);
+   protected StructureStart getStructureStart(int var1, int var2) {
+      Biome var3 = this.world.getBiome(new BlockPos((var1 << 4) + 8, 64, (var2 << 4) + 8));
+      MapGenMineshaft.Type var4 = var3 instanceof BiomeMesa ? MapGenMineshaft.Type.MESA : MapGenMineshaft.Type.NORMAL;
+      return new StructureMineshaftStart(this.world, this.rand, var1, var2, var4);
    }
 
    public static enum Type {
       NORMAL,
       MESA;
 
-      public static MapGenMineshaft.Type byId(int id) {
-         return id >= 0 && id < values().length ? values()[id] : NORMAL;
+      public static MapGenMineshaft.Type byId(int var0) {
+         return var0 >= 0 && var0 < values().length ? values()[var0] : NORMAL;
       }
    }
 }

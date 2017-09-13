@@ -31,9 +31,13 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.bukkit.entity.Slime;
+import org.bukkit.event.entity.SlimeSplitEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntitySlime extends EntityLiving implements IMob {
    private static final DataParameter SLIME_SIZE = EntityDataManager.createKey(EntitySlime.class, DataSerializers.VARINT);
@@ -42,8 +46,8 @@ public class EntitySlime extends EntityLiving implements IMob {
    public float prevSquishFactor;
    private boolean wasOnGround;
 
-   public EntitySlime(World worldIn) {
-      super(worldIn);
+   public EntitySlime(World world) {
+      super(world);
       this.moveHelper = new EntitySlime.SlimeMoveHelper(this);
    }
 
@@ -61,39 +65,39 @@ public class EntitySlime extends EntityLiving implements IMob {
       this.dataManager.register(SLIME_SIZE, Integer.valueOf(1));
    }
 
-   protected void setSlimeSize(int size) {
-      this.dataManager.set(SLIME_SIZE, Integer.valueOf(size));
-      this.setSize(0.51000005F * (float)size, 0.51000005F * (float)size);
+   public void setSlimeSize(int i) {
+      this.dataManager.set(SLIME_SIZE, Integer.valueOf(i));
+      this.setSize(0.51000005F * (float)i, 0.51000005F * (float)i);
       this.setPosition(this.posX, this.posY, this.posZ);
-      this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)(size * size));
-      this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue((double)(0.2F + 0.1F * (float)size));
+      this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)(i * i));
+      this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue((double)(0.2F + 0.1F * (float)i));
       this.setHealth(this.getMaxHealth());
-      this.experienceValue = size;
+      this.experienceValue = i;
    }
 
    public int getSlimeSize() {
       return ((Integer)this.dataManager.get(SLIME_SIZE)).intValue();
    }
 
-   public static void registerFixesSlime(DataFixer fixer) {
-      EntityLiving.registerFixesMob(fixer, "Slime");
+   public static void registerFixesSlime(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "Slime");
    }
 
-   public void writeEntityToNBT(NBTTagCompound compound) {
-      super.writeEntityToNBT(compound);
-      compound.setInteger("Size", this.getSlimeSize() - 1);
-      compound.setBoolean("wasOnGround", this.wasOnGround);
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      nbttagcompound.setInteger("Size", this.getSlimeSize() - 1);
+      nbttagcompound.setBoolean("wasOnGround", this.wasOnGround);
    }
 
-   public void readEntityFromNBT(NBTTagCompound compound) {
-      super.readEntityFromNBT(compound);
-      int i = compound.getInteger("Size");
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      int i = nbttagcompound.getInteger("Size");
       if (i < 0) {
          i = 0;
       }
 
       this.setSlimeSize(i + 1);
-      this.wasOnGround = compound.getBoolean("wasOnGround");
+      this.wasOnGround = nbttagcompound.getBoolean("wasOnGround");
    }
 
    public boolean isSmallSlime() {
@@ -114,9 +118,6 @@ public class EntitySlime extends EntityLiving implements IMob {
       super.onUpdate();
       if (this.onGround && !this.wasOnGround) {
          int i = this.getSlimeSize();
-         if (this.spawnCustomParticles()) {
-            i = 0;
-         }
 
          for(int j = 0; j < i * 8; ++j) {
             float f = this.rand.nextFloat() * 6.2831855F;
@@ -124,10 +125,10 @@ public class EntitySlime extends EntityLiving implements IMob {
             float f2 = MathHelper.sin(f) * (float)i * 0.5F * f1;
             float f3 = MathHelper.cos(f) * (float)i * 0.5F * f1;
             World world = this.world;
-            EnumParticleTypes enumparticletypes = this.getParticleType();
+            EnumParticleTypes enumparticle = this.getParticleType();
             double d0 = this.posX + (double)f2;
             double d1 = this.posZ + (double)f3;
-            world.spawnParticle(enumparticletypes, d0, this.getEntityBoundingBox().minY, d1, 0.0D, 0.0D, 0.0D);
+            world.spawnParticle(enumparticle, d0, this.getEntityBoundingBox().minY, d1, 0.0D, 0.0D, 0.0D);
          }
 
          this.playSound(this.getSquishSound(), this.getSoundVolume(), ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) / 0.8F);
@@ -152,8 +153,8 @@ public class EntitySlime extends EntityLiving implements IMob {
       return new EntitySlime(this.world);
    }
 
-   public void notifyDataManagerChange(DataParameter key) {
-      if (SLIME_SIZE.equals(key)) {
+   public void notifyDataManagerChange(DataParameter datawatcherobject) {
+      if (SLIME_SIZE.equals(datawatcherobject)) {
          int i = this.getSlimeSize();
          this.setSize(0.51000005F * (float)i, 0.51000005F * (float)i);
          this.rotationYaw = this.rotationYawHead;
@@ -163,13 +164,21 @@ public class EntitySlime extends EntityLiving implements IMob {
          }
       }
 
-      super.notifyDataManagerChange(key);
+      super.notifyDataManagerChange(datawatcherobject);
    }
 
    public void setDead() {
       int i = this.getSlimeSize();
       if (!this.world.isRemote && i > 1 && this.getHealth() <= 0.0F) {
          int j = 2 + this.rand.nextInt(3);
+         SlimeSplitEvent event = new SlimeSplitEvent((Slime)this.getBukkitEntity(), j);
+         this.world.getServer().getPluginManager().callEvent(event);
+         if (event.isCancelled() || event.getCount() <= 0) {
+            super.setDead();
+            return;
+         }
+
+         j = event.getCount();
 
          for(int k = 0; k < j; ++k) {
             float f = ((float)(k % 2) - 0.5F) * (float)i / 4.0F;
@@ -185,33 +194,33 @@ public class EntitySlime extends EntityLiving implements IMob {
 
             entityslime.setSlimeSize(i / 2);
             entityslime.setLocationAndAngles(this.posX + (double)f, this.posY + 0.5D, this.posZ + (double)f1, this.rand.nextFloat() * 360.0F, 0.0F);
-            this.world.spawnEntity(entityslime);
+            this.world.addEntity(entityslime, SpawnReason.SLIME_SPLIT);
          }
       }
 
       super.setDead();
    }
 
-   public void applyEntityCollision(Entity entityIn) {
-      super.applyEntityCollision(entityIn);
-      if (entityIn instanceof EntityIronGolem && this.canDamagePlayer()) {
-         this.dealDamage((EntityLivingBase)entityIn);
+   public void applyEntityCollision(Entity entity) {
+      super.applyEntityCollision(entity);
+      if (entity instanceof EntityIronGolem && this.canDamagePlayer()) {
+         this.dealDamage((EntityLivingBase)entity);
       }
 
    }
 
-   public void onCollideWithPlayer(EntityPlayer entityIn) {
+   public void onCollideWithPlayer(EntityPlayer entityhuman) {
       if (this.canDamagePlayer()) {
-         this.dealDamage(entityIn);
+         this.dealDamage(entityhuman);
       }
 
    }
 
-   protected void dealDamage(EntityLivingBase entityIn) {
+   protected void dealDamage(EntityLivingBase entityliving) {
       int i = this.getSlimeSize();
-      if (this.canEntityBeSeen(entityIn) && this.getDistanceSqToEntity(entityIn) < 0.6D * (double)i * 0.6D * (double)i && entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getAttackStrength())) {
+      if (this.canEntityBeSeen(entityliving) && this.getDistanceSqToEntity(entityliving) < 0.6D * (double)i * 0.6D * (double)i && entityliving.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getAttackStrength())) {
          this.playSound(SoundEvents.ENTITY_SLIME_ATTACK, 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
-         this.applyEnchantments(this, entityIn);
+         this.applyEnchantments(this, entityliving);
       }
 
    }
@@ -250,14 +259,14 @@ public class EntitySlime extends EntityLiving implements IMob {
    }
 
    public boolean getCanSpawnHere() {
-      BlockPos blockpos = new BlockPos(MathHelper.floor(this.posX), 0, MathHelper.floor(this.posZ));
-      Chunk chunk = this.world.getChunkFromBlockCoords(blockpos);
-      if (this.world.getWorldInfo().getTerrainType().handleSlimeSpawnReduction(this.rand, this.world)) {
+      BlockPos blockposition = new BlockPos(MathHelper.floor(this.posX), 0, MathHelper.floor(this.posZ));
+      Chunk chunk = this.world.getChunkFromBlockCoords(blockposition);
+      if (this.world.getWorldInfo().getTerrainType() == WorldType.FLAT && this.rand.nextInt(4) != 1) {
          return false;
       } else {
          if (this.world.getDifficulty() != EnumDifficulty.PEACEFUL) {
-            Biome biome = this.world.getBiome(blockpos);
-            if (biome == Biomes.SWAMPLAND && this.posY > 50.0D && this.posY < 70.0D && this.rand.nextFloat() < 0.5F && this.rand.nextFloat() < this.world.getCurrentMoonPhaseFactor() && this.world.getLightFromNeighbors(new BlockPos(this)) <= this.rand.nextInt(8)) {
+            Biome biomebase = this.world.getBiome(blockposition);
+            if (biomebase == Biomes.SWAMPLAND && this.posY > 50.0D && this.posY < 70.0D && this.rand.nextFloat() < 0.5F && this.rand.nextFloat() < this.world.getCurrentMoonPhaseFactor() && this.world.getLightFromNeighbors(new BlockPos(this)) <= this.rand.nextInt(8)) {
                return super.getCanSpawnHere();
             }
 
@@ -288,37 +297,33 @@ public class EntitySlime extends EntityLiving implements IMob {
    }
 
    @Nullable
-   public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+   public IEntityLivingData onInitialSpawn(DifficultyInstance difficultydamagescaler, @Nullable IEntityLivingData groupdataentity) {
       int i = this.rand.nextInt(3);
-      if (i < 2 && this.rand.nextFloat() < 0.5F * difficulty.getClampedAdditionalDifficulty()) {
+      if (i < 2 && this.rand.nextFloat() < 0.5F * difficultydamagescaler.getClampedAdditionalDifficulty()) {
          ++i;
       }
 
       int j = 1 << i;
       this.setSlimeSize(j);
-      return super.onInitialSpawn(difficulty, livingdata);
+      return super.onInitialSpawn(difficultydamagescaler, groupdataentity);
    }
 
    protected SoundEvent getJumpSound() {
       return this.isSmallSlime() ? SoundEvents.ENTITY_SMALL_SLIME_JUMP : SoundEvents.ENTITY_SLIME_JUMP;
    }
 
-   protected boolean spawnCustomParticles() {
-      return false;
-   }
-
    static class AISlimeAttack extends EntityAIBase {
       private final EntitySlime slime;
       private int growTieredTimer;
 
-      public AISlimeAttack(EntitySlime slimeIn) {
-         this.slime = slimeIn;
+      public AISlimeAttack(EntitySlime entityslime) {
+         this.slime = entityslime;
          this.setMutexBits(2);
       }
 
       public boolean shouldExecute() {
-         EntityLivingBase entitylivingbase = this.slime.getAttackTarget();
-         return entitylivingbase == null ? false : (!entitylivingbase.isEntityAlive() ? false : !(entitylivingbase instanceof EntityPlayer) || !((EntityPlayer)entitylivingbase).capabilities.disableDamage);
+         EntityLivingBase entityliving = this.slime.getAttackTarget();
+         return entityliving == null ? false : (!entityliving.isEntityAlive() ? false : !(entityliving instanceof EntityPlayer) || !((EntityPlayer)entityliving).capabilities.disableDamage);
       }
 
       public void startExecuting() {
@@ -327,8 +332,8 @@ public class EntitySlime extends EntityLiving implements IMob {
       }
 
       public boolean continueExecuting() {
-         EntityLivingBase entitylivingbase = this.slime.getAttackTarget();
-         return entitylivingbase == null ? false : (!entitylivingbase.isEntityAlive() ? false : (entitylivingbase instanceof EntityPlayer && ((EntityPlayer)entitylivingbase).capabilities.disableDamage ? false : --this.growTieredTimer > 0));
+         EntityLivingBase entityliving = this.slime.getAttackTarget();
+         return entityliving == null ? false : (!entityliving.isEntityAlive() ? false : (entityliving instanceof EntityPlayer && ((EntityPlayer)entityliving).capabilities.disableDamage ? false : --this.growTieredTimer > 0));
       }
 
       public void updateTask() {
@@ -342,8 +347,8 @@ public class EntitySlime extends EntityLiving implements IMob {
       private float chosenDegrees;
       private int nextRandomizeTime;
 
-      public AISlimeFaceRandom(EntitySlime slimeIn) {
-         this.slime = slimeIn;
+      public AISlimeFaceRandom(EntitySlime entityslime) {
+         this.slime = entityslime;
          this.setMutexBits(2);
       }
 
@@ -364,10 +369,10 @@ public class EntitySlime extends EntityLiving implements IMob {
    static class AISlimeFloat extends EntityAIBase {
       private final EntitySlime slime;
 
-      public AISlimeFloat(EntitySlime slimeIn) {
-         this.slime = slimeIn;
+      public AISlimeFloat(EntitySlime entityslime) {
+         this.slime = entityslime;
          this.setMutexBits(5);
-         ((PathNavigateGround)slimeIn.getNavigator()).setCanSwim(true);
+         ((PathNavigateGround)entityslime.getNavigator()).setCanSwim(true);
       }
 
       public boolean shouldExecute() {
@@ -386,8 +391,8 @@ public class EntitySlime extends EntityLiving implements IMob {
    static class AISlimeHop extends EntityAIBase {
       private final EntitySlime slime;
 
-      public AISlimeHop(EntitySlime slimeIn) {
-         this.slime = slimeIn;
+      public AISlimeHop(EntitySlime entityslime) {
+         this.slime = entityslime;
          this.setMutexBits(5);
       }
 
@@ -406,19 +411,19 @@ public class EntitySlime extends EntityLiving implements IMob {
       private final EntitySlime slime;
       private boolean isAggressive;
 
-      public SlimeMoveHelper(EntitySlime slimeIn) {
-         super(slimeIn);
-         this.slime = slimeIn;
-         this.yRot = 180.0F * slimeIn.rotationYaw / 3.1415927F;
+      public SlimeMoveHelper(EntitySlime entityslime) {
+         super(entityslime);
+         this.slime = entityslime;
+         this.yRot = 180.0F * entityslime.rotationYaw / 3.1415927F;
       }
 
-      public void setDirection(float p_179920_1_, boolean p_179920_2_) {
-         this.yRot = p_179920_1_;
-         this.isAggressive = p_179920_2_;
+      public void setDirection(float f, boolean flag) {
+         this.yRot = f;
+         this.isAggressive = flag;
       }
 
-      public void setSpeed(double speedIn) {
-         this.speed = speedIn;
+      public void setSpeed(double d0) {
+         this.speed = d0;
          this.action = EntityMoveHelper.Action.MOVE_TO;
       }
 

@@ -6,8 +6,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketScoreboardObjective implements Packet {
    private String objectiveName;
@@ -18,54 +16,34 @@ public class SPacketScoreboardObjective implements Packet {
    public SPacketScoreboardObjective() {
    }
 
-   public SPacketScoreboardObjective(ScoreObjective objective, int actionIn) {
-      this.objectiveName = objective.getName();
-      this.objectiveValue = objective.getDisplayName();
-      this.type = objective.getCriteria().getRenderType();
-      this.action = actionIn;
+   public SPacketScoreboardObjective(ScoreObjective var1, int var2) {
+      this.objectiveName = var1.getName();
+      this.objectiveValue = var1.getDisplayName();
+      this.type = var1.getCriteria().getRenderType();
+      this.action = var2;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.objectiveName = buf.readString(16);
-      this.action = buf.readByte();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.objectiveName = var1.readString(16);
+      this.action = var1.readByte();
       if (this.action == 0 || this.action == 2) {
-         this.objectiveValue = buf.readString(32);
-         this.type = IScoreCriteria.EnumRenderType.getByName(buf.readString(16));
+         this.objectiveValue = var1.readString(32);
+         this.type = IScoreCriteria.EnumRenderType.getByName(var1.readString(16));
       }
 
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeString(this.objectiveName);
-      buf.writeByte(this.action);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeString(this.objectiveName);
+      var1.writeByte(this.action);
       if (this.action == 0 || this.action == 2) {
-         buf.writeString(this.objectiveValue);
-         buf.writeString(this.type.getRenderType());
+         var1.writeString(this.objectiveValue);
+         var1.writeString(this.type.getRenderType());
       }
 
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleScoreboardObjective(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getObjectiveName() {
-      return this.objectiveName;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getObjectiveValue() {
-      return this.objectiveValue;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getAction() {
-      return this.action;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public IScoreCriteria.EnumRenderType getRenderType() {
-      return this.type;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleScoreboardObjective(this);
    }
 }

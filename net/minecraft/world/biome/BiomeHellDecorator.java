@@ -5,6 +5,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class BiomeHellDecorator extends BiomeDecorator {
-   public void decorate(World worldIn, Random random, Biome biome, BlockPos pos) {
+   public void decorate(World var1, Random var2, Biome var3, BlockPos var4) {
    }
 }

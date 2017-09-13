@@ -9,6 +9,8 @@ import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.event.entity.EntityUnleashEvent;
+import org.bukkit.event.entity.EntityUnleashEvent.UnleashReason;
 
 public abstract class EntityCreature extends EntityLiving {
    public static final UUID FLEEING_SPEED_MODIFIER_UUID = UUID.fromString("E199AD21-BA8A-4C53-8D13-6182D5C69D3A");
@@ -19,11 +21,11 @@ public abstract class EntityCreature extends EntityLiving {
    private boolean isMovementAITaskSet;
    private float restoreWaterCost = PathNodeType.WATER.getPriority();
 
-   public EntityCreature(World worldIn) {
-      super(worldIn);
+   public EntityCreature(World world) {
+      super(world);
    }
 
-   public float getBlockPathWeight(BlockPos pos) {
+   public float getBlockPathWeight(BlockPos blockposition) {
       return 0.0F;
    }
 
@@ -39,13 +41,13 @@ public abstract class EntityCreature extends EntityLiving {
       return this.isWithinHomeDistanceFromPosition(new BlockPos(this));
    }
 
-   public boolean isWithinHomeDistanceFromPosition(BlockPos pos) {
-      return this.maximumHomeDistance == -1.0F ? true : this.homePosition.distanceSq(pos) < (double)(this.maximumHomeDistance * this.maximumHomeDistance);
+   public boolean isWithinHomeDistanceFromPosition(BlockPos blockposition) {
+      return this.maximumHomeDistance == -1.0F ? true : this.homePosition.distanceSq(blockposition) < (double)(this.maximumHomeDistance * this.maximumHomeDistance);
    }
 
-   public void setHomePosAndDistance(BlockPos pos, int distance) {
-      this.homePosition = pos;
-      this.maximumHomeDistance = (float)distance;
+   public void setHomePosAndDistance(BlockPos blockposition, int i) {
+      this.homePosition = blockposition;
+      this.maximumHomeDistance = (float)i;
    }
 
    public BlockPos getHomePosition() {
@@ -72,6 +74,7 @@ public abstract class EntityCreature extends EntityLiving {
          float f = this.getDistanceToEntity(entity);
          if (this instanceof EntityTameable && ((EntityTameable)this).isSitting()) {
             if (f > 10.0F) {
+               this.world.getServer().getPluginManager().callEvent(new EntityUnleashEvent(this.getBukkitEntity(), UnleashReason.DISTANCE));
                this.clearLeashed(true, true);
             }
 
@@ -103,6 +106,7 @@ public abstract class EntityCreature extends EntityLiving {
          }
 
          if (f > 10.0F) {
+            this.world.getServer().getPluginManager().callEvent(new EntityUnleashEvent(this.getBukkitEntity(), UnleashReason.DISTANCE));
             this.clearLeashed(true, true);
          }
       } else if (!this.getLeashed() && this.isMovementAITaskSet) {
@@ -117,6 +121,6 @@ public abstract class EntityCreature extends EntityLiving {
 
    }
 
-   protected void onLeashDistance(float p_142017_1_) {
+   protected void onLeashDistance(float f) {
    }
 }

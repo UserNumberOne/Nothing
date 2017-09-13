@@ -8,25 +8,21 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockMobSpawner extends BlockContainer {
    protected BlockMobSpawner() {
       super(Material.ROCK);
    }
 
-   public TileEntity createNewTileEntity(World worldIn, int meta) {
+   public TileEntity createNewTileEntity(World world, int i) {
       return new TileEntityMobSpawner();
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
       return null;
    }
 
@@ -34,29 +30,25 @@ public class BlockMobSpawner extends BlockContainer {
       return 0;
    }
 
-   public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune) {
-      super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
+   public void dropBlockAsItemWithChance(World world, BlockPos blockposition, IBlockState iblockdata, float f, int i) {
+      super.dropBlockAsItemWithChance(world, blockposition, iblockdata, f, i);
    }
 
-   public int getExpDrop(IBlockState state, IBlockAccess world, BlockPos pos, int fortune) {
-      return 15 + RANDOM.nextInt(15) + RANDOM.nextInt(15);
+   public int getExpDrop(World world, IBlockState iblockdata, int enchantmentLevel) {
+      int j = 15 + world.rand.nextInt(15) + world.rand.nextInt(15);
+      return j;
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public EnumBlockRenderType getRenderType(IBlockState state) {
+   public EnumBlockRenderType getRenderType(IBlockState iblockdata) {
       return EnumBlockRenderType.MODEL;
    }
 
    @Nullable
-   public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return null;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 }

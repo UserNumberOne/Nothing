@@ -6,28 +6,32 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 
 public class EnchantmentDurability extends Enchantment {
-   protected EnchantmentDurability(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots) {
-      super(rarityIn, EnumEnchantmentType.BREAKABLE, slots);
+   protected EnchantmentDurability(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
+      super(var1, EnumEnchantmentType.BREAKABLE, var2);
       this.setName("durability");
    }
 
-   public int getMinEnchantability(int enchantmentLevel) {
-      return 5 + (enchantmentLevel - 1) * 8;
+   public int getMinEnchantability(int var1) {
+      return 5 + (var1 - 1) * 8;
    }
 
-   public int getMaxEnchantability(int enchantmentLevel) {
-      return super.getMinEnchantability(enchantmentLevel) + 50;
+   public int getMaxEnchantability(int var1) {
+      return super.getMinEnchantability(var1) + 50;
    }
 
    public int getMaxLevel() {
       return 3;
    }
 
-   public boolean canApply(ItemStack stack) {
-      return stack.isItemStackDamageable() ? true : super.canApply(stack);
+   public boolean canApply(ItemStack var1) {
+      return var1.isItemStackDamageable() ? true : super.canApply(var1);
    }
 
-   public static boolean negateDamage(ItemStack p_92097_0_, int p_92097_1_, Random p_92097_2_) {
-      return p_92097_0_.getItem() instanceof ItemArmor && p_92097_2_.nextFloat() < 0.6F ? false : p_92097_2_.nextInt(p_92097_1_ + 1) > 0;
+   public static boolean negateDamage(ItemStack var0, int var1, Random var2) {
+      if (var0.getItem() instanceof ItemArmor && var2.nextFloat() < 0.6F) {
+         return false;
+      } else {
+         return var2.nextInt(var1 + 1) > 0;
+      }
    }
 }

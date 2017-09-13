@@ -11,24 +11,24 @@ public class CPacketChatMessage implements Packet {
    public CPacketChatMessage() {
    }
 
-   public CPacketChatMessage(String messageIn) {
-      if (messageIn.length() > 100) {
-         messageIn = messageIn.substring(0, 100);
+   public CPacketChatMessage(String var1) {
+      if (var1.length() > 100) {
+         var1 = var1.substring(0, 100);
       }
 
-      this.message = messageIn;
+      this.message = var1;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.message = buf.readString(100);
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.message = var1.readString(100);
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeString(this.message);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeString(this.message);
    }
 
-   public void processPacket(INetHandlerPlayServer handler) {
-      handler.processChatMessage(this);
+   public void processPacket(INetHandlerPlayServer var1) {
+      var1.processChatMessage(this);
    }
 
    public String getMessage() {

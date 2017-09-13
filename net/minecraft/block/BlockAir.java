@@ -14,31 +14,31 @@ public class BlockAir extends Block {
       super(Material.AIR);
    }
 
-   public EnumBlockRenderType getRenderType(IBlockState state) {
+   public EnumBlockRenderType getRenderType(IBlockState var1) {
       return EnumBlockRenderType.INVISIBLE;
    }
 
    @Nullable
-   public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos) {
+   public AxisAlignedBB getCollisionBoundingBox(IBlockState var1, World var2, BlockPos var3) {
       return NULL_AABB;
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState var1) {
       return false;
    }
 
-   public boolean canCollideCheck(IBlockState state, boolean hitIfLiquid) {
+   public boolean canCollideCheck(IBlockState var1, boolean var2) {
       return false;
    }
 
-   public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune) {
+   public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
    }
 
-   public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos) {
+   public boolean isReplaceable(IBlockAccess var1, BlockPos var2) {
       return true;
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState var1) {
       return false;
    }
 }

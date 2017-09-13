@@ -19,18 +19,18 @@ public class BlockSnowBlock extends Block {
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Items.SNOWBALL;
    }
 
-   public int quantityDropped(Random random) {
+   public int quantityDropped(Random var1) {
       return 4;
    }
 
-   public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-      if (worldIn.getLightFor(EnumSkyBlock.BLOCK, pos) > 11) {
-         this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
-         worldIn.setBlockToAir(pos);
+   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
+      if (var1.getLightFor(EnumSkyBlock.BLOCK, var2) > 11) {
+         this.dropBlockAsItem(var1, var2, var1.getBlockState(var2), 0);
+         var1.setBlockToAir(var2);
       }
 
    }

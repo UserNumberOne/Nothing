@@ -2,7 +2,7 @@ package net.minecraft.command;
 
 import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
@@ -31,5 +31,5 @@ public interface ICommandSender {
    void setCommandStat(CommandResultStats.Type var1, int var2);
 
    @Nullable
-   MinecraftServer getServer();
+   MinecraftServer h();
 }

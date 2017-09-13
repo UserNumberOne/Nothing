@@ -68,12 +68,12 @@ public abstract class Biomes {
    public static final Biome MUTATED_MESA_ROCK;
    public static final Biome MUTATED_MESA_CLEAR_ROCK;
 
-   private static Biome getRegisteredBiome(String id) {
-      Biome biome = (Biome)Biome.REGISTRY.getObject(new ResourceLocation(id));
-      if (biome == null) {
-         throw new IllegalStateException("Invalid Biome requested: " + id);
+   private static Biome getRegisteredBiome(String var0) {
+      Biome var1 = (Biome)Biome.REGISTRY.getObject(new ResourceLocation(var0));
+      if (var1 == null) {
+         throw new IllegalStateException("Invalid Biome requested: " + var0);
       } else {
-         return biome;
+         return var1;
       }
    }
 

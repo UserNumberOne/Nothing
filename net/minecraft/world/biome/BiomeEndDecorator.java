@@ -7,8 +7,8 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import net.minecraft.util.math.BlockPos;
@@ -19,45 +19,50 @@ public class BiomeEndDecorator extends BiomeDecorator {
    private static final LoadingCache SPIKE_CACHE = CacheBuilder.newBuilder().expireAfterWrite(5L, TimeUnit.MINUTES).build(new BiomeEndDecorator.SpikeCacheLoader());
    private final WorldGenSpikes spikeGen = new WorldGenSpikes();
 
-   protected void genDecorations(Biome biomeIn, World worldIn, Random random) {
-      this.generateOres(worldIn, random);
-      WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = getSpikesForWorld(worldIn);
+   protected void genDecorations(Biome var1, World var2, Random var3) {
+      this.generateOres(var2, var3);
+      WorldGenSpikes.EndSpike[] var4 = getSpikesForWorld(var2);
 
-      for(WorldGenSpikes.EndSpike worldgenspikes$endspike : aworldgenspikes$endspike) {
-         if (worldgenspikes$endspike.doesStartInChunk(this.chunkPos)) {
-            this.spikeGen.setSpike(worldgenspikes$endspike);
-            this.spikeGen.generate(worldIn, random, new BlockPos(worldgenspikes$endspike.getCenterX(), 45, worldgenspikes$endspike.getCenterZ()));
+      for(WorldGenSpikes.EndSpike var8 : var4) {
+         if (var8.doesStartInChunk(this.chunkPos)) {
+            this.spikeGen.setSpike(var8);
+            this.spikeGen.generate(var2, var3, new BlockPos(var8.getCenterX(), 45, var8.getCenterZ()));
          }
       }
 
    }
 
-   public static WorldGenSpikes.EndSpike[] getSpikesForWorld(World p_185426_0_) {
-      Random random = new Random(p_185426_0_.getSeed());
-      long i = random.nextLong() & 65535L;
-      return (WorldGenSpikes.EndSpike[])SPIKE_CACHE.getUnchecked(Long.valueOf(i));
+   public static WorldGenSpikes.EndSpike[] getSpikesForWorld(World var0) {
+      Random var1 = new Random(var0.getSeed());
+      long var2 = var1.nextLong() & 65535L;
+      return (WorldGenSpikes.EndSpike[])SPIKE_CACHE.getUnchecked(Long.valueOf(var2));
    }
 
    static class SpikeCacheLoader extends CacheLoader {
       private SpikeCacheLoader() {
       }
 
-      public WorldGenSpikes.EndSpike[] load(Long p_load_1_) throws Exception {
-         List list = Lists.newArrayList(ContiguousSet.create(Range.closedOpen(Integer.valueOf(0), Integer.valueOf(10)), DiscreteDomain.integers()));
-         Collections.shuffle(list, new Random(p_load_1_.longValue()));
-         WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = new WorldGenSpikes.EndSpike[10];
+      public WorldGenSpikes.EndSpike[] load(Long var1) throws Exception {
+         ArrayList var2 = Lists.newArrayList(ContiguousSet.create(Range.closedOpen(Integer.valueOf(0), Integer.valueOf(10)), DiscreteDomain.integers()));
+         Collections.shuffle(var2, new Random(var1.longValue()));
+         WorldGenSpikes.EndSpike[] var3 = new WorldGenSpikes.EndSpike[10];
 
-         for(int i = 0; i < 10; ++i) {
-            int j = (int)(42.0D * Math.cos(2.0D * (-3.141592653589793D + 0.3141592653589793D * (double)i)));
-            int k = (int)(42.0D * Math.sin(2.0D * (-3.141592653589793D + 0.3141592653589793D * (double)i)));
-            int l = ((Integer)list.get(i)).intValue();
-            int i1 = 2 + l / 3;
-            int j1 = 76 + l * 3;
-            boolean flag = l == 1 || l == 2;
-            aworldgenspikes$endspike[i] = new WorldGenSpikes.EndSpike(j, k, i1, j1, flag);
+         for(int var4 = 0; var4 < 10; ++var4) {
+            int var5 = (int)(42.0D * Math.cos(2.0D * (-3.141592653589793D + 0.3141592653589793D * (double)var4)));
+            int var6 = (int)(42.0D * Math.sin(2.0D * (-3.141592653589793D + 0.3141592653589793D * (double)var4)));
+            int var7 = ((Integer)var2.get(var4)).intValue();
+            int var8 = 2 + var7 / 3;
+            int var9 = 76 + var7 * 3;
+            boolean var10 = var7 == 1 || var7 == 2;
+            var3[var4] = new WorldGenSpikes.EndSpike(var5, var6, var8, var9, var10);
          }
 
-         return aworldgenspikes$endspike;
+         return var3;
+      }
+
+      // $FF: synthetic method
+      public Object load(Object var1) throws Exception {
+         return this.load((Long)var1);
       }
    }
 }

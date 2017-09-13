@@ -13,8 +13,8 @@ public class PhaseTakeoff extends PhaseBase {
    private Path currentPath;
    private Vec3d targetLocation;
 
-   public PhaseTakeoff(EntityDragon dragonIn) {
-      super(dragonIn);
+   public PhaseTakeoff(EntityDragon var1) {
+      super(var1);
    }
 
    public void doLocalUpdate() {
@@ -22,9 +22,9 @@ public class PhaseTakeoff extends PhaseBase {
          this.firstTick = false;
          this.findNewTarget();
       } else {
-         BlockPos blockpos = this.dragon.world.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
-         double d0 = this.dragon.getDistanceSqToCenter(blockpos);
-         if (d0 > 100.0D) {
+         BlockPos var1 = this.dragon.world.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
+         double var2 = this.dragon.getDistanceSqToCenter(var1);
+         if (var2 > 100.0D) {
             this.dragon.getPhaseManager().setPhase(PhaseList.HOLDING_PATTERN);
          }
       }
@@ -38,21 +38,21 @@ public class PhaseTakeoff extends PhaseBase {
    }
 
    private void findNewTarget() {
-      int i = this.dragon.initPathPoints();
-      Vec3d vec3d = this.dragon.getHeadLookVec(1.0F);
-      int j = this.dragon.getNearestPpIdx(-vec3d.xCoord * 40.0D, 105.0D, -vec3d.zCoord * 40.0D);
+      int var1 = this.dragon.initPathPoints();
+      Vec3d var2 = this.dragon.getHeadLookVec(1.0F);
+      int var3 = this.dragon.getNearestPpIdx(-var2.xCoord * 40.0D, 105.0D, -var2.zCoord * 40.0D);
       if (this.dragon.getFightManager() != null && this.dragon.getFightManager().getNumAliveCrystals() >= 0) {
-         j = j % 12;
-         if (j < 0) {
-            j += 12;
+         var3 = var3 % 12;
+         if (var3 < 0) {
+            var3 += 12;
          }
       } else {
-         j = j - 12;
-         j = j & 7;
-         j = j + 12;
+         var3 = var3 - 12;
+         var3 = var3 & 7;
+         var3 = var3 + 12;
       }
 
-      this.currentPath = this.dragon.findPath(i, j, (PathPoint)null);
+      this.currentPath = this.dragon.findPath(var1, var3, (PathPoint)null);
       if (this.currentPath != null) {
          this.currentPath.incrementPathIndex();
          this.navigateToNextPathNode();
@@ -61,18 +61,18 @@ public class PhaseTakeoff extends PhaseBase {
    }
 
    private void navigateToNextPathNode() {
-      Vec3d vec3d = this.currentPath.getCurrentPos();
+      Vec3d var1 = this.currentPath.getCurrentPos();
       this.currentPath.incrementPathIndex();
 
-      double d0;
+      double var2;
       while(true) {
-         d0 = vec3d.yCoord + (double)(this.dragon.getRNG().nextFloat() * 20.0F);
-         if (d0 >= vec3d.yCoord) {
+         var2 = var1.yCoord + (double)(this.dragon.getRNG().nextFloat() * 20.0F);
+         if (var2 >= var1.yCoord) {
             break;
          }
       }
 
-      this.targetLocation = new Vec3d(vec3d.xCoord, d0, vec3d.zCoord);
+      this.targetLocation = new Vec3d(var1.xCoord, var2, var1.zCoord);
    }
 
    @Nullable

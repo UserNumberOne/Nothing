@@ -12,20 +12,20 @@ public class CPacketPlayerTryUseItem implements Packet {
    public CPacketPlayerTryUseItem() {
    }
 
-   public CPacketPlayerTryUseItem(EnumHand handIn) {
-      this.hand = handIn;
+   public CPacketPlayerTryUseItem(EnumHand var1) {
+      this.hand = var1;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.hand = (EnumHand)buf.readEnumValue(EnumHand.class);
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.hand = (EnumHand)var1.readEnumValue(EnumHand.class);
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeEnumValue(this.hand);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeEnumValue(this.hand);
    }
 
-   public void processPacket(INetHandlerPlayServer handler) {
-      handler.processTryUseItem(this);
+   public void processPacket(INetHandlerPlayServer var1) {
+      var1.processTryUseItem(this);
    }
 
    public EnumHand getHand() {

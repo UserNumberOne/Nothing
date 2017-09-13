@@ -7,11 +7,11 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
 public abstract class EntityGolem extends EntityCreature implements IAnimals {
-   public EntityGolem(World worldIn) {
-      super(worldIn);
+   public EntityGolem(World var1) {
+      super(var1);
    }
 
-   public void fall(float distance, float damageMultiplier) {
+   public void fall(float var1, float var2) {
    }
 
    @Nullable

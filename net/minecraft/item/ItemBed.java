@@ -20,36 +20,36 @@ public class ItemBed extends Item {
       this.setCreativeTab(CreativeTabs.DECORATIONS);
    }
 
-   public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-      if (worldIn.isRemote) {
+   public EnumActionResult onItemUse(ItemStack var1, EntityPlayer var2, World var3, BlockPos var4, EnumHand var5, EnumFacing var6, float var7, float var8, float var9) {
+      if (var3.isRemote) {
          return EnumActionResult.SUCCESS;
-      } else if (facing != EnumFacing.UP) {
+      } else if (var6 != EnumFacing.UP) {
          return EnumActionResult.FAIL;
       } else {
-         IBlockState iblockstate = worldIn.getBlockState(pos);
-         Block block = iblockstate.getBlock();
-         boolean flag = block.isReplaceable(worldIn, pos);
-         if (!flag) {
-            pos = pos.up();
+         IBlockState var10 = var3.getBlockState(var4);
+         Block var11 = var10.getBlock();
+         boolean var12 = var11.isReplaceable(var3, var4);
+         if (!var12) {
+            var4 = var4.up();
          }
 
-         int i = MathHelper.floor((double)(playerIn.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-         EnumFacing enumfacing = EnumFacing.getHorizontal(i);
-         BlockPos blockpos = pos.offset(enumfacing);
-         if (playerIn.canPlayerEdit(pos, facing, stack) && playerIn.canPlayerEdit(blockpos, facing, stack)) {
-            boolean flag1 = worldIn.getBlockState(blockpos).getBlock().isReplaceable(worldIn, blockpos);
-            boolean flag2 = flag || worldIn.isAirBlock(pos);
-            boolean flag3 = flag1 || worldIn.isAirBlock(blockpos);
-            if (flag2 && flag3 && worldIn.getBlockState(pos.down()).isFullyOpaque() && worldIn.getBlockState(blockpos.down()).isFullyOpaque()) {
-               IBlockState iblockstate1 = Blocks.BED.getDefaultState().withProperty(BlockBed.OCCUPIED, Boolean.valueOf(false)).withProperty(BlockBed.FACING, enumfacing).withProperty(BlockBed.PART, BlockBed.EnumPartType.FOOT);
-               if (worldIn.setBlockState(pos, iblockstate1, 11)) {
-                  IBlockState iblockstate2 = iblockstate1.withProperty(BlockBed.PART, BlockBed.EnumPartType.HEAD);
-                  worldIn.setBlockState(blockpos, iblockstate2, 11);
+         int var13 = MathHelper.floor((double)(var2.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+         EnumFacing var14 = EnumFacing.getHorizontal(var13);
+         BlockPos var15 = var4.offset(var14);
+         if (var2.canPlayerEdit(var4, var6, var1) && var2.canPlayerEdit(var15, var6, var1)) {
+            boolean var16 = var3.getBlockState(var15).getBlock().isReplaceable(var3, var15);
+            boolean var17 = var12 || var3.isAirBlock(var4);
+            boolean var18 = var16 || var3.isAirBlock(var15);
+            if (var17 && var18 && var3.getBlockState(var4.down()).isFullyOpaque() && var3.getBlockState(var15.down()).isFullyOpaque()) {
+               IBlockState var19 = Blocks.BED.getDefaultState().withProperty(BlockBed.OCCUPIED, Boolean.valueOf(false)).withProperty(BlockBed.FACING, var14).withProperty(BlockBed.PART, BlockBed.EnumPartType.FOOT);
+               if (var3.setBlockState(var4, var19, 11)) {
+                  IBlockState var20 = var19.withProperty(BlockBed.PART, BlockBed.EnumPartType.HEAD);
+                  var3.setBlockState(var15, var20, 11);
                }
 
-               SoundType soundtype = iblockstate1.getBlock().getSoundType(iblockstate1, worldIn, pos, playerIn);
-               worldIn.playSound((EntityPlayer)null, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-               --stack.stackSize;
+               SoundType var21 = var19.getBlock().getSoundType();
+               var3.playSound((EntityPlayer)null, var4, var21.getPlaceSound(), SoundCategory.BLOCKS, (var21.getVolume() + 1.0F) / 2.0F, var21.getPitch() * 0.8F);
+               --var1.stackSize;
                return EnumActionResult.SUCCESS;
             } else {
                return EnumActionResult.FAIL;

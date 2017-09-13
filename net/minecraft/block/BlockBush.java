@@ -7,127 +7,79 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.EnumPlantType;
-import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.block.BlockPhysicsEvent;
 
-public class BlockBush extends Block implements IPlantable {
+public class BlockBush extends Block {
    protected static final AxisAlignedBB BUSH_AABB = new AxisAlignedBB(0.30000001192092896D, 0.0D, 0.30000001192092896D, 0.699999988079071D, 0.6000000238418579D, 0.699999988079071D);
 
    protected BlockBush() {
       this(Material.PLANTS);
    }
 
-   protected BlockBush(Material materialIn) {
-      this(materialIn, materialIn.getMaterialMapColor());
+   protected BlockBush(Material material) {
+      this(material, material.getMaterialMapColor());
    }
 
-   protected BlockBush(Material materialIn, MapColor mapColorIn) {
-      super(materialIn, mapColorIn);
+   protected BlockBush(Material material, MapColor materialmapcolor) {
+      super(material, materialmapcolor);
       this.setTickRandomly(true);
       this.setCreativeTab(CreativeTabs.DECORATIONS);
    }
 
-   public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-      IBlockState soil = worldIn.getBlockState(pos.down());
-      return super.canPlaceBlockAt(worldIn, pos) && soil.getBlock().canSustainPlant(soil, worldIn, pos.down(), EnumFacing.UP, this);
+   public boolean canPlaceBlockAt(World world, BlockPos blockposition) {
+      return super.canPlaceBlockAt(world, blockposition) && this.canSustainBush(world.getBlockState(blockposition.down()));
    }
 
-   protected boolean canSustainBush(IBlockState state) {
-      return state.getBlock() == Blocks.GRASS || state.getBlock() == Blocks.DIRT || state.getBlock() == Blocks.FARMLAND;
+   protected boolean canSustainBush(IBlockState iblockdata) {
+      return iblockdata.getBlock() == Blocks.GRASS || iblockdata.getBlock() == Blocks.DIRT || iblockdata.getBlock() == Blocks.FARMLAND;
    }
 
-   public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn) {
-      super.neighborChanged(state, worldIn, pos, blockIn);
-      this.checkAndDropBlock(worldIn, pos, state);
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      super.neighborChanged(iblockdata, world, blockposition, block);
+      this.checkAndDropBlock(world, blockposition, iblockdata);
    }
 
-   public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-      this.checkAndDropBlock(worldIn, pos, state);
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      this.checkAndDropBlock(world, blockposition, iblockdata);
    }
 
-   protected void checkAndDropBlock(World worldIn, BlockPos pos, IBlockState state) {
-      if (!this.canBlockStay(worldIn, pos, state)) {
-         this.dropBlockAsItem(worldIn, pos, state, 0);
-         worldIn.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
+   protected void checkAndDropBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (!this.canBlockStay(world, blockposition, iblockdata)) {
+         org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+         BlockPhysicsEvent event = new BlockPhysicsEvent(block, block.getTypeId());
+         world.getServer().getPluginManager().callEvent(event);
+         if (event.isCancelled()) {
+            return;
+         }
+
+         this.dropBlockAsItem(world, blockposition, iblockdata, 0);
+         world.setBlockState(blockposition, Blocks.AIR.getDefaultState(), 3);
       }
 
    }
 
-   public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state) {
-      if (state.getBlock() == this) {
-         IBlockState soil = worldIn.getBlockState(pos.down());
-         return soil.getBlock().canSustainPlant(soil, worldIn, pos.down(), EnumFacing.UP, this);
-      } else {
-         return this.canSustainBush(worldIn.getBlockState(pos.down()));
-      }
+   public boolean canBlockStay(World world, BlockPos blockposition, IBlockState iblockdata) {
+      return this.canSustainBush(world.getBlockState(blockposition.down()));
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
       return BUSH_AABB;
    }
 
    @Nullable
-   public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos) {
+   public AxisAlignedBB getCollisionBoundingBox(IBlockState iblockdata, World world, BlockPos blockposition) {
       return NULL_AABB;
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
-   }
-
-   public EnumPlantType getPlantType(IBlockAccess world, BlockPos pos) {
-      if (this == Blocks.WHEAT) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.CARROTS) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.POTATOES) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.MELON_STEM) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.PUMPKIN_STEM) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.DEADBUSH) {
-         return EnumPlantType.Desert;
-      } else if (this == Blocks.WATERLILY) {
-         return EnumPlantType.Water;
-      } else if (this == Blocks.RED_MUSHROOM) {
-         return EnumPlantType.Cave;
-      } else if (this == Blocks.BROWN_MUSHROOM) {
-         return EnumPlantType.Cave;
-      } else if (this == Blocks.NETHER_WART) {
-         return EnumPlantType.Nether;
-      } else if (this == Blocks.SAPLING) {
-         return EnumPlantType.Plains;
-      } else if (this == Blocks.TALLGRASS) {
-         return EnumPlantType.Plains;
-      } else if (this == Blocks.DOUBLE_PLANT) {
-         return EnumPlantType.Plains;
-      } else if (this == Blocks.RED_FLOWER) {
-         return EnumPlantType.Plains;
-      } else {
-         return this == Blocks.YELLOW_FLOWER ? EnumPlantType.Plains : EnumPlantType.Plains;
-      }
-   }
-
-   public IBlockState getPlant(IBlockAccess world, BlockPos pos) {
-      IBlockState state = world.getBlockState(pos);
-      return state.getBlock() != this ? this.getDefaultState() : state;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 }

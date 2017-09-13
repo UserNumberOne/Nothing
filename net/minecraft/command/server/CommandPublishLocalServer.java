@@ -3,7 +3,7 @@ package net.minecraft.command.server;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.world.GameType;
 
 public class CommandPublishLocalServer extends CommandBase {
@@ -11,16 +11,16 @@ public class CommandPublishLocalServer extends CommandBase {
       return "publish";
    }
 
-   public String getUsage(ICommandSender sender) {
+   public String getUsage(ICommandSender var1) {
       return "commands.publish.usage";
    }
 
-   public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-      String s = server.shareToLAN(GameType.SURVIVAL, false);
-      if (s != null) {
-         notifyCommandListener(sender, this, "commands.publish.started", new Object[]{s});
+   public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
+      String var4 = var1.a(GameType.SURVIVAL, false);
+      if (var4 != null) {
+         notifyCommandListener(var2, this, "commands.publish.started", new Object[]{var4});
       } else {
-         notifyCommandListener(sender, this, "commands.publish.failed", new Object[0]);
+         notifyCommandListener(var2, this, "commands.publish.failed", new Object[0]);
       }
 
    }

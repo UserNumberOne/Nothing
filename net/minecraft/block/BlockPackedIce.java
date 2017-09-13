@@ -11,7 +11,7 @@ public class BlockPackedIce extends Block {
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
-   public int quantityDropped(Random random) {
+   public int quantityDropped(Random var1) {
       return 0;
    }
 }

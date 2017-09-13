@@ -19,8 +19,6 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
 
 public class EntityMinecartFurnace extends EntityMinecart {
    private static final DataParameter POWERED = EntityDataManager.createKey(EntityMinecartFurnace.class, DataSerializers.BOOLEAN);
@@ -28,16 +26,16 @@ public class EntityMinecartFurnace extends EntityMinecart {
    public double pushX;
    public double pushZ;
 
-   public EntityMinecartFurnace(World worldIn) {
-      super(worldIn);
+   public EntityMinecartFurnace(World var1) {
+      super(var1);
    }
 
-   public EntityMinecartFurnace(World worldIn, double x, double y, double z) {
-      super(worldIn, x, y, z);
+   public EntityMinecartFurnace(World var1, double var2, double var4, double var6) {
+      super(var1, var2, var4, var6);
    }
 
-   public static void registerFixesMinecartFurnace(DataFixer fixer) {
-      EntityMinecart.registerFixesMinecart(fixer, "MinecartFurnace");
+   public static void registerFixesMinecartFurnace(DataFixer var0) {
+      EntityMinecart.registerFixesMinecart(var0, "MinecartFurnace");
    }
 
    public EntityMinecart.Type getType() {
@@ -71,40 +69,40 @@ public class EntityMinecartFurnace extends EntityMinecart {
       return 0.2D;
    }
 
-   public void killMinecart(DamageSource source) {
-      super.killMinecart(source);
-      if (!source.isExplosion() && this.world.getGameRules().getBoolean("doEntityDrops")) {
+   public void killMinecart(DamageSource var1) {
+      super.killMinecart(var1);
+      if (!var1.isExplosion() && this.world.getGameRules().getBoolean("doEntityDrops")) {
          this.entityDropItem(new ItemStack(Blocks.FURNACE, 1), 0.0F);
       }
 
    }
 
-   protected void moveAlongTrack(BlockPos pos, IBlockState state) {
-      super.moveAlongTrack(pos, state);
-      double d0 = this.pushX * this.pushX + this.pushZ * this.pushZ;
-      if (d0 > 1.0E-4D && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.001D) {
-         d0 = (double)MathHelper.sqrt(d0);
-         this.pushX /= d0;
-         this.pushZ /= d0;
+   protected void moveAlongTrack(BlockPos var1, IBlockState var2) {
+      super.moveAlongTrack(var1, var2);
+      double var3 = this.pushX * this.pushX + this.pushZ * this.pushZ;
+      if (var3 > 1.0E-4D && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.001D) {
+         var3 = (double)MathHelper.sqrt(var3);
+         this.pushX /= var3;
+         this.pushZ /= var3;
          if (this.pushX * this.motionX + this.pushZ * this.motionZ < 0.0D) {
             this.pushX = 0.0D;
             this.pushZ = 0.0D;
          } else {
-            double d1 = d0 / this.getMaximumSpeed();
-            this.pushX *= d1;
-            this.pushZ *= d1;
+            double var5 = var3 / this.getMaximumSpeed();
+            this.pushX *= var5;
+            this.pushZ *= var5;
          }
       }
 
    }
 
    protected void applyDrag() {
-      double d0 = this.pushX * this.pushX + this.pushZ * this.pushZ;
-      if (d0 > 1.0E-4D) {
-         d0 = (double)MathHelper.sqrt(d0);
-         this.pushX /= d0;
-         this.pushZ /= d0;
-         double d1 = 1.0D;
+      double var1 = this.pushX * this.pushX + this.pushZ * this.pushZ;
+      if (var1 > 1.0E-4D) {
+         var1 = (double)MathHelper.sqrt(var1);
+         this.pushX /= var1;
+         this.pushZ /= var1;
+         double var3 = 1.0D;
          this.motionX *= 0.800000011920929D;
          this.motionY *= 0.0D;
          this.motionZ *= 0.800000011920929D;
@@ -119,44 +117,40 @@ public class EntityMinecartFurnace extends EntityMinecart {
       super.applyDrag();
    }
 
-   public boolean processInitialInteract(EntityPlayer player, @Nullable ItemStack stack, EnumHand hand) {
-      if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, player, stack, hand))) {
-         return true;
-      } else {
-         if (stack != null && stack.getItem() == Items.COAL && this.fuel + 3600 <= 32000) {
-            if (!player.capabilities.isCreativeMode) {
-               --stack.stackSize;
-            }
-
-            this.fuel += 3600;
+   public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
+      if (var2 != null && var2.getItem() == Items.COAL && this.fuel + 3600 <= 32000) {
+         if (!var1.capabilities.isCreativeMode) {
+            --var2.stackSize;
          }
 
-         this.pushX = this.posX - player.posX;
-         this.pushZ = this.posZ - player.posZ;
-         return true;
+         this.fuel += 3600;
       }
+
+      this.pushX = this.posX - var1.posX;
+      this.pushZ = this.posZ - var1.posZ;
+      return true;
    }
 
-   protected void writeEntityToNBT(NBTTagCompound compound) {
-      super.writeEntityToNBT(compound);
-      compound.setDouble("PushX", this.pushX);
-      compound.setDouble("PushZ", this.pushZ);
-      compound.setShort("Fuel", (short)this.fuel);
+   protected void writeEntityToNBT(NBTTagCompound var1) {
+      super.writeEntityToNBT(var1);
+      var1.setDouble("PushX", this.pushX);
+      var1.setDouble("PushZ", this.pushZ);
+      var1.setShort("Fuel", (short)this.fuel);
    }
 
-   protected void readEntityFromNBT(NBTTagCompound compound) {
-      super.readEntityFromNBT(compound);
-      this.pushX = compound.getDouble("PushX");
-      this.pushZ = compound.getDouble("PushZ");
-      this.fuel = compound.getShort("Fuel");
+   protected void readEntityFromNBT(NBTTagCompound var1) {
+      super.readEntityFromNBT(var1);
+      this.pushX = var1.getDouble("PushX");
+      this.pushZ = var1.getDouble("PushZ");
+      this.fuel = var1.getShort("Fuel");
    }
 
    protected boolean isMinecartPowered() {
       return ((Boolean)this.dataManager.get(POWERED)).booleanValue();
    }
 
-   protected void setMinecartPowered(boolean p_94107_1_) {
-      this.dataManager.set(POWERED, Boolean.valueOf(p_94107_1_));
+   protected void setMinecartPowered(boolean var1) {
+      this.dataManager.set(POWERED, Boolean.valueOf(var1));
    }
 
    public IBlockState getDefaultDisplayTile() {

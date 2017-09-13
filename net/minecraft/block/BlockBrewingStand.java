@@ -19,18 +19,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBrewingStand;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockBrewingStand extends BlockContainer {
    public static final PropertyBool[] HAS_BOTTLE = new PropertyBool[]{PropertyBool.create("has_bottle_0"), PropertyBool.create("has_bottle_1"), PropertyBool.create("has_bottle_2")};
@@ -46,114 +42,101 @@ public class BlockBrewingStand extends BlockContainer {
       return I18n.translateToLocal("item.brewingStand.name");
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState var1) {
       return false;
    }
 
-   public EnumBlockRenderType getRenderType(IBlockState state) {
+   public EnumBlockRenderType getRenderType(IBlockState var1) {
       return EnumBlockRenderType.MODEL;
    }
 
-   public TileEntity createNewTileEntity(World worldIn, int meta) {
+   public TileEntity createNewTileEntity(World var1, int var2) {
       return new TileEntityBrewingStand();
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState var1) {
       return false;
    }
 
-   public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List collidingBoxes, @Nullable Entity entityIn) {
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, STICK_AABB);
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, BASE_AABB);
+   public void addCollisionBoxToList(IBlockState var1, World var2, BlockPos var3, AxisAlignedBB var4, List var5, @Nullable Entity var6) {
+      addCollisionBoxToList(var3, var4, var5, STICK_AABB);
+      addCollisionBoxToList(var3, var4, var5, BASE_AABB);
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
       return BASE_AABB;
    }
 
-   public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-      if (worldIn.isRemote) {
+   public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
+      if (var1.isRemote) {
          return true;
       } else {
-         TileEntity tileentity = worldIn.getTileEntity(pos);
-         if (tileentity instanceof TileEntityBrewingStand) {
-            playerIn.displayGUIChest((TileEntityBrewingStand)tileentity);
-            playerIn.addStat(StatList.BREWINGSTAND_INTERACTION);
+         TileEntity var11 = var1.getTileEntity(var2);
+         if (var11 instanceof TileEntityBrewingStand) {
+            var4.displayGUIChest((TileEntityBrewingStand)var11);
+            var4.addStat(StatList.BREWINGSTAND_INTERACTION);
          }
 
          return true;
       }
    }
 
-   public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-      if (stack.hasDisplayName()) {
-         TileEntity tileentity = worldIn.getTileEntity(pos);
-         if (tileentity instanceof TileEntityBrewingStand) {
-            ((TileEntityBrewingStand)tileentity).setName(stack.getDisplayName());
+   public void onBlockPlacedBy(World var1, BlockPos var2, IBlockState var3, EntityLivingBase var4, ItemStack var5) {
+      if (var5.hasDisplayName()) {
+         TileEntity var6 = var1.getTileEntity(var2);
+         if (var6 instanceof TileEntityBrewingStand) {
+            ((TileEntityBrewingStand)var6).setName(var5.getDisplayName());
          }
       }
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand) {
-      double d0 = (double)((float)pos.getX() + 0.4F + rand.nextFloat() * 0.2F);
-      double d1 = (double)((float)pos.getY() + 0.7F + rand.nextFloat() * 0.3F);
-      double d2 = (double)((float)pos.getZ() + 0.4F + rand.nextFloat() * 0.2F);
-      worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D);
-   }
-
-   public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-      TileEntity tileentity = worldIn.getTileEntity(pos);
-      if (tileentity instanceof TileEntityBrewingStand) {
-         InventoryHelper.dropInventoryItems(worldIn, pos, (TileEntityBrewingStand)tileentity);
+   public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
+      TileEntity var4 = var1.getTileEntity(var2);
+      if (var4 instanceof TileEntityBrewingStand) {
+         InventoryHelper.dropInventoryItems(var1, var2, (TileEntityBrewingStand)var4);
       }
 
-      super.breakBlock(worldIn, pos, state);
+      super.breakBlock(var1, var2, var3);
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Items.BREWING_STAND;
    }
 
-   public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
+   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
       return new ItemStack(Items.BREWING_STAND);
    }
 
-   public boolean hasComparatorInputOverride(IBlockState state) {
+   public boolean hasComparatorInputOverride(IBlockState var1) {
       return true;
    }
 
-   public int getComparatorInputOverride(IBlockState blockState, World worldIn, BlockPos pos) {
-      return Container.calcRedstone(worldIn.getTileEntity(pos));
+   public int getComparatorInputOverride(IBlockState var1, World var2, BlockPos var3) {
+      return Container.calcRedstone(var2.getTileEntity(var3));
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
-   }
+   public IBlockState getStateFromMeta(int var1) {
+      IBlockState var2 = this.getDefaultState();
 
-   public IBlockState getStateFromMeta(int meta) {
-      IBlockState iblockstate = this.getDefaultState();
-
-      for(int i = 0; i < 3; ++i) {
-         iblockstate = iblockstate.withProperty(HAS_BOTTLE[i], Boolean.valueOf((meta & 1 << i) > 0));
+      for(int var3 = 0; var3 < 3; ++var3) {
+         var2 = var2.withProperty(HAS_BOTTLE[var3], Boolean.valueOf((var1 & 1 << var3) > 0));
       }
 
-      return iblockstate;
+      return var2;
    }
 
-   public int getMetaFromState(IBlockState state) {
-      int i = 0;
+   public int getMetaFromState(IBlockState var1) {
+      int var2 = 0;
 
-      for(int j = 0; j < 3; ++j) {
-         if (((Boolean)state.getValue(HAS_BOTTLE[j])).booleanValue()) {
-            i |= 1 << j;
+      for(int var3 = 0; var3 < 3; ++var3) {
+         if (((Boolean)var1.getValue(HAS_BOTTLE[var3])).booleanValue()) {
+            var2 |= 1 << var3;
          }
       }
 
-      return i;
+      return var2;
    }
 
    protected BlockStateContainer createBlockState() {

@@ -5,6 +5,7 @@ import com.google.common.base.Predicates;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -33,8 +34,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
@@ -47,8 +50,10 @@ import net.minecraft.world.BossInfo;
 import net.minecraft.world.BossInfoServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.WorldServer;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
 public class EntityWither extends EntityMob implements IRangedAttackMob {
    private static final DataParameter FIRST_HEAD_TARGET = EntityDataManager.createKey(EntityWither.class, DataSerializers.VARINT);
@@ -65,13 +70,17 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
    private int blockBreakCounter;
    private final BossInfoServer bossInfo = (BossInfoServer)(new BossInfoServer(this.getDisplayName(), BossInfo.Color.PURPLE, BossInfo.Overlay.PROGRESS)).setDarkenSky(true);
    private static final Predicate NOT_UNDEAD = new Predicate() {
-      public boolean apply(@Nullable Entity p_apply_1_) {
-         return p_apply_1_ instanceof EntityLivingBase && ((EntityLivingBase)p_apply_1_).getCreatureAttribute() != EnumCreatureAttribute.UNDEAD;
+      public boolean apply(@Nullable Entity entity) {
+         return entity instanceof EntityLivingBase && ((EntityLivingBase)entity).getCreatureAttribute() != EnumCreatureAttribute.UNDEAD;
+      }
+
+      public boolean apply(Object object) {
+         return this.apply((Entity)object);
       }
    };
 
-   public EntityWither(World worldIn) {
-      super(worldIn);
+   public EntityWither(World world) {
+      super(world);
       this.setHealth(this.getMaxHealth());
       this.setSize(0.9F, 3.5F);
       this.isImmuneToFire = true;
@@ -98,18 +107,18 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       this.dataManager.register(INVULNERABILITY_TIME, Integer.valueOf(0));
    }
 
-   public static void registerFixesWither(DataFixer fixer) {
-      EntityLiving.registerFixesMob(fixer, "WitherBoss");
+   public static void registerFixesWither(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "WitherBoss");
    }
 
-   public void writeEntityToNBT(NBTTagCompound compound) {
-      super.writeEntityToNBT(compound);
-      compound.setInteger("Invul", this.getInvulTime());
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      nbttagcompound.setInteger("Invul", this.getInvulTime());
    }
 
-   public void readEntityFromNBT(NBTTagCompound compound) {
-      super.readEntityFromNBT(compound);
-      this.setInvulTime(compound.getInteger("Invul"));
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      this.setInvulTime(nbttagcompound.getInteger("Invul"));
    }
 
    protected SoundEvent getAmbientSound() {
@@ -137,13 +146,13 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
                this.motionY += (0.5D - this.motionY) * 0.6000000238418579D;
             }
 
-            double d0 = entity.posX - this.posX;
-            double d1 = entity.posZ - this.posZ;
-            double d3 = d0 * d0 + d1 * d1;
-            if (d3 > 9.0D) {
-               double d5 = (double)MathHelper.sqrt(d3);
-               this.motionX += (d0 / d5 * 0.5D - this.motionX) * 0.6000000238418579D;
-               this.motionZ += (d1 / d5 * 0.5D - this.motionZ) * 0.6000000238418579D;
+            double d3 = entity.posX - this.posX;
+            double d0 = entity.posZ - this.posZ;
+            double d1 = d3 * d3 + d0 * d0;
+            if (d1 > 9.0D) {
+               double d2 = (double)MathHelper.sqrt(d1);
+               this.motionX += (d3 / d2 * 0.5D - this.motionX) * 0.6000000238418579D;
+               this.motionZ += (d0 / d2 * 0.5D - this.motionZ) * 0.6000000238418579D;
             }
          }
       }
@@ -159,44 +168,44 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
          this.xRotOHeads[i] = this.xRotationHeads[i];
       }
 
-      for(int j = 0; j < 2; ++j) {
-         int k = this.getWatchedTargetId(j + 1);
+      for(int var23 = 0; var23 < 2; ++var23) {
+         int j = this.getWatchedTargetId(var23 + 1);
          Entity entity1 = null;
-         if (k > 0) {
-            entity1 = this.world.getEntityByID(k);
+         if (j > 0) {
+            entity1 = this.world.getEntityByID(j);
          }
 
          if (entity1 != null) {
-            double d11 = this.getHeadX(j + 1);
-            double d12 = this.getHeadY(j + 1);
-            double d13 = this.getHeadZ(j + 1);
-            double d6 = entity1.posX - d11;
-            double d7 = entity1.posY + (double)entity1.getEyeHeight() - d12;
-            double d8 = entity1.posZ - d13;
-            double d9 = (double)MathHelper.sqrt(d6 * d6 + d8 * d8);
-            float f = (float)(MathHelper.atan2(d8, d6) * 57.29577951308232D) - 90.0F;
-            float f1 = (float)(-(MathHelper.atan2(d7, d9) * 57.29577951308232D));
-            this.xRotationHeads[j] = this.rotlerp(this.xRotationHeads[j], f1, 40.0F);
-            this.yRotationHeads[j] = this.rotlerp(this.yRotationHeads[j], f, 10.0F);
+            double d0 = this.getHeadX(var23 + 1);
+            double d1 = this.getHeadY(var23 + 1);
+            double d2 = this.getHeadZ(var23 + 1);
+            double d4 = entity1.posX - d0;
+            double d5 = entity1.posY + (double)entity1.getEyeHeight() - d1;
+            double d6 = entity1.posZ - d2;
+            double d7 = (double)MathHelper.sqrt(d4 * d4 + d6 * d6);
+            float f = (float)(MathHelper.atan2(d6, d4) * 57.2957763671875D) - 90.0F;
+            float f1 = (float)(-(MathHelper.atan2(d5, d7) * 57.2957763671875D));
+            this.xRotationHeads[var23] = this.rotlerp(this.xRotationHeads[var23], f1, 40.0F);
+            this.yRotationHeads[var23] = this.rotlerp(this.yRotationHeads[var23], f, 10.0F);
          } else {
-            this.yRotationHeads[j] = this.rotlerp(this.yRotationHeads[j], this.renderYawOffset, 10.0F);
+            this.yRotationHeads[var23] = this.rotlerp(this.yRotationHeads[var23], this.renderYawOffset, 10.0F);
          }
       }
 
       boolean flag = this.isArmored();
 
-      for(int l = 0; l < 3; ++l) {
-         double d10 = this.getHeadX(l);
-         double d2 = this.getHeadY(l);
-         double d4 = this.getHeadZ(l);
-         this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d10 + this.rand.nextGaussian() * 0.30000001192092896D, d2 + this.rand.nextGaussian() * 0.30000001192092896D, d4 + this.rand.nextGaussian() * 0.30000001192092896D, 0.0D, 0.0D, 0.0D);
+      for(int j = 0; j < 3; ++j) {
+         double d8 = this.getHeadX(j);
+         double d9 = this.getHeadY(j);
+         double d10 = this.getHeadZ(j);
+         this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d8 + this.rand.nextGaussian() * 0.30000001192092896D, d9 + this.rand.nextGaussian() * 0.30000001192092896D, d10 + this.rand.nextGaussian() * 0.30000001192092896D, 0.0D, 0.0D, 0.0D);
          if (flag && this.world.rand.nextInt(4) == 0) {
-            this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, d10 + this.rand.nextGaussian() * 0.30000001192092896D, d2 + this.rand.nextGaussian() * 0.30000001192092896D, d4 + this.rand.nextGaussian() * 0.30000001192092896D, 0.699999988079071D, 0.699999988079071D, 0.5D);
+            this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, d8 + this.rand.nextGaussian() * 0.30000001192092896D, d9 + this.rand.nextGaussian() * 0.30000001192092896D, d10 + this.rand.nextGaussian() * 0.30000001192092896D, 0.699999988079071D, 0.699999988079071D, 0.5D);
          }
       }
 
       if (this.getInvulTime() > 0) {
-         for(int i1 = 0; i1 < 3; ++i1) {
+         for(int var28 = 0; var28 < 3; ++var28) {
             this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + this.rand.nextGaussian(), this.posY + (double)(this.rand.nextFloat() * 3.3F), this.posZ + this.rand.nextGaussian(), 0.699999988079071D, 0.699999988079071D, 0.8999999761581421D);
          }
       }
@@ -205,15 +214,34 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
 
    protected void updateAITasks() {
       if (this.getInvulTime() > 0) {
-         int j1 = this.getInvulTime() - 1;
-         if (j1 <= 0) {
-            this.world.newExplosion(this, this.posX, this.posY + (double)this.getEyeHeight(), this.posZ, 7.0F, false, this.world.getGameRules().getBoolean("mobGriefing"));
-            this.world.playBroadcastSound(1023, new BlockPos(this), 0);
+         int i = this.getInvulTime() - 1;
+         if (i <= 0) {
+            ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), 7.0F, false);
+            this.world.getServer().getPluginManager().callEvent(event);
+            if (!event.isCancelled()) {
+               this.world.newExplosion(this, this.posX, this.posY + (double)this.getEyeHeight(), this.posZ, event.getRadius(), event.getFire(), this.world.getGameRules().getBoolean("mobGriefing"));
+            }
+
+            int viewDistance = ((WorldServer)this.world).getServer().getViewDistance() * 16;
+
+            for(EntityPlayerMP player : MinecraftServer.getServer().getPlayerList().playerEntityList) {
+               double deltaX = this.posX - player.posX;
+               double deltaZ = this.posZ - player.posZ;
+               double distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
+               if (distanceSquared > (double)(viewDistance * viewDistance)) {
+                  double deltaLength = Math.sqrt(distanceSquared);
+                  double relativeX = player.posX + deltaX / deltaLength * (double)viewDistance;
+                  double relativeZ = player.posZ + deltaZ / deltaLength * (double)viewDistance;
+                  player.connection.sendPacket(new SPacketEffect(1013, new BlockPos((int)relativeX, (int)this.posY, (int)relativeZ), 0, true));
+               } else {
+                  player.connection.sendPacket(new SPacketEffect(1013, new BlockPos((int)this.posX, (int)this.posY, (int)this.posZ), 0, true));
+               }
+            }
          }
 
-         this.setInvulTime(j1);
+         this.setInvulTime(i);
          if (this.ticksExisted % 10 == 0) {
-            this.heal(10.0F);
+            this.heal(10.0F, RegainReason.WITHER_SPAWN);
          }
       } else {
          super.updateAITasks();
@@ -222,12 +250,10 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
             if (this.ticksExisted >= this.nextHeadUpdate[i - 1]) {
                this.nextHeadUpdate[i - 1] = this.ticksExisted + 10 + this.rand.nextInt(10);
                if (this.world.getDifficulty() == EnumDifficulty.NORMAL || this.world.getDifficulty() == EnumDifficulty.HARD) {
-                  int j3 = i - 1;
-                  int k3 = this.idleHeadUpdates[i - 1];
-                  this.idleHeadUpdates[j3] = this.idleHeadUpdates[i - 1] + 1;
-                  if (k3 > 15) {
-                     float f = 10.0F;
-                     float f1 = 5.0F;
+                  int k = i - 1;
+                  int l = this.idleHeadUpdates[i - 1];
+                  this.idleHeadUpdates[k] = this.idleHeadUpdates[i - 1] + 1;
+                  if (l > 15) {
                      double d0 = MathHelper.nextDouble(this.rand, this.posX - 10.0D, this.posX + 10.0D);
                      double d1 = MathHelper.nextDouble(this.rand, this.posY - 5.0D, this.posY + 5.0D);
                      double d2 = MathHelper.nextDouble(this.rand, this.posZ - 10.0D, this.posZ + 10.0D);
@@ -236,9 +262,9 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
                   }
                }
 
-               int k1 = this.getWatchedTargetId(i);
-               if (k1 > 0) {
-                  Entity entity = this.world.getEntityByID(k1);
+               int j = this.getWatchedTargetId(i);
+               if (j > 0) {
+                  Entity entity = this.world.getEntityByID(j);
                   if (entity != null && entity.isEntityAlive() && this.getDistanceSqToEntity(entity) <= 900.0D && this.canEntityBeSeen(entity)) {
                      if (entity instanceof EntityPlayer && ((EntityPlayer)entity).capabilities.disableDamage) {
                         this.updateWatchedTargetId(i, 0);
@@ -253,20 +279,20 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
                } else {
                   List list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(20.0D, 8.0D, 20.0D), Predicates.and(NOT_UNDEAD, EntitySelectors.NOT_SPECTATING));
 
-                  for(int j2 = 0; j2 < 10 && !list.isEmpty(); ++j2) {
-                     EntityLivingBase entitylivingbase = (EntityLivingBase)list.get(this.rand.nextInt(list.size()));
-                     if (entitylivingbase != this && entitylivingbase.isEntityAlive() && this.canEntityBeSeen(entitylivingbase)) {
-                        if (entitylivingbase instanceof EntityPlayer) {
-                           if (!((EntityPlayer)entitylivingbase).capabilities.disableDamage) {
-                              this.updateWatchedTargetId(i, entitylivingbase.getEntityId());
+                  for(int i1 = 0; i1 < 10 && !list.isEmpty(); ++i1) {
+                     EntityLivingBase entityliving = (EntityLivingBase)list.get(this.rand.nextInt(list.size()));
+                     if (entityliving != this && entityliving.isEntityAlive() && this.canEntityBeSeen(entityliving)) {
+                        if (entityliving instanceof EntityPlayer) {
+                           if (!((EntityPlayer)entityliving).capabilities.disableDamage) {
+                              this.updateWatchedTargetId(i, entityliving.getEntityId());
                            }
                         } else {
-                           this.updateWatchedTargetId(i, entitylivingbase.getEntityId());
+                           this.updateWatchedTargetId(i, entityliving.getEntityId());
                         }
                         break;
                      }
 
-                     list.remove(entitylivingbase);
+                     list.remove(entityliving);
                   }
                }
             }
@@ -281,22 +307,22 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
          if (this.blockBreakCounter > 0) {
             --this.blockBreakCounter;
             if (this.blockBreakCounter == 0 && this.world.getGameRules().getBoolean("mobGriefing")) {
-               int i1 = MathHelper.floor(this.posY);
-               int l1 = MathHelper.floor(this.posX);
-               int i2 = MathHelper.floor(this.posZ);
+               int var33 = MathHelper.floor(this.posY);
+               int j = MathHelper.floor(this.posX);
+               int j1 = MathHelper.floor(this.posZ);
                boolean flag = false;
 
-               for(int k2 = -1; k2 <= 1; ++k2) {
-                  for(int l2 = -1; l2 <= 1; ++l2) {
-                     for(int j = 0; j <= 3; ++j) {
-                        int i3 = l1 + k2;
-                        int k = i1 + j;
-                        int l = i2 + l2;
-                        BlockPos blockpos = new BlockPos(i3, k, l);
-                        IBlockState iblockstate = this.world.getBlockState(blockpos);
-                        Block block = iblockstate.getBlock();
-                        if (!block.isAir(iblockstate, this.world, blockpos) && block.canEntityDestroy(iblockstate, this.world, blockpos, this)) {
-                           flag = this.world.destroyBlock(blockpos, true) || flag;
+               for(int k1 = -1; k1 <= 1; ++k1) {
+                  for(int l1 = -1; l1 <= 1; ++l1) {
+                     for(int i2 = 0; i2 <= 3; ++i2) {
+                        int j2 = j + k1;
+                        int k2 = var33 + i2;
+                        int l2 = j1 + l1;
+                        BlockPos blockposition = new BlockPos(j2, k2, l2);
+                        IBlockState iblockdata = this.world.getBlockState(blockposition);
+                        Block block = iblockdata.getBlock();
+                        if (iblockdata.getMaterial() != Material.AIR && canDestroyBlock(block) && !CraftEventFactory.callEntityChangeBlockEvent(this, blockposition, Blocks.AIR, 0).isCancelled()) {
+                           flag = this.world.destroyBlock(blockposition, true) || flag;
                         }
                      }
                   }
@@ -309,7 +335,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
          }
 
          if (this.ticksExisted % 20 == 0) {
-            this.heal(1.0F);
+            this.heal(1.0F, RegainReason.REGEN);
          }
 
          this.bossInfo.setPercent(this.getHealth() / this.getMaxHealth());
@@ -317,8 +343,8 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
 
    }
 
-   public static boolean canDestroyBlock(Block blockIn) {
-      return blockIn != Blocks.BEDROCK && blockIn != Blocks.END_PORTAL && blockIn != Blocks.END_PORTAL_FRAME && blockIn != Blocks.COMMAND_BLOCK && blockIn != Blocks.REPEATING_COMMAND_BLOCK && blockIn != Blocks.CHAIN_COMMAND_BLOCK && blockIn != Blocks.BARRIER;
+   public static boolean canDestroyBlock(Block block) {
+      return block != Blocks.BEDROCK && block != Blocks.END_PORTAL && block != Blocks.END_PORTAL_FRAME && block != Blocks.COMMAND_BLOCK && block != Blocks.REPEATING_COMMAND_BLOCK && block != Blocks.CHAIN_COMMAND_BLOCK && block != Blocks.BARRIER;
    }
 
    public void ignite() {
@@ -329,96 +355,96 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
    public void setInWeb() {
    }
 
-   public void addTrackingPlayer(EntityPlayerMP player) {
-      super.addTrackingPlayer(player);
-      this.bossInfo.addPlayer(player);
+   public void addTrackingPlayer(EntityPlayerMP entityplayer) {
+      super.addTrackingPlayer(entityplayer);
+      this.bossInfo.addPlayer(entityplayer);
    }
 
-   public void removeTrackingPlayer(EntityPlayerMP player) {
-      super.removeTrackingPlayer(player);
-      this.bossInfo.removePlayer(player);
+   public void removeTrackingPlayer(EntityPlayerMP entityplayer) {
+      super.removeTrackingPlayer(entityplayer);
+      this.bossInfo.removePlayer(entityplayer);
    }
 
-   private double getHeadX(int p_82214_1_) {
-      if (p_82214_1_ <= 0) {
+   private double getHeadX(int i) {
+      if (i <= 0) {
          return this.posX;
       } else {
-         float f = (this.renderYawOffset + (float)(180 * (p_82214_1_ - 1))) * 0.017453292F;
+         float f = (this.renderYawOffset + (float)(180 * (i - 1))) * 0.017453292F;
          float f1 = MathHelper.cos(f);
          return this.posX + (double)f1 * 1.3D;
       }
    }
 
-   private double getHeadY(int p_82208_1_) {
-      return p_82208_1_ <= 0 ? this.posY + 3.0D : this.posY + 2.2D;
+   private double getHeadY(int i) {
+      return i <= 0 ? this.posY + 3.0D : this.posY + 2.2D;
    }
 
-   private double getHeadZ(int p_82213_1_) {
-      if (p_82213_1_ <= 0) {
+   private double getHeadZ(int i) {
+      if (i <= 0) {
          return this.posZ;
       } else {
-         float f = (this.renderYawOffset + (float)(180 * (p_82213_1_ - 1))) * 0.017453292F;
+         float f = (this.renderYawOffset + (float)(180 * (i - 1))) * 0.017453292F;
          float f1 = MathHelper.sin(f);
          return this.posZ + (double)f1 * 1.3D;
       }
    }
 
-   private float rotlerp(float p_82204_1_, float p_82204_2_, float p_82204_3_) {
-      float f = MathHelper.wrapDegrees(p_82204_2_ - p_82204_1_);
-      if (f > p_82204_3_) {
-         f = p_82204_3_;
+   private float rotlerp(float f, float f1, float f2) {
+      float f3 = MathHelper.wrapDegrees(f1 - f);
+      if (f3 > f2) {
+         f3 = f2;
       }
 
-      if (f < -p_82204_3_) {
-         f = -p_82204_3_;
+      if (f3 < -f2) {
+         f3 = -f2;
       }
 
-      return p_82204_1_ + f;
+      return f + f3;
    }
 
-   private void launchWitherSkullToEntity(int p_82216_1_, EntityLivingBase p_82216_2_) {
-      this.launchWitherSkullToCoords(p_82216_1_, p_82216_2_.posX, p_82216_2_.posY + (double)p_82216_2_.getEyeHeight() * 0.5D, p_82216_2_.posZ, p_82216_1_ == 0 && this.rand.nextFloat() < 0.001F);
+   private void launchWitherSkullToEntity(int i, EntityLivingBase entityliving) {
+      this.launchWitherSkullToCoords(i, entityliving.posX, entityliving.posY + (double)entityliving.getEyeHeight() * 0.5D, entityliving.posZ, i == 0 && this.rand.nextFloat() < 0.001F);
    }
 
-   private void launchWitherSkullToCoords(int p_82209_1_, double x, double y, double z, boolean invulnerable) {
+   private void launchWitherSkullToCoords(int i, double d0, double d1, double d2, boolean flag) {
       this.world.playEvent((EntityPlayer)null, 1024, new BlockPos(this), 0);
-      double d0 = this.getHeadX(p_82209_1_);
-      double d1 = this.getHeadY(p_82209_1_);
-      double d2 = this.getHeadZ(p_82209_1_);
-      double d3 = x - d0;
-      double d4 = y - d1;
-      double d5 = z - d2;
-      EntityWitherSkull entitywitherskull = new EntityWitherSkull(this.world, this, d3, d4, d5);
-      if (invulnerable) {
+      double d3 = this.getHeadX(i);
+      double d4 = this.getHeadY(i);
+      double d5 = this.getHeadZ(i);
+      double d6 = d0 - d3;
+      double d7 = d1 - d4;
+      double d8 = d2 - d5;
+      EntityWitherSkull entitywitherskull = new EntityWitherSkull(this.world, this, d6, d7, d8);
+      if (flag) {
          entitywitherskull.setInvulnerable(true);
       }
 
-      entitywitherskull.posY = d1;
-      entitywitherskull.posX = d0;
-      entitywitherskull.posZ = d2;
+      entitywitherskull.posY = d4;
+      entitywitherskull.posX = d3;
+      entitywitherskull.posZ = d5;
       this.world.spawnEntity(entitywitherskull);
    }
 
-   public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
-      this.launchWitherSkullToEntity(0, target);
+   public void attackEntityWithRangedAttack(EntityLivingBase entityliving, float f) {
+      this.launchWitherSkullToEntity(0, entityliving);
    }
 
-   public boolean attackEntityFrom(DamageSource source, float amount) {
-      if (this.isEntityInvulnerable(source)) {
+   public boolean attackEntityFrom(DamageSource damagesource, float f) {
+      if (this.isEntityInvulnerable(damagesource)) {
          return false;
-      } else if (source != DamageSource.drown && !(source.getEntity() instanceof EntityWither)) {
-         if (this.getInvulTime() > 0 && source != DamageSource.outOfWorld) {
+      } else if (damagesource != DamageSource.drown && !(damagesource.getEntity() instanceof EntityWither)) {
+         if (this.getInvulTime() > 0 && damagesource != DamageSource.outOfWorld) {
             return false;
          } else {
             if (this.isArmored()) {
-               Entity entity = source.getSourceOfDamage();
+               Entity entity = damagesource.getSourceOfDamage();
                if (entity instanceof EntityArrow) {
                   return false;
                }
             }
 
-            Entity entity1 = source.getEntity();
-            if (entity1 != null && !(entity1 instanceof EntityPlayer) && entity1 instanceof EntityLivingBase && ((EntityLivingBase)entity1).getCreatureAttribute() == this.getCreatureAttribute()) {
+            Entity entity = damagesource.getEntity();
+            if (entity != null && !(entity instanceof EntityPlayer) && entity instanceof EntityLivingBase && ((EntityLivingBase)entity).getCreatureAttribute() == this.getCreatureAttribute()) {
                return false;
             } else {
                if (this.blockBreakCounter <= 0) {
@@ -429,7 +455,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
                   this.idleHeadUpdates[i] += 3;
                }
 
-               return super.attackEntityFrom(source, amount);
+               return super.attackEntityFrom(damagesource, f);
             }
          }
       } else {
@@ -437,15 +463,15 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       }
    }
 
-   protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier) {
+   protected void dropFewItems(boolean flag, int i) {
       EntityItem entityitem = this.dropItem(Items.NETHER_STAR, 1);
       if (entityitem != null) {
          entityitem.setNoDespawn();
       }
 
       if (!this.world.isRemote) {
-         for(EntityPlayer entityplayer : this.world.getEntitiesWithinAABB(EntityPlayer.class, this.getEntityBoundingBox().expand(50.0D, 100.0D, 50.0D))) {
-            entityplayer.addStat(AchievementList.KILL_WITHER);
+         for(EntityPlayer entityhuman : this.world.getEntitiesWithinAABB(EntityPlayer.class, this.getEntityBoundingBox().expand(50.0D, 100.0D, 50.0D))) {
+            entityhuman.addStat(AchievementList.KILL_WITHER);
          }
       }
 
@@ -455,15 +481,10 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       this.entityAge = 0;
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float partialTicks) {
-      return 15728880;
+   public void fall(float f, float f1) {
    }
 
-   public void fall(float distance, float damageMultiplier) {
-   }
-
-   public void addPotionEffect(PotionEffect potioneffectIn) {
+   public void addPotionEffect(PotionEffect mobeffect) {
    }
 
    protected void applyEntityAttributes() {
@@ -474,30 +495,20 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(4.0D);
    }
 
-   @SideOnly(Side.CLIENT)
-   public float getHeadYRotation(int p_82207_1_) {
-      return this.yRotationHeads[p_82207_1_];
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getHeadXRotation(int p_82210_1_) {
-      return this.xRotationHeads[p_82210_1_];
-   }
-
    public int getInvulTime() {
       return ((Integer)this.dataManager.get(INVULNERABILITY_TIME)).intValue();
    }
 
-   public void setInvulTime(int time) {
-      this.dataManager.set(INVULNERABILITY_TIME, Integer.valueOf(time));
+   public void setInvulTime(int i) {
+      this.dataManager.set(INVULNERABILITY_TIME, Integer.valueOf(i));
    }
 
-   public int getWatchedTargetId(int head) {
-      return ((Integer)this.dataManager.get(HEAD_TARGETS[head])).intValue();
+   public int getWatchedTargetId(int i) {
+      return ((Integer)this.dataManager.get(HEAD_TARGETS[i])).intValue();
    }
 
-   public void updateWatchedTargetId(int targetOffset, int newId) {
-      this.dataManager.set(HEAD_TARGETS[targetOffset], Integer.valueOf(newId));
+   public void updateWatchedTargetId(int i, int j) {
+      this.dataManager.set(HEAD_TARGETS[i], Integer.valueOf(j));
    }
 
    public boolean isArmored() {
@@ -508,7 +519,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       return EnumCreatureAttribute.UNDEAD;
    }
 
-   protected boolean canBeRidden(Entity entityIn) {
+   protected boolean canBeRidden(Entity entity) {
       return false;
    }
 

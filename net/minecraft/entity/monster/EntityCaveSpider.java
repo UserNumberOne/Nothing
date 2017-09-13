@@ -16,13 +16,13 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityCaveSpider extends EntitySpider {
-   public EntityCaveSpider(World worldIn) {
-      super(worldIn);
+   public EntityCaveSpider(World var1) {
+      super(var1);
       this.setSize(0.7F, 0.5F);
    }
 
-   public static void registerFixesCaveSpider(DataFixer fixer) {
-      EntityLiving.registerFixesMob(fixer, "CaveSpider");
+   public static void registerFixesCaveSpider(DataFixer var0) {
+      EntityLiving.registerFixesMob(var0, "CaveSpider");
    }
 
    protected void applyEntityAttributes() {
@@ -30,18 +30,18 @@ public class EntityCaveSpider extends EntitySpider {
       this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(12.0D);
    }
 
-   public boolean attackEntityAsMob(Entity entityIn) {
-      if (super.attackEntityAsMob(entityIn)) {
-         if (entityIn instanceof EntityLivingBase) {
-            int i = 0;
+   public boolean attackEntityAsMob(Entity var1) {
+      if (super.attackEntityAsMob(var1)) {
+         if (var1 instanceof EntityLivingBase) {
+            byte var2 = 0;
             if (this.world.getDifficulty() == EnumDifficulty.NORMAL) {
-               i = 7;
+               var2 = 7;
             } else if (this.world.getDifficulty() == EnumDifficulty.HARD) {
-               i = 15;
+               var2 = 15;
             }
 
-            if (i > 0) {
-               ((EntityLivingBase)entityIn).addPotionEffect(new PotionEffect(MobEffects.POISON, i * 20, 0));
+            if (var2 > 0) {
+               ((EntityLivingBase)var1).addPotionEffect(new PotionEffect(MobEffects.POISON, var2 * 20, 0));
             }
          }
 
@@ -52,8 +52,8 @@ public class EntityCaveSpider extends EntitySpider {
    }
 
    @Nullable
-   public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
-      return livingdata;
+   public IEntityLivingData onInitialSpawn(DifficultyInstance var1, @Nullable IEntityLivingData var2) {
+      return var2;
    }
 
    public float getEyeHeight() {

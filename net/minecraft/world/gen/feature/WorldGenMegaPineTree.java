@@ -7,11 +7,9 @@ import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockSapling;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -22,34 +20,38 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
    private static final IBlockState PODZOL = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
    private final boolean useBaseHeight;
 
-   public WorldGenMegaPineTree(boolean notify, boolean p_i45457_2_) {
-      super(notify, 13, 15, TRUNK, LEAF);
-      this.useBaseHeight = p_i45457_2_;
+   public WorldGenMegaPineTree(boolean var1, boolean var2) {
+      super(var1, 13, 15, TRUNK, LEAF);
+      this.useBaseHeight = var2;
    }
 
-   public boolean generate(World worldIn, Random rand, BlockPos position) {
-      int i = this.getHeight(rand);
-      if (!this.ensureGrowable(worldIn, rand, position, i)) {
+   public boolean generate(World var1, Random var2, BlockPos var3) {
+      int var4 = this.getHeight(var2);
+      if (!this.ensureGrowable(var1, var2, var3, var4)) {
          return false;
       } else {
-         this.createCrown(worldIn, position.getX(), position.getZ(), position.getY() + i, 0, rand);
+         this.createCrown(var1, var3.getX(), var3.getZ(), var3.getY() + var4, 0, var2);
 
-         for(int j = 0; j < i; ++j) {
-            if (this.isAirLeaves(worldIn, position.up(j))) {
-               this.setBlockAndNotifyAdequately(worldIn, position.up(j), this.woodMetadata);
+         for(int var5 = 0; var5 < var4; ++var5) {
+            IBlockState var6 = var1.getBlockState(var3.up(var5));
+            if (var6.getMaterial() == Material.AIR || var6.getMaterial() == Material.LEAVES) {
+               this.setBlockAndNotifyAdequately(var1, var3.up(var5), this.woodMetadata);
             }
 
-            if (j < i - 1) {
-               if (this.isAirLeaves(worldIn, position.add(1, j, 0))) {
-                  this.setBlockAndNotifyAdequately(worldIn, position.add(1, j, 0), this.woodMetadata);
+            if (var5 < var4 - 1) {
+               var6 = var1.getBlockState(var3.add(1, var5, 0));
+               if (var6.getMaterial() == Material.AIR || var6.getMaterial() == Material.LEAVES) {
+                  this.setBlockAndNotifyAdequately(var1, var3.add(1, var5, 0), this.woodMetadata);
                }
 
-               if (this.isAirLeaves(worldIn, position.add(1, j, 1))) {
-                  this.setBlockAndNotifyAdequately(worldIn, position.add(1, j, 1), this.woodMetadata);
+               var6 = var1.getBlockState(var3.add(1, var5, 1));
+               if (var6.getMaterial() == Material.AIR || var6.getMaterial() == Material.LEAVES) {
+                  this.setBlockAndNotifyAdequately(var1, var3.add(1, var5, 1), this.woodMetadata);
                }
 
-               if (this.isAirLeaves(worldIn, position.add(0, j, 1))) {
-                  this.setBlockAndNotifyAdequately(worldIn, position.add(0, j, 1), this.woodMetadata);
+               var6 = var1.getBlockState(var3.add(0, var5, 1));
+               if (var6.getMaterial() == Material.AIR || var6.getMaterial() == Material.LEAVES) {
+                  this.setBlockAndNotifyAdequately(var1, var3.add(0, var5, 1), this.woodMetadata);
                }
             }
          }
@@ -58,66 +60,61 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
       }
    }
 
-   private void createCrown(World worldIn, int x, int z, int y, int p_150541_5_, Random rand) {
-      int i = rand.nextInt(5) + (this.useBaseHeight ? this.baseHeight : 3);
-      int j = 0;
+   private void createCrown(World var1, int var2, int var3, int var4, int var5, Random var6) {
+      int var7 = var6.nextInt(5) + (this.useBaseHeight ? this.baseHeight : 3);
+      int var8 = 0;
 
-      for(int k = y - i; k <= y; ++k) {
-         int l = y - k;
-         int i1 = p_150541_5_ + MathHelper.floor((float)l / (float)i * 3.5F);
-         this.growLeavesLayerStrict(worldIn, new BlockPos(x, k, z), i1 + (l > 0 && i1 == j && (k & 1) == 0 ? 1 : 0));
-         j = i1;
+      for(int var9 = var4 - var7; var9 <= var4; ++var9) {
+         int var10 = var4 - var9;
+         int var11 = var5 + MathHelper.floor((float)var10 / (float)var7 * 3.5F);
+         this.growLeavesLayerStrict(var1, new BlockPos(var2, var9, var3), var11 + (var10 > 0 && var11 == var8 && (var9 & 1) == 0 ? 1 : 0));
+         var8 = var11;
       }
 
    }
 
-   public void generateSaplings(World worldIn, Random random, BlockPos pos) {
-      this.placePodzolCircle(worldIn, pos.west().north());
-      this.placePodzolCircle(worldIn, pos.east(2).north());
-      this.placePodzolCircle(worldIn, pos.west().south(2));
-      this.placePodzolCircle(worldIn, pos.east(2).south(2));
+   public void generateSaplings(World var1, Random var2, BlockPos var3) {
+      this.placePodzolCircle(var1, var3.west().north());
+      this.placePodzolCircle(var1, var3.east(2).north());
+      this.placePodzolCircle(var1, var3.west().south(2));
+      this.placePodzolCircle(var1, var3.east(2).south(2));
 
-      for(int i = 0; i < 5; ++i) {
-         int j = random.nextInt(64);
-         int k = j % 8;
-         int l = j / 8;
-         if (k == 0 || k == 7 || l == 0 || l == 7) {
-            this.placePodzolCircle(worldIn, pos.add(-3 + k, 0, -3 + l));
+      for(int var4 = 0; var4 < 5; ++var4) {
+         int var5 = var2.nextInt(64);
+         int var6 = var5 % 8;
+         int var7 = var5 / 8;
+         if (var6 == 0 || var6 == 7 || var7 == 0 || var7 == 7) {
+            this.placePodzolCircle(var1, var3.add(-3 + var6, 0, -3 + var7));
          }
       }
 
    }
 
-   private void placePodzolCircle(World worldIn, BlockPos center) {
-      for(int i = -2; i <= 2; ++i) {
-         for(int j = -2; j <= 2; ++j) {
-            if (Math.abs(i) != 2 || Math.abs(j) != 2) {
-               this.placePodzolAt(worldIn, center.add(i, 0, j));
+   private void placePodzolCircle(World var1, BlockPos var2) {
+      for(int var3 = -2; var3 <= 2; ++var3) {
+         for(int var4 = -2; var4 <= 2; ++var4) {
+            if (Math.abs(var3) != 2 || Math.abs(var4) != 2) {
+               this.placePodzolAt(var1, var2.add(var3, 0, var4));
             }
          }
       }
 
    }
 
-   private void placePodzolAt(World worldIn, BlockPos pos) {
-      for(int i = 2; i >= -3; --i) {
-         BlockPos blockpos = pos.up(i);
-         IBlockState iblockstate = worldIn.getBlockState(blockpos);
-         Block block = iblockstate.getBlock();
-         if (block.canSustainPlant(iblockstate, worldIn, blockpos, EnumFacing.UP, (BlockSapling)Blocks.SAPLING)) {
-            this.setBlockAndNotifyAdequately(worldIn, blockpos, PODZOL);
+   private void placePodzolAt(World var1, BlockPos var2) {
+      for(int var3 = 2; var3 >= -3; --var3) {
+         BlockPos var4 = var2.up(var3);
+         IBlockState var5 = var1.getBlockState(var4);
+         Block var6 = var5.getBlock();
+         if (var6 == Blocks.GRASS || var6 == Blocks.DIRT) {
+            this.setBlockAndNotifyAdequately(var1, var4, PODZOL);
             break;
          }
 
-         if (iblockstate.getMaterial() != Material.AIR && i < 0) {
+         if (var5.getMaterial() != Material.AIR && var3 < 0) {
             break;
          }
       }
 
-   }
-
-   private boolean isAirLeaves(World world, BlockPos pos) {
-      IBlockState state = world.getBlockState(pos);
-      return state.getBlock().isAir(state, world, pos) || state.getBlock().isLeaves(state, world, pos);
    }
 }

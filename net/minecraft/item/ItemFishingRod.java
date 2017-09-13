@@ -1,8 +1,6 @@
 package net.minecraft.item;
 
-import javax.annotation.Nullable;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.SoundEvents;
@@ -13,8 +11,11 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Fish;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerFishEvent.State;
 
 public class ItemFishingRod extends Item {
    public ItemFishingRod() {
@@ -22,43 +23,36 @@ public class ItemFishingRod extends Item {
       this.setMaxStackSize(1);
       this.setCreativeTab(CreativeTabs.TOOLS);
       this.addPropertyOverride(new ResourceLocation("cast"), new IItemPropertyGetter() {
-         @SideOnly(Side.CLIENT)
-         public float apply(ItemStack stack, @Nullable World worldIn, @Nullable EntityLivingBase entityIn) {
-            return entityIn == null ? 0.0F : (entityIn.getHeldItemMainhand() == stack && entityIn instanceof EntityPlayer && ((EntityPlayer)entityIn).fishEntity != null ? 1.0F : 0.0F);
-         }
       });
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isFull3D() {
-      return true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldRotateAroundWhenRendering() {
-      return true;
-   }
-
-   public ActionResult onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
-      if (playerIn.fishEntity != null) {
-         int i = playerIn.fishEntity.handleHookRetraction();
-         itemStackIn.damageItem(i, playerIn);
-         playerIn.swingArm(hand);
+   public ActionResult onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityhuman, EnumHand enumhand) {
+      if (entityhuman.fishEntity != null) {
+         int i = entityhuman.fishEntity.handleHookRetraction();
+         itemstack.damageItem(i, entityhuman);
+         entityhuman.swingArm(enumhand);
       } else {
-         worldIn.playSound((EntityPlayer)null, playerIn.posX, playerIn.posY, playerIn.posZ, SoundEvents.ENTITY_BOBBER_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
-         if (!worldIn.isRemote) {
-            worldIn.spawnEntity(new EntityFishHook(worldIn, playerIn));
+         EntityFishHook hook = new EntityFishHook(world, entityhuman);
+         PlayerFishEvent playerFishEvent = new PlayerFishEvent((Player)entityhuman.getBukkitEntity(), (Entity)null, (Fish)hook.getBukkitEntity(), State.FISHING);
+         world.getServer().getPluginManager().callEvent(playerFishEvent);
+         if (playerFishEvent.isCancelled()) {
+            return new ActionResult(EnumActionResult.PASS, itemstack);
          }
 
-         playerIn.swingArm(hand);
-         playerIn.addStat(StatList.getObjectUseStats(this));
+         world.playSound((EntityPlayer)null, entityhuman.posX, entityhuman.posY, entityhuman.posZ, SoundEvents.ENTITY_BOBBER_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+         if (!world.isRemote) {
+            world.spawnEntity(hook);
+         }
+
+         entityhuman.swingArm(enumhand);
+         entityhuman.addStat(StatList.getObjectUseStats(this));
       }
 
-      return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
+      return new ActionResult(EnumActionResult.SUCCESS, itemstack);
    }
 
-   public boolean isEnchantable(ItemStack stack) {
-      return super.isEnchantable(stack);
+   public boolean isEnchantable(ItemStack itemstack) {
+      return super.isEnchantable(itemstack);
    }
 
    public int getItemEnchantability() {

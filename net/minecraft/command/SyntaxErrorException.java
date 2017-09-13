@@ -5,7 +5,7 @@ public class SyntaxErrorException extends CommandException {
       this("commands.generic.snytax");
    }
 
-   public SyntaxErrorException(String message, Object... replacements) {
-      super(message, replacements);
+   public SyntaxErrorException(String var1, Object... var2) {
+      super(var1, var2);
    }
 }

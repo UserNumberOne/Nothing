@@ -8,8 +8,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSpawnObject implements Packet {
    private int entityId;
@@ -28,141 +26,76 @@ public class SPacketSpawnObject implements Packet {
    public SPacketSpawnObject() {
    }
 
-   public SPacketSpawnObject(Entity entityIn, int typeIn) {
-      this(entityIn, typeIn, 0);
+   public SPacketSpawnObject(Entity var1, int var2) {
+      this(var1, var2, 0);
    }
 
-   public SPacketSpawnObject(Entity entityIn, int typeIn, int dataIn) {
-      this.entityId = entityIn.getEntityId();
-      this.uniqueId = entityIn.getUniqueID();
-      this.x = entityIn.posX;
-      this.y = entityIn.posY;
-      this.z = entityIn.posZ;
-      this.pitch = MathHelper.floor(entityIn.rotationPitch * 256.0F / 360.0F);
-      this.yaw = MathHelper.floor(entityIn.rotationYaw * 256.0F / 360.0F);
-      this.type = typeIn;
-      this.data = dataIn;
-      double d0 = 3.9D;
-      this.speedX = (int)(MathHelper.clamp(entityIn.motionX, -3.9D, 3.9D) * 8000.0D);
-      this.speedY = (int)(MathHelper.clamp(entityIn.motionY, -3.9D, 3.9D) * 8000.0D);
-      this.speedZ = (int)(MathHelper.clamp(entityIn.motionZ, -3.9D, 3.9D) * 8000.0D);
+   public SPacketSpawnObject(Entity var1, int var2, int var3) {
+      this.entityId = var1.getEntityId();
+      this.uniqueId = var1.getUniqueID();
+      this.x = var1.posX;
+      this.y = var1.posY;
+      this.z = var1.posZ;
+      this.pitch = MathHelper.floor(var1.rotationPitch * 256.0F / 360.0F);
+      this.yaw = MathHelper.floor(var1.rotationYaw * 256.0F / 360.0F);
+      this.type = var2;
+      this.data = var3;
+      double var4 = 3.9D;
+      this.speedX = (int)(MathHelper.clamp(var1.motionX, -3.9D, 3.9D) * 8000.0D);
+      this.speedY = (int)(MathHelper.clamp(var1.motionY, -3.9D, 3.9D) * 8000.0D);
+      this.speedZ = (int)(MathHelper.clamp(var1.motionZ, -3.9D, 3.9D) * 8000.0D);
    }
 
-   public SPacketSpawnObject(Entity entityIn, int typeIn, int dataIn, BlockPos pos) {
-      this(entityIn, typeIn, dataIn);
-      this.x = (double)pos.getX();
-      this.y = (double)pos.getY();
-      this.z = (double)pos.getZ();
+   public SPacketSpawnObject(Entity var1, int var2, int var3, BlockPos var4) {
+      this(var1, var2, var3);
+      this.x = (double)var4.getX();
+      this.y = (double)var4.getY();
+      this.z = (double)var4.getZ();
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.entityId = buf.readVarInt();
-      this.uniqueId = buf.readUniqueId();
-      this.type = buf.readByte();
-      this.x = buf.readDouble();
-      this.y = buf.readDouble();
-      this.z = buf.readDouble();
-      this.pitch = buf.readByte();
-      this.yaw = buf.readByte();
-      this.data = buf.readInt();
-      this.speedX = buf.readShort();
-      this.speedY = buf.readShort();
-      this.speedZ = buf.readShort();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.entityId = var1.readVarInt();
+      this.uniqueId = var1.readUniqueId();
+      this.type = var1.readByte();
+      this.x = var1.readDouble();
+      this.y = var1.readDouble();
+      this.z = var1.readDouble();
+      this.pitch = var1.readByte();
+      this.yaw = var1.readByte();
+      this.data = var1.readInt();
+      this.speedX = var1.readShort();
+      this.speedY = var1.readShort();
+      this.speedZ = var1.readShort();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeVarInt(this.entityId);
-      buf.writeUniqueId(this.uniqueId);
-      buf.writeByte(this.type);
-      buf.writeDouble(this.x);
-      buf.writeDouble(this.y);
-      buf.writeDouble(this.z);
-      buf.writeByte(this.pitch);
-      buf.writeByte(this.yaw);
-      buf.writeInt(this.data);
-      buf.writeShort(this.speedX);
-      buf.writeShort(this.speedY);
-      buf.writeShort(this.speedZ);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeVarInt(this.entityId);
+      var1.writeUniqueId(this.uniqueId);
+      var1.writeByte(this.type);
+      var1.writeDouble(this.x);
+      var1.writeDouble(this.y);
+      var1.writeDouble(this.z);
+      var1.writeByte(this.pitch);
+      var1.writeByte(this.yaw);
+      var1.writeInt(this.data);
+      var1.writeShort(this.speedX);
+      var1.writeShort(this.speedY);
+      var1.writeShort(this.speedZ);
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleSpawnObject(this);
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleSpawnObject(this);
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getEntityID() {
-      return this.entityId;
+   public void setSpeedX(int var1) {
+      this.speedX = var1;
    }
 
-   public void setSpeedX(int newSpeedX) {
-      this.speedX = newSpeedX;
+   public void setSpeedY(int var1) {
+      this.speedY = var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public UUID getUniqueId() {
-      return this.uniqueId;
-   }
-
-   public void setSpeedY(int newSpeedY) {
-      this.speedY = newSpeedY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.x;
-   }
-
-   public void setSpeedZ(int newSpeedZ) {
-      this.speedZ = newSpeedZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.y;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.z;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSpeedX() {
-      return this.speedX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSpeedY() {
-      return this.speedY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSpeedZ() {
-      return this.speedZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getPitch() {
-      return this.pitch;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getYaw() {
-      return this.yaw;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getType() {
-      return this.type;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getData() {
-      return this.data;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setData(int dataIn) {
-      this.data = dataIn;
+   public void setSpeedZ(int var1) {
+      this.speedZ = var1;
    }
 }

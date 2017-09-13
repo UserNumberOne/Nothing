@@ -7,32 +7,32 @@ import java.util.Collection;
 public class PropertyBool extends PropertyHelper {
    private final ImmutableSet allowedValues = ImmutableSet.of(Boolean.valueOf(true), Boolean.valueOf(false));
 
-   protected PropertyBool(String name) {
-      super(name, Boolean.class);
+   protected PropertyBool(String var1) {
+      super(var1, Boolean.class);
    }
 
    public Collection getAllowedValues() {
       return this.allowedValues;
    }
 
-   public static PropertyBool create(String name) {
-      return new PropertyBool(name);
+   public static PropertyBool create(String var0) {
+      return new PropertyBool(var0);
    }
 
-   public Optional parseValue(String value) {
-      return !"true".equals(value) && !"false".equals(value) ? Optional.absent() : Optional.of(Boolean.valueOf(value));
+   public Optional parseValue(String var1) {
+      return !"true".equals(var1) && !"false".equals(var1) ? Optional.absent() : Optional.of(Boolean.valueOf(var1));
    }
 
-   public String getName(Boolean value) {
-      return value.toString();
+   public String getName(Boolean var1) {
+      return var1.toString();
    }
 
-   public boolean equals(Object p_equals_1_) {
-      if (this == p_equals_1_) {
+   public boolean equals(Object var1) {
+      if (this == var1) {
          return true;
-      } else if (p_equals_1_ instanceof PropertyBool && super.equals(p_equals_1_)) {
-         PropertyBool propertybool = (PropertyBool)p_equals_1_;
-         return this.allowedValues.equals(propertybool.allowedValues);
+      } else if (var1 instanceof PropertyBool && super.equals(var1)) {
+         PropertyBool var2 = (PropertyBool)var1;
+         return this.allowedValues.equals(var2.allowedValues);
       } else {
          return false;
       }

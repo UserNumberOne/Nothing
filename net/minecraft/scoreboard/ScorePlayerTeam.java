@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ScorePlayerTeam extends Team {
    private final Scoreboard theScoreboard;
@@ -22,10 +20,10 @@ public class ScorePlayerTeam extends Team {
    private TextFormatting chatFormat = TextFormatting.RESET;
    private Team.CollisionRule collisionRule = Team.CollisionRule.ALWAYS;
 
-   public ScorePlayerTeam(Scoreboard theScoreboardIn, String name) {
-      this.theScoreboard = theScoreboardIn;
-      this.registeredName = name;
-      this.teamNameSPT = name;
+   public ScorePlayerTeam(Scoreboard var1, String var2) {
+      this.theScoreboard = var1;
+      this.registeredName = var2;
+      this.teamNameSPT = var2;
    }
 
    public String getRegisteredName() {
@@ -36,11 +34,11 @@ public class ScorePlayerTeam extends Team {
       return this.teamNameSPT;
    }
 
-   public void setTeamName(String name) {
-      if (name == null) {
+   public void setTeamName(String var1) {
+      if (var1 == null) {
          throw new IllegalArgumentException("Name cannot be null");
       } else {
-         this.teamNameSPT = name;
+         this.teamNameSPT = var1;
          this.theScoreboard.broadcastTeamInfoUpdate(this);
       }
    }
@@ -53,11 +51,11 @@ public class ScorePlayerTeam extends Team {
       return this.namePrefixSPT;
    }
 
-   public void setNamePrefix(String prefix) {
-      if (prefix == null) {
+   public void setNamePrefix(String var1) {
+      if (var1 == null) {
          throw new IllegalArgumentException("Prefix cannot be null");
       } else {
-         this.namePrefixSPT = prefix;
+         this.namePrefixSPT = var1;
          this.theScoreboard.broadcastTeamInfoUpdate(this);
       }
    }
@@ -66,25 +64,25 @@ public class ScorePlayerTeam extends Team {
       return this.colorSuffix;
    }
 
-   public void setNameSuffix(String suffix) {
-      this.colorSuffix = suffix;
+   public void setNameSuffix(String var1) {
+      this.colorSuffix = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
-   public String formatString(String input) {
-      return this.getColorPrefix() + input + this.getColorSuffix();
+   public String formatString(String var1) {
+      return this.getColorPrefix() + var1 + this.getColorSuffix();
    }
 
-   public static String formatPlayerName(@Nullable Team teamIn, String string) {
-      return teamIn == null ? string : teamIn.formatString(string);
+   public static String formatPlayerName(@Nullable Team var0, String var1) {
+      return var0 == null ? var1 : var0.formatString(var1);
    }
 
    public boolean getAllowFriendlyFire() {
       return this.allowFriendlyFire;
    }
 
-   public void setAllowFriendlyFire(boolean friendlyFire) {
-      this.allowFriendlyFire = friendlyFire;
+   public void setAllowFriendlyFire(boolean var1) {
+      this.allowFriendlyFire = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
@@ -92,8 +90,8 @@ public class ScorePlayerTeam extends Team {
       return this.canSeeFriendlyInvisibles;
    }
 
-   public void setSeeFriendlyInvisiblesEnabled(boolean friendlyInvisibles) {
-      this.canSeeFriendlyInvisibles = friendlyInvisibles;
+   public void setSeeFriendlyInvisiblesEnabled(boolean var1) {
+      this.canSeeFriendlyInvisibles = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
@@ -105,13 +103,13 @@ public class ScorePlayerTeam extends Team {
       return this.deathMessageVisibility;
    }
 
-   public void setNameTagVisibility(Team.EnumVisible visibility) {
-      this.nameTagVisibility = visibility;
+   public void setNameTagVisibility(Team.EnumVisible var1) {
+      this.nameTagVisibility = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
-   public void setDeathMessageVisibility(Team.EnumVisible visibility) {
-      this.deathMessageVisibility = visibility;
+   public void setDeathMessageVisibility(Team.EnumVisible var1) {
+      this.deathMessageVisibility = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
@@ -119,32 +117,26 @@ public class ScorePlayerTeam extends Team {
       return this.collisionRule;
    }
 
-   public void setCollisionRule(Team.CollisionRule rule) {
-      this.collisionRule = rule;
+   public void setCollisionRule(Team.CollisionRule var1) {
+      this.collisionRule = var1;
       this.theScoreboard.broadcastTeamInfoUpdate(this);
    }
 
    public int getFriendlyFlags() {
-      int i = 0;
+      int var1 = 0;
       if (this.getAllowFriendlyFire()) {
-         i |= 1;
+         var1 |= 1;
       }
 
       if (this.getSeeFriendlyInvisiblesEnabled()) {
-         i |= 2;
+         var1 |= 2;
       }
 
-      return i;
+      return var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setFriendlyFlags(int flags) {
-      this.setAllowFriendlyFire((flags & 1) > 0);
-      this.setSeeFriendlyInvisiblesEnabled((flags & 2) > 0);
-   }
-
-   public void setChatFormat(TextFormatting format) {
-      this.chatFormat = format;
+   public void setChatFormat(TextFormatting var1) {
+      this.chatFormat = var1;
    }
 
    public TextFormatting getChatFormat() {

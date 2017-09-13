@@ -1,58 +1,44 @@
 package net.minecraft.item;
 
 import com.google.common.collect.Maps;
-import java.util.List;
 import java.util.Map;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemFishFood extends ItemFood {
    private final boolean cooked;
 
-   public ItemFishFood(boolean cooked) {
+   public ItemFishFood(boolean var1) {
       super(0, 0.0F, false);
-      this.cooked = cooked;
+      this.cooked = var1;
    }
 
-   public int getHealAmount(ItemStack stack) {
-      ItemFishFood.FishType itemfishfood$fishtype = ItemFishFood.FishType.byItemStack(stack);
-      return this.cooked && itemfishfood$fishtype.canCook() ? itemfishfood$fishtype.getCookedHealAmount() : itemfishfood$fishtype.getUncookedHealAmount();
+   public int getHealAmount(ItemStack var1) {
+      ItemFishFood.FishType var2 = ItemFishFood.FishType.byItemStack(var1);
+      return this.cooked && var2.canCook() ? var2.getCookedHealAmount() : var2.getUncookedHealAmount();
    }
 
-   public float getSaturationModifier(ItemStack stack) {
-      ItemFishFood.FishType itemfishfood$fishtype = ItemFishFood.FishType.byItemStack(stack);
-      return this.cooked && itemfishfood$fishtype.canCook() ? itemfishfood$fishtype.getCookedSaturationModifier() : itemfishfood$fishtype.getUncookedSaturationModifier();
+   public float getSaturationModifier(ItemStack var1) {
+      ItemFishFood.FishType var2 = ItemFishFood.FishType.byItemStack(var1);
+      return this.cooked && var2.canCook() ? var2.getCookedSaturationModifier() : var2.getUncookedSaturationModifier();
    }
 
-   protected void onFoodEaten(ItemStack stack, World worldIn, EntityPlayer player) {
-      ItemFishFood.FishType itemfishfood$fishtype = ItemFishFood.FishType.byItemStack(stack);
-      if (itemfishfood$fishtype == ItemFishFood.FishType.PUFFERFISH) {
-         player.addPotionEffect(new PotionEffect(MobEffects.POISON, 1200, 3));
-         player.addPotionEffect(new PotionEffect(MobEffects.HUNGER, 300, 2));
-         player.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 300, 1));
+   protected void onFoodEaten(ItemStack var1, World var2, EntityPlayer var3) {
+      ItemFishFood.FishType var4 = ItemFishFood.FishType.byItemStack(var1);
+      if (var4 == ItemFishFood.FishType.PUFFERFISH) {
+         var3.addPotionEffect(new PotionEffect(MobEffects.POISON, 1200, 3));
+         var3.addPotionEffect(new PotionEffect(MobEffects.HUNGER, 300, 2));
+         var3.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 300, 1));
       }
 
-      super.onFoodEaten(stack, worldIn, player);
+      super.onFoodEaten(var1, var2, var3);
    }
 
-   @SideOnly(Side.CLIENT)
-   public void getSubItems(Item itemIn, CreativeTabs tab, List subItems) {
-      for(ItemFishFood.FishType itemfishfood$fishtype : ItemFishFood.FishType.values()) {
-         if (!this.cooked || itemfishfood$fishtype.canCook()) {
-            subItems.add(new ItemStack(this, 1, itemfishfood$fishtype.getMetadata()));
-         }
-      }
-
-   }
-
-   public String getUnlocalizedName(ItemStack stack) {
-      ItemFishFood.FishType itemfishfood$fishtype = ItemFishFood.FishType.byItemStack(stack);
-      return this.getUnlocalizedName() + "." + itemfishfood$fishtype.getUnlocalizedName() + "." + (this.cooked && itemfishfood$fishtype.canCook() ? "cooked" : "raw");
+   public String getUnlocalizedName(ItemStack var1) {
+      ItemFishFood.FishType var2 = ItemFishFood.FishType.byItemStack(var1);
+      return this.getUnlocalizedName() + "." + var2.getUnlocalizedName() + "." + (this.cooked && var2.canCook() ? "cooked" : "raw");
    }
 
    public static enum FishType {
@@ -70,21 +56,21 @@ public class ItemFishFood extends ItemFood {
       private final float cookedSaturationModifier;
       private boolean cookable;
 
-      private FishType(int meta, String unlocalizedName, int uncookedHeal, float uncookedSaturation, int cookedHeal, float cookedSaturation) {
-         this.meta = meta;
-         this.unlocalizedName = unlocalizedName;
-         this.uncookedHealAmount = uncookedHeal;
-         this.uncookedSaturationModifier = uncookedSaturation;
-         this.cookedHealAmount = cookedHeal;
-         this.cookedSaturationModifier = cookedSaturation;
+      private FishType(int var3, String var4, int var5, float var6, int var7, float var8) {
+         this.meta = var3;
+         this.unlocalizedName = var4;
+         this.uncookedHealAmount = var5;
+         this.uncookedSaturationModifier = var6;
+         this.cookedHealAmount = var7;
+         this.cookedSaturationModifier = var8;
          this.cookable = true;
       }
 
-      private FishType(int meta, String unlocalizedName, int uncookedHeal, float uncookedSaturation) {
-         this.meta = meta;
-         this.unlocalizedName = unlocalizedName;
-         this.uncookedHealAmount = uncookedHeal;
-         this.uncookedSaturationModifier = uncookedSaturation;
+      private FishType(int var3, String var4, int var5, float var6) {
+         this.meta = var3;
+         this.unlocalizedName = var4;
+         this.uncookedHealAmount = var5;
+         this.uncookedSaturationModifier = var6;
          this.cookedHealAmount = 0;
          this.cookedSaturationModifier = 0.0F;
          this.cookable = false;
@@ -118,18 +104,18 @@ public class ItemFishFood extends ItemFood {
          return this.cookable;
       }
 
-      public static ItemFishFood.FishType byMetadata(int meta) {
-         ItemFishFood.FishType itemfishfood$fishtype = (ItemFishFood.FishType)META_LOOKUP.get(Integer.valueOf(meta));
-         return itemfishfood$fishtype == null ? COD : itemfishfood$fishtype;
+      public static ItemFishFood.FishType byMetadata(int var0) {
+         ItemFishFood.FishType var1 = (ItemFishFood.FishType)META_LOOKUP.get(Integer.valueOf(var0));
+         return var1 == null ? COD : var1;
       }
 
-      public static ItemFishFood.FishType byItemStack(ItemStack stack) {
-         return stack.getItem() instanceof ItemFishFood ? byMetadata(stack.getMetadata()) : COD;
+      public static ItemFishFood.FishType byItemStack(ItemStack var0) {
+         return var0.getItem() instanceof ItemFishFood ? byMetadata(var0.getMetadata()) : COD;
       }
 
       static {
-         for(ItemFishFood.FishType itemfishfood$fishtype : values()) {
-            META_LOOKUP.put(Integer.valueOf(itemfishfood$fishtype.getMetadata()), itemfishfood$fishtype);
+         for(ItemFishFood.FishType var3 : values()) {
+            META_LOOKUP.put(Integer.valueOf(var3.getMetadata()), var3);
          }
 
       }

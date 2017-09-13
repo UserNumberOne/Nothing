@@ -6,10 +6,10 @@ import net.minecraft.pathfinding.PathNavigateGround;
 public class EntityAISwimming extends EntityAIBase {
    private final EntityLiving theEntity;
 
-   public EntityAISwimming(EntityLiving entitylivingIn) {
-      this.theEntity = entitylivingIn;
+   public EntityAISwimming(EntityLiving var1) {
+      this.theEntity = var1;
       this.setMutexBits(4);
-      ((PathNavigateGround)entitylivingIn.getNavigator()).setCanSwim(true);
+      ((PathNavigateGround)var1.getNavigator()).setCanSwim(true);
    }
 
    public boolean shouldExecute() {

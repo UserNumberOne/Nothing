@@ -5,11 +5,11 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 public class NBTTagEnd extends NBTBase {
-   void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
-      sizeTracker.read(64L);
+   void read(DataInput var1, int var2, NBTSizeTracker var3) throws IOException {
+      var3.read(64L);
    }
 
-   void write(DataOutput output) throws IOException {
+   void write(DataOutput var1) throws IOException {
    }
 
    public byte getId() {
@@ -22,5 +22,10 @@ public class NBTTagEnd extends NBTBase {
 
    public NBTTagEnd copy() {
       return new NBTTagEnd();
+   }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
    }
 }

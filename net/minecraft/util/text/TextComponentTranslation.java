@@ -20,13 +20,13 @@ public class TextComponentTranslation extends TextComponentBase {
    List children = Lists.newArrayList();
    public static final Pattern STRING_VARIABLE_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
-   public TextComponentTranslation(String translationKey, Object... args) {
-      this.key = translationKey;
-      this.formatArgs = args;
+   public TextComponentTranslation(String var1, Object... var2) {
+      this.key = var1;
+      this.formatArgs = var2;
 
-      for(Object object : args) {
-         if (object instanceof ITextComponent) {
-            ((ITextComponent)object).getStyle().setParentStyle(this.getStyle());
+      for(Object var6 : var2) {
+         if (var6 instanceof ITextComponent) {
+            ((ITextComponent)var6).getStyle().setParentStyle(this.getStyle());
          }
       }
 
@@ -35,69 +35,69 @@ public class TextComponentTranslation extends TextComponentBase {
    @VisibleForTesting
    synchronized void ensureInitialized() {
       synchronized(this.syncLock) {
-         long i = I18n.getLastTranslationUpdateTimeInMilliseconds();
-         if (i == this.lastTranslationUpdateTimeInMilliseconds) {
+         long var2 = I18n.getLastTranslationUpdateTimeInMilliseconds();
+         if (var2 == this.lastTranslationUpdateTimeInMilliseconds) {
             return;
          }
 
-         this.lastTranslationUpdateTimeInMilliseconds = i;
+         this.lastTranslationUpdateTimeInMilliseconds = var2;
          this.children.clear();
       }
 
       try {
          this.initializeFromFormat(I18n.translateToLocal(this.key));
-      } catch (TextComponentTranslationFormatException var6) {
+      } catch (TextComponentTranslationFormatException var7) {
          this.children.clear();
 
          try {
             this.initializeFromFormat(I18n.translateToFallback(this.key));
-         } catch (TextComponentTranslationFormatException var51) {
-            throw var6;
+         } catch (TextComponentTranslationFormatException var6) {
+            throw var7;
          }
       }
 
    }
 
-   protected void initializeFromFormat(String format) {
-      boolean flag = false;
-      Matcher matcher = STRING_VARIABLE_PATTERN.matcher(format);
-      int i = 0;
-      int j = 0;
+   protected void initializeFromFormat(String var1) {
+      boolean var2 = false;
+      Matcher var3 = STRING_VARIABLE_PATTERN.matcher(var1);
+      int var4 = 0;
+      int var5 = 0;
 
       try {
-         int l;
-         for(; matcher.find(j); j = l) {
-            int k = matcher.start();
-            l = matcher.end();
-            if (k > j) {
-               TextComponentString textcomponentstring = new TextComponentString(String.format(format.substring(j, k)));
-               textcomponentstring.getStyle().setParentStyle(this.getStyle());
-               this.children.add(textcomponentstring);
+         int var7;
+         for(; var3.find(var5); var5 = var7) {
+            int var6 = var3.start();
+            var7 = var3.end();
+            if (var6 > var5) {
+               TextComponentString var8 = new TextComponentString(String.format(var1.substring(var5, var6)));
+               var8.getStyle().setParentStyle(this.getStyle());
+               this.children.add(var8);
             }
 
-            String s2 = matcher.group(2);
-            String s = format.substring(k, l);
-            if ("%".equals(s2) && "%%".equals(s)) {
-               TextComponentString textcomponentstring2 = new TextComponentString("%");
-               textcomponentstring2.getStyle().setParentStyle(this.getStyle());
-               this.children.add(textcomponentstring2);
+            String var14 = var3.group(2);
+            String var9 = var1.substring(var6, var7);
+            if ("%".equals(var14) && "%%".equals(var9)) {
+               TextComponentString var15 = new TextComponentString("%");
+               var15.getStyle().setParentStyle(this.getStyle());
+               this.children.add(var15);
             } else {
-               if (!"s".equals(s2)) {
-                  throw new TextComponentTranslationFormatException(this, "Unsupported format: '" + s + "'");
+               if (!"s".equals(var14)) {
+                  throw new TextComponentTranslationFormatException(this, "Unsupported format: '" + var9 + "'");
                }
 
-               String s1 = matcher.group(1);
-               int i1 = s1 != null ? Integer.parseInt(s1) - 1 : i++;
-               if (i1 < this.formatArgs.length) {
-                  this.children.add(this.getFormatArgumentAsComponent(i1));
+               String var10 = var3.group(1);
+               int var11 = var10 != null ? Integer.parseInt(var10) - 1 : var4++;
+               if (var11 < this.formatArgs.length) {
+                  this.children.add(this.getFormatArgumentAsComponent(var11));
                }
             }
          }
 
-         if (j < format.length()) {
-            TextComponentString textcomponentstring1 = new TextComponentString(String.format(format.substring(j)));
-            textcomponentstring1.getStyle().setParentStyle(this.getStyle());
-            this.children.add(textcomponentstring1);
+         if (var5 < var1.length()) {
+            TextComponentString var13 = new TextComponentString(String.format(var1.substring(var5)));
+            var13.getStyle().setParentStyle(this.getStyle());
+            this.children.add(var13);
          }
 
       } catch (IllegalFormatException var12) {
@@ -105,35 +105,35 @@ public class TextComponentTranslation extends TextComponentBase {
       }
    }
 
-   private ITextComponent getFormatArgumentAsComponent(int index) {
-      if (index >= this.formatArgs.length) {
-         throw new TextComponentTranslationFormatException(this, index);
+   private ITextComponent getFormatArgumentAsComponent(int var1) {
+      if (var1 >= this.formatArgs.length) {
+         throw new TextComponentTranslationFormatException(this, var1);
       } else {
-         Object object = this.formatArgs[index];
-         ITextComponent itextcomponent;
-         if (object instanceof ITextComponent) {
-            itextcomponent = (ITextComponent)object;
+         Object var2 = this.formatArgs[var1];
+         Object var3;
+         if (var2 instanceof ITextComponent) {
+            var3 = (ITextComponent)var2;
          } else {
-            itextcomponent = new TextComponentString(object == null ? "null" : object.toString());
-            itextcomponent.getStyle().setParentStyle(this.getStyle());
+            var3 = new TextComponentString(var2 == null ? "null" : var2.toString());
+            ((ITextComponent)var3).getStyle().setParentStyle(this.getStyle());
          }
 
-         return itextcomponent;
+         return (ITextComponent)var3;
       }
    }
 
-   public ITextComponent setStyle(Style style) {
-      super.setStyle(style);
+   public ITextComponent setStyle(Style var1) {
+      super.setStyle(var1);
 
-      for(Object object : this.formatArgs) {
-         if (object instanceof ITextComponent) {
-            ((ITextComponent)object).getStyle().setParentStyle(this.getStyle());
+      for(Object var5 : this.formatArgs) {
+         if (var5 instanceof ITextComponent) {
+            ((ITextComponent)var5).getStyle().setParentStyle(this.getStyle());
          }
       }
 
       if (this.lastTranslationUpdateTimeInMilliseconds > -1L) {
-         for(ITextComponent itextcomponent : this.children) {
-            itextcomponent.getStyle().setParentStyle(style);
+         for(ITextComponent var7 : this.children) {
+            var7.getStyle().setParentStyle(var1);
          }
       }
 
@@ -147,52 +147,52 @@ public class TextComponentTranslation extends TextComponentBase {
 
    public String getUnformattedComponentText() {
       this.ensureInitialized();
-      StringBuilder stringbuilder = new StringBuilder();
+      StringBuilder var1 = new StringBuilder();
 
-      for(ITextComponent itextcomponent : this.children) {
-         stringbuilder.append(itextcomponent.getUnformattedComponentText());
+      for(ITextComponent var3 : this.children) {
+         var1.append(var3.getUnformattedComponentText());
       }
 
-      return stringbuilder.toString();
+      return var1.toString();
    }
 
    public TextComponentTranslation createCopy() {
-      Object[] aobject = new Object[this.formatArgs.length];
+      Object[] var1 = new Object[this.formatArgs.length];
 
-      for(int i = 0; i < this.formatArgs.length; ++i) {
-         if (this.formatArgs[i] instanceof ITextComponent) {
-            aobject[i] = ((ITextComponent)this.formatArgs[i]).createCopy();
+      for(int var2 = 0; var2 < this.formatArgs.length; ++var2) {
+         if (this.formatArgs[var2] instanceof ITextComponent) {
+            var1[var2] = ((ITextComponent)this.formatArgs[var2]).createCopy();
          } else {
-            aobject[i] = this.formatArgs[i];
+            var1[var2] = this.formatArgs[var2];
          }
       }
 
-      TextComponentTranslation textcomponenttranslation = new TextComponentTranslation(this.key, aobject);
-      textcomponenttranslation.setStyle(this.getStyle().createShallowCopy());
+      TextComponentTranslation var5 = new TextComponentTranslation(this.key, var1);
+      var5.setStyle(this.getStyle().createShallowCopy());
 
-      for(ITextComponent itextcomponent : this.getSiblings()) {
-         textcomponenttranslation.appendSibling(itextcomponent.createCopy());
+      for(ITextComponent var4 : this.getSiblings()) {
+         var5.appendSibling(var4.createCopy());
       }
 
-      return textcomponenttranslation;
+      return var5;
    }
 
-   public boolean equals(Object p_equals_1_) {
-      if (this == p_equals_1_) {
+   public boolean equals(Object var1) {
+      if (this == var1) {
          return true;
-      } else if (!(p_equals_1_ instanceof TextComponentTranslation)) {
+      } else if (!(var1 instanceof TextComponentTranslation)) {
          return false;
       } else {
-         TextComponentTranslation textcomponenttranslation = (TextComponentTranslation)p_equals_1_;
-         return Arrays.equals(this.formatArgs, textcomponenttranslation.formatArgs) && this.key.equals(textcomponenttranslation.key) && super.equals(p_equals_1_);
+         TextComponentTranslation var2 = (TextComponentTranslation)var1;
+         return Arrays.equals(this.formatArgs, var2.formatArgs) && this.key.equals(var2.key) && super.equals(var1);
       }
    }
 
    public int hashCode() {
-      int i = super.hashCode();
-      i = 31 * i + this.key.hashCode();
-      i = 31 * i + Arrays.hashCode(this.formatArgs);
-      return i;
+      int var1 = super.hashCode();
+      var1 = 31 * var1 + this.key.hashCode();
+      var1 = 31 * var1 + Arrays.hashCode(this.formatArgs);
+      return var1;
    }
 
    public String toString() {
@@ -205,5 +205,10 @@ public class TextComponentTranslation extends TextComponentBase {
 
    public Object[] getFormatArgs() {
       return this.formatArgs;
+   }
+
+   // $FF: synthetic method
+   public ITextComponent createCopy() {
+      return this.createCopy();
    }
 }

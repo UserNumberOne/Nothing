@@ -3,8 +3,8 @@ package net.minecraft.command;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandXP extends CommandBase {
@@ -16,54 +16,54 @@ public class CommandXP extends CommandBase {
       return 2;
    }
 
-   public String getUsage(ICommandSender sender) {
+   public String getUsage(ICommandSender var1) {
       return "commands.xp.usage";
    }
 
-   public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-      if (args.length <= 0) {
+   public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
+      if (var3.length <= 0) {
          throw new WrongUsageException("commands.xp.usage", new Object[0]);
       } else {
-         String s = args[0];
-         boolean flag = s.endsWith("l") || s.endsWith("L");
-         if (flag && s.length() > 1) {
-            s = s.substring(0, s.length() - 1);
+         String var4 = var3[0];
+         boolean var5 = var4.endsWith("l") || var4.endsWith("L");
+         if (var5 && var4.length() > 1) {
+            var4 = var4.substring(0, var4.length() - 1);
          }
 
-         int i = parseInt(s);
-         boolean flag1 = i < 0;
-         if (flag1) {
-            i *= -1;
+         int var6 = parseInt(var4);
+         boolean var7 = var6 < 0;
+         if (var7) {
+            var6 *= -1;
          }
 
-         EntityPlayer entityplayer = args.length > 1 ? getPlayer(server, sender, args[1]) : getCommandSenderAsPlayer(sender);
-         if (flag) {
-            sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, entityplayer.experienceLevel);
-            if (flag1) {
-               entityplayer.addExperienceLevel(-i);
-               notifyCommandListener(sender, this, "commands.xp.success.negative.levels", new Object[]{i, entityplayer.getName()});
+         EntityPlayerMP var8 = var3.length > 1 ? a(var1, var2, var3[1]) : getCommandSenderAsPlayer(var2);
+         if (var5) {
+            var2.setCommandStat(CommandResultStats.Type.QUERY_RESULT, var8.experienceLevel);
+            if (var7) {
+               var8.addExperienceLevel(-var6);
+               notifyCommandListener(var2, this, "commands.xp.success.negative.levels", new Object[]{var6, var8.getName()});
             } else {
-               entityplayer.addExperienceLevel(i);
-               notifyCommandListener(sender, this, "commands.xp.success.levels", new Object[]{i, entityplayer.getName()});
+               var8.addExperienceLevel(var6);
+               notifyCommandListener(var2, this, "commands.xp.success.levels", new Object[]{var6, var8.getName()});
             }
          } else {
-            sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, entityplayer.experienceTotal);
-            if (flag1) {
+            var2.setCommandStat(CommandResultStats.Type.QUERY_RESULT, var8.experienceTotal);
+            if (var7) {
                throw new CommandException("commands.xp.failure.widthdrawXp", new Object[0]);
             }
 
-            entityplayer.addExperience(i);
-            notifyCommandListener(sender, this, "commands.xp.success", new Object[]{i, entityplayer.getName()});
+            var8.addExperience(var6);
+            notifyCommandListener(var2, this, "commands.xp.success", new Object[]{var6, var8.getName()});
          }
 
       }
    }
 
-   public List getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
-      return args.length == 2 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return var3.length == 2 ? getListOfStringsMatchingLastWord(var3, var1.getPlayers()) : Collections.emptyList();
    }
 
-   public boolean isUsernameIndex(String[] args, int index) {
-      return index == 1;
+   public boolean isUsernameIndex(String[] var1, int var2) {
+      return var2 == 1;
    }
 }

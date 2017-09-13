@@ -14,20 +14,20 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 
 public class EntityMinecartChest extends EntityMinecartContainer {
-   public EntityMinecartChest(World worldIn) {
-      super(worldIn);
+   public EntityMinecartChest(World var1) {
+      super(var1);
    }
 
-   public EntityMinecartChest(World worldIn, double x, double y, double z) {
-      super(worldIn, x, y, z);
+   public EntityMinecartChest(World var1, double var2, double var4, double var6) {
+      super(var1, var2, var4, var6);
    }
 
-   public static void registerFixesMinecartChest(DataFixer fixer) {
-      EntityMinecartContainer.registerFixesMinecartContainer(fixer, "MinecartChest");
+   public static void registerFixesMinecartChest(DataFixer var0) {
+      EntityMinecartContainer.registerFixesMinecartContainer(var0, "MinecartChest");
    }
 
-   public void killMinecart(DamageSource source) {
-      super.killMinecart(source);
+   public void killMinecart(DamageSource var1) {
+      super.killMinecart(var1);
       if (this.world.getGameRules().getBoolean("doEntityDrops")) {
          this.dropItemWithOffset(Item.getItemFromBlock(Blocks.CHEST), 1, 0.0F);
       }
@@ -54,8 +54,8 @@ public class EntityMinecartChest extends EntityMinecartContainer {
       return "minecraft:chest";
    }
 
-   public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn) {
-      this.addLoot(playerIn);
-      return new ContainerChest(playerInventory, this, playerIn);
+   public Container createContainer(InventoryPlayer var1, EntityPlayer var2) {
+      this.addLoot(var2);
+      return new ContainerChest(var1, this, var2);
    }
 }

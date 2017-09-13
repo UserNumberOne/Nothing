@@ -4,30 +4,20 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketHeldItemChange implements Packet {
    private int slotId;
 
-   public CPacketHeldItemChange() {
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.slotId = var1.readShort();
    }
 
-   @SideOnly(Side.CLIENT)
-   public CPacketHeldItemChange(int slotIdIn) {
-      this.slotId = slotIdIn;
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeShort(this.slotId);
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.slotId = buf.readShort();
-   }
-
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeShort(this.slotId);
-   }
-
-   public void processPacket(INetHandlerPlayServer handler) {
-      handler.processHeldItemChange(this);
+   public void processPacket(INetHandlerPlayServer var1) {
+      var1.processHeldItemChange(this);
    }
 
    public int getSlotId() {

@@ -17,19 +17,19 @@ public class SetMetadata extends LootFunction {
    private static final Logger LOGGER = LogManager.getLogger();
    private final RandomValueRange metaRange;
 
-   public SetMetadata(LootCondition[] conditionsIn, RandomValueRange metaRangeIn) {
-      super(conditionsIn);
-      this.metaRange = metaRangeIn;
+   public SetMetadata(LootCondition[] var1, RandomValueRange var2) {
+      super(var1);
+      this.metaRange = var2;
    }
 
-   public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-      if (stack.isItemStackDamageable()) {
-         LOGGER.warn("Couldn't set data of loot item {}", new Object[]{stack});
+   public ItemStack apply(ItemStack var1, Random var2, LootContext var3) {
+      if (var1.isItemStackDamageable()) {
+         LOGGER.warn("Couldn't set data of loot item {}", new Object[]{var1});
       } else {
-         stack.setItemDamage(this.metaRange.generateInt(rand));
+         var1.setItemDamage(this.metaRange.generateInt(var2));
       }
 
-      return stack;
+      return var1;
    }
 
    public static class Serializer extends LootFunction.Serializer {
@@ -37,12 +37,17 @@ public class SetMetadata extends LootFunction {
          super(new ResourceLocation("set_data"), SetMetadata.class);
       }
 
-      public void serialize(JsonObject object, SetMetadata functionClazz, JsonSerializationContext serializationContext) {
-         object.add("data", serializationContext.serialize(functionClazz.metaRange));
+      public void serialize(JsonObject var1, SetMetadata var2, JsonSerializationContext var3) {
+         var1.add("data", var3.serialize(var2.metaRange));
       }
 
-      public SetMetadata deserialize(JsonObject object, JsonDeserializationContext deserializationContext, LootCondition[] conditionsIn) {
-         return new SetMetadata(conditionsIn, (RandomValueRange)JsonUtils.deserializeClass(object, "data", deserializationContext, RandomValueRange.class));
+      public SetMetadata deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return new SetMetadata(var3, (RandomValueRange)JsonUtils.deserializeClass(var1, "data", var2, RandomValueRange.class));
+      }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketPlayerListHeaderFooter implements Packet {
    private ITextComponent header;
@@ -15,31 +13,21 @@ public class SPacketPlayerListHeaderFooter implements Packet {
    public SPacketPlayerListHeaderFooter() {
    }
 
-   public SPacketPlayerListHeaderFooter(ITextComponent headerIn) {
-      this.header = headerIn;
+   public SPacketPlayerListHeaderFooter(ITextComponent var1) {
+      this.header = var1;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.header = buf.readTextComponent();
-      this.footer = buf.readTextComponent();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.header = var1.readTextComponent();
+      this.footer = var1.readTextComponent();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeTextComponent(this.header);
-      buf.writeTextComponent(this.footer);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeTextComponent(this.header);
+      var1.writeTextComponent(this.footer);
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handlePlayerListHeaderFooter(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getHeader() {
-      return this.header;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getFooter() {
-      return this.footer;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handlePlayerListHeaderFooter(this);
    }
 }

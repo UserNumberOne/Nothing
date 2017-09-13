@@ -5,19 +5,19 @@ import net.minecraft.util.text.ITextComponent;
 
 public abstract class BossInfo {
    private final UUID uniqueId;
-   protected ITextComponent name;
+   public ITextComponent name;
    protected float percent;
-   protected BossInfo.Color color;
-   protected BossInfo.Overlay overlay;
+   public BossInfo.Color color;
+   public BossInfo.Overlay overlay;
    protected boolean darkenSky;
    protected boolean playEndBossMusic;
    protected boolean createFog;
 
-   public BossInfo(UUID uniqueIdIn, ITextComponent nameIn, BossInfo.Color colorIn, BossInfo.Overlay overlayIn) {
-      this.uniqueId = uniqueIdIn;
-      this.name = nameIn;
-      this.color = colorIn;
-      this.overlay = overlayIn;
+   public BossInfo(UUID var1, ITextComponent var2, BossInfo.Color var3, BossInfo.Overlay var4) {
+      this.uniqueId = var1;
+      this.name = var2;
+      this.color = var3;
+      this.overlay = var4;
       this.percent = 1.0F;
    }
 
@@ -29,40 +29,28 @@ public abstract class BossInfo {
       return this.name;
    }
 
-   public void setName(ITextComponent nameIn) {
-      this.name = nameIn;
-   }
-
    public float getPercent() {
       return this.percent;
    }
 
-   public void setPercent(float percentIn) {
-      this.percent = percentIn;
+   public void setPercent(float var1) {
+      this.percent = var1;
    }
 
    public BossInfo.Color getColor() {
       return this.color;
    }
 
-   public void setColor(BossInfo.Color colorIn) {
-      this.color = colorIn;
-   }
-
    public BossInfo.Overlay getOverlay() {
       return this.overlay;
-   }
-
-   public void setOverlay(BossInfo.Overlay overlayIn) {
-      this.overlay = overlayIn;
    }
 
    public boolean shouldDarkenSky() {
       return this.darkenSky;
    }
 
-   public BossInfo setDarkenSky(boolean darkenSkyIn) {
-      this.darkenSky = darkenSkyIn;
+   public BossInfo setDarkenSky(boolean var1) {
+      this.darkenSky = var1;
       return this;
    }
 
@@ -70,13 +58,13 @@ public abstract class BossInfo {
       return this.playEndBossMusic;
    }
 
-   public BossInfo setPlayEndBossMusic(boolean playEndBossMusicIn) {
-      this.playEndBossMusic = playEndBossMusicIn;
+   public BossInfo setPlayEndBossMusic(boolean var1) {
+      this.playEndBossMusic = var1;
       return this;
    }
 
-   public BossInfo setCreateFog(boolean createFogIn) {
-      this.createFog = createFogIn;
+   public BossInfo setCreateFog(boolean var1) {
+      this.createFog = var1;
       return this;
    }
 

@@ -21,25 +21,25 @@ public class LootConditionManager {
    private static final Map NAME_TO_SERIALIZER_MAP = Maps.newHashMap();
    private static final Map CLASS_TO_SERIALIZER_MAP = Maps.newHashMap();
 
-   public static void registerCondition(LootCondition.Serializer condition) {
-      ResourceLocation resourcelocation = condition.getLootTableLocation();
-      Class oclass = condition.getConditionClass();
-      if (NAME_TO_SERIALIZER_MAP.containsKey(resourcelocation)) {
-         throw new IllegalArgumentException("Can't re-register item condition name " + resourcelocation);
-      } else if (CLASS_TO_SERIALIZER_MAP.containsKey(oclass)) {
-         throw new IllegalArgumentException("Can't re-register item condition class " + oclass.getName());
+   public static void registerCondition(LootCondition.Serializer var0) {
+      ResourceLocation var1 = var0.getLootTableLocation();
+      Class var2 = var0.getConditionClass();
+      if (NAME_TO_SERIALIZER_MAP.containsKey(var1)) {
+         throw new IllegalArgumentException("Can't re-register item condition name " + var1);
+      } else if (CLASS_TO_SERIALIZER_MAP.containsKey(var2)) {
+         throw new IllegalArgumentException("Can't re-register item condition class " + var2.getName());
       } else {
-         NAME_TO_SERIALIZER_MAP.put(resourcelocation, condition);
-         CLASS_TO_SERIALIZER_MAP.put(oclass, condition);
+         NAME_TO_SERIALIZER_MAP.put(var1, var0);
+         CLASS_TO_SERIALIZER_MAP.put(var2, var0);
       }
    }
 
-   public static boolean testAllConditions(Iterable conditions, Random rand, LootContext context) {
-      if (conditions == null) {
+   public static boolean testAllConditions(@Nullable LootCondition[] var0, Random var1, LootContext var2) {
+      if (var0 == null) {
          return true;
       } else {
-         for(LootCondition cond : conditions) {
-            if (!cond.testCondition(rand, context)) {
+         for(LootCondition var6 : var0) {
+            if (!var6.testCondition(var1, var2)) {
                return false;
             }
          }
@@ -48,35 +48,21 @@ public class LootConditionManager {
       }
    }
 
-   public static boolean testAllConditions(@Nullable LootCondition[] conditions, Random rand, LootContext context) {
-      if (conditions == null) {
-         return true;
+   public static LootCondition.Serializer getSerializerForName(ResourceLocation var0) {
+      LootCondition.Serializer var1 = (LootCondition.Serializer)NAME_TO_SERIALIZER_MAP.get(var0);
+      if (var1 == null) {
+         throw new IllegalArgumentException("Unknown loot item condition '" + var0 + "'");
       } else {
-         for(LootCondition lootcondition : conditions) {
-            if (!lootcondition.testCondition(rand, context)) {
-               return false;
-            }
-         }
-
-         return true;
+         return var1;
       }
    }
 
-   public static LootCondition.Serializer getSerializerForName(ResourceLocation location) {
-      LootCondition.Serializer serializer = (LootCondition.Serializer)NAME_TO_SERIALIZER_MAP.get(location);
-      if (serializer == null) {
-         throw new IllegalArgumentException("Unknown loot item condition '" + location + "'");
+   public static LootCondition.Serializer getSerializerFor(LootCondition var0) {
+      LootCondition.Serializer var1 = (LootCondition.Serializer)CLASS_TO_SERIALIZER_MAP.get(var0.getClass());
+      if (var1 == null) {
+         throw new IllegalArgumentException("Unknown loot item condition " + var0);
       } else {
-         return serializer;
-      }
-   }
-
-   public static LootCondition.Serializer getSerializerFor(LootCondition conditionClass) {
-      LootCondition.Serializer serializer = (LootCondition.Serializer)CLASS_TO_SERIALIZER_MAP.get(conditionClass.getClass());
-      if (serializer == null) {
-         throw new IllegalArgumentException("Unknown loot item condition " + conditionClass);
-      } else {
-         return serializer;
+         return var1;
       }
    }
 
@@ -89,26 +75,36 @@ public class LootConditionManager {
    }
 
    public static class Serializer implements JsonDeserializer, JsonSerializer {
-      public LootCondition deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
-         JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "condition");
-         ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(jsonobject, "condition"));
+      public LootCondition deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         JsonObject var4 = JsonUtils.getJsonObject(var1, "condition");
+         ResourceLocation var5 = new ResourceLocation(JsonUtils.getString(var4, "condition"));
 
-         LootCondition.Serializer serializer;
+         LootCondition.Serializer var6;
          try {
-            serializer = LootConditionManager.getSerializerForName(resourcelocation);
+            var6 = LootConditionManager.getSerializerForName(var5);
          } catch (IllegalArgumentException var8) {
-            throw new JsonSyntaxException("Unknown condition '" + resourcelocation + "'");
+            throw new JsonSyntaxException("Unknown condition '" + var5 + "'");
          }
 
-         return serializer.deserialize(jsonobject, p_deserialize_3_);
+         return var6.deserialize(var4, var3);
       }
 
-      public JsonElement serialize(LootCondition p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
-         LootCondition.Serializer serializer = LootConditionManager.getSerializerFor(p_serialize_1_);
-         JsonObject jsonobject = new JsonObject();
-         serializer.serialize(jsonobject, p_serialize_1_, p_serialize_3_);
-         jsonobject.addProperty("condition", serializer.getLootTableLocation().toString());
-         return jsonobject;
+      public JsonElement serialize(LootCondition var1, Type var2, JsonSerializationContext var3) {
+         LootCondition.Serializer var4 = LootConditionManager.getSerializerFor(var1);
+         JsonObject var5 = new JsonObject();
+         var4.serialize(var5, var1, var3);
+         var5.addProperty("condition", var4.getLootTableLocation().toString());
+         return var5;
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((LootCondition)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

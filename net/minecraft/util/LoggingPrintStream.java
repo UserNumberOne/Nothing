@@ -9,22 +9,22 @@ public class LoggingPrintStream extends PrintStream {
    private static final Logger LOGGER = LogManager.getLogger();
    private final String domain;
 
-   public LoggingPrintStream(String domainIn, OutputStream outStream) {
-      super(outStream);
-      this.domain = domainIn;
+   public LoggingPrintStream(String var1, OutputStream var2) {
+      super(var2);
+      this.domain = var1;
    }
 
-   public void println(String p_println_1_) {
-      this.logString(p_println_1_);
+   public void println(String var1) {
+      this.logString(var1);
    }
 
-   public void println(Object p_println_1_) {
-      this.logString(String.valueOf(p_println_1_));
+   public void println(Object var1) {
+      this.logString(String.valueOf(var1));
    }
 
-   private void logString(String string) {
-      StackTraceElement[] astacktraceelement = Thread.currentThread().getStackTrace();
-      StackTraceElement stacktraceelement = astacktraceelement[Math.min(3, astacktraceelement.length)];
-      LOGGER.info("[{}]@.({}:{}): {}", new Object[]{this.domain, stacktraceelement.getFileName(), stacktraceelement.getLineNumber(), string});
+   private void logString(String var1) {
+      StackTraceElement[] var2 = Thread.currentThread().getStackTrace();
+      StackTraceElement var3 = var2[Math.min(3, var2.length)];
+      LOGGER.info("[{}]@.({}:{}): {}", new Object[]{this.domain, var3.getFileName(), var3.getLineNumber(), var1});
    }
 }

@@ -14,30 +14,30 @@ public class EntityLookHelper {
    private double posY;
    private double posZ;
 
-   public EntityLookHelper(EntityLiving entitylivingIn) {
-      this.entity = entitylivingIn;
+   public EntityLookHelper(EntityLiving var1) {
+      this.entity = var1;
    }
 
-   public void setLookPositionWithEntity(Entity entityIn, float deltaYaw, float deltaPitch) {
-      this.posX = entityIn.posX;
-      if (entityIn instanceof EntityLivingBase) {
-         this.posY = entityIn.posY + (double)entityIn.getEyeHeight();
+   public void setLookPositionWithEntity(Entity var1, float var2, float var3) {
+      this.posX = var1.posX;
+      if (var1 instanceof EntityLivingBase) {
+         this.posY = var1.posY + (double)var1.getEyeHeight();
       } else {
-         this.posY = (entityIn.getEntityBoundingBox().minY + entityIn.getEntityBoundingBox().maxY) / 2.0D;
+         this.posY = (var1.getEntityBoundingBox().minY + var1.getEntityBoundingBox().maxY) / 2.0D;
       }
 
-      this.posZ = entityIn.posZ;
-      this.deltaLookYaw = deltaYaw;
-      this.deltaLookPitch = deltaPitch;
+      this.posZ = var1.posZ;
+      this.deltaLookYaw = var2;
+      this.deltaLookPitch = var3;
       this.isLooking = true;
    }
 
-   public void setLookPosition(double x, double y, double z, float deltaYaw, float deltaPitch) {
-      this.posX = x;
-      this.posY = y;
-      this.posZ = z;
-      this.deltaLookYaw = deltaYaw;
-      this.deltaLookPitch = deltaPitch;
+   public void setLookPosition(double var1, double var3, double var5, float var7, float var8) {
+      this.posX = var1;
+      this.posY = var3;
+      this.posZ = var5;
+      this.deltaLookYaw = var7;
+      this.deltaLookPitch = var8;
       this.isLooking = true;
    }
 
@@ -45,42 +45,42 @@ public class EntityLookHelper {
       this.entity.rotationPitch = 0.0F;
       if (this.isLooking) {
          this.isLooking = false;
-         double d0 = this.posX - this.entity.posX;
-         double d1 = this.posY - (this.entity.posY + (double)this.entity.getEyeHeight());
-         double d2 = this.posZ - this.entity.posZ;
-         double d3 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
-         float f = (float)(MathHelper.atan2(d2, d0) * 57.29577951308232D) - 90.0F;
-         float f1 = (float)(-(MathHelper.atan2(d1, d3) * 57.29577951308232D));
-         this.entity.rotationPitch = this.updateRotation(this.entity.rotationPitch, f1, this.deltaLookPitch);
-         this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, f, this.deltaLookYaw);
+         double var1 = this.posX - this.entity.posX;
+         double var3 = this.posY - (this.entity.posY + (double)this.entity.getEyeHeight());
+         double var5 = this.posZ - this.entity.posZ;
+         double var7 = (double)MathHelper.sqrt(var1 * var1 + var5 * var5);
+         float var9 = (float)(MathHelper.atan2(var5, var1) * 57.2957763671875D) - 90.0F;
+         float var10 = (float)(-(MathHelper.atan2(var3, var7) * 57.2957763671875D));
+         this.entity.rotationPitch = this.updateRotation(this.entity.rotationPitch, var10, this.deltaLookPitch);
+         this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, var9, this.deltaLookYaw);
       } else {
          this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, this.entity.renderYawOffset, 10.0F);
       }
 
-      float f2 = MathHelper.wrapDegrees(this.entity.rotationYawHead - this.entity.renderYawOffset);
+      float var11 = MathHelper.wrapDegrees(this.entity.rotationYawHead - this.entity.renderYawOffset);
       if (!this.entity.getNavigator().noPath()) {
-         if (f2 < -75.0F) {
+         if (var11 < -75.0F) {
             this.entity.rotationYawHead = this.entity.renderYawOffset - 75.0F;
          }
 
-         if (f2 > 75.0F) {
+         if (var11 > 75.0F) {
             this.entity.rotationYawHead = this.entity.renderYawOffset + 75.0F;
          }
       }
 
    }
 
-   private float updateRotation(float p_75652_1_, float p_75652_2_, float p_75652_3_) {
-      float f = MathHelper.wrapDegrees(p_75652_2_ - p_75652_1_);
-      if (f > p_75652_3_) {
-         f = p_75652_3_;
+   private float updateRotation(float var1, float var2, float var3) {
+      float var4 = MathHelper.wrapDegrees(var2 - var1);
+      if (var4 > var3) {
+         var4 = var3;
       }
 
-      if (f < -p_75652_3_) {
-         f = -p_75652_3_;
+      if (var4 < -var3) {
+         var4 = -var3;
       }
 
-      return p_75652_1_ + f;
+      return var1 + var4;
    }
 
    public boolean getIsLooking() {

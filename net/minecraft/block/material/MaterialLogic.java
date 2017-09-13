@@ -1,8 +1,8 @@
 package net.minecraft.block.material;
 
 public class MaterialLogic extends Material {
-   public MaterialLogic(MapColor color) {
-      super(color);
+   public MaterialLogic(MapColor var1) {
+      super(var1);
       this.setAdventureModeExempt();
    }
 

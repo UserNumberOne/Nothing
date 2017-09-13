@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -14,111 +13,119 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
+import net.minecraft.network.play.server.SPacketUpdateHealth;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StringUtils;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.RegistryNamespaced;
-import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry.Impl;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_10_R1.potion.CraftPotionEffectType;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.potion.PotionEffectType;
 
-public class Potion extends Impl {
-   public static final RegistryNamespaced REGISTRY = GameData.getPotionRegistry();
+public class Potion {
+   public static final RegistryNamespaced REGISTRY = new RegistryNamespaced();
    private final Map attributeModifierMap = Maps.newHashMap();
    private final boolean isBadEffect;
    private final int liquidColor;
    private String name = "";
    private int statusIconIndex = -1;
-   private double effectiveness;
+   public double effectiveness;
    private boolean beneficial;
 
    @Nullable
-   public static Potion getPotionById(int potionID) {
-      return (Potion)REGISTRY.getObjectById(potionID);
+   public static Potion getPotionById(int i) {
+      return (Potion)REGISTRY.getObjectById(i);
    }
 
-   public static int getIdFromPotion(Potion potionIn) {
-      return REGISTRY.getIDForObject(potionIn);
+   public static int getIdFromPotion(Potion mobeffectlist) {
+      return REGISTRY.getIDForObject(mobeffectlist);
    }
 
    @Nullable
-   public static Potion getPotionFromResourceLocation(String location) {
-      return (Potion)REGISTRY.getObject(new ResourceLocation(location));
+   public static Potion getPotionFromResourceLocation(String s) {
+      return (Potion)REGISTRY.getObject(new ResourceLocation(s));
    }
 
-   protected Potion(boolean isBadEffectIn, int liquidColorIn) {
-      this.isBadEffect = isBadEffectIn;
-      if (isBadEffectIn) {
+   protected Potion(boolean flag, int i) {
+      this.isBadEffect = flag;
+      if (flag) {
          this.effectiveness = 0.5D;
       } else {
          this.effectiveness = 1.0D;
       }
 
-      this.liquidColor = liquidColorIn;
+      this.liquidColor = i;
    }
 
-   protected Potion setIconIndex(int p_76399_1_, int p_76399_2_) {
-      this.statusIconIndex = p_76399_1_ + p_76399_2_ * 8;
+   protected Potion setIconIndex(int i, int j) {
+      this.statusIconIndex = i + j * 8;
       return this;
    }
 
-   public void performEffect(EntityLivingBase entityLivingBaseIn, int p_76394_2_) {
+   public void performEffect(EntityLivingBase entityliving, int i) {
       if (this == MobEffects.REGENERATION) {
-         if (entityLivingBaseIn.getHealth() < entityLivingBaseIn.getMaxHealth()) {
-            entityLivingBaseIn.heal(1.0F);
+         if (entityliving.getHealth() < entityliving.getMaxHealth()) {
+            entityliving.heal(1.0F, RegainReason.MAGIC_REGEN);
          }
       } else if (this == MobEffects.POISON) {
-         if (entityLivingBaseIn.getHealth() > 1.0F) {
-            entityLivingBaseIn.attackEntityFrom(DamageSource.magic, 1.0F);
+         if (entityliving.getHealth() > 1.0F) {
+            entityliving.attackEntityFrom(CraftEventFactory.POISON, 1.0F);
          }
       } else if (this == MobEffects.WITHER) {
-         entityLivingBaseIn.attackEntityFrom(DamageSource.wither, 1.0F);
-      } else if (this == MobEffects.HUNGER && entityLivingBaseIn instanceof EntityPlayer) {
-         ((EntityPlayer)entityLivingBaseIn).addExhaustion(0.025F * (float)(p_76394_2_ + 1));
-      } else if (this == MobEffects.SATURATION && entityLivingBaseIn instanceof EntityPlayer) {
-         if (!entityLivingBaseIn.world.isRemote) {
-            ((EntityPlayer)entityLivingBaseIn).getFoodStats().addStats(p_76394_2_ + 1, 1.0F);
+         entityliving.attackEntityFrom(DamageSource.wither, 1.0F);
+      } else if (this == MobEffects.HUNGER && entityliving instanceof EntityPlayer) {
+         ((EntityPlayer)entityliving).addExhaustion(0.025F * (float)(i + 1));
+      } else if (this == MobEffects.SATURATION && entityliving instanceof EntityPlayer) {
+         if (!entityliving.world.isRemote) {
+            EntityPlayer entityhuman = (EntityPlayer)entityliving;
+            int oldFoodLevel = entityhuman.getFoodStats().foodLevel;
+            FoodLevelChangeEvent event = CraftEventFactory.callFoodLevelChangeEvent(entityhuman, i + 1 + oldFoodLevel);
+            if (!event.isCancelled()) {
+               entityhuman.getFoodStats().addStats(event.getFoodLevel() - oldFoodLevel, 1.0F);
+            }
+
+            ((EntityPlayerMP)entityhuman).connection.sendPacket(new SPacketUpdateHealth(((EntityPlayerMP)entityhuman).getBukkitEntity().getScaledHealth(), entityhuman.getFoodStats().foodLevel, entityhuman.getFoodStats().foodSaturationLevel));
          }
-      } else if ((this != MobEffects.INSTANT_HEALTH || entityLivingBaseIn.isEntityUndead()) && (this != MobEffects.INSTANT_DAMAGE || !entityLivingBaseIn.isEntityUndead())) {
-         if (this == MobEffects.INSTANT_DAMAGE && !entityLivingBaseIn.isEntityUndead() || this == MobEffects.INSTANT_HEALTH && entityLivingBaseIn.isEntityUndead()) {
-            entityLivingBaseIn.attackEntityFrom(DamageSource.magic, (float)(6 << p_76394_2_));
+      } else if ((this != MobEffects.INSTANT_HEALTH || entityliving.isEntityUndead()) && (this != MobEffects.INSTANT_DAMAGE || !entityliving.isEntityUndead())) {
+         if (this == MobEffects.INSTANT_DAMAGE && !entityliving.isEntityUndead() || this == MobEffects.INSTANT_HEALTH && entityliving.isEntityUndead()) {
+            entityliving.attackEntityFrom(DamageSource.magic, (float)(6 << i));
          }
       } else {
-         entityLivingBaseIn.heal((float)Math.max(4 << p_76394_2_, 0));
+         entityliving.heal((float)Math.max(4 << i, 0), RegainReason.MAGIC);
       }
 
    }
 
-   public void affectEntity(@Nullable Entity source, @Nullable Entity indirectSource, EntityLivingBase entityLivingBaseIn, int amplifier, double health) {
-      if ((this != MobEffects.INSTANT_HEALTH || entityLivingBaseIn.isEntityUndead()) && (this != MobEffects.INSTANT_DAMAGE || !entityLivingBaseIn.isEntityUndead())) {
-         if (this == MobEffects.INSTANT_DAMAGE && !entityLivingBaseIn.isEntityUndead() || this == MobEffects.INSTANT_HEALTH && entityLivingBaseIn.isEntityUndead()) {
-            int j = (int)(health * (double)(6 << amplifier) + 0.5D);
-            if (source == null) {
-               entityLivingBaseIn.attackEntityFrom(DamageSource.magic, (float)j);
+   public void affectEntity(@Nullable Entity entity, @Nullable Entity entity1, EntityLivingBase entityliving, int i, double d0) {
+      if ((this != MobEffects.INSTANT_HEALTH || entityliving.isEntityUndead()) && (this != MobEffects.INSTANT_DAMAGE || !entityliving.isEntityUndead())) {
+         if (this == MobEffects.INSTANT_DAMAGE && !entityliving.isEntityUndead() || this == MobEffects.INSTANT_HEALTH && entityliving.isEntityUndead()) {
+            int j = (int)(d0 * (double)(6 << i) + 0.5D);
+            if (entity == null) {
+               entityliving.attackEntityFrom(DamageSource.magic, (float)j);
             } else {
-               entityLivingBaseIn.attackEntityFrom(DamageSource.causeIndirectMagicDamage(source, indirectSource), (float)j);
+               entityliving.attackEntityFrom(DamageSource.causeIndirectMagicDamage(entity, entity1), (float)j);
             }
          }
       } else {
-         int i = (int)(health * (double)(4 << amplifier) + 0.5D);
-         entityLivingBaseIn.heal((float)i);
+         int j = (int)(d0 * (double)(4 << i) + 0.5D);
+         entityliving.heal((float)j, RegainReason.MAGIC);
       }
 
    }
 
-   public boolean isReady(int duration, int amplifier) {
+   public boolean isReady(int i, int j) {
       if (this == MobEffects.REGENERATION) {
-         int k = 50 >> amplifier;
-         return k > 0 ? duration % k == 0 : true;
+         int k = 50 >> j;
+         return k > 0 ? i % k == 0 : true;
       } else if (this == MobEffects.POISON) {
-         int j = 25 >> amplifier;
-         return j > 0 ? duration % j == 0 : true;
+         int k = 25 >> j;
+         return k > 0 ? i % k == 0 : true;
       } else if (this == MobEffects.WITHER) {
-         int i = 40 >> amplifier;
-         return i > 0 ? duration % i == 0 : true;
+         int k = 40 >> j;
+         return k > 0 ? i % k == 0 : true;
       } else {
          return this == MobEffects.HUNGER;
       }
@@ -128,8 +135,8 @@ public class Potion extends Impl {
       return false;
    }
 
-   public Potion setPotionName(String nameIn) {
-      this.name = nameIn;
+   public Potion setPotionName(String s) {
+      this.name = s;
       return this;
    }
 
@@ -137,99 +144,45 @@ public class Potion extends Impl {
       return this.name;
    }
 
-   protected Potion setEffectiveness(double effectivenessIn) {
-      this.effectiveness = effectivenessIn;
+   protected Potion setEffectiveness(double d0) {
+      this.effectiveness = d0;
       return this;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasStatusIcon() {
-      return this.statusIconIndex >= 0;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getStatusIconIndex() {
-      return this.statusIconIndex;
-   }
-
-   public boolean isBadEffect() {
-      return this.isBadEffect;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static String getPotionDurationString(PotionEffect p_188410_0_, float p_188410_1_) {
-      if (p_188410_0_.getIsPotionDurationMax()) {
-         return "**:**";
-      } else {
-         int i = MathHelper.floor((float)p_188410_0_.getDuration() * p_188410_1_);
-         return StringUtils.ticksToElapsedTime(i);
-      }
    }
 
    public int getLiquidColor() {
       return this.liquidColor;
    }
 
-   public Potion registerPotionAttributeModifier(IAttribute attribute, String uniqueId, double ammount, int operation) {
-      AttributeModifier attributemodifier = new AttributeModifier(UUID.fromString(uniqueId), this.getName(), ammount, operation);
-      this.attributeModifierMap.put(attribute, attributemodifier);
+   public Potion registerPotionAttributeModifier(IAttribute iattribute, String s, double d0, int i) {
+      AttributeModifier attributemodifier = new AttributeModifier(UUID.fromString(s), this.getName(), d0, i);
+      this.attributeModifierMap.put(iattribute, attributemodifier);
       return this;
    }
 
-   public void removeAttributesModifiersFromEntity(EntityLivingBase entityLivingBaseIn, AbstractAttributeMap attributeMapIn, int amplifier) {
+   public void removeAttributesModifiersFromEntity(EntityLivingBase entityliving, AbstractAttributeMap attributemapbase, int i) {
       for(Entry entry : this.attributeModifierMap.entrySet()) {
-         IAttributeInstance iattributeinstance = attributeMapIn.getAttributeInstance((IAttribute)entry.getKey());
-         if (iattributeinstance != null) {
-            iattributeinstance.removeModifier((AttributeModifier)entry.getValue());
+         IAttributeInstance attributeinstance = attributemapbase.getAttributeInstance((IAttribute)entry.getKey());
+         if (attributeinstance != null) {
+            attributeinstance.removeModifier((AttributeModifier)entry.getValue());
          }
       }
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public Map getAttributeModifierMap() {
-      return this.attributeModifierMap;
-   }
-
-   public void applyAttributesModifiersToEntity(EntityLivingBase entityLivingBaseIn, AbstractAttributeMap attributeMapIn, int amplifier) {
+   public void applyAttributesModifiersToEntity(EntityLivingBase entityliving, AbstractAttributeMap attributemapbase, int i) {
       for(Entry entry : this.attributeModifierMap.entrySet()) {
-         IAttributeInstance iattributeinstance = attributeMapIn.getAttributeInstance((IAttribute)entry.getKey());
-         if (iattributeinstance != null) {
+         IAttributeInstance attributeinstance = attributemapbase.getAttributeInstance((IAttribute)entry.getKey());
+         if (attributeinstance != null) {
             AttributeModifier attributemodifier = (AttributeModifier)entry.getValue();
-            iattributeinstance.removeModifier(attributemodifier);
-            iattributeinstance.applyModifier(new AttributeModifier(attributemodifier.getID(), this.getName() + " " + amplifier, this.getAttributeModifierAmount(amplifier, attributemodifier), attributemodifier.getOperation()));
+            attributeinstance.removeModifier(attributemodifier);
+            attributeinstance.applyModifier(new AttributeModifier(attributemodifier.getID(), this.getName() + " " + i, this.getAttributeModifierAmount(i, attributemodifier), attributemodifier.getOperation()));
          }
       }
 
    }
 
-   public double getAttributeModifierAmount(int amplifier, AttributeModifier modifier) {
-      return modifier.getAmount() * (double)(amplifier + 1);
-   }
-
-   public boolean shouldRender(PotionEffect effect) {
-      return true;
-   }
-
-   public boolean shouldRenderInvText(PotionEffect effect) {
-      return true;
-   }
-
-   public boolean shouldRenderHUD(PotionEffect effect) {
-      return true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void renderInventoryEffect(int x, int y, PotionEffect effect, Minecraft mc) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void renderHUDEffect(int x, int y, PotionEffect effect, Minecraft mc, float alpha) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isBeneficial() {
-      return this.beneficial;
+   public double getAttributeModifierAmount(int i, AttributeModifier attributemodifier) {
+      return attributemodifier.getAmount() * (double)(i + 1);
    }
 
    public Potion setBeneficial() {
@@ -265,5 +218,10 @@ public class Potion extends Impl {
       REGISTRY.register(25, new ResourceLocation("levitation"), (new Potion(true, 13565951)).setPotionName("effect.levitation").setIconIndex(3, 2));
       REGISTRY.register(26, new ResourceLocation("luck"), (new Potion(false, 3381504)).setPotionName("effect.luck").setIconIndex(5, 2).setBeneficial().registerPotionAttributeModifier(SharedMonsterAttributes.LUCK, "03C3C89D-7037-4B42-869F-B146BCB64D2E", 1.0D, 0));
       REGISTRY.register(27, new ResourceLocation("unluck"), (new Potion(true, 12624973)).setPotionName("effect.unluck").setIconIndex(6, 2).registerPotionAttributeModifier(SharedMonsterAttributes.LUCK, "CC5AF142-2BD2-4215-B636-2605AED11727", -1.0D, 0));
+
+      for(Object effect : REGISTRY) {
+         PotionEffectType.registerPotionEffectType(new CraftPotionEffectType((Potion)effect));
+      }
+
    }
 }

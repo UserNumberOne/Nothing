@@ -11,12 +11,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 
 public class BlockMycelium extends Block {
    public static final PropertyBool SNOWY = PropertyBool.create("snowy");
@@ -28,22 +29,36 @@ public class BlockMycelium extends Block {
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
-   public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-      Block block = worldIn.getBlockState(pos.up()).getBlock();
-      return state.withProperty(SNOWY, Boolean.valueOf(block == Blocks.SNOW || block == Blocks.SNOW_LAYER));
+   public IBlockState getActualState(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
+      Block block = iblockaccess.getBlockState(blockposition.up()).getBlock();
+      return iblockdata.withProperty(SNOWY, Boolean.valueOf(block == Blocks.SNOW || block == Blocks.SNOW_LAYER));
    }
 
-   public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-      if (!worldIn.isRemote) {
-         if (worldIn.getLightFromNeighbors(pos.up()) < 4 && worldIn.getBlockState(pos.up()).getLightOpacity(worldIn, pos.up()) > 2) {
-            worldIn.setBlockState(pos, Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT));
-         } else if (worldIn.getLightFromNeighbors(pos.up()) >= 9) {
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      if (!world.isRemote) {
+         if (world.getLightFromNeighbors(blockposition.up()) < 4 && world.getBlockState(blockposition.up()).getLightOpacity() > 2) {
+            org.bukkit.World bworld = world.getWorld();
+            BlockState blockState = bworld.getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()).getState();
+            blockState.setType(CraftMagicNumbers.getMaterial(Blocks.DIRT));
+            BlockFadeEvent event = new BlockFadeEvent(blockState.getBlock(), blockState);
+            world.getServer().getPluginManager().callEvent(event);
+            if (!event.isCancelled()) {
+               blockState.update(true);
+            }
+         } else if (world.getLightFromNeighbors(blockposition.up()) >= 9) {
             for(int i = 0; i < 4; ++i) {
-               BlockPos blockpos = pos.add(rand.nextInt(3) - 1, rand.nextInt(5) - 3, rand.nextInt(3) - 1);
-               IBlockState iblockstate = worldIn.getBlockState(blockpos);
-               IBlockState iblockstate1 = worldIn.getBlockState(blockpos.up());
-               if (iblockstate.getBlock() == Blocks.DIRT && iblockstate.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT && worldIn.getLightFromNeighbors(blockpos.up()) >= 4 && iblockstate1.getLightOpacity(worldIn, blockpos.up()) <= 2) {
-                  worldIn.setBlockState(blockpos, this.getDefaultState());
+               BlockPos blockposition1 = blockposition.add(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
+               IBlockState iblockdata1 = world.getBlockState(blockposition1);
+               IBlockState iblockdata2 = world.getBlockState(blockposition1.up());
+               if (iblockdata1.getBlock() == Blocks.DIRT && iblockdata1.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT && world.getLightFromNeighbors(blockposition1.up()) >= 4 && iblockdata2.getLightOpacity() <= 2) {
+                  org.bukkit.World bworld = world.getWorld();
+                  BlockState blockState = bworld.getBlockAt(blockposition1.getX(), blockposition1.getY(), blockposition1.getZ()).getState();
+                  blockState.setType(CraftMagicNumbers.getMaterial(this));
+                  BlockSpreadEvent event = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), blockState);
+                  world.getServer().getPluginManager().callEvent(event);
+                  if (!event.isCancelled()) {
+                     blockState.update(true);
+                  }
                }
             }
          }
@@ -51,21 +66,12 @@ public class BlockMycelium extends Block {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand) {
-      super.randomDisplayTick(stateIn, worldIn, pos, rand);
-      if (rand.nextInt(10) == 0) {
-         worldIn.spawnParticle(EnumParticleTypes.TOWN_AURA, (double)((float)pos.getX() + rand.nextFloat()), (double)((float)pos.getY() + 1.1F), (double)((float)pos.getZ() + rand.nextFloat()), 0.0D, 0.0D, 0.0D);
-      }
-
-   }
-
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-      return Blocks.DIRT.getItemDropped(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT), rand, fortune);
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
+      return Blocks.DIRT.getItemDropped(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT), random, i);
    }
 
-   public int getMetaFromState(IBlockState state) {
+   public int getMetaFromState(IBlockState iblockdata) {
       return 0;
    }
 

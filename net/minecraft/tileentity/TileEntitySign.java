@@ -1,5 +1,6 @@
 package net.minecraft.tileentity;
 
+import com.google.gson.JsonParseException;
 import javax.annotation.Nullable;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandResultStats;
@@ -8,7 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
@@ -17,36 +18,41 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentUtils;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.command.CraftBlockCommandSender;
+import org.bukkit.craftbukkit.v1_10_R1.command.ProxiedNativeCommandSender;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftChatMessage;
 
 public class TileEntitySign extends TileEntity {
    public final ITextComponent[] signText = new ITextComponent[]{new TextComponentString(""), new TextComponentString(""), new TextComponentString(""), new TextComponentString("")};
    public int lineBeingEdited = -1;
-   private boolean isEditable = true;
+   public boolean isEditable = true;
    private EntityPlayer player;
    private final CommandResultStats stats = new CommandResultStats();
 
-   public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-      super.writeToNBT(compound);
+   public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
+      super.writeToNBT(nbttagcompound);
 
       for(int i = 0; i < 4; ++i) {
          String s = ITextComponent.Serializer.componentToJson(this.signText[i]);
-         compound.setString("Text" + (i + 1), s);
+         nbttagcompound.setString("Text" + (i + 1), s);
       }
 
-      this.stats.writeStatsToNBT(compound);
-      return compound;
+      if (Boolean.getBoolean("convertLegacySigns")) {
+         nbttagcompound.setBoolean("Bukkit.isConverted", true);
+      }
+
+      this.stats.writeStatsToNBT(nbttagcompound);
+      return nbttagcompound;
    }
 
-   protected void setWorldCreate(World worldIn) {
-      this.setWorld(worldIn);
+   protected void setWorldCreate(World world) {
+      this.setWorld(world);
    }
 
-   public void readFromNBT(NBTTagCompound compound) {
+   public void readFromNBT(NBTTagCompound nbttagcompound) {
       this.isEditable = false;
-      super.readFromNBT(compound);
-      ICommandSender icommandsender = new ICommandSender() {
+      super.readFromNBT(nbttagcompound);
+      ICommandSender icommandlistener = new ICommandSender() {
          public String getName() {
             return "Sign";
          }
@@ -55,11 +61,11 @@ public class TileEntitySign extends TileEntity {
             return new TextComponentString(this.getName());
          }
 
-         public void sendMessage(ITextComponent component) {
+         public void sendMessage(ITextComponent ichatbasecomponent) {
          }
 
-         public boolean canUseCommand(int permLevel, String commandName) {
-            return permLevel <= 2;
+         public boolean canUseCommand(int i, String s) {
+            return true;
          }
 
          public BlockPos getPosition() {
@@ -82,26 +88,38 @@ public class TileEntitySign extends TileEntity {
             return false;
          }
 
-         public void setCommandStat(CommandResultStats.Type type, int amount) {
+         public void setCommandStat(CommandResultStats.Type commandobjectiveexecutor_enumcommandresult, int i) {
          }
 
-         public MinecraftServer getServer() {
+         public MinecraftServer h() {
             return TileEntitySign.this.world.getMinecraftServer();
          }
       };
+      boolean oldSign = Boolean.getBoolean("convertLegacySigns") && !nbttagcompound.getBoolean("Bukkit.isConverted");
 
       for(int i = 0; i < 4; ++i) {
-         String s = compound.getString("Text" + (i + 1));
-         ITextComponent itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
+         String s = nbttagcompound.getString("Text" + (i + 1));
+         if (s != null && s.length() > 2048) {
+            s = "\"\"";
+         }
 
          try {
-            this.signText[i] = TextComponentUtils.processComponent(icommandsender, itextcomponent, (Entity)null);
-         } catch (CommandException var7) {
-            this.signText[i] = itextcomponent;
+            ITextComponent ichatbasecomponent = ITextComponent.Serializer.jsonToComponent(s);
+            if (oldSign) {
+               this.signText[i] = CraftChatMessage.fromString(s)[0];
+            } else {
+               try {
+                  this.signText[i] = TextComponentUtils.processComponent(icommandlistener, ichatbasecomponent, (Entity)null);
+               } catch (CommandException var7) {
+                  this.signText[i] = ichatbasecomponent;
+               }
+            }
+         } catch (JsonParseException var8) {
+            this.signText[i] = new TextComponentString(s);
          }
       }
 
-      this.stats.readStatsFromNBT(compound);
+      this.stats.readStatsFromNBT(nbttagcompound);
    }
 
    @Nullable
@@ -121,38 +139,29 @@ public class TileEntitySign extends TileEntity {
       return this.isEditable;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setEditable(boolean isEditableIn) {
-      this.isEditable = isEditableIn;
-      if (!isEditableIn) {
-         this.player = null;
-      }
-
-   }
-
-   public void setPlayer(EntityPlayer playerIn) {
-      this.player = playerIn;
+   public void setPlayer(EntityPlayer entityhuman) {
+      this.player = entityhuman;
    }
 
    public EntityPlayer getPlayer() {
       return this.player;
    }
 
-   public boolean executeCommand(final EntityPlayer playerIn) {
-      ICommandSender icommandsender = new ICommandSender() {
+   public boolean executeCommand(final EntityPlayer entityhuman) {
+      ICommandSender icommandlistener = new ICommandSender() {
          public String getName() {
-            return playerIn.getName();
+            return entityhuman.getName();
          }
 
          public ITextComponent getDisplayName() {
-            return playerIn.getDisplayName();
+            return entityhuman.getDisplayName();
          }
 
-         public void sendMessage(ITextComponent component) {
+         public void sendMessage(ITextComponent ichatbasecomponent) {
          }
 
-         public boolean canUseCommand(int permLevel, String commandName) {
-            return permLevel <= 2;
+         public boolean canUseCommand(int i, String s) {
+            return i <= 2;
          }
 
          public BlockPos getPosition() {
@@ -164,35 +173,35 @@ public class TileEntitySign extends TileEntity {
          }
 
          public World getEntityWorld() {
-            return playerIn.getEntityWorld();
+            return entityhuman.getEntityWorld();
          }
 
          public Entity getCommandSenderEntity() {
-            return playerIn;
+            return entityhuman;
          }
 
          public boolean sendCommandFeedback() {
             return false;
          }
 
-         public void setCommandStat(CommandResultStats.Type type, int amount) {
+         public void setCommandStat(CommandResultStats.Type commandobjectiveexecutor_enumcommandresult, int i) {
             if (TileEntitySign.this.world != null && !TileEntitySign.this.world.isRemote) {
-               TileEntitySign.this.stats.setCommandStatForSender(TileEntitySign.this.world.getMinecraftServer(), this, type, amount);
+               TileEntitySign.this.stats.a(TileEntitySign.this.world.getMinecraftServer(), this, commandobjectiveexecutor_enumcommandresult, i);
             }
 
          }
 
-         public MinecraftServer getServer() {
-            return playerIn.getServer();
+         public MinecraftServer h() {
+            return entityhuman.h();
          }
       };
 
-      for(ITextComponent itextcomponent : this.signText) {
-         Style style = itextcomponent == null ? null : itextcomponent.getStyle();
-         if (style != null && style.getClickEvent() != null) {
-            ClickEvent clickevent = style.getClickEvent();
-            if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-               playerIn.getServer().getCommandManager().executeCommand(icommandsender, clickevent.getValue());
+      for(ITextComponent ichatbasecomponent : this.signText) {
+         Style chatmodifier = ichatbasecomponent == null ? null : ichatbasecomponent.getStyle();
+         if (chatmodifier != null && chatmodifier.getClickEvent() != null) {
+            ClickEvent chatclickable = chatmodifier.getClickEvent();
+            if (chatclickable.getAction() == ClickEvent.Action.RUN_COMMAND) {
+               CommandBlockBaseLogic.executeCommand(icommandlistener, new ProxiedNativeCommandSender(icommandlistener, new CraftBlockCommandSender(icommandlistener), entityhuman.getBukkitEntity()), chatclickable.getValue());
             }
          }
       }

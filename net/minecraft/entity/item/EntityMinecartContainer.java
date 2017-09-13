@@ -1,8 +1,9 @@
 package net.minecraft.entity.item;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryHelper;
@@ -11,7 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
@@ -24,30 +24,58 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.ILootContainer;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.entity.Entity;
+import org.bukkit.inventory.InventoryHolder;
 
 public abstract class EntityMinecartContainer extends EntityMinecart implements ILockableContainer, ILootContainer {
-   private ItemStack[] minecartContainerItems = new ItemStack[36];
-   public boolean dropContentsWhenDead = true;
+   private ItemStack[] minecartContainerItems = new ItemStack[27];
+   private boolean dropContentsWhenDead = true;
    private ResourceLocation lootTable;
    private long lootTableSeed;
-   public IItemHandler itemHandler = new InvWrapper(this);
+   public List transaction = new ArrayList();
+   private int maxStack = 64;
 
-   public EntityMinecartContainer(World worldIn) {
-      super(worldIn);
+   public ItemStack[] getContents() {
+      return this.minecartContainerItems;
    }
 
-   public EntityMinecartContainer(World worldIn, double x, double y, double z) {
-      super(worldIn, x, y, z);
+   public void onOpen(CraftHumanEntity who) {
+      this.transaction.add(who);
    }
 
-   public void killMinecart(DamageSource source) {
-      super.killMinecart(source);
+   public void onClose(CraftHumanEntity who) {
+      this.transaction.remove(who);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public InventoryHolder getOwner() {
+      Entity cart = this.getBukkitEntity();
+      return cart instanceof InventoryHolder ? (InventoryHolder)cart : null;
+   }
+
+   public void setMaxStackSize(int size) {
+      this.maxStack = size;
+   }
+
+   public Location getLocation() {
+      return this.getBukkitEntity().getLocation();
+   }
+
+   public EntityMinecartContainer(World world) {
+      super(world);
+   }
+
+   public EntityMinecartContainer(World world, double d0, double d1, double d2) {
+      super(world, d0, d1, d2);
+   }
+
+   public void killMinecart(DamageSource damagesource) {
+      super.killMinecart(damagesource);
       if (this.world.getGameRules().getBoolean("doEntityDrops")) {
          InventoryHelper.dropInventoryItems(this.world, this, this);
       }
@@ -55,34 +83,34 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
    }
 
    @Nullable
-   public ItemStack getStackInSlot(int index) {
+   public ItemStack getStackInSlot(int i) {
       this.addLoot((EntityPlayer)null);
-      return this.minecartContainerItems[index];
+      return this.minecartContainerItems[i];
    }
 
    @Nullable
-   public ItemStack decrStackSize(int index, int count) {
+   public ItemStack decrStackSize(int i, int j) {
       this.addLoot((EntityPlayer)null);
-      return ItemStackHelper.getAndSplit(this.minecartContainerItems, index, count);
+      return ItemStackHelper.getAndSplit(this.minecartContainerItems, i, j);
    }
 
    @Nullable
-   public ItemStack removeStackFromSlot(int index) {
+   public ItemStack removeStackFromSlot(int i) {
       this.addLoot((EntityPlayer)null);
-      if (this.minecartContainerItems[index] != null) {
-         ItemStack itemstack = this.minecartContainerItems[index];
-         this.minecartContainerItems[index] = null;
+      if (this.minecartContainerItems[i] != null) {
+         ItemStack itemstack = this.minecartContainerItems[i];
+         this.minecartContainerItems[i] = null;
          return itemstack;
       } else {
          return null;
       }
    }
 
-   public void setInventorySlotContents(int index, @Nullable ItemStack stack) {
+   public void setInventorySlotContents(int i, @Nullable ItemStack itemstack) {
       this.addLoot((EntityPlayer)null);
-      this.minecartContainerItems[index] = stack;
-      if (stack != null && stack.stackSize > this.getInventoryStackLimit()) {
-         stack.stackSize = this.getInventoryStackLimit();
+      this.minecartContainerItems[i] = itemstack;
+      if (itemstack != null && itemstack.stackSize > this.getInventoryStackLimit()) {
+         itemstack.stackSize = this.getInventoryStackLimit();
       }
 
    }
@@ -90,28 +118,28 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
    public void markDirty() {
    }
 
-   public boolean isUsableByPlayer(EntityPlayer player) {
-      return this.isDead ? false : player.getDistanceSqToEntity(this) <= 64.0D;
+   public boolean isUsableByPlayer(EntityPlayer entityhuman) {
+      return this.isDead ? false : entityhuman.getDistanceSqToEntity(this) <= 64.0D;
    }
 
-   public void openInventory(EntityPlayer player) {
+   public void openInventory(EntityPlayer entityhuman) {
    }
 
-   public void closeInventory(EntityPlayer player) {
+   public void closeInventory(EntityPlayer entityhuman) {
    }
 
-   public boolean isItemValidForSlot(int index, ItemStack stack) {
+   public boolean isItemValidForSlot(int i, ItemStack itemstack) {
       return true;
    }
 
    public int getInventoryStackLimit() {
-      return 64;
+      return this.maxStack;
    }
 
    @Nullable
-   public Entity changeDimension(int dimensionIn) {
+   public net.minecraft.entity.Entity changeDimension(int i) {
       this.dropContentsWhenDead = false;
-      return super.changeDimension(dimensionIn);
+      return super.changeDimension(i);
    }
 
    public void setDead() {
@@ -122,69 +150,65 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
       super.setDead();
    }
 
-   public void setDropItemsWhenDead(boolean dropWhenDead) {
-      this.dropContentsWhenDead = dropWhenDead;
+   public void setDropItemsWhenDead(boolean flag) {
+      this.dropContentsWhenDead = flag;
    }
 
-   public static void registerFixesMinecartContainer(DataFixer fixer, String name) {
-      EntityMinecart.registerFixesMinecart(fixer, name);
-      fixer.registerWalker(FixTypes.ENTITY, new ItemStackDataLists(name, new String[]{"Items"}));
+   public static void registerFixesMinecartContainer(DataFixer dataconvertermanager, String s) {
+      EntityMinecart.registerFixesMinecart(dataconvertermanager, s);
+      dataconvertermanager.registerWalker(FixTypes.ENTITY, new ItemStackDataLists(s, new String[]{"Items"}));
    }
 
-   protected void writeEntityToNBT(NBTTagCompound compound) {
-      super.writeEntityToNBT(compound);
+   protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
       if (this.lootTable != null) {
-         compound.setString("LootTable", this.lootTable.toString());
+         nbttagcompound.setString("LootTable", this.lootTable.toString());
          if (this.lootTableSeed != 0L) {
-            compound.setLong("LootTableSeed", this.lootTableSeed);
+            nbttagcompound.setLong("LootTableSeed", this.lootTableSeed);
          }
       } else {
          NBTTagList nbttaglist = new NBTTagList();
 
          for(int i = 0; i < this.minecartContainerItems.length; ++i) {
             if (this.minecartContainerItems[i] != null) {
-               NBTTagCompound nbttagcompound = new NBTTagCompound();
-               nbttagcompound.setByte("Slot", (byte)i);
-               this.minecartContainerItems[i].writeToNBT(nbttagcompound);
-               nbttaglist.appendTag(nbttagcompound);
+               NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+               nbttagcompound1.setByte("Slot", (byte)i);
+               this.minecartContainerItems[i].writeToNBT(nbttagcompound1);
+               nbttaglist.appendTag(nbttagcompound1);
             }
          }
 
-         compound.setTag("Items", nbttaglist);
+         nbttagcompound.setTag("Items", nbttaglist);
       }
 
    }
 
-   protected void readEntityFromNBT(NBTTagCompound compound) {
-      super.readEntityFromNBT(compound);
+   protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
       this.minecartContainerItems = new ItemStack[this.getSizeInventory()];
-      if (compound.hasKey("LootTable", 8)) {
-         this.lootTable = new ResourceLocation(compound.getString("LootTable"));
-         this.lootTableSeed = compound.getLong("LootTableSeed");
+      if (nbttagcompound.hasKey("LootTable", 8)) {
+         this.lootTable = new ResourceLocation(nbttagcompound.getString("LootTable"));
+         this.lootTableSeed = nbttagcompound.getLong("LootTableSeed");
       } else {
-         NBTTagList nbttaglist = compound.getTagList("Items", 10);
+         NBTTagList nbttaglist = nbttagcompound.getTagList("Items", 10);
 
          for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-            int j = nbttagcompound.getByte("Slot") & 255;
+            NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
+            int j = nbttagcompound1.getByte("Slot") & 255;
             if (j >= 0 && j < this.minecartContainerItems.length) {
-               this.minecartContainerItems[j] = ItemStack.loadItemStackFromNBT(nbttagcompound);
+               this.minecartContainerItems[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
             }
          }
       }
 
    }
 
-   public boolean processInitialInteract(EntityPlayer player, @Nullable ItemStack stack, EnumHand hand) {
-      if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, player, stack, hand))) {
-         return true;
-      } else {
-         if (!this.world.isRemote) {
-            player.displayGUIChest(this);
-         }
-
-         return true;
+   public boolean processInitialInteract(EntityPlayer entityhuman, @Nullable ItemStack itemstack, EnumHand enumhand) {
+      if (!this.world.isRemote) {
+         entityhuman.displayGUIChest(this);
       }
+
+      return true;
    }
 
    protected void applyDrag() {
@@ -199,11 +223,11 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
       this.motionZ *= (double)f;
    }
 
-   public int getField(int id) {
+   public int getField(int i) {
       return 0;
    }
 
-   public void setField(int id, int value) {
+   public void setField(int i, int j) {
    }
 
    public int getFieldCount() {
@@ -214,14 +238,14 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
       return false;
    }
 
-   public void setLockCode(LockCode code) {
+   public void setLockCode(LockCode chestlock) {
    }
 
    public LockCode getLockCode() {
       return LockCode.EMPTY_CODE;
    }
 
-   public void addLoot(@Nullable EntityPlayer player) {
+   public void addLoot(@Nullable EntityPlayer entityhuman) {
       if (this.lootTable != null) {
          LootTable loottable = this.world.getLootTableManager().getLootTableFromLocation(this.lootTable);
          this.lootTable = null;
@@ -232,22 +256,14 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
             random = new Random(this.lootTableSeed);
          }
 
-         LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.world);
-         if (player != null) {
-            lootcontext$builder.withLuck(player.getLuck());
+         LootContext.Builder loottableinfo_a = new LootContext.Builder((WorldServer)this.world);
+         if (entityhuman != null) {
+            loottableinfo_a.withLuck(entityhuman.getLuck());
          }
 
-         loottable.fillInventory(this, random, lootcontext$builder.build());
+         loottable.fillInventory(this, random, loottableinfo_a.build());
       }
 
-   }
-
-   public Object getCapability(Capability capability, EnumFacing facing) {
-      return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? this.itemHandler : super.getCapability(capability, facing);
-   }
-
-   public boolean hasCapability(Capability capability, EnumFacing facing) {
-      return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
    }
 
    public void clear() {
@@ -259,9 +275,9 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
 
    }
 
-   public void setLootTable(ResourceLocation lootTableIn, long lootTableSeedIn) {
-      this.lootTable = lootTableIn;
-      this.lootTableSeed = lootTableSeedIn;
+   public void setLootTable(ResourceLocation minecraftkey, long i) {
+      this.lootTable = minecraftkey;
+      this.lootTableSeed = i;
    }
 
    public ResourceLocation getLootTable() {

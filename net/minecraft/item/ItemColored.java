@@ -5,30 +5,30 @@ import net.minecraft.block.Block;
 public class ItemColored extends ItemBlock {
    private String[] subtypeNames;
 
-   public ItemColored(Block block, boolean hasSubtypes) {
-      super(block);
-      if (hasSubtypes) {
+   public ItemColored(Block var1, boolean var2) {
+      super(var1);
+      if (var2) {
          this.setMaxDamage(0);
          this.setHasSubtypes(true);
       }
 
    }
 
-   public int getMetadata(int damage) {
-      return damage;
+   public int getMetadata(int var1) {
+      return var1;
    }
 
-   public ItemColored setSubtypeNames(String[] names) {
-      this.subtypeNames = names;
+   public ItemColored setSubtypeNames(String[] var1) {
+      this.subtypeNames = var1;
       return this;
    }
 
-   public String getUnlocalizedName(ItemStack stack) {
+   public String getUnlocalizedName(ItemStack var1) {
       if (this.subtypeNames == null) {
-         return super.getUnlocalizedName(stack);
+         return super.getUnlocalizedName(var1);
       } else {
-         int i = stack.getMetadata();
-         return i >= 0 && i < this.subtypeNames.length ? super.getUnlocalizedName(stack) + "." + this.subtypeNames[i] : super.getUnlocalizedName(stack);
+         int var2 = var1.getMetadata();
+         return var2 >= 0 && var2 < this.subtypeNames.length ? super.getUnlocalizedName(var1) + "." + this.subtypeNames[var2] : super.getUnlocalizedName(var1);
       }
    }
 }

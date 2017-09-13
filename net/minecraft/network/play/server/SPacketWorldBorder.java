@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.border.WorldBorder;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketWorldBorder implements Packet {
    private SPacketWorldBorder.Action action;
@@ -22,121 +20,88 @@ public class SPacketWorldBorder implements Packet {
    public SPacketWorldBorder() {
    }
 
-   public SPacketWorldBorder(WorldBorder border, SPacketWorldBorder.Action actionIn) {
-      this.action = actionIn;
-      this.centerX = border.getCenterX();
-      this.centerZ = border.getCenterZ();
-      this.diameter = border.getDiameter();
-      this.targetSize = border.getTargetSize();
-      this.timeUntilTarget = border.getTimeUntilTarget();
-      this.size = border.getSize();
-      this.warningDistance = border.getWarningDistance();
-      this.warningTime = border.getWarningTime();
+   public SPacketWorldBorder(WorldBorder var1, SPacketWorldBorder.Action var2) {
+      this.action = var2;
+      this.centerX = var1.getCenterX();
+      this.centerZ = var1.getCenterZ();
+      this.diameter = var1.getDiameter();
+      this.targetSize = var1.getTargetSize();
+      this.timeUntilTarget = var1.getTimeUntilTarget();
+      this.size = var1.getSize();
+      this.warningDistance = var1.getWarningDistance();
+      this.warningTime = var1.getWarningTime();
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.action = (SPacketWorldBorder.Action)buf.readEnumValue(SPacketWorldBorder.Action.class);
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.action = (SPacketWorldBorder.Action)var1.readEnumValue(SPacketWorldBorder.Action.class);
       switch(this.action) {
       case SET_SIZE:
-         this.targetSize = buf.readDouble();
+         this.targetSize = var1.readDouble();
          break;
       case LERP_SIZE:
-         this.diameter = buf.readDouble();
-         this.targetSize = buf.readDouble();
-         this.timeUntilTarget = buf.readVarLong();
+         this.diameter = var1.readDouble();
+         this.targetSize = var1.readDouble();
+         this.timeUntilTarget = var1.readVarLong();
          break;
       case SET_CENTER:
-         this.centerX = buf.readDouble();
-         this.centerZ = buf.readDouble();
+         this.centerX = var1.readDouble();
+         this.centerZ = var1.readDouble();
          break;
       case SET_WARNING_BLOCKS:
-         this.warningDistance = buf.readVarInt();
+         this.warningDistance = var1.readVarInt();
          break;
       case SET_WARNING_TIME:
-         this.warningTime = buf.readVarInt();
+         this.warningTime = var1.readVarInt();
          break;
       case INITIALIZE:
-         this.centerX = buf.readDouble();
-         this.centerZ = buf.readDouble();
-         this.diameter = buf.readDouble();
-         this.targetSize = buf.readDouble();
-         this.timeUntilTarget = buf.readVarLong();
-         this.size = buf.readVarInt();
-         this.warningDistance = buf.readVarInt();
-         this.warningTime = buf.readVarInt();
+         this.centerX = var1.readDouble();
+         this.centerZ = var1.readDouble();
+         this.diameter = var1.readDouble();
+         this.targetSize = var1.readDouble();
+         this.timeUntilTarget = var1.readVarLong();
+         this.size = var1.readVarInt();
+         this.warningDistance = var1.readVarInt();
+         this.warningTime = var1.readVarInt();
       }
 
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeEnumValue(this.action);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeEnumValue(this.action);
       switch(this.action) {
       case SET_SIZE:
-         buf.writeDouble(this.targetSize);
+         var1.writeDouble(this.targetSize);
          break;
       case LERP_SIZE:
-         buf.writeDouble(this.diameter);
-         buf.writeDouble(this.targetSize);
-         buf.writeVarLong(this.timeUntilTarget);
+         var1.writeDouble(this.diameter);
+         var1.writeDouble(this.targetSize);
+         var1.writeVarLong(this.timeUntilTarget);
          break;
       case SET_CENTER:
-         buf.writeDouble(this.centerX);
-         buf.writeDouble(this.centerZ);
+         var1.writeDouble(this.centerX);
+         var1.writeDouble(this.centerZ);
          break;
       case SET_WARNING_BLOCKS:
-         buf.writeVarInt(this.warningDistance);
+         var1.writeVarInt(this.warningDistance);
          break;
       case SET_WARNING_TIME:
-         buf.writeVarInt(this.warningTime);
+         var1.writeVarInt(this.warningTime);
          break;
       case INITIALIZE:
-         buf.writeDouble(this.centerX);
-         buf.writeDouble(this.centerZ);
-         buf.writeDouble(this.diameter);
-         buf.writeDouble(this.targetSize);
-         buf.writeVarLong(this.timeUntilTarget);
-         buf.writeVarInt(this.size);
-         buf.writeVarInt(this.warningDistance);
-         buf.writeVarInt(this.warningTime);
+         var1.writeDouble(this.centerX);
+         var1.writeDouble(this.centerZ);
+         var1.writeDouble(this.diameter);
+         var1.writeDouble(this.targetSize);
+         var1.writeVarLong(this.timeUntilTarget);
+         var1.writeVarInt(this.size);
+         var1.writeVarInt(this.warningDistance);
+         var1.writeVarInt(this.warningTime);
       }
 
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleWorldBorder(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void apply(WorldBorder border) {
-      switch(this.action) {
-      case SET_SIZE:
-         border.setTransition(this.targetSize);
-         break;
-      case LERP_SIZE:
-         border.setTransition(this.diameter, this.targetSize, this.timeUntilTarget);
-         break;
-      case SET_CENTER:
-         border.setCenter(this.centerX, this.centerZ);
-         break;
-      case SET_WARNING_BLOCKS:
-         border.setWarningDistance(this.warningDistance);
-         break;
-      case SET_WARNING_TIME:
-         border.setWarningTime(this.warningTime);
-         break;
-      case INITIALIZE:
-         border.setCenter(this.centerX, this.centerZ);
-         if (this.timeUntilTarget > 0L) {
-            border.setTransition(this.diameter, this.targetSize, this.timeUntilTarget);
-         } else {
-            border.setTransition(this.targetSize);
-         }
-
-         border.setSize(this.size);
-         border.setWarningDistance(this.warningDistance);
-         border.setWarningTime(this.warningTime);
-      }
-
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleWorldBorder(this);
    }
 
    public static enum Action {

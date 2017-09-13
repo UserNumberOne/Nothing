@@ -8,8 +8,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketBlockChange implements Packet {
    private BlockPos blockPosition;
@@ -18,32 +16,22 @@ public class SPacketBlockChange implements Packet {
    public SPacketBlockChange() {
    }
 
-   public SPacketBlockChange(World worldIn, BlockPos posIn) {
-      this.blockPosition = posIn;
-      this.blockState = worldIn.getBlockState(posIn);
+   public SPacketBlockChange(World var1, BlockPos var2) {
+      this.blockPosition = var2;
+      this.blockState = var1.getBlockState(var2);
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.blockPosition = buf.readBlockPos();
-      this.blockState = (IBlockState)Block.BLOCK_STATE_IDS.getByValue(buf.readVarInt());
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.blockPosition = var1.readBlockPos();
+      this.blockState = (IBlockState)Block.BLOCK_STATE_IDS.getByValue(var1.readVarInt());
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeBlockPos(this.blockPosition);
-      buf.writeVarInt(Block.BLOCK_STATE_IDS.get(this.blockState));
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeBlockPos(this.blockPosition);
+      var1.writeVarInt(Block.BLOCK_STATE_IDS.get(this.blockState));
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleBlockChange(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public IBlockState getBlockState() {
-      return this.blockState;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockPos getBlockPosition() {
-      return this.blockPosition;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleBlockChange(this);
    }
 }

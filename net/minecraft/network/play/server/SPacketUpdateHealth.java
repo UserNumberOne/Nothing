@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketUpdateHealth implements Packet {
    private float health;
@@ -15,40 +13,25 @@ public class SPacketUpdateHealth implements Packet {
    public SPacketUpdateHealth() {
    }
 
-   public SPacketUpdateHealth(float healthIn, int foodLevelIn, float saturationLevelIn) {
-      this.health = healthIn;
-      this.foodLevel = foodLevelIn;
-      this.saturationLevel = saturationLevelIn;
+   public SPacketUpdateHealth(float var1, int var2, float var3) {
+      this.health = var1;
+      this.foodLevel = var2;
+      this.saturationLevel = var3;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.health = buf.readFloat();
-      this.foodLevel = buf.readVarInt();
-      this.saturationLevel = buf.readFloat();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.health = var1.readFloat();
+      this.foodLevel = var1.readVarInt();
+      this.saturationLevel = var1.readFloat();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeFloat(this.health);
-      buf.writeVarInt(this.foodLevel);
-      buf.writeFloat(this.saturationLevel);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeFloat(this.health);
+      var1.writeVarInt(this.foodLevel);
+      var1.writeFloat(this.saturationLevel);
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleUpdateHealth(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getHealth() {
-      return this.health;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFoodLevel() {
-      return this.foodLevel;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getSaturationLevel() {
-      return this.saturationLevel;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleUpdateHealth(this);
    }
 }

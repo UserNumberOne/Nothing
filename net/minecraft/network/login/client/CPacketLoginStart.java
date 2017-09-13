@@ -13,20 +13,20 @@ public class CPacketLoginStart implements Packet {
    public CPacketLoginStart() {
    }
 
-   public CPacketLoginStart(GameProfile profileIn) {
-      this.profile = profileIn;
+   public CPacketLoginStart(GameProfile var1) {
+      this.profile = var1;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.profile = new GameProfile((UUID)null, buf.readString(16));
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.profile = new GameProfile((UUID)null, var1.readString(16));
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeString(this.profile.getName());
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeString(this.profile.getName());
    }
 
-   public void processPacket(INetHandlerLoginServer handler) {
-      handler.processLoginStart(this);
+   public void processPacket(INetHandlerLoginServer var1) {
+      var1.processLoginStart(this);
    }
 
    public GameProfile getProfile() {

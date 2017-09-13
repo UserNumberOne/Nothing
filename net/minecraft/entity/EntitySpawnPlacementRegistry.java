@@ -38,15 +38,8 @@ import net.minecraft.entity.passive.EntityWolf;
 public class EntitySpawnPlacementRegistry {
    private static final Map ENTITY_PLACEMENTS = Maps.newHashMap();
 
-   public static EntityLiving.SpawnPlacementType getPlacementForEntity(Class entityClass) {
-      return (EntityLiving.SpawnPlacementType)ENTITY_PLACEMENTS.get(entityClass);
-   }
-
-   public static void setPlacementType(Class entityClass, EntityLiving.SpawnPlacementType placementType) {
-      if (!ENTITY_PLACEMENTS.containsKey(entityClass)) {
-         ENTITY_PLACEMENTS.put(entityClass, placementType);
-      }
-
+   public static EntityLiving.SpawnPlacementType getPlacementForEntity(Class var0) {
+      return (EntityLiving.SpawnPlacementType)ENTITY_PLACEMENTS.get(var0);
    }
 
    static {

@@ -11,28 +11,28 @@ public class WorldGenSand extends WorldGenerator {
    private final Block block;
    private final int radius;
 
-   public WorldGenSand(Block p_i45462_1_, int p_i45462_2_) {
-      this.block = p_i45462_1_;
-      this.radius = p_i45462_2_;
+   public WorldGenSand(Block var1, int var2) {
+      this.block = var1;
+      this.radius = var2;
    }
 
-   public boolean generate(World worldIn, Random rand, BlockPos position) {
-      if (worldIn.getBlockState(position).getMaterial() != Material.WATER) {
+   public boolean generate(World var1, Random var2, BlockPos var3) {
+      if (var1.getBlockState(var3).getMaterial() != Material.WATER) {
          return false;
       } else {
-         int i = rand.nextInt(this.radius - 2) + 2;
-         int j = 2;
+         int var4 = var2.nextInt(this.radius - 2) + 2;
+         boolean var5 = true;
 
-         for(int k = position.getX() - i; k <= position.getX() + i; ++k) {
-            for(int l = position.getZ() - i; l <= position.getZ() + i; ++l) {
-               int i1 = k - position.getX();
-               int j1 = l - position.getZ();
-               if (i1 * i1 + j1 * j1 <= i * i) {
-                  for(int k1 = position.getY() - 2; k1 <= position.getY() + 2; ++k1) {
-                     BlockPos blockpos = new BlockPos(k, k1, l);
-                     Block block = worldIn.getBlockState(blockpos).getBlock();
-                     if (block == Blocks.DIRT || block == Blocks.GRASS) {
-                        worldIn.setBlockState(blockpos, this.block.getDefaultState(), 2);
+         for(int var6 = var3.getX() - var4; var6 <= var3.getX() + var4; ++var6) {
+            for(int var7 = var3.getZ() - var4; var7 <= var3.getZ() + var4; ++var7) {
+               int var8 = var6 - var3.getX();
+               int var9 = var7 - var3.getZ();
+               if (var8 * var8 + var9 * var9 <= var4 * var4) {
+                  for(int var10 = var3.getY() - 2; var10 <= var3.getY() + 2; ++var10) {
+                     BlockPos var11 = new BlockPos(var6, var10, var7);
+                     Block var12 = var1.getBlockState(var11).getBlock();
+                     if (var12 == Blocks.DIRT || var12 == Blocks.GRASS) {
+                        var1.setBlockState(var11, this.block.getDefaultState(), 2);
                      }
                   }
                }

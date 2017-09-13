@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketKeepAlive implements Packet {
    private int id;
@@ -13,24 +11,19 @@ public class SPacketKeepAlive implements Packet {
    public SPacketKeepAlive() {
    }
 
-   public SPacketKeepAlive(int idIn) {
-      this.id = idIn;
+   public SPacketKeepAlive(int var1) {
+      this.id = var1;
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleKeepAlive(this);
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleKeepAlive(this);
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.id = buf.readVarInt();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.id = var1.readVarInt();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeVarInt(this.id);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getId() {
-      return this.id;
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeVarInt(this.id);
    }
 }

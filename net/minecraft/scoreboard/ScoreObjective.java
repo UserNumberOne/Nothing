@@ -1,8 +1,5 @@
 package net.minecraft.scoreboard;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 public class ScoreObjective {
    private final Scoreboard theScoreboard;
    private final String name;
@@ -10,17 +7,12 @@ public class ScoreObjective {
    private IScoreCriteria.EnumRenderType renderType;
    private String displayName;
 
-   public ScoreObjective(Scoreboard theScoreboardIn, String nameIn, IScoreCriteria objectiveCriteriaIn) {
-      this.theScoreboard = theScoreboardIn;
-      this.name = nameIn;
-      this.objectiveCriteria = objectiveCriteriaIn;
-      this.displayName = nameIn;
-      this.renderType = objectiveCriteriaIn.getRenderType();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Scoreboard getScoreboard() {
-      return this.theScoreboard;
+   public ScoreObjective(Scoreboard var1, String var2, IScoreCriteria var3) {
+      this.theScoreboard = var1;
+      this.name = var2;
+      this.objectiveCriteria = var3;
+      this.displayName = var2;
+      this.renderType = var3.getRenderType();
    }
 
    public String getName() {
@@ -35,8 +27,8 @@ public class ScoreObjective {
       return this.displayName;
    }
 
-   public void setDisplayName(String nameIn) {
-      this.displayName = nameIn;
+   public void setDisplayName(String var1) {
+      this.displayName = var1;
       this.theScoreboard.onObjectiveDisplayNameChanged(this);
    }
 
@@ -44,8 +36,8 @@ public class ScoreObjective {
       return this.renderType;
    }
 
-   public void setRenderType(IScoreCriteria.EnumRenderType type) {
-      this.renderType = type;
+   public void setRenderType(IScoreCriteria.EnumRenderType var1) {
+      this.renderType = var1;
       this.theScoreboard.onObjectiveDisplayNameChanged(this);
    }
 }

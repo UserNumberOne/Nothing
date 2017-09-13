@@ -42,8 +42,8 @@ public class EntityChicken extends EntityAnimal {
    public int timeUntilNextEgg;
    public boolean chickenJockey;
 
-   public EntityChicken(World worldIn) {
-      super(worldIn);
+   public EntityChicken(World world) {
+      super(world);
       this.setSize(0.4F, 0.7F);
       this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;
       this.setPathPriority(PathNodeType.WATER, 0.0F);
@@ -71,6 +71,10 @@ public class EntityChicken extends EntityAnimal {
    }
 
    public void onLivingUpdate() {
+      if (this.isChickenJockey()) {
+         this.spawnableBlock = !this.canDespawn();
+      }
+
       super.onLivingUpdate();
       this.oFlap = this.wingRotation;
       this.oFlapSpeed = this.destPos;
@@ -88,13 +92,15 @@ public class EntityChicken extends EntityAnimal {
       this.wingRotation += this.wingRotDelta * 2.0F;
       if (!this.world.isRemote && !this.isChild() && !this.isChickenJockey() && --this.timeUntilNextEgg <= 0) {
          this.playSound(SoundEvents.ENTITY_CHICKEN_EGG, 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+         this.forceDrops = true;
          this.dropItem(Items.EGG, 1);
+         this.forceDrops = false;
          this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;
       }
 
    }
 
-   public void fall(float distance, float damageMultiplier) {
+   public void fall(float f, float f1) {
    }
 
    protected SoundEvent getAmbientSound() {
@@ -109,7 +115,7 @@ public class EntityChicken extends EntityAnimal {
       return SoundEvents.ENTITY_CHICKEN_DEATH;
    }
 
-   protected void playStepSound(BlockPos pos, Block blockIn) {
+   protected void playStepSound(BlockPos blockposition, Block block) {
       this.playSound(SoundEvents.ENTITY_CHICKEN_STEP, 0.15F, 1.0F);
    }
 
@@ -118,50 +124,48 @@ public class EntityChicken extends EntityAnimal {
       return LootTableList.ENTITIES_CHICKEN;
    }
 
-   public EntityChicken createChild(EntityAgeable ageable) {
+   public EntityChicken createChild(EntityAgeable entityageable) {
       return new EntityChicken(this.world);
    }
 
-   public boolean isBreedingItem(@Nullable ItemStack stack) {
-      return stack != null && TEMPTATION_ITEMS.contains(stack.getItem());
+   public boolean isBreedingItem(@Nullable ItemStack itemstack) {
+      return itemstack != null && TEMPTATION_ITEMS.contains(itemstack.getItem());
    }
 
-   protected int getExperiencePoints(EntityPlayer player) {
-      return this.isChickenJockey() ? 10 : super.getExperiencePoints(player);
+   protected int getExperiencePoints(EntityPlayer entityhuman) {
+      return this.isChickenJockey() ? 10 : super.getExperiencePoints(entityhuman);
    }
 
-   public static void registerFixesChicken(DataFixer fixer) {
-      EntityLiving.registerFixesMob(fixer, "Chicken");
+   public static void registerFixesChicken(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "Chicken");
    }
 
-   public void readEntityFromNBT(NBTTagCompound compound) {
-      super.readEntityFromNBT(compound);
-      this.chickenJockey = compound.getBoolean("IsChickenJockey");
-      if (compound.hasKey("EggLayTime")) {
-         this.timeUntilNextEgg = compound.getInteger("EggLayTime");
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      this.chickenJockey = nbttagcompound.getBoolean("IsChickenJockey");
+      if (nbttagcompound.hasKey("EggLayTime")) {
+         this.timeUntilNextEgg = nbttagcompound.getInteger("EggLayTime");
       }
 
    }
 
-   public void writeEntityToNBT(NBTTagCompound compound) {
-      super.writeEntityToNBT(compound);
-      compound.setBoolean("IsChickenJockey", this.chickenJockey);
-      compound.setInteger("EggLayTime", this.timeUntilNextEgg);
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      nbttagcompound.setBoolean("IsChickenJockey", this.chickenJockey);
+      nbttagcompound.setInteger("EggLayTime", this.timeUntilNextEgg);
    }
 
    protected boolean canDespawn() {
       return this.isChickenJockey() && !this.isBeingRidden();
    }
 
-   public void updatePassenger(Entity passenger) {
-      super.updatePassenger(passenger);
+   public void updatePassenger(Entity entity) {
+      super.updatePassenger(entity);
       float f = MathHelper.sin(this.renderYawOffset * 0.017453292F);
       float f1 = MathHelper.cos(this.renderYawOffset * 0.017453292F);
-      float f2 = 0.1F;
-      float f3 = 0.0F;
-      passenger.setPosition(this.posX + (double)(0.1F * f), this.posY + (double)(this.height * 0.5F) + passenger.getYOffset() + 0.0D, this.posZ - (double)(0.1F * f1));
-      if (passenger instanceof EntityLivingBase) {
-         ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
+      entity.setPosition(this.posX + (double)(0.1F * f), this.posY + (double)(this.height * 0.5F) + entity.getYOffset() + 0.0D, this.posZ - (double)(0.1F * f1));
+      if (entity instanceof EntityLivingBase) {
+         ((EntityLivingBase)entity).renderYawOffset = this.renderYawOffset;
       }
 
    }
@@ -170,7 +174,11 @@ public class EntityChicken extends EntityAnimal {
       return this.chickenJockey;
    }
 
-   public void setChickenJockey(boolean jockey) {
-      this.chickenJockey = jockey;
+   public void setChickenJockey(boolean flag) {
+      this.chickenJockey = flag;
+   }
+
+   public EntityAgeable createChild(EntityAgeable entityageable) {
+      return this.createChild(entityageable);
    }
 }

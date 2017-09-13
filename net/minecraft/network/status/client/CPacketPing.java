@@ -4,30 +4,20 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.status.INetHandlerStatusServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketPing implements Packet {
    private long clientTime;
 
-   public CPacketPing() {
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.clientTime = var1.readLong();
    }
 
-   @SideOnly(Side.CLIENT)
-   public CPacketPing(long clientTimeIn) {
-      this.clientTime = clientTimeIn;
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeLong(this.clientTime);
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.clientTime = buf.readLong();
-   }
-
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeLong(this.clientTime);
-   }
-
-   public void processPacket(INetHandlerStatusServer handler) {
-      handler.processPing(this);
+   public void processPacket(INetHandlerStatusServer var1) {
+      var1.processPing(this);
    }
 
    public long getClientTime() {

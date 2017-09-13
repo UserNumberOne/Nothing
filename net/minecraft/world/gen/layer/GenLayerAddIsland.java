@@ -1,71 +1,71 @@
 package net.minecraft.world.gen.layer;
 
 public class GenLayerAddIsland extends GenLayer {
-   public GenLayerAddIsland(long p_i2119_1_, GenLayer p_i2119_3_) {
-      super(p_i2119_1_);
-      this.parent = p_i2119_3_;
+   public GenLayerAddIsland(long var1, GenLayer var3) {
+      super(var1);
+      this.parent = var3;
    }
 
-   public int[] getInts(int areaX, int areaY, int areaWidth, int areaHeight) {
-      int i = areaX - 1;
-      int j = areaY - 1;
-      int k = areaWidth + 2;
-      int l = areaHeight + 2;
-      int[] aint = this.parent.getInts(i, j, k, l);
-      int[] aint1 = IntCache.getIntCache(areaWidth * areaHeight);
+   public int[] getInts(int var1, int var2, int var3, int var4) {
+      int var5 = var1 - 1;
+      int var6 = var2 - 1;
+      int var7 = var3 + 2;
+      int var8 = var4 + 2;
+      int[] var9 = this.parent.getInts(var5, var6, var7, var8);
+      int[] var10 = IntCache.getIntCache(var3 * var4);
 
-      for(int i1 = 0; i1 < areaHeight; ++i1) {
-         for(int j1 = 0; j1 < areaWidth; ++j1) {
-            int k1 = aint[j1 + 0 + (i1 + 0) * k];
-            int l1 = aint[j1 + 2 + (i1 + 0) * k];
-            int i2 = aint[j1 + 0 + (i1 + 2) * k];
-            int j2 = aint[j1 + 2 + (i1 + 2) * k];
-            int k2 = aint[j1 + 1 + (i1 + 1) * k];
-            this.initChunkSeed((long)(j1 + areaX), (long)(i1 + areaY));
-            if (k2 != 0 || k1 == 0 && l1 == 0 && i2 == 0 && j2 == 0) {
-               if (k2 > 0 && (k1 == 0 || l1 == 0 || i2 == 0 || j2 == 0)) {
+      for(int var11 = 0; var11 < var4; ++var11) {
+         for(int var12 = 0; var12 < var3; ++var12) {
+            int var13 = var9[var12 + 0 + (var11 + 0) * var7];
+            int var14 = var9[var12 + 2 + (var11 + 0) * var7];
+            int var15 = var9[var12 + 0 + (var11 + 2) * var7];
+            int var16 = var9[var12 + 2 + (var11 + 2) * var7];
+            int var17 = var9[var12 + 1 + (var11 + 1) * var7];
+            this.initChunkSeed((long)(var12 + var1), (long)(var11 + var2));
+            if (var17 != 0 || var13 == 0 && var14 == 0 && var15 == 0 && var16 == 0) {
+               if (var17 > 0 && (var13 == 0 || var14 == 0 || var15 == 0 || var16 == 0)) {
                   if (this.nextInt(5) == 0) {
-                     if (k2 == 4) {
-                        aint1[j1 + i1 * areaWidth] = 4;
+                     if (var17 == 4) {
+                        var10[var12 + var11 * var3] = 4;
                      } else {
-                        aint1[j1 + i1 * areaWidth] = 0;
+                        var10[var12 + var11 * var3] = 0;
                      }
                   } else {
-                     aint1[j1 + i1 * areaWidth] = k2;
+                     var10[var12 + var11 * var3] = var17;
                   }
                } else {
-                  aint1[j1 + i1 * areaWidth] = k2;
+                  var10[var12 + var11 * var3] = var17;
                }
             } else {
-               int l2 = 1;
-               int i3 = 1;
-               if (k1 != 0 && this.nextInt(l2++) == 0) {
-                  i3 = k1;
+               int var18 = 1;
+               int var19 = 1;
+               if (var13 != 0 && this.nextInt(var18++) == 0) {
+                  var19 = var13;
                }
 
-               if (l1 != 0 && this.nextInt(l2++) == 0) {
-                  i3 = l1;
+               if (var14 != 0 && this.nextInt(var18++) == 0) {
+                  var19 = var14;
                }
 
-               if (i2 != 0 && this.nextInt(l2++) == 0) {
-                  i3 = i2;
+               if (var15 != 0 && this.nextInt(var18++) == 0) {
+                  var19 = var15;
                }
 
-               if (j2 != 0 && this.nextInt(l2++) == 0) {
-                  i3 = j2;
+               if (var16 != 0 && this.nextInt(var18++) == 0) {
+                  var19 = var16;
                }
 
                if (this.nextInt(3) == 0) {
-                  aint1[j1 + i1 * areaWidth] = i3;
-               } else if (i3 == 4) {
-                  aint1[j1 + i1 * areaWidth] = 4;
+                  var10[var12 + var11 * var3] = var19;
+               } else if (var19 == 4) {
+                  var10[var12 + var11 * var3] = 4;
                } else {
-                  aint1[j1 + i1 * areaWidth] = 0;
+                  var10[var12 + var11 * var3] = 0;
                }
             }
          }
       }
 
-      return aint1;
+      return var10;
    }
 }

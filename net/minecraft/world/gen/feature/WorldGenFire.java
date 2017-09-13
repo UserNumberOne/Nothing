@@ -6,11 +6,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenFire extends WorldGenerator {
-   public boolean generate(World worldIn, Random rand, BlockPos position) {
-      for(int i = 0; i < 64; ++i) {
-         BlockPos blockpos = position.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
-         if (worldIn.isAirBlock(blockpos) && worldIn.getBlockState(blockpos.down()).getBlock() == Blocks.NETHERRACK) {
-            worldIn.setBlockState(blockpos, Blocks.FIRE.getDefaultState(), 2);
+   public boolean generate(World var1, Random var2, BlockPos var3) {
+      for(int var4 = 0; var4 < 64; ++var4) {
+         BlockPos var5 = var3.add(var2.nextInt(8) - var2.nextInt(8), var2.nextInt(4) - var2.nextInt(4), var2.nextInt(8) - var2.nextInt(8));
+         if (var1.isAirBlock(var5) && var1.getBlockState(var5.down()).getBlock() == Blocks.NETHERRACK) {
+            var1.setBlockState(var5, Blocks.FIRE.getDefaultState(), 2);
          }
       }
 

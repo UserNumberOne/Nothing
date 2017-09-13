@@ -6,8 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginClient;
 import net.minecraft.util.CryptManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEncryptionRequest implements Packet {
    private String hashedServerId;
@@ -17,40 +15,25 @@ public class SPacketEncryptionRequest implements Packet {
    public SPacketEncryptionRequest() {
    }
 
-   public SPacketEncryptionRequest(String serverIdIn, PublicKey publicKeyIn, byte[] verifyTokenIn) {
-      this.hashedServerId = serverIdIn;
-      this.publicKey = publicKeyIn;
-      this.verifyToken = verifyTokenIn;
+   public SPacketEncryptionRequest(String var1, PublicKey var2, byte[] var3) {
+      this.hashedServerId = var1;
+      this.publicKey = var2;
+      this.verifyToken = var3;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.hashedServerId = buf.readString(20);
-      this.publicKey = CryptManager.decodePublicKey(buf.readByteArray());
-      this.verifyToken = buf.readByteArray();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.hashedServerId = var1.readString(20);
+      this.publicKey = CryptManager.decodePublicKey(var1.readByteArray());
+      this.verifyToken = var1.readByteArray();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeString(this.hashedServerId);
-      buf.writeByteArray(this.publicKey.getEncoded());
-      buf.writeByteArray(this.verifyToken);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeString(this.hashedServerId);
+      var1.writeByteArray(this.publicKey.getEncoded());
+      var1.writeByteArray(this.verifyToken);
    }
 
-   public void processPacket(INetHandlerLoginClient handler) {
-      handler.handleEncryptionRequest(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getServerId() {
-      return this.hashedServerId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public PublicKey getPublicKey() {
-      return this.publicKey;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte[] getVerifyToken() {
-      return this.verifyToken;
+   public void processPacket(INetHandlerLoginClient var1) {
+      var1.handleEncryptionRequest(this);
    }
 }

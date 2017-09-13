@@ -8,8 +8,8 @@ public class ForceVBOOn implements IFixableData {
       return 505;
    }
 
-   public NBTTagCompound fixTagCompound(NBTTagCompound compound) {
-      compound.setString("useVbo", "true");
-      return compound;
+   public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
+      var1.setString("useVbo", "true");
+      return var1;
    }
 }

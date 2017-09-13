@@ -5,40 +5,45 @@ import com.mojang.authlib.GameProfile;
 import java.io.File;
 
 public class UserListBans extends UserList {
-   public UserListBans(File bansFile) {
-      super(bansFile);
+   public UserListBans(File var1) {
+      super(var1);
    }
 
-   protected UserListEntry createEntry(JsonObject entryData) {
-      return new UserListBansEntry(entryData);
+   protected UserListEntry createEntry(JsonObject var1) {
+      return new UserListBansEntry(var1);
    }
 
-   public boolean isBanned(GameProfile profile) {
-      return this.hasEntry(profile);
+   public boolean isBanned(GameProfile var1) {
+      return this.hasEntry(var1);
    }
 
    public String[] getKeys() {
-      String[] astring = new String[this.getValues().size()];
-      int i = 0;
+      String[] var1 = new String[this.getValues().size()];
+      int var2 = 0;
 
-      for(UserListBansEntry userlistbansentry : this.getValues().values()) {
-         astring[i++] = ((GameProfile)userlistbansentry.getValue()).getName();
+      for(UserListBansEntry var4 : this.getValues().values()) {
+         var1[var2++] = ((GameProfile)var4.getValue()).getName();
       }
 
-      return astring;
+      return var1;
    }
 
-   protected String getObjectKey(GameProfile obj) {
-      return obj.getId().toString();
+   protected String getObjectKey(GameProfile var1) {
+      return var1.getId().toString();
    }
 
-   public GameProfile getBannedProfile(String username) {
-      for(UserListBansEntry userlistbansentry : this.getValues().values()) {
-         if (username.equalsIgnoreCase(((GameProfile)userlistbansentry.getValue()).getName())) {
-            return (GameProfile)userlistbansentry.getValue();
+   public GameProfile getBannedProfile(String var1) {
+      for(UserListBansEntry var3 : this.getValues().values()) {
+         if (var1.equalsIgnoreCase(((GameProfile)var3.getValue()).getName())) {
+            return (GameProfile)var3.getValue();
          }
       }
 
       return null;
+   }
+
+   // $FF: synthetic method
+   protected String getObjectKey(Object var1) {
+      return this.getObjectKey((GameProfile)var1);
    }
 }

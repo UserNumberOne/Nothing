@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginClient;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketDisconnect implements Packet {
    private ITextComponent reason;
@@ -14,24 +12,19 @@ public class SPacketDisconnect implements Packet {
    public SPacketDisconnect() {
    }
 
-   public SPacketDisconnect(ITextComponent p_i46853_1_) {
-      this.reason = p_i46853_1_;
+   public SPacketDisconnect(ITextComponent var1) {
+      this.reason = var1;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.reason = ITextComponent.Serializer.fromJsonLenient(buf.readString(32767));
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.reason = ITextComponent.Serializer.fromJsonLenient(var1.readString(32767));
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeTextComponent(this.reason);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeTextComponent(this.reason);
    }
 
-   public void processPacket(INetHandlerLoginClient handler) {
-      handler.handleDisconnect(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getReason() {
-      return this.reason;
+   public void processPacket(INetHandlerLoginClient var1) {
+      var1.handleDisconnect(this);
    }
 }

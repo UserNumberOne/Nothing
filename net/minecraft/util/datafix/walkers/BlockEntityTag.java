@@ -16,73 +16,73 @@ public class BlockEntityTag implements IDataWalker {
    private static final Map ITEM_ID_TO_BLOCK_ENTITY_ID = Maps.newHashMap();
 
    @Nullable
-   private static String getBlockEntityID(String blockID) {
-      return (String)ITEM_ID_TO_BLOCK_ENTITY_ID.get((new ResourceLocation(blockID)).toString());
+   private static String getBlockEntityID(String var0) {
+      return (String)ITEM_ID_TO_BLOCK_ENTITY_ID.get((new ResourceLocation(var0)).toString());
    }
 
-   public NBTTagCompound process(IDataFixer fixer, NBTTagCompound compound, int versionIn) {
-      if (!compound.hasKey("tag", 10)) {
-         return compound;
+   public NBTTagCompound process(IDataFixer var1, NBTTagCompound var2, int var3) {
+      if (!var2.hasKey("tag", 10)) {
+         return var2;
       } else {
-         NBTTagCompound nbttagcompound = compound.getCompoundTag("tag");
-         if (nbttagcompound.hasKey("BlockEntityTag", 10)) {
-            NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("BlockEntityTag");
-            String s = compound.getString("id");
-            String s1 = getBlockEntityID(s);
-            boolean flag;
-            if (s1 == null) {
-               LOGGER.warn("Unable to resolve BlockEntity for ItemInstance: {}", new Object[]{s});
-               flag = false;
+         NBTTagCompound var4 = var2.getCompoundTag("tag");
+         if (var4.hasKey("BlockEntityTag", 10)) {
+            NBTTagCompound var5 = var4.getCompoundTag("BlockEntityTag");
+            String var6 = var2.getString("id");
+            String var7 = getBlockEntityID(var6);
+            boolean var8;
+            if (var7 == null) {
+               LOGGER.warn("Unable to resolve BlockEntity for ItemInstance: {}", new Object[]{var6});
+               var8 = false;
             } else {
-               flag = !nbttagcompound1.hasKey("id");
-               nbttagcompound1.setString("id", s1);
+               var8 = !var5.hasKey("id");
+               var5.setString("id", var7);
             }
 
-            fixer.process(FixTypes.BLOCK_ENTITY, nbttagcompound1, versionIn);
-            if (flag) {
-               nbttagcompound1.removeTag("id");
+            var1.process(FixTypes.BLOCK_ENTITY, var5, var3);
+            if (var8) {
+               var5.removeTag("id");
             }
          }
 
-         return compound;
+         return var2;
       }
    }
 
    static {
-      Map map = ITEM_ID_TO_BLOCK_ENTITY_ID;
-      map.put("minecraft:furnace", "Furnace");
-      map.put("minecraft:lit_furnace", "Furnace");
-      map.put("minecraft:chest", "Chest");
-      map.put("minecraft:trapped_chest", "Chest");
-      map.put("minecraft:ender_chest", "EnderChest");
-      map.put("minecraft:jukebox", "RecordPlayer");
-      map.put("minecraft:dispenser", "Trap");
-      map.put("minecraft:dropper", "Dropper");
-      map.put("minecraft:sign", "Sign");
-      map.put("minecraft:mob_spawner", "MobSpawner");
-      map.put("minecraft:noteblock", "Music");
-      map.put("minecraft:brewing_stand", "Cauldron");
-      map.put("minecraft:enhanting_table", "EnchantTable");
-      map.put("minecraft:command_block", "CommandBlock");
-      map.put("minecraft:beacon", "Beacon");
-      map.put("minecraft:skull", "Skull");
-      map.put("minecraft:daylight_detector", "DLDetector");
-      map.put("minecraft:hopper", "Hopper");
-      map.put("minecraft:banner", "Banner");
-      map.put("minecraft:flower_pot", "FlowerPot");
-      map.put("minecraft:repeating_command_block", "CommandBlock");
-      map.put("minecraft:chain_command_block", "CommandBlock");
-      map.put("minecraft:standing_sign", "Sign");
-      map.put("minecraft:wall_sign", "Sign");
-      map.put("minecraft:piston_head", "Piston");
-      map.put("minecraft:daylight_detector_inverted", "DLDetector");
-      map.put("minecraft:unpowered_comparator", "Comparator");
-      map.put("minecraft:powered_comparator", "Comparator");
-      map.put("minecraft:wall_banner", "Banner");
-      map.put("minecraft:standing_banner", "Banner");
-      map.put("minecraft:structure_block", "Structure");
-      map.put("minecraft:end_portal", "Airportal");
-      map.put("minecraft:end_gateway", "EndGateway");
-      map.put("minecraft:shield", "Shield");
+      Map var0 = ITEM_ID_TO_BLOCK_ENTITY_ID;
+      var0.put("minecraft:furnace", "Furnace");
+      var0.put("minecraft:lit_furnace", "Furnace");
+      var0.put("minecraft:chest", "Chest");
+      var0.put("minecraft:trapped_chest", "Chest");
+      var0.put("minecraft:ender_chest", "EnderChest");
+      var0.put("minecraft:jukebox", "RecordPlayer");
+      var0.put("minecraft:dispenser", "Trap");
+      var0.put("minecraft:dropper", "Dropper");
+      var0.put("minecraft:sign", "Sign");
+      var0.put("minecraft:mob_spawner", "MobSpawner");
+      var0.put("minecraft:noteblock", "Music");
+      var0.put("minecraft:brewing_stand", "Cauldron");
+      var0.put("minecraft:enhanting_table", "EnchantTable");
+      var0.put("minecraft:command_block", "CommandBlock");
+      var0.put("minecraft:beacon", "Beacon");
+      var0.put("minecraft:skull", "Skull");
+      var0.put("minecraft:daylight_detector", "DLDetector");
+      var0.put("minecraft:hopper", "Hopper");
+      var0.put("minecraft:banner", "Banner");
+      var0.put("minecraft:flower_pot", "FlowerPot");
+      var0.put("minecraft:repeating_command_block", "CommandBlock");
+      var0.put("minecraft:chain_command_block", "CommandBlock");
+      var0.put("minecraft:standing_sign", "Sign");
+      var0.put("minecraft:wall_sign", "Sign");
+      var0.put("minecraft:piston_head", "Piston");
+      var0.put("minecraft:daylight_detector_inverted", "DLDetector");
+      var0.put("minecraft:unpowered_comparator", "Comparator");
+      var0.put("minecraft:powered_comparator", "Comparator");
+      var0.put("minecraft:wall_banner", "Banner");
+      var0.put("minecraft:standing_banner", "Banner");
+      var0.put("minecraft:structure_block", "Structure");
+      var0.put("minecraft:end_portal", "Airportal");
+      var0.put("minecraft:end_gateway", "EndGateway");
+      var0.put("minecraft:shield", "Shield");
    }
 }

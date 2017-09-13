@@ -12,20 +12,20 @@ public class CPacketAnimation implements Packet {
    public CPacketAnimation() {
    }
 
-   public CPacketAnimation(EnumHand handIn) {
-      this.hand = handIn;
+   public CPacketAnimation(EnumHand var1) {
+      this.hand = var1;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.hand = (EnumHand)buf.readEnumValue(EnumHand.class);
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.hand = (EnumHand)var1.readEnumValue(EnumHand.class);
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeEnumValue(this.hand);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeEnumValue(this.hand);
    }
 
-   public void processPacket(INetHandlerPlayServer handler) {
-      handler.handleAnimation(this);
+   public void processPacket(INetHandlerPlayServer var1) {
+      var1.handleAnimation(this);
    }
 
    public EnumHand getHand() {

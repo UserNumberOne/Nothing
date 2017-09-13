@@ -9,8 +9,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class BiomeHell extends Biome {
-   public BiomeHell(Biome.BiomeProperties properties) {
-      super(properties);
+   public BiomeHell(Biome.BiomeProperties var1) {
+      super(var1);
       this.spawnableMonsterList.clear();
       this.spawnableCreatureList.clear();
       this.spawnableWaterCreatureList.clear();
@@ -22,7 +22,7 @@ public class BiomeHell extends Biome {
       this.theBiomeDecorator = new BiomeHellDecorator();
    }
 
-   public void decorate(World worldIn, Random rand, BlockPos pos) {
-      super.decorate(worldIn, rand, pos);
+   public void decorate(World var1, Random var2, BlockPos var3) {
+      super.decorate(var1, var2, var3);
    }
 }

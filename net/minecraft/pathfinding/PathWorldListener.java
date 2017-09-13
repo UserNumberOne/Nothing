@@ -17,69 +17,69 @@ import net.minecraft.world.World;
 public class PathWorldListener implements IWorldEventListener {
    private final List navigations = Lists.newArrayList();
 
-   public void notifyBlockUpdate(World worldIn, BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
-      if (this.didBlockChange(worldIn, pos, oldState, newState)) {
-         int i = 0;
+   public void notifyBlockUpdate(World var1, BlockPos var2, IBlockState var3, IBlockState var4, int var5) {
+      if (this.didBlockChange(var1, var2, var3, var4)) {
+         int var6 = 0;
 
-         for(int j = this.navigations.size(); i < j; ++i) {
-            PathNavigate pathnavigate = (PathNavigate)this.navigations.get(i);
-            if (pathnavigate != null && !pathnavigate.canUpdatePathOnTimeout()) {
-               Path path = pathnavigate.getPath();
-               if (path != null && !path.isFinished() && path.getCurrentPathLength() != 0) {
-                  PathPoint pathpoint = pathnavigate.currentPath.getFinalPathPoint();
-                  double d0 = pos.distanceSq(((double)pathpoint.xCoord + pathnavigate.theEntity.posX) / 2.0D, ((double)pathpoint.yCoord + pathnavigate.theEntity.posY) / 2.0D, ((double)pathpoint.zCoord + pathnavigate.theEntity.posZ) / 2.0D);
-                  int k = (path.getCurrentPathLength() - path.getCurrentPathIndex()) * (path.getCurrentPathLength() - path.getCurrentPathIndex());
-                  if (d0 < (double)k) {
-                     pathnavigate.updatePath();
+         for(int var7 = this.navigations.size(); var6 < var7; ++var6) {
+            PathNavigate var8 = (PathNavigate)this.navigations.get(var6);
+            if (var8 != null && !var8.canUpdatePathOnTimeout()) {
+               Path var9 = var8.getPath();
+               if (var9 != null && !var9.isFinished() && var9.getCurrentPathLength() != 0) {
+                  PathPoint var10 = var8.currentPath.getFinalPathPoint();
+                  double var11 = var2.distanceSq(((double)var10.xCoord + var8.theEntity.posX) / 2.0D, ((double)var10.yCoord + var8.theEntity.posY) / 2.0D, ((double)var10.zCoord + var8.theEntity.posZ) / 2.0D);
+                  int var13 = (var9.getCurrentPathLength() - var9.getCurrentPathIndex()) * (var9.getCurrentPathLength() - var9.getCurrentPathIndex());
+                  if (var11 < (double)var13) {
+                     var8.updatePath();
                   }
                }
             }
          }
+
+      }
+   }
+
+   protected boolean didBlockChange(World var1, BlockPos var2, IBlockState var3, IBlockState var4) {
+      AxisAlignedBB var5 = var3.getCollisionBoundingBox(var1, var2);
+      AxisAlignedBB var6 = var4.getCollisionBoundingBox(var1, var2);
+      return var5 != var6 && (var5 == null || !var5.equals(var6));
+   }
+
+   public void notifyLightSet(BlockPos var1) {
+   }
+
+   public void markBlockRangeForRenderUpdate(int var1, int var2, int var3, int var4, int var5, int var6) {
+   }
+
+   public void playSoundToAllNearExcept(@Nullable EntityPlayer var1, SoundEvent var2, SoundCategory var3, double var4, double var6, double var8, float var10, float var11) {
+   }
+
+   public void spawnParticle(int var1, boolean var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
+   }
+
+   public void onEntityAdded(Entity var1) {
+      if (var1 instanceof EntityLiving) {
+         this.navigations.add(((EntityLiving)var1).getNavigator());
       }
 
    }
 
-   protected boolean didBlockChange(World worldIn, BlockPos pos, IBlockState oldState, IBlockState newState) {
-      AxisAlignedBB axisalignedbb = oldState.getCollisionBoundingBox(worldIn, pos);
-      AxisAlignedBB axisalignedbb1 = newState.getCollisionBoundingBox(worldIn, pos);
-      return axisalignedbb != axisalignedbb1 && (axisalignedbb == null || !axisalignedbb.equals(axisalignedbb1));
-   }
-
-   public void notifyLightSet(BlockPos pos) {
-   }
-
-   public void markBlockRangeForRenderUpdate(int x1, int y1, int z1, int x2, int y2, int z2) {
-   }
-
-   public void playSoundToAllNearExcept(@Nullable EntityPlayer player, SoundEvent soundIn, SoundCategory category, double x, double y, double z, float volume, float pitch) {
-   }
-
-   public void spawnParticle(int particleID, boolean ignoreRange, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... parameters) {
-   }
-
-   public void onEntityAdded(Entity entityIn) {
-      if (entityIn instanceof EntityLiving) {
-         this.navigations.add(((EntityLiving)entityIn).getNavigator());
+   public void onEntityRemoved(Entity var1) {
+      if (var1 instanceof EntityLiving) {
+         this.navigations.remove(((EntityLiving)var1).getNavigator());
       }
 
    }
 
-   public void onEntityRemoved(Entity entityIn) {
-      if (entityIn instanceof EntityLiving) {
-         this.navigations.remove(((EntityLiving)entityIn).getNavigator());
-      }
-
+   public void playRecord(SoundEvent var1, BlockPos var2) {
    }
 
-   public void playRecord(SoundEvent soundIn, BlockPos pos) {
+   public void broadcastSound(int var1, BlockPos var2, int var3) {
    }
 
-   public void broadcastSound(int soundID, BlockPos pos, int data) {
+   public void playEvent(EntityPlayer var1, int var2, BlockPos var3, int var4) {
    }
 
-   public void playEvent(EntityPlayer player, int type, BlockPos blockPosIn, int data) {
-   }
-
-   public void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress) {
+   public void sendBlockBreakProgress(int var1, BlockPos var2, int var3) {
    }
 }

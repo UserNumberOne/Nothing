@@ -17,19 +17,19 @@ public class ItemEgg extends Item {
       this.setCreativeTab(CreativeTabs.MATERIALS);
    }
 
-   public ActionResult onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
-      if (!playerIn.capabilities.isCreativeMode) {
-         --itemStackIn.stackSize;
+   public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
+      if (!var3.capabilities.isCreativeMode) {
+         --var1.stackSize;
       }
 
-      worldIn.playSound((EntityPlayer)null, playerIn.posX, playerIn.posY, playerIn.posZ, SoundEvents.ENTITY_EGG_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
-      if (!worldIn.isRemote) {
-         EntityEgg entityegg = new EntityEgg(worldIn, playerIn);
-         entityegg.setHeadingFromThrower(playerIn, playerIn.rotationPitch, playerIn.rotationYaw, 0.0F, 1.5F, 1.0F);
-         worldIn.spawnEntity(entityegg);
+      var2.playSound((EntityPlayer)null, var3.posX, var3.posY, var3.posZ, SoundEvents.ENTITY_EGG_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+      if (!var2.isRemote) {
+         EntityEgg var5 = new EntityEgg(var2, var3);
+         var5.setHeadingFromThrower(var3, var3.rotationPitch, var3.rotationYaw, 0.0F, 1.5F, 1.0F);
+         var2.spawnEntity(var5);
       }
 
-      playerIn.addStat(StatList.getObjectUseStats(this));
-      return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
+      var3.addStat(StatList.getObjectUseStats(this));
+      return new ActionResult(EnumActionResult.SUCCESS, var1);
    }
 }

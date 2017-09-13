@@ -11,37 +11,43 @@ public class VillageDoorInfo {
    private boolean isDetachedFromVillageFlag;
    private int doorOpeningRestrictionCounter;
 
-   public VillageDoorInfo(BlockPos pos, int deltaX, int deltaZ, int timestamp) {
-      this(pos, getFaceDirection(deltaX, deltaZ), timestamp);
+   public VillageDoorInfo(BlockPos var1, int var2, int var3, int var4) {
+      this(var1, getFaceDirection(var2, var3), var4);
    }
 
-   private static EnumFacing getFaceDirection(int deltaX, int deltaZ) {
-      return deltaX < 0 ? EnumFacing.WEST : (deltaX > 0 ? EnumFacing.EAST : (deltaZ < 0 ? EnumFacing.NORTH : EnumFacing.SOUTH));
+   private static EnumFacing getFaceDirection(int var0, int var1) {
+      if (var0 < 0) {
+         return EnumFacing.WEST;
+      } else if (var0 > 0) {
+         return EnumFacing.EAST;
+      } else {
+         return var1 < 0 ? EnumFacing.NORTH : EnumFacing.SOUTH;
+      }
    }
 
-   public VillageDoorInfo(BlockPos pos, EnumFacing facing, int timestamp) {
-      this.doorBlockPos = pos;
-      this.insideDirection = facing;
-      this.insideBlock = pos.offset(facing, 2);
-      this.lastActivityTimestamp = timestamp;
+   public VillageDoorInfo(BlockPos var1, EnumFacing var2, int var3) {
+      this.doorBlockPos = var1;
+      this.insideDirection = var2;
+      this.insideBlock = var1.offset(var2, 2);
+      this.lastActivityTimestamp = var3;
    }
 
-   public int getDistanceSquared(int x, int y, int z) {
-      return (int)this.doorBlockPos.distanceSq((double)x, (double)y, (double)z);
+   public int getDistanceSquared(int var1, int var2, int var3) {
+      return (int)this.doorBlockPos.distanceSq((double)var1, (double)var2, (double)var3);
    }
 
-   public int getDistanceToDoorBlockSq(BlockPos pos) {
-      return (int)pos.distanceSq(this.getDoorBlockPos());
+   public int getDistanceToDoorBlockSq(BlockPos var1) {
+      return (int)var1.distanceSq(this.getDoorBlockPos());
    }
 
-   public int getDistanceToInsideBlockSq(BlockPos pos) {
-      return (int)this.insideBlock.distanceSq(pos);
+   public int getDistanceToInsideBlockSq(BlockPos var1) {
+      return (int)this.insideBlock.distanceSq(var1);
    }
 
-   public boolean isInsideSide(BlockPos pos) {
-      int i = pos.getX() - this.doorBlockPos.getX();
-      int j = pos.getZ() - this.doorBlockPos.getY();
-      return i * this.insideDirection.getFrontOffsetX() + j * this.insideDirection.getFrontOffsetZ() >= 0;
+   public boolean isInsideSide(BlockPos var1) {
+      int var2 = var1.getX() - this.doorBlockPos.getX();
+      int var3 = var1.getZ() - this.doorBlockPos.getY();
+      return var2 * this.insideDirection.getFrontOffsetX() + var3 * this.insideDirection.getFrontOffsetZ() >= 0;
    }
 
    public void resetDoorOpeningRestrictionCounter() {
@@ -76,16 +82,16 @@ public class VillageDoorInfo {
       return this.lastActivityTimestamp;
    }
 
-   public void setLastActivityTimestamp(int timestamp) {
-      this.lastActivityTimestamp = timestamp;
+   public void setLastActivityTimestamp(int var1) {
+      this.lastActivityTimestamp = var1;
    }
 
    public boolean getIsDetachedFromVillageFlag() {
       return this.isDetachedFromVillageFlag;
    }
 
-   public void setIsDetachedFromVillageFlag(boolean detached) {
-      this.isDetachedFromVillageFlag = detached;
+   public void setIsDetachedFromVillageFlag(boolean var1) {
+      this.isDetachedFromVillageFlag = var1;
    }
 
    public EnumFacing getInsideDirection() {

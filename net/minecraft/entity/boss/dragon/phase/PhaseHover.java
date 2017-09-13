@@ -7,8 +7,8 @@ import net.minecraft.util.math.Vec3d;
 public class PhaseHover extends PhaseBase {
    private Vec3d targetLocation;
 
-   public PhaseHover(EntityDragon dragonIn) {
-      super(dragonIn);
+   public PhaseHover(EntityDragon var1) {
+      super(var1);
    }
 
    public void doLocalUpdate() {

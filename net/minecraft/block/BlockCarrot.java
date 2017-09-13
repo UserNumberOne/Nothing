@@ -18,7 +18,7 @@ public class BlockCarrot extends BlockCrops {
       return Items.CARROT;
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-      return CARROT_AABB[((Integer)state.getValue(this.getAgeProperty())).intValue()];
+   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return CARROT_AABB[((Integer)var1.getValue(this.getAgeProperty())).intValue()];
    }
 }

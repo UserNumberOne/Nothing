@@ -11,16 +11,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenFossils;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate.EventType;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BiomeSwamp extends Biome {
    protected static final IBlockState WATER_LILY = Blocks.WATERLILY.getDefaultState();
 
-   protected BiomeSwamp(Biome.BiomeProperties properties) {
-      super(properties);
+   protected BiomeSwamp(Biome.BiomeProperties var1) {
+      super(var1);
       this.theBiomeDecorator.treesPerChunk = 2;
       this.theBiomeDecorator.flowersPerChunk = 1;
       this.theBiomeDecorator.deadBushPerChunk = 1;
@@ -34,26 +30,26 @@ public class BiomeSwamp extends Biome {
       this.spawnableMonsterList.add(new Biome.SpawnListEntry(EntitySlime.class, 1, 1, 1));
    }
 
-   public WorldGenAbstractTree genBigTreeChance(Random rand) {
+   public WorldGenAbstractTree genBigTreeChance(Random var1) {
       return SWAMP_FEATURE;
    }
 
-   public BlockFlower.EnumFlowerType pickRandomFlower(Random rand, BlockPos pos) {
+   public BlockFlower.EnumFlowerType pickRandomFlower(Random var1, BlockPos var2) {
       return BlockFlower.EnumFlowerType.BLUE_ORCHID;
    }
 
-   public void genTerrainBlocks(World worldIn, Random rand, ChunkPrimer chunkPrimerIn, int x, int z, double noiseVal) {
-      double d0 = GRASS_COLOR_NOISE.getValue((double)x * 0.25D, (double)z * 0.25D);
-      if (d0 > 0.0D) {
-         int i = x & 15;
-         int j = z & 15;
+   public void genTerrainBlocks(World var1, Random var2, ChunkPrimer var3, int var4, int var5, double var6) {
+      double var8 = GRASS_COLOR_NOISE.getValue((double)var4 * 0.25D, (double)var5 * 0.25D);
+      if (var8 > 0.0D) {
+         int var10 = var4 & 15;
+         int var11 = var5 & 15;
 
-         for(int k = 255; k >= 0; --k) {
-            if (chunkPrimerIn.getBlockState(j, k, i).getMaterial() != Material.AIR) {
-               if (k == 62 && chunkPrimerIn.getBlockState(j, k, i).getBlock() != Blocks.WATER) {
-                  chunkPrimerIn.setBlockState(j, k, i, WATER);
-                  if (d0 < 0.12D) {
-                     chunkPrimerIn.setBlockState(j, k + 1, i, WATER_LILY);
+         for(int var12 = 255; var12 >= 0; --var12) {
+            if (var3.getBlockState(var11, var12, var10).getMaterial() != Material.AIR) {
+               if (var12 == 62 && var3.getBlockState(var11, var12, var10).getBlock() != Blocks.WATER) {
+                  var3.setBlockState(var11, var12, var10, WATER);
+                  if (var8 < 0.12D) {
+                     var3.setBlockState(var11, var12 + 1, var10, WATER_LILY);
                   }
                }
                break;
@@ -61,29 +57,14 @@ public class BiomeSwamp extends Biome {
          }
       }
 
-      this.generateBiomeTerrain(worldIn, rand, chunkPrimerIn, x, z, noiseVal);
+      this.generateBiomeTerrain(var1, var2, var3, var4, var5, var6);
    }
 
-   public void decorate(World worldIn, Random rand, BlockPos pos) {
-      super.decorate(worldIn, rand, pos);
-      if (TerrainGen.decorate(worldIn, rand, pos, EventType.FOSSIL) && rand.nextInt(64) == 0) {
-         (new WorldGenFossils()).generate(worldIn, rand, pos);
+   public void decorate(World var1, Random var2, BlockPos var3) {
+      super.decorate(var1, var2, var3);
+      if (var2.nextInt(64) == 0) {
+         (new WorldGenFossils()).generate(var1, var2, var3);
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getGrassColorAtPos(BlockPos pos) {
-      double d0 = GRASS_COLOR_NOISE.getValue((double)pos.getX() * 0.0225D, (double)pos.getZ() * 0.0225D);
-      return d0 < -0.1D ? 5011004 : 6975545;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFoliageColorAtPos(BlockPos pos) {
-      return 6975545;
-   }
-
-   public void addDefaultFlowers() {
-      this.addFlower(Blocks.RED_FLOWER.getDefaultState().withProperty(Blocks.RED_FLOWER.getTypeProperty(), BlockFlower.EnumFlowerType.BLUE_ORCHID), 10);
    }
 }

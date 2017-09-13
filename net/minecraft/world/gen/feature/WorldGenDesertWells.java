@@ -18,64 +18,64 @@ public class WorldGenDesertWells extends WorldGenerator {
    private final IBlockState sandstone = Blocks.SANDSTONE.getDefaultState();
    private final IBlockState water = Blocks.FLOWING_WATER.getDefaultState();
 
-   public boolean generate(World worldIn, Random rand, BlockPos position) {
-      while(worldIn.isAirBlock(position) && position.getY() > 2) {
-         position = position.down();
+   public boolean generate(World var1, Random var2, BlockPos var3) {
+      while(var1.isAirBlock(var3) && var3.getY() > 2) {
+         var3 = var3.down();
       }
 
-      if (!IS_SAND.apply(worldIn.getBlockState(position))) {
+      if (!IS_SAND.apply(var1.getBlockState(var3))) {
          return false;
       } else {
-         for(int i = -2; i <= 2; ++i) {
-            for(int j = -2; j <= 2; ++j) {
-               if (worldIn.isAirBlock(position.add(i, -1, j)) && worldIn.isAirBlock(position.add(i, -2, j))) {
+         for(int var4 = -2; var4 <= 2; ++var4) {
+            for(int var5 = -2; var5 <= 2; ++var5) {
+               if (var1.isAirBlock(var3.add(var4, -1, var5)) && var1.isAirBlock(var3.add(var4, -2, var5))) {
                   return false;
                }
             }
          }
 
-         for(int l = -1; l <= 0; ++l) {
-            for(int l1 = -2; l1 <= 2; ++l1) {
-               for(int k = -2; k <= 2; ++k) {
-                  worldIn.setBlockState(position.add(l1, l, k), this.sandstone, 2);
+         for(int var7 = -1; var7 <= 0; ++var7) {
+            for(int var12 = -2; var12 <= 2; ++var12) {
+               for(int var6 = -2; var6 <= 2; ++var6) {
+                  var1.setBlockState(var3.add(var12, var7, var6), this.sandstone, 2);
                }
             }
          }
 
-         worldIn.setBlockState(position, this.water, 2);
+         var1.setBlockState(var3, this.water, 2);
 
-         for(EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-            worldIn.setBlockState(position.offset(enumfacing), this.water, 2);
+         for(EnumFacing var13 : EnumFacing.Plane.HORIZONTAL) {
+            var1.setBlockState(var3.offset(var13), this.water, 2);
          }
 
-         for(int i1 = -2; i1 <= 2; ++i1) {
-            for(int i2 = -2; i2 <= 2; ++i2) {
-               if (i1 == -2 || i1 == 2 || i2 == -2 || i2 == 2) {
-                  worldIn.setBlockState(position.add(i1, 1, i2), this.sandstone, 2);
+         for(int var9 = -2; var9 <= 2; ++var9) {
+            for(int var14 = -2; var14 <= 2; ++var14) {
+               if (var9 == -2 || var9 == 2 || var14 == -2 || var14 == 2) {
+                  var1.setBlockState(var3.add(var9, 1, var14), this.sandstone, 2);
                }
             }
          }
 
-         worldIn.setBlockState(position.add(2, 1, 0), this.sandSlab, 2);
-         worldIn.setBlockState(position.add(-2, 1, 0), this.sandSlab, 2);
-         worldIn.setBlockState(position.add(0, 1, 2), this.sandSlab, 2);
-         worldIn.setBlockState(position.add(0, 1, -2), this.sandSlab, 2);
+         var1.setBlockState(var3.add(2, 1, 0), this.sandSlab, 2);
+         var1.setBlockState(var3.add(-2, 1, 0), this.sandSlab, 2);
+         var1.setBlockState(var3.add(0, 1, 2), this.sandSlab, 2);
+         var1.setBlockState(var3.add(0, 1, -2), this.sandSlab, 2);
 
-         for(int j1 = -1; j1 <= 1; ++j1) {
-            for(int j2 = -1; j2 <= 1; ++j2) {
-               if (j1 == 0 && j2 == 0) {
-                  worldIn.setBlockState(position.add(j1, 4, j2), this.sandstone, 2);
+         for(int var10 = -1; var10 <= 1; ++var10) {
+            for(int var15 = -1; var15 <= 1; ++var15) {
+               if (var10 == 0 && var15 == 0) {
+                  var1.setBlockState(var3.add(var10, 4, var15), this.sandstone, 2);
                } else {
-                  worldIn.setBlockState(position.add(j1, 4, j2), this.sandSlab, 2);
+                  var1.setBlockState(var3.add(var10, 4, var15), this.sandSlab, 2);
                }
             }
          }
 
-         for(int k1 = 1; k1 <= 3; ++k1) {
-            worldIn.setBlockState(position.add(-1, k1, -1), this.sandstone, 2);
-            worldIn.setBlockState(position.add(-1, k1, 1), this.sandstone, 2);
-            worldIn.setBlockState(position.add(1, k1, -1), this.sandstone, 2);
-            worldIn.setBlockState(position.add(1, k1, 1), this.sandstone, 2);
+         for(int var11 = 1; var11 <= 3; ++var11) {
+            var1.setBlockState(var3.add(-1, var11, -1), this.sandstone, 2);
+            var1.setBlockState(var3.add(-1, var11, 1), this.sandstone, 2);
+            var1.setBlockState(var3.add(1, var11, -1), this.sandstone, 2);
+            var1.setBlockState(var3.add(1, var11, 1), this.sandstone, 2);
          }
 
          return true;

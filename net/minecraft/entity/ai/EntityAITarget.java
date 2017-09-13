@@ -12,6 +12,7 @@ import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public abstract class EntityAITarget extends EntityAIBase {
    protected final EntityCreature taskOwner;
@@ -23,49 +24,49 @@ public abstract class EntityAITarget extends EntityAIBase {
    protected EntityLivingBase target;
    protected int unseenMemoryTicks;
 
-   public EntityAITarget(EntityCreature creature, boolean checkSight) {
-      this(creature, checkSight, false);
+   public EntityAITarget(EntityCreature entitycreature, boolean flag) {
+      this(entitycreature, flag, false);
    }
 
-   public EntityAITarget(EntityCreature creature, boolean checkSight, boolean onlyNearby) {
+   public EntityAITarget(EntityCreature entitycreature, boolean flag, boolean flag1) {
       this.unseenMemoryTicks = 60;
-      this.taskOwner = creature;
-      this.shouldCheckSight = checkSight;
-      this.nearbyOnly = onlyNearby;
+      this.taskOwner = entitycreature;
+      this.shouldCheckSight = flag;
+      this.nearbyOnly = flag1;
    }
 
    public boolean continueExecuting() {
-      EntityLivingBase entitylivingbase = this.taskOwner.getAttackTarget();
-      if (entitylivingbase == null) {
-         entitylivingbase = this.target;
+      EntityLivingBase entityliving = this.taskOwner.getAttackTarget();
+      if (entityliving == null) {
+         entityliving = this.target;
       }
 
-      if (entitylivingbase == null) {
+      if (entityliving == null) {
          return false;
-      } else if (!entitylivingbase.isEntityAlive()) {
+      } else if (!entityliving.isEntityAlive()) {
          return false;
       } else {
-         Team team = this.taskOwner.getTeam();
-         Team team1 = entitylivingbase.getTeam();
-         if (team != null && team1 == team) {
+         Team scoreboardteambase = this.taskOwner.getTeam();
+         Team scoreboardteambase1 = entityliving.getTeam();
+         if (scoreboardteambase != null && scoreboardteambase1 == scoreboardteambase) {
             return false;
          } else {
             double d0 = this.getTargetDistance();
-            if (this.taskOwner.getDistanceSqToEntity(entitylivingbase) > d0 * d0) {
+            if (this.taskOwner.getDistanceSqToEntity(entityliving) > d0 * d0) {
                return false;
             } else {
                if (this.shouldCheckSight) {
-                  if (this.taskOwner.getEntitySenses().canSee(entitylivingbase)) {
+                  if (this.taskOwner.getEntitySenses().canSee(entityliving)) {
                      this.targetUnseenTicks = 0;
                   } else if (++this.targetUnseenTicks > this.unseenMemoryTicks) {
                      return false;
                   }
                }
 
-               if (entitylivingbase instanceof EntityPlayer && ((EntityPlayer)entitylivingbase).capabilities.disableDamage) {
+               if (entityliving instanceof EntityPlayer && ((EntityPlayer)entityliving).capabilities.disableDamage) {
                   return false;
                } else {
-                  this.taskOwner.setAttackTarget(entitylivingbase);
+                  this.taskOwner.setGoalTarget(entityliving, TargetReason.CLOSEST_ENTITY, true);
                   return true;
                }
             }
@@ -74,8 +75,8 @@ public abstract class EntityAITarget extends EntityAIBase {
    }
 
    protected double getTargetDistance() {
-      IAttributeInstance iattributeinstance = this.taskOwner.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
-      return iattributeinstance == null ? 16.0D : iattributeinstance.getAttributeValue();
+      IAttributeInstance attributeinstance = this.taskOwner.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
+      return attributeinstance == null ? 16.0D : attributeinstance.getAttributeValue();
    }
 
    public void startExecuting() {
@@ -85,42 +86,42 @@ public abstract class EntityAITarget extends EntityAIBase {
    }
 
    public void resetTask() {
-      this.taskOwner.setAttackTarget((EntityLivingBase)null);
+      this.taskOwner.setGoalTarget((EntityLivingBase)null, TargetReason.FORGOT_TARGET, true);
       this.target = null;
    }
 
-   public static boolean isSuitableTarget(EntityLiving attacker, EntityLivingBase target, boolean includeInvincibles, boolean checkSight) {
-      if (target == null) {
+   public static boolean isSuitableTarget(EntityLiving entityinsentient, EntityLivingBase entityliving, boolean flag, boolean flag1) {
+      if (entityliving == null) {
          return false;
-      } else if (target == attacker) {
+      } else if (entityliving == entityinsentient) {
          return false;
-      } else if (!target.isEntityAlive()) {
+      } else if (!entityliving.isEntityAlive()) {
          return false;
-      } else if (!attacker.canAttackClass(target.getClass())) {
+      } else if (!entityinsentient.canAttackClass(entityliving.getClass())) {
          return false;
-      } else if (attacker.isOnSameTeam(target)) {
+      } else if (entityinsentient.isOnSameTeam(entityliving)) {
          return false;
       } else {
-         if (attacker instanceof IEntityOwnable && ((IEntityOwnable)attacker).getOwnerId() != null) {
-            if (target instanceof IEntityOwnable && ((IEntityOwnable)attacker).getOwnerId().equals(target.getUniqueID())) {
+         if (entityinsentient instanceof IEntityOwnable && ((IEntityOwnable)entityinsentient).getOwnerId() != null) {
+            if (entityliving instanceof IEntityOwnable && ((IEntityOwnable)entityinsentient).getOwnerId().equals(entityliving.getUniqueID())) {
                return false;
             }
 
-            if (target == ((IEntityOwnable)attacker).getOwner()) {
+            if (entityliving == ((IEntityOwnable)entityinsentient).getOwner()) {
                return false;
             }
-         } else if (target instanceof EntityPlayer && !includeInvincibles && ((EntityPlayer)target).capabilities.disableDamage) {
+         } else if (entityliving instanceof EntityPlayer && !flag && ((EntityPlayer)entityliving).capabilities.disableDamage) {
             return false;
          }
 
-         return !checkSight || attacker.getEntitySenses().canSee(target);
+         return !flag1 || entityinsentient.getEntitySenses().canSee(entityliving);
       }
    }
 
-   protected boolean isSuitableTarget(EntityLivingBase target, boolean includeInvincibles) {
-      if (!isSuitableTarget(this.taskOwner, target, includeInvincibles, this.shouldCheckSight)) {
+   protected boolean isSuitableTarget(EntityLivingBase entityliving, boolean flag) {
+      if (!isSuitableTarget(this.taskOwner, entityliving, flag, this.shouldCheckSight)) {
          return false;
-      } else if (!this.taskOwner.isWithinHomeDistanceFromPosition(new BlockPos(target))) {
+      } else if (!this.taskOwner.isWithinHomeDistanceFromPosition(new BlockPos(entityliving))) {
          return false;
       } else {
          if (this.nearbyOnly) {
@@ -129,7 +130,7 @@ public abstract class EntityAITarget extends EntityAIBase {
             }
 
             if (this.targetSearchStatus == 0) {
-               this.targetSearchStatus = this.canEasilyReach(target) ? 1 : 2;
+               this.targetSearchStatus = this.canEasilyReach(entityliving) ? 1 : 2;
             }
 
             if (this.targetSearchStatus == 2) {
@@ -141,18 +142,18 @@ public abstract class EntityAITarget extends EntityAIBase {
       }
    }
 
-   private boolean canEasilyReach(EntityLivingBase target) {
+   private boolean canEasilyReach(EntityLivingBase entityliving) {
       this.targetSearchDelay = 10 + this.taskOwner.getRNG().nextInt(5);
-      Path path = this.taskOwner.getNavigator().getPathToEntityLiving(target);
-      if (path == null) {
+      Path pathentity = this.taskOwner.getNavigator().getPathToEntityLiving(entityliving);
+      if (pathentity == null) {
          return false;
       } else {
-         PathPoint pathpoint = path.getFinalPathPoint();
+         PathPoint pathpoint = pathentity.getFinalPathPoint();
          if (pathpoint == null) {
             return false;
          } else {
-            int i = pathpoint.xCoord - MathHelper.floor(target.posX);
-            int j = pathpoint.zCoord - MathHelper.floor(target.posZ);
+            int i = pathpoint.xCoord - MathHelper.floor(entityliving.posX);
+            int j = pathpoint.zCoord - MathHelper.floor(entityliving.posZ);
             return (double)(i * i + j * j) <= 2.25D;
          }
       }

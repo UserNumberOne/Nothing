@@ -1,81 +1,42 @@
 package net.minecraft.item;
 
 import com.google.common.collect.Maps;
-import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
 import net.minecraft.block.BlockJukebox;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.stats.StatList;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemRecord extends Item {
    private static final Map RECORDS = Maps.newHashMap();
    private final SoundEvent sound;
    private final String displayName;
 
-   protected ItemRecord(String p_i46742_1_, SoundEvent soundIn) {
-      this.displayName = "item.record." + p_i46742_1_ + ".desc";
-      this.sound = soundIn;
+   protected ItemRecord(String s, SoundEvent soundeffect) {
+      this.displayName = "item.record." + s + ".desc";
+      this.sound = soundeffect;
       this.maxStackSize = 1;
       this.setCreativeTab(CreativeTabs.MISC);
       RECORDS.put(this.sound, this);
    }
 
-   public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-      IBlockState iblockstate = worldIn.getBlockState(pos);
-      if (iblockstate.getBlock() == Blocks.JUKEBOX && !((Boolean)iblockstate.getValue(BlockJukebox.HAS_RECORD)).booleanValue()) {
-         if (!worldIn.isRemote) {
-            ((BlockJukebox)Blocks.JUKEBOX).insertRecord(worldIn, pos, iblockstate, stack);
-            worldIn.playEvent((EntityPlayer)null, 1010, pos, Item.getIdFromItem(this));
-            --stack.stackSize;
-            playerIn.addStat(StatList.RECORD_PLAYED);
-         }
-
-         return EnumActionResult.SUCCESS;
+   public EnumActionResult onItemUse(ItemStack itemstack, EntityPlayer entityhuman, World world, BlockPos blockposition, EnumHand enumhand, EnumFacing enumdirection, float f, float f1, float f2) {
+      IBlockState iblockdata = world.getBlockState(blockposition);
+      if (iblockdata.getBlock() == Blocks.JUKEBOX && !((Boolean)iblockdata.getValue(BlockJukebox.HAS_RECORD)).booleanValue()) {
+         return !world.isRemote ? EnumActionResult.SUCCESS : EnumActionResult.SUCCESS;
       } else {
          return EnumActionResult.PASS;
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced) {
-      tooltip.add(this.getRecordNameLocal());
-   }
-
-   public ResourceLocation getRecordResource(String name) {
-      return new ResourceLocation(name);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getRecordNameLocal() {
-      return I18n.translateToLocal(this.displayName);
-   }
-
-   public EnumRarity getRarity(ItemStack stack) {
+   public EnumRarity getRarity(ItemStack itemstack) {
       return EnumRarity.RARE;
-   }
-
-   @Nullable
-   @SideOnly(Side.CLIENT)
-   public static ItemRecord getBySound(SoundEvent soundIn) {
-      return (ItemRecord)RECORDS.get(soundIn);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SoundEvent getSound() {
-      return this.sound;
    }
 }

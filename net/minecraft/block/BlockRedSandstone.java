@@ -1,17 +1,12 @@
 package net.minecraft.block;
 
-import java.util.List;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockRedSandstone extends Block {
    public static final PropertyEnum TYPE = PropertyEnum.create("type", BlockRedSandstone.EnumType.class);
@@ -22,24 +17,16 @@ public class BlockRedSandstone extends Block {
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
-   public int damageDropped(IBlockState state) {
-      return ((BlockRedSandstone.EnumType)state.getValue(TYPE)).getMetadata();
+   public int damageDropped(IBlockState var1) {
+      return ((BlockRedSandstone.EnumType)var1.getValue(TYPE)).getMetadata();
    }
 
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
-      for(BlockRedSandstone.EnumType blockredsandstone$enumtype : BlockRedSandstone.EnumType.values()) {
-         list.add(new ItemStack(itemIn, 1, blockredsandstone$enumtype.getMetadata()));
-      }
-
+   public IBlockState getStateFromMeta(int var1) {
+      return this.getDefaultState().withProperty(TYPE, BlockRedSandstone.EnumType.byMetadata(var1));
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      return this.getDefaultState().withProperty(TYPE, BlockRedSandstone.EnumType.byMetadata(meta));
-   }
-
-   public int getMetaFromState(IBlockState state) {
-      return ((BlockRedSandstone.EnumType)state.getValue(TYPE)).getMetadata();
+   public int getMetaFromState(IBlockState var1) {
+      return ((BlockRedSandstone.EnumType)var1.getValue(TYPE)).getMetadata();
    }
 
    protected BlockStateContainer createBlockState() {
@@ -56,10 +43,10 @@ public class BlockRedSandstone extends Block {
       private final String name;
       private final String unlocalizedName;
 
-      private EnumType(int meta, String name, String unlocalizedName) {
-         this.meta = meta;
-         this.name = name;
-         this.unlocalizedName = unlocalizedName;
+      private EnumType(int var3, String var4, String var5) {
+         this.meta = var3;
+         this.name = var4;
+         this.unlocalizedName = var5;
       }
 
       public int getMetadata() {
@@ -70,12 +57,12 @@ public class BlockRedSandstone extends Block {
          return this.name;
       }
 
-      public static BlockRedSandstone.EnumType byMetadata(int meta) {
-         if (meta < 0 || meta >= META_LOOKUP.length) {
-            meta = 0;
+      public static BlockRedSandstone.EnumType byMetadata(int var0) {
+         if (var0 < 0 || var0 >= META_LOOKUP.length) {
+            var0 = 0;
          }
 
-         return META_LOOKUP[meta];
+         return META_LOOKUP[var0];
       }
 
       public String getName() {
@@ -87,8 +74,8 @@ public class BlockRedSandstone extends Block {
       }
 
       static {
-         for(BlockRedSandstone.EnumType blockredsandstone$enumtype : values()) {
-            META_LOOKUP[blockredsandstone$enumtype.getMetadata()] = blockredsandstone$enumtype;
+         for(BlockRedSandstone.EnumType var3 : values()) {
+            META_LOOKUP[var3.getMetadata()] = var3;
          }
 
       }

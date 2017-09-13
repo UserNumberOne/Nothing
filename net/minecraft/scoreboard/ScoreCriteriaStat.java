@@ -5,8 +5,8 @@ import net.minecraft.stats.StatBase;
 public class ScoreCriteriaStat extends ScoreCriteria {
    private final StatBase stat;
 
-   public ScoreCriteriaStat(StatBase statIn) {
-      super(statIn.statId);
-      this.stat = statIn;
+   public ScoreCriteriaStat(StatBase var1) {
+      super(var1.statId);
+      this.stat = var1;
    }
 }

@@ -22,6 +22,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 
 public abstract class BlockButton extends BlockDirectional {
    public static final PropertyBool POWERED = PropertyBool.create("powered");
@@ -39,38 +41,38 @@ public abstract class BlockButton extends BlockDirectional {
    protected static final AxisAlignedBB AABB_EAST_ON = new AxisAlignedBB(0.0D, 0.375D, 0.3125D, 0.0625D, 0.625D, 0.6875D);
    private final boolean wooden;
 
-   protected BlockButton(boolean wooden) {
+   protected BlockButton(boolean flag) {
       super(Material.CIRCUITS);
       this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(POWERED, Boolean.valueOf(false)));
       this.setTickRandomly(true);
       this.setCreativeTab(CreativeTabs.REDSTONE);
-      this.wooden = wooden;
+      this.wooden = flag;
    }
 
    @Nullable
-   public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos) {
+   public AxisAlignedBB getCollisionBoundingBox(IBlockState iblockdata, World world, BlockPos blockposition) {
       return NULL_AABB;
    }
 
-   public int tickRate(World worldIn) {
+   public int tickRate(World world) {
       return this.wooden ? 30 : 20;
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
-      return canPlaceBlock(worldIn, pos, side.getOpposite());
+   public boolean canPlaceBlockOnSide(World world, BlockPos blockposition, EnumFacing enumdirection) {
+      return canPlaceBlock(world, blockposition, enumdirection.getOpposite());
    }
 
-   public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-      for(EnumFacing enumfacing : EnumFacing.values()) {
-         if (canPlaceBlock(worldIn, pos, enumfacing)) {
+   public boolean canPlaceBlockAt(World world, BlockPos blockposition) {
+      for(EnumFacing enumdirection : EnumFacing.values()) {
+         if (canPlaceBlock(world, blockposition, enumdirection)) {
             return true;
          }
       }
@@ -78,63 +80,73 @@ public abstract class BlockButton extends BlockDirectional {
       return false;
    }
 
-   protected static boolean canPlaceBlock(World worldIn, BlockPos pos, EnumFacing direction) {
-      BlockPos blockpos = pos.offset(direction);
-      return worldIn.getBlockState(blockpos).isSideSolid(worldIn, blockpos, direction.getOpposite());
+   protected static boolean canPlaceBlock(World world, BlockPos blockposition, EnumFacing enumdirection) {
+      BlockPos blockposition1 = blockposition.offset(enumdirection);
+      return enumdirection == EnumFacing.DOWN ? world.getBlockState(blockposition1).isFullyOpaque() : world.getBlockState(blockposition1).isNormalCube();
    }
 
-   public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
-      return canPlaceBlock(worldIn, pos, facing.getOpposite()) ? this.getDefaultState().withProperty(FACING, facing).withProperty(POWERED, Boolean.valueOf(false)) : this.getDefaultState().withProperty(FACING, EnumFacing.DOWN).withProperty(POWERED, Boolean.valueOf(false));
+   public IBlockState getStateForPlacement(World world, BlockPos blockposition, EnumFacing enumdirection, float f, float f1, float f2, int i, EntityLivingBase entityliving) {
+      return canPlaceBlock(world, blockposition, enumdirection.getOpposite()) ? this.getDefaultState().withProperty(FACING, enumdirection).withProperty(POWERED, Boolean.valueOf(false)) : this.getDefaultState().withProperty(FACING, EnumFacing.DOWN).withProperty(POWERED, Boolean.valueOf(false));
    }
 
-   public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn) {
-      if (this.checkForDrop(worldIn, pos, state) && !canPlaceBlock(worldIn, pos, ((EnumFacing)state.getValue(FACING)).getOpposite())) {
-         this.dropBlockAsItem(worldIn, pos, state, 0);
-         worldIn.setBlockToAir(pos);
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      if (this.checkForDrop(world, blockposition, iblockdata) && !canPlaceBlock(world, blockposition, ((EnumFacing)iblockdata.getValue(FACING)).getOpposite())) {
+         this.dropBlockAsItem(world, blockposition, iblockdata, 0);
+         world.setBlockToAir(blockposition);
       }
 
    }
 
-   private boolean checkForDrop(World worldIn, BlockPos pos, IBlockState state) {
-      if (this.canPlaceBlockAt(worldIn, pos)) {
+   private boolean checkForDrop(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (this.canPlaceBlockAt(world, blockposition)) {
          return true;
       } else {
-         this.dropBlockAsItem(worldIn, pos, state, 0);
-         worldIn.setBlockToAir(pos);
+         this.dropBlockAsItem(world, blockposition, iblockdata, 0);
+         world.setBlockToAir(blockposition);
          return false;
       }
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-      EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
-      boolean flag = ((Boolean)state.getValue(POWERED)).booleanValue();
-      switch(enumfacing) {
-      case EAST:
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
+      EnumFacing enumdirection = (EnumFacing)iblockdata.getValue(FACING);
+      boolean flag = ((Boolean)iblockdata.getValue(POWERED)).booleanValue();
+      switch(BlockButton.SyntheticClass_1.a[enumdirection.ordinal()]) {
+      case 1:
          return flag ? AABB_EAST_ON : AABB_EAST_OFF;
-      case WEST:
+      case 2:
          return flag ? AABB_WEST_ON : AABB_WEST_OFF;
-      case SOUTH:
+      case 3:
          return flag ? AABB_SOUTH_ON : AABB_SOUTH_OFF;
-      case NORTH:
+      case 4:
       default:
          return flag ? AABB_NORTH_ON : AABB_NORTH_OFF;
-      case UP:
+      case 5:
          return flag ? AABB_UP_ON : AABB_UP_OFF;
-      case DOWN:
+      case 6:
          return flag ? AABB_DOWN_ON : AABB_DOWN_OFF;
       }
    }
 
-   public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-      if (((Boolean)state.getValue(POWERED)).booleanValue()) {
+   public boolean onBlockActivated(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack, EnumFacing enumdirection, float f, float f1, float f2) {
+      if (((Boolean)iblockdata.getValue(POWERED)).booleanValue()) {
          return true;
       } else {
-         worldIn.setBlockState(pos, state.withProperty(POWERED, Boolean.valueOf(true)), 3);
-         worldIn.markBlockRangeForRenderUpdate(pos, pos);
-         this.playClickSound(playerIn, worldIn, pos);
-         this.notifyNeighbors(worldIn, pos, (EnumFacing)state.getValue(FACING));
-         worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
-         return true;
+         boolean powered = ((Boolean)iblockdata.getValue(POWERED)).booleanValue();
+         org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+         int old = powered ? 15 : 0;
+         int current = !powered ? 15 : 0;
+         BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, old, current);
+         world.getServer().getPluginManager().callEvent(eventRedstone);
+         if (eventRedstone.getNewCurrent() > 0 != !powered) {
+            return true;
+         } else {
+            world.setBlockState(blockposition, iblockdata.withProperty(POWERED, Boolean.valueOf(true)), 3);
+            world.markBlockRangeForRenderUpdate(blockposition, blockposition);
+            this.playClickSound(entityhuman, world, blockposition);
+            this.notifyNeighbors(world, blockposition, (EnumFacing)iblockdata.getValue(FACING));
+            world.scheduleUpdate(blockposition, this, this.tickRate(world));
+            return true;
+         }
       }
    }
 
@@ -142,144 +154,228 @@ public abstract class BlockButton extends BlockDirectional {
 
    protected abstract void playReleaseSound(World var1, BlockPos var2);
 
-   public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-      if (((Boolean)state.getValue(POWERED)).booleanValue()) {
-         this.notifyNeighbors(worldIn, pos, (EnumFacing)state.getValue(FACING));
+   public void breakBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (((Boolean)iblockdata.getValue(POWERED)).booleanValue()) {
+         this.notifyNeighbors(world, blockposition, (EnumFacing)iblockdata.getValue(FACING));
       }
 
-      super.breakBlock(worldIn, pos, state);
+      super.breakBlock(world, blockposition, iblockdata);
    }
 
-   public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
-      return ((Boolean)blockState.getValue(POWERED)).booleanValue() ? 15 : 0;
+   public int getWeakPower(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
+      return ((Boolean)iblockdata.getValue(POWERED)).booleanValue() ? 15 : 0;
    }
 
-   public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
-      return !((Boolean)blockState.getValue(POWERED)).booleanValue() ? 0 : (blockState.getValue(FACING) == side ? 15 : 0);
+   public int getStrongPower(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
+      return !((Boolean)iblockdata.getValue(POWERED)).booleanValue() ? 0 : (iblockdata.getValue(FACING) == enumdirection ? 15 : 0);
    }
 
-   public boolean canProvidePower(IBlockState state) {
+   public boolean canProvidePower(IBlockState iblockdata) {
       return true;
    }
 
-   public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random) {
+   public void randomTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
    }
 
-   public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-      if (!worldIn.isRemote && ((Boolean)state.getValue(POWERED)).booleanValue()) {
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      if (!world.isRemote && ((Boolean)iblockdata.getValue(POWERED)).booleanValue()) {
          if (this.wooden) {
-            this.checkPressed(state, worldIn, pos);
+            this.checkPressed(iblockdata, world, blockposition);
          } else {
-            worldIn.setBlockState(pos, state.withProperty(POWERED, Boolean.valueOf(false)));
-            this.notifyNeighbors(worldIn, pos, (EnumFacing)state.getValue(FACING));
-            this.playReleaseSound(worldIn, pos);
-            worldIn.markBlockRangeForRenderUpdate(pos, pos);
+            org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, 15, 0);
+            world.getServer().getPluginManager().callEvent(eventRedstone);
+            if (eventRedstone.getNewCurrent() > 0) {
+               return;
+            }
+
+            world.setBlockState(blockposition, iblockdata.withProperty(POWERED, Boolean.valueOf(false)));
+            this.notifyNeighbors(world, blockposition, (EnumFacing)iblockdata.getValue(FACING));
+            this.playReleaseSound(world, blockposition);
+            world.markBlockRangeForRenderUpdate(blockposition, blockposition);
          }
       }
 
    }
 
-   public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
-      if (!worldIn.isRemote && this.wooden && !((Boolean)state.getValue(POWERED)).booleanValue()) {
-         this.checkPressed(state, worldIn, pos);
+   public void onEntityCollidedWithBlock(World world, BlockPos blockposition, IBlockState iblockdata, Entity entity) {
+      if (!world.isRemote && this.wooden && !((Boolean)iblockdata.getValue(POWERED)).booleanValue()) {
+         this.checkPressed(iblockdata, world, blockposition);
       }
 
    }
 
-   private void checkPressed(IBlockState p_185616_1_, World p_185616_2_, BlockPos p_185616_3_) {
-      List list = p_185616_2_.getEntitiesWithinAABB(EntityArrow.class, p_185616_1_.getBoundingBox(p_185616_2_, p_185616_3_).offset(p_185616_3_));
+   private void checkPressed(IBlockState iblockdata, World world, BlockPos blockposition) {
+      List list = world.getEntitiesWithinAABB(EntityArrow.class, iblockdata.getBoundingBox(world, blockposition).offset(blockposition));
       boolean flag = !list.isEmpty();
-      boolean flag1 = ((Boolean)p_185616_1_.getValue(POWERED)).booleanValue();
+      boolean flag1 = ((Boolean)iblockdata.getValue(POWERED)).booleanValue();
+      if (flag1 != flag && flag) {
+         org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+         boolean allowed = false;
+
+         for(Object object : list) {
+            if (object != null) {
+               EntityInteractEvent event = new EntityInteractEvent(((Entity)object).getBukkitEntity(), block);
+               world.getServer().getPluginManager().callEvent(event);
+               if (!event.isCancelled()) {
+                  allowed = true;
+                  break;
+               }
+            }
+         }
+
+         if (!allowed) {
+            return;
+         }
+      }
+
       if (flag && !flag1) {
-         p_185616_2_.setBlockState(p_185616_3_, p_185616_1_.withProperty(POWERED, Boolean.valueOf(true)));
-         this.notifyNeighbors(p_185616_2_, p_185616_3_, (EnumFacing)p_185616_1_.getValue(FACING));
-         p_185616_2_.markBlockRangeForRenderUpdate(p_185616_3_, p_185616_3_);
-         this.playClickSound((EntityPlayer)null, p_185616_2_, p_185616_3_);
+         org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+         BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, 0, 15);
+         world.getServer().getPluginManager().callEvent(eventRedstone);
+         if (eventRedstone.getNewCurrent() <= 0) {
+            return;
+         }
+
+         world.setBlockState(blockposition, iblockdata.withProperty(POWERED, Boolean.valueOf(true)));
+         this.notifyNeighbors(world, blockposition, (EnumFacing)iblockdata.getValue(FACING));
+         world.markBlockRangeForRenderUpdate(blockposition, blockposition);
+         this.playClickSound((EntityPlayer)null, world, blockposition);
       }
 
       if (!flag && flag1) {
-         p_185616_2_.setBlockState(p_185616_3_, p_185616_1_.withProperty(POWERED, Boolean.valueOf(false)));
-         this.notifyNeighbors(p_185616_2_, p_185616_3_, (EnumFacing)p_185616_1_.getValue(FACING));
-         p_185616_2_.markBlockRangeForRenderUpdate(p_185616_3_, p_185616_3_);
-         this.playReleaseSound(p_185616_2_, p_185616_3_);
+         org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+         BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, 15, 0);
+         world.getServer().getPluginManager().callEvent(eventRedstone);
+         if (eventRedstone.getNewCurrent() > 0) {
+            return;
+         }
+
+         world.setBlockState(blockposition, iblockdata.withProperty(POWERED, Boolean.valueOf(false)));
+         this.notifyNeighbors(world, blockposition, (EnumFacing)iblockdata.getValue(FACING));
+         world.markBlockRangeForRenderUpdate(blockposition, blockposition);
+         this.playReleaseSound(world, blockposition);
       }
 
       if (flag) {
-         p_185616_2_.scheduleUpdate(new BlockPos(p_185616_3_), this, this.tickRate(p_185616_2_));
+         world.scheduleUpdate(new BlockPos(blockposition), this, this.tickRate(world));
       }
 
    }
 
-   private void notifyNeighbors(World worldIn, BlockPos pos, EnumFacing facing) {
-      worldIn.notifyNeighborsOfStateChange(pos, this);
-      worldIn.notifyNeighborsOfStateChange(pos.offset(facing.getOpposite()), this);
+   private void notifyNeighbors(World world, BlockPos blockposition, EnumFacing enumdirection) {
+      world.notifyNeighborsOfStateChange(blockposition, this);
+      world.notifyNeighborsOfStateChange(blockposition.offset(enumdirection.getOpposite()), this);
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      EnumFacing enumfacing;
-      switch(meta & 7) {
+   public IBlockState getStateFromMeta(int i) {
+      EnumFacing enumdirection;
+      switch(i & 7) {
       case 0:
-         enumfacing = EnumFacing.DOWN;
+         enumdirection = EnumFacing.DOWN;
          break;
       case 1:
-         enumfacing = EnumFacing.EAST;
+         enumdirection = EnumFacing.EAST;
          break;
       case 2:
-         enumfacing = EnumFacing.WEST;
+         enumdirection = EnumFacing.WEST;
          break;
       case 3:
-         enumfacing = EnumFacing.SOUTH;
+         enumdirection = EnumFacing.SOUTH;
          break;
       case 4:
-         enumfacing = EnumFacing.NORTH;
+         enumdirection = EnumFacing.NORTH;
          break;
       case 5:
       default:
-         enumfacing = EnumFacing.UP;
+         enumdirection = EnumFacing.UP;
       }
 
-      return this.getDefaultState().withProperty(FACING, enumfacing).withProperty(POWERED, Boolean.valueOf((meta & 8) > 0));
+      return this.getDefaultState().withProperty(FACING, enumdirection).withProperty(POWERED, Boolean.valueOf((i & 8) > 0));
    }
 
-   public int getMetaFromState(IBlockState state) {
+   public int getMetaFromState(IBlockState iblockdata) {
       int i;
-      switch((EnumFacing)state.getValue(FACING)) {
-      case EAST:
+      switch(BlockButton.SyntheticClass_1.a[((EnumFacing)iblockdata.getValue(FACING)).ordinal()]) {
+      case 1:
          i = 1;
          break;
-      case WEST:
+      case 2:
          i = 2;
          break;
-      case SOUTH:
+      case 3:
          i = 3;
          break;
-      case NORTH:
+      case 4:
          i = 4;
          break;
-      case UP:
+      case 5:
       default:
          i = 5;
          break;
-      case DOWN:
+      case 6:
          i = 0;
       }
 
-      if (((Boolean)state.getValue(POWERED)).booleanValue()) {
+      if (((Boolean)iblockdata.getValue(POWERED)).booleanValue()) {
          i |= 8;
       }
 
       return i;
    }
 
-   public IBlockState withRotation(IBlockState state, Rotation rot) {
-      return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+   public IBlockState withRotation(IBlockState iblockdata, Rotation enumblockrotation) {
+      return iblockdata.withProperty(FACING, enumblockrotation.rotate((EnumFacing)iblockdata.getValue(FACING)));
    }
 
-   public IBlockState withMirror(IBlockState state, Mirror mirrorIn) {
-      return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+   public IBlockState withMirror(IBlockState iblockdata, Mirror enumblockmirror) {
+      return iblockdata.withRotation(enumblockmirror.toRotation((EnumFacing)iblockdata.getValue(FACING)));
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, POWERED});
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.EAST.ordinal()] = 1;
+         } catch (NoSuchFieldError var5) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 2;
+         } catch (NoSuchFieldError var4) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 3;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 4;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.UP.ordinal()] = 5;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.DOWN.ordinal()] = 6;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

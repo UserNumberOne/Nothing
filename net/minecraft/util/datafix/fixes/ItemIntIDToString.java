@@ -10,15 +10,15 @@ public class ItemIntIDToString implements IFixableData {
       return 102;
    }
 
-   public NBTTagCompound fixTagCompound(NBTTagCompound compound) {
-      if (compound.hasKey("id", 99)) {
-         short short1 = compound.getShort("id");
-         if (short1 > 0 && short1 < ID_MAP.length && ID_MAP[short1] != null) {
-            compound.setString("id", ID_MAP[short1]);
+   public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
+      if (var1.hasKey("id", 99)) {
+         short var2 = var1.getShort("id");
+         if (var2 > 0 && var2 < ID_MAP.length && ID_MAP[var2] != null) {
+            var1.setString("id", ID_MAP[var2]);
          }
       }
 
-      return compound;
+      return var1;
    }
 
    static {

@@ -6,18 +6,18 @@ public class Vec4b {
    private byte y;
    private byte rotation;
 
-   public Vec4b(byte typeIn, byte xIn, byte yIn, byte rotationIn) {
-      this.type = typeIn;
-      this.x = xIn;
-      this.y = yIn;
-      this.rotation = rotationIn;
+   public Vec4b(byte var1, byte var2, byte var3, byte var4) {
+      this.type = var1;
+      this.x = var2;
+      this.y = var3;
+      this.rotation = var4;
    }
 
-   public Vec4b(Vec4b vec) {
-      this.type = vec.type;
-      this.x = vec.x;
-      this.y = vec.y;
-      this.rotation = vec.rotation;
+   public Vec4b(Vec4b var1) {
+      this.type = var1.type;
+      this.x = var1.x;
+      this.y = var1.y;
+      this.rotation = var1.rotation;
    }
 
    public byte getType() {
@@ -36,22 +36,30 @@ public class Vec4b {
       return this.rotation;
    }
 
-   public boolean equals(Object p_equals_1_) {
-      if (this == p_equals_1_) {
+   public boolean equals(Object var1) {
+      if (this == var1) {
          return true;
-      } else if (!(p_equals_1_ instanceof Vec4b)) {
+      } else if (!(var1 instanceof Vec4b)) {
          return false;
       } else {
-         Vec4b vec4b = (Vec4b)p_equals_1_;
-         return this.type != vec4b.type ? false : (this.rotation != vec4b.rotation ? false : (this.x != vec4b.x ? false : this.y == vec4b.y));
+         Vec4b var2 = (Vec4b)var1;
+         if (this.type != var2.type) {
+            return false;
+         } else if (this.rotation != var2.rotation) {
+            return false;
+         } else if (this.x != var2.x) {
+            return false;
+         } else {
+            return this.y == var2.y;
+         }
       }
    }
 
    public int hashCode() {
-      int i = this.type;
-      i = 31 * i + this.x;
-      i = 31 * i + this.y;
-      i = 31 * i + this.rotation;
-      return i;
+      int var1 = this.type;
+      var1 = 31 * var1 + this.x;
+      var1 = 31 * var1 + this.y;
+      var1 = 31 * var1 + this.rotation;
+      return var1;
    }
 }

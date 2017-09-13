@@ -12,8 +12,8 @@ import net.minecraft.world.storage.loot.conditions.LootCondition;
 public abstract class LootFunction {
    private final LootCondition[] conditions;
 
-   protected LootFunction(LootCondition[] conditionsIn) {
-      this.conditions = conditionsIn;
+   protected LootFunction(LootCondition[] var1) {
+      this.conditions = var1;
    }
 
    public abstract ItemStack apply(ItemStack var1, Random var2, LootContext var3);
@@ -26,9 +26,9 @@ public abstract class LootFunction {
       private final ResourceLocation lootTableLocation;
       private final Class functionClass;
 
-      protected Serializer(ResourceLocation location, Class clazz) {
-         this.lootTableLocation = location;
-         this.functionClass = clazz;
+      protected Serializer(ResourceLocation var1, Class var2) {
+         this.lootTableLocation = var1;
+         this.functionClass = var2;
       }
 
       public ResourceLocation getFunctionName() {

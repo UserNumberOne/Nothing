@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -12,7 +11,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -20,9 +18,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockCocoa extends BlockHorizontal implements IGrowable {
    public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 2);
@@ -37,133 +33,154 @@ public class BlockCocoa extends BlockHorizontal implements IGrowable {
       this.setTickRandomly(true);
    }
 
-   public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-      if (!this.canBlockStay(worldIn, pos, state)) {
-         this.dropBlock(worldIn, pos, state);
-      } else {
-         int i = ((Integer)state.getValue(AGE)).intValue();
-         if (i < 2 && ForgeHooks.onCropsGrowPre(worldIn, pos, state, rand.nextInt(5) == 0)) {
-            worldIn.setBlockState(pos, state.withProperty(AGE, Integer.valueOf(i + 1)), 2);
-            ForgeHooks.onCropsGrowPost(worldIn, pos, state, worldIn.getBlockState(pos));
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      if (!this.canBlockStay(world, blockposition, iblockdata)) {
+         this.dropBlock(world, blockposition, iblockdata);
+      } else if (world.rand.nextInt(5) == 0) {
+         int i = ((Integer)iblockdata.getValue(AGE)).intValue();
+         if (i < 2) {
+            IBlockState data = iblockdata.withProperty(AGE, Integer.valueOf(i + 1));
+            CraftEventFactory.handleBlockGrowEvent(world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), this, this.getMetaFromState(data));
          }
       }
 
    }
 
-   public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state) {
-      pos = pos.offset((EnumFacing)state.getValue(FACING));
-      IBlockState iblockstate = worldIn.getBlockState(pos);
-      return iblockstate.getBlock() == Blocks.LOG && iblockstate.getValue(BlockOldLog.VARIANT) == BlockPlanks.EnumType.JUNGLE;
+   public boolean canBlockStay(World world, BlockPos blockposition, IBlockState iblockdata) {
+      blockposition = blockposition.offset((EnumFacing)iblockdata.getValue(FACING));
+      IBlockState iblockdata1 = world.getBlockState(blockposition);
+      return iblockdata1.getBlock() == Blocks.LOG && iblockdata1.getValue(BlockOldLog.VARIANT) == BlockPlanks.EnumType.JUNGLE;
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-      int i = ((Integer)state.getValue(AGE)).intValue();
-      switch((EnumFacing)state.getValue(FACING)) {
-      case SOUTH:
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
+      int i = ((Integer)iblockdata.getValue(AGE)).intValue();
+      switch(BlockCocoa.SyntheticClass_1.a[((EnumFacing)iblockdata.getValue(FACING)).ordinal()]) {
+      case 1:
          return COCOA_SOUTH_AABB[i];
-      case NORTH:
+      case 2:
       default:
          return COCOA_NORTH_AABB[i];
-      case WEST:
+      case 3:
          return COCOA_WEST_AABB[i];
-      case EAST:
+      case 4:
          return COCOA_EAST_AABB[i];
       }
    }
 
-   public IBlockState withRotation(IBlockState state, Rotation rot) {
-      return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+   public IBlockState withRotation(IBlockState iblockdata, Rotation enumblockrotation) {
+      return iblockdata.withProperty(FACING, enumblockrotation.rotate((EnumFacing)iblockdata.getValue(FACING)));
    }
 
-   public IBlockState withMirror(IBlockState state, Mirror mirrorIn) {
-      return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+   public IBlockState withMirror(IBlockState iblockdata, Mirror enumblockmirror) {
+      return iblockdata.withRotation(enumblockmirror.toRotation((EnumFacing)iblockdata.getValue(FACING)));
    }
 
-   public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-      EnumFacing enumfacing = EnumFacing.fromAngle((double)placer.rotationYaw);
-      worldIn.setBlockState(pos, state.withProperty(FACING, enumfacing), 2);
+   public void onBlockPlacedBy(World world, BlockPos blockposition, IBlockState iblockdata, EntityLivingBase entityliving, ItemStack itemstack) {
+      EnumFacing enumdirection = EnumFacing.fromAngle((double)entityliving.rotationYaw);
+      world.setBlockState(blockposition, iblockdata.withProperty(FACING, enumdirection), 2);
    }
 
-   public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
-      if (!facing.getAxis().isHorizontal()) {
-         facing = EnumFacing.NORTH;
+   public IBlockState getStateForPlacement(World world, BlockPos blockposition, EnumFacing enumdirection, float f, float f1, float f2, int i, EntityLivingBase entityliving) {
+      if (!enumdirection.getAxis().isHorizontal()) {
+         enumdirection = EnumFacing.NORTH;
       }
 
-      return this.getDefaultState().withProperty(FACING, facing.getOpposite()).withProperty(AGE, Integer.valueOf(0));
+      return this.getDefaultState().withProperty(FACING, enumdirection.getOpposite()).withProperty(AGE, Integer.valueOf(0));
    }
 
-   public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn) {
-      if (!this.canBlockStay(worldIn, pos, state)) {
-         this.dropBlock(worldIn, pos, state);
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      if (!this.canBlockStay(world, blockposition, iblockdata)) {
+         this.dropBlock(world, blockposition, iblockdata);
       }
 
    }
 
-   private void dropBlock(World worldIn, BlockPos pos, IBlockState state) {
-      worldIn.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
-      this.dropBlockAsItem(worldIn, pos, state, 0);
+   private void dropBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
+      world.setBlockState(blockposition, Blocks.AIR.getDefaultState(), 3);
+      this.dropBlockAsItem(world, blockposition, iblockdata, 0);
    }
 
-   public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune) {
-      super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
-   }
-
-   public List getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
-      List dropped = super.getDrops(world, pos, state, fortune);
-      int i = ((Integer)state.getValue(AGE)).intValue();
-      int j = 1;
-      if (i >= 2) {
-         j = 3;
+   public void dropBlockAsItemWithChance(World world, BlockPos blockposition, IBlockState iblockdata, float f, int i) {
+      int j = ((Integer)iblockdata.getValue(AGE)).intValue();
+      byte b0 = 1;
+      if (j >= 2) {
+         b0 = 3;
       }
 
-      for(int k = 0; k < j; ++k) {
-         dropped.add(new ItemStack(Items.DYE, 1, EnumDyeColor.BROWN.getDyeDamage()));
+      for(int k = 0; k < b0; ++k) {
+         spawnAsEntity(world, blockposition, new ItemStack(Items.DYE, 1, EnumDyeColor.BROWN.getDyeDamage()));
       }
 
-      return dropped;
    }
 
-   public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return new ItemStack(Items.DYE, 1, EnumDyeColor.BROWN.getDyeDamage());
    }
 
-   public boolean canGrow(World worldIn, BlockPos pos, IBlockState state, boolean isClient) {
-      return ((Integer)state.getValue(AGE)).intValue() < 2;
+   public boolean canGrow(World world, BlockPos blockposition, IBlockState iblockdata, boolean flag) {
+      return ((Integer)iblockdata.getValue(AGE)).intValue() < 2;
    }
 
-   public boolean canUseBonemeal(World worldIn, Random rand, BlockPos pos, IBlockState state) {
+   public boolean canUseBonemeal(World world, Random random, BlockPos blockposition, IBlockState iblockdata) {
       return true;
    }
 
-   public void grow(World worldIn, Random rand, BlockPos pos, IBlockState state) {
-      worldIn.setBlockState(pos, state.withProperty(AGE, Integer.valueOf(((Integer)state.getValue(AGE)).intValue() + 1)), 2);
+   public void grow(World world, Random random, BlockPos blockposition, IBlockState iblockdata) {
+      IBlockState data = iblockdata.withProperty(AGE, Integer.valueOf(((Integer)iblockdata.getValue(AGE)).intValue() + 1));
+      CraftEventFactory.handleBlockGrowEvent(world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), this, this.getMetaFromState(data));
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(i)).withProperty(AGE, Integer.valueOf((i & 15) >> 2));
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta)).withProperty(AGE, Integer.valueOf((meta & 15) >> 2));
-   }
-
-   public int getMetaFromState(IBlockState state) {
-      int i = 0;
-      i = i | ((EnumFacing)state.getValue(FACING)).getHorizontalIndex();
-      i = i | ((Integer)state.getValue(AGE)).intValue() << 2;
+   public int getMetaFromState(IBlockState iblockdata) {
+      byte b0 = 0;
+      int i = b0 | ((EnumFacing)iblockdata.getValue(FACING)).getHorizontalIndex();
+      i = i | ((Integer)iblockdata.getValue(AGE)).intValue() << 2;
       return i;
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, AGE});
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 1;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 2;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 3;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.EAST.ordinal()] = 4;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

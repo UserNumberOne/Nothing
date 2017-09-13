@@ -6,8 +6,8 @@ import net.minecraft.init.SoundEvents;
 public class PhaseSittingAttacking extends PhaseSittingBase {
    private int attackingTicks;
 
-   public PhaseSittingAttacking(EntityDragon dragonIn) {
-      super(dragonIn);
+   public PhaseSittingAttacking(EntityDragon var1) {
+      super(var1);
    }
 
    public void doClientRenderEffects() {

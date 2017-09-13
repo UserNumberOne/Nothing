@@ -14,12 +14,12 @@ public class BlockBookshelf extends Block {
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
-   public int quantityDropped(Random random) {
+   public int quantityDropped(Random var1) {
       return 3;
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Items.BOOK;
    }
 }

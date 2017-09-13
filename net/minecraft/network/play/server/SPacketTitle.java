@@ -6,8 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketTitle implements Packet {
    private SPacketTitle.Type type;
@@ -19,77 +17,52 @@ public class SPacketTitle implements Packet {
    public SPacketTitle() {
    }
 
-   public SPacketTitle(SPacketTitle.Type typeIn, ITextComponent messageIn) {
-      this(typeIn, messageIn, -1, -1, -1);
+   public SPacketTitle(SPacketTitle.Type var1, ITextComponent var2) {
+      this(var1, var2, -1, -1, -1);
    }
 
-   public SPacketTitle(int fadeInTimeIn, int displayTimeIn, int fadeOutTimeIn) {
-      this(SPacketTitle.Type.TIMES, (ITextComponent)null, fadeInTimeIn, displayTimeIn, fadeOutTimeIn);
+   public SPacketTitle(int var1, int var2, int var3) {
+      this(SPacketTitle.Type.TIMES, (ITextComponent)null, var1, var2, var3);
    }
 
-   public SPacketTitle(SPacketTitle.Type typeIn, @Nullable ITextComponent messageIn, int fadeInTimeIn, int displayTimeIn, int fadeOutTimeIn) {
-      this.type = typeIn;
-      this.message = messageIn;
-      this.fadeInTime = fadeInTimeIn;
-      this.displayTime = displayTimeIn;
-      this.fadeOutTime = fadeOutTimeIn;
+   public SPacketTitle(SPacketTitle.Type var1, @Nullable ITextComponent var2, int var3, int var4, int var5) {
+      this.type = var1;
+      this.message = var2;
+      this.fadeInTime = var3;
+      this.displayTime = var4;
+      this.fadeOutTime = var5;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.type = (SPacketTitle.Type)buf.readEnumValue(SPacketTitle.Type.class);
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.type = (SPacketTitle.Type)var1.readEnumValue(SPacketTitle.Type.class);
       if (this.type == SPacketTitle.Type.TITLE || this.type == SPacketTitle.Type.SUBTITLE) {
-         this.message = buf.readTextComponent();
+         this.message = var1.readTextComponent();
       }
 
       if (this.type == SPacketTitle.Type.TIMES) {
-         this.fadeInTime = buf.readInt();
-         this.displayTime = buf.readInt();
-         this.fadeOutTime = buf.readInt();
+         this.fadeInTime = var1.readInt();
+         this.displayTime = var1.readInt();
+         this.fadeOutTime = var1.readInt();
       }
 
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeEnumValue(this.type);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeEnumValue(this.type);
       if (this.type == SPacketTitle.Type.TITLE || this.type == SPacketTitle.Type.SUBTITLE) {
-         buf.writeTextComponent(this.message);
+         var1.writeTextComponent(this.message);
       }
 
       if (this.type == SPacketTitle.Type.TIMES) {
-         buf.writeInt(this.fadeInTime);
-         buf.writeInt(this.displayTime);
-         buf.writeInt(this.fadeOutTime);
+         var1.writeInt(this.fadeInTime);
+         var1.writeInt(this.displayTime);
+         var1.writeInt(this.fadeOutTime);
       }
 
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleTitle(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SPacketTitle.Type getType() {
-      return this.type;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getMessage() {
-      return this.message;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFadeInTime() {
-      return this.fadeInTime;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getDisplayTime() {
-      return this.displayTime;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFadeOutTime() {
-      return this.fadeOutTime;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleTitle(this);
    }
 
    public static enum Type {
@@ -99,10 +72,10 @@ public class SPacketTitle implements Packet {
       CLEAR,
       RESET;
 
-      public static SPacketTitle.Type byName(String name) {
-         for(SPacketTitle.Type spackettitle$type : values()) {
-            if (spackettitle$type.name().equalsIgnoreCase(name)) {
-               return spackettitle$type;
+      public static SPacketTitle.Type byName(String var0) {
+         for(SPacketTitle.Type var4 : values()) {
+            if (var4.name().equalsIgnoreCase(var0)) {
+               return var4;
             }
          }
 
@@ -110,14 +83,14 @@ public class SPacketTitle implements Packet {
       }
 
       public static String[] getNames() {
-         String[] astring = new String[values().length];
-         int i = 0;
+         String[] var0 = new String[values().length];
+         int var1 = 0;
 
-         for(SPacketTitle.Type spackettitle$type : values()) {
-            astring[i++] = spackettitle$type.name().toLowerCase();
+         for(SPacketTitle.Type var5 : values()) {
+            var0[var1++] = var5.name().toLowerCase();
          }
 
-         return astring;
+         return var0;
       }
    }
 }

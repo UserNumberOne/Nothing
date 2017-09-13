@@ -6,40 +6,36 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
 
 public class EntityMinecartEmpty extends EntityMinecart {
-   public EntityMinecartEmpty(World worldIn) {
-      super(worldIn);
+   public EntityMinecartEmpty(World var1) {
+      super(var1);
    }
 
-   public EntityMinecartEmpty(World worldIn, double x, double y, double z) {
-      super(worldIn, x, y, z);
+   public EntityMinecartEmpty(World var1, double var2, double var4, double var6) {
+      super(var1, var2, var4, var6);
    }
 
-   public static void registerFixesMinecartEmpty(DataFixer fixer) {
-      EntityMinecart.registerFixesMinecart(fixer, "MinecartRideable");
+   public static void registerFixesMinecartEmpty(DataFixer var0) {
+      EntityMinecart.registerFixesMinecart(var0, "MinecartRideable");
    }
 
-   public boolean processInitialInteract(EntityPlayer player, @Nullable ItemStack stack, EnumHand hand) {
-      if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, player, stack, hand))) {
-         return true;
-      } else if (player.isSneaking()) {
+   public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
+      if (var1.isSneaking()) {
          return false;
       } else if (this.isBeingRidden()) {
          return true;
       } else {
          if (!this.world.isRemote) {
-            player.startRiding(this);
+            var1.startRiding(this);
          }
 
          return true;
       }
    }
 
-   public void onActivatorRailPass(int x, int y, int z, boolean receivingPower) {
-      if (receivingPower) {
+   public void onActivatorRailPass(int var1, int var2, int var3, boolean var4) {
+      if (var4) {
          if (this.isBeingRidden()) {
             this.removePassengers();
          }

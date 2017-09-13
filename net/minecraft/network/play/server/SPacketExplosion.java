@@ -8,8 +8,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketExplosion implements Packet {
    private double posX;
@@ -24,108 +22,68 @@ public class SPacketExplosion implements Packet {
    public SPacketExplosion() {
    }
 
-   public SPacketExplosion(double xIn, double yIn, double zIn, float strengthIn, List affectedBlockPositionsIn, Vec3d motion) {
-      this.posX = xIn;
-      this.posY = yIn;
-      this.posZ = zIn;
-      this.strength = strengthIn;
-      this.affectedBlockPositions = Lists.newArrayList(affectedBlockPositionsIn);
-      if (motion != null) {
-         this.motionX = (float)motion.xCoord;
-         this.motionY = (float)motion.yCoord;
-         this.motionZ = (float)motion.zCoord;
+   public SPacketExplosion(double var1, double var3, double var5, float var7, List var8, Vec3d var9) {
+      this.posX = var1;
+      this.posY = var3;
+      this.posZ = var5;
+      this.strength = var7;
+      this.affectedBlockPositions = Lists.newArrayList(var8);
+      if (var9 != null) {
+         this.motionX = (float)var9.xCoord;
+         this.motionY = (float)var9.yCoord;
+         this.motionZ = (float)var9.zCoord;
       }
 
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.posX = (double)buf.readFloat();
-      this.posY = (double)buf.readFloat();
-      this.posZ = (double)buf.readFloat();
-      this.strength = buf.readFloat();
-      int i = buf.readInt();
-      this.affectedBlockPositions = Lists.newArrayListWithCapacity(i);
-      int j = (int)this.posX;
-      int k = (int)this.posY;
-      int l = (int)this.posZ;
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.posX = (double)var1.readFloat();
+      this.posY = (double)var1.readFloat();
+      this.posZ = (double)var1.readFloat();
+      this.strength = var1.readFloat();
+      int var2 = var1.readInt();
+      this.affectedBlockPositions = Lists.newArrayListWithCapacity(var2);
+      int var3 = (int)this.posX;
+      int var4 = (int)this.posY;
+      int var5 = (int)this.posZ;
 
-      for(int i1 = 0; i1 < i; ++i1) {
-         int j1 = buf.readByte() + j;
-         int k1 = buf.readByte() + k;
-         int l1 = buf.readByte() + l;
-         this.affectedBlockPositions.add(new BlockPos(j1, k1, l1));
+      for(int var6 = 0; var6 < var2; ++var6) {
+         int var7 = var1.readByte() + var3;
+         int var8 = var1.readByte() + var4;
+         int var9 = var1.readByte() + var5;
+         this.affectedBlockPositions.add(new BlockPos(var7, var8, var9));
       }
 
-      this.motionX = buf.readFloat();
-      this.motionY = buf.readFloat();
-      this.motionZ = buf.readFloat();
+      this.motionX = var1.readFloat();
+      this.motionY = var1.readFloat();
+      this.motionZ = var1.readFloat();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeFloat((float)this.posX);
-      buf.writeFloat((float)this.posY);
-      buf.writeFloat((float)this.posZ);
-      buf.writeFloat(this.strength);
-      buf.writeInt(this.affectedBlockPositions.size());
-      int i = (int)this.posX;
-      int j = (int)this.posY;
-      int k = (int)this.posZ;
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeFloat((float)this.posX);
+      var1.writeFloat((float)this.posY);
+      var1.writeFloat((float)this.posZ);
+      var1.writeFloat(this.strength);
+      var1.writeInt(this.affectedBlockPositions.size());
+      int var2 = (int)this.posX;
+      int var3 = (int)this.posY;
+      int var4 = (int)this.posZ;
 
-      for(BlockPos blockpos : this.affectedBlockPositions) {
-         int l = blockpos.getX() - i;
-         int i1 = blockpos.getY() - j;
-         int j1 = blockpos.getZ() - k;
-         buf.writeByte(l);
-         buf.writeByte(i1);
-         buf.writeByte(j1);
+      for(BlockPos var6 : this.affectedBlockPositions) {
+         int var7 = var6.getX() - var2;
+         int var8 = var6.getY() - var3;
+         int var9 = var6.getZ() - var4;
+         var1.writeByte(var7);
+         var1.writeByte(var8);
+         var1.writeByte(var9);
       }
 
-      buf.writeFloat(this.motionX);
-      buf.writeFloat(this.motionY);
-      buf.writeFloat(this.motionZ);
+      var1.writeFloat(this.motionX);
+      var1.writeFloat(this.motionY);
+      var1.writeFloat(this.motionZ);
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleExplosion(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getMotionX() {
-      return this.motionX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getMotionY() {
-      return this.motionY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getMotionZ() {
-      return this.motionZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.posX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.posY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.posZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getStrength() {
-      return this.strength;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getAffectedBlockPositions() {
-      return this.affectedBlockPositions;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleExplosion(this);
    }
 }

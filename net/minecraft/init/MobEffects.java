@@ -34,12 +34,12 @@ public class MobEffects {
    public static final Potion UNLUCK;
 
    @Nullable
-   private static Potion getRegisteredMobEffect(String id) {
-      Potion potion = (Potion)Potion.REGISTRY.getObject(new ResourceLocation(id));
-      if (potion == null) {
-         throw new IllegalStateException("Invalid MobEffect requested: " + id);
+   private static Potion getRegisteredMobEffect(String var0) {
+      Potion var1 = (Potion)Potion.REGISTRY.getObject(new ResourceLocation(var0));
+      if (var1 == null) {
+         throw new IllegalStateException("Invalid MobEffect requested: " + var0);
       } else {
-         return potion;
+         return var1;
       }
    }
 

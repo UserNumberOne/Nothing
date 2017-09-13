@@ -11,18 +11,15 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityMagmaCube extends EntitySlime {
-   public EntityMagmaCube(World worldIn) {
-      super(worldIn);
+   public EntityMagmaCube(World var1) {
+      super(var1);
       this.isImmuneToFire = true;
    }
 
-   public static void registerFixesMagmaCube(DataFixer fixer) {
-      EntityLiving.registerFixesMob(fixer, "LavaSlime");
+   public static void registerFixesMagmaCube(DataFixer var0) {
+      EntityLiving.registerFixesMob(var0, "LavaSlime");
    }
 
    protected void applyEntityAttributes() {
@@ -38,17 +35,12 @@ public class EntityMagmaCube extends EntitySlime {
       return this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this) && this.world.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty() && !this.world.containsAnyLiquid(this.getEntityBoundingBox());
    }
 
-   protected void setSlimeSize(int size) {
-      super.setSlimeSize(size);
-      this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)(size * 3));
+   protected void setSlimeSize(int var1) {
+      super.setSlimeSize(var1);
+      this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)(var1 * 3));
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float partialTicks) {
-      return 15728880;
-   }
-
-   public float getBrightness(float partialTicks) {
+   public float getBrightness(float var1) {
       return 1.0F;
    }
 
@@ -80,7 +72,6 @@ public class EntityMagmaCube extends EntitySlime {
    protected void jump() {
       this.motionY = (double)(0.42F + (float)this.getSlimeSize() * 0.1F);
       this.isAirBorne = true;
-      ForgeHooks.onLivingJump(this);
    }
 
    protected void handleJumpLava() {
@@ -88,7 +79,7 @@ public class EntityMagmaCube extends EntitySlime {
       this.isAirBorne = true;
    }
 
-   public void fall(float distance, float damageMultiplier) {
+   public void fall(float var1, float var2) {
    }
 
    protected boolean canDamagePlayer() {

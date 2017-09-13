@@ -7,36 +7,33 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenSavannaTree;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate.EventType;
 
 public class BiomeSavanna extends Biome {
    private static final WorldGenSavannaTree SAVANNA_TREE = new WorldGenSavannaTree(false);
 
-   public BiomeSavanna(Biome.BiomeProperties properties) {
-      super(properties);
+   protected BiomeSavanna(Biome.BiomeProperties var1) {
+      super(var1);
       this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityHorse.class, 1, 2, 6));
       this.theBiomeDecorator.treesPerChunk = 1;
       this.theBiomeDecorator.flowersPerChunk = 4;
       this.theBiomeDecorator.grassPerChunk = 20;
    }
 
-   public WorldGenAbstractTree genBigTreeChance(Random rand) {
-      return (WorldGenAbstractTree)(rand.nextInt(5) > 0 ? SAVANNA_TREE : TREE_FEATURE);
+   public WorldGenAbstractTree genBigTreeChance(Random var1) {
+      return (WorldGenAbstractTree)(var1.nextInt(5) > 0 ? SAVANNA_TREE : TREE_FEATURE);
    }
 
-   public void decorate(World worldIn, Random rand, BlockPos pos) {
+   public void decorate(World var1, Random var2, BlockPos var3) {
       DOUBLE_PLANT_GENERATOR.setPlantType(BlockDoublePlant.EnumPlantType.GRASS);
-      if (TerrainGen.decorate(worldIn, rand, pos, EventType.GRASS)) {
-         for(int i = 0; i < 7; ++i) {
-            int j = rand.nextInt(16) + 8;
-            int k = rand.nextInt(16) + 8;
-            int l = rand.nextInt(worldIn.getHeight(pos.add(j, 0, k)).getY() + 32);
-            DOUBLE_PLANT_GENERATOR.generate(worldIn, rand, pos.add(j, l, k));
-         }
+
+      for(int var4 = 0; var4 < 7; ++var4) {
+         int var5 = var2.nextInt(16) + 8;
+         int var6 = var2.nextInt(16) + 8;
+         int var7 = var2.nextInt(var1.getHeight(var3.add(var5, 0, var6)).getY() + 32);
+         DOUBLE_PLANT_GENERATOR.generate(var1, var2, var3.add(var5, var7, var6));
       }
 
-      super.decorate(worldIn, rand, pos);
+      super.decorate(var1, var2, var3);
    }
 
    public Class getBiomeClass() {

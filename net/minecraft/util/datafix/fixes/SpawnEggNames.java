@@ -10,96 +10,96 @@ public class SpawnEggNames implements IFixableData {
       return 105;
    }
 
-   public NBTTagCompound fixTagCompound(NBTTagCompound compound) {
-      if ("minecraft:spawn_egg".equals(compound.getString("id"))) {
-         NBTTagCompound nbttagcompound = compound.getCompoundTag("tag");
-         NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("EntityTag");
-         short short1 = compound.getShort("Damage");
-         if (!nbttagcompound1.hasKey("id", 8)) {
-            String s = ENTITY_IDS[short1 & 255];
-            if (s != null) {
-               nbttagcompound1.setString("id", s);
-               nbttagcompound.setTag("EntityTag", nbttagcompound1);
-               compound.setTag("tag", nbttagcompound);
+   public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
+      if ("minecraft:spawn_egg".equals(var1.getString("id"))) {
+         NBTTagCompound var2 = var1.getCompoundTag("tag");
+         NBTTagCompound var3 = var2.getCompoundTag("EntityTag");
+         short var4 = var1.getShort("Damage");
+         if (!var3.hasKey("id", 8)) {
+            String var5 = ENTITY_IDS[var4 & 255];
+            if (var5 != null) {
+               var3.setString("id", var5);
+               var2.setTag("EntityTag", var3);
+               var1.setTag("tag", var2);
             }
          }
 
-         if (short1 != 0) {
-            compound.setShort("Damage", (short)0);
+         if (var4 != 0) {
+            var1.setShort("Damage", (short)0);
          }
       }
 
-      return compound;
+      return var1;
    }
 
    static {
-      String[] astring = ENTITY_IDS;
-      astring[1] = "Item";
-      astring[2] = "XPOrb";
-      astring[7] = "ThrownEgg";
-      astring[8] = "LeashKnot";
-      astring[9] = "Painting";
-      astring[10] = "Arrow";
-      astring[11] = "Snowball";
-      astring[12] = "Fireball";
-      astring[13] = "SmallFireball";
-      astring[14] = "ThrownEnderpearl";
-      astring[15] = "EyeOfEnderSignal";
-      astring[16] = "ThrownPotion";
-      astring[17] = "ThrownExpBottle";
-      astring[18] = "ItemFrame";
-      astring[19] = "WitherSkull";
-      astring[20] = "PrimedTnt";
-      astring[21] = "FallingSand";
-      astring[22] = "FireworksRocketEntity";
-      astring[23] = "TippedArrow";
-      astring[24] = "SpectralArrow";
-      astring[25] = "ShulkerBullet";
-      astring[26] = "DragonFireball";
-      astring[30] = "ArmorStand";
-      astring[41] = "Boat";
-      astring[42] = "MinecartRideable";
-      astring[43] = "MinecartChest";
-      astring[44] = "MinecartFurnace";
-      astring[45] = "MinecartTNT";
-      astring[46] = "MinecartHopper";
-      astring[47] = "MinecartSpawner";
-      astring[40] = "MinecartCommandBlock";
-      astring[48] = "Mob";
-      astring[49] = "Monster";
-      astring[50] = "Creeper";
-      astring[51] = "Skeleton";
-      astring[52] = "Spider";
-      astring[53] = "Giant";
-      astring[54] = "Zombie";
-      astring[55] = "Slime";
-      astring[56] = "Ghast";
-      astring[57] = "PigZombie";
-      astring[58] = "Enderman";
-      astring[59] = "CaveSpider";
-      astring[60] = "Silverfish";
-      astring[61] = "Blaze";
-      astring[62] = "LavaSlime";
-      astring[63] = "EnderDragon";
-      astring[64] = "WitherBoss";
-      astring[65] = "Bat";
-      astring[66] = "Witch";
-      astring[67] = "Endermite";
-      astring[68] = "Guardian";
-      astring[69] = "Shulker";
-      astring[90] = "Pig";
-      astring[91] = "Sheep";
-      astring[92] = "Cow";
-      astring[93] = "Chicken";
-      astring[94] = "Squid";
-      astring[95] = "Wolf";
-      astring[96] = "MushroomCow";
-      astring[97] = "SnowMan";
-      astring[98] = "Ozelot";
-      astring[99] = "VillagerGolem";
-      astring[100] = "EntityHorse";
-      astring[101] = "Rabbit";
-      astring[120] = "Villager";
-      astring[200] = "EnderCrystal";
+      String[] var0 = ENTITY_IDS;
+      var0[1] = "Item";
+      var0[2] = "XPOrb";
+      var0[7] = "ThrownEgg";
+      var0[8] = "LeashKnot";
+      var0[9] = "Painting";
+      var0[10] = "Arrow";
+      var0[11] = "Snowball";
+      var0[12] = "Fireball";
+      var0[13] = "SmallFireball";
+      var0[14] = "ThrownEnderpearl";
+      var0[15] = "EyeOfEnderSignal";
+      var0[16] = "ThrownPotion";
+      var0[17] = "ThrownExpBottle";
+      var0[18] = "ItemFrame";
+      var0[19] = "WitherSkull";
+      var0[20] = "PrimedTnt";
+      var0[21] = "FallingSand";
+      var0[22] = "FireworksRocketEntity";
+      var0[23] = "TippedArrow";
+      var0[24] = "SpectralArrow";
+      var0[25] = "ShulkerBullet";
+      var0[26] = "DragonFireball";
+      var0[30] = "ArmorStand";
+      var0[41] = "Boat";
+      var0[42] = "MinecartRideable";
+      var0[43] = "MinecartChest";
+      var0[44] = "MinecartFurnace";
+      var0[45] = "MinecartTNT";
+      var0[46] = "MinecartHopper";
+      var0[47] = "MinecartSpawner";
+      var0[40] = "MinecartCommandBlock";
+      var0[48] = "Mob";
+      var0[49] = "Monster";
+      var0[50] = "Creeper";
+      var0[51] = "Skeleton";
+      var0[52] = "Spider";
+      var0[53] = "Giant";
+      var0[54] = "Zombie";
+      var0[55] = "Slime";
+      var0[56] = "Ghast";
+      var0[57] = "PigZombie";
+      var0[58] = "Enderman";
+      var0[59] = "CaveSpider";
+      var0[60] = "Silverfish";
+      var0[61] = "Blaze";
+      var0[62] = "LavaSlime";
+      var0[63] = "EnderDragon";
+      var0[64] = "WitherBoss";
+      var0[65] = "Bat";
+      var0[66] = "Witch";
+      var0[67] = "Endermite";
+      var0[68] = "Guardian";
+      var0[69] = "Shulker";
+      var0[90] = "Pig";
+      var0[91] = "Sheep";
+      var0[92] = "Cow";
+      var0[93] = "Chicken";
+      var0[94] = "Squid";
+      var0[95] = "Wolf";
+      var0[96] = "MushroomCow";
+      var0[97] = "SnowMan";
+      var0[98] = "Ozelot";
+      var0[99] = "VillagerGolem";
+      var0[100] = "EntityHorse";
+      var0[101] = "Rabbit";
+      var0[120] = "Villager";
+      var0[200] = "EnderCrystal";
    }
 }

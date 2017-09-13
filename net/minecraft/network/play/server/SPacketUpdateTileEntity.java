@@ -6,8 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketUpdateTileEntity implements Packet {
    private BlockPos blockPos;
@@ -17,40 +15,25 @@ public class SPacketUpdateTileEntity implements Packet {
    public SPacketUpdateTileEntity() {
    }
 
-   public SPacketUpdateTileEntity(BlockPos blockPosIn, int tileEntityTypeIn, NBTTagCompound compoundIn) {
-      this.blockPos = blockPosIn;
-      this.tileEntityType = tileEntityTypeIn;
-      this.nbt = compoundIn;
+   public SPacketUpdateTileEntity(BlockPos var1, int var2, NBTTagCompound var3) {
+      this.blockPos = var1;
+      this.tileEntityType = var2;
+      this.nbt = var3;
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.blockPos = buf.readBlockPos();
-      this.tileEntityType = buf.readUnsignedByte();
-      this.nbt = buf.readCompoundTag();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.blockPos = var1.readBlockPos();
+      this.tileEntityType = var1.readUnsignedByte();
+      this.nbt = var1.readCompoundTag();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeBlockPos(this.blockPos);
-      buf.writeByte((byte)this.tileEntityType);
-      buf.writeCompoundTag(this.nbt);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeBlockPos(this.blockPos);
+      var1.writeByte((byte)this.tileEntityType);
+      var1.writeCompoundTag(this.nbt);
    }
 
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleUpdateTileEntity(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockPos getPos() {
-      return this.blockPos;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getTileEntityType() {
-      return this.tileEntityType;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public NBTTagCompound getNbtCompound() {
-      return this.nbt;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleUpdateTileEntity(this);
    }
 }

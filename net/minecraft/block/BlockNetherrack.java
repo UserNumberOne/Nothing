@@ -11,7 +11,7 @@ public class BlockNetherrack extends Block {
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
-   public MapColor getMapColor(IBlockState state) {
+   public MapColor getMapColor(IBlockState var1) {
       return MapColor.NETHERRACK;
    }
 }

@@ -7,19 +7,19 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class WorldGenEndIsland extends WorldGenerator {
-   public boolean generate(World worldIn, Random rand, BlockPos position) {
-      float f = (float)(rand.nextInt(3) + 4);
+   public boolean generate(World var1, Random var2, BlockPos var3) {
+      float var4 = (float)(var2.nextInt(3) + 4);
 
-      for(int i = 0; f > 0.5F; --i) {
-         for(int j = MathHelper.floor(-f); j <= MathHelper.ceil(f); ++j) {
-            for(int k = MathHelper.floor(-f); k <= MathHelper.ceil(f); ++k) {
-               if ((float)(j * j + k * k) <= (f + 1.0F) * (f + 1.0F)) {
-                  this.setBlockAndNotifyAdequately(worldIn, position.add(j, i, k), Blocks.END_STONE.getDefaultState());
+      for(int var5 = 0; var4 > 0.5F; --var5) {
+         for(int var6 = MathHelper.floor(-var4); var6 <= MathHelper.ceil(var4); ++var6) {
+            for(int var7 = MathHelper.floor(-var4); var7 <= MathHelper.ceil(var4); ++var7) {
+               if ((float)(var6 * var6 + var7 * var7) <= (var4 + 1.0F) * (var4 + 1.0F)) {
+                  this.setBlockAndNotifyAdequately(var1, var3.add(var6, var5, var7), Blocks.END_STONE.getDefaultState());
                }
             }
          }
 
-         f = (float)((double)f - ((double)rand.nextInt(2) + 0.5D));
+         var4 = (float)((double)var4 - ((double)var2.nextInt(2) + 0.5D));
       }
 
       return true;

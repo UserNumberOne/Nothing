@@ -6,9 +6,9 @@ import net.minecraft.entity.player.EntityPlayer;
 public class EntityAILookAtTradePlayer extends EntityAIWatchClosest {
    private final EntityVillager theMerchant;
 
-   public EntityAILookAtTradePlayer(EntityVillager theMerchantIn) {
-      super(theMerchantIn, EntityPlayer.class, 8.0F);
-      this.theMerchant = theMerchantIn;
+   public EntityAILookAtTradePlayer(EntityVillager var1) {
+      super(var1, EntityPlayer.class, 8.0F);
+      this.theMerchant = var1;
    }
 
    public boolean shouldExecute() {

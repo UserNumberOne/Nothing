@@ -24,24 +24,24 @@ public class BlockSign extends BlockContainer {
       super(Material.WOOD);
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
       return SIGN_AABB;
    }
 
    @Nullable
-   public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos) {
+   public AxisAlignedBB getCollisionBoundingBox(IBlockState var1, World var2, BlockPos var3) {
       return NULL_AABB;
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState var1) {
       return false;
    }
 
-   public boolean isPassable(IBlockAccess worldIn, BlockPos pos) {
+   public boolean isPassable(IBlockAccess var1, BlockPos var2) {
       return true;
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState var1) {
       return false;
    }
 
@@ -49,29 +49,29 @@ public class BlockSign extends BlockContainer {
       return true;
    }
 
-   public TileEntity createNewTileEntity(World worldIn, int meta) {
+   public TileEntity createNewTileEntity(World var1, int var2) {
       return new TileEntitySign();
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Items.SIGN;
    }
 
-   public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
+   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
       return new ItemStack(Items.SIGN);
    }
 
-   public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-      if (worldIn.isRemote) {
+   public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
+      if (var1.isRemote) {
          return true;
       } else {
-         TileEntity tileentity = worldIn.getTileEntity(pos);
-         return tileentity instanceof TileEntitySign ? ((TileEntitySign)tileentity).executeCommand(playerIn) : false;
+         TileEntity var11 = var1.getTileEntity(var2);
+         return var11 instanceof TileEntitySign ? ((TileEntitySign)var11).executeCommand(var4) : false;
       }
    }
 
-   public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-      return !this.hasInvalidNeighbor(worldIn, pos) && super.canPlaceBlockAt(worldIn, pos);
+   public boolean canPlaceBlockAt(World var1, BlockPos var2) {
+      return !this.hasInvalidNeighbor(var1, var2) && super.canPlaceBlockAt(var1, var2);
    }
 }

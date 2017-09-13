@@ -6,20 +6,20 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.util.DamageSource;
 
 public abstract class PhaseSittingBase extends PhaseBase {
-   public PhaseSittingBase(EntityDragon p_i46794_1_) {
-      super(p_i46794_1_);
+   public PhaseSittingBase(EntityDragon var1) {
+      super(var1);
    }
 
    public boolean getIsStationary() {
       return true;
    }
 
-   public float getAdjustedDamage(EntityDragonPart pt, DamageSource src, float damage) {
-      if (src.getSourceOfDamage() instanceof EntityArrow) {
-         src.getSourceOfDamage().setFire(1);
+   public float getAdjustedDamage(EntityDragonPart var1, DamageSource var2, float var3) {
+      if (var2.getSourceOfDamage() instanceof EntityArrow) {
+         var2.getSourceOfDamage().setFire(1);
          return 0.0F;
       } else {
-         return super.getAdjustedDamage(pt, src, damage);
+         return super.getAdjustedDamage(var1, var2, var3);
       }
    }
 }

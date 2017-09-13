@@ -17,21 +17,21 @@ import net.minecraft.world.storage.loot.conditions.LootCondition;
 public class SetNBT extends LootFunction {
    private final NBTTagCompound tag;
 
-   public SetNBT(LootCondition[] conditionsIn, NBTTagCompound tagIn) {
-      super(conditionsIn);
-      this.tag = tagIn;
+   public SetNBT(LootCondition[] var1, NBTTagCompound var2) {
+      super(var1);
+      this.tag = var2;
    }
 
-   public ItemStack apply(ItemStack stack, Random rand, LootContext context) {
-      NBTTagCompound nbttagcompound = stack.getTagCompound();
-      if (nbttagcompound == null) {
-         nbttagcompound = this.tag.copy();
+   public ItemStack apply(ItemStack var1, Random var2, LootContext var3) {
+      NBTTagCompound var4 = var1.getTagCompound();
+      if (var4 == null) {
+         var4 = this.tag.copy();
       } else {
-         nbttagcompound.merge(this.tag);
+         var4.merge(this.tag);
       }
 
-      stack.setTagCompound(nbttagcompound);
-      return stack;
+      var1.setTagCompound(var4);
+      return var1;
    }
 
    public static class Serializer extends LootFunction.Serializer {
@@ -39,17 +39,22 @@ public class SetNBT extends LootFunction {
          super(new ResourceLocation("set_nbt"), SetNBT.class);
       }
 
-      public void serialize(JsonObject object, SetNBT functionClazz, JsonSerializationContext serializationContext) {
-         object.addProperty("tag", functionClazz.tag.toString());
+      public void serialize(JsonObject var1, SetNBT var2, JsonSerializationContext var3) {
+         var1.addProperty("tag", var2.tag.toString());
       }
 
-      public SetNBT deserialize(JsonObject object, JsonDeserializationContext deserializationContext, LootCondition[] conditionsIn) {
+      public SetNBT deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
          try {
-            NBTTagCompound nbttagcompound = JsonToNBT.getTagFromJson(JsonUtils.getString(object, "tag"));
-            return new SetNBT(conditionsIn, nbttagcompound);
+            NBTTagCompound var4 = JsonToNBT.getTagFromJson(JsonUtils.getString(var1, "tag"));
+            return new SetNBT(var3, var4);
          } catch (NBTException var5) {
             throw new JsonSyntaxException(var5);
          }
+      }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

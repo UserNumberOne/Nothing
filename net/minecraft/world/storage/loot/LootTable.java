@@ -9,6 +9,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -23,165 +24,120 @@ import org.apache.logging.log4j.Logger;
 public class LootTable {
    private static final Logger LOGGER = LogManager.getLogger();
    public static final LootTable EMPTY_LOOT_TABLE = new LootTable(new LootPool[0]);
-   private final List pools;
-   private boolean isFrozen = false;
+   private final LootPool[] pools;
 
-   public LootTable(LootPool[] poolsIn) {
-      this.pools = Lists.newArrayList(poolsIn);
+   public LootTable(LootPool[] var1) {
+      this.pools = var1;
    }
 
-   public List generateLootForPools(Random rand, LootContext context) {
-      List list = Lists.newArrayList();
-      if (context.addLootTable(this)) {
-         for(LootPool lootpool : this.pools) {
-            lootpool.generateLoot(list, rand, context);
+   public List generateLootForPools(Random var1, LootContext var2) {
+      ArrayList var3 = Lists.newArrayList();
+      if (var2.addLootTable(this)) {
+         for(LootPool var7 : this.pools) {
+            var7.generateLoot(var3, var1, var2);
          }
 
-         context.removeLootTable(this);
+         var2.removeLootTable(this);
       } else {
          LOGGER.warn("Detected infinite loop in loot tables");
       }
 
-      return list;
+      return var3;
    }
 
-   public void fillInventory(IInventory inventory, Random rand, LootContext context) {
-      List list = this.generateLootForPools(rand, context);
-      List list1 = this.getEmptySlotsRandomized(inventory, rand);
-      this.shuffleItems(list, list1.size(), rand);
+   public void fillInventory(IInventory var1, Random var2, LootContext var3) {
+      List var4 = this.generateLootForPools(var2, var3);
+      List var5 = this.getEmptySlotsRandomized(var1, var2);
+      this.shuffleItems(var4, var5.size(), var2);
 
-      for(ItemStack itemstack : list) {
-         if (list1.isEmpty()) {
+      for(ItemStack var7 : var4) {
+         if (var5.isEmpty()) {
             LOGGER.warn("Tried to over-fill a container");
             return;
          }
 
-         if (itemstack == null) {
-            inventory.setInventorySlotContents(((Integer)list1.remove(list1.size() - 1)).intValue(), (ItemStack)null);
+         if (var7 == null) {
+            var1.setInventorySlotContents(((Integer)var5.remove(var5.size() - 1)).intValue(), (ItemStack)null);
          } else {
-            inventory.setInventorySlotContents(((Integer)list1.remove(list1.size() - 1)).intValue(), itemstack);
+            var1.setInventorySlotContents(((Integer)var5.remove(var5.size() - 1)).intValue(), var7);
          }
       }
 
    }
 
-   private void shuffleItems(List stacks, int p_186463_2_, Random rand) {
-      List list = Lists.newArrayList();
-      Iterator iterator = stacks.iterator();
+   private void shuffleItems(List var1, int var2, Random var3) {
+      ArrayList var4 = Lists.newArrayList();
+      Iterator var5 = var1.iterator();
 
-      while(iterator.hasNext()) {
-         ItemStack itemstack = (ItemStack)iterator.next();
-         if (itemstack.stackSize <= 0) {
-            iterator.remove();
-         } else if (itemstack.stackSize > 1) {
-            list.add(itemstack);
-            iterator.remove();
+      while(var5.hasNext()) {
+         ItemStack var6 = (ItemStack)var5.next();
+         if (var6.stackSize <= 0) {
+            var5.remove();
+         } else if (var6.stackSize > 1) {
+            var4.add(var6);
+            var5.remove();
          }
       }
 
-      p_186463_2_ = p_186463_2_ - stacks.size();
+      var2 = var2 - var1.size();
 
-      while(p_186463_2_ > 0 && list.size() > 0) {
-         ItemStack itemstack2 = (ItemStack)list.remove(MathHelper.getInt(rand, 0, list.size() - 1));
-         int i = MathHelper.getInt(rand, 1, itemstack2.stackSize / 2);
-         itemstack2.stackSize -= i;
-         ItemStack itemstack1 = itemstack2.copy();
-         itemstack1.stackSize = i;
-         if (itemstack2.stackSize > 1 && rand.nextBoolean()) {
-            list.add(itemstack2);
+      while(var2 > 0 && var4.size() > 0) {
+         ItemStack var9 = (ItemStack)var4.remove(MathHelper.getInt(var3, 0, var4.size() - 1));
+         int var10 = MathHelper.getInt(var3, 1, var9.stackSize / 2);
+         var9.stackSize -= var10;
+         ItemStack var7 = var9.copy();
+         var7.stackSize = var10;
+         if (var9.stackSize > 1 && var3.nextBoolean()) {
+            var4.add(var9);
          } else {
-            stacks.add(itemstack2);
+            var1.add(var9);
          }
 
-         if (itemstack1.stackSize > 1 && rand.nextBoolean()) {
-            list.add(itemstack1);
+         if (var7.stackSize > 1 && var3.nextBoolean()) {
+            var4.add(var7);
          } else {
-            stacks.add(itemstack1);
+            var1.add(var7);
          }
       }
 
-      stacks.addAll(list);
-      Collections.shuffle(stacks, rand);
+      var1.addAll(var4);
+      Collections.shuffle(var1, var3);
    }
 
-   private List getEmptySlotsRandomized(IInventory inventory, Random rand) {
-      List list = Lists.newArrayList();
+   private List getEmptySlotsRandomized(IInventory var1, Random var2) {
+      ArrayList var3 = Lists.newArrayList();
 
-      for(int i = 0; i < inventory.getSizeInventory(); ++i) {
-         if (inventory.getStackInSlot(i) == null) {
-            list.add(Integer.valueOf(i));
+      for(int var4 = 0; var4 < var1.getSizeInventory(); ++var4) {
+         if (var1.getStackInSlot(var4) == null) {
+            var3.add(Integer.valueOf(var4));
          }
       }
 
-      Collections.shuffle(list, rand);
-      return list;
-   }
-
-   public void freeze() {
-      this.isFrozen = true;
-
-      for(LootPool pool : this.pools) {
-         pool.freeze();
-      }
-
-   }
-
-   public boolean isFrozen() {
-      return this.isFrozen;
-   }
-
-   private void checkFrozen() {
-      if (this.isFrozen()) {
-         throw new RuntimeException("Attempted to modify LootTable after being finalized!");
-      }
-   }
-
-   public LootPool getPool(String name) {
-      for(LootPool pool : this.pools) {
-         if (name.equals(pool.getName())) {
-            return pool;
-         }
-      }
-
-      return null;
-   }
-
-   public LootPool removePool(String name) {
-      this.checkFrozen();
-
-      for(LootPool pool : this.pools) {
-         if (name.equals(pool.getName())) {
-            this.pools.remove(pool);
-            return pool;
-         }
-      }
-
-      return null;
-   }
-
-   public void addPool(LootPool pool) {
-      this.checkFrozen();
-
-      for(LootPool p : this.pools) {
-         if (p == pool || p.getName().equals(pool.getName())) {
-            throw new RuntimeException("Attempted to add a duplicate pool to loot table: " + pool.getName());
-         }
-      }
-
-      this.pools.add(pool);
+      Collections.shuffle(var3, var2);
+      return var3;
    }
 
    public static class Serializer implements JsonDeserializer, JsonSerializer {
-      public LootTable deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
-         JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "loot table");
-         LootPool[] alootpool = (LootPool[])JsonUtils.deserializeClass(jsonobject, "pools", new LootPool[0], p_deserialize_3_, LootPool[].class);
-         return new LootTable(alootpool);
+      public LootTable deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         JsonObject var4 = JsonUtils.getJsonObject(var1, "loot table");
+         LootPool[] var5 = (LootPool[])JsonUtils.deserializeClass(var4, "pools", new LootPool[0], var3, LootPool[].class);
+         return new LootTable(var5);
       }
 
-      public JsonElement serialize(LootTable p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
-         JsonObject jsonobject = new JsonObject();
-         jsonobject.add("pools", p_serialize_3_.serialize(p_serialize_1_.pools));
-         return jsonobject;
+      public JsonElement serialize(LootTable var1, Type var2, JsonSerializationContext var3) {
+         JsonObject var4 = new JsonObject();
+         var4.add("pools", var3.serialize(var1.pools));
+         return var4;
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((LootTable)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

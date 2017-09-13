@@ -11,20 +11,20 @@ public class WeightedSpawnerEntity extends WeightedRandom.Item {
       this.nbt.setString("id", "Pig");
    }
 
-   public WeightedSpawnerEntity(NBTTagCompound nbtIn) {
-      this(nbtIn.hasKey("Weight", 99) ? nbtIn.getInteger("Weight") : 1, nbtIn.getCompoundTag("Entity"));
+   public WeightedSpawnerEntity(NBTTagCompound var1) {
+      this(var1.hasKey("Weight", 99) ? var1.getInteger("Weight") : 1, var1.getCompoundTag("Entity"));
    }
 
-   public WeightedSpawnerEntity(int itemWeightIn, NBTTagCompound nbtIn) {
-      super(itemWeightIn);
-      this.nbt = nbtIn;
+   public WeightedSpawnerEntity(int var1, NBTTagCompound var2) {
+      super(var1);
+      this.nbt = var2;
    }
 
    public NBTTagCompound toCompoundTag() {
-      NBTTagCompound nbttagcompound = new NBTTagCompound();
-      nbttagcompound.setTag("Entity", this.nbt);
-      nbttagcompound.setInteger("Weight", this.itemWeight);
-      return nbttagcompound;
+      NBTTagCompound var1 = new NBTTagCompound();
+      var1.setTag("Entity", this.nbt);
+      var1.setInteger("Weight", this.itemWeight);
+      return var1;
    }
 
    public NBTTagCompound getNbt() {

@@ -5,46 +5,28 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketCustomPayload implements Packet {
    private String channel;
    private PacketBuffer data;
 
-   public CPacketCustomPayload() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketCustomPayload(String channelIn, PacketBuffer bufIn) {
-      this.channel = channelIn;
-      this.data = bufIn;
-      if (bufIn.writerIndex() > 32767) {
-         throw new IllegalArgumentException("Payload may not be larger than 32767 bytes");
-      }
-   }
-
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.channel = buf.readString(20);
-      int i = buf.readableBytes();
-      if (i >= 0 && i <= 32767) {
-         this.data = new PacketBuffer(buf.readBytes(i));
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.channel = var1.readString(20);
+      int var2 = var1.readableBytes();
+      if (var2 >= 0 && var2 <= 32767) {
+         this.data = new PacketBuffer(var1.readBytes(var2));
       } else {
          throw new IOException("Payload may not be larger than 32767 bytes");
       }
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeString(this.channel);
-      synchronized(this.data) {
-         this.data.markReaderIndex();
-         buf.writeBytes((ByteBuf)this.data);
-         this.data.resetReaderIndex();
-      }
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeString(this.channel);
+      var1.writeBytes((ByteBuf)this.data);
    }
 
-   public void processPacket(INetHandlerPlayServer handler) {
-      handler.processCustomPayload(this);
+   public void processPacket(INetHandlerPlayServer var1) {
+      var1.processCustomPayload(this);
       if (this.data != null) {
          this.data.release();
       }

@@ -6,43 +6,43 @@ public class ChunkPos {
    public final int chunkXPos;
    public final int chunkZPos;
 
-   public ChunkPos(int x, int z) {
-      this.chunkXPos = x;
-      this.chunkZPos = z;
+   public ChunkPos(int var1, int var2) {
+      this.chunkXPos = var1;
+      this.chunkZPos = var2;
    }
 
-   public ChunkPos(BlockPos pos) {
-      this.chunkXPos = pos.getX() >> 4;
-      this.chunkZPos = pos.getZ() >> 4;
+   public ChunkPos(BlockPos var1) {
+      this.chunkXPos = var1.getX() >> 4;
+      this.chunkZPos = var1.getZ() >> 4;
    }
 
-   public static long asLong(int x, int z) {
-      return (long)x & 4294967295L | ((long)z & 4294967295L) << 32;
+   public static long asLong(int var0, int var1) {
+      return (long)var0 & 4294967295L | ((long)var1 & 4294967295L) << 32;
    }
 
    public int hashCode() {
-      int i = 1664525 * this.chunkXPos + 1013904223;
-      int j = 1664525 * (this.chunkZPos ^ -559038737) + 1013904223;
-      return i ^ j;
+      int var1 = 1664525 * this.chunkXPos + 1013904223;
+      int var2 = 1664525 * (this.chunkZPos ^ -559038737) + 1013904223;
+      return var1 ^ var2;
    }
 
-   public boolean equals(Object p_equals_1_) {
-      if (this == p_equals_1_) {
+   public boolean equals(Object var1) {
+      if (this == var1) {
          return true;
-      } else if (!(p_equals_1_ instanceof ChunkPos)) {
+      } else if (!(var1 instanceof ChunkPos)) {
          return false;
       } else {
-         ChunkPos chunkpos = (ChunkPos)p_equals_1_;
-         return this.chunkXPos == chunkpos.chunkXPos && this.chunkZPos == chunkpos.chunkZPos;
+         ChunkPos var2 = (ChunkPos)var1;
+         return this.chunkXPos == var2.chunkXPos && this.chunkZPos == var2.chunkZPos;
       }
    }
 
-   public double getDistanceSq(Entity entityIn) {
-      double d0 = (double)(this.chunkXPos * 16 + 8);
-      double d1 = (double)(this.chunkZPos * 16 + 8);
-      double d2 = d0 - entityIn.posX;
-      double d3 = d1 - entityIn.posZ;
-      return d2 * d2 + d3 * d3;
+   public double getDistanceSq(Entity var1) {
+      double var2 = (double)(this.chunkXPos * 16 + 8);
+      double var4 = (double)(this.chunkZPos * 16 + 8);
+      double var6 = var2 - var1.posX;
+      double var8 = var4 - var1.posZ;
+      return var6 * var6 + var8 * var8;
    }
 
    public int getXCenter() {
@@ -69,12 +69,12 @@ public class ChunkPos {
       return (this.chunkZPos << 4) + 15;
    }
 
-   public BlockPos getBlock(int x, int y, int z) {
-      return new BlockPos((this.chunkXPos << 4) + x, y, (this.chunkZPos << 4) + z);
+   public BlockPos getBlock(int var1, int var2, int var3) {
+      return new BlockPos((this.chunkXPos << 4) + var1, var2, (this.chunkZPos << 4) + var3);
    }
 
-   public BlockPos getCenterBlock(int y) {
-      return new BlockPos(this.getXCenter(), y, this.getZCenter());
+   public BlockPos getCenterBlock(int var1) {
+      return new BlockPos(this.getXCenter(), var1, this.getZCenter());
    }
 
    public String toString() {

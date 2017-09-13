@@ -16,13 +16,13 @@ public abstract class NodeProcessor {
    protected boolean canBreakDoors;
    protected boolean canSwim;
 
-   public void initProcessor(IBlockAccess sourceIn, EntityLiving mob) {
-      this.blockaccess = sourceIn;
-      this.entity = mob;
+   public void initProcessor(IBlockAccess var1, EntityLiving var2) {
+      this.blockaccess = var1;
+      this.entity = var2;
       this.pointMap.clearMap();
-      this.entitySizeX = MathHelper.floor(mob.width + 1.0F);
-      this.entitySizeY = MathHelper.floor(mob.height + 1.0F);
-      this.entitySizeZ = MathHelper.floor(mob.width + 1.0F);
+      this.entitySizeX = MathHelper.floor(var2.width + 1.0F);
+      this.entitySizeY = MathHelper.floor(var2.height + 1.0F);
+      this.entitySizeZ = MathHelper.floor(var2.width + 1.0F);
    }
 
    public void postProcess() {
@@ -30,15 +30,15 @@ public abstract class NodeProcessor {
       this.entity = null;
    }
 
-   protected PathPoint openPoint(int x, int y, int z) {
-      int i = PathPoint.makeHash(x, y, z);
-      PathPoint pathpoint = (PathPoint)this.pointMap.lookup(i);
-      if (pathpoint == null) {
-         pathpoint = new PathPoint(x, y, z);
-         this.pointMap.addKey(i, pathpoint);
+   protected PathPoint openPoint(int var1, int var2, int var3) {
+      int var4 = PathPoint.makeHash(var1, var2, var3);
+      PathPoint var5 = (PathPoint)this.pointMap.lookup(var4);
+      if (var5 == null) {
+         var5 = new PathPoint(var1, var2, var3);
+         this.pointMap.addKey(var4, var5);
       }
 
-      return pathpoint;
+      return var5;
    }
 
    public abstract PathPoint getStart();
@@ -51,16 +51,16 @@ public abstract class NodeProcessor {
 
    public abstract PathNodeType getPathNodeType(IBlockAccess var1, int var2, int var3, int var4);
 
-   public void setCanEnterDoors(boolean canEnterDoorsIn) {
-      this.canEnterDoors = canEnterDoorsIn;
+   public void setCanEnterDoors(boolean var1) {
+      this.canEnterDoors = var1;
    }
 
-   public void setCanBreakDoors(boolean canBreakDoorsIn) {
-      this.canBreakDoors = canBreakDoorsIn;
+   public void setCanBreakDoors(boolean var1) {
+      this.canBreakDoors = var1;
    }
 
-   public void setCanSwim(boolean canSwimIn) {
-      this.canSwim = canSwimIn;
+   public void setCanSwim(boolean var1) {
+      this.canSwim = var1;
    }
 
    public boolean getCanEnterDoors() {

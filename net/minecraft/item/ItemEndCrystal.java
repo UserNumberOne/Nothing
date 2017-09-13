@@ -15,8 +15,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.end.DragonFightManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemEndCrystal extends Item {
    public ItemEndCrystal() {
@@ -24,48 +22,43 @@ public class ItemEndCrystal extends Item {
       this.setCreativeTab(CreativeTabs.DECORATIONS);
    }
 
-   public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-      IBlockState iblockstate = worldIn.getBlockState(pos);
-      if (iblockstate.getBlock() != Blocks.OBSIDIAN && iblockstate.getBlock() != Blocks.BEDROCK) {
+   public EnumActionResult onItemUse(ItemStack var1, EntityPlayer var2, World var3, BlockPos var4, EnumHand var5, EnumFacing var6, float var7, float var8, float var9) {
+      IBlockState var10 = var3.getBlockState(var4);
+      if (var10.getBlock() != Blocks.OBSIDIAN && var10.getBlock() != Blocks.BEDROCK) {
          return EnumActionResult.FAIL;
       } else {
-         BlockPos blockpos = pos.up();
-         if (!playerIn.canPlayerEdit(blockpos, facing, stack)) {
+         BlockPos var11 = var4.up();
+         if (!var2.canPlayerEdit(var11, var6, var1)) {
             return EnumActionResult.FAIL;
          } else {
-            BlockPos blockpos1 = blockpos.up();
-            boolean flag = !worldIn.isAirBlock(blockpos) && !worldIn.getBlockState(blockpos).getBlock().isReplaceable(worldIn, blockpos);
-            flag = flag | (!worldIn.isAirBlock(blockpos1) && !worldIn.getBlockState(blockpos1).getBlock().isReplaceable(worldIn, blockpos1));
-            if (flag) {
+            BlockPos var12 = var11.up();
+            boolean var13 = !var3.isAirBlock(var11) && !var3.getBlockState(var11).getBlock().isReplaceable(var3, var11);
+            var13 = var13 | (!var3.isAirBlock(var12) && !var3.getBlockState(var12).getBlock().isReplaceable(var3, var12));
+            if (var13) {
                return EnumActionResult.FAIL;
             } else {
-               double d0 = (double)blockpos.getX();
-               double d1 = (double)blockpos.getY();
-               double d2 = (double)blockpos.getZ();
-               List list = worldIn.getEntitiesWithinAABBExcludingEntity((Entity)null, new AxisAlignedBB(d0, d1, d2, d0 + 1.0D, d1 + 2.0D, d2 + 1.0D));
-               if (!list.isEmpty()) {
+               double var14 = (double)var11.getX();
+               double var16 = (double)var11.getY();
+               double var18 = (double)var11.getZ();
+               List var20 = var3.getEntitiesWithinAABBExcludingEntity((Entity)null, new AxisAlignedBB(var14, var16, var18, var14 + 1.0D, var16 + 2.0D, var18 + 1.0D));
+               if (!var20.isEmpty()) {
                   return EnumActionResult.FAIL;
                } else {
-                  if (!worldIn.isRemote) {
-                     EntityEnderCrystal entityendercrystal = new EntityEnderCrystal(worldIn, (double)((float)pos.getX() + 0.5F), (double)(pos.getY() + 1), (double)((float)pos.getZ() + 0.5F));
-                     entityendercrystal.setShowBottom(false);
-                     worldIn.spawnEntity(entityendercrystal);
-                     if (worldIn.provider instanceof WorldProviderEnd) {
-                        DragonFightManager dragonfightmanager = ((WorldProviderEnd)worldIn.provider).getDragonFightManager();
-                        dragonfightmanager.respawnDragon();
+                  if (!var3.isRemote) {
+                     EntityEnderCrystal var21 = new EntityEnderCrystal(var3, (double)((float)var4.getX() + 0.5F), (double)(var4.getY() + 1), (double)((float)var4.getZ() + 0.5F));
+                     var21.setShowBottom(false);
+                     var3.spawnEntity(var21);
+                     if (var3.provider instanceof WorldProviderEnd) {
+                        DragonFightManager var22 = ((WorldProviderEnd)var3.provider).getDragonFightManager();
+                        var22.respawnDragon();
                      }
                   }
 
-                  --stack.stackSize;
+                  --var1.stackSize;
                   return EnumActionResult.SUCCESS;
                }
             }
          }
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasEffect(ItemStack stack) {
-      return true;
    }
 }

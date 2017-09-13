@@ -3,15 +3,15 @@ package net.minecraft.command;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 public class CommandTP extends CommandBase {
    public String getName() {
@@ -22,114 +22,108 @@ public class CommandTP extends CommandBase {
       return 2;
    }
 
-   public String getUsage(ICommandSender sender) {
+   public String getUsage(ICommandSender icommandlistener) {
       return "commands.tp.usage";
    }
 
-   public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-      if (args.length < 1) {
+   public void execute(MinecraftServer minecraftserver, ICommandSender icommandlistener, String[] astring) throws CommandException {
+      if (astring.length < 1) {
          throw new WrongUsageException("commands.tp.usage", new Object[0]);
       } else {
-         int i = 0;
-         Entity entity;
-         if (args.length != 2 && args.length != 4 && args.length != 6) {
-            entity = getCommandSenderAsPlayer(sender);
+         byte b0 = 0;
+         Object object;
+         if (astring.length != 2 && astring.length != 4 && astring.length != 6) {
+            object = getCommandSenderAsPlayer(icommandlistener);
          } else {
-            entity = getEntity(server, sender, args[0]);
-            i = 1;
+            object = b(minecraftserver, icommandlistener, astring[0]);
+            b0 = 1;
          }
 
-         if (args.length != 1 && args.length != 2) {
-            if (args.length < i + 3) {
+         if (astring.length != 1 && astring.length != 2) {
+            if (astring.length < b0 + 3) {
                throw new WrongUsageException("commands.tp.usage", new Object[0]);
             }
 
-            if (entity.world != null) {
-               int j = 4096;
-               int lvt_6_2_ = i + 1;
-               CommandBase.CoordinateArg commandbase$coordinatearg = parseCoordinate(entity.posX, args[i], true);
-               CommandBase.CoordinateArg commandbase$coordinatearg1 = parseCoordinate(entity.posY, args[lvt_6_2_++], -4096, 4096, false);
-               CommandBase.CoordinateArg commandbase$coordinatearg2 = parseCoordinate(entity.posZ, args[lvt_6_2_++], true);
-               CommandBase.CoordinateArg commandbase$coordinatearg3 = parseCoordinate((double)entity.rotationYaw, args.length > lvt_6_2_ ? args[lvt_6_2_++] : "~", false);
-               CommandBase.CoordinateArg commandbase$coordinatearg4 = parseCoordinate((double)entity.rotationPitch, args.length > lvt_6_2_ ? args[lvt_6_2_] : "~", false);
-               teleportEntityToCoordinates(entity, commandbase$coordinatearg, commandbase$coordinatearg1, commandbase$coordinatearg2, commandbase$coordinatearg3, commandbase$coordinatearg4);
-               notifyCommandListener(sender, this, "commands.tp.success.coordinates", new Object[]{entity.getName(), commandbase$coordinatearg.getResult(), commandbase$coordinatearg1.getResult(), commandbase$coordinatearg2.getResult()});
+            if (((Entity)object).world != null) {
+               int i = b0 + 1;
+               CommandBase.CoordinateArg commandabstract_commandnumber = parseCoordinate(((Entity)object).posX, astring[b0], true);
+               CommandBase.CoordinateArg commandabstract_commandnumber1 = parseCoordinate(((Entity)object).posY, astring[i++], -4096, 4096, false);
+               CommandBase.CoordinateArg commandabstract_commandnumber2 = parseCoordinate(((Entity)object).posZ, astring[i++], true);
+               CommandBase.CoordinateArg commandabstract_commandnumber3 = parseCoordinate((double)((Entity)object).rotationYaw, astring.length > i ? astring[i++] : "~", false);
+               CommandBase.CoordinateArg commandabstract_commandnumber4 = parseCoordinate((double)((Entity)object).rotationPitch, astring.length > i ? astring[i] : "~", false);
+               teleportEntityToCoordinates((Entity)object, commandabstract_commandnumber, commandabstract_commandnumber1, commandabstract_commandnumber2, commandabstract_commandnumber3, commandabstract_commandnumber4);
+               notifyCommandListener(icommandlistener, this, "commands.tp.success.coordinates", new Object[]{((Entity)object).getName(), commandabstract_commandnumber.getResult(), commandabstract_commandnumber1.getResult(), commandabstract_commandnumber2.getResult()});
             }
          } else {
-            Entity entity1 = getEntity(server, sender, args[args.length - 1]);
-            if (entity1.world != entity.world) {
-               throw new CommandException("commands.tp.notSameDimension", new Object[0]);
+            Entity entity = b(minecraftserver, icommandlistener, astring[astring.length - 1]);
+            if (((Entity)object).getBukkitEntity().teleport(entity.getBukkitEntity(), TeleportCause.COMMAND)) {
+               notifyCommandListener(icommandlistener, this, "commands.tp.success", new Object[]{((Entity)object).getName(), entity.getName()});
             }
-
-            entity.dismountRidingEntity();
-            if (entity instanceof EntityPlayerMP) {
-               ((EntityPlayerMP)entity).connection.setPlayerLocation(entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
-            } else {
-               entity.setLocationAndAngles(entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
-            }
-
-            notifyCommandListener(sender, this, "commands.tp.success", new Object[]{entity.getName(), entity1.getName()});
          }
 
       }
    }
 
-   private static void teleportEntityToCoordinates(Entity p_189863_0_, CommandBase.CoordinateArg p_189863_1_, CommandBase.CoordinateArg p_189863_2_, CommandBase.CoordinateArg p_189863_3_, CommandBase.CoordinateArg p_189863_4_, CommandBase.CoordinateArg p_189863_5_) {
-      if (p_189863_0_ instanceof EntityPlayerMP) {
-         Set set = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
-         if (p_189863_1_.isRelative()) {
-            set.add(SPacketPlayerPosLook.EnumFlags.X);
+   private static void teleportEntityToCoordinates(Entity entity, CommandBase.CoordinateArg commandabstract_commandnumber, CommandBase.CoordinateArg commandabstract_commandnumber1, CommandBase.CoordinateArg commandabstract_commandnumber2, CommandBase.CoordinateArg commandabstract_commandnumber3, CommandBase.CoordinateArg commandabstract_commandnumber4) {
+      if (entity instanceof EntityPlayerMP) {
+         EnumSet enumset = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
+         if (commandabstract_commandnumber.isRelative()) {
+            enumset.add(SPacketPlayerPosLook.EnumFlags.X);
          }
 
-         if (p_189863_2_.isRelative()) {
-            set.add(SPacketPlayerPosLook.EnumFlags.Y);
+         if (commandabstract_commandnumber1.isRelative()) {
+            enumset.add(SPacketPlayerPosLook.EnumFlags.Y);
          }
 
-         if (p_189863_3_.isRelative()) {
-            set.add(SPacketPlayerPosLook.EnumFlags.Z);
+         if (commandabstract_commandnumber2.isRelative()) {
+            enumset.add(SPacketPlayerPosLook.EnumFlags.Z);
          }
 
-         if (p_189863_5_.isRelative()) {
-            set.add(SPacketPlayerPosLook.EnumFlags.X_ROT);
+         if (commandabstract_commandnumber4.isRelative()) {
+            enumset.add(SPacketPlayerPosLook.EnumFlags.X_ROT);
          }
 
-         if (p_189863_4_.isRelative()) {
-            set.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
+         if (commandabstract_commandnumber3.isRelative()) {
+            enumset.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
          }
 
-         float f = (float)p_189863_4_.getAmount();
-         if (!p_189863_4_.isRelative()) {
+         float f = (float)commandabstract_commandnumber3.getAmount();
+         if (!commandabstract_commandnumber3.isRelative()) {
             f = MathHelper.wrapDegrees(f);
          }
 
-         float f1 = (float)p_189863_5_.getAmount();
-         if (!p_189863_5_.isRelative()) {
+         float f1 = (float)commandabstract_commandnumber4.getAmount();
+         if (!commandabstract_commandnumber4.isRelative()) {
             f1 = MathHelper.wrapDegrees(f1);
          }
 
-         p_189863_0_.dismountRidingEntity();
-         ((EntityPlayerMP)p_189863_0_).connection.setPlayerLocation(p_189863_1_.getAmount(), p_189863_2_.getAmount(), p_189863_3_.getAmount(), f, f1, set);
-         p_189863_0_.setRotationYawHead(f);
+         entity.dismountRidingEntity();
+         ((EntityPlayerMP)entity).connection.setPlayerLocation(commandabstract_commandnumber.getAmount(), commandabstract_commandnumber1.getAmount(), commandabstract_commandnumber2.getAmount(), f, f1, enumset);
+         entity.setRotationYawHead(f);
       } else {
-         float f2 = (float)MathHelper.wrapDegrees(p_189863_4_.getResult());
-         float f3 = (float)MathHelper.wrapDegrees(p_189863_5_.getResult());
-         f3 = MathHelper.clamp(f3, -90.0F, 90.0F);
-         p_189863_0_.setLocationAndAngles(p_189863_1_.getResult(), p_189863_2_.getResult(), p_189863_3_.getResult(), f2, f3);
-         p_189863_0_.setRotationYawHead(f2);
+         float f2 = (float)MathHelper.wrapDegrees(commandabstract_commandnumber3.getResult());
+         float f = (float)MathHelper.wrapDegrees(commandabstract_commandnumber4.getResult());
+         f = MathHelper.clamp(f, -90.0F, 90.0F);
+         entity.setLocationAndAngles(commandabstract_commandnumber.getResult(), commandabstract_commandnumber1.getResult(), commandabstract_commandnumber2.getResult(), f2, f);
+         entity.setRotationYawHead(f2);
       }
 
-      if (!(p_189863_0_ instanceof EntityLivingBase) || !((EntityLivingBase)p_189863_0_).isElytraFlying()) {
-         p_189863_0_.motionY = 0.0D;
-         p_189863_0_.onGround = true;
+      if (!(entity instanceof EntityLivingBase) || !((EntityLivingBase)entity).isElytraFlying()) {
+         entity.motionY = 0.0D;
+         entity.onGround = true;
       }
 
    }
 
-   public List getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
-      return args.length != 1 && args.length != 2 ? Collections.emptyList() : getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
+   public List tabComplete(MinecraftServer minecraftserver, ICommandSender icommandlistener, String[] astring, @Nullable BlockPos blockposition) {
+      return astring.length != 1 && astring.length != 2 ? Collections.emptyList() : getListOfStringsMatchingLastWord(astring, minecraftserver.getPlayers());
    }
 
-   public boolean isUsernameIndex(String[] args, int index) {
-      return index == 0;
+   public boolean isUsernameIndex(String[] astring, int i) {
+      return i == 0;
+   }
+
+   public int compareTo(ICommand o) {
+      return this.compareTo(o);
    }
 }

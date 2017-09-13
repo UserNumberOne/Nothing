@@ -4,37 +4,24 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockChest;
-import net.minecraft.block.BlockEnderChest;
 import net.minecraft.block.BlockJukebox;
-import net.minecraft.block.BlockSign;
-import net.minecraft.block.BlockSkull;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityDispatcher;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.block.BlockState;
+import org.bukkit.inventory.InventoryHolder;
 
-public abstract class TileEntity implements ICapabilitySerializable {
+public abstract class TileEntity {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final Map nameToClassMap = Maps.newHashMap();
    private static final Map classToNameMap = Maps.newHashMap();
@@ -43,17 +30,39 @@ public abstract class TileEntity implements ICapabilitySerializable {
    protected boolean tileEntityInvalid;
    private int blockMetadata = -1;
    protected Block blockType;
-   private boolean isVanilla = this.getClass().getName().startsWith("net.minecraft.");
-   public static final AxisAlignedBB INFINITE_EXTENT_AABB = new AxisAlignedBB(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-   private NBTTagCompound customTileData;
-   private CapabilityDispatcher capabilities = ForgeEventFactory.gatherCapabilities(this);
 
-   public static void addMapping(Class cl, String id) {
-      if (nameToClassMap.containsKey(id)) {
-         throw new IllegalArgumentException("Duplicate id: " + id);
+   static {
+      addMapping(TileEntityFurnace.class, "Furnace");
+      addMapping(TileEntityChest.class, "Chest");
+      addMapping(TileEntityEnderChest.class, "EnderChest");
+      addMapping(BlockJukebox.TileEntityJukebox.class, "RecordPlayer");
+      addMapping(TileEntityDispenser.class, "Trap");
+      addMapping(TileEntityDropper.class, "Dropper");
+      addMapping(TileEntitySign.class, "Sign");
+      addMapping(TileEntityMobSpawner.class, "MobSpawner");
+      addMapping(TileEntityNote.class, "Music");
+      addMapping(TileEntityPiston.class, "Piston");
+      addMapping(TileEntityBrewingStand.class, "Cauldron");
+      addMapping(TileEntityEnchantmentTable.class, "EnchantTable");
+      addMapping(TileEntityEndPortal.class, "Airportal");
+      addMapping(TileEntityBeacon.class, "Beacon");
+      addMapping(TileEntitySkull.class, "Skull");
+      addMapping(TileEntityDaylightDetector.class, "DLDetector");
+      addMapping(TileEntityHopper.class, "Hopper");
+      addMapping(TileEntityComparator.class, "Comparator");
+      addMapping(TileEntityFlowerPot.class, "FlowerPot");
+      addMapping(TileEntityBanner.class, "Banner");
+      addMapping(TileEntityStructure.class, "Structure");
+      addMapping(TileEntityEndGateway.class, "EndGateway");
+      addMapping(TileEntityCommandBlock.class, "Control");
+   }
+
+   private static void addMapping(Class oclass, String s) {
+      if (nameToClassMap.containsKey(s)) {
+         throw new IllegalArgumentException("Duplicate id: " + s);
       } else {
-         nameToClassMap.put(id, cl);
-         classToNameMap.put(cl, id);
+         nameToClassMap.put(s, oclass);
+         classToNameMap.put(oclass, s);
       }
    }
 
@@ -61,73 +70,54 @@ public abstract class TileEntity implements ICapabilitySerializable {
       return this.world;
    }
 
-   public void setWorld(World worldIn) {
-      this.world = worldIn;
+   public void setWorld(World world) {
+      this.world = world;
    }
 
    public boolean hasWorld() {
       return this.world != null;
    }
 
-   public void readFromNBT(NBTTagCompound compound) {
-      this.pos = new BlockPos(compound.getInteger("x"), compound.getInteger("y"), compound.getInteger("z"));
-      if (compound.hasKey("ForgeData")) {
-         this.customTileData = compound.getCompoundTag("ForgeData");
-      }
-
-      if (this.capabilities != null && compound.hasKey("ForgeCaps")) {
-         this.capabilities.deserializeNBT(compound.getCompoundTag("ForgeCaps"));
-      }
-
+   public void readFromNBT(NBTTagCompound nbttagcompound) {
+      this.pos = new BlockPos(nbttagcompound.getInteger("x"), nbttagcompound.getInteger("y"), nbttagcompound.getInteger("z"));
    }
 
-   public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-      return this.writeInternal(compound);
+   public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
+      return this.writeInternal(nbttagcompound);
    }
 
-   private NBTTagCompound writeInternal(NBTTagCompound compound) {
+   private NBTTagCompound writeInternal(NBTTagCompound nbttagcompound) {
       String s = (String)classToNameMap.get(this.getClass());
       if (s == null) {
          throw new RuntimeException(this.getClass() + " is missing a mapping! This is a bug!");
       } else {
-         compound.setString("id", s);
-         compound.setInteger("x", this.pos.getX());
-         compound.setInteger("y", this.pos.getY());
-         compound.setInteger("z", this.pos.getZ());
-         if (this.customTileData != null) {
-            compound.setTag("ForgeData", this.customTileData);
-         }
-
-         if (this.capabilities != null) {
-            compound.setTag("ForgeCaps", this.capabilities.serializeNBT());
-         }
-
-         return compound;
+         nbttagcompound.setString("id", s);
+         nbttagcompound.setInteger("x", this.pos.getX());
+         nbttagcompound.setInteger("y", this.pos.getY());
+         nbttagcompound.setInteger("z", this.pos.getZ());
+         return nbttagcompound;
       }
    }
 
-   public static TileEntity create(World worldIn, NBTTagCompound compound) {
+   public static TileEntity create(World world, NBTTagCompound nbttagcompound) {
       TileEntity tileentity = null;
-      String s = compound.getString("id");
-      Class oclass = null;
+      String s = nbttagcompound.getString("id");
 
       try {
-         oclass = (Class)nameToClassMap.get(s);
+         Class oclass = (Class)nameToClassMap.get(s);
          if (oclass != null) {
             tileentity = (TileEntity)oclass.newInstance();
          }
-      } catch (Throwable var7) {
-         LOGGER.error("Failed to create block entity {}", new Object[]{s, var7});
-         FMLLog.log(Level.ERROR, var7, "A TileEntity %s(%s) has thrown an exception during loading, its state cannot be restored. Report this to the mod author", new Object[]{s, oclass.getName()});
+      } catch (Throwable var6) {
+         LOGGER.error("Failed to create block entity {}", new Object[]{s, var6});
       }
 
       if (tileentity != null) {
          try {
-            tileentity.setWorldCreate(worldIn);
-            tileentity.readFromNBT(compound);
-         } catch (Throwable var6) {
-            LOGGER.error("Failed to load data for block entity {}", new Object[]{s, var6});
-            FMLLog.log(Level.ERROR, var6, "A TileEntity %s(%s) has thrown an exception during loading, its state cannot be restored. Report this to the mod author", new Object[]{s, oclass.getName()});
+            tileentity.setWorldCreate(world);
+            tileentity.readFromNBT(nbttagcompound);
+         } catch (Throwable var5) {
+            LOGGER.error("Failed to load data for block entity {}", new Object[]{s, var5});
             tileentity = null;
          }
       } else {
@@ -137,13 +127,13 @@ public abstract class TileEntity implements ICapabilitySerializable {
       return tileentity;
    }
 
-   protected void setWorldCreate(World worldIn) {
+   protected void setWorldCreate(World world) {
    }
 
    public int getBlockMetadata() {
       if (this.blockMetadata == -1) {
-         IBlockState iblockstate = this.world.getBlockState(this.pos);
-         this.blockMetadata = iblockstate.getBlock().getMetaFromState(iblockstate);
+         IBlockState iblockdata = this.world.getBlockState(this.pos);
+         this.blockMetadata = iblockdata.getBlock().getMetaFromState(iblockdata);
       }
 
       return this.blockMetadata;
@@ -151,26 +141,14 @@ public abstract class TileEntity implements ICapabilitySerializable {
 
    public void markDirty() {
       if (this.world != null) {
-         IBlockState iblockstate = this.world.getBlockState(this.pos);
-         this.blockMetadata = iblockstate.getBlock().getMetaFromState(iblockstate);
+         IBlockState iblockdata = this.world.getBlockState(this.pos);
+         this.blockMetadata = iblockdata.getBlock().getMetaFromState(iblockdata);
          this.world.markChunkDirty(this.pos, this);
          if (this.getBlockType() != Blocks.AIR) {
             this.world.updateComparatorOutputLevel(this.pos, this.getBlockType());
          }
       }
 
-   }
-
-   public double getDistanceSq(double x, double y, double z) {
-      double d0 = (double)this.pos.getX() + 0.5D - x;
-      double d1 = (double)this.pos.getY() + 0.5D - y;
-      double d2 = (double)this.pos.getZ() + 0.5D - z;
-      return d0 * d0 + d1 * d1 + d2 * d2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getMaxRenderDistanceSquared() {
-      return 4096.0D;
    }
 
    public BlockPos getPos() {
@@ -206,7 +184,7 @@ public abstract class TileEntity implements ICapabilitySerializable {
       this.tileEntityInvalid = false;
    }
 
-   public boolean receiveClientEvent(int id, int type) {
+   public boolean receiveClientEvent(int i, int j) {
       return false;
    }
 
@@ -215,29 +193,37 @@ public abstract class TileEntity implements ICapabilitySerializable {
       this.blockMetadata = -1;
    }
 
-   public void addInfoToCrashReport(CrashReportCategory reportCategory) {
-      reportCategory.setDetail("Name", new ICrashReportDetail() {
+   public void addInfoToCrashReport(CrashReportCategory crashreportsystemdetails) {
+      crashreportsystemdetails.setDetail("Name", new ICrashReportDetail() {
          public String call() throws Exception {
             return (String)TileEntity.classToNameMap.get(TileEntity.this.getClass()) + " // " + TileEntity.this.getClass().getCanonicalName();
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       if (this.world != null) {
-         CrashReportCategory.addBlockInfo(reportCategory, this.pos, this.getBlockType(), this.getBlockMetadata());
-         reportCategory.setDetail("Actual block type", new ICrashReportDetail() {
+         CrashReportCategory.addBlockInfo(crashreportsystemdetails, this.pos, this.getBlockType(), this.getBlockMetadata());
+         crashreportsystemdetails.setDetail("Actual block type", new ICrashReportDetail() {
             public String call() throws Exception {
                int i = Block.getIdFromBlock(TileEntity.this.world.getBlockState(TileEntity.this.pos).getBlock());
 
                try {
                   return String.format("ID #%d (%s // %s)", i, Block.getBlockById(i).getUnlocalizedName(), Block.getBlockById(i).getClass().getCanonicalName());
-               } catch (Throwable var3) {
+               } catch (Throwable var2) {
                   return "ID #" + i;
                }
             }
+
+            public Object call() throws Exception {
+               return this.call();
+            }
          });
-         reportCategory.setDetail("Actual block data value", new ICrashReportDetail() {
+         crashreportsystemdetails.setDetail("Actual block data value", new ICrashReportDetail() {
             public String call() throws Exception {
-               IBlockState iblockstate = TileEntity.this.world.getBlockState(TileEntity.this.pos);
-               int i = iblockstate.getBlock().getMetaFromState(iblockstate);
+               IBlockState iblockdata = TileEntity.this.world.getBlockState(TileEntity.this.pos);
+               int i = iblockdata.getBlock().getMetaFromState(iblockdata);
                if (i < 0) {
                   return "Unknown? (Got " + i + ")";
                } else {
@@ -245,18 +231,22 @@ public abstract class TileEntity implements ICapabilitySerializable {
                   return String.format("%1$d / 0x%1$X / 0b%2$s", i, s);
                }
             }
+
+            public Object call() throws Exception {
+               return this.call();
+            }
          });
       }
 
    }
 
-   public void setPos(BlockPos posIn) {
-      if (posIn instanceof BlockPos.MutableBlockPos || posIn instanceof BlockPos.PooledMutableBlockPos) {
-         LOGGER.warn("Tried to assign a mutable BlockPos to a block entity...", new Error(posIn.getClass().toString()));
-         posIn = new BlockPos(posIn);
+   public void setPos(BlockPos blockposition) {
+      if (blockposition instanceof BlockPos.MutableBlockPos || blockposition instanceof BlockPos.PooledMutableBlockPos) {
+         LOGGER.warn("Tried to assign a mutable BlockPos to a block entity...", new Error(blockposition.getClass().toString()));
+         blockposition = new BlockPos(blockposition);
       }
 
-      this.pos = posIn;
+      this.pos = blockposition;
    }
 
    public boolean onlyOpsCanSetNbt() {
@@ -268,125 +258,18 @@ public abstract class TileEntity implements ICapabilitySerializable {
       return null;
    }
 
-   public void rotate(Rotation p_189667_1_) {
+   public void rotate(Rotation enumblockrotation) {
    }
 
-   public void mirror(Mirror p_189668_1_) {
+   public void mirror(Mirror enumblockmirror) {
    }
 
-   public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-   }
-
-   public void handleUpdateTag(NBTTagCompound tag) {
-      this.readFromNBT(tag);
-   }
-
-   public void onChunkUnload() {
-   }
-
-   public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
-      return this.isVanilla ? oldState.getBlock() != newSate.getBlock() : oldState != newSate;
-   }
-
-   public boolean shouldRenderInPass(int pass) {
-      return pass == 0;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public AxisAlignedBB getRenderBoundingBox() {
-      AxisAlignedBB bb = INFINITE_EXTENT_AABB;
-      Block type = this.getBlockType();
-      BlockPos pos = this.getPos();
-      if (type == Blocks.ENCHANTING_TABLE) {
-         bb = new AxisAlignedBB(pos, pos.add(1, 1, 1));
-      } else if (type != Blocks.CHEST && type != Blocks.TRAPPED_CHEST) {
-         if (type == Blocks.STRUCTURE_BLOCK) {
-            bb = INFINITE_EXTENT_AABB;
-         } else if (type != null && type != Blocks.BEACON) {
-            AxisAlignedBB cbb = null;
-
-            try {
-               cbb = this.world.getBlockState(this.getPos()).getCollisionBoundingBox(this.world, pos).addCoord((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
-            } catch (Exception var6) {
-               cbb = new AxisAlignedBB(this.getPos().add(-1, 0, -1), this.getPos().add(1, 1, 1));
-            }
-
-            if (cbb != null) {
-               bb = cbb;
-            }
-         }
+   public InventoryHolder getOwner() {
+      if (this.world == null) {
+         return null;
       } else {
-         bb = new AxisAlignedBB(pos.add(-1, 0, -1), pos.add(2, 2, 2));
+         BlockState state = this.world.getWorld().getBlockAt(this.pos.getX(), this.pos.getY(), this.pos.getZ()).getState();
+         return state instanceof InventoryHolder ? (InventoryHolder)state : null;
       }
-
-      return bb;
-   }
-
-   public boolean canRenderBreaking() {
-      Block block = this.getBlockType();
-      return block instanceof BlockChest || block instanceof BlockEnderChest || block instanceof BlockSign || block instanceof BlockSkull;
-   }
-
-   public NBTTagCompound getTileData() {
-      if (this.customTileData == null) {
-         this.customTileData = new NBTTagCompound();
-      }
-
-      return this.customTileData;
-   }
-
-   public boolean restrictNBTCopy() {
-      return this instanceof TileEntityCommandBlock || this instanceof TileEntityMobSpawner || this instanceof TileEntitySign;
-   }
-
-   public void onLoad() {
-   }
-
-   public boolean hasFastRenderer() {
-      return false;
-   }
-
-   public boolean hasCapability(Capability capability, EnumFacing facing) {
-      return this.capabilities == null ? false : this.capabilities.hasCapability(capability, facing);
-   }
-
-   public Object getCapability(Capability capability, EnumFacing facing) {
-      return this.capabilities == null ? null : this.capabilities.getCapability(capability, facing);
-   }
-
-   public void deserializeNBT(NBTTagCompound nbt) {
-      this.readFromNBT(nbt);
-   }
-
-   public NBTTagCompound serializeNBT() {
-      NBTTagCompound ret = new NBTTagCompound();
-      this.writeToNBT(ret);
-      return ret;
-   }
-
-   static {
-      addMapping(TileEntityFurnace.class, "Furnace");
-      addMapping(TileEntityChest.class, "Chest");
-      addMapping(TileEntityEnderChest.class, "EnderChest");
-      addMapping(BlockJukebox.TileEntityJukebox.class, "RecordPlayer");
-      addMapping(TileEntityDispenser.class, "Trap");
-      addMapping(TileEntityDropper.class, "Dropper");
-      addMapping(TileEntitySign.class, "Sign");
-      addMapping(TileEntityMobSpawner.class, "MobSpawner");
-      addMapping(TileEntityNote.class, "Music");
-      addMapping(TileEntityPiston.class, "Piston");
-      addMapping(TileEntityBrewingStand.class, "Cauldron");
-      addMapping(TileEntityEnchantmentTable.class, "EnchantTable");
-      addMapping(TileEntityEndPortal.class, "Airportal");
-      addMapping(TileEntityBeacon.class, "Beacon");
-      addMapping(TileEntitySkull.class, "Skull");
-      addMapping(TileEntityDaylightDetector.class, "DLDetector");
-      addMapping(TileEntityHopper.class, "Hopper");
-      addMapping(TileEntityComparator.class, "Comparator");
-      addMapping(TileEntityFlowerPot.class, "FlowerPot");
-      addMapping(TileEntityBanner.class, "Banner");
-      addMapping(TileEntityStructure.class, "Structure");
-      addMapping(TileEntityEndGateway.class, "EndGateway");
-      addMapping(TileEntityCommandBlock.class, "Control");
    }
 }

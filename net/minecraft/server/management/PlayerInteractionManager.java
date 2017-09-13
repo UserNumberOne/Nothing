@@ -2,18 +2,25 @@ package net.minecraft.server.management;
 
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockCake;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockCommandBlock;
+import net.minecraft.block.BlockDoor;
 import net.minecraft.block.BlockStructure;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Enchantments;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.ActionResult;
@@ -25,14 +32,14 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.Event.Result;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 public class PlayerInteractionManager {
-   private double blockReachDistance = 5.0D;
    public World world;
    public EntityPlayerMP player;
    private GameType gameType = GameType.NOT_SET;
@@ -44,16 +51,18 @@ public class PlayerInteractionManager {
    private BlockPos delayedDestroyPos = BlockPos.ORIGIN;
    private int initialBlockDamage;
    private int durabilityRemainingOnBlock = -1;
+   public boolean interactResult = false;
+   public boolean firedInteract = false;
 
-   public PlayerInteractionManager(World worldIn) {
-      this.world = worldIn;
+   public PlayerInteractionManager(World world) {
+      this.world = world;
    }
 
-   public void setGameType(GameType type) {
-      this.gameType = type;
-      type.configurePlayerCapabilities(this.player.capabilities);
+   public void setGameType(GameType enumgamemode) {
+      this.gameType = enumgamemode;
+      enumgamemode.configurePlayerCapabilities(this.player.capabilities);
       this.player.sendPlayerAbilities();
-      this.player.mcServer.getPlayerList().sendPacketToAllPlayers(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_GAME_MODE, new EntityPlayerMP[]{this.player}));
+      this.player.mcServer.getPlayerList().sendAll(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_GAME_MODE, new EntityPlayerMP[]{this.player}), this.player);
       this.world.updateAllPlayersSleepingFlag();
    }
 
@@ -69,28 +78,28 @@ public class PlayerInteractionManager {
       return this.gameType.isCreative();
    }
 
-   public void initializeGameType(GameType type) {
+   public void initializeGameType(GameType enumgamemode) {
       if (this.gameType == GameType.NOT_SET) {
-         this.gameType = type;
+         this.gameType = enumgamemode;
       }
 
       this.setGameType(this.gameType);
    }
 
    public void updateBlockRemoving() {
-      ++this.curblockDamage;
+      this.curblockDamage = MinecraftServer.currentTick;
       if (this.receivedFinishDiggingPacket) {
-         int i = this.curblockDamage - this.initialBlockDamage;
-         IBlockState iblockstate = this.world.getBlockState(this.delayedDestroyPos);
-         Block block = iblockstate.getBlock();
-         if (block.isAir(iblockstate, this.world, this.delayedDestroyPos)) {
+         int j = this.curblockDamage - this.initialBlockDamage;
+         IBlockState iblockdata = this.world.getBlockState(this.delayedDestroyPos);
+         iblockdata.getBlock();
+         if (iblockdata.getMaterial() == Material.AIR) {
             this.receivedFinishDiggingPacket = false;
          } else {
-            float f = iblockstate.getPlayerRelativeBlockHardness(this.player, this.player.world, this.delayedDestroyPos) * (float)(i + 1);
-            int j = (int)(f * 10.0F);
-            if (j != this.durabilityRemainingOnBlock) {
-               this.world.sendBlockBreakProgress(this.player.getEntityId(), this.delayedDestroyPos, j);
-               this.durabilityRemainingOnBlock = j;
+            float f = iblockdata.getPlayerRelativeBlockHardness(this.player, this.player.world, this.delayedDestroyPos) * (float)(j + 1);
+            int i = (int)(f * 10.0F);
+            if (i != this.durabilityRemainingOnBlock) {
+               this.world.sendBlockBreakProgress(this.player.getEntityId(), this.delayedDestroyPos, i);
+               this.durabilityRemainingOnBlock = i;
             }
 
             if (f >= 1.0F) {
@@ -99,38 +108,42 @@ public class PlayerInteractionManager {
             }
          }
       } else if (this.isDestroyingBlock) {
-         IBlockState iblockstate1 = this.world.getBlockState(this.destroyPos);
-         Block block1 = iblockstate1.getBlock();
-         if (block1.isAir(iblockstate1, this.world, this.destroyPos)) {
+         IBlockState iblockdata1 = this.world.getBlockState(this.destroyPos);
+         iblockdata1.getBlock();
+         if (iblockdata1.getMaterial() == Material.AIR) {
             this.world.sendBlockBreakProgress(this.player.getEntityId(), this.destroyPos, -1);
             this.durabilityRemainingOnBlock = -1;
             this.isDestroyingBlock = false;
          } else {
             int k = this.curblockDamage - this.initialDamage;
-            float f1 = iblockstate1.getPlayerRelativeBlockHardness(this.player, this.player.world, this.destroyPos) * (float)(k + 1);
-            int l = (int)(f1 * 10.0F);
-            if (l != this.durabilityRemainingOnBlock) {
-               this.world.sendBlockBreakProgress(this.player.getEntityId(), this.destroyPos, l);
-               this.durabilityRemainingOnBlock = l;
+            float f = iblockdata1.getPlayerRelativeBlockHardness(this.player, this.player.world, this.delayedDestroyPos) * (float)(k + 1);
+            int i = (int)(f * 10.0F);
+            if (i != this.durabilityRemainingOnBlock) {
+               this.world.sendBlockBreakProgress(this.player.getEntityId(), this.destroyPos, i);
+               this.durabilityRemainingOnBlock = i;
             }
          }
       }
 
    }
 
-   public void onBlockClicked(BlockPos pos, EnumFacing side) {
-      LeftClickBlock event = ForgeHooks.onLeftClickBlock(this.player, pos, side, ForgeHooks.rayTraceEyeHitVec(this.player, this.getBlockReachDistance() + 1.0D));
-      if (event.isCanceled()) {
-         this.player.connection.sendPacket(new SPacketBlockChange(this.world, pos));
-         this.world.notifyBlockUpdate(pos, this.world.getBlockState(pos), this.world.getBlockState(pos), 3);
+   public void onBlockClicked(BlockPos blockposition, EnumFacing enumdirection) {
+      PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(this.player, Action.LEFT_CLICK_BLOCK, blockposition, enumdirection, this.player.inventory.getCurrentItem(), EnumHand.MAIN_HAND);
+      if (event.isCancelled()) {
+         this.player.connection.sendPacket(new SPacketBlockChange(this.world, blockposition));
+         TileEntity tileentity = this.world.getTileEntity(blockposition);
+         if (tileentity != null) {
+            this.player.connection.sendPacket(tileentity.getUpdatePacket());
+         }
+
       } else {
          if (this.isCreative()) {
-            if (!this.world.extinguishFire((EntityPlayer)null, pos, side)) {
-               this.tryHarvestBlock(pos);
+            if (!this.world.extinguishFire((EntityPlayer)null, blockposition, enumdirection)) {
+               this.tryHarvestBlock(blockposition);
             }
          } else {
-            IBlockState iblockstate = this.world.getBlockState(pos);
-            Block block = iblockstate.getBlock();
+            IBlockState iblockdata = this.world.getBlockState(blockposition);
+            Block block = iblockdata.getBlock();
             if (this.gameType.isAdventure()) {
                if (this.gameType == GameType.SPECTATOR) {
                   return;
@@ -150,34 +163,46 @@ public class PlayerInteractionManager {
 
             this.initialDamage = this.curblockDamage;
             float f = 1.0F;
-            if (!iblockstate.getBlock().isAir(iblockstate, this.world, pos)) {
-               if (event.getUseBlock() != Result.DENY) {
-                  block.onBlockClicked(this.world, pos, this.player);
-                  this.world.extinguishFire((EntityPlayer)null, pos, side);
-               } else {
-                  this.player.connection.sendPacket(new SPacketBlockChange(this.world, pos));
-                  this.world.notifyBlockUpdate(pos, this.world.getBlockState(pos), this.world.getBlockState(pos), 3);
+            if (event.useInteractedBlock() == Result.DENY) {
+               IBlockState data = this.world.getBlockState(blockposition);
+               if (block == Blocks.OAK_DOOR) {
+                  boolean bottom = data.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER;
+                  this.player.connection.sendPacket(new SPacketBlockChange(this.world, blockposition));
+                  this.player.connection.sendPacket(new SPacketBlockChange(this.world, bottom ? blockposition.up() : blockposition.down()));
+               } else if (block == Blocks.TRAPDOOR) {
+                  this.player.connection.sendPacket(new SPacketBlockChange(this.world, blockposition));
                }
-
-               f = iblockstate.getPlayerRelativeBlockHardness(this.player, this.player.world, pos);
+            } else if (iblockdata.getMaterial() != Material.AIR) {
+               block.onBlockClicked(this.world, blockposition, this.player);
+               f = iblockdata.getPlayerRelativeBlockHardness(this.player, this.player.world, blockposition);
+               this.world.extinguishFire((EntityPlayer)null, blockposition, enumdirection);
             }
 
-            if (event.getUseItem() == Result.DENY) {
-               if (f >= 1.0F) {
-                  this.player.connection.sendPacket(new SPacketBlockChange(this.world, pos));
-                  this.world.notifyBlockUpdate(pos, this.world.getBlockState(pos), this.world.getBlockState(pos), 3);
+            if (event.useItemInHand() == Result.DENY) {
+               if (f > 1.0F) {
+                  this.player.connection.sendPacket(new SPacketBlockChange(this.world, blockposition));
                }
 
                return;
             }
 
-            if (!iblockstate.getBlock().isAir(iblockstate, this.world, pos) && f >= 1.0F) {
-               this.tryHarvestBlock(pos);
+            BlockDamageEvent blockEvent = CraftEventFactory.callBlockDamageEvent(this.player, blockposition.getX(), blockposition.getY(), blockposition.getZ(), this.player.inventory.getCurrentItem(), f >= 1.0F);
+            if (blockEvent.isCancelled()) {
+               this.player.connection.sendPacket(new SPacketBlockChange(this.world, blockposition));
+               return;
+            }
+
+            if (blockEvent.getInstaBreak()) {
+               f = 2.0F;
+            }
+
+            if (iblockdata.getMaterial() != Material.AIR && f >= 1.0F) {
+               this.tryHarvestBlock(blockposition);
             } else {
                this.isDestroyingBlock = true;
-               this.destroyPos = pos;
+               this.destroyPos = blockposition;
                int i = (int)(f * 10.0F);
-               this.world.sendBlockBreakProgress(this.player.getEntityId(), pos, i);
+               this.world.sendBlockBreakProgress(this.player.getEntityId(), blockposition, i);
                this.durabilityRemainingOnBlock = i;
             }
          }
@@ -185,23 +210,26 @@ public class PlayerInteractionManager {
       }
    }
 
-   public void blockRemoving(BlockPos pos) {
-      if (pos.equals(this.destroyPos)) {
+   public void blockRemoving(BlockPos blockposition) {
+      if (blockposition.equals(this.destroyPos)) {
+         this.curblockDamage = MinecraftServer.currentTick;
          int i = this.curblockDamage - this.initialDamage;
-         IBlockState iblockstate = this.world.getBlockState(pos);
-         if (!iblockstate.getBlock().isAir(iblockstate, this.world, pos)) {
-            float f = iblockstate.getPlayerRelativeBlockHardness(this.player, this.player.world, pos) * (float)(i + 1);
+         IBlockState iblockdata = this.world.getBlockState(blockposition);
+         if (iblockdata.getMaterial() != Material.AIR) {
+            float f = iblockdata.getPlayerRelativeBlockHardness(this.player, this.player.world, blockposition) * (float)(i + 1);
             if (f >= 0.7F) {
                this.isDestroyingBlock = false;
-               this.world.sendBlockBreakProgress(this.player.getEntityId(), pos, -1);
-               this.tryHarvestBlock(pos);
+               this.world.sendBlockBreakProgress(this.player.getEntityId(), blockposition, -1);
+               this.tryHarvestBlock(blockposition);
             } else if (!this.receivedFinishDiggingPacket) {
                this.isDestroyingBlock = false;
                this.receivedFinishDiggingPacket = true;
-               this.delayedDestroyPos = pos;
+               this.delayedDestroyPos = blockposition;
                this.initialBlockDamage = this.initialDamage;
             }
          }
+      } else {
+         this.player.connection.sendPacket(new SPacketBlockChange(this.world, blockposition));
       }
 
    }
@@ -211,193 +239,220 @@ public class PlayerInteractionManager {
       this.world.sendBlockBreakProgress(this.player.getEntityId(), this.destroyPos, -1);
    }
 
-   private boolean removeBlock(BlockPos pos) {
-      return this.removeBlock(pos, false);
-   }
-
-   private boolean removeBlock(BlockPos pos, boolean canHarvest) {
-      IBlockState iblockstate = this.world.getBlockState(pos);
-      boolean flag = iblockstate.getBlock().removedByPlayer(iblockstate, this.world, pos, this.player, canHarvest);
+   private boolean removeBlock(BlockPos blockposition) {
+      IBlockState iblockdata = this.world.getBlockState(blockposition);
+      iblockdata.getBlock().onBlockHarvested(this.world, blockposition, iblockdata, this.player);
+      boolean flag = this.world.setBlockToAir(blockposition);
       if (flag) {
-         iblockstate.getBlock().onBlockDestroyedByPlayer(this.world, pos, iblockstate);
+         iblockdata.getBlock().onBlockDestroyedByPlayer(this.world, blockposition, iblockdata);
       }
 
       return flag;
    }
 
-   public boolean tryHarvestBlock(BlockPos pos) {
-      int exp = ForgeHooks.onBlockBreakEvent(this.world, this.gameType, this.player, pos);
-      if (exp == -1) {
+   public boolean tryHarvestBlock(BlockPos blockposition) {
+      BlockBreakEvent event = null;
+      if (this.player instanceof EntityPlayerMP) {
+         org.bukkit.block.Block block = this.world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+         boolean isSwordNoBreak = this.gameType.isCreative() && this.player.getHeldItemMainhand() != null && this.player.getHeldItemMainhand().getItem() instanceof ItemSword;
+         if (this.world.getTileEntity(blockposition) == null && !isSwordNoBreak) {
+            SPacketBlockChange packet = new SPacketBlockChange(this.world, blockposition);
+            packet.blockState = Blocks.AIR.getDefaultState();
+            this.player.connection.sendPacket(packet);
+         }
+
+         event = new BlockBreakEvent(block, this.player.getBukkitEntity());
+         event.setCancelled(isSwordNoBreak);
+         IBlockState nmsData = this.world.getBlockState(blockposition);
+         Block nmsBlock = nmsData.getBlock();
+         ItemStack itemstack = this.player.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
+         if (nmsBlock != null && !event.isCancelled() && !this.isCreative() && this.player.canHarvestBlock(nmsBlock.getDefaultState()) && (!nmsBlock.canSilkHarvest() || EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, itemstack) <= 0)) {
+            int bonusLevel = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, itemstack);
+            event.setExpToDrop(nmsBlock.getExpDrop(this.world, nmsData, bonusLevel));
+         }
+
+         this.world.getServer().getPluginManager().callEvent(event);
+         if (event.isCancelled()) {
+            if (isSwordNoBreak) {
+               return false;
+            }
+
+            this.player.connection.sendPacket(new SPacketBlockChange(this.world, blockposition));
+            if (nmsBlock instanceof BlockDoor) {
+               boolean bottom = nmsData.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER;
+               this.player.connection.sendPacket(new SPacketBlockChange(this.world, bottom ? blockposition.up() : blockposition.down()));
+            }
+
+            TileEntity tileentity = this.world.getTileEntity(blockposition);
+            if (tileentity != null) {
+               this.player.connection.sendPacket(tileentity.getUpdatePacket());
+            }
+
+            return false;
+         }
+      }
+
+      IBlockState iblockdata = this.world.getBlockState(blockposition);
+      if (iblockdata.getBlock() == Blocks.AIR) {
          return false;
       } else {
-         IBlockState iblockstate = this.world.getBlockState(pos);
-         TileEntity tileentity = this.world.getTileEntity(pos);
-         Block block = iblockstate.getBlock();
-         if ((block instanceof BlockCommandBlock || block instanceof BlockStructure) && !this.player.canUseCommandBlock()) {
-            this.world.notifyBlockUpdate(pos, iblockstate, iblockstate, 3);
+         TileEntity tileentity = this.world.getTileEntity(blockposition);
+         Block block = iblockdata.getBlock();
+         if (iblockdata.getBlock() == Blocks.SKULL && !this.isCreative()) {
+            iblockdata.getBlock().dropBlockAsItemWithChance(this.world, blockposition, iblockdata, 1.0F, 0);
+            return this.removeBlock(blockposition);
+         } else if ((block instanceof BlockCommandBlock || block instanceof BlockStructure) && !this.player.canUseCommandBlock()) {
+            this.world.notifyBlockUpdate(blockposition, iblockdata, iblockdata, 3);
             return false;
          } else {
-            ItemStack stack = this.player.getHeldItemMainhand();
-            if (stack != null && stack.getItem().onBlockStartBreak(stack, pos, this.player)) {
-               return false;
-            } else {
-               this.world.playEvent(this.player, 2001, pos, Block.getStateId(iblockstate));
-               boolean flag1 = false;
-               if (this.isCreative()) {
-                  flag1 = this.removeBlock(pos);
-                  this.player.connection.sendPacket(new SPacketBlockChange(this.world, pos));
-               } else {
-                  ItemStack itemstack1 = this.player.getHeldItemMainhand();
-                  ItemStack itemstack2 = itemstack1 == null ? null : itemstack1.copy();
-                  boolean flag = iblockstate.getBlock().canHarvestBlock(this.world, pos, this.player);
-                  if (itemstack1 != null) {
-                     itemstack1.onBlockDestroyed(this.world, iblockstate, pos, this.player);
-                     if (itemstack1.stackSize <= 0) {
-                        ForgeEventFactory.onPlayerDestroyItem(this.player, itemstack1, EnumHand.MAIN_HAND);
-                        this.player.setHeldItem(EnumHand.MAIN_HAND, (ItemStack)null);
-                     }
-                  }
-
-                  flag1 = this.removeBlock(pos, flag);
-                  if (flag1 && flag) {
-                     iblockstate.getBlock().harvestBlock(this.world, this.player, pos, iblockstate, tileentity, itemstack2);
-                  }
+            if (this.gameType.isAdventure()) {
+               if (this.gameType == GameType.SPECTATOR) {
+                  return false;
                }
 
-               if (!this.isCreative() && flag1 && exp > 0) {
-                  iblockstate.getBlock().dropXpOnBlockBreak(this.world, pos, exp);
-               }
+               if (!this.player.isAllowEdit()) {
+                  ItemStack itemstack = this.player.getHeldItemMainhand();
+                  if (itemstack == null) {
+                     return false;
+                  }
 
-               return flag1;
+                  if (!itemstack.canDestroy(block)) {
+                     return false;
+                  }
+               }
             }
-         }
-      }
-   }
 
-   public EnumActionResult processRightClick(EntityPlayer player, World worldIn, ItemStack stack, EnumHand hand) {
-      if (this.gameType == GameType.SPECTATOR) {
-         return EnumActionResult.PASS;
-      } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
-         return EnumActionResult.PASS;
-      } else if (ForgeHooks.onItemRightClick(player, hand, stack)) {
-         return EnumActionResult.PASS;
-      } else {
-         int i = stack.stackSize;
-         int j = stack.getMetadata();
-         ActionResult actionresult = stack.useItemRightClick(worldIn, player, hand);
-         ItemStack itemstack = (ItemStack)actionresult.getResult();
-         if (itemstack == stack && itemstack.stackSize == i && itemstack.getMaxItemUseDuration() <= 0 && itemstack.getMetadata() == j) {
-            return actionresult.getType();
-         } else {
-            player.setHeldItem(hand, itemstack);
+            this.world.playEvent(this.player, 2001, blockposition, Block.getStateId(iblockdata));
+            boolean flag = this.removeBlock(blockposition);
             if (this.isCreative()) {
-               itemstack.stackSize = i;
-               if (itemstack.isItemStackDamageable()) {
-                  itemstack.setItemDamage(j);
+               this.player.connection.sendPacket(new SPacketBlockChange(this.world, blockposition));
+            } else {
+               ItemStack itemstack1 = this.player.getHeldItemMainhand();
+               ItemStack itemstack2 = itemstack1 == null ? null : itemstack1.copy();
+               boolean flag1 = this.player.canHarvestBlock(iblockdata);
+               if (itemstack1 != null) {
+                  itemstack1.onBlockDestroyed(this.world, iblockdata, blockposition, this.player);
+                  if (itemstack1.stackSize == 0) {
+                     this.player.setHeldItem(EnumHand.MAIN_HAND, (ItemStack)null);
+                  }
+               }
+
+               if (flag && flag1) {
+                  iblockdata.getBlock().harvestBlock(this.world, this.player, blockposition, iblockdata, tileentity, itemstack2);
                }
             }
 
-            if (itemstack.stackSize == 0) {
-               player.setHeldItem(hand, (ItemStack)null);
-               ForgeEventFactory.onPlayerDestroyItem(player, itemstack, hand);
+            if (flag && event != null) {
+               iblockdata.getBlock().dropXpOnBlockBreak(this.world, blockposition, event.getExpToDrop());
             }
 
-            if (!player.isHandActive()) {
-               ((EntityPlayerMP)player).sendContainerToPlayer(player.inventoryContainer);
-            }
-
-            return actionresult.getType();
+            return flag;
          }
       }
    }
 
-   public EnumActionResult processRightClickBlock(EntityPlayer player, World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
+   public EnumActionResult processRightClick(EntityPlayer entityhuman, World world, ItemStack itemstack, EnumHand enumhand) {
       if (this.gameType == GameType.SPECTATOR) {
-         TileEntity tileentity = worldIn.getTileEntity(pos);
-         if (tileentity instanceof ILockableContainer) {
-            Block block1 = worldIn.getBlockState(pos).getBlock();
-            ILockableContainer ilockablecontainer = (ILockableContainer)tileentity;
-            if (ilockablecontainer instanceof TileEntityChest && block1 instanceof BlockChest) {
-               ilockablecontainer = ((BlockChest)block1).getLockableContainer(worldIn, pos);
-            }
-
-            if (ilockablecontainer != null) {
-               player.displayGUIChest(ilockablecontainer);
-               return EnumActionResult.SUCCESS;
-            }
-         } else if (tileentity instanceof IInventory) {
-            player.displayGUIChest((IInventory)tileentity);
-            return EnumActionResult.SUCCESS;
-         }
-
+         return EnumActionResult.PASS;
+      } else if (entityhuman.getCooldownTracker().hasCooldown(itemstack.getItem())) {
          return EnumActionResult.PASS;
       } else {
-         RightClickBlock event = ForgeHooks.onRightClickBlock(player, hand, stack, pos, facing, ForgeHooks.rayTraceEyeHitVec(player, this.getBlockReachDistance() + 1.0D));
-         if (event.isCanceled()) {
-            return EnumActionResult.PASS;
+         int i = itemstack.stackSize;
+         int j = itemstack.getMetadata();
+         ActionResult interactionresultwrapper = itemstack.useItemRightClick(world, entityhuman, enumhand);
+         ItemStack itemstack1 = (ItemStack)interactionresultwrapper.getResult();
+         if (itemstack1 == itemstack && itemstack1.stackSize == i && itemstack1.getMaxItemUseDuration() <= 0 && itemstack1.getMetadata() == j) {
+            return interactionresultwrapper.getType();
          } else {
-            Item item = stack == null ? null : stack.getItem();
-            EnumActionResult ret = item == null ? EnumActionResult.PASS : item.onItemUseFirst(stack, player, worldIn, pos, facing, hitX, hitY, hitZ, hand);
-            if (ret != EnumActionResult.PASS) {
-               return ret;
-            } else {
-               boolean bypass = true;
-
-               for(ItemStack s : new ItemStack[]{player.getHeldItemMainhand(), player.getHeldItemOffhand()}) {
-                  bypass = bypass && (s == null || s.getItem().doesSneakBypassUse(s, worldIn, pos, player));
-               }
-
-               EnumActionResult result = EnumActionResult.PASS;
-               if (!player.isSneaking() || bypass || event.getUseBlock() == Result.ALLOW) {
-                  IBlockState iblockstate = worldIn.getBlockState(pos);
-                  if (event.getUseBlock() != Result.DENY && iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, hitX, hitY, hitZ)) {
-                     result = EnumActionResult.SUCCESS;
-                  }
-               }
-
-               if (stack == null) {
-                  return EnumActionResult.PASS;
-               } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
-                  return EnumActionResult.PASS;
-               } else {
-                  if (stack.getItem() instanceof ItemBlock && !player.canUseCommandBlock()) {
-                     Block block = ((ItemBlock)stack.getItem()).getBlock();
-                     if (block instanceof BlockCommandBlock || block instanceof BlockStructure) {
-                        return EnumActionResult.FAIL;
-                     }
-                  }
-
-                  if (this.isCreative()) {
-                     int j = stack.getMetadata();
-                     int i = stack.stackSize;
-                     if ((result == EnumActionResult.SUCCESS || event.getUseItem() == Result.DENY) && (result != EnumActionResult.SUCCESS || event.getUseItem() != Result.ALLOW)) {
-                        return result;
-                     } else {
-                        EnumActionResult enumactionresult = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
-                        stack.setItemDamage(j);
-                        stack.stackSize = i;
-                        return enumactionresult;
-                     }
-                  } else if ((result == EnumActionResult.SUCCESS || event.getUseItem() == Result.DENY) && (result != EnumActionResult.SUCCESS || event.getUseItem() != Result.ALLOW)) {
-                     return result;
-                  } else {
-                     return stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
-                  }
+            entityhuman.setHeldItem(enumhand, itemstack1);
+            if (this.isCreative()) {
+               itemstack1.stackSize = i;
+               if (itemstack1.isItemStackDamageable()) {
+                  itemstack1.setItemDamage(j);
                }
             }
+
+            if (itemstack1.stackSize == 0) {
+               entityhuman.setHeldItem(enumhand, (ItemStack)null);
+            }
+
+            if (!entityhuman.isHandActive()) {
+               ((EntityPlayerMP)entityhuman).sendContainerToPlayer(entityhuman.inventoryContainer);
+            }
+
+            return interactionresultwrapper.getType();
          }
       }
    }
 
-   public void setWorld(WorldServer serverWorld) {
-      this.world = serverWorld;
+   public EnumActionResult processRightClickBlock(EntityPlayer entityhuman, World world, @Nullable ItemStack itemstack, EnumHand enumhand, BlockPos blockposition, EnumFacing enumdirection, float f, float f1, float f2) {
+      IBlockState blockdata = world.getBlockState(blockposition);
+      EnumActionResult result = EnumActionResult.FAIL;
+      if (blockdata.getBlock() != Blocks.AIR) {
+         boolean cancelledBlock = false;
+         if (this.gameType == GameType.SPECTATOR) {
+            TileEntity tileentity = world.getTileEntity(blockposition);
+            cancelledBlock = !(tileentity instanceof ILockableContainer) && !(tileentity instanceof IInventory);
+         }
+
+         if (!entityhuman.getBukkitEntity().isOp() && itemstack != null && Block.getBlockFromItem(itemstack.getItem()) instanceof BlockCommandBlock) {
+            cancelledBlock = true;
+         }
+
+         PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(entityhuman, Action.RIGHT_CLICK_BLOCK, blockposition, enumdirection, itemstack, cancelledBlock, enumhand);
+         this.firedInteract = true;
+         this.interactResult = event.useItemInHand() == Result.DENY;
+         if (event.useInteractedBlock() == Result.DENY) {
+            if (blockdata.getBlock() instanceof BlockDoor) {
+               boolean bottom = blockdata.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER;
+               ((EntityPlayerMP)entityhuman).connection.sendPacket(new SPacketBlockChange(world, bottom ? blockposition.up() : blockposition.down()));
+            } else if (blockdata.getBlock() instanceof BlockCake) {
+               ((EntityPlayerMP)entityhuman).getBukkitEntity().sendHealthUpdate();
+            }
+
+            result = event.useItemInHand() != Result.ALLOW ? EnumActionResult.SUCCESS : EnumActionResult.PASS;
+         } else {
+            if (this.gameType == GameType.SPECTATOR) {
+               TileEntity tileentity = world.getTileEntity(blockposition);
+               if (tileentity instanceof ILockableContainer) {
+                  Block block = world.getBlockState(blockposition).getBlock();
+                  ILockableContainer itileinventory = (ILockableContainer)tileentity;
+                  if (itileinventory instanceof TileEntityChest && block instanceof BlockChest) {
+                     itileinventory = ((BlockChest)block).getLockableContainer(world, blockposition);
+                  }
+
+                  if (itileinventory != null) {
+                     entityhuman.displayGUIChest(itileinventory);
+                     return EnumActionResult.SUCCESS;
+                  }
+               } else if (tileentity instanceof IInventory) {
+                  entityhuman.displayGUIChest((IInventory)tileentity);
+                  return EnumActionResult.SUCCESS;
+               }
+
+               return EnumActionResult.PASS;
+            }
+
+            if (!entityhuman.isSneaking() || entityhuman.getHeldItemMainhand() == null && entityhuman.getHeldItemOffhand() == null) {
+               result = blockdata.getBlock().onBlockActivated(world, blockposition, blockdata, entityhuman, enumhand, itemstack, enumdirection, f, f1, f2) ? EnumActionResult.SUCCESS : EnumActionResult.PASS;
+            }
+         }
+
+         if (itemstack != null && result != EnumActionResult.SUCCESS && !this.interactResult) {
+            int j1 = itemstack.getMetadata();
+            int k1 = itemstack.stackSize;
+            result = itemstack.onItemUse(entityhuman, world, blockposition, enumhand, enumdirection, f, f1, f2);
+            if (this.isCreative()) {
+               itemstack.setItemDamage(j1);
+               itemstack.stackSize = k1;
+            }
+         }
+      }
+
+      return result;
    }
 
-   public double getBlockReachDistance() {
-      return this.blockReachDistance;
-   }
-
-   public void setBlockReachDistance(double distance) {
-      this.blockReachDistance = distance;
+   public void setWorld(WorldServer worldserver) {
+      this.world = worldserver;
    }
 }

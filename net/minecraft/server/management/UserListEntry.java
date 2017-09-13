@@ -5,15 +5,15 @@ import com.google.gson.JsonObject;
 public class UserListEntry {
    private final Object value;
 
-   public UserListEntry(Object valueIn) {
-      this.value = valueIn;
+   public UserListEntry(Object var1) {
+      this.value = var1;
    }
 
-   protected UserListEntry(Object valueIn, JsonObject json) {
-      this.value = valueIn;
+   protected UserListEntry(Object var1, JsonObject var2) {
+      this.value = var1;
    }
 
-   Object getValue() {
+   public Object getValue() {
       return this.value;
    }
 
@@ -21,6 +21,6 @@ public class UserListEntry {
       return false;
    }
 
-   protected void onSerialization(JsonObject data) {
+   protected void onSerialization(JsonObject var1) {
    }
 }

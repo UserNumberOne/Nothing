@@ -17,14 +17,14 @@ public class RandomValueRange {
    private final float min;
    private final float max;
 
-   public RandomValueRange(float minIn, float maxIn) {
-      this.min = minIn;
-      this.max = maxIn;
+   public RandomValueRange(float var1, float var2) {
+      this.min = var1;
+      this.max = var2;
    }
 
-   public RandomValueRange(float value) {
-      this.min = value;
-      this.max = value;
+   public RandomValueRange(float var1) {
+      this.min = var1;
+      this.max = var1;
    }
 
    public float getMin() {
@@ -35,39 +35,49 @@ public class RandomValueRange {
       return this.max;
    }
 
-   public int generateInt(Random rand) {
-      return MathHelper.getInt(rand, MathHelper.floor(this.min), MathHelper.floor(this.max));
+   public int generateInt(Random var1) {
+      return MathHelper.getInt(var1, MathHelper.floor(this.min), MathHelper.floor(this.max));
    }
 
-   public float generateFloat(Random rand) {
-      return MathHelper.nextFloat(rand, this.min, this.max);
+   public float generateFloat(Random var1) {
+      return MathHelper.nextFloat(var1, this.min, this.max);
    }
 
-   public boolean isInRange(int value) {
-      return (float)value <= this.max && (float)value >= this.min;
+   public boolean isInRange(int var1) {
+      return (float)var1 <= this.max && (float)var1 >= this.min;
    }
 
    public static class Serializer implements JsonDeserializer, JsonSerializer {
-      public RandomValueRange deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
-         if (JsonUtils.isNumber(p_deserialize_1_)) {
-            return new RandomValueRange(JsonUtils.getFloat(p_deserialize_1_, "value"));
+      public RandomValueRange deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         if (JsonUtils.isNumber(var1)) {
+            return new RandomValueRange(JsonUtils.getFloat(var1, "value"));
          } else {
-            JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "value");
-            float f = JsonUtils.getFloat(jsonobject, "min");
-            float f1 = JsonUtils.getFloat(jsonobject, "max");
-            return new RandomValueRange(f, f1);
+            JsonObject var4 = JsonUtils.getJsonObject(var1, "value");
+            float var5 = JsonUtils.getFloat(var4, "min");
+            float var6 = JsonUtils.getFloat(var4, "max");
+            return new RandomValueRange(var5, var6);
          }
       }
 
-      public JsonElement serialize(RandomValueRange p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
-         if (p_serialize_1_.min == p_serialize_1_.max) {
-            return new JsonPrimitive(p_serialize_1_.min);
+      public JsonElement serialize(RandomValueRange var1, Type var2, JsonSerializationContext var3) {
+         if (var1.min == var1.max) {
+            return new JsonPrimitive(var1.min);
          } else {
-            JsonObject jsonobject = new JsonObject();
-            jsonobject.addProperty("min", Float.valueOf(p_serialize_1_.min));
-            jsonobject.addProperty("max", Float.valueOf(p_serialize_1_.max));
-            return jsonobject;
+            JsonObject var4 = new JsonObject();
+            var4.addProperty("min", Float.valueOf(var1.min));
+            var4.addProperty("max", Float.valueOf(var1.max));
+            return var4;
          }
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((RandomValueRange)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

@@ -10,37 +10,37 @@ import org.apache.logging.log4j.Logger;
 public class EntityTag implements IDataWalker {
    private static final Logger LOGGER = LogManager.getLogger();
 
-   public NBTTagCompound process(IDataFixer fixer, NBTTagCompound compound, int versionIn) {
-      NBTTagCompound nbttagcompound = compound.getCompoundTag("tag");
-      if (nbttagcompound.hasKey("EntityTag", 10)) {
-         NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("EntityTag");
-         String s = compound.getString("id");
-         String s1;
-         if ("minecraft:armor_stand".equals(s)) {
-            s1 = "ArmorStand";
+   public NBTTagCompound process(IDataFixer var1, NBTTagCompound var2, int var3) {
+      NBTTagCompound var4 = var2.getCompoundTag("tag");
+      if (var4.hasKey("EntityTag", 10)) {
+         NBTTagCompound var5 = var4.getCompoundTag("EntityTag");
+         String var6 = var2.getString("id");
+         String var7;
+         if ("minecraft:armor_stand".equals(var6)) {
+            var7 = "ArmorStand";
          } else {
-            if (!"minecraft:spawn_egg".equals(s)) {
-               return compound;
+            if (!"minecraft:spawn_egg".equals(var6)) {
+               return var2;
             }
 
-            s1 = nbttagcompound1.getString("id");
+            var7 = var5.getString("id");
          }
 
-         boolean flag;
-         if (s1 == null) {
-            LOGGER.warn("Unable to resolve Entity for ItemInstance: {}", new Object[]{s});
-            flag = false;
+         boolean var8;
+         if (var7 == null) {
+            LOGGER.warn("Unable to resolve Entity for ItemInstance: {}", new Object[]{var6});
+            var8 = false;
          } else {
-            flag = !nbttagcompound1.hasKey("id", 8);
-            nbttagcompound1.setString("id", s1);
+            var8 = !var5.hasKey("id", 8);
+            var5.setString("id", var7);
          }
 
-         fixer.process(FixTypes.ENTITY, nbttagcompound1, versionIn);
-         if (flag) {
-            nbttagcompound1.removeTag("id");
+         var1.process(FixTypes.ENTITY, var5, var3);
+         if (var8) {
+            var5.removeTag("id");
          }
       }
 
-      return compound;
+      return var2;
    }
 }

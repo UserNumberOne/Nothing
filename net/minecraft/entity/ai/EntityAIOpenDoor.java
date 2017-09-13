@@ -6,10 +6,10 @@ public class EntityAIOpenDoor extends EntityAIDoorInteract {
    boolean closeDoor;
    int closeDoorTemporisation;
 
-   public EntityAIOpenDoor(EntityLiving entitylivingIn, boolean shouldClose) {
-      super(entitylivingIn);
-      this.theEntity = entitylivingIn;
-      this.closeDoor = shouldClose;
+   public EntityAIOpenDoor(EntityLiving var1, boolean var2) {
+      super(var1);
+      this.theEntity = var1;
+      this.closeDoor = var2;
    }
 
    public boolean continueExecuting() {

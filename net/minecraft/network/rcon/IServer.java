@@ -1,9 +1,5 @@
 package net.minecraft.network.rcon;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-@SideOnly(Side.SERVER)
 public interface IServer {
    int getIntProperty(String var1, int var2);
 

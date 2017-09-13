@@ -3,8 +3,8 @@ package net.minecraft.util.text;
 public class TextComponentString extends TextComponentBase {
    private final String text;
 
-   public TextComponentString(String msg) {
-      this.text = msg;
+   public TextComponentString(String var1) {
+      this.text = var1;
    }
 
    public String getText() {
@@ -16,28 +16,33 @@ public class TextComponentString extends TextComponentBase {
    }
 
    public TextComponentString createCopy() {
-      TextComponentString textcomponentstring = new TextComponentString(this.text);
-      textcomponentstring.setStyle(this.getStyle().createShallowCopy());
+      TextComponentString var1 = new TextComponentString(this.text);
+      var1.setStyle(this.getStyle().createShallowCopy());
 
-      for(ITextComponent itextcomponent : this.getSiblings()) {
-         textcomponentstring.appendSibling(itextcomponent.createCopy());
+      for(ITextComponent var3 : this.getSiblings()) {
+         var1.appendSibling(var3.createCopy());
       }
 
-      return textcomponentstring;
+      return var1;
    }
 
-   public boolean equals(Object p_equals_1_) {
-      if (this == p_equals_1_) {
+   public boolean equals(Object var1) {
+      if (this == var1) {
          return true;
-      } else if (!(p_equals_1_ instanceof TextComponentString)) {
+      } else if (!(var1 instanceof TextComponentString)) {
          return false;
       } else {
-         TextComponentString textcomponentstring = (TextComponentString)p_equals_1_;
-         return this.text.equals(textcomponentstring.getText()) && super.equals(p_equals_1_);
+         TextComponentString var2 = (TextComponentString)var1;
+         return this.text.equals(var2.getText()) && super.equals(var1);
       }
    }
 
    public String toString() {
       return "TextComponent{text='" + this.text + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+   }
+
+   // $FF: synthetic method
+   public ITextComponent createCopy() {
+      return this.createCopy();
    }
 }

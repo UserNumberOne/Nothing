@@ -8,9 +8,6 @@ import java.io.InputStream;
 import java.util.IllegalFormatException;
 import java.util.Map;
 import java.util.regex.Pattern;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 
@@ -22,80 +19,52 @@ public class LanguageMap {
    private long lastUpdateTimeInMilliseconds;
 
    public LanguageMap() {
-      InputStream inputstream = LanguageMap.class.getResourceAsStream("/assets/minecraft/lang/en_US.lang");
-      inject(this, inputstream);
-   }
-
-   public static void inject(InputStream inputstream) {
-      inject(instance, inputstream);
-   }
-
-   private static void inject(LanguageMap inst, InputStream inputstream) {
-      Map map = parseLangFile(inputstream);
-      inst.languageList.putAll(map);
-      inst.lastUpdateTimeInMilliseconds = System.currentTimeMillis();
-   }
-
-   public static Map parseLangFile(InputStream inputstream) {
-      Map table = Maps.newHashMap();
-
       try {
-         inputstream = FMLCommonHandler.instance().loadLanguage(table, inputstream);
-         if (inputstream == null) {
-            return table;
-         }
+         InputStream var1 = LanguageMap.class.getResourceAsStream("/assets/minecraft/lang/en_US.lang");
 
-         for(String s : IOUtils.readLines(inputstream, Charsets.UTF_8)) {
-            if (!s.isEmpty() && s.charAt(0) != '#') {
-               String[] astring = (String[])Iterables.toArray(EQUAL_SIGN_SPLITTER.split(s), String.class);
-               if (astring != null && astring.length == 2) {
-                  String s1 = astring[0];
-                  String s2 = NUMERIC_VARIABLE_PATTERN.matcher(astring[1]).replaceAll("%$1s");
-                  table.put(s1, s2);
+         for(String var3 : IOUtils.readLines(var1, Charsets.UTF_8)) {
+            if (!var3.isEmpty() && var3.charAt(0) != '#') {
+               String[] var4 = (String[])Iterables.toArray(EQUAL_SIGN_SPLITTER.split(var3), String.class);
+               if (var4 != null && var4.length == 2) {
+                  String var5 = var4[0];
+                  String var6 = NUMERIC_VARIABLE_PATTERN.matcher(var4[1]).replaceAll("%$1s");
+                  this.languageList.put(var5, var6);
                }
             }
          }
+
+         this.lastUpdateTimeInMilliseconds = System.currentTimeMillis();
       } catch (IOException var7) {
-         ;
-      } catch (Exception var8) {
          ;
       }
 
-      return table;
    }
 
    static LanguageMap getInstance() {
       return instance;
    }
 
-   @SideOnly(Side.CLIENT)
-   public static synchronized void replaceWith(Map p_135063_0_) {
-      instance.languageList.clear();
-      instance.languageList.putAll(p_135063_0_);
-      instance.lastUpdateTimeInMilliseconds = System.currentTimeMillis();
+   public synchronized String translateKey(String var1) {
+      return this.tryTranslateKey(var1);
    }
 
-   public synchronized String translateKey(String key) {
-      return this.tryTranslateKey(key);
-   }
-
-   public synchronized String translateKeyFormat(String key, Object... format) {
-      String s = this.tryTranslateKey(key);
+   public synchronized String translateKeyFormat(String var1, Object... var2) {
+      String var3 = this.tryTranslateKey(var1);
 
       try {
-         return String.format(s, format);
+         return String.format(var3, var2);
       } catch (IllegalFormatException var5) {
-         return "Format error: " + s;
+         return "Format error: " + var3;
       }
    }
 
-   private String tryTranslateKey(String key) {
-      String s = (String)this.languageList.get(key);
-      return s == null ? key : s;
+   private String tryTranslateKey(String var1) {
+      String var2 = (String)this.languageList.get(var1);
+      return var2 == null ? var1 : var2;
    }
 
-   public synchronized boolean isKeyTranslated(String key) {
-      return this.languageList.containsKey(key);
+   public synchronized boolean isKeyTranslated(String var1) {
+      return this.languageList.containsKey(var1);
    }
 
    public long getLastUpdateTimeInMilliseconds() {

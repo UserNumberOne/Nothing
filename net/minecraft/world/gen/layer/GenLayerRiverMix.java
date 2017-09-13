@@ -7,41 +7,41 @@ public class GenLayerRiverMix extends GenLayer {
    private final GenLayer biomePatternGeneratorChain;
    private final GenLayer riverPatternGeneratorChain;
 
-   public GenLayerRiverMix(long p_i2129_1_, GenLayer p_i2129_3_, GenLayer p_i2129_4_) {
-      super(p_i2129_1_);
-      this.biomePatternGeneratorChain = p_i2129_3_;
-      this.riverPatternGeneratorChain = p_i2129_4_;
+   public GenLayerRiverMix(long var1, GenLayer var3, GenLayer var4) {
+      super(var1);
+      this.biomePatternGeneratorChain = var3;
+      this.riverPatternGeneratorChain = var4;
    }
 
-   public void initWorldGenSeed(long seed) {
-      this.biomePatternGeneratorChain.initWorldGenSeed(seed);
-      this.riverPatternGeneratorChain.initWorldGenSeed(seed);
-      super.initWorldGenSeed(seed);
+   public void initWorldGenSeed(long var1) {
+      this.biomePatternGeneratorChain.initWorldGenSeed(var1);
+      this.riverPatternGeneratorChain.initWorldGenSeed(var1);
+      super.initWorldGenSeed(var1);
    }
 
-   public int[] getInts(int areaX, int areaY, int areaWidth, int areaHeight) {
-      int[] aint = this.biomePatternGeneratorChain.getInts(areaX, areaY, areaWidth, areaHeight);
-      int[] aint1 = this.riverPatternGeneratorChain.getInts(areaX, areaY, areaWidth, areaHeight);
-      int[] aint2 = IntCache.getIntCache(areaWidth * areaHeight);
+   public int[] getInts(int var1, int var2, int var3, int var4) {
+      int[] var5 = this.biomePatternGeneratorChain.getInts(var1, var2, var3, var4);
+      int[] var6 = this.riverPatternGeneratorChain.getInts(var1, var2, var3, var4);
+      int[] var7 = IntCache.getIntCache(var3 * var4);
 
-      for(int i = 0; i < areaWidth * areaHeight; ++i) {
-         if (aint[i] != Biome.getIdForBiome(Biomes.OCEAN) && aint[i] != Biome.getIdForBiome(Biomes.DEEP_OCEAN)) {
-            if (aint1[i] == Biome.getIdForBiome(Biomes.RIVER)) {
-               if (aint[i] == Biome.getIdForBiome(Biomes.ICE_PLAINS)) {
-                  aint2[i] = Biome.getIdForBiome(Biomes.FROZEN_RIVER);
-               } else if (aint[i] != Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND) && aint[i] != Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND_SHORE)) {
-                  aint2[i] = aint1[i] & 255;
+      for(int var8 = 0; var8 < var3 * var4; ++var8) {
+         if (var5[var8] != Biome.getIdForBiome(Biomes.OCEAN) && var5[var8] != Biome.getIdForBiome(Biomes.DEEP_OCEAN)) {
+            if (var6[var8] == Biome.getIdForBiome(Biomes.RIVER)) {
+               if (var5[var8] == Biome.getIdForBiome(Biomes.ICE_PLAINS)) {
+                  var7[var8] = Biome.getIdForBiome(Biomes.FROZEN_RIVER);
+               } else if (var5[var8] != Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND) && var5[var8] != Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND_SHORE)) {
+                  var7[var8] = var6[var8] & 255;
                } else {
-                  aint2[i] = Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND_SHORE);
+                  var7[var8] = Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND_SHORE);
                }
             } else {
-               aint2[i] = aint[i];
+               var7[var8] = var5[var8];
             }
          } else {
-            aint2[i] = aint[i];
+            var7[var8] = var5[var8];
          }
       }
 
-      return aint2;
+      return var7;
    }
 }

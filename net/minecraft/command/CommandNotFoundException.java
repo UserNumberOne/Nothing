@@ -5,7 +5,7 @@ public class CommandNotFoundException extends CommandException {
       this("commands.generic.notFound");
    }
 
-   public CommandNotFoundException(String message, Object... args) {
-      super(message, args);
+   public CommandNotFoundException(String var1, Object... var2) {
+      super(var1, var2);
    }
 }

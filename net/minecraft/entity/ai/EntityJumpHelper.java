@@ -6,8 +6,8 @@ public class EntityJumpHelper {
    private final EntityLiving entity;
    protected boolean isJumping;
 
-   public EntityJumpHelper(EntityLiving entityIn) {
-      this.entity = entityIn;
+   public EntityJumpHelper(EntityLiving var1) {
+      this.entity = var1;
    }
 
    public void setJumping() {

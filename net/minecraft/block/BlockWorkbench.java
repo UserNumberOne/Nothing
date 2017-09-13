@@ -25,12 +25,12 @@ public class BlockWorkbench extends Block {
       this.setCreativeTab(CreativeTabs.DECORATIONS);
    }
 
-   public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-      if (worldIn.isRemote) {
+   public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
+      if (var1.isRemote) {
          return true;
       } else {
-         playerIn.displayGui(new BlockWorkbench.InterfaceCraftingTable(worldIn, pos));
-         playerIn.addStat(StatList.CRAFTING_TABLE_INTERACTION);
+         var4.displayGui(new BlockWorkbench.InterfaceCraftingTable(var1, var2));
+         var4.addStat(StatList.CRAFTING_TABLE_INTERACTION);
          return true;
       }
    }
@@ -39,9 +39,9 @@ public class BlockWorkbench extends Block {
       private final World world;
       private final BlockPos position;
 
-      public InterfaceCraftingTable(World worldIn, BlockPos pos) {
-         this.world = worldIn;
-         this.position = pos;
+      public InterfaceCraftingTable(World var1, BlockPos var2) {
+         this.world = var1;
+         this.position = var2;
       }
 
       public String getName() {
@@ -56,8 +56,8 @@ public class BlockWorkbench extends Block {
          return new TextComponentTranslation(Blocks.CRAFTING_TABLE.getUnlocalizedName() + ".name", new Object[0]);
       }
 
-      public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn) {
-         return new ContainerWorkbench(playerInventory, this.world, this.position);
+      public Container createContainer(InventoryPlayer var1, EntityPlayer var2) {
+         return new ContainerWorkbench(var1, this.world, this.position);
       }
 
       public String getGuiID() {

@@ -1,6 +1,5 @@
 package net.minecraft.world;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,104 +12,80 @@ import net.minecraft.util.text.ITextComponent;
 public class BossInfoServer extends BossInfo {
    private final Set players = Sets.newHashSet();
    private final Set readOnlyPlayers;
-   private boolean visible;
+   public boolean visible;
 
-   public BossInfoServer(ITextComponent nameIn, BossInfo.Color colorIn, BossInfo.Overlay overlayIn) {
-      super(MathHelper.getRandomUUID(), nameIn, colorIn, overlayIn);
+   public BossInfoServer(ITextComponent var1, BossInfo.Color var2, BossInfo.Overlay var3) {
+      super(MathHelper.getRandomUUID(), var1, var2, var3);
       this.readOnlyPlayers = Collections.unmodifiableSet(this.players);
       this.visible = true;
    }
 
-   public void setPercent(float percentIn) {
-      if (percentIn != this.percent) {
-         super.setPercent(percentIn);
+   public void setPercent(float var1) {
+      if (var1 != this.percent) {
+         super.setPercent(var1);
          this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_PCT);
       }
 
    }
 
-   public void setColor(BossInfo.Color colorIn) {
-      if (colorIn != this.color) {
-         super.setColor(colorIn);
-         this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
-      }
-
-   }
-
-   public void setOverlay(BossInfo.Overlay overlayIn) {
-      if (overlayIn != this.overlay) {
-         super.setOverlay(overlayIn);
-         this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
-      }
-
-   }
-
-   public BossInfo setDarkenSky(boolean darkenSkyIn) {
-      if (darkenSkyIn != this.darkenSky) {
-         super.setDarkenSky(darkenSkyIn);
+   public BossInfo setDarkenSky(boolean var1) {
+      if (var1 != this.darkenSky) {
+         super.setDarkenSky(var1);
          this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_PROPERTIES);
       }
 
       return this;
    }
 
-   public BossInfo setPlayEndBossMusic(boolean playEndBossMusicIn) {
-      if (playEndBossMusicIn != this.playEndBossMusic) {
-         super.setPlayEndBossMusic(playEndBossMusicIn);
+   public BossInfo setPlayEndBossMusic(boolean var1) {
+      if (var1 != this.playEndBossMusic) {
+         super.setPlayEndBossMusic(var1);
          this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_PROPERTIES);
       }
 
       return this;
    }
 
-   public BossInfo setCreateFog(boolean createFogIn) {
-      if (createFogIn != this.createFog) {
-         super.setCreateFog(createFogIn);
+   public BossInfo setCreateFog(boolean var1) {
+      if (var1 != this.createFog) {
+         super.setCreateFog(var1);
          this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_PROPERTIES);
       }
 
       return this;
    }
 
-   public void setName(ITextComponent nameIn) {
-      if (!Objects.equal(nameIn, this.name)) {
-         super.setName(nameIn);
-         this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_NAME);
-      }
-
-   }
-
-   private void sendUpdate(SPacketUpdateBossInfo.Operation operationIn) {
+   public void sendUpdate(SPacketUpdateBossInfo.Operation var1) {
       if (this.visible) {
-         SPacketUpdateBossInfo spacketupdatebossinfo = new SPacketUpdateBossInfo(operationIn, this);
+         SPacketUpdateBossInfo var2 = new SPacketUpdateBossInfo(var1, this);
 
-         for(EntityPlayerMP entityplayermp : this.players) {
-            entityplayermp.connection.sendPacket(spacketupdatebossinfo);
+         for(EntityPlayerMP var4 : this.players) {
+            var4.connection.sendPacket(var2);
          }
       }
 
    }
 
-   public void addPlayer(EntityPlayerMP player) {
-      if (this.players.add(player) && this.visible) {
-         player.connection.sendPacket(new SPacketUpdateBossInfo(SPacketUpdateBossInfo.Operation.ADD, this));
+   public void addPlayer(EntityPlayerMP var1) {
+      if (this.players.add(var1) && this.visible) {
+         var1.connection.sendPacket(new SPacketUpdateBossInfo(SPacketUpdateBossInfo.Operation.ADD, this));
       }
 
    }
 
-   public void removePlayer(EntityPlayerMP player) {
-      if (this.players.remove(player) && this.visible) {
-         player.connection.sendPacket(new SPacketUpdateBossInfo(SPacketUpdateBossInfo.Operation.REMOVE, this));
+   public void removePlayer(EntityPlayerMP var1) {
+      if (this.players.remove(var1) && this.visible) {
+         var1.connection.sendPacket(new SPacketUpdateBossInfo(SPacketUpdateBossInfo.Operation.REMOVE, this));
       }
 
    }
 
-   public void setVisible(boolean visibleIn) {
-      if (visibleIn != this.visible) {
-         this.visible = visibleIn;
+   public void setVisible(boolean var1) {
+      if (var1 != this.visible) {
+         this.visible = var1;
 
-         for(EntityPlayerMP entityplayermp : this.players) {
-            entityplayermp.connection.sendPacket(new SPacketUpdateBossInfo(visibleIn ? SPacketUpdateBossInfo.Operation.ADD : SPacketUpdateBossInfo.Operation.REMOVE, this));
+         for(EntityPlayerMP var3 : this.players) {
+            var3.connection.sendPacket(new SPacketUpdateBossInfo(var1 ? SPacketUpdateBossInfo.Operation.ADD : SPacketUpdateBossInfo.Operation.REMOVE, this));
          }
       }
 

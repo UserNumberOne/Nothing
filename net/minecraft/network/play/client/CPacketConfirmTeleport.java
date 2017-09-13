@@ -4,30 +4,20 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketConfirmTeleport implements Packet {
    private int telportId;
 
-   public CPacketConfirmTeleport() {
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.telportId = var1.readVarInt();
    }
 
-   @SideOnly(Side.CLIENT)
-   public CPacketConfirmTeleport(int teleportIdIn) {
-      this.telportId = teleportIdIn;
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeVarInt(this.telportId);
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.telportId = buf.readVarInt();
-   }
-
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeVarInt(this.telportId);
-   }
-
-   public void processPacket(INetHandlerPlayServer handler) {
-      handler.processConfirmTeleport(this);
+   public void processPacket(INetHandlerPlayServer var1) {
+      var1.processConfirmTeleport(this);
    }
 
    public int getTeleportId() {

@@ -22,37 +22,39 @@ public class VillageCollection extends WorldSavedData {
    private final List villageList = Lists.newArrayList();
    private int tickCounter;
 
-   public VillageCollection(String name) {
-      super(name);
+   public VillageCollection(String var1) {
+      super(var1);
    }
 
-   public VillageCollection(World worldIn) {
-      super(fileNameForProvider(worldIn.provider));
-      this.world = worldIn;
+   public VillageCollection(World var1) {
+      super(fileNameForProvider(var1.provider));
+      this.world = var1;
       this.markDirty();
    }
 
-   public void setWorldsForAll(World worldIn) {
-      this.world = worldIn;
+   public void setWorldsForAll(World var1) {
+      this.world = var1;
 
-      for(Village village : this.villageList) {
-         village.setWorld(worldIn);
+      for(Village var3 : this.villageList) {
+         var3.setWorld(var1);
       }
 
    }
 
-   public void addToVillagerPositionList(BlockPos pos) {
-      if (this.villagerPositionsList.size() <= 64 && !this.positionInList(pos)) {
-         this.villagerPositionsList.add(pos);
-      }
+   public void addToVillagerPositionList(BlockPos var1) {
+      if (this.villagerPositionsList.size() <= 64) {
+         if (!this.positionInList(var1)) {
+            this.villagerPositionsList.add(var1);
+         }
 
+      }
    }
 
    public void tick() {
       ++this.tickCounter;
 
-      for(Village village : this.villageList) {
-         village.tick(this.tickCounter);
+      for(Village var2 : this.villageList) {
+         var2.tick(this.tickCounter);
       }
 
       this.removeAnnihilatedVillages();
@@ -65,12 +67,12 @@ public class VillageCollection extends WorldSavedData {
    }
 
    private void removeAnnihilatedVillages() {
-      Iterator iterator = this.villageList.iterator();
+      Iterator var1 = this.villageList.iterator();
 
-      while(iterator.hasNext()) {
-         Village village = (Village)iterator.next();
-         if (village.isAnnihilated()) {
-            iterator.remove();
+      while(var1.hasNext()) {
+         Village var2 = (Village)var1.next();
+         if (var2.isAnnihilated()) {
+            var1.remove();
             this.markDirty();
          }
       }
@@ -81,62 +83,61 @@ public class VillageCollection extends WorldSavedData {
       return this.villageList;
    }
 
-   public Village getNearestVillage(BlockPos doorBlock, int radius) {
-      Village village = null;
-      double d0 = 3.4028234663852886E38D;
+   public Village getNearestVillage(BlockPos var1, int var2) {
+      Village var3 = null;
+      double var4 = 3.4028234663852886E38D;
 
-      for(Village village1 : this.villageList) {
-         double d1 = village1.getCenter().distanceSq(doorBlock);
-         if (d1 < d0) {
-            float f = (float)(radius + village1.getVillageRadius());
-            if (d1 <= (double)(f * f)) {
-               village = village1;
-               d0 = d1;
+      for(Village var7 : this.villageList) {
+         double var8 = var7.getCenter().distanceSq(var1);
+         if (var8 < var4) {
+            float var10 = (float)(var2 + var7.getVillageRadius());
+            if (var8 <= (double)(var10 * var10)) {
+               var3 = var7;
+               var4 = var8;
             }
          }
       }
 
-      return village;
+      return var3;
    }
 
    private void dropOldestVillagerPosition() {
       if (!this.villagerPositionsList.isEmpty()) {
          this.addDoorsAround((BlockPos)this.villagerPositionsList.remove(0));
       }
-
    }
 
    private void addNewDoorsToVillageOrCreateVillage() {
-      for(int i = 0; i < this.newDoors.size(); ++i) {
-         VillageDoorInfo villagedoorinfo = (VillageDoorInfo)this.newDoors.get(i);
-         Village village = this.getNearestVillage(villagedoorinfo.getDoorBlockPos(), 32);
-         if (village == null) {
-            village = new Village(this.world);
-            this.villageList.add(village);
+      for(int var1 = 0; var1 < this.newDoors.size(); ++var1) {
+         VillageDoorInfo var2 = (VillageDoorInfo)this.newDoors.get(var1);
+         Village var3 = this.getNearestVillage(var2.getDoorBlockPos(), 32);
+         if (var3 == null) {
+            var3 = new Village(this.world);
+            this.villageList.add(var3);
             this.markDirty();
          }
 
-         village.addVillageDoorInfo(villagedoorinfo);
+         var3.addVillageDoorInfo(var2);
       }
 
       this.newDoors.clear();
    }
 
-   private void addDoorsAround(BlockPos central) {
-      int i = 16;
-      int j = 4;
-      int k = 16;
+   private void addDoorsAround(BlockPos var1) {
+      boolean var2 = true;
+      boolean var3 = true;
+      boolean var4 = true;
 
-      for(int l = -16; l < 16; ++l) {
-         for(int i1 = -4; i1 < 4; ++i1) {
-            for(int j1 = -16; j1 < 16; ++j1) {
-               BlockPos blockpos = central.add(l, i1, j1);
-               if (this.isWoodDoor(blockpos)) {
-                  VillageDoorInfo villagedoorinfo = this.checkDoorExistence(blockpos);
-                  if (villagedoorinfo == null) {
-                     this.addToNewDoorsList(blockpos);
+      for(int var5 = -16; var5 < 16; ++var5) {
+         for(int var6 = -4; var6 < 4; ++var6) {
+            for(int var7 = -16; var7 < 16; ++var7) {
+               BlockPos var8 = var1.add(var5, var6, var7);
+               if (this.isWoodDoor(var8)) {
+                  VillageDoorInfo var9 = this.checkDoorExistence(var8);
+                  if (var9 == null) {
+                     this.addToNewDoorsList(var8);
                   } else {
-                     villagedoorinfo.setLastActivityTimestamp(this.tickCounter);
+                     var9.setLastActivityTimestamp(this.tickCounter);
                   }
                }
             }
@@ -145,52 +146,52 @@ public class VillageCollection extends WorldSavedData {
 
    }
 
-   private VillageDoorInfo checkDoorExistence(BlockPos doorBlock) {
-      for(VillageDoorInfo villagedoorinfo : this.newDoors) {
-         if (villagedoorinfo.getDoorBlockPos().getX() == doorBlock.getX() && villagedoorinfo.getDoorBlockPos().getZ() == doorBlock.getZ() && Math.abs(villagedoorinfo.getDoorBlockPos().getY() - doorBlock.getY()) <= 1) {
-            return villagedoorinfo;
+   private VillageDoorInfo checkDoorExistence(BlockPos var1) {
+      for(VillageDoorInfo var3 : this.newDoors) {
+         if (var3.getDoorBlockPos().getX() == var1.getX() && var3.getDoorBlockPos().getZ() == var1.getZ() && Math.abs(var3.getDoorBlockPos().getY() - var1.getY()) <= 1) {
+            return var3;
          }
       }
 
-      for(Village village : this.villageList) {
-         VillageDoorInfo villagedoorinfo1 = village.getExistedDoor(doorBlock);
-         if (villagedoorinfo1 != null) {
-            return villagedoorinfo1;
+      for(Village var6 : this.villageList) {
+         VillageDoorInfo var4 = var6.getExistedDoor(var1);
+         if (var4 != null) {
+            return var4;
          }
       }
 
       return null;
    }
 
-   private void addToNewDoorsList(BlockPos doorBlock) {
-      EnumFacing enumfacing = BlockDoor.getFacing(this.world, doorBlock);
-      EnumFacing enumfacing1 = enumfacing.getOpposite();
-      int i = this.countBlocksCanSeeSky(doorBlock, enumfacing, 5);
-      int j = this.countBlocksCanSeeSky(doorBlock, enumfacing1, i + 1);
-      if (i != j) {
-         this.newDoors.add(new VillageDoorInfo(doorBlock, i < j ? enumfacing : enumfacing1, this.tickCounter));
+   private void addToNewDoorsList(BlockPos var1) {
+      EnumFacing var2 = BlockDoor.getFacing(this.world, var1);
+      EnumFacing var3 = var2.getOpposite();
+      int var4 = this.countBlocksCanSeeSky(var1, var2, 5);
+      int var5 = this.countBlocksCanSeeSky(var1, var3, var4 + 1);
+      if (var4 != var5) {
+         this.newDoors.add(new VillageDoorInfo(var1, var4 < var5 ? var2 : var3, this.tickCounter));
       }
 
    }
 
-   private int countBlocksCanSeeSky(BlockPos centerPos, EnumFacing direction, int limitation) {
-      int i = 0;
+   private int countBlocksCanSeeSky(BlockPos var1, EnumFacing var2, int var3) {
+      int var4 = 0;
 
-      for(int j = 1; j <= 5; ++j) {
-         if (this.world.canSeeSky(centerPos.offset(direction, j))) {
-            ++i;
-            if (i >= limitation) {
-               return i;
+      for(int var5 = 1; var5 <= 5; ++var5) {
+         if (this.world.canSeeSky(var1.offset(var2, var5))) {
+            ++var4;
+            if (var4 >= var3) {
+               return var4;
             }
          }
       }
 
-      return i;
+      return var4;
    }
 
-   private boolean positionInList(BlockPos pos) {
-      for(BlockPos blockpos : this.villagerPositionsList) {
-         if (blockpos.equals(pos)) {
+   private boolean positionInList(BlockPos var1) {
+      for(BlockPos var3 : this.villagerPositionsList) {
+         if (var3.equals(var1)) {
             return true;
          }
       }
@@ -198,40 +199,44 @@ public class VillageCollection extends WorldSavedData {
       return false;
    }
 
-   private boolean isWoodDoor(BlockPos doorPos) {
-      IBlockState iblockstate = this.world.getBlockState(doorPos);
-      Block block = iblockstate.getBlock();
-      return block instanceof BlockDoor ? iblockstate.getMaterial() == Material.WOOD : false;
+   private boolean isWoodDoor(BlockPos var1) {
+      IBlockState var2 = this.world.getBlockState(var1);
+      Block var3 = var2.getBlock();
+      if (var3 instanceof BlockDoor) {
+         return var2.getMaterial() == Material.WOOD;
+      } else {
+         return false;
+      }
    }
 
-   public void readFromNBT(NBTTagCompound nbt) {
-      this.tickCounter = nbt.getInteger("Tick");
-      NBTTagList nbttaglist = nbt.getTagList("Villages", 10);
+   public void readFromNBT(NBTTagCompound var1) {
+      this.tickCounter = var1.getInteger("Tick");
+      NBTTagList var2 = var1.getTagList("Villages", 10);
 
-      for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-         NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-         Village village = new Village();
-         village.readVillageDataFromNBT(nbttagcompound);
-         this.villageList.add(village);
+      for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
+         NBTTagCompound var4 = var2.getCompoundTagAt(var3);
+         Village var5 = new Village();
+         var5.readVillageDataFromNBT(var4);
+         this.villageList.add(var5);
       }
 
    }
 
-   public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-      compound.setInteger("Tick", this.tickCounter);
-      NBTTagList nbttaglist = new NBTTagList();
+   public NBTTagCompound writeToNBT(NBTTagCompound var1) {
+      var1.setInteger("Tick", this.tickCounter);
+      NBTTagList var2 = new NBTTagList();
 
-      for(Village village : this.villageList) {
-         NBTTagCompound nbttagcompound = new NBTTagCompound();
-         village.writeVillageDataToNBT(nbttagcompound);
-         nbttaglist.appendTag(nbttagcompound);
+      for(Village var4 : this.villageList) {
+         NBTTagCompound var5 = new NBTTagCompound();
+         var4.writeVillageDataToNBT(var5);
+         var2.appendTag(var5);
       }
 
-      compound.setTag("Villages", nbttaglist);
-      return compound;
+      var1.setTag("Villages", var2);
+      return var1;
    }
 
-   public static String fileNameForProvider(WorldProvider provider) {
-      return "villages" + provider.getDimensionType().getSuffix();
+   public static String fileNameForProvider(WorldProvider var0) {
+      return "villages" + var0.getDimensionType().getSuffix();
    }
 }

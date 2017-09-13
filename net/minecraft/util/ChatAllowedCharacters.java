@@ -8,20 +8,20 @@ public class ChatAllowedCharacters {
    public static final char[] ILLEGAL_STRUCTURE_CHARACTERS = new char[]{'.', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"'};
    public static final char[] ILLEGAL_FILE_CHARACTERS = new char[]{'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"', ':'};
 
-   public static boolean isAllowedCharacter(char character) {
-      return character != 167 && character >= ' ' && character != 127;
+   public static boolean isAllowedCharacter(char var0) {
+      return var0 != 167 && var0 >= ' ' && var0 != 127;
    }
 
-   public static String filterAllowedCharacters(String input) {
-      StringBuilder stringbuilder = new StringBuilder();
+   public static String filterAllowedCharacters(String var0) {
+      StringBuilder var1 = new StringBuilder();
 
-      for(char c0 : input.toCharArray()) {
-         if (isAllowedCharacter(c0)) {
-            stringbuilder.append(c0);
+      for(char var5 : var0.toCharArray()) {
+         if (isAllowedCharacter(var5)) {
+            var1.append(var5);
          }
       }
 
-      return stringbuilder.toString();
+      return var1.toString();
    }
 
    static {

@@ -15,7 +15,7 @@ public class BlockHay extends BlockRotatedPillar {
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
-   public void onFallenUpon(World worldIn, BlockPos pos, Entity entityIn, float fallDistance) {
-      entityIn.fall(fallDistance, 0.2F);
+   public void onFallenUpon(World var1, BlockPos var2, Entity var3, float var4) {
+      var3.fall(var4, 0.2F);
    }
 }

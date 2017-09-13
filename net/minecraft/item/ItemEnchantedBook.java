@@ -1,90 +1,57 @@
 package net.minecraft.item;
 
-import java.util.List;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemEnchantedBook extends Item {
-   @SideOnly(Side.CLIENT)
-   public boolean hasEffect(ItemStack stack) {
-      return true;
-   }
-
-   public boolean isEnchantable(ItemStack stack) {
+   public boolean isEnchantable(ItemStack var1) {
       return false;
    }
 
-   public EnumRarity getRarity(ItemStack stack) {
-      return this.getEnchantments(stack).hasNoTags() ? super.getRarity(stack) : EnumRarity.UNCOMMON;
+   public EnumRarity getRarity(ItemStack var1) {
+      return this.getEnchantments(var1).hasNoTags() ? super.getRarity(var1) : EnumRarity.UNCOMMON;
    }
 
-   public NBTTagList getEnchantments(ItemStack stack) {
-      NBTTagCompound nbttagcompound = stack.getTagCompound();
-      return nbttagcompound != null && nbttagcompound.hasKey("StoredEnchantments", 9) ? (NBTTagList)nbttagcompound.getTag("StoredEnchantments") : new NBTTagList();
+   public NBTTagList getEnchantments(ItemStack var1) {
+      NBTTagCompound var2 = var1.getTagCompound();
+      return var2 != null && var2.hasKey("StoredEnchantments", 9) ? (NBTTagList)var2.getTag("StoredEnchantments") : new NBTTagList();
    }
 
-   @SideOnly(Side.CLIENT)
-   public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced) {
-      super.addInformation(stack, playerIn, tooltip, advanced);
-      NBTTagList nbttaglist = this.getEnchantments(stack);
-      if (nbttaglist != null) {
-         for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-            int j = nbttaglist.getCompoundTagAt(i).getShort("id");
-            int k = nbttaglist.getCompoundTagAt(i).getShort("lvl");
-            if (Enchantment.getEnchantmentByID(j) != null) {
-               tooltip.add(Enchantment.getEnchantmentByID(j).getTranslatedName(k));
-            }
-         }
-      }
+   public void addEnchantment(ItemStack var1, EnchantmentData var2) {
+      NBTTagList var3 = this.getEnchantments(var1);
+      boolean var4 = true;
 
-   }
-
-   public void addEnchantment(ItemStack stack, EnchantmentData enchantment) {
-      NBTTagList nbttaglist = this.getEnchantments(stack);
-      boolean flag = true;
-
-      for(int i = 0; i < nbttaglist.tagCount(); ++i) {
-         NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-         if (Enchantment.getEnchantmentByID(nbttagcompound.getShort("id")) == enchantment.enchantmentobj) {
-            if (nbttagcompound.getShort("lvl") < enchantment.enchantmentLevel) {
-               nbttagcompound.setShort("lvl", (short)enchantment.enchantmentLevel);
+      for(int var5 = 0; var5 < var3.tagCount(); ++var5) {
+         NBTTagCompound var6 = var3.getCompoundTagAt(var5);
+         if (Enchantment.getEnchantmentByID(var6.getShort("id")) == var2.enchantmentobj) {
+            if (var6.getShort("lvl") < var2.enchantmentLevel) {
+               var6.setShort("lvl", (short)var2.enchantmentLevel);
             }
 
-            flag = false;
+            var4 = false;
             break;
          }
       }
 
-      if (flag) {
-         NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-         nbttagcompound1.setShort("id", (short)Enchantment.getEnchantmentID(enchantment.enchantmentobj));
-         nbttagcompound1.setShort("lvl", (short)enchantment.enchantmentLevel);
-         nbttaglist.appendTag(nbttagcompound1);
+      if (var4) {
+         NBTTagCompound var7 = new NBTTagCompound();
+         var7.setShort("id", (short)Enchantment.getEnchantmentID(var2.enchantmentobj));
+         var7.setShort("lvl", (short)var2.enchantmentLevel);
+         var3.appendTag(var7);
       }
 
-      if (!stack.hasTagCompound()) {
-         stack.setTagCompound(new NBTTagCompound());
+      if (!var1.hasTagCompound()) {
+         var1.setTagCompound(new NBTTagCompound());
       }
 
-      stack.getTagCompound().setTag("StoredEnchantments", nbttaglist);
+      var1.getTagCompound().setTag("StoredEnchantments", var3);
    }
 
-   public ItemStack getEnchantedItemStack(EnchantmentData data) {
-      ItemStack itemstack = new ItemStack(this);
-      this.addEnchantment(itemstack, data);
-      return itemstack;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getAll(Enchantment enchantment, List list) {
-      for(int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); ++i) {
-         list.add(this.getEnchantedItemStack(new EnchantmentData(enchantment, i)));
-      }
-
+   public ItemStack getEnchantedItemStack(EnchantmentData var1) {
+      ItemStack var2 = new ItemStack(this);
+      this.addEnchantment(var2, var1);
+      return var2;
    }
 }

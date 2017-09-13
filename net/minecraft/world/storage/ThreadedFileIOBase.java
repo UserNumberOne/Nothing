@@ -12,9 +12,9 @@ public class ThreadedFileIOBase implements Runnable {
    private volatile boolean isThreadWaiting;
 
    private ThreadedFileIOBase() {
-      Thread thread = new Thread(this, "File IO Thread");
-      thread.setPriority(1);
-      thread.start();
+      Thread var1 = new Thread(this, "File IO Thread");
+      var1.setPriority(1);
+      var1.start();
    }
 
    public static ThreadedFileIOBase getThreadedIOInstance() {
@@ -28,11 +28,11 @@ public class ThreadedFileIOBase implements Runnable {
    }
 
    private void processQueue() {
-      for(int i = 0; i < this.threadedIOQueue.size(); ++i) {
-         IThreadedFileIO ithreadedfileio = (IThreadedFileIO)this.threadedIOQueue.get(i);
-         boolean flag = ithreadedfileio.writeNextIO();
-         if (!flag) {
-            this.threadedIOQueue.remove(i--);
+      for(int var1 = 0; var1 < this.threadedIOQueue.size(); ++var1) {
+         IThreadedFileIO var2 = (IThreadedFileIO)this.threadedIOQueue.get(var1);
+         boolean var3 = var2.writeNextIO();
+         if (!var3) {
+            this.threadedIOQueue.remove(var1--);
             ++this.savedIOCounter;
          }
 
@@ -53,12 +53,11 @@ public class ThreadedFileIOBase implements Runnable {
 
    }
 
-   public void queueIO(IThreadedFileIO fileIo) {
-      if (!this.threadedIOQueue.contains(fileIo)) {
+   public void queueIO(IThreadedFileIO var1) {
+      if (!this.threadedIOQueue.contains(var1)) {
          ++this.writeQueuedCounter;
-         this.threadedIOQueue.add(fileIo);
+         this.threadedIOQueue.add(var1);
       }
-
    }
 
    public void waitForFinish() throws InterruptedException {

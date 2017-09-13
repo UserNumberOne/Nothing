@@ -11,8 +11,8 @@ public enum EnumRarity {
    public final TextFormatting rarityColor;
    public final String rarityName;
 
-   private EnumRarity(TextFormatting color, String name) {
-      this.rarityColor = color;
-      this.rarityName = name;
+   private EnumRarity(TextFormatting var3, String var4) {
+      this.rarityColor = var3;
+      this.rarityName = var4;
    }
 }

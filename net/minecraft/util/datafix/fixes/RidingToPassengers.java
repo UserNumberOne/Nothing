@@ -9,25 +9,25 @@ public class RidingToPassengers implements IFixableData {
       return 135;
    }
 
-   public NBTTagCompound fixTagCompound(NBTTagCompound compound) {
-      while(compound.hasKey("Riding", 10)) {
-         NBTTagCompound nbttagcompound = this.extractVehicle(compound);
-         this.addPassengerToVehicle(compound, nbttagcompound);
-         compound = nbttagcompound;
+   public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
+      while(var1.hasKey("Riding", 10)) {
+         NBTTagCompound var2 = this.extractVehicle(var1);
+         this.addPassengerToVehicle(var1, var2);
+         var1 = var2;
       }
 
-      return compound;
+      return var1;
    }
 
-   protected void addPassengerToVehicle(NBTTagCompound p_188219_1_, NBTTagCompound p_188219_2_) {
-      NBTTagList nbttaglist = new NBTTagList();
-      nbttaglist.appendTag(p_188219_1_);
-      p_188219_2_.setTag("Passengers", nbttaglist);
+   protected void addPassengerToVehicle(NBTTagCompound var1, NBTTagCompound var2) {
+      NBTTagList var3 = new NBTTagList();
+      var3.appendTag(var1);
+      var2.setTag("Passengers", var3);
    }
 
-   protected NBTTagCompound extractVehicle(NBTTagCompound p_188220_1_) {
-      NBTTagCompound nbttagcompound = p_188220_1_.getCompoundTag("Riding");
-      p_188220_1_.removeTag("Riding");
-      return nbttagcompound;
+   protected NBTTagCompound extractVehicle(NBTTagCompound var1) {
+      NBTTagCompound var2 = var1.getCompoundTag("Riding");
+      var1.removeTag("Riding");
+      return var2;
    }
 }

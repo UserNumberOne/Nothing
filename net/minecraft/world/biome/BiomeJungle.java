@@ -20,8 +20,6 @@ import net.minecraft.world.gen.feature.WorldGenTallGrass;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 import net.minecraft.world.gen.feature.WorldGenVines;
 import net.minecraft.world.gen.feature.WorldGenerator;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate.EventType;
 
 public class BiomeJungle extends Biome {
    private final boolean isEdge;
@@ -29,10 +27,10 @@ public class BiomeJungle extends Biome {
    private static final IBlockState JUNGLE_LEAF = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
    private static final IBlockState OAK_LEAF = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
 
-   public BiomeJungle(boolean isEdgeIn, Biome.BiomeProperties properties) {
-      super(properties);
-      this.isEdge = isEdgeIn;
-      if (isEdgeIn) {
+   public BiomeJungle(boolean var1, Biome.BiomeProperties var2) {
+      super(var2);
+      this.isEdge = var1;
+      if (var1) {
          this.theBiomeDecorator.treesPerChunk = 2;
       } else {
          this.theBiomeDecorator.treesPerChunk = 50;
@@ -40,43 +38,40 @@ public class BiomeJungle extends Biome {
 
       this.theBiomeDecorator.grassPerChunk = 25;
       this.theBiomeDecorator.flowersPerChunk = 4;
-      if (!isEdgeIn) {
+      if (!var1) {
          this.spawnableMonsterList.add(new Biome.SpawnListEntry(EntityOcelot.class, 2, 1, 1));
       }
 
       this.spawnableCreatureList.add(new Biome.SpawnListEntry(EntityChicken.class, 10, 4, 4));
    }
 
-   public WorldGenAbstractTree genBigTreeChance(Random rand) {
-      return (WorldGenAbstractTree)(rand.nextInt(10) == 0 ? BIG_TREE_FEATURE : (rand.nextInt(2) == 0 ? new WorldGenShrub(JUNGLE_LOG, OAK_LEAF) : (!this.isEdge && rand.nextInt(3) == 0 ? new WorldGenMegaJungle(false, 10, 20, JUNGLE_LOG, JUNGLE_LEAF) : new WorldGenTrees(false, 4 + rand.nextInt(7), JUNGLE_LOG, JUNGLE_LEAF, true))));
+   public WorldGenAbstractTree genBigTreeChance(Random var1) {
+      if (var1.nextInt(10) == 0) {
+         return BIG_TREE_FEATURE;
+      } else if (var1.nextInt(2) == 0) {
+         return new WorldGenShrub(JUNGLE_LOG, OAK_LEAF);
+      } else {
+         return (WorldGenAbstractTree)(!this.isEdge && var1.nextInt(3) == 0 ? new WorldGenMegaJungle(false, 10, 20, JUNGLE_LOG, JUNGLE_LEAF) : new WorldGenTrees(false, 4 + var1.nextInt(7), JUNGLE_LOG, JUNGLE_LEAF, true));
+      }
    }
 
-   public WorldGenerator getRandomWorldGenForGrass(Random rand) {
-      return rand.nextInt(4) == 0 ? new WorldGenTallGrass(BlockTallGrass.EnumType.FERN) : new WorldGenTallGrass(BlockTallGrass.EnumType.GRASS);
+   public WorldGenerator getRandomWorldGenForGrass(Random var1) {
+      return var1.nextInt(4) == 0 ? new WorldGenTallGrass(BlockTallGrass.EnumType.FERN) : new WorldGenTallGrass(BlockTallGrass.EnumType.GRASS);
    }
 
-   public void decorate(World worldIn, Random rand, BlockPos pos) {
-      super.decorate(worldIn, rand, pos);
-      int i = rand.nextInt(16) + 8;
-      int j = rand.nextInt(16) + 8;
-      int height = worldIn.getHeight(pos.add(i, 0, j)).getY() * 2;
-      if (height < 1) {
-         height = 1;
-      }
+   public void decorate(World var1, Random var2, BlockPos var3) {
+      super.decorate(var1, var2, var3);
+      int var4 = var2.nextInt(16) + 8;
+      int var5 = var2.nextInt(16) + 8;
+      int var6 = var2.nextInt(var1.getHeight(var3.add(var4, 0, var5)).getY() * 2);
+      (new WorldGenMelon()).generate(var1, var2, var3.add(var4, var6, var5));
+      WorldGenVines var9 = new WorldGenVines();
 
-      int k = rand.nextInt(height);
-      if (TerrainGen.decorate(worldIn, rand, pos, EventType.PUMPKIN)) {
-         (new WorldGenMelon()).generate(worldIn, rand, pos.add(i, k, j));
-      }
-
-      WorldGenVines worldgenvines = new WorldGenVines();
-      if (TerrainGen.decorate(worldIn, rand, pos, EventType.GRASS)) {
-         for(int var11 = 0; var11 < 50; ++var11) {
-            k = rand.nextInt(16) + 8;
-            int l = 128;
-            int i1 = rand.nextInt(16) + 8;
-            worldgenvines.generate(worldIn, rand, pos.add(k, 128, i1));
-         }
+      for(int var10 = 0; var10 < 50; ++var10) {
+         var6 = var2.nextInt(16) + 8;
+         boolean var7 = true;
+         int var8 = var2.nextInt(16) + 8;
+         var9.generate(var1, var2, var3.add(var6, 128, var8));
       }
 
    }

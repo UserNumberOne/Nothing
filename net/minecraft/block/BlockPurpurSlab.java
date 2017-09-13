@@ -20,47 +20,47 @@ public abstract class BlockPurpurSlab extends BlockSlab {
 
    public BlockPurpurSlab() {
       super(Material.ROCK);
-      IBlockState iblockstate = this.blockState.getBaseState();
+      IBlockState var1 = this.blockState.getBaseState();
       if (!this.isDouble()) {
-         iblockstate = iblockstate.withProperty(HALF, BlockSlab.EnumBlockHalf.BOTTOM);
+         var1 = var1.withProperty(HALF, BlockSlab.EnumBlockHalf.BOTTOM);
       }
 
-      this.setDefaultState(iblockstate.withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT));
+      this.setDefaultState(var1.withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT));
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Item.getItemFromBlock(Blocks.PURPUR_SLAB);
    }
 
-   public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
+   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
       return new ItemStack(Blocks.PURPUR_SLAB);
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      IBlockState iblockstate = this.getDefaultState().withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT);
+   public IBlockState getStateFromMeta(int var1) {
+      IBlockState var2 = this.getDefaultState().withProperty(VARIANT, BlockPurpurSlab.Variant.DEFAULT);
       if (!this.isDouble()) {
-         iblockstate = iblockstate.withProperty(HALF, (meta & 8) == 0 ? BlockSlab.EnumBlockHalf.BOTTOM : BlockSlab.EnumBlockHalf.TOP);
+         var2 = var2.withProperty(HALF, (var1 & 8) == 0 ? BlockSlab.EnumBlockHalf.BOTTOM : BlockSlab.EnumBlockHalf.TOP);
       }
 
-      return iblockstate;
+      return var2;
    }
 
-   public int getMetaFromState(IBlockState state) {
-      int i = 0;
-      if (!this.isDouble() && state.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP) {
-         i |= 8;
+   public int getMetaFromState(IBlockState var1) {
+      int var2 = 0;
+      if (!this.isDouble() && var1.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP) {
+         var2 |= 8;
       }
 
-      return i;
+      return var2;
    }
 
    protected BlockStateContainer createBlockState() {
       return this.isDouble() ? new BlockStateContainer(this, new IProperty[]{VARIANT}) : new BlockStateContainer(this, new IProperty[]{HALF, VARIANT});
    }
 
-   public String getUnlocalizedName(int meta) {
+   public String getUnlocalizedName(int var1) {
       return super.getUnlocalizedName();
    }
 
@@ -68,7 +68,7 @@ public abstract class BlockPurpurSlab extends BlockSlab {
       return VARIANT;
    }
 
-   public Comparable getTypeForItem(ItemStack stack) {
+   public Comparable getTypeForItem(ItemStack var1) {
       return BlockPurpurSlab.Variant.DEFAULT;
    }
 

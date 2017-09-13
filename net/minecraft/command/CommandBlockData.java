@@ -7,7 +7,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -21,54 +21,54 @@ public class CommandBlockData extends CommandBase {
       return 2;
    }
 
-   public String getUsage(ICommandSender sender) {
+   public String getUsage(ICommandSender var1) {
       return "commands.blockdata.usage";
    }
 
-   public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-      if (args.length < 4) {
+   public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
+      if (var3.length < 4) {
          throw new WrongUsageException("commands.blockdata.usage", new Object[0]);
       } else {
-         sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 0);
-         BlockPos blockpos = parseBlockPos(sender, args, 0, false);
-         World world = sender.getEntityWorld();
-         if (!world.isBlockLoaded(blockpos)) {
+         var2.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 0);
+         BlockPos var4 = parseBlockPos(var2, var3, 0, false);
+         World var5 = var2.getEntityWorld();
+         if (!var5.isBlockLoaded(var4)) {
             throw new CommandException("commands.blockdata.outOfWorld", new Object[0]);
          } else {
-            IBlockState iblockstate = world.getBlockState(blockpos);
-            TileEntity tileentity = world.getTileEntity(blockpos);
-            if (tileentity == null) {
+            IBlockState var6 = var5.getBlockState(var4);
+            TileEntity var7 = var5.getTileEntity(var4);
+            if (var7 == null) {
                throw new CommandException("commands.blockdata.notValid", new Object[0]);
             } else {
-               NBTTagCompound nbttagcompound = tileentity.writeToNBT(new NBTTagCompound());
-               NBTTagCompound nbttagcompound1 = nbttagcompound.copy();
+               NBTTagCompound var8 = var7.writeToNBT(new NBTTagCompound());
+               NBTTagCompound var9 = var8.copy();
 
-               NBTTagCompound nbttagcompound2;
+               NBTTagCompound var10;
                try {
-                  nbttagcompound2 = JsonToNBT.getTagFromJson(getChatComponentFromNthArg(sender, args, 3).getUnformattedText());
+                  var10 = JsonToNBT.getTagFromJson(getChatComponentFromNthArg(var2, var3, 3).getUnformattedText());
                } catch (NBTException var12) {
                   throw new CommandException("commands.blockdata.tagError", new Object[]{var12.getMessage()});
                }
 
-               nbttagcompound.merge(nbttagcompound2);
-               nbttagcompound.setInteger("x", blockpos.getX());
-               nbttagcompound.setInteger("y", blockpos.getY());
-               nbttagcompound.setInteger("z", blockpos.getZ());
-               if (nbttagcompound.equals(nbttagcompound1)) {
-                  throw new CommandException("commands.blockdata.failed", new Object[]{nbttagcompound.toString()});
+               var8.merge(var10);
+               var8.setInteger("x", var4.getX());
+               var8.setInteger("y", var4.getY());
+               var8.setInteger("z", var4.getZ());
+               if (var8.equals(var9)) {
+                  throw new CommandException("commands.blockdata.failed", new Object[]{var8.toString()});
                } else {
-                  tileentity.readFromNBT(nbttagcompound);
-                  tileentity.markDirty();
-                  world.notifyBlockUpdate(blockpos, iblockstate, iblockstate, 3);
-                  sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 1);
-                  notifyCommandListener(sender, this, "commands.blockdata.success", new Object[]{nbttagcompound.toString()});
+                  var7.readFromNBT(var8);
+                  var7.markDirty();
+                  var5.notifyBlockUpdate(var4, var6, var6, 3);
+                  var2.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 1);
+                  notifyCommandListener(var2, this, "commands.blockdata.success", new Object[]{var8.toString()});
                }
             }
          }
       }
    }
 
-   public List getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
-      return args.length > 0 && args.length <= 3 ? getTabCompletionCoordinate(args, 0, pos) : Collections.emptyList();
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return var3.length > 0 && var3.length <= 3 ? getTabCompletionCoordinate(var3, 0, var4) : Collections.emptyList();
    }
 }

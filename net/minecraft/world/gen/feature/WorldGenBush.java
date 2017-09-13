@@ -8,15 +8,15 @@ import net.minecraft.world.World;
 public class WorldGenBush extends WorldGenerator {
    private final BlockBush block;
 
-   public WorldGenBush(BlockBush blockIn) {
-      this.block = blockIn;
+   public WorldGenBush(BlockBush var1) {
+      this.block = var1;
    }
 
-   public boolean generate(World worldIn, Random rand, BlockPos position) {
-      for(int i = 0; i < 64; ++i) {
-         BlockPos blockpos = position.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
-         if (worldIn.isAirBlock(blockpos) && (!worldIn.provider.hasNoSky() || blockpos.getY() < worldIn.getHeight() - 1) && this.block.canBlockStay(worldIn, blockpos, this.block.getDefaultState())) {
-            worldIn.setBlockState(blockpos, this.block.getDefaultState(), 2);
+   public boolean generate(World var1, Random var2, BlockPos var3) {
+      for(int var4 = 0; var4 < 64; ++var4) {
+         BlockPos var5 = var3.add(var2.nextInt(8) - var2.nextInt(8), var2.nextInt(4) - var2.nextInt(4), var2.nextInt(8) - var2.nextInt(8));
+         if (var1.isAirBlock(var5) && (!var1.provider.hasNoSky() || var5.getY() < 255) && this.block.canBlockStay(var1, var5, this.block.getDefaultState())) {
+            var1.setBlockState(var5, this.block.getDefaultState(), 2);
          }
       }
 

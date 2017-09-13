@@ -4,9 +4,9 @@ public class ActionResult {
    private final EnumActionResult type;
    private final Object result;
 
-   public ActionResult(EnumActionResult typeIn, Object resultIn) {
-      this.type = typeIn;
-      this.result = resultIn;
+   public ActionResult(EnumActionResult var1, Object var2) {
+      this.type = var1;
+      this.result = var2;
    }
 
    public EnumActionResult getType() {
@@ -15,9 +15,5 @@ public class ActionResult {
 
    public Object getResult() {
       return this.result;
-   }
-
-   public static ActionResult newResult(EnumActionResult result, Object value) {
-      return new ActionResult(result, value);
    }
 }

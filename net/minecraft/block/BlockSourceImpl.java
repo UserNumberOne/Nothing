@@ -10,9 +10,9 @@ public class BlockSourceImpl implements IBlockSource {
    private final World world;
    private final BlockPos pos;
 
-   public BlockSourceImpl(World worldIn, BlockPos posIn) {
-      this.world = worldIn;
-      this.pos = posIn;
+   public BlockSourceImpl(World var1, BlockPos var2) {
+      this.world = var1;
+      this.pos = var2;
    }
 
    public World getWorld() {

@@ -14,54 +14,54 @@ public class WorldGenSpikes extends WorldGenerator {
    private WorldGenSpikes.EndSpike spike;
    private BlockPos beamTarget;
 
-   public void setSpike(WorldGenSpikes.EndSpike p_186143_1_) {
-      this.spike = p_186143_1_;
+   public void setSpike(WorldGenSpikes.EndSpike var1) {
+      this.spike = var1;
    }
 
-   public void setCrystalInvulnerable(boolean p_186144_1_) {
-      this.crystalInvulnerable = p_186144_1_;
+   public void setCrystalInvulnerable(boolean var1) {
+      this.crystalInvulnerable = var1;
    }
 
-   public boolean generate(World worldIn, Random rand, BlockPos position) {
+   public boolean generate(World var1, Random var2, BlockPos var3) {
       if (this.spike == null) {
          throw new IllegalStateException("Decoration requires priming with a spike");
       } else {
-         int i = this.spike.getRadius();
+         int var4 = this.spike.getRadius();
 
-         for(BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(new BlockPos(position.getX() - i, 0, position.getZ() - i), new BlockPos(position.getX() + i, this.spike.getHeight() + 10, position.getZ() + i))) {
-            if (blockpos$mutableblockpos.distanceSq((double)position.getX(), (double)blockpos$mutableblockpos.getY(), (double)position.getZ()) <= (double)(i * i + 1) && blockpos$mutableblockpos.getY() < this.spike.getHeight()) {
-               this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.OBSIDIAN.getDefaultState());
-            } else if (blockpos$mutableblockpos.getY() > 65) {
-               this.setBlockAndNotifyAdequately(worldIn, blockpos$mutableblockpos, Blocks.AIR.getDefaultState());
+         for(BlockPos.MutableBlockPos var6 : BlockPos.getAllInBoxMutable(new BlockPos(var3.getX() - var4, 0, var3.getZ() - var4), new BlockPos(var3.getX() + var4, this.spike.getHeight() + 10, var3.getZ() + var4))) {
+            if (var6.distanceSq((double)var3.getX(), (double)var6.getY(), (double)var3.getZ()) <= (double)(var4 * var4 + 1) && var6.getY() < this.spike.getHeight()) {
+               this.setBlockAndNotifyAdequately(var1, var6, Blocks.OBSIDIAN.getDefaultState());
+            } else if (var6.getY() > 65) {
+               this.setBlockAndNotifyAdequately(var1, var6, Blocks.AIR.getDefaultState());
             }
          }
 
          if (this.spike.isGuarded()) {
-            for(int j = -2; j <= 2; ++j) {
-               for(int k = -2; k <= 2; ++k) {
-                  if (MathHelper.abs(j) == 2 || MathHelper.abs(k) == 2) {
-                     this.setBlockAndNotifyAdequately(worldIn, new BlockPos(position.getX() + j, this.spike.getHeight(), position.getZ() + k), Blocks.IRON_BARS.getDefaultState());
-                     this.setBlockAndNotifyAdequately(worldIn, new BlockPos(position.getX() + j, this.spike.getHeight() + 1, position.getZ() + k), Blocks.IRON_BARS.getDefaultState());
-                     this.setBlockAndNotifyAdequately(worldIn, new BlockPos(position.getX() + j, this.spike.getHeight() + 2, position.getZ() + k), Blocks.IRON_BARS.getDefaultState());
+            for(int var7 = -2; var7 <= 2; ++var7) {
+               for(int var9 = -2; var9 <= 2; ++var9) {
+                  if (MathHelper.abs(var7) == 2 || MathHelper.abs(var9) == 2) {
+                     this.setBlockAndNotifyAdequately(var1, new BlockPos(var3.getX() + var7, this.spike.getHeight(), var3.getZ() + var9), Blocks.IRON_BARS.getDefaultState());
+                     this.setBlockAndNotifyAdequately(var1, new BlockPos(var3.getX() + var7, this.spike.getHeight() + 1, var3.getZ() + var9), Blocks.IRON_BARS.getDefaultState());
+                     this.setBlockAndNotifyAdequately(var1, new BlockPos(var3.getX() + var7, this.spike.getHeight() + 2, var3.getZ() + var9), Blocks.IRON_BARS.getDefaultState());
                   }
 
-                  this.setBlockAndNotifyAdequately(worldIn, new BlockPos(position.getX() + j, this.spike.getHeight() + 3, position.getZ() + k), Blocks.IRON_BARS.getDefaultState());
+                  this.setBlockAndNotifyAdequately(var1, new BlockPos(var3.getX() + var7, this.spike.getHeight() + 3, var3.getZ() + var9), Blocks.IRON_BARS.getDefaultState());
                }
             }
          }
 
-         EntityEnderCrystal entityendercrystal = new EntityEnderCrystal(worldIn);
-         entityendercrystal.setBeamTarget(this.beamTarget);
-         entityendercrystal.setEntityInvulnerable(this.crystalInvulnerable);
-         entityendercrystal.setLocationAndAngles((double)((float)position.getX() + 0.5F), (double)(this.spike.getHeight() + 1), (double)((float)position.getZ() + 0.5F), rand.nextFloat() * 360.0F, 0.0F);
-         worldIn.spawnEntity(entityendercrystal);
-         this.setBlockAndNotifyAdequately(worldIn, new BlockPos(position.getX(), this.spike.getHeight(), position.getZ()), Blocks.BEDROCK.getDefaultState());
+         EntityEnderCrystal var8 = new EntityEnderCrystal(var1);
+         var8.setBeamTarget(this.beamTarget);
+         var8.setEntityInvulnerable(this.crystalInvulnerable);
+         var8.setLocationAndAngles((double)((float)var3.getX() + 0.5F), (double)(this.spike.getHeight() + 1), (double)((float)var3.getZ() + 0.5F), var2.nextFloat() * 360.0F, 0.0F);
+         var1.spawnEntity(var8);
+         this.setBlockAndNotifyAdequately(var1, new BlockPos(var3.getX(), this.spike.getHeight(), var3.getZ()), Blocks.BEDROCK.getDefaultState());
          return true;
       }
    }
 
-   public void setBeamTarget(@Nullable BlockPos pos) {
-      this.beamTarget = pos;
+   public void setBeamTarget(@Nullable BlockPos var1) {
+      this.beamTarget = var1;
    }
 
    public static class EndSpike {
@@ -72,19 +72,19 @@ public class WorldGenSpikes extends WorldGenerator {
       private final boolean guarded;
       private final AxisAlignedBB topBoundingBox;
 
-      public EndSpike(int p_i47020_1_, int p_i47020_2_, int p_i47020_3_, int p_i47020_4_, boolean p_i47020_5_) {
-         this.centerX = p_i47020_1_;
-         this.centerZ = p_i47020_2_;
-         this.radius = p_i47020_3_;
-         this.height = p_i47020_4_;
-         this.guarded = p_i47020_5_;
-         this.topBoundingBox = new AxisAlignedBB((double)(p_i47020_1_ - p_i47020_3_), 0.0D, (double)(p_i47020_2_ - p_i47020_3_), (double)(p_i47020_1_ + p_i47020_3_), 256.0D, (double)(p_i47020_2_ + p_i47020_3_));
+      public EndSpike(int var1, int var2, int var3, int var4, boolean var5) {
+         this.centerX = var1;
+         this.centerZ = var2;
+         this.radius = var3;
+         this.height = var4;
+         this.guarded = var5;
+         this.topBoundingBox = new AxisAlignedBB((double)(var1 - var3), 0.0D, (double)(var2 - var3), (double)(var1 + var3), 256.0D, (double)(var2 + var3));
       }
 
-      public boolean doesStartInChunk(BlockPos p_186154_1_) {
-         int i = this.centerX - this.radius;
-         int j = this.centerZ - this.radius;
-         return p_186154_1_.getX() == (i & -16) && p_186154_1_.getZ() == (j & -16);
+      public boolean doesStartInChunk(BlockPos var1) {
+         int var2 = this.centerX - this.radius;
+         int var3 = this.centerZ - this.radius;
+         return var1.getX() == (var2 & -16) && var1.getZ() == (var3 & -16);
       }
 
       public int getCenterX() {

@@ -5,11 +5,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
 public abstract class EntityAmbientCreature extends EntityLiving implements IAnimals {
-   public EntityAmbientCreature(World worldIn) {
-      super(worldIn);
+   public EntityAmbientCreature(World var1) {
+      super(var1);
    }
 
-   public boolean canBeLeashedTo(EntityPlayer player) {
+   public boolean canBeLeashedTo(EntityPlayer var1) {
       return false;
    }
 }

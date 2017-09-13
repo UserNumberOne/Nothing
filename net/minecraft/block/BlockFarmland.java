@@ -14,13 +14,15 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityInteractEvent;
 
 public class BlockFarmland extends Block {
    public static final PropertyInteger MOISTURE = PropertyInteger.create("moisture", 0, 7);
@@ -33,48 +35,69 @@ public class BlockFarmland extends Block {
       this.setLightOpacity(255);
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
       return FARMLAND_AABB;
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-      int i = ((Integer)state.getValue(MOISTURE)).intValue();
-      if (!this.hasWater(worldIn, pos) && !worldIn.isRainingAt(pos.up())) {
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      int i = ((Integer)iblockdata.getValue(MOISTURE)).intValue();
+      if (!this.hasWater(world, blockposition) && !world.isRainingAt(blockposition.up())) {
          if (i > 0) {
-            worldIn.setBlockState(pos, state.withProperty(MOISTURE, Integer.valueOf(i - 1)), 2);
-         } else if (!this.hasCrops(worldIn, pos)) {
-            worldIn.setBlockState(pos, Blocks.DIRT.getDefaultState());
+            world.setBlockState(blockposition, iblockdata.withProperty(MOISTURE, Integer.valueOf(i - 1)), 2);
+         } else if (!this.hasCrops(world, blockposition)) {
+            org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+            if (CraftEventFactory.callBlockFadeEvent(block, Blocks.DIRT).isCancelled()) {
+               return;
+            }
+
+            world.setBlockState(blockposition, Blocks.DIRT.getDefaultState());
          }
       } else if (i < 7) {
-         worldIn.setBlockState(pos, state.withProperty(MOISTURE, Integer.valueOf(7)), 2);
+         world.setBlockState(blockposition, iblockdata.withProperty(MOISTURE, Integer.valueOf(7)), 2);
       }
 
    }
 
-   public void onFallenUpon(World worldIn, BlockPos pos, Entity entityIn, float fallDistance) {
-      if (!worldIn.isRemote && worldIn.rand.nextFloat() < fallDistance - 0.5F && entityIn instanceof EntityLivingBase && (entityIn instanceof EntityPlayer || worldIn.getGameRules().getBoolean("mobGriefing")) && entityIn.width * entityIn.width * entityIn.height > 0.512F) {
-         worldIn.setBlockState(pos, Blocks.DIRT.getDefaultState());
+   public void onFallenUpon(World world, BlockPos blockposition, Entity entity, float f) {
+      super.onFallenUpon(world, blockposition, entity, f);
+      if (!world.isRemote && world.rand.nextFloat() < f - 0.5F && entity instanceof EntityLivingBase && (entity instanceof EntityPlayer || world.getGameRules().getBoolean("mobGriefing")) && entity.width * entity.width * entity.height > 0.512F) {
+         Cancellable cancellable;
+         if (entity instanceof EntityPlayer) {
+            cancellable = CraftEventFactory.callPlayerInteractEvent((EntityPlayer)entity, Action.PHYSICAL, blockposition, (EnumFacing)null, (ItemStack)null, (EnumHand)null);
+         } else {
+            cancellable = new EntityInteractEvent(entity.getBukkitEntity(), world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()));
+            world.getServer().getPluginManager().callEvent((EntityInteractEvent)cancellable);
+         }
+
+         if (cancellable.isCancelled()) {
+            return;
+         }
+
+         if (CraftEventFactory.callEntityChangeBlockEvent(entity, blockposition, Blocks.DIRT, 0).isCancelled()) {
+            return;
+         }
+
+         world.setBlockState(blockposition, Blocks.DIRT.getDefaultState());
       }
 
-      super.onFallenUpon(worldIn, pos, entityIn, fallDistance);
    }
 
-   private boolean hasCrops(World worldIn, BlockPos pos) {
-      Block block = worldIn.getBlockState(pos.up()).getBlock();
-      return block instanceof IPlantable && this.canSustainPlant(worldIn.getBlockState(pos), worldIn, pos, EnumFacing.UP, (IPlantable)block);
+   private boolean hasCrops(World world, BlockPos blockposition) {
+      Block block = world.getBlockState(blockposition.up()).getBlock();
+      return block instanceof BlockCrops || block instanceof BlockStem;
    }
 
-   private boolean hasWater(World worldIn, BlockPos pos) {
-      for(BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(pos.add(-4, 0, -4), pos.add(4, 1, 4))) {
-         if (worldIn.getBlockState(blockpos$mutableblockpos).getMaterial() == Material.WATER) {
+   private boolean hasWater(World world, BlockPos blockposition) {
+      for(BlockPos.MutableBlockPos blockposition_mutableblockposition : BlockPos.getAllInBoxMutable(blockposition.add(-4, 0, -4), blockposition.add(4, 1, 4))) {
+         if (world.getBlockState(blockposition_mutableblockposition).getMaterial() == Material.WATER) {
             return true;
          }
       }
@@ -82,46 +105,29 @@ public class BlockFarmland extends Block {
       return false;
    }
 
-   public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn) {
-      super.neighborChanged(state, worldIn, pos, blockIn);
-      if (worldIn.getBlockState(pos.up()).getMaterial().isSolid()) {
-         worldIn.setBlockState(pos, Blocks.DIRT.getDefaultState());
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      super.neighborChanged(iblockdata, world, blockposition, block);
+      if (world.getBlockState(blockposition.up()).getMaterial().isSolid()) {
+         world.setBlockState(blockposition, Blocks.DIRT.getDefaultState());
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
-      switch(side) {
-      case UP:
-         return true;
-      case NORTH:
-      case SOUTH:
-      case WEST:
-      case EAST:
-         IBlockState iblockstate = blockAccess.getBlockState(pos.offset(side));
-         Block block = iblockstate.getBlock();
-         return !iblockstate.isOpaqueCube() && block != Blocks.FARMLAND && block != Blocks.GRASS_PATH;
-      default:
-         return super.shouldSideBeRendered(blockState, blockAccess, pos, side);
-      }
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-      return Blocks.DIRT.getItemDropped(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT), rand, fortune);
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
+      return Blocks.DIRT.getItemDropped(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT), random, i);
    }
 
-   public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return new ItemStack(Blocks.DIRT);
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      return this.getDefaultState().withProperty(MOISTURE, Integer.valueOf(meta & 7));
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(MOISTURE, Integer.valueOf(i & 7));
    }
 
-   public int getMetaFromState(IBlockState state) {
-      return ((Integer)state.getValue(MOISTURE)).intValue();
+   public int getMetaFromState(IBlockState iblockdata) {
+      return ((Integer)iblockdata.getValue(MOISTURE)).intValue();
    }
 
    protected BlockStateContainer createBlockState() {

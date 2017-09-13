@@ -6,8 +6,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityEffect implements Packet {
    private int entityId;
@@ -19,79 +17,44 @@ public class SPacketEntityEffect implements Packet {
    public SPacketEntityEffect() {
    }
 
-   public SPacketEntityEffect(int entityIdIn, PotionEffect effect) {
-      this.entityId = entityIdIn;
-      this.effectId = (byte)(Potion.getIdFromPotion(effect.getPotion()) & 255);
-      this.amplifier = (byte)(effect.getAmplifier() & 255);
-      if (effect.getDuration() > 32767) {
+   public SPacketEntityEffect(int var1, PotionEffect var2) {
+      this.entityId = var1;
+      this.effectId = (byte)(Potion.getIdFromPotion(var2.getPotion()) & 255);
+      this.amplifier = (byte)(var2.getAmplifier() & 255);
+      if (var2.getDuration() > 32767) {
          this.duration = 32767;
       } else {
-         this.duration = effect.getDuration();
+         this.duration = var2.getDuration();
       }
 
       this.flags = 0;
-      if (effect.getIsAmbient()) {
+      if (var2.getIsAmbient()) {
          this.flags = (byte)(this.flags | 1);
       }
 
-      if (effect.doesShowParticles()) {
+      if (var2.doesShowParticles()) {
          this.flags = (byte)(this.flags | 2);
       }
 
    }
 
-   public void readPacketData(PacketBuffer buf) throws IOException {
-      this.entityId = buf.readVarInt();
-      this.effectId = buf.readByte();
-      this.amplifier = buf.readByte();
-      this.duration = buf.readVarInt();
-      this.flags = buf.readByte();
+   public void readPacketData(PacketBuffer var1) throws IOException {
+      this.entityId = var1.readVarInt();
+      this.effectId = var1.readByte();
+      this.amplifier = var1.readByte();
+      this.duration = var1.readVarInt();
+      this.flags = var1.readByte();
    }
 
-   public void writePacketData(PacketBuffer buf) throws IOException {
-      buf.writeVarInt(this.entityId);
-      buf.writeByte(this.effectId);
-      buf.writeByte(this.amplifier);
-      buf.writeVarInt(this.duration);
-      buf.writeByte(this.flags);
+   public void writePacketData(PacketBuffer var1) throws IOException {
+      var1.writeVarInt(this.entityId);
+      var1.writeByte(this.effectId);
+      var1.writeByte(this.amplifier);
+      var1.writeVarInt(this.duration);
+      var1.writeByte(this.flags);
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isMaxDuration() {
-      return this.duration == 32767;
-   }
-
-   public void processPacket(INetHandlerPlayClient handler) {
-      handler.handleEntityEffect(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getEffectId() {
-      return this.effectId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getAmplifier() {
-      return this.amplifier;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getDuration() {
-      return this.duration;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean doesShowParticles() {
-      return (this.flags & 2) == 2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean getIsAmbient() {
-      return (this.flags & 1) == 1;
+   public void processPacket(INetHandlerPlayClient var1) {
+      var1.handleEntityEffect(this);
    }
 }

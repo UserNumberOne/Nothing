@@ -6,8 +6,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
 public abstract class EntityWaterMob extends EntityLiving implements IAnimals {
-   public EntityWaterMob(World worldIn) {
-      super(worldIn);
+   public EntityWaterMob(World var1) {
+      super(var1);
    }
 
    public boolean canBreatheUnderwater() {
@@ -30,16 +30,16 @@ public abstract class EntityWaterMob extends EntityLiving implements IAnimals {
       return true;
    }
 
-   protected int getExperiencePoints(EntityPlayer player) {
+   protected int getExperiencePoints(EntityPlayer var1) {
       return 1 + this.world.rand.nextInt(3);
    }
 
    public void onEntityUpdate() {
-      int i = this.getAir();
+      int var1 = this.getAir();
       super.onEntityUpdate();
       if (this.isEntityAlive() && !this.isInWater()) {
-         --i;
-         this.setAir(i);
+         --var1;
+         this.setAir(var1);
          if (this.getAir() == -20) {
             this.setAir(0);
             this.attackEntityFrom(DamageSource.drown, 2.0F);

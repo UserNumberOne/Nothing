@@ -39,66 +39,66 @@ public class BlockEndPortalFrame extends Block {
       this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(EYE, Boolean.valueOf(false)));
    }
 
-   public boolean isOpaqueCube(IBlockState state) {
+   public boolean isOpaqueCube(IBlockState var1) {
       return false;
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
       return AABB_BLOCK;
    }
 
-   public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List collidingBoxes, @Nullable Entity entityIn) {
-      addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_BLOCK);
-      if (((Boolean)worldIn.getBlockState(pos).getValue(EYE)).booleanValue()) {
-         addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_EYE);
+   public void addCollisionBoxToList(IBlockState var1, World var2, BlockPos var3, AxisAlignedBB var4, List var5, @Nullable Entity var6) {
+      addCollisionBoxToList(var3, var4, var5, AABB_BLOCK);
+      if (((Boolean)var2.getBlockState(var3).getValue(EYE)).booleanValue()) {
+         addCollisionBoxToList(var3, var4, var5, AABB_EYE);
       }
 
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return null;
    }
 
-   public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
-      return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite()).withProperty(EYE, Boolean.valueOf(false));
+   public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
+      return this.getDefaultState().withProperty(FACING, var8.getHorizontalFacing().getOpposite()).withProperty(EYE, Boolean.valueOf(false));
    }
 
-   public boolean hasComparatorInputOverride(IBlockState state) {
+   public boolean hasComparatorInputOverride(IBlockState var1) {
       return true;
    }
 
-   public int getComparatorInputOverride(IBlockState blockState, World worldIn, BlockPos pos) {
-      return ((Boolean)blockState.getValue(EYE)).booleanValue() ? 15 : 0;
+   public int getComparatorInputOverride(IBlockState var1, World var2, BlockPos var3) {
+      return ((Boolean)var1.getValue(EYE)).booleanValue() ? 15 : 0;
    }
 
-   public IBlockState getStateFromMeta(int meta) {
-      return this.getDefaultState().withProperty(EYE, Boolean.valueOf((meta & 4) != 0)).withProperty(FACING, EnumFacing.getHorizontal(meta & 3));
+   public IBlockState getStateFromMeta(int var1) {
+      return this.getDefaultState().withProperty(EYE, Boolean.valueOf((var1 & 4) != 0)).withProperty(FACING, EnumFacing.getHorizontal(var1 & 3));
    }
 
-   public int getMetaFromState(IBlockState state) {
-      int i = 0;
-      i = i | ((EnumFacing)state.getValue(FACING)).getHorizontalIndex();
-      if (((Boolean)state.getValue(EYE)).booleanValue()) {
-         i |= 4;
+   public int getMetaFromState(IBlockState var1) {
+      int var2 = 0;
+      var2 = var2 | ((EnumFacing)var1.getValue(FACING)).getHorizontalIndex();
+      if (((Boolean)var1.getValue(EYE)).booleanValue()) {
+         var2 |= 4;
       }
 
-      return i;
+      return var2;
    }
 
-   public IBlockState withRotation(IBlockState state, Rotation rot) {
-      return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+   public IBlockState withRotation(IBlockState var1, Rotation var2) {
+      return var1.withProperty(FACING, var2.rotate((EnumFacing)var1.getValue(FACING)));
    }
 
-   public IBlockState withMirror(IBlockState state, Mirror mirrorIn) {
-      return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+   public IBlockState withMirror(IBlockState var1, Mirror var2) {
+      return var1.withRotation(var2.toRotation((EnumFacing)var1.getValue(FACING)));
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, EYE});
    }
 
-   public boolean isFullCube(IBlockState state) {
+   public boolean isFullCube(IBlockState var1) {
       return false;
    }
 

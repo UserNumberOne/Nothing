@@ -1,6 +1,5 @@
 package net.minecraft.item;
 
-import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockFence;
@@ -15,7 +14,7 @@ import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntity;
@@ -29,17 +28,16 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class ItemMonsterPlacer extends Item {
    public ItemMonsterPlacer() {
       this.setCreativeTab(CreativeTabs.MISC);
    }
 
-   public String getItemStackDisplayName(ItemStack stack) {
-      String s = ("" + I18n.translateToLocal(this.getUnlocalizedName() + ".name")).trim();
-      String s1 = getEntityIdFromItem(stack);
+   public String getItemStackDisplayName(ItemStack itemstack) {
+      String s = I18n.translateToLocal(this.getUnlocalizedName() + ".name").trim();
+      String s1 = getEntityIdFromItem(itemstack);
       if (s1 != null) {
          s = s + " " + I18n.translateToLocal("entity." + s1 + ".name");
       }
@@ -47,43 +45,43 @@ public class ItemMonsterPlacer extends Item {
       return s;
    }
 
-   public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-      if (worldIn.isRemote) {
+   public EnumActionResult onItemUse(ItemStack itemstack, EntityPlayer entityhuman, World world, BlockPos blockposition, EnumHand enumhand, EnumFacing enumdirection, float f, float f1, float f2) {
+      if (world.isRemote) {
          return EnumActionResult.SUCCESS;
-      } else if (!playerIn.canPlayerEdit(pos.offset(facing), facing, stack)) {
+      } else if (!entityhuman.canPlayerEdit(blockposition.offset(enumdirection), enumdirection, itemstack)) {
          return EnumActionResult.FAIL;
       } else {
-         IBlockState iblockstate = worldIn.getBlockState(pos);
-         if (iblockstate.getBlock() == Blocks.MOB_SPAWNER) {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
+         IBlockState iblockdata = world.getBlockState(blockposition);
+         if (iblockdata.getBlock() == Blocks.MOB_SPAWNER) {
+            TileEntity tileentity = world.getTileEntity(blockposition);
             if (tileentity instanceof TileEntityMobSpawner) {
-               MobSpawnerBaseLogic mobspawnerbaselogic = ((TileEntityMobSpawner)tileentity).getSpawnerBaseLogic();
-               mobspawnerbaselogic.setEntityName(getEntityIdFromItem(stack));
+               MobSpawnerBaseLogic mobspawnerabstract = ((TileEntityMobSpawner)tileentity).getSpawnerBaseLogic();
+               mobspawnerabstract.setEntityName(getEntityIdFromItem(itemstack));
                tileentity.markDirty();
-               worldIn.notifyBlockUpdate(pos, iblockstate, iblockstate, 3);
-               if (!playerIn.capabilities.isCreativeMode) {
-                  --stack.stackSize;
+               world.notifyBlockUpdate(blockposition, iblockdata, iblockdata, 3);
+               if (!entityhuman.capabilities.isCreativeMode) {
+                  --itemstack.stackSize;
                }
 
                return EnumActionResult.SUCCESS;
             }
          }
 
-         pos = pos.offset(facing);
+         blockposition = blockposition.offset(enumdirection);
          double d0 = 0.0D;
-         if (facing == EnumFacing.UP && iblockstate.getBlock() instanceof BlockFence) {
+         if (enumdirection == EnumFacing.UP && iblockdata instanceof BlockFence) {
             d0 = 0.5D;
          }
 
-         Entity entity = spawnCreature(worldIn, getEntityIdFromItem(stack), (double)pos.getX() + 0.5D, (double)pos.getY() + d0, (double)pos.getZ() + 0.5D);
+         Entity entity = spawnCreature(world, getEntityIdFromItem(itemstack), (double)blockposition.getX() + 0.5D, (double)blockposition.getY() + d0, (double)blockposition.getZ() + 0.5D);
          if (entity != null) {
-            if (entity instanceof EntityLivingBase && stack.hasDisplayName()) {
-               entity.setCustomNameTag(stack.getDisplayName());
+            if (entity instanceof EntityLivingBase && itemstack.hasDisplayName()) {
+               entity.setCustomNameTag(itemstack.getDisplayName());
             }
 
-            applyItemEntityDataToEntity(worldIn, playerIn, stack, entity);
-            if (!playerIn.capabilities.isCreativeMode) {
-               --stack.stackSize;
+            applyItemEntityDataToEntity(world, entityhuman, itemstack, entity);
+            if (!entityhuman.capabilities.isCreativeMode) {
+               --itemstack.stackSize;
             }
          }
 
@@ -91,75 +89,82 @@ public class ItemMonsterPlacer extends Item {
       }
    }
 
-   public static void applyItemEntityDataToEntity(World entityWorld, @Nullable EntityPlayer player, ItemStack stack, @Nullable Entity targetEntity) {
-      MinecraftServer minecraftserver = entityWorld.getMinecraftServer();
-      if (minecraftserver != null && targetEntity != null) {
-         NBTTagCompound nbttagcompound = stack.getTagCompound();
+   public static void applyItemEntityDataToEntity(World world, @Nullable EntityPlayer entityhuman, ItemStack itemstack, @Nullable Entity entity) {
+      MinecraftServer minecraftserver = world.getMinecraftServer();
+      if (minecraftserver != null && entity != null) {
+         NBTTagCompound nbttagcompound = itemstack.getTagCompound();
          if (nbttagcompound != null && nbttagcompound.hasKey("EntityTag", 10)) {
-            if (!entityWorld.isRemote && targetEntity.ignoreItemEntityData() && (player == null || !minecraftserver.getPlayerList().canSendCommands(player.getGameProfile()))) {
+            if (!world.isRemote && entity.ignoreItemEntityData() && (entityhuman == null || !minecraftserver.getPlayerList().canSendCommands(entityhuman.getGameProfile()))) {
                return;
             }
 
-            NBTTagCompound nbttagcompound1 = targetEntity.writeToNBT(new NBTTagCompound());
-            UUID uuid = targetEntity.getUniqueID();
+            NBTTagCompound nbttagcompound1 = entity.writeToNBT(new NBTTagCompound());
+            UUID uuid = entity.getUniqueID();
             nbttagcompound1.merge(nbttagcompound.getCompoundTag("EntityTag"));
-            targetEntity.setUniqueId(uuid);
-            targetEntity.readFromNBT(nbttagcompound1);
+            entity.setUniqueId(uuid);
+            entity.readFromNBT(nbttagcompound1);
          }
       }
 
    }
 
-   public ActionResult onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
-      if (worldIn.isRemote) {
-         return new ActionResult(EnumActionResult.PASS, itemStackIn);
+   public ActionResult onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityhuman, EnumHand enumhand) {
+      if (world.isRemote) {
+         return new ActionResult(EnumActionResult.PASS, itemstack);
       } else {
-         RayTraceResult raytraceresult = this.rayTrace(worldIn, playerIn, true);
-         if (raytraceresult != null && raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK) {
-            BlockPos blockpos = raytraceresult.getBlockPos();
-            if (!(worldIn.getBlockState(blockpos).getBlock() instanceof BlockLiquid)) {
-               return new ActionResult(EnumActionResult.PASS, itemStackIn);
-            } else if (worldIn.isBlockModifiable(playerIn, blockpos) && playerIn.canPlayerEdit(blockpos, raytraceresult.sideHit, itemStackIn)) {
-               Entity entity = spawnCreature(worldIn, getEntityIdFromItem(itemStackIn), (double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.5D, (double)blockpos.getZ() + 0.5D);
+         RayTraceResult movingobjectposition = this.rayTrace(world, entityhuman, true);
+         if (movingobjectposition != null && movingobjectposition.typeOfHit == RayTraceResult.Type.BLOCK) {
+            BlockPos blockposition = movingobjectposition.getBlockPos();
+            if (!(world.getBlockState(blockposition).getBlock() instanceof BlockLiquid)) {
+               return new ActionResult(EnumActionResult.PASS, itemstack);
+            } else if (world.isBlockModifiable(entityhuman, blockposition) && entityhuman.canPlayerEdit(blockposition, movingobjectposition.sideHit, itemstack)) {
+               Entity entity = spawnCreature(world, getEntityIdFromItem(itemstack), (double)blockposition.getX() + 0.5D, (double)blockposition.getY() + 0.5D, (double)blockposition.getZ() + 0.5D);
                if (entity == null) {
-                  return new ActionResult(EnumActionResult.PASS, itemStackIn);
+                  return new ActionResult(EnumActionResult.PASS, itemstack);
                } else {
-                  if (entity instanceof EntityLivingBase && itemStackIn.hasDisplayName()) {
-                     entity.setCustomNameTag(itemStackIn.getDisplayName());
+                  if (entity instanceof EntityLivingBase && itemstack.hasDisplayName()) {
+                     entity.setCustomNameTag(itemstack.getDisplayName());
                   }
 
-                  applyItemEntityDataToEntity(worldIn, playerIn, itemStackIn, entity);
-                  if (!playerIn.capabilities.isCreativeMode) {
-                     --itemStackIn.stackSize;
+                  applyItemEntityDataToEntity(world, entityhuman, itemstack, entity);
+                  if (!entityhuman.capabilities.isCreativeMode) {
+                     --itemstack.stackSize;
                   }
 
-                  playerIn.addStat(StatList.getObjectUseStats(this));
-                  return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
+                  entityhuman.addStat(StatList.getObjectUseStats(this));
+                  return new ActionResult(EnumActionResult.SUCCESS, itemstack);
                }
             } else {
-               return new ActionResult(EnumActionResult.FAIL, itemStackIn);
+               return new ActionResult(EnumActionResult.FAIL, itemstack);
             }
          } else {
-            return new ActionResult(EnumActionResult.PASS, itemStackIn);
+            return new ActionResult(EnumActionResult.PASS, itemstack);
          }
       }
    }
 
    @Nullable
-   public static Entity spawnCreature(World worldIn, @Nullable String entityID, double x, double y, double z) {
-      if (entityID != null && EntityList.ENTITY_EGGS.containsKey(entityID)) {
+   public static Entity spawnCreature(World world, @Nullable String s, double d0, double d1, double d2) {
+      return spawnCreature(world, s, d0, d1, d2, SpawnReason.SPAWNER_EGG);
+   }
+
+   public static Entity spawnCreature(World world, String s, double d0, double d1, double d2, SpawnReason spawnReason) {
+      if (s != null && EntityList.ENTITY_EGGS.containsKey(s)) {
          Entity entity = null;
 
          for(int i = 0; i < 1; ++i) {
-            entity = EntityList.createEntityByIDFromName(entityID, worldIn);
+            entity = EntityList.createEntityByIDFromName(s, world);
             if (entity instanceof EntityLivingBase) {
-               EntityLiving entityliving = (EntityLiving)entity;
-               entity.setLocationAndAngles(x, y, z, MathHelper.wrapDegrees(worldIn.rand.nextFloat() * 360.0F), 0.0F);
-               entityliving.rotationYawHead = entityliving.rotationYaw;
-               entityliving.renderYawOffset = entityliving.rotationYaw;
-               entityliving.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(entityliving)), (IEntityLivingData)null);
-               worldIn.spawnEntity(entity);
-               entityliving.playLivingSound();
+               EntityLiving entityinsentient = (EntityLiving)entity;
+               entity.setLocationAndAngles(d0, d1, d2, MathHelper.wrapDegrees(world.rand.nextFloat() * 360.0F), 0.0F);
+               entityinsentient.rotationYawHead = entityinsentient.rotationYaw;
+               entityinsentient.renderYawOffset = entityinsentient.rotationYaw;
+               entityinsentient.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(entityinsentient)), (IEntityLivingData)null);
+               if (!world.addEntity(entity, spawnReason)) {
+                  entity = null;
+               } else {
+                  entityinsentient.playLivingSound();
+               }
             }
          }
 
@@ -169,28 +174,9 @@ public class ItemMonsterPlacer extends Item {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public void getSubItems(Item itemIn, CreativeTabs tab, List subItems) {
-      for(EntityList.EntityEggInfo entitylist$entityegginfo : EntityList.ENTITY_EGGS.values()) {
-         ItemStack itemstack = new ItemStack(itemIn, 1);
-         applyEntityIdToItemStack(itemstack, entitylist$entityegginfo.spawnedID);
-         subItems.add(itemstack);
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static void applyEntityIdToItemStack(ItemStack stack, String entityId) {
-      NBTTagCompound nbttagcompound = stack.hasTagCompound() ? stack.getTagCompound() : new NBTTagCompound();
-      NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-      nbttagcompound1.setString("id", entityId);
-      nbttagcompound.setTag("EntityTag", nbttagcompound1);
-      stack.setTagCompound(nbttagcompound);
-   }
-
    @Nullable
-   public static String getEntityIdFromItem(ItemStack stack) {
-      NBTTagCompound nbttagcompound = stack.getTagCompound();
+   public static String getEntityIdFromItem(ItemStack itemstack) {
+      NBTTagCompound nbttagcompound = itemstack.getTagCompound();
       if (nbttagcompound == null) {
          return null;
       } else if (!nbttagcompound.hasKey("EntityTag", 10)) {

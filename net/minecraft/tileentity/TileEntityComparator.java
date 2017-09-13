@@ -5,22 +5,22 @@ import net.minecraft.nbt.NBTTagCompound;
 public class TileEntityComparator extends TileEntity {
    private int outputSignal;
 
-   public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-      super.writeToNBT(compound);
-      compound.setInteger("OutputSignal", this.outputSignal);
-      return compound;
+   public NBTTagCompound writeToNBT(NBTTagCompound var1) {
+      super.writeToNBT(var1);
+      var1.setInteger("OutputSignal", this.outputSignal);
+      return var1;
    }
 
-   public void readFromNBT(NBTTagCompound compound) {
-      super.readFromNBT(compound);
-      this.outputSignal = compound.getInteger("OutputSignal");
+   public void readFromNBT(NBTTagCompound var1) {
+      super.readFromNBT(var1);
+      this.outputSignal = var1.getInteger("OutputSignal");
    }
 
    public int getOutputSignal() {
       return this.outputSignal;
    }
 
-   public void setOutputSignal(int outputSignalIn) {
-      this.outputSignal = outputSignalIn;
+   public void setOutputSignal(int var1) {
+      this.outputSignal = var1;
    }
 }
