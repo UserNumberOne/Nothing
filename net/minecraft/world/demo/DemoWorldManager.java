@@ -9,6 +9,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
@@ -39,7 +40,7 @@ public class DemoWorldManager extends PlayerInteractionManager {
 
       if (var1 % 24000L == 500L) {
          if (var3 <= 6L) {
-            this.player.sendMessage(new TextComponentTranslation("demo.day." + var3, new Object[0]));
+            this.player.sendMessage((ITextComponent)(new TextComponentTranslation("demo.day." + var3, new Object[0])));
          }
       } else if (var3 == 1L) {
          if (var1 == 100L) {
@@ -50,14 +51,14 @@ public class DemoWorldManager extends PlayerInteractionManager {
             this.player.connection.sendPacket(new SPacketChangeGameState(5, 103.0F));
          }
       } else if (var3 == 5L && var1 % 24000L == 22000L) {
-         this.player.sendMessage(new TextComponentTranslation("demo.day.warning", new Object[0]));
+         this.player.sendMessage((ITextComponent)(new TextComponentTranslation("demo.day.warning", new Object[0])));
       }
 
    }
 
    private void sendDemoReminder() {
       if (this.demoEndedReminder > 100) {
-         this.player.sendMessage(new TextComponentTranslation("demo.reminder", new Object[0]));
+         this.player.sendMessage((ITextComponent)(new TextComponentTranslation("demo.reminder", new Object[0])));
          this.demoEndedReminder = 0;
       }
 
@@ -69,14 +70,12 @@ public class DemoWorldManager extends PlayerInteractionManager {
       } else {
          super.onBlockClicked(var1, var2);
       }
-
    }
 
    public void blockRemoving(BlockPos var1) {
       if (!this.demoTimeExpired) {
          super.blockRemoving(var1);
       }
-
    }
 
    public boolean tryHarvestBlock(BlockPos var1) {

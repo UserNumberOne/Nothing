@@ -14,8 +14,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BiomeMesa extends Biome {
    protected static final IBlockState COARSE_DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
@@ -51,7 +49,7 @@ public class BiomeMesa extends Biome {
 
    }
 
-   public BiomeDecorator createBiomeDecorator() {
+   protected BiomeDecorator createBiomeDecorator() {
       return new BiomeMesa.Decorator();
    }
 
@@ -75,109 +73,109 @@ public class BiomeMesa extends Biome {
       }
 
       this.worldSeed = var1.getSeed();
-      double var23 = 0.0D;
+      double var9 = 0.0D;
       if (this.brycePillars) {
-         int var10 = (var4 & -16) + (var5 & 15);
-         int var11 = (var5 & -16) + (var4 & 15);
-         double var12 = Math.min(Math.abs(var6), this.pillarNoise.getValue((double)var10 * 0.25D, (double)var11 * 0.25D));
-         if (var12 > 0.0D) {
-            double var14 = 0.001953125D;
-            double var16 = Math.abs(this.pillarRoofNoise.getValue((double)var10 * 0.001953125D, (double)var11 * 0.001953125D));
-            var23 = var12 * var12 * 2.5D;
-            double var18 = Math.ceil(var16 * 50.0D) + 14.0D;
-            if (var23 > var18) {
-               var23 = var18;
+         int var11 = (var4 & -16) + (var5 & 15);
+         int var12 = (var5 & -16) + (var4 & 15);
+         double var13 = Math.min(Math.abs(var6), this.pillarNoise.getValue((double)var11 * 0.25D, (double)var12 * 0.25D));
+         if (var13 > 0.0D) {
+            double var15 = 0.001953125D;
+            double var17 = Math.abs(this.pillarRoofNoise.getValue((double)var11 * 0.001953125D, (double)var12 * 0.001953125D));
+            var9 = var13 * var13 * 2.5D;
+            double var19 = Math.ceil(var17 * 50.0D) + 14.0D;
+            if (var9 > var19) {
+               var9 = var19;
             }
 
-            var23 = var23 + 64.0D;
+            var9 = var9 + 64.0D;
          }
       }
 
-      int var25 = var4 & 15;
-      int var26 = var5 & 15;
-      int var27 = var1.getSeaLevel();
-      IBlockState var13 = STAINED_HARDENED_CLAY;
-      IBlockState var28 = this.fillerBlock;
-      int var15 = (int)(var6 / 3.0D + 3.0D + var2.nextDouble() * 0.25D);
-      boolean var29 = Math.cos(var6 / 3.0D * 3.141592653589793D) > 0.0D;
-      int var17 = -1;
-      boolean var30 = false;
-      int var19 = 0;
+      int var33 = var4 & 15;
+      int var34 = var5 & 15;
+      int var21 = var1.getSeaLevel();
+      IBlockState var22 = STAINED_HARDENED_CLAY;
+      IBlockState var23 = this.fillerBlock;
+      int var24 = (int)(var6 / 3.0D + 3.0D + var2.nextDouble() * 0.25D);
+      boolean var25 = Math.cos(var6 / 3.0D * 3.141592653589793D) > 0.0D;
+      int var26 = -1;
+      boolean var27 = false;
+      int var28 = 0;
 
-      for(int var20 = 255; var20 >= 0; --var20) {
-         if (var3.getBlockState(var26, var20, var25).getMaterial() == Material.AIR && var20 < (int)var23) {
-            var3.setBlockState(var26, var20, var25, STONE);
+      for(int var29 = 255; var29 >= 0; --var29) {
+         if (var3.getBlockState(var34, var29, var33).getMaterial() == Material.AIR && var29 < (int)var9) {
+            var3.setBlockState(var34, var29, var33, STONE);
          }
 
-         if (var20 <= var2.nextInt(5)) {
-            var3.setBlockState(var26, var20, var25, BEDROCK);
-         } else if (var19 < 15) {
-            IBlockState var21 = var3.getBlockState(var26, var20, var25);
-            if (var21.getMaterial() == Material.AIR) {
-               var17 = -1;
-            } else if (var21.getBlock() == Blocks.STONE) {
-               if (var17 == -1) {
-                  var30 = false;
-                  if (var15 <= 0) {
-                     var13 = AIR;
-                     var28 = STONE;
-                  } else if (var20 >= var27 - 4 && var20 <= var27 + 1) {
-                     var13 = STAINED_HARDENED_CLAY;
-                     var28 = this.fillerBlock;
+         if (var29 <= var2.nextInt(5)) {
+            var3.setBlockState(var34, var29, var33, BEDROCK);
+         } else if (var28 < 15) {
+            IBlockState var30 = var3.getBlockState(var34, var29, var33);
+            if (var30.getMaterial() == Material.AIR) {
+               var26 = -1;
+            } else if (var30.getBlock() == Blocks.STONE) {
+               if (var26 == -1) {
+                  var27 = false;
+                  if (var24 <= 0) {
+                     var22 = AIR;
+                     var23 = STONE;
+                  } else if (var29 >= var21 - 4 && var29 <= var21 + 1) {
+                     var22 = STAINED_HARDENED_CLAY;
+                     var23 = this.fillerBlock;
                   }
 
-                  if (var20 < var27 && (var13 == null || var13.getMaterial() == Material.AIR)) {
-                     var13 = WATER;
+                  if (var29 < var21 && (var22 == null || var22.getMaterial() == Material.AIR)) {
+                     var22 = WATER;
                   }
 
-                  var17 = var15 + Math.max(0, var20 - var27);
-                  if (var20 >= var27 - 1) {
-                     if (this.hasForest && var20 > 86 + var15 * 2) {
-                        if (var29) {
-                           var3.setBlockState(var26, var20, var25, COARSE_DIRT);
+                  var26 = var24 + Math.max(0, var29 - var21);
+                  if (var29 >= var21 - 1) {
+                     if (this.hasForest && var29 > 86 + var24 * 2) {
+                        if (var25) {
+                           var3.setBlockState(var34, var29, var33, COARSE_DIRT);
                         } else {
-                           var3.setBlockState(var26, var20, var25, GRASS);
+                           var3.setBlockState(var34, var29, var33, GRASS);
                         }
-                     } else if (var20 > var27 + 3 + var15) {
-                        IBlockState var22;
-                        if (var20 >= 64 && var20 <= 127) {
-                           if (var29) {
-                              var22 = HARDENED_CLAY;
+                     } else if (var29 > var21 + 3 + var24) {
+                        IBlockState var31;
+                        if (var29 >= 64 && var29 <= 127) {
+                           if (var25) {
+                              var31 = HARDENED_CLAY;
                            } else {
-                              var22 = this.getBand(var4, var20, var5);
+                              var31 = this.getBand(var4, var29, var5);
                            }
                         } else {
-                           var22 = ORANGE_STAINED_HARDENED_CLAY;
+                           var31 = ORANGE_STAINED_HARDENED_CLAY;
                         }
 
-                        var3.setBlockState(var26, var20, var25, var22);
+                        var3.setBlockState(var34, var29, var33, var31);
                      } else {
-                        var3.setBlockState(var26, var20, var25, this.topBlock);
-                        var30 = true;
+                        var3.setBlockState(var34, var29, var33, this.topBlock);
+                        var27 = true;
                      }
                   } else {
-                     var3.setBlockState(var26, var20, var25, var28);
-                     if (var28.getBlock() == Blocks.STAINED_HARDENED_CLAY) {
-                        var3.setBlockState(var26, var20, var25, ORANGE_STAINED_HARDENED_CLAY);
+                     var3.setBlockState(var34, var29, var33, var23);
+                     if (var23.getBlock() == Blocks.STAINED_HARDENED_CLAY) {
+                        var3.setBlockState(var34, var29, var33, ORANGE_STAINED_HARDENED_CLAY);
                      }
                   }
-               } else if (var17 > 0) {
-                  --var17;
-                  if (var30) {
-                     var3.setBlockState(var26, var20, var25, ORANGE_STAINED_HARDENED_CLAY);
+               } else if (var26 > 0) {
+                  --var26;
+                  if (var27) {
+                     var3.setBlockState(var34, var29, var33, ORANGE_STAINED_HARDENED_CLAY);
                   } else {
-                     var3.setBlockState(var26, var20, var25, this.getBand(var4, var20, var5));
+                     var3.setBlockState(var34, var29, var33, this.getBand(var4, var29, var5));
                   }
                }
 
-               ++var19;
+               ++var28;
             }
          }
       }
 
    }
 
-   public void generateBands(long var1) {
+   private void generateBands(long var1) {
       this.clayBands = new IBlockState[64];
       Arrays.fill(this.clayBands, HARDENED_CLAY);
       Random var3 = new Random(var1);
@@ -244,19 +242,9 @@ public class BiomeMesa extends Biome {
 
    }
 
-   public IBlockState getBand(int var1, int var2, int var3) {
+   private IBlockState getBand(int var1, int var2, int var3) {
       int var4 = (int)Math.round(this.clayBandsOffsetNoise.getValue((double)var1 / 512.0D, (double)var1 / 512.0D) * 2.0D);
       return this.clayBands[(var2 + var4 + 64) % 64];
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFoliageColorAtPos(BlockPos var1) {
-      return 10387789;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getGrassColorAtPos(BlockPos var1) {
-      return 9470285;
    }
 
    class Decorator extends BiomeDecorator {

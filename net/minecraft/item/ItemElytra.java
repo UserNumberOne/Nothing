@@ -1,10 +1,8 @@
 package net.minecraft.item;
 
-import javax.annotation.Nullable;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -13,8 +11,6 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemElytra extends Item {
    public ItemElytra() {
@@ -22,10 +18,6 @@ public class ItemElytra extends Item {
       this.setMaxDamage(432);
       this.setCreativeTab(CreativeTabs.TRANSPORTATION);
       this.addPropertyOverride(new ResourceLocation("broken"), new IItemPropertyGetter() {
-         @SideOnly(Side.CLIENT)
-         public float apply(ItemStack var1, @Nullable World var2, @Nullable EntityLivingBase var3) {
-            return ItemElytra.isBroken(var1) ? 0.0F : 1.0F;
-         }
       });
       BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, ItemArmor.DISPENSER_BEHAVIOR);
    }

@@ -46,13 +46,13 @@ public class TextComponentTranslation extends TextComponentBase {
 
       try {
          this.initializeFromFormat(I18n.translateToLocal(this.key));
-      } catch (TextComponentTranslationFormatException var6) {
+      } catch (TextComponentTranslationFormatException var7) {
          this.children.clear();
 
          try {
             this.initializeFromFormat(I18n.translateToFallback(this.key));
-         } catch (TextComponentTranslationFormatException var5) {
-            throw var6;
+         } catch (TextComponentTranslationFormatException var6) {
+            throw var7;
          }
       }
 
@@ -65,18 +65,18 @@ public class TextComponentTranslation extends TextComponentBase {
       int var5 = 0;
 
       try {
-         int var6;
-         for(; var3.find(var5); var5 = var6) {
-            int var7 = var3.start();
-            var6 = var3.end();
-            if (var7 > var5) {
-               TextComponentString var8 = new TextComponentString(String.format(var1.substring(var5, var7)));
+         int var7;
+         for(; var3.find(var5); var5 = var7) {
+            int var6 = var3.start();
+            var7 = var3.end();
+            if (var6 > var5) {
+               TextComponentString var8 = new TextComponentString(String.format(var1.substring(var5, var6)));
                var8.getStyle().setParentStyle(this.getStyle());
                this.children.add(var8);
             }
 
             String var14 = var3.group(2);
-            String var9 = var1.substring(var7, var6);
+            String var9 = var1.substring(var6, var7);
             if ("%".equals(var14) && "%%".equals(var9)) {
                TextComponentString var15 = new TextComponentString("%");
                var15.getStyle().setParentStyle(this.getStyle());
@@ -205,5 +205,10 @@ public class TextComponentTranslation extends TextComponentBase {
 
    public Object[] getFormatArgs() {
       return this.formatArgs;
+   }
+
+   // $FF: synthetic method
+   public ITextComponent createCopy() {
+      return this.createCopy();
    }
 }

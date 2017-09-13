@@ -6,36 +6,38 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class RegionFileCache {
    private static final Map REGIONS_BY_FILE = Maps.newHashMap();
 
-   public static synchronized RegionFile createOrLoadRegionFile(File var0, int var1, int var2) {
-      File var3 = new File(var0, "region");
-      File var4 = new File(var3, "r." + (var1 >> 5) + "." + (var2 >> 5) + ".mca");
-      RegionFile var5 = (RegionFile)REGIONS_BY_FILE.get(var4);
-      if (var5 != null) {
-         return var5;
+   public static synchronized RegionFile createOrLoadRegionFile(File file, int i, int j) {
+      File file1 = new File(file, "region");
+      File file2 = new File(file1, "r." + (i >> 5) + "." + (j >> 5) + ".mca");
+      RegionFile regionfile = (RegionFile)REGIONS_BY_FILE.get(file2);
+      if (regionfile != null) {
+         return regionfile;
       } else {
-         if (!var3.exists()) {
-            var3.mkdirs();
+         if (!file1.exists()) {
+            file1.mkdirs();
          }
 
          if (REGIONS_BY_FILE.size() >= 256) {
             clearRegionFileReferences();
          }
 
-         RegionFile var6 = new RegionFile(var4);
-         REGIONS_BY_FILE.put(var4, var6);
-         return var6;
+         RegionFile regionfile1 = new RegionFile(file2);
+         REGIONS_BY_FILE.put(file2, regionfile1);
+         return regionfile1;
       }
    }
 
    public static synchronized void clearRegionFileReferences() {
-      for(RegionFile var1 : REGIONS_BY_FILE.values()) {
+      for(RegionFile regionfile : REGIONS_BY_FILE.values()) {
          try {
-            if (var1 != null) {
-               var1.close();
+            if (regionfile != null) {
+               regionfile.close();
             }
          } catch (IOException var3) {
             var3.printStackTrace();
@@ -45,13 +47,16 @@ public class RegionFileCache {
       REGIONS_BY_FILE.clear();
    }
 
-   public static DataInputStream getChunkInputStream(File var0, int var1, int var2) {
-      RegionFile var3 = createOrLoadRegionFile(var0, var1, var2);
-      return var3.getChunkDataInputStream(var1 & 31, var2 & 31);
+   public static synchronized NBTTagCompound c(File file, int i, int j) throws IOException {
+      RegionFile regionfile = createOrLoadRegionFile(file, i, j);
+      DataInputStream datainputstream = regionfile.getChunkDataInputStream(i & 31, j & 31);
+      return datainputstream == null ? null : CompressedStreamTools.read(datainputstream);
    }
 
-   public static DataOutputStream getChunkOutputStream(File var0, int var1, int var2) {
-      RegionFile var3 = createOrLoadRegionFile(var0, var1, var2);
-      return var3.getChunkDataOutputStream(var1 & 31, var2 & 31);
+   public static synchronized void d(File file, int i, int j, NBTTagCompound nbttagcompound) throws IOException {
+      RegionFile regionfile = createOrLoadRegionFile(file, i, j);
+      DataOutputStream dataoutputstream = regionfile.getChunkDataOutputStream(i & 31, j & 31);
+      CompressedStreamTools.write(nbttagcompound, dataoutputstream);
+      dataoutputstream.close();
    }
 }

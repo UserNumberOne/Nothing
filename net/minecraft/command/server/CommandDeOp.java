@@ -8,7 +8,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandDeOp extends CommandBase {
@@ -38,7 +38,7 @@ public class CommandDeOp extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getPlayerList().getOppedPlayerNames()) : Collections.emptyList();
    }
 }

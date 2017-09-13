@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketTimeUpdate implements Packet {
    private long totalWorldTime;
@@ -38,15 +36,5 @@ public class SPacketTimeUpdate implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleTimeUpdate(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public long getTotalWorldTime() {
-      return this.totalWorldTime;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public long getWorldTime() {
-      return this.worldTime;
    }
 }

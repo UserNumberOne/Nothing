@@ -3,7 +3,7 @@ package net.minecraft.command;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 
@@ -32,14 +32,14 @@ public class CommandTime extends CommandBase {
                var8 = parseInt(var3[1], 0);
             }
 
-            this.setAllWorldTimes(var1, var8);
+            this.a(var1, var8);
             notifyCommandListener(var2, this, "commands.time.set", new Object[]{var8});
             return;
          }
 
          if ("add".equals(var3[0])) {
             int var7 = parseInt(var3[1], 0);
-            this.incrementAllWorldTimes(var1, var7);
+            this.b(var1, var7);
             notifyCommandListener(var2, this, "commands.time.added", new Object[]{var7});
             return;
          }
@@ -71,20 +71,26 @@ public class CommandTime extends CommandBase {
       throw new WrongUsageException("commands.time.usage", new Object[0]);
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, new String[]{"set", "add", "query"}) : (var3.length == 2 && "set".equals(var3[0]) ? getListOfStringsMatchingLastWord(var3, new String[]{"day", "night"}) : (var3.length == 2 && "query".equals(var3[0]) ? getListOfStringsMatchingLastWord(var3, new String[]{"daytime", "gametime", "day"}) : Collections.emptyList()));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"set", "add", "query"});
+      } else if (var3.length == 2 && "set".equals(var3[0])) {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"day", "night"});
+      } else {
+         return var3.length == 2 && "query".equals(var3[0]) ? getListOfStringsMatchingLastWord(var3, new String[]{"daytime", "gametime", "day"}) : Collections.emptyList();
+      }
    }
 
-   protected void setAllWorldTimes(MinecraftServer var1, int var2) {
-      for(int var3 = 0; var3 < var1.worlds.length; ++var3) {
-         var1.worlds[var3].setWorldTime((long)var2);
+   protected void a(MinecraftServer var1, int var2) {
+      for(int var3 = 0; var3 < var1.worldServer.length; ++var3) {
+         var1.worldServer[var3].setWorldTime((long)var2);
       }
 
    }
 
-   protected void incrementAllWorldTimes(MinecraftServer var1, int var2) {
-      for(int var3 = 0; var3 < var1.worlds.length; ++var3) {
-         WorldServer var4 = var1.worlds[var3];
+   protected void b(MinecraftServer var1, int var2) {
+      for(int var3 = 0; var3 < var1.worldServer.length; ++var3) {
+         WorldServer var4 = var1.worldServer[var3];
          var4.setWorldTime(var4.getWorldTime() + (long)var2);
       }
 

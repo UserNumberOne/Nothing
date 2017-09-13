@@ -12,7 +12,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -20,8 +19,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockPane extends Block {
    public static final PropertyBool NORTH = PropertyBool.create("north");
@@ -90,7 +87,7 @@ public class BlockPane extends Block {
    }
 
    public IBlockState getActualState(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return var1.withProperty(NORTH, Boolean.valueOf(this.canPaneConnectTo(var2, var3, EnumFacing.NORTH))).withProperty(SOUTH, Boolean.valueOf(this.canPaneConnectTo(var2, var3, EnumFacing.SOUTH))).withProperty(WEST, Boolean.valueOf(this.canPaneConnectTo(var2, var3, EnumFacing.WEST))).withProperty(EAST, Boolean.valueOf(this.canPaneConnectTo(var2, var3, EnumFacing.EAST)));
+      return var1.withProperty(NORTH, Boolean.valueOf(this.canPaneConnectToBlock(var2.getBlockState(var3.north()).getBlock()))).withProperty(SOUTH, Boolean.valueOf(this.canPaneConnectToBlock(var2.getBlockState(var3.south()).getBlock()))).withProperty(WEST, Boolean.valueOf(this.canPaneConnectToBlock(var2.getBlockState(var3.west()).getBlock()))).withProperty(EAST, Boolean.valueOf(this.canPaneConnectToBlock(var2.getBlockState(var3.east()).getBlock())));
    }
 
    @Nullable
@@ -110,18 +107,8 @@ public class BlockPane extends Block {
       return var1.getDefaultState().isFullCube() || var1 == this || var1 == Blocks.GLASS || var1 == Blocks.STAINED_GLASS || var1 == Blocks.STAINED_GLASS_PANE || var1 instanceof BlockPane;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return var2.getBlockState(var3.offset(var4)).getBlock() == this ? false : super.shouldSideBeRendered(var1, var2, var3, var4);
-   }
-
    protected boolean canSilkHarvest() {
       return true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT_MIPPED;
    }
 
    public int getMetaFromState(IBlockState var1) {
@@ -154,11 +141,5 @@ public class BlockPane extends Block {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{NORTH, EAST, WEST, SOUTH});
-   }
-
-   public boolean canPaneConnectTo(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
-      BlockPos var4 = var2.offset(var3);
-      IBlockState var5 = var1.getBlockState(var4);
-      return this.canPaneConnectToBlock(var5.getBlock()) || var5.isSideSolid(var1, var4, var3.getOpposite());
    }
 }

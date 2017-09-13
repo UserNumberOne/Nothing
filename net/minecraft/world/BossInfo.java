@@ -5,10 +5,10 @@ import net.minecraft.util.text.ITextComponent;
 
 public abstract class BossInfo {
    private final UUID uniqueId;
-   protected ITextComponent name;
+   public ITextComponent name;
    protected float percent;
-   protected BossInfo.Color color;
-   protected BossInfo.Overlay overlay;
+   public BossInfo.Color color;
+   public BossInfo.Overlay overlay;
    protected boolean darkenSky;
    protected boolean playEndBossMusic;
    protected boolean createFog;
@@ -29,10 +29,6 @@ public abstract class BossInfo {
       return this.name;
    }
 
-   public void setName(ITextComponent var1) {
-      this.name = var1;
-   }
-
    public float getPercent() {
       return this.percent;
    }
@@ -45,16 +41,8 @@ public abstract class BossInfo {
       return this.color;
    }
 
-   public void setColor(BossInfo.Color var1) {
-      this.color = var1;
-   }
-
    public BossInfo.Overlay getOverlay() {
       return this.overlay;
-   }
-
-   public void setOverlay(BossInfo.Overlay var1) {
-      this.overlay = var1;
    }
 
    public boolean shouldDarkenSky() {

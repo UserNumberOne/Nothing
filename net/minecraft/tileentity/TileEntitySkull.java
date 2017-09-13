@@ -16,12 +16,10 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.StringUtils;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntitySkull extends TileEntity implements ITickable {
    private int skullType;
-   private int skullRotation;
+   public int skullRotation;
    private GameProfile playerProfile;
    private int dragonAnimatedTicks;
    private boolean dragonAnimated;
@@ -77,11 +75,6 @@ public class TileEntitySkull extends TileEntity implements ITickable {
          }
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getAnimationProgress(float var1) {
-      return this.dragonAnimated ? (float)this.dragonAnimatedTicks + var1 : (float)this.dragonAnimatedTicks;
    }
 
    @Nullable
@@ -140,11 +133,6 @@ public class TileEntitySkull extends TileEntity implements ITickable {
 
    public int getSkullType() {
       return this.skullType;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSkullRotation() {
-      return this.skullRotation;
    }
 
    public void setSkullRotation(int var1) {

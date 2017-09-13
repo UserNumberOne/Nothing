@@ -12,7 +12,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -34,7 +34,7 @@ public class CommandTeleport extends CommandBase {
       if (var3.length < 4) {
          throw new WrongUsageException("commands.teleport.usage", new Object[0]);
       } else {
-         Entity var4 = getEntity(var1, var2, var3[0]);
+         Entity var4 = b(var1, var2, var3[0]);
          if (var4.world != null) {
             boolean var5 = true;
             Vec3d var6 = var2.getPositionVector();
@@ -49,7 +49,6 @@ public class CommandTeleport extends CommandBase {
             doTeleport(var4, var8, var9, var10, var12, var13);
             notifyCommandListener(var2, this, "commands.teleport.success.coordinates", new Object[]{var4.getName(), var8.getResult(), var9.getResult(), var10.getResult()});
          }
-
       }
    }
 
@@ -88,8 +87,12 @@ public class CommandTeleport extends CommandBase {
 
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : (var3.length > 1 && var3.length <= 4 ? getTabCompletionCoordinate(var3, 1, var4) : Collections.emptyList());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else {
+         return var3.length > 1 && var3.length <= 4 ? getTabCompletionCoordinate(var3, 1, var4) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

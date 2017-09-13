@@ -18,7 +18,7 @@ public class NettyPacketEncoder extends MessageToByteEncoder {
       this.direction = var1;
    }
 
-   protected void encode(ChannelHandlerContext var1, Packet var2, ByteBuf var3) throws IOException, Exception {
+   protected void encode(ChannelHandlerContext var1, Packet var2, ByteBuf var3) throws Exception {
       Integer var4 = ((EnumConnectionState)var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getPacketId(this.direction, var2);
       if (LOGGER.isDebugEnabled()) {
          LOGGER.debug(RECEIVED_PACKET_MARKER, "OUT: [{}:{}] {}", new Object[]{var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), var4, var2.getClass().getName()});
@@ -37,5 +37,10 @@ public class NettyPacketEncoder extends MessageToByteEncoder {
          }
 
       }
+   }
+
+   // $FF: synthetic method
+   protected void encode(ChannelHandlerContext var1, Object var2, ByteBuf var3) throws Exception {
+      this.encode(var1, (Packet)var2, var3);
    }
 }

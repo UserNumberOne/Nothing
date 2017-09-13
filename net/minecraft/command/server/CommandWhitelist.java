@@ -8,7 +8,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -45,7 +45,7 @@ public class CommandWhitelist extends CommandBase {
                throw new WrongUsageException("commands.whitelist.add.usage", new Object[0]);
             }
 
-            GameProfile var5 = var1.getPlayerProfileCache().getGameProfileForUsername(var3[1]);
+            GameProfile var5 = var1.getUserCache().getGameProfileForUsername(var3[1]);
             if (var5 == null) {
                throw new CommandException("commands.whitelist.add.failed", new Object[]{var3[1]});
             }
@@ -72,7 +72,7 @@ public class CommandWhitelist extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       if (var3.length == 1) {
          return getListOfStringsMatchingLastWord(var3, new String[]{"on", "off", "list", "add", "remove", "reload"});
       } else {
@@ -82,7 +82,7 @@ public class CommandWhitelist extends CommandBase {
             }
 
             if ("add".equals(var3[0])) {
-               return getListOfStringsMatchingLastWord(var3, var1.getPlayerProfileCache().getUsernames());
+               return getListOfStringsMatchingLastWord(var3, var1.getUserCache().getUsernames());
             }
          }
 

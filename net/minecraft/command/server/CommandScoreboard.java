@@ -29,7 +29,7 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -49,167 +49,167 @@ public class CommandScoreboard extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (!this.handleUserWildcards(var1, var2, var3)) {
+      if (!this.b(var1, var2, var3)) {
          if (var3.length < 1) {
             throw new WrongUsageException("commands.scoreboard.usage", new Object[0]);
-         }
-
-         if ("objectives".equalsIgnoreCase(var3[0])) {
-            if (var3.length == 1) {
-               throw new WrongUsageException("commands.scoreboard.objectives.usage", new Object[0]);
-            }
-
-            if ("list".equalsIgnoreCase(var3[1])) {
-               this.listObjectives(var2, var1);
-            } else if ("add".equalsIgnoreCase(var3[1])) {
-               if (var3.length < 4) {
-                  throw new WrongUsageException("commands.scoreboard.objectives.add.usage", new Object[0]);
-               }
-
-               this.addObjective(var2, var3, 2, var1);
-            } else if ("remove".equalsIgnoreCase(var3[1])) {
-               if (var3.length != 3) {
-                  throw new WrongUsageException("commands.scoreboard.objectives.remove.usage", new Object[0]);
-               }
-
-               this.removeObjective(var2, var3[2], var1);
-            } else {
-               if (!"setdisplay".equalsIgnoreCase(var3[1])) {
+         } else {
+            if ("objectives".equalsIgnoreCase(var3[0])) {
+               if (var3.length == 1) {
                   throw new WrongUsageException("commands.scoreboard.objectives.usage", new Object[0]);
                }
 
-               if (var3.length != 3 && var3.length != 4) {
-                  throw new WrongUsageException("commands.scoreboard.objectives.setdisplay.usage", new Object[0]);
+               if ("list".equalsIgnoreCase(var3[1])) {
+                  this.a(var2, var1);
+               } else if ("add".equalsIgnoreCase(var3[1])) {
+                  if (var3.length < 4) {
+                     throw new WrongUsageException("commands.scoreboard.objectives.add.usage", new Object[0]);
+                  }
+
+                  this.a(var2, var3, 2, var1);
+               } else if ("remove".equalsIgnoreCase(var3[1])) {
+                  if (var3.length != 3) {
+                     throw new WrongUsageException("commands.scoreboard.objectives.remove.usage", new Object[0]);
+                  }
+
+                  this.a(var2, var3[2], var1);
+               } else {
+                  if (!"setdisplay".equalsIgnoreCase(var3[1])) {
+                     throw new WrongUsageException("commands.scoreboard.objectives.usage", new Object[0]);
+                  }
+
+                  if (var3.length != 3 && var3.length != 4) {
+                     throw new WrongUsageException("commands.scoreboard.objectives.setdisplay.usage", new Object[0]);
+                  }
+
+                  this.i(var2, var3, 2, var1);
                }
-
-               this.setDisplayObjective(var2, var3, 2, var1);
-            }
-         } else if ("players".equalsIgnoreCase(var3[0])) {
-            if (var3.length == 1) {
-               throw new WrongUsageException("commands.scoreboard.players.usage", new Object[0]);
-            }
-
-            if ("list".equalsIgnoreCase(var3[1])) {
-               if (var3.length > 3) {
-                  throw new WrongUsageException("commands.scoreboard.players.list.usage", new Object[0]);
-               }
-
-               this.listPlayers(var2, var3, 2, var1);
-            } else if ("add".equalsIgnoreCase(var3[1])) {
-               if (var3.length < 5) {
-                  throw new WrongUsageException("commands.scoreboard.players.add.usage", new Object[0]);
-               }
-
-               this.addPlayerScore(var2, var3, 2, var1);
-            } else if ("remove".equalsIgnoreCase(var3[1])) {
-               if (var3.length < 5) {
-                  throw new WrongUsageException("commands.scoreboard.players.remove.usage", new Object[0]);
-               }
-
-               this.addPlayerScore(var2, var3, 2, var1);
-            } else if ("set".equalsIgnoreCase(var3[1])) {
-               if (var3.length < 5) {
-                  throw new WrongUsageException("commands.scoreboard.players.set.usage", new Object[0]);
-               }
-
-               this.addPlayerScore(var2, var3, 2, var1);
-            } else if ("reset".equalsIgnoreCase(var3[1])) {
-               if (var3.length != 3 && var3.length != 4) {
-                  throw new WrongUsageException("commands.scoreboard.players.reset.usage", new Object[0]);
-               }
-
-               this.resetPlayerScore(var2, var3, 2, var1);
-            } else if ("enable".equalsIgnoreCase(var3[1])) {
-               if (var3.length != 4) {
-                  throw new WrongUsageException("commands.scoreboard.players.enable.usage", new Object[0]);
-               }
-
-               this.enablePlayerTrigger(var2, var3, 2, var1);
-            } else if ("test".equalsIgnoreCase(var3[1])) {
-               if (var3.length != 5 && var3.length != 6) {
-                  throw new WrongUsageException("commands.scoreboard.players.test.usage", new Object[0]);
-               }
-
-               this.testPlayerScore(var2, var3, 2, var1);
-            } else if ("operation".equalsIgnoreCase(var3[1])) {
-               if (var3.length != 7) {
-                  throw new WrongUsageException("commands.scoreboard.players.operation.usage", new Object[0]);
-               }
-
-               this.applyPlayerOperation(var2, var3, 2, var1);
-            } else {
-               if (!"tag".equalsIgnoreCase(var3[1])) {
+            } else if ("players".equalsIgnoreCase(var3[0])) {
+               if (var3.length == 1) {
                   throw new WrongUsageException("commands.scoreboard.players.usage", new Object[0]);
                }
 
-               if (var3.length < 4) {
-                  throw new WrongUsageException("commands.scoreboard.players.tag.usage", new Object[0]);
+               if ("list".equalsIgnoreCase(var3[1])) {
+                  if (var3.length > 3) {
+                     throw new WrongUsageException("commands.scoreboard.players.list.usage", new Object[0]);
+                  }
+
+                  this.j(var2, var3, 2, var1);
+               } else if ("add".equalsIgnoreCase(var3[1])) {
+                  if (var3.length < 5) {
+                     throw new WrongUsageException("commands.scoreboard.players.add.usage", new Object[0]);
+                  }
+
+                  this.k(var2, var3, 2, var1);
+               } else if ("remove".equalsIgnoreCase(var3[1])) {
+                  if (var3.length < 5) {
+                     throw new WrongUsageException("commands.scoreboard.players.remove.usage", new Object[0]);
+                  }
+
+                  this.k(var2, var3, 2, var1);
+               } else if ("set".equalsIgnoreCase(var3[1])) {
+                  if (var3.length < 5) {
+                     throw new WrongUsageException("commands.scoreboard.players.set.usage", new Object[0]);
+                  }
+
+                  this.k(var2, var3, 2, var1);
+               } else if ("reset".equalsIgnoreCase(var3[1])) {
+                  if (var3.length != 3 && var3.length != 4) {
+                     throw new WrongUsageException("commands.scoreboard.players.reset.usage", new Object[0]);
+                  }
+
+                  this.l(var2, var3, 2, var1);
+               } else if ("enable".equalsIgnoreCase(var3[1])) {
+                  if (var3.length != 4) {
+                     throw new WrongUsageException("commands.scoreboard.players.enable.usage", new Object[0]);
+                  }
+
+                  this.m(var2, var3, 2, var1);
+               } else if ("test".equalsIgnoreCase(var3[1])) {
+                  if (var3.length != 5 && var3.length != 6) {
+                     throw new WrongUsageException("commands.scoreboard.players.test.usage", new Object[0]);
+                  }
+
+                  this.n(var2, var3, 2, var1);
+               } else if ("operation".equalsIgnoreCase(var3[1])) {
+                  if (var3.length != 7) {
+                     throw new WrongUsageException("commands.scoreboard.players.operation.usage", new Object[0]);
+                  }
+
+                  this.o(var2, var3, 2, var1);
+               } else {
+                  if (!"tag".equalsIgnoreCase(var3[1])) {
+                     throw new WrongUsageException("commands.scoreboard.players.usage", new Object[0]);
+                  }
+
+                  if (var3.length < 4) {
+                     throw new WrongUsageException("commands.scoreboard.players.tag.usage", new Object[0]);
+                  }
+
+                  this.a(var1, var2, var3, 2);
                }
-
-               this.applyPlayerTag(var1, var2, var3, 2);
-            }
-         } else {
-            if (!"teams".equalsIgnoreCase(var3[0])) {
-               throw new WrongUsageException("commands.scoreboard.usage", new Object[0]);
-            }
-
-            if (var3.length == 1) {
-               throw new WrongUsageException("commands.scoreboard.teams.usage", new Object[0]);
-            }
-
-            if ("list".equalsIgnoreCase(var3[1])) {
-               if (var3.length > 3) {
-                  throw new WrongUsageException("commands.scoreboard.teams.list.usage", new Object[0]);
-               }
-
-               this.listTeams(var2, var3, 2, var1);
-            } else if ("add".equalsIgnoreCase(var3[1])) {
-               if (var3.length < 3) {
-                  throw new WrongUsageException("commands.scoreboard.teams.add.usage", new Object[0]);
-               }
-
-               this.addTeam(var2, var3, 2, var1);
-            } else if ("remove".equalsIgnoreCase(var3[1])) {
-               if (var3.length != 3) {
-                  throw new WrongUsageException("commands.scoreboard.teams.remove.usage", new Object[0]);
-               }
-
-               this.removeTeam(var2, var3, 2, var1);
-            } else if ("empty".equalsIgnoreCase(var3[1])) {
-               if (var3.length != 3) {
-                  throw new WrongUsageException("commands.scoreboard.teams.empty.usage", new Object[0]);
-               }
-
-               this.emptyTeam(var2, var3, 2, var1);
-            } else if ("join".equalsIgnoreCase(var3[1])) {
-               if (var3.length < 4 && (var3.length != 3 || !(var2 instanceof EntityPlayer))) {
-                  throw new WrongUsageException("commands.scoreboard.teams.join.usage", new Object[0]);
-               }
-
-               this.joinTeam(var2, var3, 2, var1);
-            } else if ("leave".equalsIgnoreCase(var3[1])) {
-               if (var3.length < 3 && !(var2 instanceof EntityPlayer)) {
-                  throw new WrongUsageException("commands.scoreboard.teams.leave.usage", new Object[0]);
-               }
-
-               this.leaveTeam(var2, var3, 2, var1);
             } else {
-               if (!"option".equalsIgnoreCase(var3[1])) {
+               if (!"teams".equalsIgnoreCase(var3[0])) {
+                  throw new WrongUsageException("commands.scoreboard.usage", new Object[0]);
+               }
+
+               if (var3.length == 1) {
                   throw new WrongUsageException("commands.scoreboard.teams.usage", new Object[0]);
                }
 
-               if (var3.length != 4 && var3.length != 5) {
-                  throw new WrongUsageException("commands.scoreboard.teams.option.usage", new Object[0]);
-               }
+               if ("list".equalsIgnoreCase(var3[1])) {
+                  if (var3.length > 3) {
+                     throw new WrongUsageException("commands.scoreboard.teams.list.usage", new Object[0]);
+                  }
 
-               this.setTeamOption(var2, var3, 2, var1);
+                  this.e(var2, var3, 2, var1);
+               } else if ("add".equalsIgnoreCase(var3[1])) {
+                  if (var3.length < 3) {
+                     throw new WrongUsageException("commands.scoreboard.teams.add.usage", new Object[0]);
+                  }
+
+                  this.b(var2, var3, 2, var1);
+               } else if ("remove".equalsIgnoreCase(var3[1])) {
+                  if (var3.length != 3) {
+                     throw new WrongUsageException("commands.scoreboard.teams.remove.usage", new Object[0]);
+                  }
+
+                  this.d(var2, var3, 2, var1);
+               } else if ("empty".equalsIgnoreCase(var3[1])) {
+                  if (var3.length != 3) {
+                     throw new WrongUsageException("commands.scoreboard.teams.empty.usage", new Object[0]);
+                  }
+
+                  this.h(var2, var3, 2, var1);
+               } else if ("join".equalsIgnoreCase(var3[1])) {
+                  if (var3.length < 4 && (var3.length != 3 || !(var2 instanceof EntityPlayer))) {
+                     throw new WrongUsageException("commands.scoreboard.teams.join.usage", new Object[0]);
+                  }
+
+                  this.f(var2, var3, 2, var1);
+               } else if ("leave".equalsIgnoreCase(var3[1])) {
+                  if (var3.length < 3 && !(var2 instanceof EntityPlayer)) {
+                     throw new WrongUsageException("commands.scoreboard.teams.leave.usage", new Object[0]);
+                  }
+
+                  this.g(var2, var3, 2, var1);
+               } else {
+                  if (!"option".equalsIgnoreCase(var3[1])) {
+                     throw new WrongUsageException("commands.scoreboard.teams.usage", new Object[0]);
+                  }
+
+                  if (var3.length != 4 && var3.length != 5) {
+                     throw new WrongUsageException("commands.scoreboard.teams.option.usage", new Object[0]);
+                  }
+
+                  this.c(var2, var3, 2, var1);
+               }
             }
+
          }
       }
-
    }
 
-   private boolean handleUserWildcards(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
+   private boolean b(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
       int var4 = -1;
 
       for(int var5 = 0; var5 < var3.length; ++var5) {
@@ -225,7 +225,7 @@ public class CommandScoreboard extends CommandBase {
       if (var4 < 0) {
          return false;
       } else {
-         ArrayList var13 = Lists.newArrayList(this.getScoreboard(var1).getObjectiveNames());
+         ArrayList var13 = Lists.newArrayList(this.a(var1).getObjectiveNames());
          String var6 = var3[var4];
          ArrayList var7 = Lists.newArrayList();
 
@@ -252,12 +252,12 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected Scoreboard getScoreboard(MinecraftServer var1) {
-      return var1.worldServerForDimension(0).getScoreboard();
+   protected Scoreboard a(MinecraftServer var1) {
+      return var1.getWorldServer(0).getScoreboard();
    }
 
-   protected ScoreObjective convertToObjective(String var1, boolean var2, MinecraftServer var3) throws CommandException {
-      Scoreboard var4 = this.getScoreboard(var3);
+   protected ScoreObjective a(String var1, boolean var2, MinecraftServer var3) throws CommandException {
+      Scoreboard var4 = this.a(var3);
       ScoreObjective var5 = var4.getObjective(var1);
       if (var5 == null) {
          throw new CommandException("commands.scoreboard.objectiveNotFound", new Object[]{var1});
@@ -268,8 +268,8 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected ScorePlayerTeam convertToTeam(String var1, MinecraftServer var2) throws CommandException {
-      Scoreboard var3 = this.getScoreboard(var2);
+   protected ScorePlayerTeam a(String var1, MinecraftServer var2) throws CommandException {
+      Scoreboard var3 = this.a(var2);
       ScorePlayerTeam var4 = var3.getTeam(var1);
       if (var4 == null) {
          throw new CommandException("commands.scoreboard.teamNotFound", new Object[]{var1});
@@ -278,10 +278,10 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void addObjective(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+   protected void a(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
       String var5 = var2[var3++];
       String var6 = var2[var3++];
-      Scoreboard var7 = this.getScoreboard(var4);
+      Scoreboard var7 = this.a(var4);
       IScoreCriteria var8 = (IScoreCriteria)IScoreCriteria.INSTANCES.get(var6);
       if (var8 == null) {
          throw new WrongUsageException("commands.scoreboard.objectives.add.wrongType", new Object[]{var6});
@@ -311,9 +311,9 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void addTeam(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+   protected void b(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
       String var5 = var2[var3++];
-      Scoreboard var6 = this.getScoreboard(var4);
+      Scoreboard var6 = this.a(var4);
       if (var6.getTeam(var5) != null) {
          throw new CommandException("commands.scoreboard.teams.add.alreadyExists", new Object[]{var5});
       } else if (var5.length() > 16) {
@@ -340,98 +340,92 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void setTeamOption(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      ScorePlayerTeam var5 = this.convertToTeam(var2[var3++], var4);
+   protected void c(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      ScorePlayerTeam var5 = this.a(var2[var3++], var4);
       if (var5 != null) {
          String var6 = var2[var3++].toLowerCase();
          if (!"color".equalsIgnoreCase(var6) && !"friendlyfire".equalsIgnoreCase(var6) && !"seeFriendlyInvisibles".equalsIgnoreCase(var6) && !"nametagVisibility".equalsIgnoreCase(var6) && !"deathMessageVisibility".equalsIgnoreCase(var6) && !"collisionRule".equalsIgnoreCase(var6)) {
             throw new WrongUsageException("commands.scoreboard.teams.option.usage", new Object[0]);
-         }
-
-         if (var2.length == 4) {
+         } else if (var2.length == 4) {
             if ("color".equalsIgnoreCase(var6)) {
                throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceStringFromCollection(TextFormatting.getValidValues(true, false))});
-            }
-
-            if (!"friendlyfire".equalsIgnoreCase(var6) && !"seeFriendlyInvisibles".equalsIgnoreCase(var6)) {
+            } else if (!"friendlyfire".equalsIgnoreCase(var6) && !"seeFriendlyInvisibles".equalsIgnoreCase(var6)) {
                if (!"nametagVisibility".equalsIgnoreCase(var6) && !"deathMessageVisibility".equalsIgnoreCase(var6)) {
                   if ("collisionRule".equalsIgnoreCase(var6)) {
                      throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceString(Team.CollisionRule.getNames())});
+                  } else {
+                     throw new WrongUsageException("commands.scoreboard.teams.option.usage", new Object[0]);
                   }
-
-                  throw new WrongUsageException("commands.scoreboard.teams.option.usage", new Object[0]);
+               } else {
+                  throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceString(Team.EnumVisible.getNames())});
+               }
+            } else {
+               throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceStringFromCollection(Arrays.asList("true", "false"))});
+            }
+         } else {
+            String var7 = var2[var3];
+            if ("color".equalsIgnoreCase(var6)) {
+               TextFormatting var8 = TextFormatting.getValueByName(var7);
+               if (var8 == null || var8.isFancyStyling()) {
+                  throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceStringFromCollection(TextFormatting.getValidValues(true, false))});
                }
 
-               throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceString(Team.EnumVisible.getNames())});
+               var5.setChatFormat(var8);
+               var5.setNamePrefix(var8.toString());
+               var5.setNameSuffix(TextFormatting.RESET.toString());
+            } else if ("friendlyfire".equalsIgnoreCase(var6)) {
+               if (!"true".equalsIgnoreCase(var7) && !"false".equalsIgnoreCase(var7)) {
+                  throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceStringFromCollection(Arrays.asList("true", "false"))});
+               }
+
+               var5.setAllowFriendlyFire("true".equalsIgnoreCase(var7));
+            } else if ("seeFriendlyInvisibles".equalsIgnoreCase(var6)) {
+               if (!"true".equalsIgnoreCase(var7) && !"false".equalsIgnoreCase(var7)) {
+                  throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceStringFromCollection(Arrays.asList("true", "false"))});
+               }
+
+               var5.setSeeFriendlyInvisiblesEnabled("true".equalsIgnoreCase(var7));
+            } else if ("nametagVisibility".equalsIgnoreCase(var6)) {
+               Team.EnumVisible var11 = Team.EnumVisible.getByName(var7);
+               if (var11 == null) {
+                  throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceString(Team.EnumVisible.getNames())});
+               }
+
+               var5.setNameTagVisibility(var11);
+            } else if ("deathMessageVisibility".equalsIgnoreCase(var6)) {
+               Team.EnumVisible var12 = Team.EnumVisible.getByName(var7);
+               if (var12 == null) {
+                  throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceString(Team.EnumVisible.getNames())});
+               }
+
+               var5.setDeathMessageVisibility(var12);
+            } else if ("collisionRule".equalsIgnoreCase(var6)) {
+               Team.CollisionRule var13 = Team.CollisionRule.getByName(var7);
+               if (var13 == null) {
+                  throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceString(Team.CollisionRule.getNames())});
+               }
+
+               var5.setCollisionRule(var13);
             }
 
-            throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceStringFromCollection(Arrays.asList("true", "false"))});
+            notifyCommandListener(var1, this, "commands.scoreboard.teams.option.success", new Object[]{var6, var5.getRegisteredName(), var7});
          }
-
-         String var7 = var2[var3];
-         if ("color".equalsIgnoreCase(var6)) {
-            TextFormatting var8 = TextFormatting.getValueByName(var7);
-            if (var8 == null || var8.isFancyStyling()) {
-               throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceStringFromCollection(TextFormatting.getValidValues(true, false))});
-            }
-
-            var5.setChatFormat(var8);
-            var5.setNamePrefix(var8.toString());
-            var5.setNameSuffix(TextFormatting.RESET.toString());
-         } else if ("friendlyfire".equalsIgnoreCase(var6)) {
-            if (!"true".equalsIgnoreCase(var7) && !"false".equalsIgnoreCase(var7)) {
-               throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceStringFromCollection(Arrays.asList("true", "false"))});
-            }
-
-            var5.setAllowFriendlyFire("true".equalsIgnoreCase(var7));
-         } else if ("seeFriendlyInvisibles".equalsIgnoreCase(var6)) {
-            if (!"true".equalsIgnoreCase(var7) && !"false".equalsIgnoreCase(var7)) {
-               throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceStringFromCollection(Arrays.asList("true", "false"))});
-            }
-
-            var5.setSeeFriendlyInvisiblesEnabled("true".equalsIgnoreCase(var7));
-         } else if ("nametagVisibility".equalsIgnoreCase(var6)) {
-            Team.EnumVisible var11 = Team.EnumVisible.getByName(var7);
-            if (var11 == null) {
-               throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceString(Team.EnumVisible.getNames())});
-            }
-
-            var5.setNameTagVisibility(var11);
-         } else if ("deathMessageVisibility".equalsIgnoreCase(var6)) {
-            Team.EnumVisible var12 = Team.EnumVisible.getByName(var7);
-            if (var12 == null) {
-               throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceString(Team.EnumVisible.getNames())});
-            }
-
-            var5.setDeathMessageVisibility(var12);
-         } else if ("collisionRule".equalsIgnoreCase(var6)) {
-            Team.CollisionRule var13 = Team.CollisionRule.getByName(var7);
-            if (var13 == null) {
-               throw new WrongUsageException("commands.scoreboard.teams.option.noValue", new Object[]{var6, joinNiceString(Team.CollisionRule.getNames())});
-            }
-
-            var5.setCollisionRule(var13);
-         }
-
-         notifyCommandListener(var1, this, "commands.scoreboard.teams.option.success", new Object[]{var6, var5.getRegisteredName(), var7});
       }
-
    }
 
-   protected void removeTeam(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
-      ScorePlayerTeam var6 = this.convertToTeam(var2[var3], var4);
+   protected void d(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
+      ScorePlayerTeam var6 = this.a(var2[var3], var4);
       if (var6 != null) {
          var5.removeTeam(var6);
          notifyCommandListener(var1, this, "commands.scoreboard.teams.remove.success", new Object[]{var6.getRegisteredName()});
       }
-
    }
 
-   protected void listTeams(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
+   protected void e(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
       if (var2.length > var3) {
-         ScorePlayerTeam var6 = this.convertToTeam(var2[var3], var4);
+         ScorePlayerTeam var6 = this.a(var2[var3], var4);
          if (var6 == null) {
             return;
          }
@@ -464,32 +458,32 @@ public class CommandScoreboard extends CommandBase {
 
    }
 
-   protected void joinTeam(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
+   protected void f(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
       String var6 = var2[var3++];
       HashSet var7 = Sets.newHashSet();
       HashSet var8 = Sets.newHashSet();
       if (var1 instanceof EntityPlayer && var3 == var2.length) {
-         String var14 = getCommandSenderAsPlayer(var1).getName();
-         if (var5.addPlayerToTeam(var14, var6)) {
-            var7.add(var14);
+         String var15 = getCommandSenderAsPlayer(var1).getName();
+         if (var5.addPlayerToTeam(var15, var6)) {
+            var7.add(var15);
          } else {
-            var8.add(var14);
+            var8.add(var15);
          }
       } else {
          while(var3 < var2.length) {
             String var9 = var2[var3++];
             if (var9.startsWith("@")) {
-               for(Entity var11 : getEntityList(var4, var1, var9)) {
-                  String var12 = getEntityName(var4, var1, var11.getCachedUniqueIdString());
-                  if (var5.addPlayerToTeam(var12, var6)) {
-                     var7.add(var12);
+               for(Entity var12 : c(var4, var1, var9)) {
+                  String var13 = e(var4, var1, var12.getCachedUniqueIdString());
+                  if (var5.addPlayerToTeam(var13, var6)) {
+                     var7.add(var13);
                   } else {
-                     var8.add(var12);
+                     var8.add(var13);
                   }
                }
             } else {
-               String var10 = getEntityName(var4, var1, var9);
+               String var10 = e(var4, var1, var9);
                if (var5.addPlayerToTeam(var10, var6)) {
                   var7.add(var10);
                } else {
@@ -509,31 +503,31 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void leaveTeam(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
+   protected void g(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
       HashSet var6 = Sets.newHashSet();
       HashSet var7 = Sets.newHashSet();
       if (var1 instanceof EntityPlayer && var3 == var2.length) {
-         String var12 = getCommandSenderAsPlayer(var1).getName();
-         if (var5.removePlayerFromTeams(var12)) {
-            var6.add(var12);
+         String var13 = getCommandSenderAsPlayer(var1).getName();
+         if (var5.removePlayerFromTeams(var13)) {
+            var6.add(var13);
          } else {
-            var7.add(var12);
+            var7.add(var13);
          }
       } else {
          while(var3 < var2.length) {
             String var8 = var2[var3++];
             if (var8.startsWith("@")) {
-               for(Entity var10 : getEntityList(var4, var1, var8)) {
-                  String var11 = getEntityName(var4, var1, var10.getCachedUniqueIdString());
-                  if (var5.removePlayerFromTeams(var11)) {
-                     var6.add(var11);
+               for(Entity var11 : c(var4, var1, var8)) {
+                  String var12 = e(var4, var1, var11.getCachedUniqueIdString());
+                  if (var5.removePlayerFromTeams(var12)) {
+                     var6.add(var12);
                   } else {
-                     var7.add(var11);
+                     var7.add(var12);
                   }
                }
             } else {
-               String var9 = getEntityName(var4, var1, var8);
+               String var9 = e(var4, var1, var8);
                if (var5.removePlayerFromTeams(var9)) {
                   var6.add(var9);
                } else {
@@ -553,34 +547,33 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void emptyTeam(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
-      ScorePlayerTeam var6 = this.convertToTeam(var2[var3], var4);
+   protected void h(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
+      ScorePlayerTeam var6 = this.a(var2[var3], var4);
       if (var6 != null) {
          ArrayList var7 = Lists.newArrayList(var6.getMembershipCollection());
          var1.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, var7.size());
          if (var7.isEmpty()) {
             throw new CommandException("commands.scoreboard.teams.empty.alreadyEmpty", new Object[]{var6.getRegisteredName()});
-         }
+         } else {
+            for(String var9 : var7) {
+               var5.removePlayerFromTeam(var9, var6);
+            }
 
-         for(String var9 : var7) {
-            var5.removePlayerFromTeam(var9, var6);
+            notifyCommandListener(var1, this, "commands.scoreboard.teams.empty.success", new Object[]{var7.size(), var6.getRegisteredName()});
          }
-
-         notifyCommandListener(var1, this, "commands.scoreboard.teams.empty.success", new Object[]{var7.size(), var6.getRegisteredName()});
       }
-
    }
 
-   protected void removeObjective(ICommandSender var1, String var2, MinecraftServer var3) throws CommandException {
-      Scoreboard var4 = this.getScoreboard(var3);
-      ScoreObjective var5 = this.convertToObjective(var2, false, var3);
+   protected void a(ICommandSender var1, String var2, MinecraftServer var3) throws CommandException {
+      Scoreboard var4 = this.a(var3);
+      ScoreObjective var5 = this.a(var2, false, var3);
       var4.removeObjective(var5);
       notifyCommandListener(var1, this, "commands.scoreboard.objectives.remove.success", new Object[]{var2});
    }
 
-   protected void listObjectives(ICommandSender var1, MinecraftServer var2) throws CommandException {
-      Scoreboard var3 = this.getScoreboard(var2);
+   protected void a(ICommandSender var1, MinecraftServer var2) throws CommandException {
+      Scoreboard var3 = this.a(var2);
       Collection var4 = var3.getScoreObjectives();
       if (var4.isEmpty()) {
          throw new CommandException("commands.scoreboard.objectives.list.empty", new Object[0]);
@@ -596,13 +589,13 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void setDisplayObjective(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
+   protected void i(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
       String var6 = var2[var3++];
       int var7 = Scoreboard.getObjectiveDisplaySlotNumber(var6);
       ScoreObjective var8 = null;
       if (var2.length == 4) {
-         var8 = this.convertToObjective(var2[var3], false, var4);
+         var8 = this.a(var2[var3], false, var4);
       }
 
       if (var7 < 0) {
@@ -618,10 +611,10 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void listPlayers(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
+   protected void j(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
       if (var2.length > var3) {
-         String var6 = getEntityName(var4, var1, var2[var3]);
+         String var6 = e(var4, var1, var2[var3]);
          Map var7 = var5.getObjectivesForEntity(var6);
          var1.setCommandStat(CommandResultStats.Type.QUERY_RESULT, var7.size());
          if (var7.isEmpty()) {
@@ -650,17 +643,17 @@ public class CommandScoreboard extends CommandBase {
 
    }
 
-   protected void addPlayerScore(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+   protected void k(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
       String var5 = var2[var3 - 1];
       int var6 = var3;
-      String var7 = getEntityName(var4, var1, var2[var3++]);
+      String var7 = e(var4, var1, var2[var3++]);
       if (var7.length() > 40) {
          throw new SyntaxErrorException("commands.scoreboard.players.name.tooLong", new Object[]{var7, Integer.valueOf(40)});
       } else {
-         ScoreObjective var8 = this.convertToObjective(var2[var3++], true, var4);
+         ScoreObjective var8 = this.a(var2[var3++], true, var4);
          int var9 = "set".equalsIgnoreCase(var5) ? parseInt(var2[var3++]) : parseInt(var2[var3++], 0);
          if (var2.length > var3) {
-            Entity var10 = getEntity(var4, var1, var2[var6]);
+            Entity var10 = b(var4, var1, var2[var6]);
 
             try {
                NBTTagCompound var11 = JsonToNBT.getTagFromJson(buildString(var2, var3));
@@ -673,7 +666,7 @@ public class CommandScoreboard extends CommandBase {
             }
          }
 
-         Scoreboard var17 = this.getScoreboard(var4);
+         Scoreboard var17 = this.a(var4);
          Score var18 = var17.getOrCreateScore(var7, var8);
          if ("set".equalsIgnoreCase(var5)) {
             var18.setScorePoints(var9);
@@ -687,11 +680,11 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void resetPlayerScore(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
-      String var6 = getEntityName(var4, var1, var2[var3++]);
+   protected void l(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
+      String var6 = e(var4, var1, var2[var3++]);
       if (var2.length > var3) {
-         ScoreObjective var7 = this.convertToObjective(var2[var3++], false, var4);
+         ScoreObjective var7 = this.a(var2[var3++], false, var4);
          var5.removeObjectiveFromEntity(var6, var7);
          notifyCommandListener(var1, this, "commands.scoreboard.players.resetscore.success", new Object[]{var7.getName(), var6});
       } else {
@@ -701,13 +694,13 @@ public class CommandScoreboard extends CommandBase {
 
    }
 
-   protected void enablePlayerTrigger(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
-      String var6 = getPlayerName(var4, var1, var2[var3++]);
+   protected void m(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
+      String var6 = d(var4, var1, var2[var3++]);
       if (var6.length() > 40) {
          throw new SyntaxErrorException("commands.scoreboard.players.name.tooLong", new Object[]{var6, Integer.valueOf(40)});
       } else {
-         ScoreObjective var7 = this.convertToObjective(var2[var3], false, var4);
+         ScoreObjective var7 = this.a(var2[var3], false, var4);
          if (var7.getCriteria() != IScoreCriteria.TRIGGER) {
             throw new CommandException("commands.scoreboard.players.enable.noTrigger", new Object[]{var7.getName()});
          } else {
@@ -718,13 +711,13 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void testPlayerScore(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
-      String var6 = getEntityName(var4, var1, var2[var3++]);
+   protected void n(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
+      String var6 = e(var4, var1, var2[var3++]);
       if (var6.length() > 40) {
          throw new SyntaxErrorException("commands.scoreboard.players.name.tooLong", new Object[]{var6, Integer.valueOf(40)});
       } else {
-         ScoreObjective var7 = this.convertToObjective(var2[var3++], false, var4);
+         ScoreObjective var7 = this.a(var2[var3++], false, var4);
          if (!var5.entityHasObjective(var6, var7)) {
             throw new CommandException("commands.scoreboard.players.test.notFound", new Object[]{var7.getName(), var6});
          } else {
@@ -741,13 +734,13 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void applyPlayerOperation(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
-      Scoreboard var5 = this.getScoreboard(var4);
-      String var6 = getEntityName(var4, var1, var2[var3++]);
-      ScoreObjective var7 = this.convertToObjective(var2[var3++], true, var4);
+   protected void o(ICommandSender var1, String[] var2, int var3, MinecraftServer var4) throws CommandException {
+      Scoreboard var5 = this.a(var4);
+      String var6 = e(var4, var1, var2[var3++]);
+      ScoreObjective var7 = this.a(var2[var3++], true, var4);
       String var8 = var2[var3++];
-      String var9 = getEntityName(var4, var1, var2[var3++]);
-      ScoreObjective var10 = this.convertToObjective(var2[var3], false, var4);
+      String var9 = e(var4, var1, var2[var3++]);
+      ScoreObjective var10 = this.a(var2[var3], false, var4);
       if (var6.length() > 40) {
          throw new SyntaxErrorException("commands.scoreboard.players.name.tooLong", new Object[]{var6, Integer.valueOf(40)});
       } else if (var9.length() > 40) {
@@ -793,26 +786,24 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected void applyPlayerTag(MinecraftServer var1, ICommandSender var2, String[] var3, int var4) throws CommandException {
-      String var5 = getEntityName(var1, var2, var3[var4]);
-      Entity var6 = getEntity(var1, var2, var3[var4++]);
+   protected void a(MinecraftServer var1, ICommandSender var2, String[] var3, int var4) throws CommandException {
+      String var5 = e(var1, var2, var3[var4]);
+      Entity var6 = b(var1, var2, var3[var4++]);
       String var7 = var3[var4++];
       Set var8 = var6.getTags();
       if ("list".equals(var7)) {
          if (!var8.isEmpty()) {
-            TextComponentTranslation var9 = new TextComponentTranslation("commands.scoreboard.players.tag.list", new Object[]{var5});
-            var9.getStyle().setColor(TextFormatting.DARK_GREEN);
-            var2.sendMessage(var9);
+            TextComponentTranslation var16 = new TextComponentTranslation("commands.scoreboard.players.tag.list", new Object[]{var5});
+            var16.getStyle().setColor(TextFormatting.DARK_GREEN);
+            var2.sendMessage(var16);
             var2.sendMessage(new TextComponentString(joinNiceString(var8.toArray())));
          }
 
          var2.setCommandStat(CommandResultStats.Type.QUERY_RESULT, var8.size());
+      } else if (var3.length < 5) {
+         throw new WrongUsageException("commands.scoreboard.players.tag.usage", new Object[0]);
       } else {
-         if (var3.length < 5) {
-            throw new WrongUsageException("commands.scoreboard.players.tag.usage", new Object[0]);
-         }
-
-         String var16 = var3[var4++];
+         String var9 = var3[var4++];
          if (var3.length > var4) {
             try {
                NBTTagCompound var10 = JsonToNBT.getTagFromJson(buildString(var3, var4));
@@ -826,27 +817,27 @@ public class CommandScoreboard extends CommandBase {
          }
 
          if ("add".equals(var7)) {
-            if (!var6.addTag(var16)) {
+            if (!var6.addTag(var9)) {
                throw new CommandException("commands.scoreboard.players.tag.tooMany", new Object[]{Integer.valueOf(1024)});
             }
 
-            notifyCommandListener(var2, this, "commands.scoreboard.players.tag.success.add", new Object[]{var16});
+            notifyCommandListener(var2, this, "commands.scoreboard.players.tag.success.add", new Object[]{var9});
          } else {
             if (!"remove".equals(var7)) {
                throw new WrongUsageException("commands.scoreboard.players.tag.usage", new Object[0]);
             }
 
-            if (!var6.removeTag(var16)) {
-               throw new CommandException("commands.scoreboard.players.tag.notFound", new Object[]{var16});
+            if (!var6.removeTag(var9)) {
+               throw new CommandException("commands.scoreboard.players.tag.notFound", new Object[]{var9});
             }
 
-            notifyCommandListener(var2, this, "commands.scoreboard.players.tag.success.remove", new Object[]{var16});
+            notifyCommandListener(var2, this, "commands.scoreboard.players.tag.success.remove", new Object[]{var9});
          }
-      }
 
+      }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       if (var3.length == 1) {
          return getListOfStringsMatchingLastWord(var3, new String[]{"objectives", "players", "teams"});
       } else {
@@ -862,7 +853,7 @@ public class CommandScoreboard extends CommandBase {
                }
             } else if ("remove".equalsIgnoreCase(var3[1])) {
                if (var3.length == 3) {
-                  return getListOfStringsMatchingLastWord(var3, this.getObjectiveNames(false, var1));
+                  return getListOfStringsMatchingLastWord(var3, this.a(false, var1));
                }
             } else if ("setdisplay".equalsIgnoreCase(var3[1])) {
                if (var3.length == 3) {
@@ -870,7 +861,7 @@ public class CommandScoreboard extends CommandBase {
                }
 
                if (var3.length == 4) {
-                  return getListOfStringsMatchingLastWord(var3, this.getObjectiveNames(false, var1));
+                  return getListOfStringsMatchingLastWord(var3, this.a(false, var1));
                }
             }
          } else if ("players".equalsIgnoreCase(var3[0])) {
@@ -881,20 +872,20 @@ public class CommandScoreboard extends CommandBase {
             if (!"set".equalsIgnoreCase(var3[1]) && !"add".equalsIgnoreCase(var3[1]) && !"remove".equalsIgnoreCase(var3[1]) && !"reset".equalsIgnoreCase(var3[1])) {
                if ("enable".equalsIgnoreCase(var3[1])) {
                   if (var3.length == 3) {
-                     return getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames());
+                     return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
                   }
 
                   if (var3.length == 4) {
-                     return getListOfStringsMatchingLastWord(var3, this.getTriggerNames(var1));
+                     return getListOfStringsMatchingLastWord(var3, this.b(var1));
                   }
                } else if (!"list".equalsIgnoreCase(var3[1]) && !"test".equalsIgnoreCase(var3[1])) {
                   if ("operation".equalsIgnoreCase(var3[1])) {
                      if (var3.length == 3) {
-                        return getListOfStringsMatchingLastWord(var3, this.getScoreboard(var1).getObjectiveNames());
+                        return getListOfStringsMatchingLastWord(var3, this.a(var1).getObjectiveNames());
                      }
 
                      if (var3.length == 4) {
-                        return getListOfStringsMatchingLastWord(var3, this.getObjectiveNames(true, var1));
+                        return getListOfStringsMatchingLastWord(var3, this.a(true, var1));
                      }
 
                      if (var3.length == 5) {
@@ -902,15 +893,15 @@ public class CommandScoreboard extends CommandBase {
                      }
 
                      if (var3.length == 6) {
-                        return getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames());
+                        return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
                      }
 
                      if (var3.length == 7) {
-                        return getListOfStringsMatchingLastWord(var3, this.getObjectiveNames(false, var1));
+                        return getListOfStringsMatchingLastWord(var3, this.a(false, var1));
                      }
                   } else if ("tag".equalsIgnoreCase(var3[1])) {
                      if (var3.length == 3) {
-                        return getListOfStringsMatchingLastWord(var3, this.getScoreboard(var1).getObjectiveNames());
+                        return getListOfStringsMatchingLastWord(var3, this.a(var1).getObjectiveNames());
                      }
 
                      if (var3.length == 4) {
@@ -919,20 +910,20 @@ public class CommandScoreboard extends CommandBase {
                   }
                } else {
                   if (var3.length == 3) {
-                     return getListOfStringsMatchingLastWord(var3, this.getScoreboard(var1).getObjectiveNames());
+                     return getListOfStringsMatchingLastWord(var3, this.a(var1).getObjectiveNames());
                   }
 
                   if (var3.length == 4 && "test".equalsIgnoreCase(var3[1])) {
-                     return getListOfStringsMatchingLastWord(var3, this.getObjectiveNames(false, var1));
+                     return getListOfStringsMatchingLastWord(var3, this.a(false, var1));
                   }
                }
             } else {
                if (var3.length == 3) {
-                  return getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames());
+                  return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
                }
 
                if (var3.length == 4) {
-                  return getListOfStringsMatchingLastWord(var3, this.getObjectiveNames(true, var1));
+                  return getListOfStringsMatchingLastWord(var3, this.a(true, var1));
                }
             }
          } else if ("teams".equalsIgnoreCase(var3[0])) {
@@ -942,21 +933,21 @@ public class CommandScoreboard extends CommandBase {
 
             if ("join".equalsIgnoreCase(var3[1])) {
                if (var3.length == 3) {
-                  return getListOfStringsMatchingLastWord(var3, this.getScoreboard(var1).getTeamNames());
+                  return getListOfStringsMatchingLastWord(var3, this.a(var1).getTeamNames());
                }
 
                if (var3.length >= 4) {
-                  return getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames());
+                  return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
                }
             } else {
                if ("leave".equalsIgnoreCase(var3[1])) {
-                  return getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames());
+                  return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
                }
 
                if (!"empty".equalsIgnoreCase(var3[1]) && !"list".equalsIgnoreCase(var3[1]) && !"remove".equalsIgnoreCase(var3[1])) {
                   if ("option".equalsIgnoreCase(var3[1])) {
                      if (var3.length == 3) {
-                        return getListOfStringsMatchingLastWord(var3, this.getScoreboard(var1).getTeamNames());
+                        return getListOfStringsMatchingLastWord(var3, this.a(var1).getTeamNames());
                      }
 
                      if (var3.length == 4) {
@@ -982,7 +973,7 @@ public class CommandScoreboard extends CommandBase {
                      }
                   }
                } else if (var3.length == 3) {
-                  return getListOfStringsMatchingLastWord(var3, this.getScoreboard(var1).getTeamNames());
+                  return getListOfStringsMatchingLastWord(var3, this.a(var1).getTeamNames());
                }
             }
          }
@@ -991,8 +982,8 @@ public class CommandScoreboard extends CommandBase {
       }
    }
 
-   protected List getObjectiveNames(boolean var1, MinecraftServer var2) {
-      Collection var3 = this.getScoreboard(var2).getScoreObjectives();
+   protected List a(boolean var1, MinecraftServer var2) {
+      Collection var3 = this.a(var2).getScoreObjectives();
       ArrayList var4 = Lists.newArrayList();
 
       for(ScoreObjective var6 : var3) {
@@ -1004,8 +995,8 @@ public class CommandScoreboard extends CommandBase {
       return var4;
    }
 
-   protected List getTriggerNames(MinecraftServer var1) {
-      Collection var2 = this.getScoreboard(var1).getScoreObjectives();
+   protected List b(MinecraftServer var1) {
+      Collection var2 = this.a(var1).getScoreObjectives();
       ArrayList var3 = Lists.newArrayList();
 
       for(ScoreObjective var5 : var2) {
@@ -1018,6 +1009,16 @@ public class CommandScoreboard extends CommandBase {
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return !"players".equalsIgnoreCase(var1[0]) ? ("teams".equalsIgnoreCase(var1[0]) ? var2 == 2 : false) : (var1.length > 1 && "operation".equalsIgnoreCase(var1[1]) ? var2 == 2 || var2 == 5 : var2 == 2);
+      if (!"players".equalsIgnoreCase(var1[0])) {
+         if ("teams".equalsIgnoreCase(var1[0])) {
+            return var2 == 2;
+         } else {
+            return false;
+         }
+      } else if (var1.length > 1 && "operation".equalsIgnoreCase(var1[1])) {
+         return var2 == 2 || var2 == 5;
+      } else {
+         return var2 == 2;
+      }
    }
 }

@@ -19,25 +19,25 @@ public class NettyPacketDecoder extends ByteToMessageDecoder {
       this.direction = var1;
    }
 
-   protected void decode(ChannelHandlerContext var1, ByteBuf var2, List var3) throws IOException, InstantiationException, IllegalAccessException, Exception {
+   protected void decode(ChannelHandlerContext var1, ByteBuf var2, List var3) throws Exception {
       if (var2.readableBytes() != 0) {
          PacketBuffer var4 = new PacketBuffer(var2);
          int var5 = var4.readVarInt();
          Packet var6 = ((EnumConnectionState)var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getPacket(this.direction, var5);
          if (var6 == null) {
             throw new IOException("Bad packet id " + var5);
-         }
+         } else {
+            var6.readPacketData(var4);
+            if (var4.readableBytes() > 0) {
+               throw new IOException("Packet " + ((EnumConnectionState)var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getId() + "/" + var5 + " (" + var6.getClass().getSimpleName() + ") was larger than I expected, found " + var4.readableBytes() + " bytes extra whilst reading packet " + var5);
+            } else {
+               var3.add(var6);
+               if (LOGGER.isDebugEnabled()) {
+                  LOGGER.debug(RECEIVED_PACKET_MARKER, " IN: [{}:{}] {}", new Object[]{var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), var5, var6.getClass().getName()});
+               }
 
-         var6.readPacketData(var4);
-         if (var4.readableBytes() > 0) {
-            throw new IOException("Packet " + ((EnumConnectionState)var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getId() + "/" + var5 + " (" + var6.getClass().getSimpleName() + ") was larger than I expected, found " + var4.readableBytes() + " bytes extra whilst reading packet " + var5);
-         }
-
-         var3.add(var6);
-         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(RECEIVED_PACKET_MARKER, " IN: [{}:{}] {}", new Object[]{var1.channel().attr(NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), var5, var6.getClass().getName()});
+            }
          }
       }
-
    }
 }

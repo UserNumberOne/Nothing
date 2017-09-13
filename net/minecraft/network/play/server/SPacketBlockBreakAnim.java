@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketBlockBreakAnim implements Packet {
    private int breakerId;
@@ -36,20 +34,5 @@ public class SPacketBlockBreakAnim implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleBlockBreakAnim(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getBreakerId() {
-      return this.breakerId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockPos getPosition() {
-      return this.position;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getProgress() {
-      return this.progress;
    }
 }

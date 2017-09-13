@@ -1,7 +1,5 @@
 package net.minecraft.block;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
@@ -94,7 +92,13 @@ public class BlockPistonMoving extends BlockContainer {
    }
 
    public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
-      super.dropBlockAsItemWithChance(var1, var2, var3, 1.0F, var5);
+      if (!var1.isRemote) {
+         TileEntityPiston var6 = this.getTilePistonAt(var1, var2);
+         if (var6 != null) {
+            IBlockState var7 = var6.getPistonState();
+            var7.getBlock().dropBlockAsItem(var1, var2, var7, 0);
+         }
+      }
    }
 
    public RayTraceResult collisionRayTrace(IBlockState var1, World var2, BlockPos var3, Vec3d var4, Vec3d var5) {
@@ -154,15 +158,5 @@ public class BlockPistonMoving extends BlockContainer {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, TYPE});
-   }
-
-   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
-      TileEntityPiston var5 = this.getTilePistonAt(var1, var2);
-      if (var5 != null) {
-         IBlockState var6 = var5.getPistonState();
-         return var6.getBlock().getDrops(var1, var2, var6, var4);
-      } else {
-         return new ArrayList();
-      }
    }
 }

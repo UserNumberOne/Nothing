@@ -19,34 +19,26 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenEndIsland;
 import net.minecraft.world.gen.structure.MapGenEndCity;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.ChunkGeneratorEvent.InitNoiseField;
-import net.minecraftforge.event.terraingen.InitNoiseGensEvent.ContextEnd;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
 
 public class ChunkProviderEnd implements IChunkGenerator {
    private final Random rand;
    protected static final IBlockState END_STONE = Blocks.END_STONE.getDefaultState();
    protected static final IBlockState AIR = Blocks.AIR.getDefaultState();
-   private NoiseGeneratorOctaves lperlinNoise1;
-   private NoiseGeneratorOctaves lperlinNoise2;
-   private NoiseGeneratorOctaves perlinNoise1;
+   private final NoiseGeneratorOctaves lperlinNoise1;
+   private final NoiseGeneratorOctaves lperlinNoise2;
+   private final NoiseGeneratorOctaves perlinNoise1;
    public NoiseGeneratorOctaves noiseGen5;
    public NoiseGeneratorOctaves noiseGen6;
    private final World world;
    private final boolean mapFeaturesEnabled;
    private final MapGenEndCity endCityGen = new MapGenEndCity(this);
-   private NoiseGeneratorSimplex islandNoise;
+   private final NoiseGeneratorSimplex islandNoise;
    private double[] buffer;
    private Biome[] biomesForGeneration;
    double[] pnr;
    double[] ar;
    double[] br;
    private final WorldGenEndIsland endIslands = new WorldGenEndIsland();
-   private int chunkX = 0;
-   private int chunkZ = 0;
 
    public ChunkProviderEnd(World var1, boolean var2, long var3) {
       this.world = var1;
@@ -58,14 +50,6 @@ public class ChunkProviderEnd implements IChunkGenerator {
       this.noiseGen5 = new NoiseGeneratorOctaves(this.rand, 10);
       this.noiseGen6 = new NoiseGeneratorOctaves(this.rand, 16);
       this.islandNoise = new NoiseGeneratorSimplex(this.rand);
-      ContextEnd var5 = new ContextEnd(this.lperlinNoise1, this.lperlinNoise2, this.perlinNoise1, this.noiseGen5, this.noiseGen6, this.islandNoise);
-      var5 = (ContextEnd)TerrainGen.getModdedNoiseGenerators(var1, this.rand, var5);
-      this.lperlinNoise1 = var5.getLPerlin1();
-      this.lperlinNoise2 = var5.getLPerlin2();
-      this.perlinNoise1 = var5.getPerlin();
-      this.noiseGen5 = var5.getDepth();
-      this.noiseGen6 = var5.getScale();
-      this.islandNoise = var5.getIsland();
    }
 
    public void setBlocksInChunk(int var1, int var2, ChunkPrimer var3) {
@@ -129,41 +113,37 @@ public class ChunkProviderEnd implements IChunkGenerator {
    }
 
    public void buildSurfaces(ChunkPrimer var1) {
-      if (ForgeEventFactory.onReplaceBiomeBlocks(this, this.chunkX, this.chunkZ, var1, this.world)) {
-         for(int var2 = 0; var2 < 16; ++var2) {
-            for(int var3 = 0; var3 < 16; ++var3) {
-               boolean var4 = true;
-               int var5 = -1;
-               IBlockState var6 = END_STONE;
-               IBlockState var7 = END_STONE;
+      for(int var2 = 0; var2 < 16; ++var2) {
+         for(int var3 = 0; var3 < 16; ++var3) {
+            boolean var4 = true;
+            int var5 = -1;
+            IBlockState var6 = END_STONE;
+            IBlockState var7 = END_STONE;
 
-               for(int var8 = 127; var8 >= 0; --var8) {
-                  IBlockState var9 = var1.getBlockState(var2, var8, var3);
-                  if (var9.getMaterial() == Material.AIR) {
-                     var5 = -1;
-                  } else if (var9.getBlock() == Blocks.STONE) {
-                     if (var5 == -1) {
-                        var5 = 1;
-                        if (var8 >= 0) {
-                           var1.setBlockState(var2, var8, var3, var6);
-                        } else {
-                           var1.setBlockState(var2, var8, var3, var7);
-                        }
-                     } else if (var5 > 0) {
-                        --var5;
+            for(int var8 = 127; var8 >= 0; --var8) {
+               IBlockState var9 = var1.getBlockState(var2, var8, var3);
+               if (var9.getMaterial() == Material.AIR) {
+                  var5 = -1;
+               } else if (var9.getBlock() == Blocks.STONE) {
+                  if (var5 == -1) {
+                     var5 = 1;
+                     if (var8 >= 0) {
+                        var1.setBlockState(var2, var8, var3, var6);
+                     } else {
                         var1.setBlockState(var2, var8, var3, var7);
                      }
+                  } else if (var5 > 0) {
+                     --var5;
+                     var1.setBlockState(var2, var8, var3, var7);
                   }
                }
             }
          }
-
       }
+
    }
 
    public Chunk provideChunk(int var1, int var2) {
-      this.chunkX = var1;
-      this.chunkZ = var2;
       this.rand.setSeed((long)var1 * 341873128712L + (long)var2 * 132897987541L);
       ChunkPrimer var3 = new ChunkPrimer();
       this.biomesForGeneration = this.world.getBiomeProvider().getBiomes(this.biomesForGeneration, var1 * 16, var2 * 16, 16, 16);
@@ -228,70 +208,63 @@ public class ChunkProviderEnd implements IChunkGenerator {
    }
 
    private double[] getHeights(double[] var1, int var2, int var3, int var4, int var5, int var6, int var7) {
-      InitNoiseField var8 = new InitNoiseField(this, var1, var2, var3, var4, var5, var6, var7);
-      MinecraftForge.EVENT_BUS.post(var8);
-      if (var8.getResult() == Result.DENY) {
-         return var8.getNoisefield();
-      } else {
-         if (var1 == null) {
-            var1 = new double[var5 * var6 * var7];
-         }
+      if (var1 == null) {
+         var1 = new double[var5 * var6 * var7];
+      }
 
-         double var9 = 684.412D;
-         double var11 = 684.412D;
-         var9 = var9 * 2.0D;
-         this.pnr = this.perlinNoise1.generateNoiseOctaves(this.pnr, var2, var3, var4, var5, var6, var7, var9 / 80.0D, 4.277575000000001D, var9 / 80.0D);
-         this.ar = this.lperlinNoise1.generateNoiseOctaves(this.ar, var2, var3, var4, var5, var6, var7, var9, 684.412D, var9);
-         this.br = this.lperlinNoise2.generateNoiseOctaves(this.br, var2, var3, var4, var5, var6, var7, var9, 684.412D, var9);
-         int var13 = var2 / 2;
-         int var14 = var4 / 2;
-         int var15 = 0;
+      double var8 = 684.412D;
+      double var10 = 684.412D;
+      var8 = var8 * 2.0D;
+      this.pnr = this.perlinNoise1.generateNoiseOctaves(this.pnr, var2, var3, var4, var5, var6, var7, var8 / 80.0D, 4.277575000000001D, var8 / 80.0D);
+      this.ar = this.lperlinNoise1.generateNoiseOctaves(this.ar, var2, var3, var4, var5, var6, var7, var8, 684.412D, var8);
+      this.br = this.lperlinNoise2.generateNoiseOctaves(this.br, var2, var3, var4, var5, var6, var7, var8, 684.412D, var8);
+      int var12 = var2 / 2;
+      int var13 = var4 / 2;
+      int var14 = 0;
 
-         for(int var16 = 0; var16 < var5; ++var16) {
-            for(int var17 = 0; var17 < var7; ++var17) {
-               float var18 = this.getIslandHeightValue(var13, var14, var16, var17);
+      for(int var15 = 0; var15 < var5; ++var15) {
+         for(int var16 = 0; var16 < var7; ++var16) {
+            float var17 = this.getIslandHeightValue(var12, var13, var15, var16);
 
-               for(int var19 = 0; var19 < var6; ++var19) {
-                  double var20 = this.ar[var15] / 512.0D;
-                  double var22 = this.br[var15] / 512.0D;
-                  double var24 = (this.pnr[var15] / 10.0D + 1.0D) / 2.0D;
-                  double var26;
-                  if (var24 < 0.0D) {
-                     var26 = var20;
-                  } else if (var24 > 1.0D) {
-                     var26 = var22;
-                  } else {
-                     var26 = var20 + (var22 - var20) * var24;
-                  }
-
-                  var26 = var26 - 8.0D;
-                  var26 = var26 + (double)var18;
-                  byte var28 = 2;
-                  if (var19 > var6 / 2 - var28) {
-                     double var29 = (double)((float)(var19 - (var6 / 2 - var28)) / 64.0F);
-                     var29 = MathHelper.clamp(var29, 0.0D, 1.0D);
-                     var26 = var26 * (1.0D - var29) + -3000.0D * var29;
-                  }
-
-                  var28 = 8;
-                  if (var19 < var28) {
-                     double var36 = (double)((float)(var28 - var19) / ((float)var28 - 1.0F));
-                     var26 = var26 * (1.0D - var36) + -30.0D * var36;
-                  }
-
-                  var1[var15] = var26;
-                  ++var15;
+            for(int var18 = 0; var18 < var6; ++var18) {
+               double var19 = this.ar[var14] / 512.0D;
+               double var21 = this.br[var14] / 512.0D;
+               double var23 = (this.pnr[var14] / 10.0D + 1.0D) / 2.0D;
+               double var25;
+               if (var23 < 0.0D) {
+                  var25 = var19;
+               } else if (var23 > 1.0D) {
+                  var25 = var21;
+               } else {
+                  var25 = var19 + (var21 - var19) * var23;
                }
+
+               var25 = var25 - 8.0D;
+               var25 = var25 + (double)var17;
+               byte var27 = 2;
+               if (var18 > var6 / 2 - var27) {
+                  double var28 = (double)((float)(var18 - (var6 / 2 - var27)) / 64.0F);
+                  var28 = MathHelper.clamp(var28, 0.0D, 1.0D);
+                  var25 = var25 * (1.0D - var28) + -3000.0D * var28;
+               }
+
+               var27 = 8;
+               if (var18 < var27) {
+                  double var35 = (double)((float)(var27 - var18) / ((float)var27 - 1.0F));
+                  var25 = var25 * (1.0D - var35) + -30.0D * var35;
+               }
+
+               var1[var14] = var25;
+               ++var14;
             }
          }
-
-         return var1;
       }
+
+      return var1;
    }
 
    public void populate(int var1, int var2) {
       BlockFalling.fallInstantly = true;
-      ForgeEventFactory.onChunkPopulate(true, this, this.world, this.rand, var1, var2, false);
       BlockPos var3 = new BlockPos(var1 * 16, 0, var2 * 16);
       if (this.mapFeaturesEnabled) {
          this.endCityGen.generateStructure(this.world, this.rand, new ChunkPos(var1, var2));
@@ -325,7 +298,6 @@ public class ChunkProviderEnd implements IChunkGenerator {
          }
       }
 
-      ForgeEventFactory.onChunkPopulate(false, this, this.world, this.rand, var1, var2, false);
       BlockFalling.fallInstantly = false;
    }
 

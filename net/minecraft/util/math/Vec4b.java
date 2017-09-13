@@ -43,7 +43,15 @@ public class Vec4b {
          return false;
       } else {
          Vec4b var2 = (Vec4b)var1;
-         return this.type != var2.type ? false : (this.rotation != var2.rotation ? false : (this.x != var2.x ? false : this.y == var2.y));
+         if (this.type != var2.type) {
+            return false;
+         } else if (this.rotation != var2.rotation) {
+            return false;
+         } else if (this.x != var2.x) {
+            return false;
+         } else {
+            return this.y == var2.y;
+         }
       }
    }
 

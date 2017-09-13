@@ -11,9 +11,11 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -32,13 +34,23 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
+import org.bukkit.event.player.PlayerPickupArrowEvent;
 
 public abstract class EntityArrow extends Entity implements IProjectile {
    private static final Predicate ARROW_TARGETS = Predicates.and(new Predicate[]{EntitySelectors.NOT_SPECTATING, EntitySelectors.IS_ALIVE, new Predicate() {
-      public boolean apply(@Nullable Entity var1) {
-         return var1.canBeCollidedWith();
+      public boolean apply(@Nullable Entity entity) {
+         return entity.canBeCollidedWith();
+      }
+
+      public boolean apply(Object object) {
+         return this.apply((Entity)object);
       }
    }});
    private static final DataParameter CRITICAL = EntityDataManager.createKey(EntityArrow.class, DataSerializers.BYTE);
@@ -55,10 +67,10 @@ public abstract class EntityArrow extends Entity implements IProjectile {
    private int ticksInGround;
    private int ticksInAir;
    private double damage;
-   private int knockbackStrength;
+   public int knockbackStrength;
 
-   public EntityArrow(World var1) {
-      super(var1);
+   public EntityArrow(World world) {
+      super(world);
       this.xTile = -1;
       this.yTile = -1;
       this.zTile = -1;
@@ -67,109 +79,76 @@ public abstract class EntityArrow extends Entity implements IProjectile {
       this.setSize(0.5F, 0.5F);
    }
 
-   public EntityArrow(World var1, double var2, double var4, double var6) {
-      this(var1);
-      this.setPosition(var2, var4, var6);
+   public EntityArrow(World world, double d0, double d1, double d2) {
+      this(world);
+      this.setPosition(d0, d1, d2);
    }
 
-   public EntityArrow(World var1, EntityLivingBase var2) {
-      this(var1, var2.posX, var2.posY + (double)var2.getEyeHeight() - 0.10000000149011612D, var2.posZ);
-      this.shootingEntity = var2;
-      if (var2 instanceof EntityPlayer) {
+   public EntityArrow(World world, EntityLivingBase entityliving) {
+      this(world, entityliving.posX, entityliving.posY + (double)entityliving.getEyeHeight() - 0.10000000149011612D, entityliving.posZ);
+      this.shootingEntity = entityliving;
+      this.projectileSource = (LivingEntity)entityliving.getBukkitEntity();
+      if (entityliving instanceof EntityPlayer) {
          this.pickupStatus = EntityArrow.PickupStatus.ALLOWED;
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      double var3 = this.getEntityBoundingBox().getAverageEdgeLength() * 10.0D;
-      if (Double.isNaN(var3)) {
-         var3 = 1.0D;
-      }
-
-      var3 = var3 * 64.0D * getRenderDistanceWeight();
-      return var1 < var3 * var3;
    }
 
    protected void entityInit() {
       this.dataManager.register(CRITICAL, Byte.valueOf((byte)0));
    }
 
-   public void setAim(Entity var1, float var2, float var3, float var4, float var5, float var6) {
-      float var7 = -MathHelper.sin(var3 * 0.017453292F) * MathHelper.cos(var2 * 0.017453292F);
-      float var8 = -MathHelper.sin(var2 * 0.017453292F);
-      float var9 = MathHelper.cos(var3 * 0.017453292F) * MathHelper.cos(var2 * 0.017453292F);
-      this.setThrowableHeading((double)var7, (double)var8, (double)var9, var5, var6);
-      this.motionX += var1.motionX;
-      this.motionZ += var1.motionZ;
-      if (!var1.onGround) {
-         this.motionY += var1.motionY;
+   public void setAim(Entity entity, float f, float f1, float f2, float f3, float f4) {
+      float f5 = -MathHelper.sin(f1 * 0.017453292F) * MathHelper.cos(f * 0.017453292F);
+      float f6 = -MathHelper.sin(f * 0.017453292F);
+      float f7 = MathHelper.cos(f1 * 0.017453292F) * MathHelper.cos(f * 0.017453292F);
+      this.setThrowableHeading((double)f5, (double)f6, (double)f7, f3, f4);
+      this.motionX += entity.motionX;
+      this.motionZ += entity.motionZ;
+      if (!entity.onGround) {
+         this.motionY += entity.motionY;
       }
 
    }
 
-   public void setThrowableHeading(double var1, double var3, double var5, float var7, float var8) {
-      float var9 = MathHelper.sqrt(var1 * var1 + var3 * var3 + var5 * var5);
-      var1 = var1 / (double)var9;
-      var3 = var3 / (double)var9;
-      var5 = var5 / (double)var9;
-      var1 = var1 + this.rand.nextGaussian() * 0.007499999832361937D * (double)var8;
-      var3 = var3 + this.rand.nextGaussian() * 0.007499999832361937D * (double)var8;
-      var5 = var5 + this.rand.nextGaussian() * 0.007499999832361937D * (double)var8;
-      var1 = var1 * (double)var7;
-      var3 = var3 * (double)var7;
-      var5 = var5 * (double)var7;
-      this.motionX = var1;
-      this.motionY = var3;
-      this.motionZ = var5;
-      float var10 = MathHelper.sqrt(var1 * var1 + var5 * var5);
-      this.rotationYaw = (float)(MathHelper.atan2(var1, var5) * 57.29577951308232D);
-      this.rotationPitch = (float)(MathHelper.atan2(var3, (double)var10) * 57.29577951308232D);
+   public void setThrowableHeading(double d0, double d1, double d2, float f, float f1) {
+      float f2 = MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+      d0 = d0 / (double)f2;
+      d1 = d1 / (double)f2;
+      d2 = d2 / (double)f2;
+      d0 = d0 + this.rand.nextGaussian() * 0.007499999832361937D * (double)f1;
+      d1 = d1 + this.rand.nextGaussian() * 0.007499999832361937D * (double)f1;
+      d2 = d2 + this.rand.nextGaussian() * 0.007499999832361937D * (double)f1;
+      d0 = d0 * (double)f;
+      d1 = d1 * (double)f;
+      d2 = d2 * (double)f;
+      this.motionX = d0;
+      this.motionY = d1;
+      this.motionZ = d2;
+      float f3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
+      this.rotationYaw = (float)(MathHelper.atan2(d0, d2) * 57.2957763671875D);
+      this.rotationPitch = (float)(MathHelper.atan2(d1, (double)f3) * 57.2957763671875D);
       this.prevRotationYaw = this.rotationYaw;
       this.prevRotationPitch = this.rotationPitch;
       this.ticksInGround = 0;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setPositionAndRotationDirect(double var1, double var3, double var5, float var7, float var8, int var9, boolean var10) {
-      this.setPosition(var1, var3, var5);
-      this.setRotation(var7, var8);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setVelocity(double var1, double var3, double var5) {
-      this.motionX = var1;
-      this.motionY = var3;
-      this.motionZ = var5;
-      if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F) {
-         float var7 = MathHelper.sqrt(var1 * var1 + var5 * var5);
-         this.rotationPitch = (float)(MathHelper.atan2(var3, (double)var7) * 57.29577951308232D);
-         this.rotationYaw = (float)(MathHelper.atan2(var1, var5) * 57.29577951308232D);
-         this.prevRotationPitch = this.rotationPitch;
-         this.prevRotationYaw = this.rotationYaw;
-         this.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
-         this.ticksInGround = 0;
-      }
-
-   }
-
    public void onUpdate() {
       super.onUpdate();
       if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F) {
-         float var1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-         this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.29577951308232D);
-         this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)var1) * 57.29577951308232D);
+         float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+         this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.2957763671875D);
+         this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)f) * 57.2957763671875D);
          this.prevRotationYaw = this.rotationYaw;
          this.prevRotationPitch = this.rotationPitch;
       }
 
-      BlockPos var13 = new BlockPos(this.xTile, this.yTile, this.zTile);
-      IBlockState var2 = this.world.getBlockState(var13);
-      Block var3 = var2.getBlock();
-      if (var2.getMaterial() != Material.AIR) {
-         AxisAlignedBB var4 = var2.getCollisionBoundingBox(this.world, var13);
-         if (var4 != Block.NULL_AABB && var4.offset(var13).isVecInside(new Vec3d(this.posX, this.posY, this.posZ))) {
+      BlockPos blockposition = new BlockPos(this.xTile, this.yTile, this.zTile);
+      IBlockState iblockdata = this.world.getBlockState(blockposition);
+      Block block = iblockdata.getBlock();
+      if (iblockdata.getMaterial() != Material.AIR) {
+         AxisAlignedBB axisalignedbb = iblockdata.getCollisionBoundingBox(this.world, blockposition);
+         if (axisalignedbb != Block.NULL_AABB && axisalignedbb.offset(blockposition).isVecInside(new Vec3d(this.posX, this.posY, this.posZ))) {
             this.inGround = true;
          }
       }
@@ -179,8 +158,8 @@ public abstract class EntityArrow extends Entity implements IProjectile {
       }
 
       if (this.inGround) {
-         int var14 = var3.getMetaFromState(var2);
-         if (var3 == this.inTile && var14 == this.inData) {
+         int i = block.getMetaFromState(iblockdata);
+         if (block == this.inTile && i == this.inData) {
             ++this.ticksInGround;
             if (this.ticksInGround >= 1200) {
                this.setDead();
@@ -198,44 +177,44 @@ public abstract class EntityArrow extends Entity implements IProjectile {
       } else {
          this.timeInGround = 0;
          ++this.ticksInAir;
-         Vec3d var15 = new Vec3d(this.posX, this.posY, this.posZ);
-         Vec3d var5 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-         RayTraceResult var6 = this.world.rayTraceBlocks(var15, var5, false, true, false);
-         var15 = new Vec3d(this.posX, this.posY, this.posZ);
-         var5 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-         if (var6 != null) {
-            var5 = new Vec3d(var6.hitVec.xCoord, var6.hitVec.yCoord, var6.hitVec.zCoord);
+         Vec3d vec3d = new Vec3d(this.posX, this.posY, this.posZ);
+         Vec3d vec3d1 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+         RayTraceResult movingobjectposition = this.world.rayTraceBlocks(vec3d, vec3d1, false, true, false);
+         vec3d = new Vec3d(this.posX, this.posY, this.posZ);
+         vec3d1 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+         if (movingobjectposition != null) {
+            vec3d1 = new Vec3d(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
          }
 
-         Entity var7 = this.findEntityOnPath(var15, var5);
-         if (var7 != null) {
-            var6 = new RayTraceResult(var7);
+         Entity entity = this.findEntityOnPath(vec3d, vec3d1);
+         if (entity != null) {
+            movingobjectposition = new RayTraceResult(entity);
          }
 
-         if (var6 != null && var6.entityHit != null && var6.entityHit instanceof EntityPlayer) {
-            EntityPlayer var8 = (EntityPlayer)var6.entityHit;
-            if (this.shootingEntity instanceof EntityPlayer && !((EntityPlayer)this.shootingEntity).canAttackPlayer(var8)) {
-               var6 = null;
+         if (movingobjectposition != null && movingobjectposition.entityHit != null && movingobjectposition.entityHit instanceof EntityPlayer) {
+            EntityPlayer entityhuman = (EntityPlayer)movingobjectposition.entityHit;
+            if (this.shootingEntity instanceof EntityPlayer && !((EntityPlayer)this.shootingEntity).canAttackPlayer(entityhuman)) {
+               movingobjectposition = null;
             }
          }
 
-         if (var6 != null) {
-            this.onHit(var6);
+         if (movingobjectposition != null) {
+            this.onHit(movingobjectposition);
          }
 
          if (this.getIsCritical()) {
-            for(int var18 = 0; var18 < 4; ++var18) {
-               this.world.spawnParticle(EnumParticleTypes.CRIT, this.posX + this.motionX * (double)var18 / 4.0D, this.posY + this.motionY * (double)var18 / 4.0D, this.posZ + this.motionZ * (double)var18 / 4.0D, -this.motionX, -this.motionY + 0.2D, -this.motionZ);
+            for(int j = 0; j < 4; ++j) {
+               this.world.spawnParticle(EnumParticleTypes.CRIT, this.posX + this.motionX * (double)j / 4.0D, this.posY + this.motionY * (double)j / 4.0D, this.posZ + this.motionZ * (double)j / 4.0D, -this.motionX, -this.motionY + 0.2D, -this.motionZ);
             }
          }
 
          this.posX += this.motionX;
          this.posY += this.motionY;
          this.posZ += this.motionZ;
-         float var19 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-         this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.29577951308232D);
+         float f1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+         this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.2957763671875D);
 
-         for(this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)var19) * 57.29577951308232D); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
+         for(this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)f1) * 57.2957763671875D); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
             ;
          }
 
@@ -253,24 +232,22 @@ public abstract class EntityArrow extends Entity implements IProjectile {
 
          this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;
          this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;
-         float var9 = 0.99F;
-         float var10 = 0.05F;
+         float f2 = 0.99F;
          if (this.isInWater()) {
-            for(int var11 = 0; var11 < 4; ++var11) {
-               float var12 = 0.25F;
+            for(int k = 0; k < 4; ++k) {
                this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
             }
 
-            var9 = 0.6F;
+            f2 = 0.6F;
          }
 
          if (this.isWet()) {
             this.extinguish();
          }
 
-         this.motionX *= (double)var9;
-         this.motionY *= (double)var9;
-         this.motionZ *= (double)var9;
+         this.motionX *= (double)f2;
+         this.motionY *= (double)f2;
+         this.motionZ *= (double)f2;
          if (!this.hasNoGravity()) {
             this.motionY -= 0.05000000074505806D;
          }
@@ -281,53 +258,58 @@ public abstract class EntityArrow extends Entity implements IProjectile {
 
    }
 
-   protected void onHit(RayTraceResult var1) {
-      Entity var2 = var1.entityHit;
-      if (var2 != null) {
-         float var3 = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-         int var4 = MathHelper.ceil((double)var3 * this.damage);
+   protected void onHit(RayTraceResult movingobjectposition) {
+      Entity entity = movingobjectposition.entityHit;
+      CraftEventFactory.callProjectileHitEvent(this);
+      if (entity != null) {
+         float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+         int i = MathHelper.ceil((double)f * this.damage);
          if (this.getIsCritical()) {
-            var4 += this.rand.nextInt(var4 / 2 + 2);
+            i += this.rand.nextInt(i / 2 + 2);
          }
 
-         DamageSource var5;
+         DamageSource damagesource;
          if (this.shootingEntity == null) {
-            var5 = DamageSource.causeArrowDamage(this, this);
+            damagesource = DamageSource.causeArrowDamage(this, this);
          } else {
-            var5 = DamageSource.causeArrowDamage(this, this.shootingEntity);
+            damagesource = DamageSource.causeArrowDamage(this, this.shootingEntity);
          }
 
-         if (this.isBurning() && !(var2 instanceof EntityEnderman)) {
-            var2.setFire(5);
+         if (this.isBurning() && !(entity instanceof EntityEnderman)) {
+            EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), entity.getBukkitEntity(), 5);
+            Bukkit.getPluginManager().callEvent(combustEvent);
+            if (!combustEvent.isCancelled()) {
+               entity.setFire(combustEvent.getDuration());
+            }
          }
 
-         if (var2.attackEntityFrom(var5, (float)var4)) {
-            if (var2 instanceof EntityLivingBase) {
-               EntityLivingBase var6 = (EntityLivingBase)var2;
+         if (entity.attackEntityFrom(damagesource, (float)i)) {
+            if (entity instanceof EntityLivingBase) {
+               EntityLivingBase entityliving = (EntityLivingBase)entity;
                if (!this.world.isRemote) {
-                  var6.setArrowCountInEntity(var6.getArrowCountInEntity() + 1);
+                  entityliving.setArrowCountInEntity(entityliving.getArrowCountInEntity() + 1);
                }
 
                if (this.knockbackStrength > 0) {
-                  float var7 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-                  if (var7 > 0.0F) {
-                     var6.addVelocity(this.motionX * (double)this.knockbackStrength * 0.6000000238418579D / (double)var7, 0.1D, this.motionZ * (double)this.knockbackStrength * 0.6000000238418579D / (double)var7);
+                  float f1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+                  if (f1 > 0.0F) {
+                     entityliving.addVelocity(this.motionX * (double)this.knockbackStrength * 0.6000000238418579D / (double)f1, 0.1D, this.motionZ * (double)this.knockbackStrength * 0.6000000238418579D / (double)f1);
                   }
                }
 
                if (this.shootingEntity instanceof EntityLivingBase) {
-                  EnchantmentHelper.applyThornEnchantments(var6, this.shootingEntity);
-                  EnchantmentHelper.applyArthropodEnchantments((EntityLivingBase)this.shootingEntity, var6);
+                  EnchantmentHelper.applyThornEnchantments(entityliving, this.shootingEntity);
+                  EnchantmentHelper.applyArthropodEnchantments((EntityLivingBase)this.shootingEntity, entityliving);
                }
 
-               this.arrowHit(var6);
-               if (this.shootingEntity != null && var6 != this.shootingEntity && var6 instanceof EntityPlayer && this.shootingEntity instanceof EntityPlayerMP) {
+               this.arrowHit(entityliving);
+               if (this.shootingEntity != null && entityliving != this.shootingEntity && entityliving instanceof EntityPlayer && this.shootingEntity instanceof EntityPlayerMP) {
                   ((EntityPlayerMP)this.shootingEntity).connection.sendPacket(new SPacketChangeGameState(6, 0.0F));
                }
             }
 
             this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
-            if (!(var2 instanceof EntityEnderman)) {
+            if (!(entity instanceof EntityEnderman)) {
                this.setDead();
             }
          } else {
@@ -346,115 +328,125 @@ public abstract class EntityArrow extends Entity implements IProjectile {
             }
          }
       } else {
-         BlockPos var8 = var1.getBlockPos();
-         this.xTile = var8.getX();
-         this.yTile = var8.getY();
-         this.zTile = var8.getZ();
-         IBlockState var9 = this.world.getBlockState(var8);
-         this.inTile = var9.getBlock();
-         this.inData = this.inTile.getMetaFromState(var9);
-         this.motionX = (double)((float)(var1.hitVec.xCoord - this.posX));
-         this.motionY = (double)((float)(var1.hitVec.yCoord - this.posY));
-         this.motionZ = (double)((float)(var1.hitVec.zCoord - this.posZ));
-         float var10 = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-         this.posX -= this.motionX / (double)var10 * 0.05000000074505806D;
-         this.posY -= this.motionY / (double)var10 * 0.05000000074505806D;
-         this.posZ -= this.motionZ / (double)var10 * 0.05000000074505806D;
+         BlockPos blockposition = movingobjectposition.getBlockPos();
+         this.xTile = blockposition.getX();
+         this.yTile = blockposition.getY();
+         this.zTile = blockposition.getZ();
+         IBlockState iblockdata = this.world.getBlockState(blockposition);
+         this.inTile = iblockdata.getBlock();
+         this.inData = this.inTile.getMetaFromState(iblockdata);
+         this.motionX = (double)((float)(movingobjectposition.hitVec.xCoord - this.posX));
+         this.motionY = (double)((float)(movingobjectposition.hitVec.yCoord - this.posY));
+         this.motionZ = (double)((float)(movingobjectposition.hitVec.zCoord - this.posZ));
+         float f2 = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+         this.posX -= this.motionX / (double)f2 * 0.05000000074505806D;
+         this.posY -= this.motionY / (double)f2 * 0.05000000074505806D;
+         this.posZ -= this.motionZ / (double)f2 * 0.05000000074505806D;
          this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
          this.inGround = true;
          this.arrowShake = 7;
          this.setIsCritical(false);
-         if (var9.getMaterial() != Material.AIR) {
-            this.inTile.onEntityCollidedWithBlock(this.world, var8, var9, this);
+         if (iblockdata.getMaterial() != Material.AIR) {
+            this.inTile.onEntityCollidedWithBlock(this.world, blockposition, iblockdata, this);
          }
       }
 
    }
 
-   protected void arrowHit(EntityLivingBase var1) {
+   protected void arrowHit(EntityLivingBase entityliving) {
    }
 
    @Nullable
-   protected Entity findEntityOnPath(Vec3d var1, Vec3d var2) {
-      Entity var3 = null;
-      List var4 = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expandXyz(1.0D), ARROW_TARGETS);
-      double var5 = 0.0D;
+   protected Entity findEntityOnPath(Vec3d vec3d, Vec3d vec3d1) {
+      Entity entity = null;
+      List list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expandXyz(1.0D), ARROW_TARGETS);
+      double d0 = 0.0D;
 
-      for(int var7 = 0; var7 < var4.size(); ++var7) {
-         Entity var8 = (Entity)var4.get(var7);
-         if (var8 != this.shootingEntity || this.ticksInAir >= 5) {
-            AxisAlignedBB var9 = var8.getEntityBoundingBox().expandXyz(0.30000001192092896D);
-            RayTraceResult var10 = var9.calculateIntercept(var1, var2);
-            if (var10 != null) {
-               double var11 = var1.squareDistanceTo(var10.hitVec);
-               if (var11 < var5 || var5 == 0.0D) {
-                  var3 = var8;
-                  var5 = var11;
+      for(int i = 0; i < list.size(); ++i) {
+         Entity entity1 = (Entity)list.get(i);
+         if (entity1 != this.shootingEntity || this.ticksInAir >= 5) {
+            AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().expandXyz(0.30000001192092896D);
+            RayTraceResult movingobjectposition = axisalignedbb.calculateIntercept(vec3d, vec3d1);
+            if (movingobjectposition != null) {
+               double d1 = vec3d.squareDistanceTo(movingobjectposition.hitVec);
+               if (d1 < d0 || d0 == 0.0D) {
+                  entity = entity1;
+                  d0 = d1;
                }
             }
          }
       }
 
-      return var3;
+      return entity;
    }
 
-   public static void registerFixesArrow(DataFixer var0, String var1) {
+   public static void registerFixesArrow(DataFixer dataconvertermanager, String s) {
    }
 
-   public static void registerFixesArrow(DataFixer var0) {
-      registerFixesArrow(var0, "Arrow");
+   public static void registerFixesArrow(DataFixer dataconvertermanager) {
+      registerFixesArrow(dataconvertermanager, "Arrow");
    }
 
-   public void writeEntityToNBT(NBTTagCompound var1) {
-      var1.setInteger("xTile", this.xTile);
-      var1.setInteger("yTile", this.yTile);
-      var1.setInteger("zTile", this.zTile);
-      var1.setShort("life", (short)this.ticksInGround);
-      ResourceLocation var2 = (ResourceLocation)Block.REGISTRY.getNameForObject(this.inTile);
-      var1.setString("inTile", var2 == null ? "" : var2.toString());
-      var1.setByte("inData", (byte)this.inData);
-      var1.setByte("shake", (byte)this.arrowShake);
-      var1.setByte("inGround", (byte)(this.inGround ? 1 : 0));
-      var1.setByte("pickup", (byte)this.pickupStatus.ordinal());
-      var1.setDouble("damage", this.damage);
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      nbttagcompound.setInteger("xTile", this.xTile);
+      nbttagcompound.setInteger("yTile", this.yTile);
+      nbttagcompound.setInteger("zTile", this.zTile);
+      nbttagcompound.setShort("life", (short)this.ticksInGround);
+      ResourceLocation minecraftkey = (ResourceLocation)Block.REGISTRY.getNameForObject(this.inTile);
+      nbttagcompound.setString("inTile", minecraftkey == null ? "" : minecraftkey.toString());
+      nbttagcompound.setByte("inData", (byte)this.inData);
+      nbttagcompound.setByte("shake", (byte)this.arrowShake);
+      nbttagcompound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
+      nbttagcompound.setByte("pickup", (byte)this.pickupStatus.ordinal());
+      nbttagcompound.setDouble("damage", this.damage);
    }
 
-   public void readEntityFromNBT(NBTTagCompound var1) {
-      this.xTile = var1.getInteger("xTile");
-      this.yTile = var1.getInteger("yTile");
-      this.zTile = var1.getInteger("zTile");
-      this.ticksInGround = var1.getShort("life");
-      if (var1.hasKey("inTile", 8)) {
-         this.inTile = Block.getBlockFromName(var1.getString("inTile"));
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      this.xTile = nbttagcompound.getInteger("xTile");
+      this.yTile = nbttagcompound.getInteger("yTile");
+      this.zTile = nbttagcompound.getInteger("zTile");
+      this.ticksInGround = nbttagcompound.getShort("life");
+      if (nbttagcompound.hasKey("inTile", 8)) {
+         this.inTile = Block.getBlockFromName(nbttagcompound.getString("inTile"));
       } else {
-         this.inTile = Block.getBlockById(var1.getByte("inTile") & 255);
+         this.inTile = Block.getBlockById(nbttagcompound.getByte("inTile") & 255);
       }
 
-      this.inData = var1.getByte("inData") & 255;
-      this.arrowShake = var1.getByte("shake") & 255;
-      this.inGround = var1.getByte("inGround") == 1;
-      if (var1.hasKey("damage", 99)) {
-         this.damage = var1.getDouble("damage");
+      this.inData = nbttagcompound.getByte("inData") & 255;
+      this.arrowShake = nbttagcompound.getByte("shake") & 255;
+      this.inGround = nbttagcompound.getByte("inGround") == 1;
+      if (nbttagcompound.hasKey("damage", 99)) {
+         this.damage = nbttagcompound.getDouble("damage");
       }
 
-      if (var1.hasKey("pickup", 99)) {
-         this.pickupStatus = EntityArrow.PickupStatus.getByOrdinal(var1.getByte("pickup"));
-      } else if (var1.hasKey("player", 99)) {
-         this.pickupStatus = var1.getBoolean("player") ? EntityArrow.PickupStatus.ALLOWED : EntityArrow.PickupStatus.DISALLOWED;
+      if (nbttagcompound.hasKey("pickup", 99)) {
+         this.pickupStatus = EntityArrow.PickupStatus.getByOrdinal(nbttagcompound.getByte("pickup"));
+      } else if (nbttagcompound.hasKey("player", 99)) {
+         this.pickupStatus = nbttagcompound.getBoolean("player") ? EntityArrow.PickupStatus.ALLOWED : EntityArrow.PickupStatus.DISALLOWED;
       }
 
    }
 
-   public void onCollideWithPlayer(EntityPlayer var1) {
+   public void onCollideWithPlayer(EntityPlayer entityhuman) {
       if (!this.world.isRemote && this.inGround && this.arrowShake <= 0) {
-         boolean var2 = this.pickupStatus == EntityArrow.PickupStatus.ALLOWED || this.pickupStatus == EntityArrow.PickupStatus.CREATIVE_ONLY && var1.capabilities.isCreativeMode;
-         if (this.pickupStatus == EntityArrow.PickupStatus.ALLOWED && !var1.inventory.addItemStackToInventory(this.getArrowStack())) {
-            var2 = false;
+         ItemStack itemstack = new ItemStack(Items.ARROW);
+         if (this.pickupStatus == EntityArrow.PickupStatus.ALLOWED && entityhuman.inventory.canHold(itemstack) > 0) {
+            EntityItem item = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
+            PlayerPickupArrowEvent event = new PlayerPickupArrowEvent((Player)entityhuman.getBukkitEntity(), new CraftItem(this.world.getServer(), this, item), (Arrow)this.getBukkitEntity());
+            this.world.getServer().getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+               return;
+            }
          }
 
-         if (var2) {
+         boolean flag = this.pickupStatus == EntityArrow.PickupStatus.ALLOWED || this.pickupStatus == EntityArrow.PickupStatus.CREATIVE_ONLY && entityhuman.capabilities.isCreativeMode;
+         if (this.pickupStatus == EntityArrow.PickupStatus.ALLOWED && !entityhuman.inventory.addItemStackToInventory(this.getArrowStack())) {
+            flag = false;
+         }
+
+         if (flag) {
             this.playSound(SoundEvents.ENTITY_ITEM_PICKUP, 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-            var1.onItemPickup(this, 1);
+            entityhuman.onItemPickup(this, 1);
             this.setDead();
          }
       }
@@ -467,21 +459,16 @@ public abstract class EntityArrow extends Entity implements IProjectile {
       return false;
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return 15728880;
-   }
-
-   public void setDamage(double var1) {
-      this.damage = var1;
+   public void setDamage(double d0) {
+      this.damage = d0;
    }
 
    public double getDamage() {
       return this.damage;
    }
 
-   public void setKnockbackStrength(int var1) {
-      this.knockbackStrength = var1;
+   public void setKnockbackStrength(int i) {
+      this.knockbackStrength = i;
    }
 
    public boolean canBeAttackedWithItem() {
@@ -492,19 +479,23 @@ public abstract class EntityArrow extends Entity implements IProjectile {
       return 0.0F;
    }
 
-   public void setIsCritical(boolean var1) {
-      byte var2 = ((Byte)this.dataManager.get(CRITICAL)).byteValue();
-      if (var1) {
-         this.dataManager.set(CRITICAL, Byte.valueOf((byte)(var2 | 1)));
+   public void setIsCritical(boolean flag) {
+      byte b0 = ((Byte)this.dataManager.get(CRITICAL)).byteValue();
+      if (flag) {
+         this.dataManager.set(CRITICAL, Byte.valueOf((byte)(b0 | 1)));
       } else {
-         this.dataManager.set(CRITICAL, Byte.valueOf((byte)(var2 & -2)));
+         this.dataManager.set(CRITICAL, Byte.valueOf((byte)(b0 & -2)));
       }
 
    }
 
    public boolean getIsCritical() {
-      byte var1 = ((Byte)this.dataManager.get(CRITICAL)).byteValue();
-      return (var1 & 1) != 0;
+      byte b0 = ((Byte)this.dataManager.get(CRITICAL)).byteValue();
+      return (b0 & 1) != 0;
+   }
+
+   public boolean isInGround() {
+      return this.inGround;
    }
 
    public static enum PickupStatus {
@@ -512,12 +503,12 @@ public abstract class EntityArrow extends Entity implements IProjectile {
       ALLOWED,
       CREATIVE_ONLY;
 
-      public static EntityArrow.PickupStatus getByOrdinal(int var0) {
-         if (var0 < 0 || var0 > values().length) {
-            var0 = 0;
+      public static EntityArrow.PickupStatus getByOrdinal(int i) {
+         if (i < 0 || i > values().length) {
+            i = 0;
          }
 
-         return values()[var0];
+         return values()[i];
       }
    }
 }

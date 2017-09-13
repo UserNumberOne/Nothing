@@ -8,8 +8,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketExplosion implements Packet {
    private double posX;
@@ -87,45 +85,5 @@ public class SPacketExplosion implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleExplosion(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getMotionX() {
-      return this.motionX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getMotionY() {
-      return this.motionY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getMotionZ() {
-      return this.motionZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.posX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.posY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.posZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getStrength() {
-      return this.strength;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getAffectedBlockPositions() {
-      return this.affectedBlockPositions;
    }
 }

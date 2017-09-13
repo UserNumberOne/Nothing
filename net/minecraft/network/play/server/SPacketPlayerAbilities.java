@@ -5,8 +5,6 @@ import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketPlayerAbilities implements Packet {
    private boolean invulnerable;
@@ -97,18 +95,8 @@ public class SPacketPlayerAbilities implements Packet {
       this.creativeMode = var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public float getFlySpeed() {
-      return this.flySpeed;
-   }
-
    public void setFlySpeed(float var1) {
       this.flySpeed = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getWalkSpeed() {
-      return this.walkSpeed;
    }
 
    public void setWalkSpeed(float var1) {

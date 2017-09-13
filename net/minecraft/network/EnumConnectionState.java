@@ -284,7 +284,7 @@ public enum EnumConnectionState {
    }
 
    @Nullable
-   public Packet getPacket(EnumPacketDirection var1, int var2) throws InstantiationException, IllegalAccessException {
+   public Packet getPacket(EnumPacketDirection var1, int var2) throws IllegalAccessException, InstantiationException {
       Class var3 = (Class)((BiMap)this.directionMaps.get(var1)).get(Integer.valueOf(var2));
       return var3 == null ? null : (Packet)var3.newInstance();
    }

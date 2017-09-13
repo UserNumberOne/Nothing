@@ -47,6 +47,11 @@ public class BlockWorldState {
          public boolean apply(@Nullable BlockWorldState var1) {
             return var1 != null && var0.apply(var1.getBlockState());
          }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1) {
+            return this.apply((BlockWorldState)var1);
+         }
       };
    }
 }

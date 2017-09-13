@@ -36,5 +36,10 @@ public class SetCount extends LootFunction {
       public SetCount deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
          return new SetCount(var3, (RandomValueRange)JsonUtils.deserializeClass(var1, "count", var2, RandomValueRange.class));
       }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
+      }
    }
 }

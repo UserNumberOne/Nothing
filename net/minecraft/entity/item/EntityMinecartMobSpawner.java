@@ -10,8 +10,6 @@ import net.minecraft.util.datafix.IDataFixer;
 import net.minecraft.util.datafix.IDataWalker;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityMinecartMobSpawner extends EntityMinecart {
    private final MobSpawnerBaseLogic mobSpawnerLogic = new MobSpawnerBaseLogic() {
@@ -67,11 +65,6 @@ public class EntityMinecartMobSpawner extends EntityMinecart {
    protected void writeEntityToNBT(NBTTagCompound var1) {
       super.writeEntityToNBT(var1);
       this.mobSpawnerLogic.writeToNBT(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      this.mobSpawnerLogic.setDelayToMin(var1);
    }
 
    public void onUpdate() {

@@ -11,10 +11,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenFossils;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate.EventType;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BiomeSwamp extends Biome {
    protected static final IBlockState WATER_LILY = Blocks.WATERLILY.getDefaultState();
@@ -66,24 +62,9 @@ public class BiomeSwamp extends Biome {
 
    public void decorate(World var1, Random var2, BlockPos var3) {
       super.decorate(var1, var2, var3);
-      if (TerrainGen.decorate(var1, var2, var3, EventType.FOSSIL) && var2.nextInt(64) == 0) {
+      if (var2.nextInt(64) == 0) {
          (new WorldGenFossils()).generate(var1, var2, var3);
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getGrassColorAtPos(BlockPos var1) {
-      double var2 = GRASS_COLOR_NOISE.getValue((double)var1.getX() * 0.0225D, (double)var1.getZ() * 0.0225D);
-      return var2 < -0.1D ? 5011004 : 6975545;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFoliageColorAtPos(BlockPos var1) {
-      return 6975545;
-   }
-
-   public void addDefaultFlowers() {
-      this.addFlower(Blocks.RED_FLOWER.getDefaultState().withProperty(Blocks.RED_FLOWER.getTypeProperty(), BlockFlower.EnumFlowerType.BLUE_ORCHID), 10);
    }
 }

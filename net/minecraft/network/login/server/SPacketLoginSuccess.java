@@ -6,8 +6,6 @@ import java.util.UUID;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketLoginSuccess implements Packet {
    private GameProfile profile;
@@ -34,10 +32,5 @@ public class SPacketLoginSuccess implements Packet {
 
    public void processPacket(INetHandlerLoginClient var1) {
       var1.handleLoginSuccess(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public GameProfile getProfile() {
-      return this.profile;
    }
 }

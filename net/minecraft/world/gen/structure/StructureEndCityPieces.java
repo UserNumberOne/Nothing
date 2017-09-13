@@ -10,7 +10,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
@@ -235,7 +235,7 @@ public class StructureEndCityPieces {
       }
 
       private void loadAndSetup(BlockPos var1) {
-         Template var2 = StructureEndCityPieces.MANAGER.getTemplate((MinecraftServer)null, new ResourceLocation("endcity/" + this.pieceName));
+         Template var2 = StructureEndCityPieces.MANAGER.a((MinecraftServer)null, new ResourceLocation("endcity/" + this.pieceName));
          PlacementSettings var3;
          if (this.overwrite) {
             var3 = StructureEndCityPieces.OVERWRITE.copy().setRotation(this.rotation);

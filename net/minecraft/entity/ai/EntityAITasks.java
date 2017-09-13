@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 public class EntityAITasks {
    private static final Logger LOGGER = LogManager.getLogger();
-   public final Set taskEntries = Sets.newLinkedHashSet();
+   private final Set taskEntries = Sets.newLinkedHashSet();
    private final Set executingTaskEntries = Sets.newLinkedHashSet();
    private final Profiler theProfiler;
    private int tickCount;
@@ -138,7 +138,7 @@ public class EntityAITasks {
 
    }
 
-   public class EntityAITaskEntry {
+   class EntityAITaskEntry {
       public final EntityAIBase action;
       public final int priority;
       public boolean using;
@@ -149,7 +149,11 @@ public class EntityAITasks {
       }
 
       public boolean equals(@Nullable Object var1) {
-         return this == var1 ? true : (var1 != null && this.getClass() == var1.getClass() ? this.action.equals(((EntityAITasks.EntityAITaskEntry)var1).action) : false);
+         if (this == var1) {
+            return true;
+         } else {
+            return var1 != null && this.getClass() == var1.getClass() ? this.action.equals(((EntityAITasks.EntityAITaskEntry)var1).action) : false;
+         }
       }
 
       public int hashCode() {

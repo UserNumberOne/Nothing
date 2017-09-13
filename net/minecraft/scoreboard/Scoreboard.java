@@ -343,6 +343,5 @@ public class Scoreboard {
          this.removeObjectiveFromEntity(var2, (ScoreObjective)null);
          this.removePlayerFromTeams(var2);
       }
-
    }
 }

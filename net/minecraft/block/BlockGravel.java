@@ -6,8 +6,6 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockGravel extends BlockFalling {
    @Nullable
@@ -21,10 +19,5 @@ public class BlockGravel extends BlockFalling {
 
    public MapColor getMapColor(IBlockState var1) {
       return MapColor.STONE;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getDustColor(IBlockState var1) {
-      return -8356741;
    }
 }

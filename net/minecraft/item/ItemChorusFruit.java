@@ -3,44 +3,62 @@ package net.minecraft.item;
 import javax.annotation.Nullable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 public class ItemChorusFruit extends ItemFood {
-   public ItemChorusFruit(int var1, float var2) {
-      super(var1, var2, false);
+   public ItemChorusFruit(int i, float f) {
+      super(i, f, false);
    }
 
    @Nullable
-   public ItemStack onItemUseFinish(ItemStack var1, World var2, EntityLivingBase var3) {
-      ItemStack var4 = super.onItemUseFinish(var1, var2, var3);
-      if (!var2.isRemote) {
-         double var5 = var3.posX;
-         double var7 = var3.posY;
-         double var9 = var3.posZ;
+   public ItemStack onItemUseFinish(ItemStack itemstack, World world, EntityLivingBase entityliving) {
+      ItemStack itemstack1 = super.onItemUseFinish(itemstack, world, entityliving);
+      if (!world.isRemote) {
+         double d0 = entityliving.posX;
+         double d1 = entityliving.posY;
+         double d2 = entityliving.posZ;
 
-         for(int var11 = 0; var11 < 16; ++var11) {
-            double var12 = var3.posX + (var3.getRNG().nextDouble() - 0.5D) * 16.0D;
-            double var14 = MathHelper.clamp(var3.posY + (double)(var3.getRNG().nextInt(16) - 8), 0.0D, (double)(var2.getActualHeight() - 1));
-            double var16 = var3.posZ + (var3.getRNG().nextDouble() - 0.5D) * 16.0D;
-            if (var3.isRiding()) {
-               var3.dismountRidingEntity();
+         for(int i = 0; i < 16; ++i) {
+            double d3 = entityliving.posX + (entityliving.getRNG().nextDouble() - 0.5D) * 16.0D;
+            double d4 = MathHelper.clamp(entityliving.posY + (double)(entityliving.getRNG().nextInt(16) - 8), 0.0D, (double)(world.getActualHeight() - 1));
+            double d5 = entityliving.posZ + (entityliving.getRNG().nextDouble() - 0.5D) * 16.0D;
+            if (entityliving instanceof EntityPlayerMP) {
+               Player player = ((EntityPlayerMP)entityliving).getBukkitEntity();
+               PlayerTeleportEvent teleEvent = new PlayerTeleportEvent(player, player.getLocation(), new Location(player.getWorld(), d3, d4, d5), TeleportCause.CHORUS_FRUIT);
+               world.getServer().getPluginManager().callEvent(teleEvent);
+               if (teleEvent.isCancelled()) {
+                  break;
+               }
+
+               d3 = teleEvent.getTo().getX();
+               d4 = teleEvent.getTo().getY();
+               d5 = teleEvent.getTo().getZ();
             }
 
-            if (var3.attemptTeleport(var12, var14, var16)) {
-               var2.playSound((EntityPlayer)null, var5, var7, var9, SoundEvents.ITEM_CHORUS_FRUIT_TELEPORT, SoundCategory.PLAYERS, 1.0F, 1.0F);
-               var3.playSound(SoundEvents.ITEM_CHORUS_FRUIT_TELEPORT, 1.0F, 1.0F);
+            if (entityliving.isRiding()) {
+               entityliving.dismountRidingEntity();
+            }
+
+            if (entityliving.attemptTeleport(d3, d4, d5)) {
+               world.playSound((EntityPlayer)null, d0, d1, d2, SoundEvents.ITEM_CHORUS_FRUIT_TELEPORT, SoundCategory.PLAYERS, 1.0F, 1.0F);
+               entityliving.playSound(SoundEvents.ITEM_CHORUS_FRUIT_TELEPORT, 1.0F, 1.0F);
                break;
             }
          }
 
-         if (var3 instanceof EntityPlayer) {
-            ((EntityPlayer)var3).getCooldownTracker().setCooldown(this, 20);
+         if (entityliving instanceof EntityPlayer) {
+            ((EntityPlayer)entityliving).getCooldownTracker().setCooldown(this, 20);
          }
       }
 
-      return var4;
+      return itemstack1;
    }
 }

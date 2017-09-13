@@ -1,7 +1,6 @@
 package net.minecraft.block;
 
 import com.google.common.base.Predicate;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -10,22 +9,24 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockTorch extends Block {
    public static final PropertyDirection FACING = PropertyDirection.create("facing", new Predicate() {
       public boolean apply(@Nullable EnumFacing var1) {
          return var1 != EnumFacing.DOWN;
+      }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((EnumFacing)var1);
       }
    });
    protected static final AxisAlignedBB STANDING_AABB = new AxisAlignedBB(0.4000000059604645D, 0.0D, 0.4000000059604645D, 0.6000000238418579D, 0.6000000238418579D, 0.6000000238418579D);
@@ -70,8 +71,12 @@ public class BlockTorch extends Block {
    }
 
    private boolean canPlaceOn(World var1, BlockPos var2) {
-      IBlockState var3 = var1.getBlockState(var2);
-      return var3.isSideSolid(var1, var2, EnumFacing.UP) ? true : var3.getBlock().canPlaceTorchOnTop(var3, var1, var2);
+      if (var1.getBlockState(var2).isFullyOpaque()) {
+         return true;
+      } else {
+         Block var3 = var1.getBlockState(var2).getBlock();
+         return var3 instanceof BlockFence || var3 == Blocks.GLASS || var3 == Blocks.COBBLESTONE_WALL || var3 == Blocks.STAINED_GLASS;
+      }
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
@@ -87,7 +92,7 @@ public class BlockTorch extends Block {
    private boolean canPlaceAt(World var1, BlockPos var2, EnumFacing var3) {
       BlockPos var4 = var2.offset(var3.getOpposite());
       boolean var5 = var3.getAxis().isHorizontal();
-      return var5 && var1.isSideSolid(var4, var3, true) || var3.equals(EnumFacing.UP) && this.canPlaceOn(var1, var4);
+      return var5 && var1.isBlockNormalCube(var4, true) || var3.equals(EnumFacing.UP) && this.canPlaceOn(var1, var4);
    }
 
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
@@ -95,7 +100,7 @@ public class BlockTorch extends Block {
          return this.getDefaultState().withProperty(FACING, var3);
       } else {
          for(EnumFacing var10 : EnumFacing.Plane.HORIZONTAL) {
-            if (var1.isSideSolid(var2.offset(var10.getOpposite()), var10, true)) {
+            if (var1.isBlockNormalCube(var2.offset(var10.getOpposite()), true)) {
                return this.getDefaultState().withProperty(FACING, var10);
             }
          }
@@ -120,7 +125,7 @@ public class BlockTorch extends Block {
          EnumFacing.Axis var5 = var4.getAxis();
          EnumFacing var6 = var4.getOpposite();
          boolean var7 = false;
-         if (var5.isHorizontal() && !var1.isSideSolid(var2.offset(var6), var4, true)) {
+         if (var5.isHorizontal() && !var1.isBlockNormalCube(var2.offset(var6), true)) {
             var7 = true;
          } else if (var5.isVertical() && !this.canPlaceOn(var1, var2.offset(var6))) {
             var7 = true;
@@ -149,25 +154,6 @@ public class BlockTorch extends Block {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      EnumFacing var5 = (EnumFacing)var1.getValue(FACING);
-      double var6 = (double)var3.getX() + 0.5D;
-      double var8 = (double)var3.getY() + 0.7D;
-      double var10 = (double)var3.getZ() + 0.5D;
-      double var12 = 0.22D;
-      double var14 = 0.27D;
-      if (var5.getAxis().isHorizontal()) {
-         EnumFacing var16 = var5.getOpposite();
-         var2.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6 + 0.27D * (double)var16.getFrontOffsetX(), var8 + 0.22D, var10 + 0.27D * (double)var16.getFrontOffsetZ(), 0.0D, 0.0D, 0.0D);
-         var2.spawnParticle(EnumParticleTypes.FLAME, var6 + 0.27D * (double)var16.getFrontOffsetX(), var8 + 0.22D, var10 + 0.27D * (double)var16.getFrontOffsetZ(), 0.0D, 0.0D, 0.0D);
-      } else {
-         var2.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6, var8, var10, 0.0D, 0.0D, 0.0D);
-         var2.spawnParticle(EnumParticleTypes.FLAME, var6, var8, var10, 0.0D, 0.0D, 0.0D);
-      }
-
-   }
-
    public IBlockState getStateFromMeta(int var1) {
       IBlockState var2 = this.getDefaultState();
       switch(var1) {
@@ -189,11 +175,6 @@ public class BlockTorch extends Block {
       }
 
       return var2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 
    public int getMetaFromState(IBlockState var1) {

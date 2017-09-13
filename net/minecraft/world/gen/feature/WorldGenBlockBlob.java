@@ -18,15 +18,15 @@ public class WorldGenBlockBlob extends WorldGenerator {
 
    public boolean generate(World var1, Random var2, BlockPos var3) {
       while(true) {
-         label51: {
+         label50: {
             if (var3.getY() > 3) {
                if (var1.isAirBlock(var3.down())) {
-                  break label51;
+                  break label50;
                }
 
                Block var4 = var1.getBlockState(var3.down()).getBlock();
                if (var4 != Blocks.GRASS && var4 != Blocks.DIRT && var4 != Blocks.STONE) {
-                  break label51;
+                  break label50;
                }
             }
 

@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.SoundCategory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.Validate;
 
 public class SPacketCustomSound implements Packet {
@@ -52,42 +50,7 @@ public class SPacketCustomSound implements Packet {
       var1.writeFloat(this.pitch);
    }
 
-   @SideOnly(Side.CLIENT)
-   public String getSoundName() {
-      return this.soundName;
-   }
-
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleCustomSound(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SoundCategory getCategory() {
-      return this.category;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return (double)((float)this.x / 8.0F);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return (double)((float)this.y / 8.0F);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return (double)((float)this.z / 8.0F);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getVolume() {
-      return this.volume;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getPitch() {
-      return this.pitch;
    }
 }

@@ -6,8 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketWindowItems implements Packet {
    private int windowId;
@@ -50,15 +48,5 @@ public class SPacketWindowItems implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleWindowItems(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getWindowId() {
-      return this.windowId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ItemStack[] getItemStacks() {
-      return this.itemStacks;
    }
 }

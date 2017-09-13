@@ -1,14 +1,11 @@
 package net.minecraft.world.gen;
 
 import java.util.Random;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
 
 public class MapGenRavine extends MapGenBase {
@@ -27,10 +24,10 @@ public class MapGenRavine extends MapGenBase {
          var16 = var26 - var19.nextInt(var26 / 4);
       }
 
-      boolean var62 = false;
+      boolean var67 = false;
       if (var15 == -1) {
          var15 = var16 / 2;
-         var62 = true;
+         var67 = true;
       }
 
       float var27 = 1.0F;
@@ -44,15 +41,15 @@ public class MapGenRavine extends MapGenBase {
       }
 
       for(; var15 < var16; ++var15) {
-         double var63 = 1.5D + (double)(MathHelper.sin((float)var15 * 3.1415927F / (float)var16) * var12);
-         double var30 = var63 * var17;
-         var63 = var63 * ((double)var19.nextFloat() * 0.25D + 0.75D);
-         var30 = var30 * ((double)var19.nextFloat() * 0.25D + 0.75D);
-         float var32 = MathHelper.cos(var14);
-         float var33 = MathHelper.sin(var14);
-         var6 += (double)(MathHelper.cos(var13) * var32);
-         var8 += (double)var33;
-         var10 += (double)(MathHelper.sin(var13) * var32);
+         double var29 = 1.5D + (double)(MathHelper.sin((float)var15 * 3.1415927F / (float)var16) * var12);
+         double var31 = var29 * var17;
+         var29 = var29 * ((double)var19.nextFloat() * 0.25D + 0.75D);
+         var31 = var31 * ((double)var19.nextFloat() * 0.25D + 0.75D);
+         float var33 = MathHelper.cos(var14);
+         float var34 = MathHelper.sin(var14);
+         var6 += (double)(MathHelper.cos(var13) * var33);
+         var8 += (double)var34;
+         var10 += (double)(MathHelper.sin(var13) * var33);
          var14 = var14 * 0.7F;
          var14 = var14 + var25 * 0.05F;
          var13 += var24 * 0.05F;
@@ -60,87 +57,101 @@ public class MapGenRavine extends MapGenBase {
          var24 = var24 * 0.5F;
          var25 = var25 + (var19.nextFloat() - var19.nextFloat()) * var19.nextFloat() * 2.0F;
          var24 = var24 + (var19.nextFloat() - var19.nextFloat()) * var19.nextFloat() * 4.0F;
-         if (var62 || var19.nextInt(4) != 0) {
-            double var34 = var6 - var20;
-            double var36 = var10 - var22;
-            double var38 = (double)(var16 - var15);
-            double var40 = (double)(var12 + 2.0F + 16.0F);
-            if (var34 * var34 + var36 * var36 - var38 * var38 > var40 * var40) {
+         if (var67 || var19.nextInt(4) != 0) {
+            double var35 = var6 - var20;
+            double var37 = var10 - var22;
+            double var39 = (double)(var16 - var15);
+            double var41 = (double)(var12 + 2.0F + 16.0F);
+            if (var35 * var35 + var37 * var37 - var39 * var39 > var41 * var41) {
                return;
             }
 
-            if (var6 >= var20 - 16.0D - var63 * 2.0D && var10 >= var22 - 16.0D - var63 * 2.0D && var6 <= var20 + 16.0D + var63 * 2.0D && var10 <= var22 + 16.0D + var63 * 2.0D) {
-               int var42 = MathHelper.floor(var6 - var63) - var3 * 16 - 1;
-               int var43 = MathHelper.floor(var6 + var63) - var3 * 16 + 1;
-               int var44 = MathHelper.floor(var8 - var30) - 1;
-               int var45 = MathHelper.floor(var8 + var30) + 1;
-               int var46 = MathHelper.floor(var10 - var63) - var4 * 16 - 1;
-               int var47 = MathHelper.floor(var10 + var63) - var4 * 16 + 1;
-               if (var42 < 0) {
-                  var42 = 0;
+            if (var6 >= var20 - 16.0D - var29 * 2.0D && var10 >= var22 - 16.0D - var29 * 2.0D && var6 <= var20 + 16.0D + var29 * 2.0D && var10 <= var22 + 16.0D + var29 * 2.0D) {
+               int var43 = MathHelper.floor(var6 - var29) - var3 * 16 - 1;
+               int var44 = MathHelper.floor(var6 + var29) - var3 * 16 + 1;
+               int var45 = MathHelper.floor(var8 - var31) - 1;
+               int var46 = MathHelper.floor(var8 + var31) + 1;
+               int var47 = MathHelper.floor(var10 - var29) - var4 * 16 - 1;
+               int var48 = MathHelper.floor(var10 + var29) - var4 * 16 + 1;
+               if (var43 < 0) {
+                  var43 = 0;
                }
 
-               if (var43 > 16) {
-                  var43 = 16;
+               if (var44 > 16) {
+                  var44 = 16;
                }
 
-               if (var44 < 1) {
-                  var44 = 1;
+               if (var45 < 1) {
+                  var45 = 1;
                }
 
-               if (var45 > 248) {
-                  var45 = 248;
+               if (var46 > 248) {
+                  var46 = 248;
                }
 
-               if (var46 < 0) {
-                  var46 = 0;
+               if (var47 < 0) {
+                  var47 = 0;
                }
 
-               if (var47 > 16) {
-                  var47 = 16;
+               if (var48 > 16) {
+                  var48 = 16;
                }
 
-               boolean var48 = false;
+               boolean var49 = false;
 
-               for(int var49 = var42; !var48 && var49 < var43; ++var49) {
-                  for(int var50 = var46; !var48 && var50 < var47; ++var50) {
-                     for(int var51 = var45 + 1; !var48 && var51 >= var44 - 1; --var51) {
-                        if (var51 >= 0 && var51 < 256) {
-                           if (this.isOceanBlock(var5, var49, var51, var50, var3, var4)) {
-                              var48 = true;
+               for(int var50 = var43; !var49 && var50 < var44; ++var50) {
+                  for(int var51 = var47; !var49 && var51 < var48; ++var51) {
+                     for(int var52 = var46 + 1; !var49 && var52 >= var45 - 1; --var52) {
+                        if (var52 >= 0 && var52 < 256) {
+                           IBlockState var53 = var5.getBlockState(var50, var52, var51);
+                           if (var53.getBlock() == Blocks.FLOWING_WATER || var53.getBlock() == Blocks.WATER) {
+                              var49 = true;
                            }
 
-                           if (var51 != var44 - 1 && var49 != var42 && var49 != var43 - 1 && var50 != var46 && var50 != var47 - 1) {
-                              var51 = var44;
+                           if (var52 != var45 - 1 && var50 != var43 && var50 != var44 - 1 && var51 != var47 && var51 != var48 - 1) {
+                              var52 = var45;
                            }
                         }
                      }
                   }
                }
 
-               if (!var48) {
-                  for(int var66 = var42; var66 < var43; ++var66) {
-                     double var67 = ((double)(var66 + var3 * 16) + 0.5D - var6) / var63;
+               if (!var49) {
+                  BlockPos.MutableBlockPos var70 = new BlockPos.MutableBlockPos();
 
-                     for(int var52 = var46; var52 < var47; ++var52) {
-                        double var53 = ((double)(var52 + var4 * 16) + 0.5D - var10) / var63;
-                        boolean var55 = false;
-                        if (var67 * var67 + var53 * var53 < 1.0D) {
-                           for(int var56 = var45; var56 > var44; --var56) {
-                              double var57 = ((double)(var56 - 1) + 0.5D - var8) / var30;
-                              if ((var67 * var67 + var53 * var53) * (double)this.rs[var56 - 1] + var57 * var57 / 6.0D < 1.0D) {
-                                 if (this.isTopBlock(var5, var66, var56, var52, var3, var4)) {
-                                    var55 = true;
+                  for(int var71 = var43; var71 < var44; ++var71) {
+                     double var54 = ((double)(var71 + var3 * 16) + 0.5D - var6) / var29;
+
+                     for(int var56 = var47; var56 < var48; ++var56) {
+                        double var57 = ((double)(var56 + var4 * 16) + 0.5D - var10) / var29;
+                        boolean var59 = false;
+                        if (var54 * var54 + var57 * var57 < 1.0D) {
+                           for(int var60 = var46; var60 > var45; --var60) {
+                              double var61 = ((double)(var60 - 1) + 0.5D - var8) / var31;
+                              if ((var54 * var54 + var57 * var57) * (double)this.rs[var60 - 1] + var61 * var61 / 6.0D < 1.0D) {
+                                 IBlockState var63 = var5.getBlockState(var71, var60, var56);
+                                 if (var63.getBlock() == Blocks.GRASS) {
+                                    var59 = true;
                                  }
 
-                                 this.digBlock(var5, var66, var56, var52, var3, var4, var55);
+                                 if (var63.getBlock() == Blocks.STONE || var63.getBlock() == Blocks.DIRT || var63.getBlock() == Blocks.GRASS) {
+                                    if (var60 - 1 < 10) {
+                                       var5.setBlockState(var71, var60, var56, FLOWING_LAVA);
+                                    } else {
+                                       var5.setBlockState(var71, var60, var56, AIR);
+                                       if (var59 && var5.getBlockState(var71, var60 - 1, var56).getBlock() == Blocks.DIRT) {
+                                          var70.setPos(var71 + var3 * 16, 0, var56 + var4 * 16);
+                                          var5.setBlockState(var71, var60 - 1, var56, this.world.getBiome(var70).topBlock);
+                                       }
+                                    }
+                                 }
                               }
                            }
                         }
                      }
                   }
 
-                  if (var62) {
+                  if (var67) {
                      break;
                   }
                }
@@ -163,48 +174,7 @@ public class MapGenRavine extends MapGenBase {
             float var17 = (this.rand.nextFloat() * 2.0F + this.rand.nextFloat()) * 2.0F;
             this.addTunnel(this.rand.nextLong(), var4, var5, var6, var7, var9, var11, var17, var15, var16, 0, 0, 3.0D);
          }
+
       }
-
-   }
-
-   protected boolean isOceanBlock(ChunkPrimer var1, int var2, int var3, int var4, int var5, int var6) {
-      Block var7 = var1.getBlockState(var2, var3, var4).getBlock();
-      return var7 == Blocks.FLOWING_WATER || var7 == Blocks.WATER;
-   }
-
-   private boolean isExceptionBiome(Biome var1) {
-      if (var1 == Biomes.BEACH) {
-         return true;
-      } else if (var1 == Biomes.DESERT) {
-         return true;
-      } else if (var1 == Biomes.MUSHROOM_ISLAND) {
-         return true;
-      } else {
-         return var1 == Biomes.MUSHROOM_ISLAND_SHORE;
-      }
-   }
-
-   private boolean isTopBlock(ChunkPrimer var1, int var2, int var3, int var4, int var5, int var6) {
-      Biome var7 = this.world.getBiome(new BlockPos(var2 + var5 * 16, 0, var4 + var6 * 16));
-      IBlockState var8 = var1.getBlockState(var2, var3, var4);
-      return this.isExceptionBiome(var7) ? var8.getBlock() == Blocks.GRASS : var8.getBlock() == var7.topBlock;
-   }
-
-   protected void digBlock(ChunkPrimer var1, int var2, int var3, int var4, int var5, int var6, boolean var7) {
-      Biome var8 = this.world.getBiome(new BlockPos(var2 + var5 * 16, 0, var4 + var6 * 16));
-      IBlockState var9 = var1.getBlockState(var2, var3, var4);
-      IBlockState var10 = this.isExceptionBiome(var8) ? Blocks.GRASS.getDefaultState() : var8.topBlock;
-      IBlockState var11 = this.isExceptionBiome(var8) ? Blocks.DIRT.getDefaultState() : var8.fillerBlock;
-      if (var9.getBlock() == Blocks.STONE || var9.getBlock() == var10.getBlock() || var9.getBlock() == var11.getBlock()) {
-         if (var3 - 1 < 10) {
-            var1.setBlockState(var2, var3, var4, FLOWING_LAVA);
-         } else {
-            var1.setBlockState(var2, var3, var4, AIR);
-            if (var7 && var1.getBlockState(var2, var3 - 1, var4).getBlock() == var11.getBlock()) {
-               var1.setBlockState(var2, var3 - 1, var4, var10.getBlock().getDefaultState());
-            }
-         }
-      }
-
    }
 }

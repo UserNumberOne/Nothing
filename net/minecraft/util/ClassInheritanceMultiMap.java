@@ -11,96 +11,96 @@ import java.util.Map;
 import java.util.Set;
 
 public class ClassInheritanceMultiMap extends AbstractSet {
-   private static final Set ALL_KNOWN = Sets.newHashSet();
+   private static final Set ALL_KNOWN = Sets.newConcurrentHashSet();
    private final Map map = Maps.newHashMap();
    private final Set knownKeys = Sets.newIdentityHashSet();
    private final Class baseClass;
    private final List values = Lists.newArrayList();
 
-   public ClassInheritanceMultiMap(Class var1) {
-      this.baseClass = var1;
-      this.knownKeys.add(var1);
-      this.map.put(var1, this.values);
+   public ClassInheritanceMultiMap(Class oclass) {
+      this.baseClass = oclass;
+      this.knownKeys.add(oclass);
+      this.map.put(oclass, this.values);
 
-      for(Class var3 : ALL_KNOWN) {
-         this.createLookup(var3);
+      for(Class oclass1 : ALL_KNOWN) {
+         this.createLookup(oclass1);
       }
 
    }
 
-   protected void createLookup(Class var1) {
-      ALL_KNOWN.add(var1);
+   protected void createLookup(Class oclass) {
+      ALL_KNOWN.add(oclass);
 
-      for(Object var3 : this.values) {
-         if (var1.isAssignableFrom(var3.getClass())) {
-            this.addForClass(var3, var1);
+      for(Object object : this.values) {
+         if (oclass.isAssignableFrom(object.getClass())) {
+            this.addForClass(object, oclass);
          }
       }
 
-      this.knownKeys.add(var1);
+      this.knownKeys.add(oclass);
    }
 
-   protected Class initializeClassLookup(Class var1) {
-      if (this.baseClass.isAssignableFrom(var1)) {
-         if (!this.knownKeys.contains(var1)) {
-            this.createLookup(var1);
+   protected Class initializeClassLookup(Class oclass) {
+      if (this.baseClass.isAssignableFrom(oclass)) {
+         if (!this.knownKeys.contains(oclass)) {
+            this.createLookup(oclass);
          }
 
-         return var1;
+         return oclass;
       } else {
-         throw new IllegalArgumentException("Don't know how to search for " + var1);
+         throw new IllegalArgumentException("Don't know how to search for " + oclass);
       }
    }
 
-   public boolean add(Object var1) {
-      for(Class var3 : this.knownKeys) {
-         if (var3.isAssignableFrom(var1.getClass())) {
-            this.addForClass(var1, var3);
+   public boolean add(Object t0) {
+      for(Class oclass : this.knownKeys) {
+         if (oclass.isAssignableFrom(t0.getClass())) {
+            this.addForClass(t0, oclass);
          }
       }
 
       return true;
    }
 
-   private void addForClass(Object var1, Class var2) {
-      List var3 = (List)this.map.get(var2);
-      if (var3 == null) {
-         this.map.put(var2, Lists.newArrayList(new Object[]{var1}));
+   private void addForClass(Object t0, Class oclass) {
+      List list = (List)this.map.get(oclass);
+      if (list == null) {
+         this.map.put(oclass, Lists.newArrayList(new Object[]{t0}));
       } else {
-         var3.add(var1);
+         list.add(t0);
       }
 
    }
 
-   public boolean remove(Object var1) {
-      Object var2 = var1;
-      boolean var3 = false;
+   public boolean remove(Object object) {
+      Object object1 = object;
+      boolean flag = false;
 
-      for(Class var5 : this.knownKeys) {
-         if (var5.isAssignableFrom(var2.getClass())) {
-            List var6 = (List)this.map.get(var5);
-            if (var6 != null && var6.remove(var2)) {
-               var3 = true;
+      for(Class oclass : this.knownKeys) {
+         if (oclass.isAssignableFrom(object1.getClass())) {
+            List list = (List)this.map.get(oclass);
+            if (list != null && list.remove(object1)) {
+               flag = true;
             }
          }
       }
 
-      return var3;
+      return flag;
    }
 
-   public boolean contains(Object var1) {
-      return Iterators.contains(this.getByClass(var1.getClass()).iterator(), var1);
+   public boolean contains(Object object) {
+      return Iterators.contains(this.getByClass(object.getClass()).iterator(), object);
    }
 
-   public Iterable getByClass(final Class var1) {
+   public Iterable getByClass(final Class oclass) {
       return new Iterable() {
          public Iterator iterator() {
-            List var1x = (List)ClassInheritanceMultiMap.this.map.get(ClassInheritanceMultiMap.this.initializeClassLookup(var1));
-            if (var1x == null) {
+            List list = (List)ClassInheritanceMultiMap.this.map.get(ClassInheritanceMultiMap.this.initializeClassLookup(oclass));
+            if (list == null) {
                return Iterators.emptyIterator();
             } else {
-               Iterator var2 = var1x.iterator();
-               return Iterators.filter(var2, var1);
+               Iterator iterator = list.iterator();
+               return Iterators.filter(iterator, oclass);
             }
          }
       };

@@ -29,6 +29,11 @@ public class ItemGlassBottle extends Item {
          public boolean apply(@Nullable EntityAreaEffectCloud var1) {
             return var1 != null && var1.isEntityAlive() && var1.getOwner() instanceof EntityDragon;
          }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1) {
+            return this.apply((EntityAreaEffectCloud)var1);
+         }
       });
       if (!var5.isEmpty()) {
          EntityAreaEffectCloud var8 = (EntityAreaEffectCloud)var5.get(0);

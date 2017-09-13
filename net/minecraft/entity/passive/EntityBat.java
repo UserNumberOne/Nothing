@@ -132,7 +132,7 @@ public class EntityBat extends EntityAmbientCreature {
          this.motionX += (Math.signum(var3) * 0.5D - this.motionX) * 0.10000000149011612D;
          this.motionY += (Math.signum(var5) * 0.699999988079071D - this.motionY) * 0.10000000149011612D;
          this.motionZ += (Math.signum(var7) * 0.5D - this.motionZ) * 0.10000000149011612D;
-         float var9 = (float)(MathHelper.atan2(this.motionZ, this.motionX) * 57.29577951308232D) - 90.0F;
+         float var9 = (float)(MathHelper.atan2(this.motionZ, this.motionX) * 57.2957763671875D) - 90.0F;
          float var10 = MathHelper.wrapDegrees(var9 - this.rotationYaw);
          this.moveForward = 0.5F;
          this.rotationYaw += var10;

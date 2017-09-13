@@ -13,8 +13,6 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemSlab extends ItemBlock {
    private final BlockSlab singleSlab;
@@ -48,7 +46,7 @@ public class ItemSlab extends ItemBlock {
                IBlockState var15 = this.makeState(var12, var13);
                AxisAlignedBB var16 = var15.getCollisionBoundingBox(var3, var4);
                if (var16 != Block.NULL_AABB && var3.checkNoEntityCollision(var16.offset(var4)) && var3.setBlockState(var4, var15, 11)) {
-                  SoundType var17 = this.doubleSlab.getSoundType(var15, var3, var4, var2);
+                  SoundType var17 = this.doubleSlab.getSoundType();
                   var3.playSound(var2, var4, var17.getPlaceSound(), SoundCategory.BLOCKS, (var17.getVolume() + 1.0F) / 2.0F, var17.getPitch() * 0.8F);
                   --var1.stackSize;
                }
@@ -63,24 +61,6 @@ public class ItemSlab extends ItemBlock {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean canPlaceBlockOnSide(World var1, BlockPos var2, EnumFacing var3, EntityPlayer var4, ItemStack var5) {
-      BlockPos var6 = var2;
-      IProperty var7 = this.singleSlab.getVariantProperty();
-      Comparable var8 = this.singleSlab.getTypeForItem(var5);
-      IBlockState var9 = var1.getBlockState(var2);
-      if (var9.getBlock() == this.singleSlab) {
-         boolean var10 = var9.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP;
-         if ((var3 == EnumFacing.UP && !var10 || var3 == EnumFacing.DOWN && var10) && var8 == var9.getValue(var7)) {
-            return true;
-         }
-      }
-
-      var2 = var2.offset(var3);
-      IBlockState var12 = var1.getBlockState(var2);
-      return var12.getBlock() == this.singleSlab && var8 == var12.getValue(var7) ? true : super.canPlaceBlockOnSide(var1, var6, var3, var4, var5);
-   }
-
    private boolean tryPlace(EntityPlayer var1, ItemStack var2, World var3, BlockPos var4, Object var5) {
       IBlockState var6 = var3.getBlockState(var4);
       if (var6.getBlock() == this.singleSlab) {
@@ -89,7 +69,7 @@ public class ItemSlab extends ItemBlock {
             IBlockState var8 = this.makeState(this.singleSlab.getVariantProperty(), var7);
             AxisAlignedBB var9 = var8.getCollisionBoundingBox(var3, var4);
             if (var9 != Block.NULL_AABB && var3.checkNoEntityCollision(var9.offset(var4)) && var3.setBlockState(var4, var8, 11)) {
-               SoundType var10 = this.doubleSlab.getSoundType(var8, var3, var4, var1);
+               SoundType var10 = this.doubleSlab.getSoundType();
                var3.playSound(var1, var4, var10.getPlaceSound(), SoundCategory.BLOCKS, (var10.getVolume() + 1.0F) / 2.0F, var10.getPitch() * 0.8F);
                --var2.stackSize;
             }

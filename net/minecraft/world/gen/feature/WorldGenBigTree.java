@@ -6,10 +6,9 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLog;
-import net.minecraft.block.BlockSapling;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -82,8 +81,8 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
          for(int var6 = -var4; var6 <= var4; ++var6) {
             if (Math.pow((double)Math.abs(var5) + 0.5D, 2.0D) + Math.pow((double)Math.abs(var6) + 0.5D, 2.0D) <= (double)(var2 * var2)) {
                BlockPos var7 = var1.add(var5, 0, var6);
-               IBlockState var8 = this.world.getBlockState(var7);
-               if (var8.getBlock().isAir(var8, this.world, var7) || var8.getBlock().isLeaves(var8, this.world, var7)) {
+               Material var8 = this.world.getBlockState(var7).getMaterial();
+               if (var8 == Material.AIR || var8 == Material.LEAVES) {
                   this.setBlockAndNotifyAdequately(this.world, var7, var3);
                }
             }
@@ -110,7 +109,11 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
    }
 
    float leafSize(int var1) {
-      return var1 >= 0 && var1 < this.leafDistanceLimit ? (var1 != 0 && var1 != this.leafDistanceLimit - 1 ? 3.0F : 2.0F) : -1.0F;
+      if (var1 >= 0 && var1 < this.leafDistanceLimit) {
+         return var1 != 0 && var1 != this.leafDistanceLimit - 1 ? 3.0F : 2.0F;
+      } else {
+         return -1.0F;
+      }
    }
 
    void generateLeafNode(BlockPos var1) {
@@ -139,7 +142,11 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
       int var2 = MathHelper.abs(var1.getX());
       int var3 = MathHelper.abs(var1.getY());
       int var4 = MathHelper.abs(var1.getZ());
-      return var4 > var2 && var4 > var3 ? var4 : (var3 > var2 ? var3 : var2);
+      if (var4 > var2 && var4 > var3) {
+         return var4;
+      } else {
+         return var3 > var2 ? var3 : var2;
+      }
    }
 
    private BlockLog.EnumAxis getLogAxis(BlockPos var1, BlockPos var2) {
@@ -204,7 +211,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
       } else {
          for(int var8 = 0; var8 <= var4; ++var8) {
             BlockPos var9 = var1.add((double)(0.5F + (float)var8 * var5), (double)(0.5F + (float)var8 * var6), (double)(0.5F + (float)var8 * var7));
-            if (!this.isReplaceable(this.world, var9)) {
+            if (!this.canGrowInto(this.world.getBlockState(var9).getBlock())) {
                return var8;
             }
          }
@@ -226,32 +233,28 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
       }
 
       if (!this.validTreeLocation()) {
-         this.world = null;
          return false;
       } else {
          this.generateLeafNodeList();
          this.generateLeaves();
          this.generateTrunk();
          this.generateLeafNodeBases();
-         this.world = null;
          return true;
       }
    }
 
    private boolean validTreeLocation() {
-      BlockPos var1 = this.basePos.down();
-      IBlockState var2 = this.world.getBlockState(var1);
-      boolean var3 = var2.getBlock().canSustainPlant(var2, this.world, var1, EnumFacing.UP, (BlockSapling)Blocks.SAPLING);
-      if (!var3) {
+      Block var1 = this.world.getBlockState(this.basePos.down()).getBlock();
+      if (var1 != Blocks.DIRT && var1 != Blocks.GRASS && var1 != Blocks.FARMLAND) {
          return false;
       } else {
-         int var4 = this.checkBlockLine(this.basePos, this.basePos.up(this.heightLimit - 1));
-         if (var4 == -1) {
+         int var2 = this.checkBlockLine(this.basePos, this.basePos.up(this.heightLimit - 1));
+         if (var2 == -1) {
             return true;
-         } else if (var4 < 6) {
+         } else if (var2 < 6) {
             return false;
          } else {
-            this.heightLimit = var4;
+            this.heightLimit = var2;
             return true;
          }
       }

@@ -9,8 +9,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 public class ObjectIntIdentityMap implements IObjectIntIterable {
-   protected final IdentityHashMap identityMap;
-   protected final List objectList;
+   private final IdentityHashMap identityMap;
+   private final List objectList;
 
    public ObjectIntIdentityMap() {
       this(512);

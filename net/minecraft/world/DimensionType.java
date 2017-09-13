@@ -2,7 +2,6 @@ package net.minecraft.world;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import net.minecraftforge.common.util.EnumHelper;
 
 public enum DimensionType {
    OVERWORLD(0, "Overworld", "", WorldProviderSurface.class),
@@ -13,15 +12,12 @@ public enum DimensionType {
    private final String name;
    private final String suffix;
    private final Class clazz;
-   private boolean shouldLoadSpawn = false;
-   private static Class[] ENUM_ARGS = new Class[]{Integer.TYPE, String.class, String.class, Class.class};
 
    private DimensionType(int var3, String var4, String var5, Class var6) {
       this.id = var3;
       this.name = var4;
       this.suffix = var5;
       this.clazz = var6;
-      this.shouldLoadSpawn = var3 == 0;
    }
 
    public int getId() {
@@ -59,24 +55,5 @@ public enum DimensionType {
       }
 
       throw new IllegalArgumentException("Invalid dimension id " + var0);
-   }
-
-   public boolean shouldLoadSpawn() {
-      return this.shouldLoadSpawn;
-   }
-
-   public DimensionType setLoadSpawn(boolean var1) {
-      this.shouldLoadSpawn = var1;
-      return this;
-   }
-
-   public static DimensionType register(String var0, String var1, int var2, Class var3, boolean var4) {
-      String var5 = var0.replace(" ", "_").toLowerCase();
-      DimensionType var6 = (DimensionType)EnumHelper.addEnum(DimensionType.class, var5, ENUM_ARGS, new Object[]{var2, var0, var1, var3});
-      return var6.setLoadSpawn(var4);
-   }
-
-   static {
-      EnumHelper.testEnum(DimensionType.class, ENUM_ARGS);
    }
 }

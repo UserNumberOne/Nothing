@@ -6,8 +6,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketScoreboardObjective implements Packet {
    private String objectiveName;
@@ -47,25 +45,5 @@ public class SPacketScoreboardObjective implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleScoreboardObjective(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getObjectiveName() {
-      return this.objectiveName;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getObjectiveValue() {
-      return this.objectiveValue;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getAction() {
-      return this.action;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public IScoreCriteria.EnumRenderType getRenderType() {
-      return this.type;
    }
 }

@@ -13,11 +13,8 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.IntCache;
 import net.minecraft.world.storage.WorldInfo;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.terraingen.WorldTypeEvent.InitBiomeGens;
 
 public class BiomeProvider {
-   public static List allowedBiomes = Lists.newArrayList(new Biome[]{Biomes.FOREST, Biomes.PLAINS, Biomes.TAIGA, Biomes.TAIGA_HILLS, Biomes.FOREST_HILLS, Biomes.JUNGLE, Biomes.JUNGLE_HILLS});
    private GenLayer genBiomes;
    private GenLayer biomeIndexLayer;
    private final BiomeCache biomeCache;
@@ -25,13 +22,12 @@ public class BiomeProvider {
 
    protected BiomeProvider() {
       this.biomeCache = new BiomeCache(this);
-      this.biomesToSpawnIn = Lists.newArrayList(allowedBiomes);
+      this.biomesToSpawnIn = Lists.newArrayList(new Biome[]{Biomes.FOREST, Biomes.PLAINS, Biomes.TAIGA, Biomes.TAIGA_HILLS, Biomes.FOREST_HILLS, Biomes.JUNGLE, Biomes.JUNGLE_HILLS});
    }
 
    private BiomeProvider(long var1, WorldType var3, String var4) {
       this();
       GenLayer[] var5 = GenLayer.initializeAllBiomeGenerators(var1, var3, var4);
-      var5 = this.getModdedBiomeGenerators(var3, var1, var5);
       this.genBiomes = var5[0];
       this.biomeIndexLayer = var5[1];
    }
@@ -166,11 +162,5 @@ public class BiomeProvider {
 
    public void cleanupCache() {
       this.biomeCache.cleanupCache();
-   }
-
-   public GenLayer[] getModdedBiomeGenerators(WorldType var1, long var2, GenLayer[] var4) {
-      InitBiomeGens var5 = new InitBiomeGens(var1, var2, var4);
-      MinecraftForge.TERRAIN_GEN_BUS.post(var5);
-      return var5.getNewBiomeGens();
    }
 }

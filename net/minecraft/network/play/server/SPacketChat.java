@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketChat implements Packet {
    private ITextComponent chatComponent;
@@ -38,17 +36,7 @@ public class SPacketChat implements Packet {
       var1.handleChat(this);
    }
 
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getChatComponent() {
-      return this.chatComponent;
-   }
-
    public boolean isSystem() {
       return this.type == 1 || this.type == 2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getType() {
-      return this.type;
    }
 }

@@ -6,8 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityAttach implements Packet {
    private int entityId;
@@ -33,15 +31,5 @@ public class SPacketEntityAttach implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleEntityAttach(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getVehicleEntityId() {
-      return this.vehicleEntityId;
    }
 }

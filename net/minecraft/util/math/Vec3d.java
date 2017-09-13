@@ -43,10 +43,6 @@ public class Vec3d {
       return this.xCoord * var1.xCoord + this.yCoord * var1.yCoord + this.zCoord * var1.zCoord;
    }
 
-   public Vec3d crossProduct(Vec3d var1) {
-      return new Vec3d(this.yCoord * var1.zCoord - this.zCoord * var1.yCoord, this.zCoord * var1.xCoord - this.xCoord * var1.zCoord, this.xCoord * var1.yCoord - this.yCoord * var1.xCoord);
-   }
-
    public Vec3d subtract(Vec3d var1) {
       return this.subtract(var1.xCoord, var1.yCoord, var1.zCoord);
    }
@@ -90,10 +86,6 @@ public class Vec3d {
 
    public double lengthVector() {
       return (double)MathHelper.sqrt(this.xCoord * this.xCoord + this.yCoord * this.yCoord + this.zCoord * this.zCoord);
-   }
-
-   public double lengthSquared() {
-      return this.xCoord * this.xCoord + this.yCoord * this.yCoord + this.zCoord * this.zCoord;
    }
 
    @Nullable
@@ -142,7 +134,13 @@ public class Vec3d {
          return false;
       } else {
          Vec3d var2 = (Vec3d)var1;
-         return Double.compare(var2.xCoord, this.xCoord) != 0 ? false : (Double.compare(var2.yCoord, this.yCoord) != 0 ? false : Double.compare(var2.zCoord, this.zCoord) == 0);
+         if (Double.compare(var2.xCoord, this.xCoord) != 0) {
+            return false;
+         } else if (Double.compare(var2.yCoord, this.yCoord) != 0) {
+            return false;
+         } else {
+            return Double.compare(var2.zCoord, this.zCoord) == 0;
+         }
       }
    }
 
@@ -176,17 +174,5 @@ public class Vec3d {
       double var6 = this.yCoord;
       double var8 = this.zCoord * (double)var2 - this.xCoord * (double)var3;
       return new Vec3d(var4, var6, var8);
-   }
-
-   public static Vec3d fromPitchYawVector(Vec2f var0) {
-      return fromPitchYaw(var0.x, var0.y);
-   }
-
-   public static Vec3d fromPitchYaw(float var0, float var1) {
-      float var2 = MathHelper.cos(-var1 * 0.017453292F - 3.1415927F);
-      float var3 = MathHelper.sin(-var1 * 0.017453292F - 3.1415927F);
-      float var4 = -MathHelper.cos(-var0 * 0.017453292F);
-      float var5 = MathHelper.sin(-var0 * 0.017453292F);
-      return new Vec3d((double)(var3 * var4), (double)var5, (double)(var2 * var4));
    }
 }

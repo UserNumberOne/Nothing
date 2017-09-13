@@ -11,7 +11,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -24,12 +25,12 @@ import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.PropertyManager;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.StringUtils;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,106 +41,81 @@ public class PreYggdrasilConverter {
    public static final File OLD_OPS_FILE = new File("ops.txt");
    public static final File OLD_WHITELIST_FILE = new File("white-list.txt");
 
-   private static void lookupNames(MinecraftServer var0, Collection var1, ProfileLookupCallback var2) {
-      String[] var3 = (String[])Iterators.toArray(Iterators.filter(var1.iterator(), new Predicate() {
-         public boolean apply(@Nullable String var1) {
-            return !StringUtils.isNullOrEmpty(var1);
+   static List readFile(File file, Map map) throws IOException {
+      List list = Files.readLines(file, Charsets.UTF_8);
+
+      for(String s : list) {
+         s = s.trim();
+         if (!s.startsWith("#") && s.length() >= 1) {
+            String[] astring = s.split("\\|");
+            map.put(astring[0].toLowerCase(Locale.ROOT), astring);
+         }
+      }
+
+      return list;
+   }
+
+   private static void a(MinecraftServer minecraftserver, Collection collection, ProfileLookupCallback profilelookupcallback) {
+      String[] astring = (String[])Iterators.toArray(Iterators.filter(collection.iterator(), new Predicate() {
+         public boolean apply(@Nullable String s) {
+            return !StringUtils.isNullOrEmpty(s);
+         }
+
+         public boolean apply(Object object) {
+            return this.apply((String)object);
          }
       }), String.class);
-      if (var0.isServerInOnlineMode()) {
-         var0.getGameProfileRepository().findProfilesByNames(var3, Agent.MINECRAFT, var2);
+      if (minecraftserver.getOnlineMode()) {
+         minecraftserver.getGameProfileRepository().findProfilesByNames(astring, Agent.MINECRAFT, profilelookupcallback);
       } else {
-         for(String var7 : var3) {
-            UUID var8 = EntityPlayer.getUUID(new GameProfile((UUID)null, var7));
-            GameProfile var9 = new GameProfile(var8, var7);
-            var2.onProfileLookupSucceeded(var9);
+         for(String s : astring) {
+            UUID uuid = EntityPlayer.getUUID(new GameProfile((UUID)null, s));
+            GameProfile gameprofile = new GameProfile(uuid, s);
+            profilelookupcallback.onProfileLookupSucceeded(gameprofile);
          }
       }
 
    }
 
-   public static String convertMobOwnerIfNeeded(final MinecraftServer var0, String var1) {
-      if (!StringUtils.isNullOrEmpty(var1) && var1.length() <= 16) {
-         GameProfile var2 = var0.getPlayerProfileCache().getGameProfileForUsername(var1);
-         if (var2 != null && var2.getId() != null) {
-            return var2.getId().toString();
-         } else if (!var0.isSinglePlayer() && var0.isServerInOnlineMode()) {
-            final ArrayList var3 = Lists.newArrayList();
-            ProfileLookupCallback var4 = new ProfileLookupCallback() {
-               public void onProfileLookupSucceeded(GameProfile var1) {
-                  var0.getPlayerProfileCache().addEntry(var1);
-                  var3.add(var1);
-               }
-
-               public void onProfileLookupFailed(GameProfile var1, Exception var2) {
-                  PreYggdrasilConverter.LOGGER.warn("Could not lookup user whitelist entry for {}", new Object[]{var1.getName(), var2});
-               }
-            };
-            lookupNames(var0, Lists.newArrayList(new String[]{var1}), var4);
-            return !var3.isEmpty() && ((GameProfile)var3.get(0)).getId() != null ? ((GameProfile)var3.get(0)).getId().toString() : "";
-         } else {
-            return EntityPlayer.getUUID(new GameProfile((UUID)null, var1)).toString();
-         }
-      } else {
-         return var1;
-      }
-   }
-
-   @SideOnly(Side.SERVER)
-   static List readFile(File var0, Map var1) throws IOException {
-      List var2 = Files.readLines(var0, Charsets.UTF_8);
-
-      for(String var4 : var2) {
-         var4 = var4.trim();
-         if (!var4.startsWith("#") && var4.length() >= 1) {
-            String[] var5 = var4.split("\\|");
-            var1.put(var5[0].toLowerCase(Locale.ROOT), var5);
-         }
-      }
-
-      return var2;
-   }
-
-   @SideOnly(Side.SERVER)
-   public static boolean convertUserBanlist(final MinecraftServer var0) throws IOException {
-      final UserListBans var1 = new UserListBans(PlayerList.FILE_PLAYERBANS);
+   public static boolean a(final MinecraftServer minecraftserver) {
+      final UserListBans gameprofilebanlist = new UserListBans(PlayerList.FILE_PLAYERBANS);
       if (OLD_PLAYERBAN_FILE.exists() && OLD_PLAYERBAN_FILE.isFile()) {
-         if (var1.getSaveFile().exists()) {
+         if (gameprofilebanlist.getSaveFile().exists()) {
             try {
-               var1.readSavedFile();
-            } catch (FileNotFoundException var6) {
-               LOGGER.warn("Could not load existing file {}", new Object[]{var1.getSaveFile().getName(), var6});
+               gameprofilebanlist.readSavedFile();
+            } catch (IOException var6) {
+               LOGGER.warn("Could not load existing file {}", new Object[]{gameprofilebanlist.getSaveFile().getName()});
             }
          }
 
          try {
-            final HashMap var2 = Maps.newHashMap();
-            readFile(OLD_PLAYERBAN_FILE, var2);
-            ProfileLookupCallback var3 = new ProfileLookupCallback() {
-               public void onProfileLookupSucceeded(GameProfile var1x) {
-                  var0.getPlayerProfileCache().addEntry(var1x);
-                  String[] var2x = (String[])var2.get(var1x.getName().toLowerCase(Locale.ROOT));
-                  if (var2x == null) {
-                     PreYggdrasilConverter.LOGGER.warn("Could not convert user banlist entry for {}", new Object[]{var1x.getName()});
-                     throw new PreYggdrasilConverter.ConversionError("Profile not in the conversionlist");
+            final HashMap hashmap = Maps.newHashMap();
+            readFile(OLD_PLAYERBAN_FILE, hashmap);
+            ProfileLookupCallback profilelookupcallback = new ProfileLookupCallback() {
+               public void onProfileLookupSucceeded(GameProfile gameprofile) {
+                  minecraftserver.getUserCache().addEntry(gameprofile);
+                  String[] astring = (String[])hashmap.get(gameprofile.getName().toLowerCase(Locale.ROOT));
+                  if (astring == null) {
+                     PreYggdrasilConverter.LOGGER.warn("Could not convert user banlist entry for {}", new Object[]{gameprofile.getName()});
+                     throw new PreYggdrasilConverter.ConversionError("Profile not in the conversionlist", (Throwable)null, (PreYggdrasilConverter.ConversionError)null);
                   } else {
-                     Date var3 = var2x.length > 1 ? PreYggdrasilConverter.parseDate(var2x[1], (Date)null) : null;
-                     String var4 = var2x.length > 2 ? var2x[2] : null;
-                     Date var5 = var2x.length > 3 ? PreYggdrasilConverter.parseDate(var2x[3], (Date)null) : null;
-                     String var6 = var2x.length > 4 ? var2x[4] : null;
-                     var1.addEntry(new UserListBansEntry(var1x, var3, var4, var5, var6));
+                     Date date = astring.length > 1 ? PreYggdrasilConverter.parseDate(astring[1], (Date)null) : null;
+                     String s = astring.length > 2 ? astring[2] : null;
+                     Date date1 = astring.length > 3 ? PreYggdrasilConverter.parseDate(astring[3], (Date)null) : null;
+                     String s1 = astring.length > 4 ? astring[4] : null;
+                     gameprofilebanlist.addEntry(new UserListBansEntry(gameprofile, date, s, date1, s1));
                   }
                }
 
-               public void onProfileLookupFailed(GameProfile var1x, Exception var2x) {
-                  PreYggdrasilConverter.LOGGER.warn("Could not lookup user banlist entry for {}", new Object[]{var1x.getName(), var2x});
-                  if (!(var2x instanceof ProfileNotFoundException)) {
-                     throw new PreYggdrasilConverter.ConversionError("Could not request user " + var1x.getName() + " from backend systems", var2x);
+               public void onProfileLookupFailed(GameProfile gameprofile, Exception exception) {
+                  PreYggdrasilConverter.LOGGER.warn("Could not lookup user banlist entry for {}", new Object[]{gameprofile.getName(), exception});
+                  if (!(exception instanceof ProfileNotFoundException)) {
+                     throw new PreYggdrasilConverter.ConversionError("Could not request user " + gameprofile.getName() + " from backend systems", exception, (Object)null);
                   }
                }
             };
-            lookupNames(var0, var2.keySet(), var3);
-            var1.writeChanges();
+            a(minecraftserver, hashmap.keySet(), profilelookupcallback);
+            gameprofilebanlist.writeChanges();
             backupConverted(OLD_PLAYERBAN_FILE);
             return true;
          } catch (IOException var4) {
@@ -154,32 +130,31 @@ public class PreYggdrasilConverter {
       }
    }
 
-   @SideOnly(Side.SERVER)
-   public static boolean convertIpBanlist(MinecraftServer var0) throws IOException {
-      UserListIPBans var1 = new UserListIPBans(PlayerList.FILE_IPBANS);
+   public static boolean b(MinecraftServer minecraftserver) {
+      UserListIPBans ipbanlist = new UserListIPBans(PlayerList.FILE_IPBANS);
       if (OLD_IPBAN_FILE.exists() && OLD_IPBAN_FILE.isFile()) {
-         if (var1.getSaveFile().exists()) {
+         if (ipbanlist.getSaveFile().exists()) {
             try {
-               var1.readSavedFile();
-            } catch (FileNotFoundException var11) {
-               LOGGER.warn("Could not load existing file {}", new Object[]{var1.getSaveFile().getName(), var11});
+               ipbanlist.readSavedFile();
+            } catch (IOException var11) {
+               LOGGER.warn("Could not load existing file {}", new Object[]{ipbanlist.getSaveFile().getName()});
             }
          }
 
          try {
-            HashMap var2 = Maps.newHashMap();
-            readFile(OLD_IPBAN_FILE, var2);
+            HashMap hashmap = Maps.newHashMap();
+            readFile(OLD_IPBAN_FILE, hashmap);
 
-            for(String var4 : var2.keySet()) {
-               String[] var5 = (String[])var2.get(var4);
-               Date var6 = var5.length > 1 ? parseDate(var5[1], (Date)null) : null;
-               String var7 = var5.length > 2 ? var5[2] : null;
-               Date var8 = var5.length > 3 ? parseDate(var5[3], (Date)null) : null;
-               String var9 = var5.length > 4 ? var5[4] : null;
-               var1.addEntry(new UserListIPBansEntry(var4, var6, var7, var8, var9));
+            for(String s : hashmap.keySet()) {
+               String[] astring = (String[])hashmap.get(s);
+               Date date = astring.length > 1 ? parseDate(astring[1], (Date)null) : null;
+               String s1 = astring.length > 2 ? astring[2] : null;
+               Date date1 = astring.length > 3 ? parseDate(astring[3], (Date)null) : null;
+               String s2 = astring.length > 4 ? astring[4] : null;
+               ipbanlist.addEntry(new UserListIPBansEntry(s, date, s1, date1, s2));
             }
 
-            var1.writeChanges();
+            ipbanlist.writeChanges();
             backupConverted(OLD_IPBAN_FILE);
             return true;
          } catch (IOException var10) {
@@ -191,35 +166,34 @@ public class PreYggdrasilConverter {
       }
    }
 
-   @SideOnly(Side.SERVER)
-   public static boolean convertOplist(final MinecraftServer var0) throws IOException {
-      final UserListOps var1 = new UserListOps(PlayerList.FILE_OPS);
+   public static boolean c(final MinecraftServer minecraftserver) {
+      final UserListOps oplist = new UserListOps(PlayerList.FILE_OPS);
       if (OLD_OPS_FILE.exists() && OLD_OPS_FILE.isFile()) {
-         if (var1.getSaveFile().exists()) {
+         if (oplist.getSaveFile().exists()) {
             try {
-               var1.readSavedFile();
-            } catch (FileNotFoundException var6) {
-               LOGGER.warn("Could not load existing file {}", new Object[]{var1.getSaveFile().getName(), var6});
+               oplist.readSavedFile();
+            } catch (IOException var6) {
+               LOGGER.warn("Could not load existing file {}", new Object[]{oplist.getSaveFile().getName()});
             }
          }
 
          try {
-            List var2 = Files.readLines(OLD_OPS_FILE, Charsets.UTF_8);
-            ProfileLookupCallback var3 = new ProfileLookupCallback() {
-               public void onProfileLookupSucceeded(GameProfile var1x) {
-                  var0.getPlayerProfileCache().addEntry(var1x);
-                  var1.addEntry(new UserListOpsEntry(var1x, var0.getOpPermissionLevel(), false));
+            List list = Files.readLines(OLD_OPS_FILE, Charsets.UTF_8);
+            ProfileLookupCallback profilelookupcallback = new ProfileLookupCallback() {
+               public void onProfileLookupSucceeded(GameProfile gameprofile) {
+                  minecraftserver.getUserCache().addEntry(gameprofile);
+                  oplist.addEntry(new UserListOpsEntry(gameprofile, minecraftserver.q(), false));
                }
 
-               public void onProfileLookupFailed(GameProfile var1x, Exception var2) {
-                  PreYggdrasilConverter.LOGGER.warn("Could not lookup oplist entry for {}", new Object[]{var1x.getName(), var2});
-                  if (!(var2 instanceof ProfileNotFoundException)) {
-                     throw new PreYggdrasilConverter.ConversionError("Could not request user " + var1x.getName() + " from backend systems", var2);
+               public void onProfileLookupFailed(GameProfile gameprofile, Exception exception) {
+                  PreYggdrasilConverter.LOGGER.warn("Could not lookup oplist entry for {}", new Object[]{gameprofile.getName(), exception});
+                  if (!(exception instanceof ProfileNotFoundException)) {
+                     throw new PreYggdrasilConverter.ConversionError("Could not request user " + gameprofile.getName() + " from backend systems", exception, (Object)null);
                   }
                }
             };
-            lookupNames(var0, var2, var3);
-            var1.writeChanges();
+            a(minecraftserver, list, profilelookupcallback);
+            oplist.writeChanges();
             backupConverted(OLD_OPS_FILE);
             return true;
          } catch (IOException var4) {
@@ -234,35 +208,34 @@ public class PreYggdrasilConverter {
       }
    }
 
-   @SideOnly(Side.SERVER)
-   public static boolean convertWhitelist(final MinecraftServer var0) throws IOException {
-      final UserListWhitelist var1 = new UserListWhitelist(PlayerList.FILE_WHITELIST);
+   public static boolean d(final MinecraftServer minecraftserver) {
+      final UserListWhitelist whitelist = new UserListWhitelist(PlayerList.FILE_WHITELIST);
       if (OLD_WHITELIST_FILE.exists() && OLD_WHITELIST_FILE.isFile()) {
-         if (var1.getSaveFile().exists()) {
+         if (whitelist.getSaveFile().exists()) {
             try {
-               var1.readSavedFile();
-            } catch (FileNotFoundException var6) {
-               LOGGER.warn("Could not load existing file {}", new Object[]{var1.getSaveFile().getName(), var6});
+               whitelist.readSavedFile();
+            } catch (IOException var6) {
+               LOGGER.warn("Could not load existing file {}", new Object[]{whitelist.getSaveFile().getName()});
             }
          }
 
          try {
-            List var2 = Files.readLines(OLD_WHITELIST_FILE, Charsets.UTF_8);
-            ProfileLookupCallback var3 = new ProfileLookupCallback() {
-               public void onProfileLookupSucceeded(GameProfile var1x) {
-                  var0.getPlayerProfileCache().addEntry(var1x);
-                  var1.addEntry(new UserListWhitelistEntry(var1x));
+            List list = Files.readLines(OLD_WHITELIST_FILE, Charsets.UTF_8);
+            ProfileLookupCallback profilelookupcallback = new ProfileLookupCallback() {
+               public void onProfileLookupSucceeded(GameProfile gameprofile) {
+                  minecraftserver.getUserCache().addEntry(gameprofile);
+                  whitelist.addEntry(new UserListWhitelistEntry(gameprofile));
                }
 
-               public void onProfileLookupFailed(GameProfile var1x, Exception var2) {
-                  PreYggdrasilConverter.LOGGER.warn("Could not lookup user whitelist entry for {}", new Object[]{var1x.getName(), var2});
-                  if (!(var2 instanceof ProfileNotFoundException)) {
-                     throw new PreYggdrasilConverter.ConversionError("Could not request user " + var1x.getName() + " from backend systems", var2);
+               public void onProfileLookupFailed(GameProfile gameprofile, Exception exception) {
+                  PreYggdrasilConverter.LOGGER.warn("Could not lookup user whitelist entry for {}", new Object[]{gameprofile.getName(), exception});
+                  if (!(exception instanceof ProfileNotFoundException)) {
+                     throw new PreYggdrasilConverter.ConversionError("Could not request user " + gameprofile.getName() + " from backend systems", exception, (Object)null);
                   }
                }
             };
-            lookupNames(var0, var2, var3);
-            var1.writeChanges();
+            a(minecraftserver, list, profilelookupcallback);
+            whitelist.writeChanges();
             backupConverted(OLD_WHITELIST_FILE);
             return true;
          } catch (IOException var4) {
@@ -277,78 +250,129 @@ public class PreYggdrasilConverter {
       }
    }
 
-   @SideOnly(Side.SERVER)
-   public static boolean convertSaveFiles(final DedicatedServer var0, PropertyManager var1) {
-      final File var2 = getPlayersDirectory(var1);
-      final File var3 = new File(var2.getParentFile(), "playerdata");
-      final File var4 = new File(var2.getParentFile(), "unknownplayers");
-      if (var2.exists() && var2.isDirectory()) {
-         File[] var5 = var2.listFiles();
-         ArrayList var6 = Lists.newArrayList();
+   public static String a(final MinecraftServer minecraftserver, String s) {
+      if (!StringUtils.isNullOrEmpty(s) && s.length() <= 16) {
+         GameProfile gameprofile = minecraftserver.getUserCache().getGameProfileForUsername(s);
+         if (gameprofile != null && gameprofile.getId() != null) {
+            return gameprofile.getId().toString();
+         } else if (!minecraftserver.R() && minecraftserver.getOnlineMode()) {
+            final ArrayList arraylist = Lists.newArrayList();
+            ProfileLookupCallback profilelookupcallback = new ProfileLookupCallback() {
+               public void onProfileLookupSucceeded(GameProfile gameprofile) {
+                  minecraftserver.getUserCache().addEntry(gameprofile);
+                  arraylist.add(gameprofile);
+               }
 
-         for(File var10 : var5) {
-            String var11 = var10.getName();
-            if (var11.toLowerCase(Locale.ROOT).endsWith(".dat")) {
-               String var12 = var11.substring(0, var11.length() - ".dat".length());
-               if (!var12.isEmpty()) {
-                  var6.add(var12);
+               public void onProfileLookupFailed(GameProfile gameprofile, Exception exception) {
+                  PreYggdrasilConverter.LOGGER.warn("Could not lookup user whitelist entry for {}", new Object[]{gameprofile.getName(), exception});
+               }
+            };
+            a(minecraftserver, Lists.newArrayList(new String[]{s}), profilelookupcallback);
+            return !arraylist.isEmpty() && ((GameProfile)arraylist.get(0)).getId() != null ? ((GameProfile)arraylist.get(0)).getId().toString() : "";
+         } else {
+            return EntityPlayer.getUUID(new GameProfile((UUID)null, s)).toString();
+         }
+      } else {
+         return s;
+      }
+   }
+
+   public static boolean convertSaveFiles(final DedicatedServer dedicatedserver, PropertyManager propertymanager) {
+      final File file = getPlayersDirectory(propertymanager);
+      new File(file.getParentFile(), "playerdata");
+      final File file2 = new File(file.getParentFile(), "unknownplayers");
+      if (file.exists() && file.isDirectory()) {
+         File[] afile = file.listFiles();
+         ArrayList arraylist = Lists.newArrayList();
+
+         for(File file3 : afile) {
+            String s = file3.getName();
+            if (s.toLowerCase(Locale.ROOT).endsWith(".dat")) {
+               String s1 = s.substring(0, s.length() - ".dat".length());
+               if (!s1.isEmpty()) {
+                  arraylist.add(s1);
                }
             }
          }
 
          try {
-            final String[] var14 = (String[])var6.toArray(new String[var6.size()]);
-            ProfileLookupCallback var15 = new ProfileLookupCallback() {
-               public void onProfileLookupSucceeded(GameProfile var1) {
-                  var0.getPlayerProfileCache().addEntry(var1);
-                  UUID var2x = var1.getId();
-                  if (var2x == null) {
-                     throw new PreYggdrasilConverter.ConversionError("Missing UUID for user profile " + var1.getName());
+            final String[] astring = (String[])arraylist.toArray(new String[arraylist.size()]);
+            ProfileLookupCallback profilelookupcallback = new ProfileLookupCallback() {
+               public void onProfileLookupSucceeded(GameProfile gameprofile) {
+                  dedicatedserver.getUserCache().addEntry(gameprofile);
+                  UUID uuid = gameprofile.getId();
+                  if (uuid == null) {
+                     throw new PreYggdrasilConverter.ConversionError("Missing UUID for user profile " + gameprofile.getName(), (Throwable)null, (PreYggdrasilConverter.ConversionError)null);
                   } else {
-                     this.renamePlayerFile(var3, this.getFileNameForProfile(var1), var2x.toString());
+                     this.renamePlayerFile(file, this.getFileNameForProfile(gameprofile), uuid.toString());
                   }
                }
 
-               public void onProfileLookupFailed(GameProfile var1, Exception var2x) {
-                  PreYggdrasilConverter.LOGGER.warn("Could not lookup user uuid for {}", new Object[]{var1.getName(), var2x});
-                  if (var2x instanceof ProfileNotFoundException) {
-                     String var3x = this.getFileNameForProfile(var1);
-                     this.renamePlayerFile(var4, var3x, var3x);
+               public void onProfileLookupFailed(GameProfile gameprofile, Exception exception) {
+                  PreYggdrasilConverter.LOGGER.warn("Could not lookup user uuid for {}", new Object[]{gameprofile.getName(), exception});
+                  if (exception instanceof ProfileNotFoundException) {
+                     String s = this.getFileNameForProfile(gameprofile);
+                     this.renamePlayerFile(file, s, s);
                   } else {
-                     throw new PreYggdrasilConverter.ConversionError("Could not request user " + var1.getName() + " from backend systems", var2x);
+                     throw new PreYggdrasilConverter.ConversionError("Could not request user " + gameprofile.getName() + " from backend systems", exception, (Object)null);
                   }
                }
 
-               private void renamePlayerFile(File var1, String var2x, String var3x) {
-                  File var4x = new File(var2, var2x + ".dat");
-                  File var5 = new File(var1, var3x + ".dat");
-                  PreYggdrasilConverter.mkdir(var1);
-                  if (!var4x.renameTo(var5)) {
-                     throw new PreYggdrasilConverter.ConversionError("Could not convert file for " + var2x);
+               private void renamePlayerFile(File filex, String s, String s1) {
+                  File file1 = new File(file2, s + ".dat");
+                  File file3 = new File(file, s1 + ".dat");
+                  NBTTagCompound root = null;
+
+                  try {
+                     root = CompressedStreamTools.readCompressed(new FileInputStream(file1));
+                  } catch (Exception var10) {
+                     var10.printStackTrace();
+                  }
+
+                  if (root != null) {
+                     if (!root.hasKey("bukkit")) {
+                        root.setTag("bukkit", new NBTTagCompound());
+                     }
+
+                     NBTTagCompound data = root.getCompoundTag("bukkit");
+                     data.setString("lastKnownName", s);
+
+                     try {
+                        CompressedStreamTools.writeCompressed(root, new FileOutputStream(file2));
+                     } catch (Exception var9) {
+                        var9.printStackTrace();
+                     }
+                  }
+
+                  PreYggdrasilConverter.mkdir(file);
+                  if (!file1.renameTo(file3)) {
+                     throw new PreYggdrasilConverter.ConversionError("Could not convert file for " + s, (Throwable)null, (PreYggdrasilConverter.ConversionError)null);
                   }
                }
 
-               private String getFileNameForProfile(GameProfile var1) {
-                  String var2x = null;
+               private String getFileNameForProfile(GameProfile gameprofile) {
+                  String s = null;
+                  int i = astring.length;
 
-                  for(String var6 : var14) {
-                     if (var6 != null && var6.equalsIgnoreCase(var1.getName())) {
-                        var2x = var6;
+                  for(int j = 0; j < i; ++j) {
+                     String s1 = astring[j];
+                     if (s1 != null && s1.equalsIgnoreCase(gameprofile.getName())) {
+                        s = s1;
                         break;
                      }
                   }
 
-                  if (var2x == null) {
-                     throw new PreYggdrasilConverter.ConversionError("Could not find the filename for " + var1.getName() + " anymore");
+                  if (s == null) {
+                     throw new PreYggdrasilConverter.ConversionError("Could not find the filename for " + gameprofile.getName() + " anymore", (Throwable)null, (PreYggdrasilConverter.ConversionError)null);
                   } else {
-                     return var2x;
+                     return s;
                   }
                }
             };
-            lookupNames(var0, Lists.newArrayList(var14), var15);
+            a(dedicatedserver, Lists.newArrayList(astring), profilelookupcallback);
             return true;
-         } catch (PreYggdrasilConverter.ConversionError var13) {
-            LOGGER.error("Conversion failed, please try again later", var13);
+         } catch (PreYggdrasilConverter.ConversionError var12) {
+            LOGGER.error("Conversion failed, please try again later", var12);
             return false;
          }
       } else {
@@ -356,65 +380,62 @@ public class PreYggdrasilConverter {
       }
    }
 
-   @SideOnly(Side.SERVER)
-   private static void mkdir(File var0) {
-      if (var0.exists()) {
-         if (!var0.isDirectory()) {
-            throw new PreYggdrasilConverter.ConversionError("Can't create directory " + var0.getName() + " in world save directory.");
+   private static void mkdir(File file) {
+      if (file.exists()) {
+         if (!file.isDirectory()) {
+            throw new PreYggdrasilConverter.ConversionError("Can't create directory " + file.getName() + " in world save directory.", (Throwable)null, (PreYggdrasilConverter.ConversionError)null);
          }
-      } else if (!var0.mkdirs()) {
-         throw new PreYggdrasilConverter.ConversionError("Can't create directory " + var0.getName() + " in world save directory.");
+      } else if (!file.mkdirs()) {
+         throw new PreYggdrasilConverter.ConversionError("Can't create directory " + file.getName() + " in world save directory.", (Throwable)null, (PreYggdrasilConverter.ConversionError)null);
       }
 
    }
 
-   @SideOnly(Side.SERVER)
-   public static boolean tryConvert(PropertyManager var0) {
-      boolean var1 = hasUnconvertableFiles(var0);
-      var1 = var1 && hasUnconvertablePlayerFiles(var0);
-      return var1;
+   public static boolean tryConvert(PropertyManager propertymanager) {
+      boolean flag = hasUnconvertableFiles(propertymanager);
+      flag = flag && hasUnconvertablePlayerFiles(propertymanager);
+      return flag;
    }
 
-   @SideOnly(Side.SERVER)
-   private static boolean hasUnconvertableFiles(PropertyManager var0) {
-      boolean var1 = false;
+   private static boolean hasUnconvertableFiles(PropertyManager propertymanager) {
+      boolean flag = false;
       if (OLD_PLAYERBAN_FILE.exists() && OLD_PLAYERBAN_FILE.isFile()) {
-         var1 = true;
+         flag = true;
       }
 
-      boolean var2 = false;
+      boolean flag1 = false;
       if (OLD_IPBAN_FILE.exists() && OLD_IPBAN_FILE.isFile()) {
-         var2 = true;
+         flag1 = true;
       }
 
-      boolean var3 = false;
+      boolean flag2 = false;
       if (OLD_OPS_FILE.exists() && OLD_OPS_FILE.isFile()) {
-         var3 = true;
+         flag2 = true;
       }
 
-      boolean var4 = false;
+      boolean flag3 = false;
       if (OLD_WHITELIST_FILE.exists() && OLD_WHITELIST_FILE.isFile()) {
-         var4 = true;
+         flag3 = true;
       }
 
-      if (!var1 && !var2 && !var3 && !var4) {
+      if (!flag && !flag1 && !flag2 && !flag3) {
          return true;
       } else {
          LOGGER.warn("**** FAILED TO START THE SERVER AFTER ACCOUNT CONVERSION!");
          LOGGER.warn("** please remove the following files and restart the server:");
-         if (var1) {
+         if (flag) {
             LOGGER.warn("* {}", new Object[]{OLD_PLAYERBAN_FILE.getName()});
          }
 
-         if (var2) {
+         if (flag1) {
             LOGGER.warn("* {}", new Object[]{OLD_IPBAN_FILE.getName()});
          }
 
-         if (var3) {
+         if (flag2) {
             LOGGER.warn("* {}", new Object[]{OLD_OPS_FILE.getName()});
          }
 
-         if (var4) {
+         if (flag3) {
             LOGGER.warn("* {}", new Object[]{OLD_WHITELIST_FILE.getName()});
          }
 
@@ -422,52 +443,60 @@ public class PreYggdrasilConverter {
       }
    }
 
-   @SideOnly(Side.SERVER)
-   private static boolean hasUnconvertablePlayerFiles(PropertyManager var0) {
-      File var1 = getPlayersDirectory(var0);
-      if (var1.exists() && var1.isDirectory() && (var1.list().length > 0 || !var1.delete())) {
+   private static boolean hasUnconvertablePlayerFiles(PropertyManager propertymanager) {
+      File file = getPlayersDirectory(propertymanager);
+      if (!file.exists() || !file.isDirectory() || file.list().length <= 0 && file.delete()) {
+         return true;
+      } else {
          LOGGER.warn("**** DETECTED OLD PLAYER DIRECTORY IN THE WORLD SAVE");
          LOGGER.warn("**** THIS USUALLY HAPPENS WHEN THE AUTOMATIC CONVERSION FAILED IN SOME WAY");
-         LOGGER.warn("** please restart the server and if the problem persists, remove the directory '{}'", new Object[]{var1.getPath()});
+         LOGGER.warn("** please restart the server and if the problem persists, remove the directory '{}'", new Object[]{file.getPath()});
          return false;
-      } else {
-         return true;
       }
    }
 
-   @SideOnly(Side.SERVER)
-   private static File getPlayersDirectory(PropertyManager var0) {
-      String var1 = var0.getStringProperty("level-name", "world");
-      File var2 = new File(var1);
-      return new File(var2, "players");
+   private static File getPlayersDirectory(PropertyManager propertymanager) {
+      String s = propertymanager.getStringProperty("level-name", "world");
+      File file = new File(MinecraftServer.getServer().server.getWorldContainer(), s);
+      return new File(file, "players");
    }
 
-   @SideOnly(Side.SERVER)
-   private static void backupConverted(File var0) {
-      File var1 = new File(var0.getName() + ".converted");
-      var0.renameTo(var1);
+   private static void backupConverted(File file) {
+      File file1 = new File(file.getName() + ".converted");
+      file.renameTo(file1);
    }
 
-   @SideOnly(Side.SERVER)
-   private static Date parseDate(String var0, Date var1) {
-      Date var2;
+   private static Date parseDate(String s, Date date) {
+      Date date1;
       try {
-         var2 = UserListEntryBan.DATE_FORMAT.parse(var0);
-      } catch (ParseException var4) {
-         var2 = var1;
+         date1 = UserListEntryBan.DATE_FORMAT.parse(s);
+      } catch (ParseException var3) {
+         date1 = date;
       }
 
-      return var2;
+      return date1;
    }
 
-   @SideOnly(Side.SERVER)
    static class ConversionError extends RuntimeException {
-      private ConversionError(String var1, Throwable var2) {
-         super(var1, var2);
+      private ConversionError(String s, Throwable throwable) {
+         super(s, throwable);
       }
 
-      private ConversionError(String var1) {
-         super(var1);
+      private ConversionError(String s) {
+         super(s);
+      }
+
+      ConversionError(String s, Object object) {
+         this(s);
+      }
+
+      ConversionError(String s, Throwable throwable, Object object) {
+         this(s, throwable);
+      }
+
+      // $FF: synthetic method
+      ConversionError(String var1, Throwable var2, PreYggdrasilConverter.ConversionError var3) {
+         this(var1, var2);
       }
    }
 }

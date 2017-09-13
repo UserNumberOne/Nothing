@@ -11,8 +11,6 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityProperties implements Packet {
    private int entityId;
@@ -70,16 +68,6 @@ public class SPacketEntityProperties implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleEntityProperties(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getSnapshots() {
-      return this.snapshots;
    }
 
    public class Snapshot {

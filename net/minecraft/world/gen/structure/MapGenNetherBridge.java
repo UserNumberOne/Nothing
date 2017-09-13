@@ -33,7 +33,13 @@ public class MapGenNetherBridge extends MapGenStructure {
       int var4 = var2 >> 4;
       this.rand.setSeed((long)(var3 ^ var4 << 4) ^ this.world.getSeed());
       this.rand.nextInt();
-      return this.rand.nextInt(3) != 0 ? false : (var1 != (var3 << 4) + 4 + this.rand.nextInt(8) ? false : var2 == (var4 << 4) + 4 + this.rand.nextInt(8));
+      if (this.rand.nextInt(3) != 0) {
+         return false;
+      } else if (var1 != (var3 << 4) + 4 + this.rand.nextInt(8)) {
+         return false;
+      } else {
+         return var2 == (var4 << 4) + 4 + this.rand.nextInt(8);
+      }
    }
 
    protected StructureStart getStructureStart(int var1, int var2) {

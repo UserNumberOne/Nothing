@@ -9,10 +9,7 @@ import java.net.SocketTimeoutException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.SERVER)
 public class RConThreadMain extends RConThreadBase {
    private int rconPort;
    private final int serverPort;
@@ -100,10 +97,10 @@ public class RConThreadMain extends RConThreadBase {
             } catch (IOException var2) {
                this.logWarning("Unable to initialise rcon on " + this.hostname + ":" + this.rconPort + " : " + var2.getMessage());
             }
+
          }
       } else {
          this.logWarning("Invalid rcon port " + this.rconPort + " found in '" + this.server.getSettingsFilename() + "', rcon disabled!");
       }
-
    }
 }

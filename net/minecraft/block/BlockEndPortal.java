@@ -10,75 +10,59 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityEndPortal;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Location;
+import org.bukkit.event.entity.EntityPortalEnterEvent;
 
 public class BlockEndPortal extends BlockContainer {
    protected static final AxisAlignedBB END_PORTAL_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D);
 
-   protected BlockEndPortal(Material var1) {
-      super(var1);
+   protected BlockEndPortal(Material material) {
+      super(material);
       this.setLightLevel(1.0F);
    }
 
-   public TileEntity createNewTileEntity(World var1, int var2) {
+   public TileEntity createNewTileEntity(World world, int i) {
       return new TileEntityEndPortal();
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
       return END_PORTAL_AABB;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return var4 == EnumFacing.DOWN ? super.shouldSideBeRendered(var1, var2, var3, var4) : false;
+   public void addCollisionBoxToList(IBlockState iblockdata, World world, BlockPos blockposition, AxisAlignedBB axisalignedbb, List list, @Nullable Entity entity) {
    }
 
-   public void addCollisionBoxToList(IBlockState var1, World var2, BlockPos var3, AxisAlignedBB var4, List var5, @Nullable Entity var6) {
-   }
-
-   public boolean isOpaqueCube(IBlockState var1) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isFullCube(IBlockState var1) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public int quantityDropped(Random var1) {
+   public int quantityDropped(Random random) {
       return 0;
    }
 
-   public void onEntityCollidedWithBlock(World var1, BlockPos var2, IBlockState var3, Entity var4) {
-      if (!var4.isRiding() && !var4.isBeingRidden() && var4.isNonBoss() && !var1.isRemote && var4.getEntityBoundingBox().intersectsWith(var3.getBoundingBox(var1, var2).offset(var2))) {
-         var4.changeDimension(1);
+   public void onEntityCollidedWithBlock(World world, BlockPos blockposition, IBlockState iblockdata, Entity entity) {
+      if (!entity.isRiding() && !entity.isBeingRidden() && entity.isNonBoss() && !world.isRemote && entity.getEntityBoundingBox().intersectsWith(iblockdata.getBoundingBox(world, blockposition).offset(blockposition))) {
+         EntityPortalEnterEvent event = new EntityPortalEnterEvent(entity.getBukkitEntity(), new Location(world.getWorld(), (double)blockposition.getX(), (double)blockposition.getY(), (double)blockposition.getZ()));
+         world.getServer().getPluginManager().callEvent(event);
+         entity.changeDimension(1);
       }
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      double var5 = (double)((float)var3.getX() + var4.nextFloat());
-      double var7 = (double)((float)var3.getY() + 0.8F);
-      double var9 = (double)((float)var3.getZ() + var4.nextFloat());
-      double var11 = 0.0D;
-      double var13 = 0.0D;
-      double var15 = 0.0D;
-      var2.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var5, var7, var9, 0.0D, 0.0D, 0.0D);
-   }
-
    @Nullable
-   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return null;
    }
 
-   public MapColor getMapColor(IBlockState var1) {
+   public MapColor getMapColor(IBlockState iblockdata) {
       return MapColor.BLACK;
    }
 }

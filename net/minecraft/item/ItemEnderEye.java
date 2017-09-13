@@ -45,13 +45,13 @@ public class ItemEnderEye extends Item {
                var3.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var12, var14, var16, 0.0D, 0.0D, 0.0D);
             }
 
-            BlockPattern.PatternHelper var24 = BlockEndPortalFrame.getOrCreatePortalShape().match(var3, var4);
-            if (var24 != null) {
-               BlockPos var25 = var24.getFrontTopLeft().add(-3, 0, -3);
+            BlockPattern.PatternHelper var27 = BlockEndPortalFrame.getOrCreatePortalShape().match(var3, var4);
+            if (var27 != null) {
+               BlockPos var24 = var27.getFrontTopLeft().add(-3, 0, -3);
 
-               for(int var13 = 0; var13 < 3; ++var13) {
+               for(int var25 = 0; var25 < 3; ++var25) {
                   for(int var26 = 0; var26 < 3; ++var26) {
-                     var3.setBlockState(var25.add(var13, 0, var26), Blocks.END_PORTAL.getDefaultState(), 2);
+                     var3.setBlockState(var24.add(var25, 0, var26), Blocks.END_PORTAL.getDefaultState(), 2);
                   }
                }
             }

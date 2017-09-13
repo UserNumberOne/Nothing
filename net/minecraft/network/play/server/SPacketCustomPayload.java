@@ -5,8 +5,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketCustomPayload implements Packet {
    private String channel;
@@ -35,24 +33,10 @@ public class SPacketCustomPayload implements Packet {
 
    public void writePacketData(PacketBuffer var1) throws IOException {
       var1.writeString(this.channel);
-      synchronized(this.data) {
-         this.data.markReaderIndex();
-         var1.writeBytes((ByteBuf)this.data);
-         this.data.resetReaderIndex();
-      }
+      var1.writeBytes((ByteBuf)this.data);
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleCustomPayload(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getChannelName() {
-      return this.channel;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public PacketBuffer getBufferData() {
-      return this.data;
    }
 }

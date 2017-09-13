@@ -6,7 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
@@ -23,7 +23,7 @@ public class CommandResultStats {
       this.objectives = STRING_RESULT_TYPES;
    }
 
-   public void setCommandStatForSender(MinecraftServer var1, final ICommandSender var2, CommandResultStats.Type var3, int var4) {
+   public void a(MinecraftServer var1, final ICommandSender var2, CommandResultStats.Type var3, int var4) {
       String var5 = this.entitiesID[var3.getTypeID()];
       if (var5 != null) {
          ICommandSender var6 = new ICommandSender() {
@@ -67,14 +67,14 @@ public class CommandResultStats {
                var2.setCommandStat(var1, var2x);
             }
 
-            public MinecraftServer getServer() {
-               return var2.getServer();
+            public MinecraftServer h() {
+               return var2.h();
             }
          };
 
          String var7;
          try {
-            var7 = CommandBase.getEntityName(var1, var6, var5);
+            var7 = CommandBase.e(var1, var6, var5);
          } catch (EntityNotFoundException var12) {
             return;
          }
@@ -83,13 +83,14 @@ public class CommandResultStats {
          if (var8 != null) {
             Scoreboard var9 = var2.getEntityWorld().getScoreboard();
             ScoreObjective var10 = var9.getObjective(var8);
-            if (var10 != null && var9.entityHasObjective(var7, var10)) {
-               Score var11 = var9.getOrCreateScore(var7, var10);
-               var11.setScorePoints(var4);
+            if (var10 != null) {
+               if (var9.entityHasObjective(var7, var10)) {
+                  Score var11 = var9.getOrCreateScore(var7, var10);
+                  var11.setScorePoints(var4);
+               }
             }
          }
       }
-
    }
 
    public void readStatsFromNBT(NBTTagCompound var1) {
@@ -105,8 +106,8 @@ public class CommandResultStats {
                setScoreBoardStat(this, var6, var9, var10);
             }
          }
-      }
 
+      }
    }
 
    public void writeStatsToNBT(NBTTagCompound var1) {
@@ -139,7 +140,6 @@ public class CommandResultStats {
       } else {
          removeScoreBoardStat(var0, var1);
       }
-
    }
 
    private static void removeScoreBoardStat(CommandResultStats var0, CommandResultStats.Type var1) {
@@ -159,8 +159,8 @@ public class CommandResultStats {
             var0.entitiesID = STRING_RESULT_TYPES;
             var0.objectives = STRING_RESULT_TYPES;
          }
-      }
 
+      }
    }
 
    public void addAllStats(CommandResultStats var1) {

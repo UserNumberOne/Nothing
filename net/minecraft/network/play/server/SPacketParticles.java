@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketParticles implements Packet {
    private EnumParticleTypes particleType;
@@ -81,62 +79,7 @@ public class SPacketParticles implements Packet {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public EnumParticleTypes getParticleType() {
-      return this.particleType;
-   }
-
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleParticles(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isLongDistance() {
-      return this.longDistance;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getXCoordinate() {
-      return (double)this.xCoord;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getYCoordinate() {
-      return (double)this.yCoord;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZCoordinate() {
-      return (double)this.zCoord;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getXOffset() {
-      return this.xOffset;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getYOffset() {
-      return this.yOffset;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getZOffset() {
-      return this.zOffset;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getParticleSpeed() {
-      return this.particleSpeed;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getParticleCount() {
-      return this.particleCount;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int[] getParticleArgs() {
-      return this.particleArguments;
    }
 }

@@ -1,6 +1,5 @@
 package net.minecraft.entity.item;
 
-import io.netty.buffer.ByteBuf;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -11,7 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.datafix.DataFixer;
@@ -23,28 +22,19 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftMinecartCommand;
 
 public class EntityMinecartCommandBlock extends EntityMinecart {
-   private static final DataParameter COMMAND = EntityDataManager.createKey(EntityMinecartCommandBlock.class, DataSerializers.STRING);
+   public static final DataParameter COMMAND = EntityDataManager.createKey(EntityMinecartCommandBlock.class, DataSerializers.STRING);
    private static final DataParameter LAST_OUTPUT = EntityDataManager.createKey(EntityMinecartCommandBlock.class, DataSerializers.TEXT_COMPONENT);
    private final CommandBlockBaseLogic commandBlockLogic = new CommandBlockBaseLogic() {
+      {
+         this.sender = (CraftMinecartCommand)EntityMinecartCommandBlock.this.getBukkitEntity();
+      }
+
       public void updateCommand() {
          EntityMinecartCommandBlock.this.getDataManager().set(EntityMinecartCommandBlock.COMMAND, this.getCommand());
          EntityMinecartCommandBlock.this.getDataManager().set(EntityMinecartCommandBlock.LAST_OUTPUT, this.getLastOutput());
-      }
-
-      @SideOnly(Side.CLIENT)
-      public int getCommandBlockType() {
-         return 1;
-      }
-
-      @SideOnly(Side.CLIENT)
-      public void fillInInfo(ByteBuf var1) {
-         var1.writeInt(EntityMinecartCommandBlock.this.getEntityId());
       }
 
       public BlockPos getPosition() {
@@ -63,31 +53,31 @@ public class EntityMinecartCommandBlock extends EntityMinecart {
          return EntityMinecartCommandBlock.this;
       }
 
-      public MinecraftServer getServer() {
+      public MinecraftServer h() {
          return EntityMinecartCommandBlock.this.world.getMinecraftServer();
       }
    };
    private int activatorRailCooldown;
 
-   public EntityMinecartCommandBlock(World var1) {
-      super(var1);
+   public EntityMinecartCommandBlock(World world) {
+      super(world);
    }
 
-   public EntityMinecartCommandBlock(World var1, double var2, double var4, double var6) {
-      super(var1, var2, var4, var6);
+   public EntityMinecartCommandBlock(World world, double d0, double d1, double d2) {
+      super(world, d0, d1, d2);
    }
 
-   public static void registerFixesMinecartCommand(DataFixer var0) {
-      EntityMinecart.registerFixesMinecart(var0, "MinecartCommandBlock");
-      var0.registerWalker(FixTypes.ENTITY, new IDataWalker() {
-         public NBTTagCompound process(IDataFixer var1, NBTTagCompound var2, int var3) {
-            if ("MinecartCommandBlock".equals(var2.getString("id"))) {
-               var2.setString("id", "Control");
-               var1.process(FixTypes.BLOCK_ENTITY, var2, var3);
-               var2.setString("id", "MinecartCommandBlock");
+   public static void registerFixesMinecartCommand(DataFixer dataconvertermanager) {
+      EntityMinecart.registerFixesMinecart(dataconvertermanager, "MinecartCommandBlock");
+      dataconvertermanager.registerWalker(FixTypes.ENTITY, new IDataWalker() {
+         public NBTTagCompound process(IDataFixer dataconverter, NBTTagCompound nbttagcompound, int i) {
+            if ("MinecartCommandBlock".equals(nbttagcompound.getString("id"))) {
+               nbttagcompound.setString("id", "Control");
+               dataconverter.process(FixTypes.BLOCK_ENTITY, nbttagcompound, i);
+               nbttagcompound.setString("id", "MinecartCommandBlock");
             }
 
-            return var2;
+            return nbttagcompound;
          }
       });
    }
@@ -98,16 +88,16 @@ public class EntityMinecartCommandBlock extends EntityMinecart {
       this.getDataManager().register(LAST_OUTPUT, new TextComponentString(""));
    }
 
-   protected void readEntityFromNBT(NBTTagCompound var1) {
-      super.readEntityFromNBT(var1);
-      this.commandBlockLogic.readDataFromNBT(var1);
+   protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      this.commandBlockLogic.readDataFromNBT(nbttagcompound);
       this.getDataManager().set(COMMAND, this.getCommandBlockLogic().getCommand());
       this.getDataManager().set(LAST_OUTPUT, this.getCommandBlockLogic().getLastOutput());
    }
 
-   protected void writeEntityToNBT(NBTTagCompound var1) {
-      super.writeEntityToNBT(var1);
-      this.commandBlockLogic.writeToNBT(var1);
+   protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      this.commandBlockLogic.writeToNBT(nbttagcompound);
    }
 
    public EntityMinecart.Type getType() {
@@ -122,32 +112,28 @@ public class EntityMinecartCommandBlock extends EntityMinecart {
       return this.commandBlockLogic;
    }
 
-   public void onActivatorRailPass(int var1, int var2, int var3, boolean var4) {
-      if (var4 && this.ticksExisted - this.activatorRailCooldown >= 4) {
+   public void onActivatorRailPass(int i, int j, int k, boolean flag) {
+      if (flag && this.ticksExisted - this.activatorRailCooldown >= 4) {
          this.getCommandBlockLogic().trigger(this.world);
          this.activatorRailCooldown = this.ticksExisted;
       }
 
    }
 
-   public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
-      if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, var1, var2, var3))) {
-         return true;
-      } else {
-         this.commandBlockLogic.tryOpenEditCommandBlock(var1);
-         return false;
-      }
+   public boolean processInitialInteract(EntityPlayer entityhuman, @Nullable ItemStack itemstack, EnumHand enumhand) {
+      this.commandBlockLogic.tryOpenEditCommandBlock(entityhuman);
+      return false;
    }
 
-   public void notifyDataManagerChange(DataParameter var1) {
-      super.notifyDataManagerChange(var1);
-      if (LAST_OUTPUT.equals(var1)) {
+   public void notifyDataManagerChange(DataParameter datawatcherobject) {
+      super.notifyDataManagerChange(datawatcherobject);
+      if (LAST_OUTPUT.equals(datawatcherobject)) {
          try {
             this.commandBlockLogic.setLastOutput((ITextComponent)this.getDataManager().get(LAST_OUTPUT));
-         } catch (Throwable var3) {
+         } catch (Throwable var2) {
             ;
          }
-      } else if (COMMAND.equals(var1)) {
+      } else if (COMMAND.equals(datawatcherobject)) {
          this.commandBlockLogic.setCommand((String)this.getDataManager().get(COMMAND));
       }
 

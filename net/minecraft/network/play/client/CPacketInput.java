@@ -4,25 +4,12 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketInput implements Packet {
    private float strafeSpeed;
    private float forwardSpeed;
    private boolean jumping;
    private boolean sneaking;
-
-   public CPacketInput() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketInput(float var1, float var2, boolean var3, boolean var4) {
-      this.strafeSpeed = var1;
-      this.forwardSpeed = var2;
-      this.jumping = var3;
-      this.sneaking = var4;
-   }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
       this.strafeSpeed = var1.readFloat();

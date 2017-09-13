@@ -24,18 +24,17 @@ import org.apache.logging.log4j.Logger;
 public class LootTable {
    private static final Logger LOGGER = LogManager.getLogger();
    public static final LootTable EMPTY_LOOT_TABLE = new LootTable(new LootPool[0]);
-   private final List pools;
-   private boolean isFrozen = false;
+   private final LootPool[] pools;
 
    public LootTable(LootPool[] var1) {
-      this.pools = Lists.newArrayList(var1);
+      this.pools = var1;
    }
 
    public List generateLootForPools(Random var1, LootContext var2) {
       ArrayList var3 = Lists.newArrayList();
       if (var2.addLootTable(this)) {
-         for(LootPool var5 : this.pools) {
-            var5.generateLoot(var3, var1, var2);
+         for(LootPool var7 : this.pools) {
+            var7.generateLoot(var3, var1, var2);
          }
 
          var2.removeLootTable(this);
@@ -83,21 +82,21 @@ public class LootTable {
       var2 = var2 - var1.size();
 
       while(var2 > 0 && var4.size() > 0) {
-         ItemStack var10 = (ItemStack)var4.remove(MathHelper.getInt(var3, 0, var4.size() - 1));
-         int var7 = MathHelper.getInt(var3, 1, var10.stackSize / 2);
-         var10.stackSize -= var7;
-         ItemStack var8 = var10.copy();
-         var8.stackSize = var7;
-         if (var10.stackSize > 1 && var3.nextBoolean()) {
-            var4.add(var10);
+         ItemStack var9 = (ItemStack)var4.remove(MathHelper.getInt(var3, 0, var4.size() - 1));
+         int var10 = MathHelper.getInt(var3, 1, var9.stackSize / 2);
+         var9.stackSize -= var10;
+         ItemStack var7 = var9.copy();
+         var7.stackSize = var10;
+         if (var9.stackSize > 1 && var3.nextBoolean()) {
+            var4.add(var9);
          } else {
-            var1.add(var10);
+            var1.add(var9);
          }
 
-         if (var8.stackSize > 1 && var3.nextBoolean()) {
-            var4.add(var8);
+         if (var7.stackSize > 1 && var3.nextBoolean()) {
+            var4.add(var7);
          } else {
-            var1.add(var8);
+            var1.add(var7);
          }
       }
 
@@ -118,60 +117,6 @@ public class LootTable {
       return var3;
    }
 
-   public void freeze() {
-      this.isFrozen = true;
-
-      for(LootPool var2 : this.pools) {
-         var2.freeze();
-      }
-
-   }
-
-   public boolean isFrozen() {
-      return this.isFrozen;
-   }
-
-   private void checkFrozen() {
-      if (this.isFrozen()) {
-         throw new RuntimeException("Attempted to modify LootTable after being finalized!");
-      }
-   }
-
-   public LootPool getPool(String var1) {
-      for(LootPool var3 : this.pools) {
-         if (var1.equals(var3.getName())) {
-            return var3;
-         }
-      }
-
-      return null;
-   }
-
-   public LootPool removePool(String var1) {
-      this.checkFrozen();
-
-      for(LootPool var3 : this.pools) {
-         if (var1.equals(var3.getName())) {
-            this.pools.remove(var3);
-            return var3;
-         }
-      }
-
-      return null;
-   }
-
-   public void addPool(LootPool var1) {
-      this.checkFrozen();
-
-      for(LootPool var3 : this.pools) {
-         if (var3 == var1 || var3.getName().equals(var1.getName())) {
-            throw new RuntimeException("Attempted to add a duplicate pool to loot table: " + var1.getName());
-         }
-      }
-
-      this.pools.add(var1);
-   }
-
    public static class Serializer implements JsonDeserializer, JsonSerializer {
       public LootTable deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject var4 = JsonUtils.getJsonObject(var1, "loot table");
@@ -183,6 +128,16 @@ public class LootTable {
          JsonObject var4 = new JsonObject();
          var4.add("pools", var3.serialize(var1.pools));
          return var4;
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((LootTable)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

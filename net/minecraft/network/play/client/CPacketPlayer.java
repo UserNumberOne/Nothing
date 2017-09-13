@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketPlayer implements Packet {
    protected double x;
@@ -16,14 +14,6 @@ public class CPacketPlayer implements Packet {
    protected boolean onGround;
    protected boolean moving;
    protected boolean rotating;
-
-   public CPacketPlayer() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketPlayer(boolean var1) {
-      this.onGround = var1;
-   }
 
    public void processPacket(INetHandlerPlayServer var1) {
       var1.processPlayer(this);
@@ -66,15 +56,6 @@ public class CPacketPlayer implements Packet {
          this.moving = true;
       }
 
-      @SideOnly(Side.CLIENT)
-      public Position(double var1, double var3, double var5, boolean var7) {
-         this.x = var1;
-         this.y = var3;
-         this.z = var5;
-         this.onGround = var7;
-         this.moving = true;
-      }
-
       public void readPacketData(PacketBuffer var1) throws IOException {
          this.x = var1.readDouble();
          this.y = var1.readDouble();
@@ -94,18 +75,6 @@ public class CPacketPlayer implements Packet {
       public PositionRotation() {
          this.moving = true;
          this.rotating = true;
-      }
-
-      @SideOnly(Side.CLIENT)
-      public PositionRotation(double var1, double var3, double var5, float var7, float var8, boolean var9) {
-         this.x = var1;
-         this.y = var3;
-         this.z = var5;
-         this.yaw = var7;
-         this.pitch = var8;
-         this.onGround = var9;
-         this.rotating = true;
-         this.moving = true;
       }
 
       public void readPacketData(PacketBuffer var1) throws IOException {
@@ -129,14 +98,6 @@ public class CPacketPlayer implements Packet {
 
    public static class Rotation extends CPacketPlayer {
       public Rotation() {
-         this.rotating = true;
-      }
-
-      @SideOnly(Side.CLIENT)
-      public Rotation(float var1, float var2, boolean var3) {
-         this.yaw = var1;
-         this.pitch = var2;
-         this.onGround = var3;
          this.rotating = true;
       }
 

@@ -6,8 +6,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketUpdateScore implements Packet {
    private String name = "";
@@ -61,26 +59,6 @@ public class SPacketUpdateScore implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleUpdateScore(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getPlayerName() {
-      return this.name;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getObjectiveName() {
-      return this.objective;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getScoreValue() {
-      return this.value;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SPacketUpdateScore.Action getScoreAction() {
-      return this.action;
    }
 
    public static enum Action {

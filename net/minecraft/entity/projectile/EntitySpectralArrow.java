@@ -11,7 +11,7 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 
 public class EntitySpectralArrow extends EntityArrow {
-   private int duration = 200;
+   public int duration = 200;
 
    public EntitySpectralArrow(World var1) {
       super(var1);

@@ -19,4 +19,9 @@ public class BlockMaterialMatcher implements Predicate {
    public boolean apply(@Nullable IBlockState var1) {
       return var1 != null && var1.getMaterial() == this.material;
    }
+
+   // $FF: synthetic method
+   public boolean apply(Object var1) {
+      return this.apply((IBlockState)var1);
+   }
 }

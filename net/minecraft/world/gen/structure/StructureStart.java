@@ -53,24 +53,20 @@ public abstract class StructureStart {
    }
 
    public NBTTagCompound writeStructureComponentsToNBT(int var1, int var2) {
-      if (MapGenStructureIO.getStructureStartName(this) == null) {
-         throw new RuntimeException("StructureStart \"" + this.getClass().getName() + "\" missing ID Mapping, Modder see MapGenStructureIO");
-      } else {
-         NBTTagCompound var3 = new NBTTagCompound();
-         var3.setString("id", MapGenStructureIO.getStructureStartName(this));
-         var3.setInteger("ChunkX", var1);
-         var3.setInteger("ChunkZ", var2);
-         var3.setTag("BB", this.boundingBox.toNBTTagIntArray());
-         NBTTagList var4 = new NBTTagList();
+      NBTTagCompound var3 = new NBTTagCompound();
+      var3.setString("id", MapGenStructureIO.getStructureStartName(this));
+      var3.setInteger("ChunkX", var1);
+      var3.setInteger("ChunkZ", var2);
+      var3.setTag("BB", this.boundingBox.toNBTTagIntArray());
+      NBTTagList var4 = new NBTTagList();
 
-         for(StructureComponent var6 : this.components) {
-            var4.appendTag(var6.createStructureBaseNBT());
-         }
-
-         var3.setTag("Children", var4);
-         this.writeToNBT(var3);
-         return var3;
+      for(StructureComponent var6 : this.components) {
+         var4.appendTag(var6.createStructureBaseNBT());
       }
+
+      var3.setTag("Children", var4);
+      this.writeToNBT(var3);
+      return var3;
    }
 
    public void writeToNBT(NBTTagCompound var1) {
@@ -86,10 +82,7 @@ public abstract class StructureStart {
       NBTTagList var3 = var2.getTagList("Children", 10);
 
       for(int var4 = 0; var4 < var3.tagCount(); ++var4) {
-         StructureComponent var5 = MapGenStructureIO.getStructureComponent(var3.getCompoundTagAt(var4), var1);
-         if (var5 != null) {
-            this.components.add(var5);
-         }
+         this.components.add(MapGenStructureIO.getStructureComponent(var3.getCompoundTagAt(var4), var1));
       }
 
       this.readFromNBT(var2);

@@ -9,213 +9,233 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
+import org.bukkit.Server;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_10_R1.block.CraftBlock;
+import org.bukkit.event.block.BlockFromToEvent;
 
 public class BlockDynamicLiquid extends BlockLiquid {
    int adjacentSourceBlocks;
 
-   protected BlockDynamicLiquid(Material var1) {
-      super(var1);
+   protected BlockDynamicLiquid(Material material) {
+      super(material);
    }
 
-   private void placeStaticBlock(World var1, BlockPos var2, IBlockState var3) {
-      var1.setBlockState(var2, getStaticBlock(this.blockMaterial).getDefaultState().withProperty(LEVEL, var3.getValue(LEVEL)), 2);
+   private void placeStaticBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
+      world.setBlockState(blockposition, getStaticBlock(this.blockMaterial).getDefaultState().withProperty(LEVEL, (Integer)iblockdata.getValue(LEVEL)), 2);
    }
 
-   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
-      int var5 = ((Integer)var3.getValue(LEVEL)).intValue();
-      byte var6 = 1;
-      if (this.blockMaterial == Material.LAVA && !var1.provider.doesWaterVaporize()) {
-         var6 = 2;
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      org.bukkit.World bworld = world.getWorld();
+      Server server = world.getServer();
+      org.bukkit.block.Block source = bworld == null ? null : bworld.getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+      int i = ((Integer)iblockdata.getValue(LEVEL)).intValue();
+      byte b0 = 1;
+      if (this.blockMaterial == Material.LAVA && !world.provider.doesWaterVaporize()) {
+         b0 = 2;
       }
 
-      int var7 = this.tickRate(var1);
-      if (var5 > 0) {
-         int var8 = -100;
+      int j = this.tickRate(world);
+      if (i > 0) {
+         int l = -100;
          this.adjacentSourceBlocks = 0;
 
-         for(EnumFacing var10 : EnumFacing.Plane.HORIZONTAL) {
-            var8 = this.checkAdjacentBlock(var1, var2.offset(var10), var8);
+         for(EnumFacing enumdirection : EnumFacing.Plane.HORIZONTAL) {
+            l = this.checkAdjacentBlock(world, blockposition.offset(enumdirection), l);
          }
 
-         int var15 = var8 + var6;
-         if (var15 >= 8 || var8 < 0) {
-            var15 = -1;
+         int i1 = l + b0;
+         if (i1 >= 8 || l < 0) {
+            i1 = -1;
          }
 
-         int var17 = this.getDepth(var1.getBlockState(var2.up()));
-         if (var17 >= 0) {
-            if (var17 >= 8) {
-               var15 = var17;
+         int k = this.getDepth(world.getBlockState(blockposition.up()));
+         if (k >= 0) {
+            if (k >= 8) {
+               i1 = k;
             } else {
-               var15 = var17 + 8;
+               i1 = k + 8;
             }
          }
 
-         if (this.adjacentSourceBlocks >= 2 && ForgeEventFactory.canCreateFluidSource(var1, var2, var3, this.blockMaterial == Material.WATER)) {
-            IBlockState var11 = var1.getBlockState(var2.down());
-            if (var11.getMaterial().isSolid()) {
-               var15 = 0;
-            } else if (var11.getMaterial() == this.blockMaterial && ((Integer)var11.getValue(LEVEL)).intValue() == 0) {
-               var15 = 0;
+         if (this.adjacentSourceBlocks >= 2 && this.blockMaterial == Material.WATER) {
+            IBlockState iblockdata1 = world.getBlockState(blockposition.down());
+            if (iblockdata1.getMaterial().isSolid()) {
+               i1 = 0;
+            } else if (iblockdata1.getMaterial() == this.blockMaterial && ((Integer)iblockdata1.getValue(LEVEL)).intValue() == 0) {
+               i1 = 0;
             }
          }
 
-         if (this.blockMaterial == Material.LAVA && var5 < 8 && var15 < 8 && var15 > var5 && var4.nextInt(4) != 0) {
-            var7 *= 4;
+         if (this.blockMaterial == Material.LAVA && i < 8 && i1 < 8 && i1 > i && random.nextInt(4) != 0) {
+            j *= 4;
          }
 
-         if (var15 == var5) {
-            this.placeStaticBlock(var1, var2, var3);
+         if (i1 == i) {
+            this.placeStaticBlock(world, blockposition, iblockdata);
          } else {
-            var5 = var15;
-            if (var15 < 0) {
-               var1.setBlockToAir(var2);
+            i = i1;
+            if (i1 < 0) {
+               world.setBlockToAir(blockposition);
             } else {
-               var3 = var3.withProperty(LEVEL, Integer.valueOf(var15));
-               var1.setBlockState(var2, var3, 2);
-               var1.scheduleUpdate(var2, this, var7);
-               var1.notifyNeighborsOfStateChange(var2, this);
+               iblockdata = iblockdata.withProperty(LEVEL, Integer.valueOf(i1));
+               world.setBlockState(blockposition, iblockdata, 2);
+               world.scheduleUpdate(blockposition, this, j);
+               world.notifyNeighborsOfStateChange(blockposition, this);
             }
          }
       } else {
-         this.placeStaticBlock(var1, var2, var3);
+         this.placeStaticBlock(world, blockposition, iblockdata);
       }
 
-      IBlockState var14 = var1.getBlockState(var2.down());
-      if (this.canFlowInto(var1, var2.down(), var14)) {
-         if (this.blockMaterial == Material.LAVA && var1.getBlockState(var2.down()).getMaterial() == Material.WATER) {
-            var1.setBlockState(var2.down(), Blocks.STONE.getDefaultState());
-            this.triggerMixEffects(var1, var2.down());
+      IBlockState iblockdata2 = world.getBlockState(blockposition.down());
+      if (this.canFlowInto(world, blockposition.down(), iblockdata2)) {
+         BlockFromToEvent event = new BlockFromToEvent(source, BlockFace.DOWN);
+         if (server != null) {
+            server.getPluginManager().callEvent(event);
+         }
+
+         if (!event.isCancelled()) {
+            if (this.blockMaterial == Material.LAVA && world.getBlockState(blockposition.down()).getMaterial() == Material.WATER) {
+               world.setBlockState(blockposition.down(), Blocks.STONE.getDefaultState());
+               this.triggerMixEffects(world, blockposition.down());
+               return;
+            }
+
+            if (i >= 8) {
+               this.tryFlowInto(world, blockposition.down(), iblockdata2, i);
+            } else {
+               this.tryFlowInto(world, blockposition.down(), iblockdata2, i + 8);
+            }
+         }
+      } else if (i >= 0 && (i == 0 || this.isBlocked(world, blockposition.down(), iblockdata2))) {
+         Set set = this.getPossibleFlowDirections(world, blockposition);
+         int k = i + b0;
+         if (i >= 8) {
+            k = 1;
+         }
+
+         if (k >= 8) {
             return;
          }
 
-         if (var5 >= 8) {
-            this.tryFlowInto(var1, var2.down(), var14, var5);
-         } else {
-            this.tryFlowInto(var1, var2.down(), var14, var5 + 8);
-         }
-      } else if (var5 >= 0 && (var5 == 0 || this.isBlocked(var1, var2.down(), var14))) {
-         Set var16 = this.getPossibleFlowDirections(var1, var2);
-         int var18 = var5 + var6;
-         if (var5 >= 8) {
-            var18 = 1;
-         }
+         for(EnumFacing enumdirection1 : set) {
+            BlockFromToEvent event = new BlockFromToEvent(source, CraftBlock.notchToBlockFace(enumdirection1));
+            if (server != null) {
+               server.getPluginManager().callEvent(event);
+            }
 
-         if (var18 >= 8) {
-            return;
-         }
-
-         for(EnumFacing var12 : var16) {
-            this.tryFlowInto(var1, var2.offset(var12), var1.getBlockState(var2.offset(var12)), var18);
+            if (!event.isCancelled()) {
+               this.tryFlowInto(world, blockposition.offset(enumdirection1), world.getBlockState(blockposition.offset(enumdirection1)), k);
+            }
          }
       }
 
    }
 
-   private void tryFlowInto(World var1, BlockPos var2, IBlockState var3, int var4) {
-      if (this.canFlowInto(var1, var2, var3)) {
-         if (var3.getMaterial() != Material.AIR) {
+   private void tryFlowInto(World world, BlockPos blockposition, IBlockState iblockdata, int i) {
+      if (world.isBlockLoaded(blockposition) && this.canFlowInto(world, blockposition, iblockdata)) {
+         if (iblockdata.getMaterial() != Material.AIR) {
             if (this.blockMaterial == Material.LAVA) {
-               this.triggerMixEffects(var1, var2);
-            } else if (var3.getBlock() != Blocks.SNOW_LAYER) {
-               var3.getBlock().dropBlockAsItem(var1, var2, var3, 0);
+               this.triggerMixEffects(world, blockposition);
+            } else {
+               iblockdata.getBlock().dropBlockAsItem(world, blockposition, iblockdata, 0);
             }
          }
 
-         var1.setBlockState(var2, this.getDefaultState().withProperty(LEVEL, Integer.valueOf(var4)), 3);
+         world.setBlockState(blockposition, this.getDefaultState().withProperty(LEVEL, Integer.valueOf(i)), 3);
       }
 
    }
 
-   private int getSlopeDistance(World var1, BlockPos var2, int var3, EnumFacing var4) {
-      int var5 = 1000;
+   private int getSlopeDistance(World world, BlockPos blockposition, int i, EnumFacing enumdirection) {
+      int j = 1000;
 
-      for(EnumFacing var7 : EnumFacing.Plane.HORIZONTAL) {
-         if (var7 != var4) {
-            BlockPos var8 = var2.offset(var7);
-            IBlockState var9 = var1.getBlockState(var8);
-            if (!this.isBlocked(var1, var8, var9) && (var9.getMaterial() != this.blockMaterial || ((Integer)var9.getValue(LEVEL)).intValue() > 0)) {
-               if (!this.isBlocked(var1, var8.down(), var9)) {
-                  return var3;
+      for(EnumFacing enumdirection1 : EnumFacing.Plane.HORIZONTAL) {
+         if (enumdirection1 != enumdirection) {
+            BlockPos blockposition1 = blockposition.offset(enumdirection1);
+            IBlockState iblockdata = world.getBlockState(blockposition1);
+            if (!this.isBlocked(world, blockposition1, iblockdata) && (iblockdata.getMaterial() != this.blockMaterial || ((Integer)iblockdata.getValue(LEVEL)).intValue() > 0)) {
+               if (!this.isBlocked(world, blockposition1.down(), iblockdata)) {
+                  return i;
                }
 
-               if (var3 < this.getSlopeFindDistance(var1)) {
-                  int var10 = this.getSlopeDistance(var1, var8, var3 + 1, var7.getOpposite());
-                  if (var10 < var5) {
-                     var5 = var10;
+               if (i < this.getSlopeFindDistance(world)) {
+                  int k = this.getSlopeDistance(world, blockposition1, i + 1, enumdirection1.getOpposite());
+                  if (k < j) {
+                     j = k;
                   }
                }
             }
          }
       }
 
-      return var5;
+      return j;
    }
 
-   private int getSlopeFindDistance(World var1) {
-      return this.blockMaterial == Material.LAVA && !var1.provider.doesWaterVaporize() ? 2 : 4;
+   private int getSlopeFindDistance(World world) {
+      return this.blockMaterial == Material.LAVA && !world.provider.doesWaterVaporize() ? 2 : 4;
    }
 
-   private Set getPossibleFlowDirections(World var1, BlockPos var2) {
-      int var3 = 1000;
-      EnumSet var4 = EnumSet.noneOf(EnumFacing.class);
+   private Set getPossibleFlowDirections(World world, BlockPos blockposition) {
+      int i = 1000;
+      EnumSet enumset = EnumSet.noneOf(EnumFacing.class);
 
-      for(EnumFacing var6 : EnumFacing.Plane.HORIZONTAL) {
-         BlockPos var7 = var2.offset(var6);
-         IBlockState var8 = var1.getBlockState(var7);
-         if (!this.isBlocked(var1, var7, var8) && (var8.getMaterial() != this.blockMaterial || ((Integer)var8.getValue(LEVEL)).intValue() > 0)) {
-            int var9;
-            if (this.isBlocked(var1, var7.down(), var1.getBlockState(var7.down()))) {
-               var9 = this.getSlopeDistance(var1, var7, 1, var6.getOpposite());
+      for(EnumFacing enumdirection : EnumFacing.Plane.HORIZONTAL) {
+         BlockPos blockposition1 = blockposition.offset(enumdirection);
+         IBlockState iblockdata = world.getBlockState(blockposition1);
+         if (!this.isBlocked(world, blockposition1, iblockdata) && (iblockdata.getMaterial() != this.blockMaterial || ((Integer)iblockdata.getValue(LEVEL)).intValue() > 0)) {
+            int j;
+            if (this.isBlocked(world, blockposition1.down(), world.getBlockState(blockposition1.down()))) {
+               j = this.getSlopeDistance(world, blockposition1, 1, enumdirection.getOpposite());
             } else {
-               var9 = 0;
+               j = 0;
             }
 
-            if (var9 < var3) {
-               var4.clear();
+            if (j < i) {
+               enumset.clear();
             }
 
-            if (var9 <= var3) {
-               var4.add(var6);
-               var3 = var9;
+            if (j <= i) {
+               enumset.add(enumdirection);
+               i = j;
             }
          }
       }
 
-      return var4;
+      return enumset;
    }
 
-   private boolean isBlocked(World var1, BlockPos var2, IBlockState var3) {
-      Block var4 = var1.getBlockState(var2).getBlock();
-      return !(var4 instanceof BlockDoor) && var4 != Blocks.STANDING_SIGN && var4 != Blocks.LADDER && var4 != Blocks.REEDS ? (var4.blockMaterial != Material.PORTAL && var4.blockMaterial != Material.STRUCTURE_VOID ? var4.blockMaterial.blocksMovement() : true) : true;
+   private boolean isBlocked(World world, BlockPos blockposition, IBlockState iblockdata) {
+      Block block = world.getBlockState(blockposition).getBlock();
+      return !(block instanceof BlockDoor) && block != Blocks.STANDING_SIGN && block != Blocks.LADDER && block != Blocks.REEDS ? (block.blockMaterial != Material.PORTAL && block.blockMaterial != Material.STRUCTURE_VOID ? block.blockMaterial.blocksMovement() : true) : true;
    }
 
-   protected int checkAdjacentBlock(World var1, BlockPos var2, int var3) {
-      int var4 = this.getDepth(var1.getBlockState(var2));
-      if (var4 < 0) {
-         return var3;
+   protected int checkAdjacentBlock(World world, BlockPos blockposition, int i) {
+      int j = this.getDepth(world.getBlockState(blockposition));
+      if (j < 0) {
+         return i;
       } else {
-         if (var4 == 0) {
+         if (j == 0) {
             ++this.adjacentSourceBlocks;
          }
 
-         if (var4 >= 8) {
-            var4 = 0;
+         if (j >= 8) {
+            j = 0;
          }
 
-         return var3 >= 0 && var4 >= var3 ? var3 : var4;
+         return i >= 0 && j >= i ? i : j;
       }
    }
 
-   private boolean canFlowInto(World var1, BlockPos var2, IBlockState var3) {
-      Material var4 = var3.getMaterial();
-      return var4 != this.blockMaterial && var4 != Material.LAVA && !this.isBlocked(var1, var2, var3);
+   private boolean canFlowInto(World world, BlockPos blockposition, IBlockState iblockdata) {
+      Material material = iblockdata.getMaterial();
+      return material != this.blockMaterial && material != Material.LAVA && !this.isBlocked(world, blockposition, iblockdata);
    }
 
-   public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
-      if (!this.checkForMixing(var1, var2, var3)) {
-         var1.scheduleUpdate(var2, this, this.tickRate(var1));
+   public void onBlockAdded(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (!this.checkForMixing(world, blockposition, iblockdata)) {
+         world.scheduleUpdate(blockposition, this, this.tickRate(world));
       }
 
    }

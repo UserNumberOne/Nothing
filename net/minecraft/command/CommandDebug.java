@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -41,9 +41,9 @@ public class CommandDebug extends CommandBase {
             }
 
             notifyCommandListener(var2, this, "commands.debug.start", new Object[0]);
-            var1.enableProfiling();
-            this.profileStartTime = MinecraftServer.getCurrentTimeMillis();
-            this.profileStartTick = var1.getTickCounter();
+            var1.aq();
+            this.profileStartTime = MinecraftServer.av();
+            this.profileStartTick = var1.ap();
          } else {
             if (!"stop".equals(var3[0])) {
                throw new WrongUsageException("commands.debug.usage", new Object[0]);
@@ -53,40 +53,38 @@ public class CommandDebug extends CommandBase {
                throw new WrongUsageException("commands.debug.usage", new Object[0]);
             }
 
-            if (!var1.theProfiler.profilingEnabled) {
+            if (!var1.methodProfiler.profilingEnabled) {
                throw new CommandException("commands.debug.notStarted", new Object[0]);
             }
 
-            long var4 = MinecraftServer.getCurrentTimeMillis();
-            int var6 = var1.getTickCounter();
+            long var4 = MinecraftServer.av();
+            int var6 = var1.ap();
             long var7 = var4 - this.profileStartTime;
             int var9 = var6 - this.profileStartTick;
-            this.saveProfilerResults(var7, var9, var1);
-            var1.theProfiler.profilingEnabled = false;
+            this.a(var7, var9, var1);
+            var1.methodProfiler.profilingEnabled = false;
             notifyCommandListener(var2, this, "commands.debug.stop", new Object[]{(float)var7 / 1000.0F, var9});
          }
 
       }
    }
 
-   private void saveProfilerResults(long var1, int var3, MinecraftServer var4) {
-      File var5 = new File(var4.getFile("debug"), "profile-results-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + ".txt");
+   private void a(long var1, int var3, MinecraftServer var4) {
+      File var5 = new File(var4.d("debug"), "profile-results-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + ".txt");
       var5.getParentFile().mkdirs();
       FileWriter var6 = null;
 
       try {
          var6 = new FileWriter(var5);
-         var6.write(this.getProfilerResults(var1, var3, var4));
-      } catch (Throwable var11) {
+         var6.write(this.b(var1, var3, var4));
+      } catch (Throwable var8) {
          IOUtils.closeQuietly(var6);
-         LOGGER.error("Could not save profiler results to {}", new Object[]{var5, var11});
-      } finally {
-         IOUtils.closeQuietly(var6);
+         LOGGER.error("Could not save profiler results to {}", new Object[]{var5, var8});
       }
 
    }
 
-   private String getProfilerResults(long var1, int var3, MinecraftServer var4) {
+   private String b(long var1, int var3, MinecraftServer var4) {
       StringBuilder var5 = new StringBuilder();
       var5.append("---- Minecraft Profiler Results ----\n");
       var5.append("// ");
@@ -96,13 +94,13 @@ public class CommandDebug extends CommandBase {
       var5.append("Tick span: ").append(var3).append(" ticks\n");
       var5.append("// This is approximately ").append(String.format("%.2f", (float)var3 / ((float)var1 / 1000.0F))).append(" ticks per second. It should be ").append(20).append(" ticks per second\n\n");
       var5.append("--- BEGIN PROFILE DUMP ---\n\n");
-      this.appendProfilerResults(0, "root", var5, var4);
+      this.a(0, "root", var5, var4);
       var5.append("--- END PROFILE DUMP ---\n\n");
       return var5.toString();
    }
 
-   private void appendProfilerResults(int var1, String var2, StringBuilder var3, MinecraftServer var4) {
-      List var5 = var4.theProfiler.getProfilingData(var2);
+   private void a(int var1, String var2, StringBuilder var3, MinecraftServer var4) {
+      List var5 = var4.methodProfiler.getProfilingData(var2);
       if (var5 != null && var5.size() >= 3) {
          for(int var6 = 1; var6 < var5.size(); ++var6) {
             Profiler.Result var7 = (Profiler.Result)var5.get(var6);
@@ -115,14 +113,14 @@ public class CommandDebug extends CommandBase {
             var3.append(var7.profilerName).append(" - ").append(String.format("%.2f", var7.usePercentage)).append("%/").append(String.format("%.2f", var7.totalUsePercentage)).append("%\n");
             if (!"unspecified".equals(var7.profilerName)) {
                try {
-                  this.appendProfilerResults(var1 + 1, var2 + "." + var7.profilerName, var3, var4);
+                  this.a(var1 + 1, var2 + "." + var7.profilerName, var3, var4);
                } catch (Exception var9) {
                   var3.append("[[ EXCEPTION ").append(var9).append(" ]]");
                }
             }
          }
-      }
 
+      }
    }
 
    private static String getWittyComment() {
@@ -135,7 +133,7 @@ public class CommandDebug extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, new String[]{"start", "stop"}) : Collections.emptyList();
    }
 }

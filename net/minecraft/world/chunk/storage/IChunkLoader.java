@@ -10,7 +10,7 @@ public interface IChunkLoader {
    @Nullable
    Chunk loadChunk(World var1, int var2, int var3) throws IOException;
 
-   void saveChunk(World var1, Chunk var2) throws MinecraftException, IOException;
+   void saveChunk(World var1, Chunk var2) throws IOException, MinecraftException;
 
    void saveExtraChunkData(World var1, Chunk var2) throws IOException;
 

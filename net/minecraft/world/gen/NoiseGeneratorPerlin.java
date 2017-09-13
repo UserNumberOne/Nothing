@@ -41,13 +41,13 @@ public class NoiseGeneratorPerlin extends NoiseGenerator {
          var1 = new double[var6 * var7];
       }
 
-      double var21 = 1.0D;
-      double var18 = 1.0D;
+      double var17 = 1.0D;
+      double var19 = 1.0D;
 
-      for(int var20 = 0; var20 < this.levels; ++var20) {
-         this.noiseLevels[var20].add(var1, var2, var4, var6, var7, var8 * var18 * var21, var10 * var18 * var21, 0.55D / var21);
-         var18 *= var12;
-         var21 *= var14;
+      for(int var21 = 0; var21 < this.levels; ++var21) {
+         this.noiseLevels[var21].add(var1, var2, var4, var6, var7, var8 * var19 * var17, var10 * var19 * var17, 0.55D / var17);
+         var19 *= var12;
+         var17 *= var14;
       }
 
       return var1;

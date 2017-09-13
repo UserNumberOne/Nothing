@@ -1,10 +1,7 @@
 package net.minecraft.network.rcon;
 
 import com.google.common.base.Charsets;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.SERVER)
 public class RConUtils {
    public static final char[] HEX_DIGITS = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 

@@ -15,7 +15,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -24,8 +23,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.block.BlockRedstoneEvent;
 
 public class BlockTripWireHook extends Block {
    public static final PropertyDirection FACING = BlockHorizontal.FACING;
@@ -43,40 +41,40 @@ public class BlockTripWireHook extends Block {
       this.setTickRandomly(true);
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      switch((EnumFacing)var1.getValue(FACING)) {
-      case EAST:
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
+      switch(BlockTripWireHook.SyntheticClass_1.a[((EnumFacing)iblockdata.getValue(FACING)).ordinal()]) {
+      case 1:
       default:
          return HOOK_EAST_AABB;
-      case WEST:
+      case 2:
          return HOOK_WEST_AABB;
-      case SOUTH:
+      case 3:
          return HOOK_SOUTH_AABB;
-      case NORTH:
+      case 4:
          return HOOK_NORTH_AABB;
       }
    }
 
    @Nullable
-   public AxisAlignedBB getCollisionBoundingBox(IBlockState var1, World var2, BlockPos var3) {
+   public AxisAlignedBB getCollisionBoundingBox(IBlockState iblockdata, World world, BlockPos blockposition) {
       return NULL_AABB;
    }
 
-   public boolean isOpaqueCube(IBlockState var1) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isFullCube(IBlockState var1) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean canPlaceBlockOnSide(World var1, BlockPos var2, EnumFacing var3) {
-      return var3.getAxis().isHorizontal() && var1.getBlockState(var2.offset(var3.getOpposite())).isSideSolid(var1, var2.offset(var3.getOpposite()), var3);
+   public boolean canPlaceBlockOnSide(World world, BlockPos blockposition, EnumFacing enumdirection) {
+      return enumdirection.getAxis().isHorizontal() && world.getBlockState(blockposition.offset(enumdirection.getOpposite())).isNormalCube();
    }
 
-   public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      for(EnumFacing var4 : EnumFacing.Plane.HORIZONTAL) {
-         if (var1.getBlockState(var2.offset(var4)).isSideSolid(var1, var2.offset(var4), var4.getOpposite())) {
+   public boolean canPlaceBlockAt(World world, BlockPos blockposition) {
+      for(EnumFacing enumdirection : EnumFacing.Plane.HORIZONTAL) {
+         if (world.getBlockState(blockposition.offset(enumdirection)).isNormalCube()) {
             return true;
          }
       }
@@ -84,193 +82,224 @@ public class BlockTripWireHook extends Block {
       return false;
    }
 
-   public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
-      IBlockState var9 = this.getDefaultState().withProperty(POWERED, Boolean.valueOf(false)).withProperty(ATTACHED, Boolean.valueOf(false));
-      if (var3.getAxis().isHorizontal()) {
-         var9 = var9.withProperty(FACING, var3);
+   public IBlockState getStateForPlacement(World world, BlockPos blockposition, EnumFacing enumdirection, float f, float f1, float f2, int i, EntityLivingBase entityliving) {
+      IBlockState iblockdata = this.getDefaultState().withProperty(POWERED, Boolean.valueOf(false)).withProperty(ATTACHED, Boolean.valueOf(false));
+      if (enumdirection.getAxis().isHorizontal()) {
+         iblockdata = iblockdata.withProperty(FACING, enumdirection);
       }
 
-      return var9;
+      return iblockdata;
    }
 
-   public void onBlockPlacedBy(World var1, BlockPos var2, IBlockState var3, EntityLivingBase var4, ItemStack var5) {
-      this.calculateState(var1, var2, var3, false, false, -1, (IBlockState)null);
+   public void onBlockPlacedBy(World world, BlockPos blockposition, IBlockState iblockdata, EntityLivingBase entityliving, ItemStack itemstack) {
+      this.calculateState(world, blockposition, iblockdata, false, false, -1, (IBlockState)null);
    }
 
-   public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      if (var4 != this && this.checkForDrop(var2, var3, var1)) {
-         EnumFacing var5 = (EnumFacing)var1.getValue(FACING);
-         if (!var2.getBlockState(var3.offset(var5.getOpposite())).isSideSolid(var2, var3.offset(var5.getOpposite()), var5)) {
-            this.dropBlockAsItem(var2, var3, var1, 0);
-            var2.setBlockToAir(var3);
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      if (block != this && this.checkForDrop(world, blockposition, iblockdata)) {
+         EnumFacing enumdirection = (EnumFacing)iblockdata.getValue(FACING);
+         if (!world.getBlockState(blockposition.offset(enumdirection.getOpposite())).isNormalCube()) {
+            this.dropBlockAsItem(world, blockposition, iblockdata, 0);
+            world.setBlockToAir(blockposition);
          }
       }
 
    }
 
-   public void calculateState(World var1, BlockPos var2, IBlockState var3, boolean var4, boolean var5, int var6, @Nullable IBlockState var7) {
-      EnumFacing var8 = (EnumFacing)var3.getValue(FACING);
-      boolean var9 = ((Boolean)var3.getValue(ATTACHED)).booleanValue();
-      boolean var10 = ((Boolean)var3.getValue(POWERED)).booleanValue();
-      boolean var11 = !var4;
-      boolean var12 = false;
-      int var13 = 0;
-      IBlockState[] var14 = new IBlockState[42];
+   public void calculateState(World world, BlockPos blockposition, IBlockState iblockdata, boolean flag, boolean flag1, int i, @Nullable IBlockState iblockdata1) {
+      EnumFacing enumdirection = (EnumFacing)iblockdata.getValue(FACING);
+      boolean flag2 = ((Boolean)iblockdata.getValue(ATTACHED)).booleanValue();
+      boolean flag3 = ((Boolean)iblockdata.getValue(POWERED)).booleanValue();
+      boolean flag4 = !flag;
+      boolean flag5 = false;
+      int j = 0;
+      IBlockState[] aiblockdata = new IBlockState[42];
 
-      for(int var15 = 1; var15 < 42; ++var15) {
-         BlockPos var16 = var2.offset(var8, var15);
-         IBlockState var17 = var1.getBlockState(var16);
-         if (var17.getBlock() == Blocks.TRIPWIRE_HOOK) {
-            if (var17.getValue(FACING) == var8.getOpposite()) {
-               var13 = var15;
+      for(int k = 1; k < 42; ++k) {
+         BlockPos blockposition1 = blockposition.offset(enumdirection, k);
+         IBlockState iblockdata2 = world.getBlockState(blockposition1);
+         if (iblockdata2.getBlock() == Blocks.TRIPWIRE_HOOK) {
+            if (iblockdata2.getValue(FACING) == enumdirection.getOpposite()) {
+               j = k;
             }
             break;
          }
 
-         if (var17.getBlock() != Blocks.TRIPWIRE && var15 != var6) {
-            var14[var15] = null;
-            var11 = false;
+         if (iblockdata2.getBlock() != Blocks.TRIPWIRE && k != i) {
+            aiblockdata[k] = null;
+            flag4 = false;
          } else {
-            if (var15 == var6) {
-               var17 = (IBlockState)Objects.firstNonNull(var7, var17);
+            if (k == i) {
+               iblockdata2 = (IBlockState)Objects.firstNonNull(iblockdata1, iblockdata2);
             }
 
-            boolean var18 = !((Boolean)var17.getValue(BlockTripWire.DISARMED)).booleanValue();
-            boolean var19 = ((Boolean)var17.getValue(BlockTripWire.POWERED)).booleanValue();
-            var12 |= var18 && var19;
-            var14[var15] = var17;
-            if (var15 == var6) {
-               var1.scheduleUpdate(var2, this, this.tickRate(var1));
-               var11 &= var18;
-            }
-         }
-      }
-
-      var11 = var11 & var13 > 1;
-      var12 = var12 & var11;
-      IBlockState var22 = this.getDefaultState().withProperty(ATTACHED, Boolean.valueOf(var11)).withProperty(POWERED, Boolean.valueOf(var12));
-      if (var13 > 0) {
-         BlockPos var23 = var2.offset(var8, var13);
-         EnumFacing var25 = var8.getOpposite();
-         var1.setBlockState(var23, var22.withProperty(FACING, var25), 3);
-         this.notifyNeighbors(var1, var23, var25);
-         this.playSound(var1, var23, var11, var12, var9, var10);
-      }
-
-      this.playSound(var1, var2, var11, var12, var9, var10);
-      if (!var4) {
-         var1.setBlockState(var2, var22.withProperty(FACING, var8), 3);
-         if (var5) {
-            this.notifyNeighbors(var1, var2, var8);
-         }
-      }
-
-      if (var9 != var11) {
-         for(int var24 = 1; var24 < var13; ++var24) {
-            BlockPos var26 = var2.offset(var8, var24);
-            IBlockState var27 = var14[var24];
-            if (var27 != null && var1.getBlockState(var26).getMaterial() != Material.AIR) {
-               var1.setBlockState(var26, var27.withProperty(ATTACHED, Boolean.valueOf(var11)), 3);
+            boolean flag6 = !((Boolean)iblockdata2.getValue(BlockTripWire.DISARMED)).booleanValue();
+            boolean flag7 = ((Boolean)iblockdata2.getValue(BlockTripWire.POWERED)).booleanValue();
+            flag5 |= flag6 && flag7;
+            aiblockdata[k] = iblockdata2;
+            if (k == i) {
+               world.scheduleUpdate(blockposition, this, this.tickRate(world));
+               flag4 &= flag6;
             }
          }
       }
 
+      flag4 = flag4 & j > 1;
+      flag5 = flag5 & flag4;
+      IBlockState iblockdata3 = this.getDefaultState().withProperty(ATTACHED, Boolean.valueOf(flag4)).withProperty(POWERED, Boolean.valueOf(flag5));
+      if (j > 0) {
+         BlockPos blockposition1 = blockposition.offset(enumdirection, j);
+         EnumFacing enumdirection1 = enumdirection.getOpposite();
+         world.setBlockState(blockposition1, iblockdata3.withProperty(FACING, enumdirection1), 3);
+         this.notifyNeighbors(world, blockposition1, enumdirection1);
+         this.playSound(world, blockposition1, flag4, flag5, flag2, flag3);
+      }
+
+      org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+      BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, 15, 0);
+      world.getServer().getPluginManager().callEvent(eventRedstone);
+      if (eventRedstone.getNewCurrent() <= 0) {
+         this.playSound(world, blockposition, flag4, flag5, flag2, flag3);
+         if (!flag) {
+            world.setBlockState(blockposition, iblockdata3.withProperty(FACING, enumdirection), 3);
+            if (flag1) {
+               this.notifyNeighbors(world, blockposition, enumdirection);
+            }
+         }
+
+         if (flag2 != flag4) {
+            for(int l = 1; l < j; ++l) {
+               BlockPos blockposition2 = blockposition.offset(enumdirection, l);
+               IBlockState iblockdata4 = aiblockdata[l];
+               if (iblockdata4 != null && world.getBlockState(blockposition2).getMaterial() != Material.AIR) {
+                  world.setBlockState(blockposition2, iblockdata4.withProperty(ATTACHED, Boolean.valueOf(flag4)), 3);
+               }
+            }
+         }
+
+      }
    }
 
-   public void randomTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
+   public void randomTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
    }
 
-   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
-      this.calculateState(var1, var2, var3, false, true, -1, (IBlockState)null);
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      this.calculateState(world, blockposition, iblockdata, false, true, -1, (IBlockState)null);
    }
 
-   private void playSound(World var1, BlockPos var2, boolean var3, boolean var4, boolean var5, boolean var6) {
-      if (var4 && !var6) {
-         var1.playSound((EntityPlayer)null, var2, SoundEvents.BLOCK_TRIPWIRE_CLICK_ON, SoundCategory.BLOCKS, 0.4F, 0.6F);
-      } else if (!var4 && var6) {
-         var1.playSound((EntityPlayer)null, var2, SoundEvents.BLOCK_TRIPWIRE_CLICK_OFF, SoundCategory.BLOCKS, 0.4F, 0.5F);
-      } else if (var3 && !var5) {
-         var1.playSound((EntityPlayer)null, var2, SoundEvents.BLOCK_TRIPWIRE_ATTACH, SoundCategory.BLOCKS, 0.4F, 0.7F);
-      } else if (!var3 && var5) {
-         var1.playSound((EntityPlayer)null, var2, SoundEvents.BLOCK_TRIPWIRE_DETACH, SoundCategory.BLOCKS, 0.4F, 1.2F / (var1.rand.nextFloat() * 0.2F + 0.9F));
+   private void playSound(World world, BlockPos blockposition, boolean flag, boolean flag1, boolean flag2, boolean flag3) {
+      if (flag1 && !flag3) {
+         world.playSound((EntityPlayer)null, blockposition, SoundEvents.BLOCK_TRIPWIRE_CLICK_ON, SoundCategory.BLOCKS, 0.4F, 0.6F);
+      } else if (!flag1 && flag3) {
+         world.playSound((EntityPlayer)null, blockposition, SoundEvents.BLOCK_TRIPWIRE_CLICK_OFF, SoundCategory.BLOCKS, 0.4F, 0.5F);
+      } else if (flag && !flag2) {
+         world.playSound((EntityPlayer)null, blockposition, SoundEvents.BLOCK_TRIPWIRE_ATTACH, SoundCategory.BLOCKS, 0.4F, 0.7F);
+      } else if (!flag && flag2) {
+         world.playSound((EntityPlayer)null, blockposition, SoundEvents.BLOCK_TRIPWIRE_DETACH, SoundCategory.BLOCKS, 0.4F, 1.2F / (world.rand.nextFloat() * 0.2F + 0.9F));
       }
 
    }
 
-   private void notifyNeighbors(World var1, BlockPos var2, EnumFacing var3) {
-      var1.notifyNeighborsOfStateChange(var2, this);
-      var1.notifyNeighborsOfStateChange(var2.offset(var3.getOpposite()), this);
+   private void notifyNeighbors(World world, BlockPos blockposition, EnumFacing enumdirection) {
+      world.notifyNeighborsOfStateChange(blockposition, this);
+      world.notifyNeighborsOfStateChange(blockposition.offset(enumdirection.getOpposite()), this);
    }
 
-   private boolean checkForDrop(World var1, BlockPos var2, IBlockState var3) {
-      if (!this.canPlaceBlockAt(var1, var2)) {
-         this.dropBlockAsItem(var1, var2, var3, 0);
-         var1.setBlockToAir(var2);
+   private boolean checkForDrop(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (!this.canPlaceBlockAt(world, blockposition)) {
+         this.dropBlockAsItem(world, blockposition, iblockdata, 0);
+         world.setBlockToAir(blockposition);
          return false;
       } else {
          return true;
       }
    }
 
-   public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      boolean var4 = ((Boolean)var3.getValue(ATTACHED)).booleanValue();
-      boolean var5 = ((Boolean)var3.getValue(POWERED)).booleanValue();
-      if (var4 || var5) {
-         this.calculateState(var1, var2, var3, true, false, -1, (IBlockState)null);
+   public void breakBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
+      boolean flag = ((Boolean)iblockdata.getValue(ATTACHED)).booleanValue();
+      boolean flag1 = ((Boolean)iblockdata.getValue(POWERED)).booleanValue();
+      if (flag || flag1) {
+         this.calculateState(world, blockposition, iblockdata, true, false, -1, (IBlockState)null);
       }
 
-      if (var5) {
-         var1.notifyNeighborsOfStateChange(var2, this);
-         var1.notifyNeighborsOfStateChange(var2.offset(((EnumFacing)var3.getValue(FACING)).getOpposite()), this);
+      if (flag1) {
+         world.notifyNeighborsOfStateChange(blockposition, this);
+         world.notifyNeighborsOfStateChange(blockposition.offset(((EnumFacing)iblockdata.getValue(FACING)).getOpposite()), this);
       }
 
-      super.breakBlock(var1, var2, var3);
+      super.breakBlock(world, blockposition, iblockdata);
    }
 
-   public int getWeakPower(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return ((Boolean)var1.getValue(POWERED)).booleanValue() ? 15 : 0;
+   public int getWeakPower(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
+      return ((Boolean)iblockdata.getValue(POWERED)).booleanValue() ? 15 : 0;
    }
 
-   public int getStrongPower(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return !((Boolean)var1.getValue(POWERED)).booleanValue() ? 0 : (var1.getValue(FACING) == var4 ? 15 : 0);
+   public int getStrongPower(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
+      return !((Boolean)iblockdata.getValue(POWERED)).booleanValue() ? 0 : (iblockdata.getValue(FACING) == enumdirection ? 15 : 0);
    }
 
-   public boolean canProvidePower(IBlockState var1) {
+   public boolean canProvidePower(IBlockState iblockdata) {
       return true;
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT_MIPPED;
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(i & 3)).withProperty(POWERED, Boolean.valueOf((i & 8) > 0)).withProperty(ATTACHED, Boolean.valueOf((i & 4) > 0));
    }
 
-   public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(var1 & 3)).withProperty(POWERED, Boolean.valueOf((var1 & 8) > 0)).withProperty(ATTACHED, Boolean.valueOf((var1 & 4) > 0));
-   }
-
-   public int getMetaFromState(IBlockState var1) {
-      int var2 = 0;
-      var2 = var2 | ((EnumFacing)var1.getValue(FACING)).getHorizontalIndex();
-      if (((Boolean)var1.getValue(POWERED)).booleanValue()) {
-         var2 |= 8;
+   public int getMetaFromState(IBlockState iblockdata) {
+      byte b0 = 0;
+      int i = b0 | ((EnumFacing)iblockdata.getValue(FACING)).getHorizontalIndex();
+      if (((Boolean)iblockdata.getValue(POWERED)).booleanValue()) {
+         i |= 8;
       }
 
-      if (((Boolean)var1.getValue(ATTACHED)).booleanValue()) {
-         var2 |= 4;
+      if (((Boolean)iblockdata.getValue(ATTACHED)).booleanValue()) {
+         i |= 4;
       }
 
-      return var2;
+      return i;
    }
 
-   public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      return var1.withProperty(FACING, var2.rotate((EnumFacing)var1.getValue(FACING)));
+   public IBlockState withRotation(IBlockState iblockdata, Rotation enumblockrotation) {
+      return iblockdata.withProperty(FACING, enumblockrotation.rotate((EnumFacing)iblockdata.getValue(FACING)));
    }
 
-   public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      return var1.withRotation(var2.toRotation((EnumFacing)var1.getValue(FACING)));
+   public IBlockState withMirror(IBlockState iblockdata, Mirror enumblockmirror) {
+      return iblockdata.withRotation(enumblockmirror.toRotation((EnumFacing)iblockdata.getValue(FACING)));
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, POWERED, ATTACHED});
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.EAST.ordinal()] = 1;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 2;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 3;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 4;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

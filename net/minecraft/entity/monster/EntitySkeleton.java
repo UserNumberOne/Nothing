@@ -54,8 +54,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeSnow;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 
 public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
    private static final DataParameter SKELETON_VARIANT = EntityDataManager.createKey(EntitySkeleton.class, DataSerializers.VARINT);
@@ -73,8 +74,8 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
       }
    };
 
-   public EntitySkeleton(World var1) {
-      super(var1);
+   public EntitySkeleton(World world) {
+      super(world);
       this.setCombatTask();
    }
 
@@ -114,15 +115,15 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
       return this.getSkeletonType().getDeathSound();
    }
 
-   protected void playStepSound(BlockPos var1, Block var2) {
-      SoundEvent var3 = this.getSkeletonType().getStepSound();
-      this.playSound(var3, 0.15F, 1.0F);
+   protected void playStepSound(BlockPos blockposition, Block block) {
+      SoundEvent soundeffect = this.getSkeletonType().getStepSound();
+      this.playSound(soundeffect, 0.15F, 1.0F);
    }
 
-   public boolean attackEntityAsMob(Entity var1) {
-      if (super.attackEntityAsMob(var1)) {
-         if (this.getSkeletonType() == SkeletonType.WITHER && var1 instanceof EntityLivingBase) {
-            ((EntityLivingBase)var1).addPotionEffect(new PotionEffect(MobEffects.WITHER, 200));
+   public boolean attackEntityAsMob(Entity entity) {
+      if (super.attackEntityAsMob(entity)) {
+         if (this.getSkeletonType() == SkeletonType.WITHER && entity instanceof EntityLivingBase) {
+            ((EntityLivingBase)entity).addPotionEffect(new PotionEffect(MobEffects.WITHER, 200));
          }
 
          return true;
@@ -137,25 +138,29 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 
    public void onLivingUpdate() {
       if (this.world.isDaytime() && !this.world.isRemote) {
-         float var1 = this.getBrightness(1.0F);
-         BlockPos var2 = this.getRidingEntity() instanceof EntityBoat ? (new BlockPos(this.posX, (double)Math.round(this.posY), this.posZ)).up() : new BlockPos(this.posX, (double)Math.round(this.posY), this.posZ);
-         if (var1 > 0.5F && this.rand.nextFloat() * 30.0F < (var1 - 0.4F) * 2.0F && this.world.canSeeSky(var2)) {
-            boolean var3 = true;
-            ItemStack var4 = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
-            if (var4 != null) {
-               if (var4.isItemStackDamageable()) {
-                  var4.setItemDamage(var4.getItemDamage() + this.rand.nextInt(2));
-                  if (var4.getItemDamage() >= var4.getMaxDamage()) {
-                     this.renderBrokenItemStack(var4);
+         float f = this.getBrightness(1.0F);
+         BlockPos blockposition = this.getRidingEntity() instanceof EntityBoat ? (new BlockPos(this.posX, (double)Math.round(this.posY), this.posZ)).up() : new BlockPos(this.posX, (double)Math.round(this.posY), this.posZ);
+         if (f > 0.5F && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.world.canSeeSky(blockposition)) {
+            boolean flag = true;
+            ItemStack itemstack = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
+            if (itemstack != null) {
+               if (itemstack.isItemStackDamageable()) {
+                  itemstack.setItemDamage(itemstack.getItemDamage() + this.rand.nextInt(2));
+                  if (itemstack.getItemDamage() >= itemstack.getMaxDamage()) {
+                     this.renderBrokenItemStack(itemstack);
                      this.setItemStackToSlot(EntityEquipmentSlot.HEAD, (ItemStack)null);
                   }
                }
 
-               var3 = false;
+               flag = false;
             }
 
-            if (var3) {
-               this.setFire(8);
+            if (flag) {
+               EntityCombustEvent event = new EntityCombustEvent(this.getBukkitEntity(), 8);
+               this.world.getServer().getPluginManager().callEvent(event);
+               if (!event.isCancelled()) {
+                  this.setFire(event.getDuration());
+               }
             }
          }
       }
@@ -170,26 +175,26 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
    public void updateRidden() {
       super.updateRidden();
       if (this.getRidingEntity() instanceof EntityCreature) {
-         EntityCreature var1 = (EntityCreature)this.getRidingEntity();
-         this.renderYawOffset = var1.renderYawOffset;
+         EntityCreature entitycreature = (EntityCreature)this.getRidingEntity();
+         this.renderYawOffset = entitycreature.renderYawOffset;
       }
 
    }
 
-   public void onDeath(DamageSource var1) {
-      super.onDeath(var1);
-      if (var1.getSourceOfDamage() instanceof EntityArrow && var1.getEntity() instanceof EntityPlayer) {
-         EntityPlayer var2 = (EntityPlayer)var1.getEntity();
-         double var3 = var2.posX - this.posX;
-         double var5 = var2.posZ - this.posZ;
-         if (var3 * var3 + var5 * var5 >= 2500.0D) {
-            var2.addStat(AchievementList.SNIPE_SKELETON);
+   public void onDeath(DamageSource damagesource) {
+      if (damagesource.getSourceOfDamage() instanceof EntityArrow && damagesource.getEntity() instanceof EntityPlayer) {
+         EntityPlayer entityhuman = (EntityPlayer)damagesource.getEntity();
+         double d0 = entityhuman.posX - this.posX;
+         double d1 = entityhuman.posZ - this.posZ;
+         if (d0 * d0 + d1 * d1 >= 2500.0D) {
+            entityhuman.addStat(AchievementList.SNIPE_SKELETON);
          }
-      } else if (var1.getEntity() instanceof EntityCreeper && ((EntityCreeper)var1.getEntity()).getPowered() && ((EntityCreeper)var1.getEntity()).isAIEnabled()) {
-         ((EntityCreeper)var1.getEntity()).incrementDroppedSkulls();
+      } else if (damagesource.getEntity() instanceof EntityCreeper && ((EntityCreeper)damagesource.getEntity()).getPowered() && ((EntityCreeper)damagesource.getEntity()).isAIEnabled()) {
+         ((EntityCreeper)damagesource.getEntity()).incrementDroppedSkulls();
          this.entityDropItem(new ItemStack(Items.SKULL, 1, this.getSkeletonType() == SkeletonType.WITHER ? 1 : 0), 0.0F);
       }
 
+      super.onDeath(damagesource);
    }
 
    @Nullable
@@ -197,54 +202,54 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
       return this.getSkeletonType().getLootTable();
    }
 
-   protected void setEquipmentBasedOnDifficulty(DifficultyInstance var1) {
-      super.setEquipmentBasedOnDifficulty(var1);
+   protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficultydamagescaler) {
+      super.setEquipmentBasedOnDifficulty(difficultydamagescaler);
       this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
    }
 
    @Nullable
-   public IEntityLivingData onInitialSpawn(DifficultyInstance var1, @Nullable IEntityLivingData var2) {
-      var2 = super.onInitialSpawn(var1, var2);
+   public IEntityLivingData onInitialSpawn(DifficultyInstance difficultydamagescaler, @Nullable IEntityLivingData groupdataentity) {
+      groupdataentity = super.onInitialSpawn(difficultydamagescaler, groupdataentity);
       if (this.world.provider instanceof WorldProviderHell && this.getRNG().nextInt(5) > 0) {
          this.tasks.addTask(4, this.aiAttackOnCollide);
          this.setSkeletonType(SkeletonType.WITHER);
          this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.STONE_SWORD));
          this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4.0D);
       } else {
-         Biome var3 = this.world.getBiome(new BlockPos(this));
-         if (var3 instanceof BiomeSnow && this.world.canSeeSky(new BlockPos(this)) && this.rand.nextInt(5) != 0) {
+         Biome biomebase = this.world.getBiome(new BlockPos(this));
+         if (biomebase instanceof BiomeSnow && this.world.canSeeSky(new BlockPos(this)) && this.rand.nextInt(5) != 0) {
             this.setSkeletonType(SkeletonType.STRAY);
          }
 
          this.tasks.addTask(4, this.aiArrowAttack);
-         this.setEquipmentBasedOnDifficulty(var1);
-         this.setEnchantmentBasedOnDifficulty(var1);
+         this.setEquipmentBasedOnDifficulty(difficultydamagescaler);
+         this.setEnchantmentBasedOnDifficulty(difficultydamagescaler);
       }
 
-      this.setCanPickUpLoot(this.rand.nextFloat() < 0.55F * var1.getClampedAdditionalDifficulty());
+      this.setCanPickUpLoot(this.rand.nextFloat() < 0.55F * difficultydamagescaler.getClampedAdditionalDifficulty());
       if (this.getItemStackFromSlot(EntityEquipmentSlot.HEAD) == null) {
-         Calendar var5 = this.world.getCurrentDate();
-         if (var5.get(2) + 1 == 10 && var5.get(5) == 31 && this.rand.nextFloat() < 0.25F) {
+         Calendar calendar = this.world.getCurrentDate();
+         if (calendar.get(2) + 1 == 10 && calendar.get(5) == 31 && this.rand.nextFloat() < 0.25F) {
             this.setItemStackToSlot(EntityEquipmentSlot.HEAD, new ItemStack(this.rand.nextFloat() < 0.1F ? Blocks.LIT_PUMPKIN : Blocks.PUMPKIN));
             this.inventoryArmorDropChances[EntityEquipmentSlot.HEAD.getIndex()] = 0.0F;
          }
       }
 
-      return var2;
+      return groupdataentity;
    }
 
    public void setCombatTask() {
       if (this.world != null && !this.world.isRemote) {
          this.tasks.removeTask(this.aiAttackOnCollide);
          this.tasks.removeTask(this.aiArrowAttack);
-         ItemStack var1 = this.getHeldItemMainhand();
-         if (var1 != null && var1.getItem() == Items.BOW) {
-            byte var2 = 20;
+         ItemStack itemstack = this.getHeldItemMainhand();
+         if (itemstack != null && itemstack.getItem() == Items.BOW) {
+            byte b0 = 20;
             if (this.world.getDifficulty() != EnumDifficulty.HARD) {
-               var2 = 40;
+               b0 = 40;
             }
 
-            this.aiArrowAttack.setAttackCooldown(var2);
+            this.aiArrowAttack.setAttackCooldown(b0);
             this.tasks.addTask(4, this.aiArrowAttack);
          } else {
             this.tasks.addTask(4, this.aiAttackOnCollide);
@@ -253,54 +258,66 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 
    }
 
-   public void attackEntityWithRangedAttack(EntityLivingBase var1, float var2) {
-      EntityTippedArrow var3 = new EntityTippedArrow(this.world, this);
-      double var4 = var1.posX - this.posX;
-      double var6 = var1.getEntityBoundingBox().minY + (double)(var1.height / 3.0F) - var3.posY;
-      double var8 = var1.posZ - this.posZ;
-      double var10 = (double)MathHelper.sqrt(var4 * var4 + var8 * var8);
-      var3.setThrowableHeading(var4, var6 + var10 * 0.20000000298023224D, var8, 1.6F, (float)(14 - this.world.getDifficulty().getDifficultyId() * 4));
-      int var12 = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.POWER, this);
-      int var13 = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
-      DifficultyInstance var14 = this.world.getDifficultyForLocation(new BlockPos(this));
-      var3.setDamage((double)(var2 * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.world.getDifficulty().getDifficultyId() * 0.11F));
-      if (var12 > 0) {
-         var3.setDamage(var3.getDamage() + (double)var12 * 0.5D + 0.5D);
+   public void attackEntityWithRangedAttack(EntityLivingBase entityliving, float f) {
+      EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.world, this);
+      double d0 = entityliving.posX - this.posX;
+      double d1 = entityliving.getEntityBoundingBox().minY + (double)(entityliving.height / 3.0F) - entitytippedarrow.posY;
+      double d2 = entityliving.posZ - this.posZ;
+      double d3 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
+      entitytippedarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, (float)(14 - this.world.getDifficulty().getDifficultyId() * 4));
+      int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.POWER, this);
+      int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
+      DifficultyInstance difficultydamagescaler = this.world.getDifficultyForLocation(new BlockPos(this));
+      entitytippedarrow.setDamage((double)(f * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.world.getDifficulty().getDifficultyId() * 0.11F));
+      if (i > 0) {
+         entitytippedarrow.setDamage(entitytippedarrow.getDamage() + (double)i * 0.5D + 0.5D);
       }
 
-      if (var13 > 0) {
-         var3.setKnockbackStrength(var13);
+      if (j > 0) {
+         entitytippedarrow.setKnockbackStrength(j);
       }
 
-      boolean var15 = this.isBurning() && var14.isHard() && this.rand.nextBoolean() || this.getSkeletonType() == SkeletonType.WITHER;
-      var15 = var15 || EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this) > 0;
-      if (var15) {
-         var3.setFire(100);
+      boolean flag = this.isBurning() && difficultydamagescaler.isHard() && this.rand.nextBoolean() || this.getSkeletonType() == SkeletonType.WITHER;
+      flag = flag || EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this) > 0;
+      if (flag) {
+         EntityCombustEvent event = new EntityCombustEvent(entitytippedarrow.getBukkitEntity(), 100);
+         this.world.getServer().getPluginManager().callEvent(event);
+         if (!event.isCancelled()) {
+            entitytippedarrow.setFire(event.getDuration());
+         }
       }
 
-      ItemStack var16 = this.getHeldItem(EnumHand.OFF_HAND);
-      if (var16 != null && var16.getItem() == Items.TIPPED_ARROW) {
-         var3.setPotionEffect(var16);
+      ItemStack itemstack = this.getHeldItem(EnumHand.OFF_HAND);
+      if (itemstack != null && itemstack.getItem() == Items.TIPPED_ARROW) {
+         entitytippedarrow.setPotionEffect(itemstack);
       } else if (this.getSkeletonType() == SkeletonType.STRAY) {
-         var3.addEffect(new PotionEffect(MobEffects.SLOWNESS, 600));
+         entitytippedarrow.addEffect(new PotionEffect(MobEffects.SLOWNESS, 600));
       }
 
-      this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-      this.world.spawnEntity(var3);
+      EntityShootBowEvent event = CraftEventFactory.callEntityShootBowEvent(this, this.getHeldItemMainhand(), entitytippedarrow, 0.8F);
+      if (event.isCancelled()) {
+         event.getProjectile().remove();
+      } else {
+         if (event.getProjectile() == entitytippedarrow.getBukkitEntity()) {
+            this.world.spawnEntity(entitytippedarrow);
+         }
+
+         this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+      }
    }
 
    public SkeletonType getSkeletonType() {
       return SkeletonType.getByOrdinal(((Integer)this.dataManager.get(SKELETON_VARIANT)).intValue());
    }
 
-   public void setSkeletonType(SkeletonType var1) {
-      this.dataManager.set(SKELETON_VARIANT, Integer.valueOf(var1.getId()));
-      this.isImmuneToFire = var1 == SkeletonType.WITHER;
-      this.updateSize(var1);
+   public void setSkeletonType(SkeletonType enumskeletontype) {
+      this.dataManager.set(SKELETON_VARIANT, Integer.valueOf(enumskeletontype.getId()));
+      this.isImmuneToFire = enumskeletontype == SkeletonType.WITHER;
+      this.updateSize(enumskeletontype);
    }
 
-   private void updateSize(SkeletonType var1) {
-      if (var1 == SkeletonType.WITHER) {
+   private void updateSize(SkeletonType enumskeletontype) {
+      if (enumskeletontype == SkeletonType.WITHER) {
          this.setSize(0.7F, 2.4F);
       } else {
          this.setSize(0.6F, 1.99F);
@@ -308,28 +325,28 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 
    }
 
-   public static void registerFixesSkeleton(DataFixer var0) {
-      EntityLiving.registerFixesMob(var0, "Skeleton");
+   public static void registerFixesSkeleton(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "Skeleton");
    }
 
-   public void readEntityFromNBT(NBTTagCompound var1) {
-      super.readEntityFromNBT(var1);
-      if (var1.hasKey("SkeletonType", 99)) {
-         byte var2 = var1.getByte("SkeletonType");
-         this.setSkeletonType(SkeletonType.getByOrdinal(var2));
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      if (nbttagcompound.hasKey("SkeletonType", 99)) {
+         byte b0 = nbttagcompound.getByte("SkeletonType");
+         this.setSkeletonType(SkeletonType.getByOrdinal(b0));
       }
 
       this.setCombatTask();
    }
 
-   public void writeEntityToNBT(NBTTagCompound var1) {
-      super.writeEntityToNBT(var1);
-      var1.setByte("SkeletonType", (byte)this.getSkeletonType().getId());
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      nbttagcompound.setByte("SkeletonType", (byte)this.getSkeletonType().getId());
    }
 
-   public void setItemStackToSlot(EntityEquipmentSlot var1, @Nullable ItemStack var2) {
-      super.setItemStackToSlot(var1, var2);
-      if (!this.world.isRemote && var1 == EntityEquipmentSlot.MAINHAND) {
+   public void setItemStackToSlot(EntityEquipmentSlot enumitemslot, @Nullable ItemStack itemstack) {
+      super.setItemStackToSlot(enumitemslot, itemstack);
+      if (!this.world.isRemote && enumitemslot == EntityEquipmentSlot.MAINHAND) {
          this.setCombatTask();
       }
 
@@ -343,12 +360,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
       return -0.35D;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isSwingingArms() {
-      return ((Boolean)this.dataManager.get(SWINGING_ARMS)).booleanValue();
-   }
-
-   public void setSwingingArms(boolean var1) {
-      this.dataManager.set(SWINGING_ARMS, Boolean.valueOf(var1));
+   public void setSwingingArms(boolean flag) {
+      this.dataManager.set(SWINGING_ARMS, Boolean.valueOf(flag));
    }
 }

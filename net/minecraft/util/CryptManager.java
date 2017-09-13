@@ -16,29 +16,15 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class CryptManager {
    private static final Logger LOGGER = LogManager.getLogger();
-
-   @SideOnly(Side.CLIENT)
-   public static SecretKey createNewSharedKey() {
-      try {
-         KeyGenerator var0 = KeyGenerator.getInstance("AES");
-         var0.init(128);
-         return var0.generateKey();
-      } catch (NoSuchAlgorithmException var1) {
-         throw new Error(var1);
-      }
-   }
 
    public static KeyPair generateKeyPair() {
       try {
@@ -93,11 +79,6 @@ public class CryptManager {
 
    public static SecretKey decryptSharedKey(PrivateKey var0, byte[] var1) {
       return new SecretKeySpec(decryptData(var0, var1), "AES");
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static byte[] encryptData(Key var0, byte[] var1) {
-      return cipherOperation(1, var0, var1);
    }
 
    public static byte[] decryptData(Key var0, byte[] var1) {

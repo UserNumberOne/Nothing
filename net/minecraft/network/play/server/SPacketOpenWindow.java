@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketOpenWindow implements Packet {
    private int windowId;
@@ -58,35 +56,5 @@ public class SPacketOpenWindow implements Packet {
          var1.writeInt(this.entityId);
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getWindowId() {
-      return this.windowId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getGuiId() {
-      return this.inventoryType;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getWindowTitle() {
-      return this.windowTitle;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSlotCount() {
-      return this.slotCount;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasSlots() {
-      return this.slotCount > 0;
    }
 }

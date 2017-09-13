@@ -90,17 +90,17 @@ public class EntityMoveHelper {
          this.action = EntityMoveHelper.Action.WAIT;
          double var12 = this.posX - this.entity.posX;
          double var14 = this.posZ - this.entity.posZ;
-         double var17 = this.posY - this.entity.posY;
-         double var18 = var12 * var12 + var17 * var17 + var14 * var14;
+         double var16 = this.posY - this.entity.posY;
+         double var18 = var12 * var12 + var16 * var16 + var14 * var14;
          if (var18 < 2.500000277905201E-7D) {
             this.entity.setMoveForward(0.0F);
             return;
          }
 
-         float var19 = (float)(MathHelper.atan2(var14, var12) * 57.29577951308232D) - 90.0F;
-         this.entity.rotationYaw = this.limitAngle(this.entity.rotationYaw, var19, 90.0F);
+         float var23 = (float)(MathHelper.atan2(var14, var12) * 57.2957763671875D) - 90.0F;
+         this.entity.rotationYaw = this.limitAngle(this.entity.rotationYaw, var23, 90.0F);
          this.entity.setAIMoveSpeed((float)(this.speed * this.entity.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
-         if (var17 > (double)this.entity.stepHeight && var12 * var12 + var14 * var14 < (double)Math.max(1.0F, this.entity.width)) {
+         if (var16 > (double)this.entity.stepHeight && var12 * var12 + var14 * var14 < (double)Math.max(1.0F, this.entity.width)) {
             this.entity.getJumpHelper().setJumping();
          }
       } else {

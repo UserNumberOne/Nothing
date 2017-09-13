@@ -8,8 +8,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketTeams implements Packet {
    private String name = "";
@@ -117,55 +115,5 @@ public class SPacketTeams implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleTeams(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getName() {
-      return this.name;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getDisplayName() {
-      return this.displayName;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getPrefix() {
-      return this.prefix;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getSuffix() {
-      return this.suffix;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Collection getPlayers() {
-      return this.players;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getAction() {
-      return this.action;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFriendlyFlags() {
-      return this.friendlyFlags;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getColor() {
-      return this.color;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getNameTagVisibility() {
-      return this.nameTagVisibility;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getCollisionRule() {
-      return this.collisionRule;
    }
 }

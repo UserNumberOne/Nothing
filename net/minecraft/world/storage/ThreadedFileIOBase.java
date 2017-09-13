@@ -58,7 +58,6 @@ public class ThreadedFileIOBase implements Runnable {
          ++this.writeQueuedCounter;
          this.threadedIOQueue.add(var1);
       }
-
    }
 
    public void waitForFinish() throws InterruptedException {

@@ -5,70 +5,60 @@ import java.util.Map;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.IJsonSerializable;
 import net.minecraft.util.TupleIntJsonSerializable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.Cancellable;
 
 public class StatisticsManager {
    protected final Map statsData = Maps.newConcurrentMap();
 
-   public boolean hasAchievementUnlocked(Achievement var1) {
-      return this.readStat(var1) > 0;
+   public boolean hasAchievementUnlocked(Achievement achievement) {
+      return this.readStat(achievement) > 0;
    }
 
-   public boolean canUnlockAchievement(Achievement var1) {
-      return var1.parentAchievement == null || this.hasAchievementUnlocked(var1.parentAchievement);
+   public boolean canUnlockAchievement(Achievement achievement) {
+      return achievement.parentAchievement == null || this.hasAchievementUnlocked(achievement.parentAchievement);
    }
 
-   public void increaseStat(EntityPlayer var1, StatBase var2, int var3) {
-      if (!var2.isAchievement() || this.canUnlockAchievement((Achievement)var2)) {
-         this.unlockAchievement(var1, var2, this.readStat(var2) + var3);
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int countRequirementsUntilAvailable(Achievement var1) {
-      if (this.hasAchievementUnlocked(var1)) {
-         return 0;
-      } else {
-         int var2 = 0;
-
-         for(Achievement var3 = var1.parentAchievement; var3 != null && !this.hasAchievementUnlocked(var3); ++var2) {
-            var3 = var3.parentAchievement;
+   public void increaseStat(EntityPlayer entityhuman, StatBase statistic, int i) {
+      if (!statistic.isAchievement() || this.canUnlockAchievement((Achievement)statistic)) {
+         Cancellable cancellable = CraftEventFactory.handleStatisticsIncrease(entityhuman, statistic, this.readStat(statistic), i);
+         if (cancellable != null && cancellable.isCancelled()) {
+            return;
          }
 
-         return var2;
-      }
-   }
-
-   public void unlockAchievement(EntityPlayer var1, StatBase var2, int var3) {
-      TupleIntJsonSerializable var4 = (TupleIntJsonSerializable)this.statsData.get(var2);
-      if (var4 == null) {
-         var4 = new TupleIntJsonSerializable();
-         this.statsData.put(var2, var4);
+         this.unlockAchievement(entityhuman, statistic, this.readStat(statistic) + i);
       }
 
-      var4.setIntegerValue(var3);
    }
 
-   public int readStat(StatBase var1) {
-      TupleIntJsonSerializable var2 = (TupleIntJsonSerializable)this.statsData.get(var1);
-      return var2 == null ? 0 : var2.getIntegerValue();
-   }
-
-   public IJsonSerializable getProgress(StatBase var1) {
-      TupleIntJsonSerializable var2 = (TupleIntJsonSerializable)this.statsData.get(var1);
-      return var2 != null ? var2.getJsonSerializableValue() : null;
-   }
-
-   public IJsonSerializable setProgress(StatBase var1, IJsonSerializable var2) {
-      TupleIntJsonSerializable var3 = (TupleIntJsonSerializable)this.statsData.get(var1);
-      if (var3 == null) {
-         var3 = new TupleIntJsonSerializable();
-         this.statsData.put(var1, var3);
+   public void unlockAchievement(EntityPlayer entityhuman, StatBase statistic, int i) {
+      TupleIntJsonSerializable statisticwrapper = (TupleIntJsonSerializable)this.statsData.get(statistic);
+      if (statisticwrapper == null) {
+         statisticwrapper = new TupleIntJsonSerializable();
+         this.statsData.put(statistic, statisticwrapper);
       }
 
-      var3.setJsonSerializableValue(var2);
-      return var2;
+      statisticwrapper.setIntegerValue(i);
+   }
+
+   public int readStat(StatBase statistic) {
+      TupleIntJsonSerializable statisticwrapper = (TupleIntJsonSerializable)this.statsData.get(statistic);
+      return statisticwrapper == null ? 0 : statisticwrapper.getIntegerValue();
+   }
+
+   public IJsonSerializable getProgress(StatBase statistic) {
+      TupleIntJsonSerializable statisticwrapper = (TupleIntJsonSerializable)this.statsData.get(statistic);
+      return statisticwrapper != null ? statisticwrapper.getJsonSerializableValue() : null;
+   }
+
+   public IJsonSerializable setProgress(StatBase statistic, IJsonSerializable t0) {
+      TupleIntJsonSerializable statisticwrapper = (TupleIntJsonSerializable)this.statsData.get(statistic);
+      if (statisticwrapper == null) {
+         statisticwrapper = new TupleIntJsonSerializable();
+         this.statsData.put(statistic, statisticwrapper);
+      }
+
+      statisticwrapper.setJsonSerializableValue(t0);
+      return t0;
    }
 }

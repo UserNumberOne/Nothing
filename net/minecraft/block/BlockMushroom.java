@@ -3,12 +3,15 @@ package net.minecraft.block;
 import java.util.Random;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
+import org.bukkit.TreeType;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.event.block.BlockSpreadEvent;
 
 public class BlockMushroom extends BlockBush implements IGrowable {
    protected static final AxisAlignedBB MUSHROOM_AABB = new AxisAlignedBB(0.30000001192092896D, 0.0D, 0.30000001192092896D, 0.699999988079071D, 0.4000000059604645D, 0.699999988079071D);
@@ -17,84 +20,95 @@ public class BlockMushroom extends BlockBush implements IGrowable {
       this.setTickRandomly(true);
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
       return MUSHROOM_AABB;
    }
 
-   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
-      if (var4.nextInt(25) == 0) {
-         int var5 = 5;
-         boolean var6 = true;
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      int sourceX = blockposition.getX();
+      int sourceY = blockposition.getY();
+      int sourceZ = blockposition.getZ();
+      if (random.nextInt(25) == 0) {
+         int i = 5;
 
-         for(BlockPos var8 : BlockPos.getAllInBoxMutable(var2.add(-4, -1, -4), var2.add(4, 1, 4))) {
-            if (var1.getBlockState(var8).getBlock() == this) {
-               --var5;
-               if (var5 <= 0) {
+         for(BlockPos blockposition1 : BlockPos.getAllInBoxMutable(blockposition.add(-4, -1, -4), blockposition.add(4, 1, 4))) {
+            if (world.getBlockState(blockposition1).getBlock() == this) {
+               --i;
+               if (i <= 0) {
                   return;
                }
             }
          }
 
-         BlockPos var9 = var2.add(var4.nextInt(3) - 1, var4.nextInt(2) - var4.nextInt(2), var4.nextInt(3) - 1);
+         BlockPos blockposition2 = blockposition.add(random.nextInt(3) - 1, random.nextInt(2) - random.nextInt(2), random.nextInt(3) - 1);
 
-         for(int var10 = 0; var10 < 4; ++var10) {
-            if (var1.isAirBlock(var9) && this.canBlockStay(var1, var9, this.getDefaultState())) {
-               var2 = var9;
+         for(int j = 0; j < 4; ++j) {
+            if (world.isAirBlock(blockposition2) && this.canBlockStay(world, blockposition2, this.getDefaultState())) {
+               blockposition = blockposition2;
             }
 
-            var9 = var2.add(var4.nextInt(3) - 1, var4.nextInt(2) - var4.nextInt(2), var4.nextInt(3) - 1);
+            blockposition2 = blockposition.add(random.nextInt(3) - 1, random.nextInt(2) - random.nextInt(2), random.nextInt(3) - 1);
          }
 
-         if (var1.isAirBlock(var9) && this.canBlockStay(var1, var9, this.getDefaultState())) {
-            var1.setBlockState(var9, this.getDefaultState(), 2);
+         if (world.isAirBlock(blockposition2) && this.canBlockStay(world, blockposition2, this.getDefaultState())) {
+            org.bukkit.World bworld = world.getWorld();
+            BlockState blockState = bworld.getBlockAt(blockposition2.getX(), blockposition2.getY(), blockposition2.getZ()).getState();
+            blockState.setType(CraftMagicNumbers.getMaterial(this));
+            BlockSpreadEvent event = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(sourceX, sourceY, sourceZ), blockState);
+            world.getServer().getPluginManager().callEvent(event);
+            if (!event.isCancelled()) {
+               blockState.update(true);
+            }
          }
       }
 
    }
 
-   public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      return super.canPlaceBlockAt(var1, var2) && this.canBlockStay(var1, var2, this.getDefaultState());
+   public boolean canPlaceBlockAt(World world, BlockPos blockposition) {
+      return super.canPlaceBlockAt(world, blockposition) && this.canBlockStay(world, blockposition, this.getDefaultState());
    }
 
-   protected boolean canSustainBush(IBlockState var1) {
-      return var1.isFullBlock();
+   protected boolean canSustainBush(IBlockState iblockdata) {
+      return iblockdata.isFullBlock();
    }
 
-   public boolean canBlockStay(World var1, BlockPos var2, IBlockState var3) {
-      if (var2.getY() >= 0 && var2.getY() < 256) {
-         IBlockState var4 = var1.getBlockState(var2.down());
-         return var4.getBlock() == Blocks.MYCELIUM ? true : (var4.getBlock() == Blocks.DIRT && var4.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.PODZOL ? true : var1.getLight(var2) < 13 && var4.getBlock().canSustainPlant(var4, var1, var2.down(), EnumFacing.UP, this));
+   public boolean canBlockStay(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (blockposition.getY() >= 0 && blockposition.getY() < 256) {
+         IBlockState iblockdata1 = world.getBlockState(blockposition.down());
+         return iblockdata1.getBlock() == Blocks.MYCELIUM ? true : (iblockdata1.getBlock() == Blocks.DIRT && iblockdata1.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.PODZOL ? true : world.getLight(blockposition) < 13 && this.canSustainBush(iblockdata1));
       } else {
          return false;
       }
    }
 
-   public boolean generateBigMushroom(World var1, BlockPos var2, IBlockState var3, Random var4) {
-      var1.setBlockToAir(var2);
-      WorldGenBigMushroom var5 = null;
+   public boolean generateBigMushroom(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      world.setBlockToAir(blockposition);
+      WorldGenBigMushroom worldgenhugemushroom = null;
       if (this == Blocks.BROWN_MUSHROOM) {
-         var5 = new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK);
+         BlockSapling.treeType = TreeType.BROWN_MUSHROOM;
+         worldgenhugemushroom = new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK);
       } else if (this == Blocks.RED_MUSHROOM) {
-         var5 = new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK);
+         BlockSapling.treeType = TreeType.RED_MUSHROOM;
+         worldgenhugemushroom = new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK);
       }
 
-      if (var5 != null && var5.generate(var1, var4, var2)) {
+      if (worldgenhugemushroom != null && worldgenhugemushroom.generate(world, random, blockposition)) {
          return true;
       } else {
-         var1.setBlockState(var2, var3, 3);
+         world.setBlockState(blockposition, iblockdata, 3);
          return false;
       }
    }
 
-   public boolean canGrow(World var1, BlockPos var2, IBlockState var3, boolean var4) {
+   public boolean canGrow(World world, BlockPos blockposition, IBlockState iblockdata, boolean flag) {
       return true;
    }
 
-   public boolean canUseBonemeal(World var1, Random var2, BlockPos var3, IBlockState var4) {
-      return (double)var2.nextFloat() < 0.4D;
+   public boolean canUseBonemeal(World world, Random random, BlockPos blockposition, IBlockState iblockdata) {
+      return (double)random.nextFloat() < 0.4D;
    }
 
-   public void grow(World var1, Random var2, BlockPos var3, IBlockState var4) {
-      this.generateBigMushroom(var1, var3, var4, var2);
+   public void grow(World world, Random random, BlockPos blockposition, IBlockState iblockdata) {
+      this.generateBigMushroom(world, blockposition, iblockdata, random);
    }
 }

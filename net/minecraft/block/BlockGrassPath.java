@@ -7,13 +7,10 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockGrassPath extends Block {
    protected static final AxisAlignedBB GRASS_PATH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.9375D, 1.0D);
@@ -21,23 +18,6 @@ public class BlockGrassPath extends Block {
    protected BlockGrassPath() {
       super(Material.GROUND);
       this.setLightOpacity(255);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      switch(var4) {
-      case UP:
-         return true;
-      case NORTH:
-      case SOUTH:
-      case WEST:
-      case EAST:
-         IBlockState var5 = var2.getBlockState(var3.offset(var4));
-         Block var6 = var5.getBlock();
-         return !var5.isOpaqueCube() && var6 != Blocks.FARMLAND && var6 != Blocks.GRASS_PATH;
-      default:
-         return super.shouldSideBeRendered(var1, var2, var3, var4);
-      }
    }
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {

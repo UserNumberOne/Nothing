@@ -32,5 +32,10 @@ public class EntityOnFire implements EntityProperty {
       public EntityOnFire deserialize(JsonElement var1, JsonDeserializationContext var2) {
          return new EntityOnFire(JsonUtils.getBoolean(var1, "on_fire"));
       }
+
+      // $FF: synthetic method
+      public EntityProperty deserialize(JsonElement var1, JsonDeserializationContext var2) {
+         return this.deserialize(var1, var2);
+      }
    }
 }

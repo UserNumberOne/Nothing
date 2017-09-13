@@ -1,8 +1,7 @@
 package net.minecraft.block;
 
 import com.google.common.base.Predicate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
@@ -38,13 +37,19 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.util.BlockStateListPopulator;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class BlockSkull extends BlockContainer {
    public static final PropertyDirection FACING = BlockDirectional.FACING;
    public static final PropertyBool NODROP = PropertyBool.create("nodrop");
    private static final Predicate IS_WITHER_SKELETON = new Predicate() {
-      public boolean apply(@Nullable BlockWorldState var1) {
-         return var1.getBlockState() != null && var1.getBlockState().getBlock() == Blocks.SKULL && var1.getTileEntity() instanceof TileEntitySkull && ((TileEntitySkull)var1.getTileEntity()).getSkullType() == 1;
+      public boolean apply(@Nullable BlockWorldState shapedetectorblock) {
+         return shapedetectorblock.getBlockState() != null && shapedetectorblock.getBlockState().getBlock() == Blocks.SKULL && shapedetectorblock.getTileEntity() instanceof TileEntitySkull && ((TileEntitySkull)shapedetectorblock.getTileEntity()).getSkullType() == 1;
+      }
+
+      public boolean apply(Object object) {
+         return this.apply((BlockWorldState)object);
       }
    };
    protected static final AxisAlignedBB DEFAULT_AABB = new AxisAlignedBB(0.25D, 0.0D, 0.25D, 0.75D, 0.5D, 0.75D);
@@ -64,157 +69,164 @@ public class BlockSkull extends BlockContainer {
       return I18n.translateToLocal("tile.skull.skeleton.name");
    }
 
-   public boolean isOpaqueCube(IBlockState var1) {
+   public boolean isOpaqueCube(IBlockState iblockdata) {
       return false;
    }
 
-   public boolean isFullCube(IBlockState var1) {
+   public boolean isFullCube(IBlockState iblockdata) {
       return false;
    }
 
-   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      switch((EnumFacing)var1.getValue(FACING)) {
-      case UP:
+   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
+      switch(BlockSkull.SyntheticClass_1.a[((EnumFacing)iblockdata.getValue(FACING)).ordinal()]) {
+      case 1:
       default:
          return DEFAULT_AABB;
-      case NORTH:
+      case 2:
          return NORTH_AABB;
-      case SOUTH:
+      case 3:
          return SOUTH_AABB;
-      case WEST:
+      case 4:
          return WEST_AABB;
-      case EAST:
+      case 5:
          return EAST_AABB;
       }
    }
 
-   public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
-      return this.getDefaultState().withProperty(FACING, var8.getHorizontalFacing()).withProperty(NODROP, Boolean.valueOf(false));
+   public IBlockState getStateForPlacement(World world, BlockPos blockposition, EnumFacing enumdirection, float f, float f1, float f2, int i, EntityLivingBase entityliving) {
+      return this.getDefaultState().withProperty(FACING, entityliving.getHorizontalFacing()).withProperty(NODROP, Boolean.valueOf(false));
    }
 
-   public TileEntity createNewTileEntity(World var1, int var2) {
+   public TileEntity createNewTileEntity(World world, int i) {
       return new TileEntitySkull();
    }
 
-   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
-      int var4 = 0;
-      TileEntity var5 = var1.getTileEntity(var2);
-      if (var5 instanceof TileEntitySkull) {
-         var4 = ((TileEntitySkull)var5).getSkullType();
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
+      int i = 0;
+      TileEntity tileentity = world.getTileEntity(blockposition);
+      if (tileentity instanceof TileEntitySkull) {
+         i = ((TileEntitySkull)tileentity).getSkullType();
       }
 
-      return new ItemStack(Items.SKULL, 1, var4);
+      return new ItemStack(Items.SKULL, 1, i);
    }
 
-   public void onBlockHarvested(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4) {
-      if (var4.capabilities.isCreativeMode) {
-         var3 = var3.withProperty(NODROP, Boolean.valueOf(true));
-         var1.setBlockState(var2, var3, 4);
-      }
-
-      this.dropBlockAsItem(var1, var2, var3, 0);
-      super.onBlockHarvested(var1, var2, var3, var4);
-   }
-
-   public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      super.breakBlock(var1, var2, var3);
-   }
-
-   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
-      ArrayList var5 = new ArrayList();
-      if (!((Boolean)var3.getValue(NODROP)).booleanValue()) {
-         TileEntity var6 = var1.getTileEntity(var2);
-         if (var6 instanceof TileEntitySkull) {
-            TileEntitySkull var7 = (TileEntitySkull)var6;
-            ItemStack var8 = new ItemStack(Items.SKULL, 1, var7.getSkullType());
-            if (var7.getSkullType() == 3 && var7.getPlayerProfile() != null) {
-               var8.setTagCompound(new NBTTagCompound());
-               NBTTagCompound var9 = new NBTTagCompound();
-               NBTUtil.writeGameProfile(var9, var7.getPlayerProfile());
-               var8.getTagCompound().setTag("SkullOwner", var9);
-            }
-
-            var5.add(var8);
+   public void dropBlockAsItemWithChance(World world, BlockPos blockposition, IBlockState iblockdata, float f, int i) {
+      if (world.rand.nextFloat() < f) {
+         TileEntitySkull tileentityskull = (TileEntitySkull)world.getTileEntity(blockposition);
+         ItemStack itemstack = this.getItem(world, blockposition, iblockdata);
+         if (tileentityskull.getSkullType() == 3 && tileentityskull.getPlayerProfile() != null) {
+            itemstack.setTagCompound(new NBTTagCompound());
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            NBTUtil.writeGameProfile(nbttagcompound, tileentityskull.getPlayerProfile());
+            itemstack.getTagCompound().setTag("SkullOwner", nbttagcompound);
          }
+
+         spawnAsEntity(world, blockposition, itemstack);
       }
 
-      return var5;
+   }
+
+   public void onBlockHarvested(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman) {
+      if (entityhuman.capabilities.isCreativeMode) {
+         iblockdata = iblockdata.withProperty(NODROP, Boolean.valueOf(true));
+         world.setBlockState(blockposition, iblockdata, 4);
+      }
+
+      super.onBlockHarvested(world, blockposition, iblockdata, entityhuman);
+   }
+
+   public void breakBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (!world.isRemote) {
+         super.breakBlock(world, blockposition, iblockdata);
+      }
+
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
       return Items.SKULL;
    }
 
-   public boolean canDispenserPlace(World var1, BlockPos var2, ItemStack var3) {
-      return var3.getMetadata() == 1 && var2.getY() >= 2 && var1.getDifficulty() != EnumDifficulty.PEACEFUL && !var1.isRemote ? this.getWitherBasePattern().match(var1, var2) != null : false;
+   public boolean canDispenserPlace(World world, BlockPos blockposition, ItemStack itemstack) {
+      return itemstack.getMetadata() == 1 && blockposition.getY() >= 2 && world.getDifficulty() != EnumDifficulty.PEACEFUL && !world.isRemote ? this.getWitherBasePattern().match(world, blockposition) != null : false;
    }
 
-   public void checkWitherSpawn(World var1, BlockPos var2, TileEntitySkull var3) {
-      if (var3.getSkullType() == 1 && var2.getY() >= 2 && var1.getDifficulty() != EnumDifficulty.PEACEFUL && !var1.isRemote) {
-         BlockPattern var4 = this.getWitherPattern();
-         BlockPattern.PatternHelper var5 = var4.match(var1, var2);
-         if (var5 != null) {
-            for(int var6 = 0; var6 < 3; ++var6) {
-               BlockWorldState var7 = var5.translateOffset(var6, 0, 0);
-               var1.setBlockState(var7.getPos(), var7.getBlockState().withProperty(NODROP, Boolean.valueOf(true)), 2);
-            }
+   public void checkWitherSpawn(World world, BlockPos blockposition, TileEntitySkull tileentityskull) {
+      if (!world.captureBlockStates) {
+         if (tileentityskull.getSkullType() == 1 && blockposition.getY() >= 2 && world.getDifficulty() != EnumDifficulty.PEACEFUL && !world.isRemote) {
+            BlockPattern shapedetector = this.getWitherPattern();
+            BlockPattern.PatternHelper shapedetector_shapedetectorcollection = shapedetector.match(world, blockposition);
+            if (shapedetector_shapedetectorcollection != null) {
+               BlockStateListPopulator blockList = new BlockStateListPopulator(world.getWorld());
 
-            for(int var12 = 0; var12 < var4.getPalmLength(); ++var12) {
-               for(int var14 = 0; var14 < var4.getThumbLength(); ++var14) {
-                  BlockWorldState var8 = var5.translateOffset(var12, var14, 0);
-                  var1.setBlockState(var8.getPos(), Blocks.AIR.getDefaultState(), 2);
+               for(int i = 0; i < 3; ++i) {
+                  BlockWorldState shapedetectorblock = shapedetector_shapedetectorcollection.translateOffset(i, 0, 0);
+                  BlockPos pos = shapedetectorblock.getPos();
+                  IBlockState data = shapedetectorblock.getBlockState().withProperty(NODROP, Boolean.valueOf(true));
+                  blockList.setTypeAndData(pos.getX(), pos.getY(), pos.getZ(), data.getBlock(), data.getBlock().getMetaFromState(data), 2);
                }
-            }
 
-            BlockPos var13 = var5.translateOffset(1, 0, 0).getPos();
-            EntityWither var15 = new EntityWither(var1);
-            BlockPos var16 = var5.translateOffset(1, 2, 0).getPos();
-            var15.setLocationAndAngles((double)var16.getX() + 0.5D, (double)var16.getY() + 0.55D, (double)var16.getZ() + 0.5D, var5.getForwards().getAxis() == EnumFacing.Axis.X ? 0.0F : 90.0F, 0.0F);
-            var15.renderYawOffset = var5.getForwards().getAxis() == EnumFacing.Axis.X ? 0.0F : 90.0F;
-            var15.ignite();
+               for(int var15 = 0; var15 < shapedetector.getPalmLength(); ++var15) {
+                  for(int j = 0; j < shapedetector.getThumbLength(); ++j) {
+                     BlockWorldState shapedetectorblock1 = shapedetector_shapedetectorcollection.translateOffset(var15, j, 0);
+                     BlockPos pos = shapedetectorblock1.getPos();
+                     blockList.setTypeAndData(pos.getX(), pos.getY(), pos.getZ(), Blocks.AIR, 0, 2);
+                  }
+               }
 
-            for(EntityPlayer var10 : var1.getEntitiesWithinAABB(EntityPlayer.class, var15.getEntityBoundingBox().expandXyz(50.0D))) {
-               var10.addStat(AchievementList.SPAWN_WITHER);
-            }
+               BlockPos blockposition1 = shapedetector_shapedetectorcollection.translateOffset(1, 0, 0).getPos();
+               EntityWither entitywither = new EntityWither(world);
+               BlockPos blockposition2 = shapedetector_shapedetectorcollection.translateOffset(1, 2, 0).getPos();
+               entitywither.setLocationAndAngles((double)blockposition2.getX() + 0.5D, (double)blockposition2.getY() + 0.55D, (double)blockposition2.getZ() + 0.5D, shapedetector_shapedetectorcollection.getForwards().getAxis() == EnumFacing.Axis.X ? 0.0F : 90.0F, 0.0F);
+               entitywither.renderYawOffset = shapedetector_shapedetectorcollection.getForwards().getAxis() == EnumFacing.Axis.X ? 0.0F : 90.0F;
+               entitywither.ignite();
+               Iterator iterator = world.getEntitiesWithinAABB(EntityPlayer.class, entitywither.getEntityBoundingBox().expandXyz(50.0D)).iterator();
+               if (world.addEntity(entitywither, SpawnReason.BUILD_WITHER)) {
+                  blockList.updateList();
 
-            var1.spawnEntity(var15);
+                  while(iterator.hasNext()) {
+                     EntityPlayer entityhuman = (EntityPlayer)iterator.next();
+                     entityhuman.addStat(AchievementList.SPAWN_WITHER);
+                  }
 
-            for(int var17 = 0; var17 < 120; ++var17) {
-               var1.spawnParticle(EnumParticleTypes.SNOWBALL, (double)var13.getX() + var1.rand.nextDouble(), (double)(var13.getY() - 2) + var1.rand.nextDouble() * 3.9D, (double)var13.getZ() + var1.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
-            }
+                  for(int k = 0; k < 120; ++k) {
+                     world.spawnParticle(EnumParticleTypes.SNOWBALL, (double)blockposition1.getX() + world.rand.nextDouble(), (double)(blockposition1.getY() - 2) + world.rand.nextDouble() * 3.9D, (double)blockposition1.getZ() + world.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
+                  }
 
-            for(int var18 = 0; var18 < var4.getPalmLength(); ++var18) {
-               for(int var19 = 0; var19 < var4.getThumbLength(); ++var19) {
-                  BlockWorldState var11 = var5.translateOffset(var18, var19, 0);
-                  var1.notifyNeighborsRespectDebug(var11.getPos(), Blocks.AIR);
+                  for(int var23 = 0; var23 < shapedetector.getPalmLength(); ++var23) {
+                     for(int l = 0; l < shapedetector.getThumbLength(); ++l) {
+                        BlockWorldState shapedetectorblock2 = shapedetector_shapedetectorcollection.translateOffset(var23, l, 0);
+                        world.notifyNeighborsRespectDebug(shapedetectorblock2.getPos(), Blocks.AIR);
+                     }
+                  }
                }
             }
          }
+
+      }
+   }
+
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(FACING, EnumFacing.getFront(i & 7)).withProperty(NODROP, Boolean.valueOf((i & 8) > 0));
+   }
+
+   public int getMetaFromState(IBlockState iblockdata) {
+      byte b0 = 0;
+      int i = b0 | ((EnumFacing)iblockdata.getValue(FACING)).getIndex();
+      if (((Boolean)iblockdata.getValue(NODROP)).booleanValue()) {
+         i |= 8;
       }
 
+      return i;
    }
 
-   public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(FACING, EnumFacing.getFront(var1 & 7)).withProperty(NODROP, Boolean.valueOf((var1 & 8) > 0));
+   public IBlockState withRotation(IBlockState iblockdata, Rotation enumblockrotation) {
+      return iblockdata.withProperty(FACING, enumblockrotation.rotate((EnumFacing)iblockdata.getValue(FACING)));
    }
 
-   public int getMetaFromState(IBlockState var1) {
-      int var2 = 0;
-      var2 = var2 | ((EnumFacing)var1.getValue(FACING)).getIndex();
-      if (((Boolean)var1.getValue(NODROP)).booleanValue()) {
-         var2 |= 8;
-      }
-
-      return var2;
-   }
-
-   public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      return var1.withProperty(FACING, var2.rotate((EnumFacing)var1.getValue(FACING)));
-   }
-
-   public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      return var1.withRotation(var2.toRotation((EnumFacing)var1.getValue(FACING)));
+   public IBlockState withMirror(IBlockState iblockdata, Mirror enumblockmirror) {
+      return iblockdata.withRotation(enumblockmirror.toRotation((EnumFacing)iblockdata.getValue(FACING)));
    }
 
    protected BlockStateContainer createBlockState() {
@@ -235,5 +247,42 @@ public class BlockSkull extends BlockContainer {
       }
 
       return this.witherPattern;
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.UP.ordinal()] = 1;
+         } catch (NoSuchFieldError var4) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 2;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 3;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 4;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.EAST.ordinal()] = 5;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

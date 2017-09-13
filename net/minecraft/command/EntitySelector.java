@@ -36,12 +36,11 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
 
 public class EntitySelector {
-   private static final Pattern TOKEN_PATTERN = Pattern.compile("^@([pare])(?:\\[([\\w\\.:=,!-]*)\\])?$");
+   private static final Pattern TOKEN_PATTERN = Pattern.compile("^@([pare])(?:\\[([\\w=,!-]*)\\])?$");
    private static final Pattern INT_LIST_PATTERN = Pattern.compile("\\G([-!]?[\\w-]*)(?:$|,)");
-   private static final Pattern KEY_VALUE_LIST_PATTERN = Pattern.compile("\\G([\\w:]+)=([-!]?[\\w\\.-]*)(?:$|,)");
+   private static final Pattern KEY_VALUE_LIST_PATTERN = Pattern.compile("\\G(\\w+)=([-!]?[\\w-]*)(?:$|,)");
    private static final Set WORLD_BINDING_ARGS = Sets.newHashSet(new String[]{"x", "y", "z", "dx", "dy", "dz", "rm", "r"});
 
    @Nullable
@@ -96,7 +95,6 @@ public class EntitySelector {
                   var12.addAll(getTagPredicates(var4));
                   var12.addAll(getRadiusPredicates(var4, var7));
                   var12.addAll(getRotationsPredicates(var4));
-                  var12.addAll(ForgeEventFactory.gatherEntitySelectors(var4, var5, var0, var7));
                   var9.addAll(filterResults(var4, var2, var12, var5, var11, var6));
                }
             }
@@ -113,7 +111,7 @@ public class EntitySelector {
       if (hasArgument(var1)) {
          var2.add(var0.getEntityWorld());
       } else {
-         Collections.addAll(var2, var0.getServer().worlds);
+         Collections.addAll(var2, var0.h().worldServer);
       }
 
       return var2;
@@ -140,13 +138,18 @@ public class EntitySelector {
          var3 = var3.substring(1);
       }
 
-      boolean var5 = !var1.equals("e");
-      boolean var6 = var1.equals("r") && var3 != null;
-      if ((var3 == null || !var1.equals("e")) && !var6) {
-         if (var5) {
+      boolean var6 = !var1.equals("e");
+      boolean var7 = var1.equals("r") && var3 != null;
+      if ((var3 == null || !var1.equals("e")) && !var7) {
+         if (var6) {
             var2.add(new Predicate() {
                public boolean apply(@Nullable Entity var1) {
                   return var1 instanceof EntityPlayer;
+               }
+
+               // $FF: synthetic method
+               public boolean apply(Object var1) {
+                  return this.apply((Entity)var1);
                }
             });
          }
@@ -154,6 +157,11 @@ public class EntitySelector {
          var2.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
                return EntityList.isStringEntityName(var1, var3) != var4;
+            }
+
+            // $FF: synthetic method
+            public boolean apply(Object var1) {
+               return this.apply((Entity)var1);
             }
          });
       }
@@ -175,6 +183,11 @@ public class EntitySelector {
                   return (var2 <= -1 || var2x.experienceLevel >= var2) && (var3 <= -1 || var2x.experienceLevel <= var3);
                }
             }
+
+            // $FF: synthetic method
+            public boolean apply(Object var1) {
+               return this.apply((Entity)var1);
+            }
          });
       }
 
@@ -192,12 +205,12 @@ public class EntitySelector {
             var2 = var2.substring(1);
          }
 
-         final GameType var4;
+         final GameType var5;
          try {
-            int var5 = Integer.parseInt(var2);
-            var4 = GameType.parseGameTypeWithDefault(var5, GameType.NOT_SET);
+            int var4 = Integer.parseInt(var2);
+            var5 = GameType.parseGameTypeWithDefault(var4, GameType.NOT_SET);
          } catch (Throwable var6) {
-            var4 = GameType.parseGameTypeWithDefault(var2, GameType.NOT_SET);
+            var5 = GameType.parseGameTypeWithDefault(var2, GameType.NOT_SET);
          }
 
          var1.add(new Predicate() {
@@ -207,8 +220,13 @@ public class EntitySelector {
                } else {
                   EntityPlayerMP var2 = (EntityPlayerMP)var1;
                   GameType var3x = var2.interactionManager.getGameType();
-                  return var3 ? var3x != var4 : var3x == var4;
+                  return var3 ? var3x != var5 : var3x == var5;
                }
+            }
+
+            // $FF: synthetic method
+            public boolean apply(Object var1) {
+               return this.apply((Entity)var1);
             }
          });
          return var1;
@@ -235,6 +253,11 @@ public class EntitySelector {
                   return var4.equals(var2) != var3;
                }
             }
+
+            // $FF: synthetic method
+            public boolean apply(Object var1) {
+               return this.apply((Entity)var1);
+            }
          });
       }
 
@@ -248,7 +271,7 @@ public class EntitySelector {
             if (var1 == null) {
                return false;
             } else {
-               Scoreboard var2x = var0.getServer().worldServerForDimension(0).getScoreboard();
+               Scoreboard var2x = var0.h().getWorldServer(0).getScoreboard();
 
                for(Entry var4 : var2.entrySet()) {
                   String var5 = (String)var4.getKey();
@@ -282,6 +305,11 @@ public class EntitySelector {
                return true;
             }
          }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1) {
+            return this.apply((Entity)var1);
+         }
       }}));
    }
 
@@ -297,6 +325,11 @@ public class EntitySelector {
          var1.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
                return var1 != null && var1.getName().equals(var2) != var3;
+            }
+
+            // $FF: synthetic method
+            public boolean apply(Object var1) {
+               return this.apply((Entity)var1);
             }
          });
       }
@@ -315,7 +348,18 @@ public class EntitySelector {
       if (var2 != null) {
          var1.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
-               return var1 == null ? false : ("".equals(var2) ? var1.getTags().isEmpty() != var3 : var1.getTags().contains(var2) != var3);
+               if (var1 == null) {
+                  return false;
+               } else if ("".equals(var2)) {
+                  return var1.getTags().isEmpty() != var3;
+               } else {
+                  return var1.getTags().contains(var2) != var3;
+               }
+            }
+
+            // $FF: synthetic method
+            public boolean apply(Object var1) {
+               return this.apply((Entity)var1);
             }
          });
       }
@@ -344,6 +388,11 @@ public class EntitySelector {
                   return (var6 || var2 >= var10) && (var7 || var2 <= var14);
                }
             }
+
+            // $FF: synthetic method
+            public boolean apply(Object var1x) {
+               return this.apply((Entity)var1x);
+            }
          }});
       }
    }
@@ -359,8 +408,17 @@ public class EntitySelector {
                   return false;
                } else {
                   int var2x = MathHelper.clampAngle(MathHelper.floor(var1.rotationYaw));
-                  return var2 > var3 ? var2x >= var2 || var2x <= var3 : var2x >= var2 && var2x <= var3;
+                  if (var2 > var3) {
+                     return var2x >= var2 || var2x <= var3;
+                  } else {
+                     return var2x >= var2 && var2x <= var3;
+                  }
                }
+            }
+
+            // $FF: synthetic method
+            public boolean apply(Object var1) {
+               return this.apply((Entity)var1);
             }
          });
       }
@@ -374,8 +432,17 @@ public class EntitySelector {
                   return false;
                } else {
                   int var2 = MathHelper.clampAngle(MathHelper.floor(var1.rotationPitch));
-                  return var4 > var5 ? var2 >= var4 || var2 <= var5 : var2 >= var4 && var2 <= var5;
+                  if (var4 > var5) {
+                     return var2 >= var4 || var2 <= var5;
+                  } else {
+                     return var2 >= var4 && var2 <= var5;
+                  }
                }
+            }
+
+            // $FF: synthetic method
+            public boolean apply(Object var1) {
+               return this.apply((Entity)var1);
             }
          });
       }
@@ -408,10 +475,10 @@ public class EntitySelector {
             }
          } else if (var3.equals("a")) {
             var6.addAll(var4.getPlayers(var1, var14));
-         } else if (var3.equals("p") || var3.equals("r") && !var9) {
-            var6.addAll(var4.getPlayers(var1, var15));
-         } else {
+         } else if (!var3.equals("p") && (!var3.equals("r") || var9)) {
             var6.addAll(var4.getEntities(var1, var15));
+         } else {
+            var6.addAll(var4.getPlayers(var1, var15));
          }
       } else {
          final AxisAlignedBB var19 = getAABB(var5, var10, var11, var12);
@@ -419,6 +486,11 @@ public class EntitySelector {
             Predicate var20 = new Predicate() {
                public boolean apply(@Nullable Entity var1) {
                   return var1 != null && var19.intersectsWith(var1.getEntityBoundingBox());
+               }
+
+               // $FF: synthetic method
+               public boolean apply(Object var1) {
+                  return this.apply((Entity)var1);
                }
             };
             var6.addAll(var4.getPlayers(var1, Predicates.and(var15, var20)));
@@ -440,6 +512,11 @@ public class EntitySelector {
          Collections.sort((List)var0, new Comparator() {
             public int compare(Entity var1, Entity var2) {
                return ComparisonChain.start().compare(var1.getDistanceSq(var5.xCoord, var5.yCoord, var5.zCoord), var2.getDistanceSq(var5.xCoord, var5.yCoord, var5.zCoord)).result();
+            }
+
+            // $FF: synthetic method
+            public int compare(Object var1, Object var2) {
+               return this.compare((Entity)var1, (Entity)var2);
             }
          });
       }

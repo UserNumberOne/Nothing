@@ -5,7 +5,16 @@ import java.util.Comparator;
 public class Score {
    public static final Comparator SCORE_COMPARATOR = new Comparator() {
       public int compare(Score var1, Score var2) {
-         return var1.getScorePoints() > var2.getScorePoints() ? 1 : (var1.getScorePoints() < var2.getScorePoints() ? -1 : var2.getPlayerName().compareToIgnoreCase(var1.getPlayerName()));
+         if (var1.getScorePoints() > var2.getScorePoints()) {
+            return 1;
+         } else {
+            return var1.getScorePoints() < var2.getScorePoints() ? -1 : var2.getPlayerName().compareToIgnoreCase(var1.getPlayerName());
+         }
+      }
+
+      // $FF: synthetic method
+      public int compare(Object var1, Object var2) {
+         return this.compare((Score)var1, (Score)var2);
       }
    };
    private final Scoreboard theScoreboard;

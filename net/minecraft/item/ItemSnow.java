@@ -5,7 +5,6 @@ import net.minecraft.block.BlockSnow;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -38,7 +37,7 @@ public class ItemSnow extends ItemBlock {
                IBlockState var14 = var10.withProperty(BlockSnow.LAYERS, Integer.valueOf(var13 + 1));
                AxisAlignedBB var15 = var14.getCollisionBoundingBox(var3, var12);
                if (var15 != Block.NULL_AABB && var3.checkNoEntityCollision(var15.offset(var12)) && var3.setBlockState(var12, var14, 10)) {
-                  SoundType var16 = this.block.getSoundType(var14, var3, var12, var2);
+                  SoundType var16 = this.block.getSoundType();
                   var3.playSound(var2, var12, var16.getPlaceSound(), SoundCategory.BLOCKS, (var16.getVolume() + 1.0F) / 2.0F, var16.getPitch() * 0.8F);
                   --var1.stackSize;
                   return EnumActionResult.SUCCESS;
@@ -54,10 +53,5 @@ public class ItemSnow extends ItemBlock {
 
    public int getMetadata(int var1) {
       return var1;
-   }
-
-   public boolean canPlaceBlockOnSide(World var1, BlockPos var2, EnumFacing var3, EntityPlayer var4, ItemStack var5) {
-      IBlockState var6 = var1.getBlockState(var2);
-      return var6.getBlock() == Blocks.SNOW_LAYER && ((Integer)var6.getValue(BlockSnow.LAYERS)).intValue() <= 7 ? true : super.canPlaceBlockOnSide(var1, var2, var3, var4, var5);
    }
 }

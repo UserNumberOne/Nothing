@@ -131,7 +131,13 @@ public class NBTTagCompound extends NBTBase {
 
    public boolean hasKey(String var1, int var2) {
       byte var3 = this.getTagId(var1);
-      return var3 == var2 ? true : (var2 != 99 ? false : var3 == 1 || var3 == 2 || var3 == 3 || var3 == 4 || var3 == 5 || var3 == 6);
+      if (var3 == var2) {
+         return true;
+      } else if (var2 != 99) {
+         return false;
+      } else {
+         return var3 == 1 || var3 == 2 || var3 == 3 || var3 == 4 || var3 == 5 || var3 == 6;
+      }
    }
 
    public byte getByte(String var1) {
@@ -304,10 +310,20 @@ public class NBTTagCompound extends NBTBase {
          public String call() throws Exception {
             return NBTBase.NBT_TYPES[((NBTBase)NBTTagCompound.this.tagMap.get(var1)).getId()];
          }
+
+         // $FF: synthetic method
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var5.setDetail("Tag type expected", new ICrashReportDetail() {
          public String call() throws Exception {
             return NBTBase.NBT_TYPES[var2];
+         }
+
+         // $FF: synthetic method
+         public Object call() throws Exception {
+            return this.call();
          }
       });
       var5.addCrashSection("Tag name", var1);
@@ -343,11 +359,9 @@ public class NBTTagCompound extends NBTBase {
          var2.writeUTF(var0);
          var1.write(var2);
       }
-
    }
 
    private static byte readType(DataInput var0, NBTSizeTracker var1) throws IOException {
-      var1.read(8L);
       return var0.readByte();
    }
 
@@ -356,7 +370,6 @@ public class NBTTagCompound extends NBTBase {
    }
 
    static NBTBase readNBT(byte var0, String var1, DataInput var2, int var3, NBTSizeTracker var4) throws IOException {
-      var4.read(32L);
       NBTBase var5 = NBTBase.createNewByType(var0);
 
       try {
@@ -386,5 +399,10 @@ public class NBTTagCompound extends NBTBase {
          }
       }
 
+   }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
    }
 }

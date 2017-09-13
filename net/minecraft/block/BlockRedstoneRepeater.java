@@ -14,15 +14,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockRedstoneRepeater extends BlockRedstoneDiode {
    public static final PropertyBool LOCKED = PropertyBool.create("locked");
@@ -91,26 +88,6 @@ public class BlockRedstoneRepeater extends BlockRedstoneDiode {
 
    protected boolean isAlternateInput(IBlockState var1) {
       return isDiode(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      if (this.isRepeaterPowered) {
-         EnumFacing var5 = (EnumFacing)var1.getValue(FACING);
-         double var6 = (double)((float)var3.getX() + 0.5F) + (double)(var4.nextFloat() - 0.5F) * 0.2D;
-         double var8 = (double)((float)var3.getY() + 0.4F) + (double)(var4.nextFloat() - 0.5F) * 0.2D;
-         double var10 = (double)((float)var3.getZ() + 0.5F) + (double)(var4.nextFloat() - 0.5F) * 0.2D;
-         float var12 = -5.0F;
-         if (var4.nextBoolean()) {
-            var12 = (float)(((Integer)var1.getValue(DELAY)).intValue() * 2 - 1);
-         }
-
-         var12 = var12 / 16.0F;
-         double var13 = (double)(var12 * (float)var5.getFrontOffsetX());
-         double var15 = (double)(var12 * (float)var5.getFrontOffsetZ());
-         var2.spawnParticle(EnumParticleTypes.REDSTONE, var6 + var13, var8, var10 + var15, 0.0D, 0.0D, 0.0D);
-      }
-
    }
 
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {

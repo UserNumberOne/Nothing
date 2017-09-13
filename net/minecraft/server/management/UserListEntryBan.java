@@ -12,36 +12,36 @@ public abstract class UserListEntryBan extends UserListEntry {
    protected final Date banEndDate;
    protected final String reason;
 
-   public UserListEntryBan(Object var1, Date var2, String var3, Date var4, String var5) {
-      super(var1);
-      this.banStartDate = var2 == null ? new Date() : var2;
-      this.bannedBy = var3 == null ? "(Unknown)" : var3;
-      this.banEndDate = var4;
-      this.reason = var5 == null ? "Banned by an operator." : var5;
+   public UserListEntryBan(Object t0, Date date, String s, Date date1, String s1) {
+      super(t0);
+      this.banStartDate = date == null ? new Date() : date;
+      this.bannedBy = s == null ? "(Unknown)" : s;
+      this.banEndDate = date1;
+      this.reason = s1 == null ? "Banned by an operator." : s1;
    }
 
-   protected UserListEntryBan(Object var1, JsonObject var2) {
-      super(var1, var2);
+   protected UserListEntryBan(Object t0, JsonObject jsonobject) {
+      super(checkExpiry(t0, jsonobject), jsonobject);
 
-      Date var3;
+      Date date;
       try {
-         var3 = var2.has("created") ? DATE_FORMAT.parse(var2.get("created").getAsString()) : new Date();
-      } catch (ParseException var7) {
-         var3 = new Date();
-      }
-
-      this.banStartDate = var3;
-      this.bannedBy = var2.has("source") ? var2.get("source").getAsString() : "(Unknown)";
-
-      Date var4;
-      try {
-         var4 = var2.has("expires") ? DATE_FORMAT.parse(var2.get("expires").getAsString()) : null;
+         date = jsonobject.has("created") ? DATE_FORMAT.parse(jsonobject.get("created").getAsString()) : new Date();
       } catch (ParseException var6) {
-         var4 = null;
+         date = new Date();
       }
 
-      this.banEndDate = var4;
-      this.reason = var2.has("reason") ? var2.get("reason").getAsString() : "Banned by an operator.";
+      this.banStartDate = date;
+      this.bannedBy = jsonobject.has("source") ? jsonobject.get("source").getAsString() : "(Unknown)";
+
+      Date date1;
+      try {
+         date1 = jsonobject.has("expires") ? DATE_FORMAT.parse(jsonobject.get("expires").getAsString()) : null;
+      } catch (ParseException var5) {
+         date1 = null;
+      }
+
+      this.banEndDate = date1;
+      this.reason = jsonobject.has("reason") ? jsonobject.get("reason").getAsString() : "Banned by an operator.";
    }
 
    public Date getBanEndDate() {
@@ -56,10 +56,30 @@ public abstract class UserListEntryBan extends UserListEntry {
       return this.banEndDate == null ? false : this.banEndDate.before(new Date());
    }
 
-   protected void onSerialization(JsonObject var1) {
-      var1.addProperty("created", DATE_FORMAT.format(this.banStartDate));
-      var1.addProperty("source", this.bannedBy);
-      var1.addProperty("expires", this.banEndDate == null ? "forever" : DATE_FORMAT.format(this.banEndDate));
-      var1.addProperty("reason", this.reason);
+   protected void onSerialization(JsonObject jsonobject) {
+      jsonobject.addProperty("created", DATE_FORMAT.format(this.banStartDate));
+      jsonobject.addProperty("source", this.bannedBy);
+      jsonobject.addProperty("expires", this.banEndDate == null ? "forever" : DATE_FORMAT.format(this.banEndDate));
+      jsonobject.addProperty("reason", this.reason);
+   }
+
+   public String getSource() {
+      return this.bannedBy;
+   }
+
+   public Date getCreated() {
+      return this.banStartDate;
+   }
+
+   private static Object checkExpiry(Object object, JsonObject jsonobject) {
+      Date expires = null;
+
+      try {
+         expires = jsonobject.has("expires") ? DATE_FORMAT.parse(jsonobject.get("expires").getAsString()) : null;
+      } catch (ParseException var3) {
+         ;
+      }
+
+      return expires != null && !expires.after(new Date()) ? null : object;
    }
 }

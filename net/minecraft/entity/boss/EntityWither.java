@@ -5,6 +5,7 @@ import com.google.common.base.Predicates;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -33,8 +34,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
@@ -47,8 +50,10 @@ import net.minecraft.world.BossInfo;
 import net.minecraft.world.BossInfoServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.WorldServer;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
 public class EntityWither extends EntityMob implements IRangedAttackMob {
    private static final DataParameter FIRST_HEAD_TARGET = EntityDataManager.createKey(EntityWither.class, DataSerializers.VARINT);
@@ -65,13 +70,17 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
    private int blockBreakCounter;
    private final BossInfoServer bossInfo = (BossInfoServer)(new BossInfoServer(this.getDisplayName(), BossInfo.Color.PURPLE, BossInfo.Overlay.PROGRESS)).setDarkenSky(true);
    private static final Predicate NOT_UNDEAD = new Predicate() {
-      public boolean apply(@Nullable Entity var1) {
-         return var1 instanceof EntityLivingBase && ((EntityLivingBase)var1).getCreatureAttribute() != EnumCreatureAttribute.UNDEAD;
+      public boolean apply(@Nullable Entity entity) {
+         return entity instanceof EntityLivingBase && ((EntityLivingBase)entity).getCreatureAttribute() != EnumCreatureAttribute.UNDEAD;
+      }
+
+      public boolean apply(Object object) {
+         return this.apply((Entity)object);
       }
    };
 
-   public EntityWither(World var1) {
-      super(var1);
+   public EntityWither(World world) {
+      super(world);
       this.setHealth(this.getMaxHealth());
       this.setSize(0.9F, 3.5F);
       this.isImmuneToFire = true;
@@ -98,18 +107,18 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       this.dataManager.register(INVULNERABILITY_TIME, Integer.valueOf(0));
    }
 
-   public static void registerFixesWither(DataFixer var0) {
-      EntityLiving.registerFixesMob(var0, "WitherBoss");
+   public static void registerFixesWither(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "WitherBoss");
    }
 
-   public void writeEntityToNBT(NBTTagCompound var1) {
-      super.writeEntityToNBT(var1);
-      var1.setInteger("Invul", this.getInvulTime());
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      super.writeEntityToNBT(nbttagcompound);
+      nbttagcompound.setInteger("Invul", this.getInvulTime());
    }
 
-   public void readEntityFromNBT(NBTTagCompound var1) {
-      super.readEntityFromNBT(var1);
-      this.setInvulTime(var1.getInteger("Invul"));
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      super.readEntityFromNBT(nbttagcompound);
+      this.setInvulTime(nbttagcompound.getInteger("Invul"));
    }
 
    protected SoundEvent getAmbientSound() {
@@ -127,9 +136,9 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
    public void onLivingUpdate() {
       this.motionY *= 0.6000000238418579D;
       if (!this.world.isRemote && this.getWatchedTargetId(0) > 0) {
-         Entity var1 = this.world.getEntityByID(this.getWatchedTargetId(0));
-         if (var1 != null) {
-            if (this.posY < var1.posY || !this.isArmored() && this.posY < var1.posY + 5.0D) {
+         Entity entity = this.world.getEntityByID(this.getWatchedTargetId(0));
+         if (entity != null) {
+            if (this.posY < entity.posY || !this.isArmored() && this.posY < entity.posY + 5.0D) {
                if (this.motionY < 0.0D) {
                   this.motionY = 0.0D;
                }
@@ -137,13 +146,13 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
                this.motionY += (0.5D - this.motionY) * 0.6000000238418579D;
             }
 
-            double var2 = var1.posX - this.posX;
-            double var4 = var1.posZ - this.posZ;
-            double var6 = var2 * var2 + var4 * var4;
-            if (var6 > 9.0D) {
-               double var8 = (double)MathHelper.sqrt(var6);
-               this.motionX += (var2 / var8 * 0.5D - this.motionX) * 0.6000000238418579D;
-               this.motionZ += (var4 / var8 * 0.5D - this.motionZ) * 0.6000000238418579D;
+            double d3 = entity.posX - this.posX;
+            double d0 = entity.posZ - this.posZ;
+            double d1 = d3 * d3 + d0 * d0;
+            if (d1 > 9.0D) {
+               double d2 = (double)MathHelper.sqrt(d1);
+               this.motionX += (d3 / d2 * 0.5D - this.motionX) * 0.6000000238418579D;
+               this.motionZ += (d0 / d2 * 0.5D - this.motionZ) * 0.6000000238418579D;
             }
          }
       }
@@ -154,49 +163,49 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
 
       super.onLivingUpdate();
 
-      for(int var20 = 0; var20 < 2; ++var20) {
-         this.yRotOHeads[var20] = this.yRotationHeads[var20];
-         this.xRotOHeads[var20] = this.xRotationHeads[var20];
+      for(int i = 0; i < 2; ++i) {
+         this.yRotOHeads[i] = this.yRotationHeads[i];
+         this.xRotOHeads[i] = this.xRotationHeads[i];
       }
 
-      for(int var21 = 0; var21 < 2; ++var21) {
-         int var23 = this.getWatchedTargetId(var21 + 1);
-         Entity var3 = null;
-         if (var23 > 0) {
-            var3 = this.world.getEntityByID(var23);
+      for(int var23 = 0; var23 < 2; ++var23) {
+         int j = this.getWatchedTargetId(var23 + 1);
+         Entity entity1 = null;
+         if (j > 0) {
+            entity1 = this.world.getEntityByID(j);
          }
 
-         if (var3 != null) {
-            double var27 = this.getHeadX(var21 + 1);
-            double var28 = this.getHeadY(var21 + 1);
-            double var29 = this.getHeadZ(var21 + 1);
-            double var10 = var3.posX - var27;
-            double var12 = var3.posY + (double)var3.getEyeHeight() - var28;
-            double var14 = var3.posZ - var29;
-            double var16 = (double)MathHelper.sqrt(var10 * var10 + var14 * var14);
-            float var18 = (float)(MathHelper.atan2(var14, var10) * 57.29577951308232D) - 90.0F;
-            float var19 = (float)(-(MathHelper.atan2(var12, var16) * 57.29577951308232D));
-            this.xRotationHeads[var21] = this.rotlerp(this.xRotationHeads[var21], var19, 40.0F);
-            this.yRotationHeads[var21] = this.rotlerp(this.yRotationHeads[var21], var18, 10.0F);
+         if (entity1 != null) {
+            double d0 = this.getHeadX(var23 + 1);
+            double d1 = this.getHeadY(var23 + 1);
+            double d2 = this.getHeadZ(var23 + 1);
+            double d4 = entity1.posX - d0;
+            double d5 = entity1.posY + (double)entity1.getEyeHeight() - d1;
+            double d6 = entity1.posZ - d2;
+            double d7 = (double)MathHelper.sqrt(d4 * d4 + d6 * d6);
+            float f = (float)(MathHelper.atan2(d6, d4) * 57.2957763671875D) - 90.0F;
+            float f1 = (float)(-(MathHelper.atan2(d5, d7) * 57.2957763671875D));
+            this.xRotationHeads[var23] = this.rotlerp(this.xRotationHeads[var23], f1, 40.0F);
+            this.yRotationHeads[var23] = this.rotlerp(this.yRotationHeads[var23], f, 10.0F);
          } else {
-            this.yRotationHeads[var21] = this.rotlerp(this.yRotationHeads[var21], this.renderYawOffset, 10.0F);
+            this.yRotationHeads[var23] = this.rotlerp(this.yRotationHeads[var23], this.renderYawOffset, 10.0F);
          }
       }
 
-      boolean var22 = this.isArmored();
+      boolean flag = this.isArmored();
 
-      for(int var24 = 0; var24 < 3; ++var24) {
-         double var26 = this.getHeadX(var24);
-         double var5 = this.getHeadY(var24);
-         double var7 = this.getHeadZ(var24);
-         this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var26 + this.rand.nextGaussian() * 0.30000001192092896D, var5 + this.rand.nextGaussian() * 0.30000001192092896D, var7 + this.rand.nextGaussian() * 0.30000001192092896D, 0.0D, 0.0D, 0.0D);
-         if (var22 && this.world.rand.nextInt(4) == 0) {
-            this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, var26 + this.rand.nextGaussian() * 0.30000001192092896D, var5 + this.rand.nextGaussian() * 0.30000001192092896D, var7 + this.rand.nextGaussian() * 0.30000001192092896D, 0.699999988079071D, 0.699999988079071D, 0.5D);
+      for(int j = 0; j < 3; ++j) {
+         double d8 = this.getHeadX(j);
+         double d9 = this.getHeadY(j);
+         double d10 = this.getHeadZ(j);
+         this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d8 + this.rand.nextGaussian() * 0.30000001192092896D, d9 + this.rand.nextGaussian() * 0.30000001192092896D, d10 + this.rand.nextGaussian() * 0.30000001192092896D, 0.0D, 0.0D, 0.0D);
+         if (flag && this.world.rand.nextInt(4) == 0) {
+            this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, d8 + this.rand.nextGaussian() * 0.30000001192092896D, d9 + this.rand.nextGaussian() * 0.30000001192092896D, d10 + this.rand.nextGaussian() * 0.30000001192092896D, 0.699999988079071D, 0.699999988079071D, 0.5D);
          }
       }
 
       if (this.getInvulTime() > 0) {
-         for(int var25 = 0; var25 < 3; ++var25) {
+         for(int var28 = 0; var28 < 3; ++var28) {
             this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + this.rand.nextGaussian(), this.posY + (double)(this.rand.nextFloat() * 3.3F), this.posZ + this.rand.nextGaussian(), 0.699999988079071D, 0.699999988079071D, 0.8999999761581421D);
          }
       }
@@ -205,68 +214,85 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
 
    protected void updateAITasks() {
       if (this.getInvulTime() > 0) {
-         int var1 = this.getInvulTime() - 1;
-         if (var1 <= 0) {
-            this.world.newExplosion(this, this.posX, this.posY + (double)this.getEyeHeight(), this.posZ, 7.0F, false, this.world.getGameRules().getBoolean("mobGriefing"));
-            this.world.playBroadcastSound(1023, new BlockPos(this), 0);
+         int i = this.getInvulTime() - 1;
+         if (i <= 0) {
+            ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), 7.0F, false);
+            this.world.getServer().getPluginManager().callEvent(event);
+            if (!event.isCancelled()) {
+               this.world.newExplosion(this, this.posX, this.posY + (double)this.getEyeHeight(), this.posZ, event.getRadius(), event.getFire(), this.world.getGameRules().getBoolean("mobGriefing"));
+            }
+
+            int viewDistance = ((WorldServer)this.world).getServer().getViewDistance() * 16;
+
+            for(EntityPlayerMP player : MinecraftServer.getServer().getPlayerList().playerEntityList) {
+               double deltaX = this.posX - player.posX;
+               double deltaZ = this.posZ - player.posZ;
+               double distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
+               if (distanceSquared > (double)(viewDistance * viewDistance)) {
+                  double deltaLength = Math.sqrt(distanceSquared);
+                  double relativeX = player.posX + deltaX / deltaLength * (double)viewDistance;
+                  double relativeZ = player.posZ + deltaZ / deltaLength * (double)viewDistance;
+                  player.connection.sendPacket(new SPacketEffect(1013, new BlockPos((int)relativeX, (int)this.posY, (int)relativeZ), 0, true));
+               } else {
+                  player.connection.sendPacket(new SPacketEffect(1013, new BlockPos((int)this.posX, (int)this.posY, (int)this.posZ), 0, true));
+               }
+            }
          }
 
-         this.setInvulTime(var1);
+         this.setInvulTime(i);
          if (this.ticksExisted % 10 == 0) {
-            this.heal(10.0F);
+            this.heal(10.0F, RegainReason.WITHER_SPAWN);
          }
       } else {
          super.updateAITasks();
 
-         for(int var14 = 1; var14 < 3; ++var14) {
-            if (this.ticksExisted >= this.nextHeadUpdate[var14 - 1]) {
-               this.nextHeadUpdate[var14 - 1] = this.ticksExisted + 10 + this.rand.nextInt(10);
+         for(int i = 1; i < 3; ++i) {
+            if (this.ticksExisted >= this.nextHeadUpdate[i - 1]) {
+               this.nextHeadUpdate[i - 1] = this.ticksExisted + 10 + this.rand.nextInt(10);
                if (this.world.getDifficulty() == EnumDifficulty.NORMAL || this.world.getDifficulty() == EnumDifficulty.HARD) {
-                  int var2 = var14 - 1;
-                  int var3 = this.idleHeadUpdates[var14 - 1];
-                  this.idleHeadUpdates[var2] = this.idleHeadUpdates[var14 - 1] + 1;
-                  if (var3 > 15) {
-                     float var4 = 10.0F;
-                     float var5 = 5.0F;
-                     double var6 = MathHelper.nextDouble(this.rand, this.posX - 10.0D, this.posX + 10.0D);
-                     double var8 = MathHelper.nextDouble(this.rand, this.posY - 5.0D, this.posY + 5.0D);
-                     double var10 = MathHelper.nextDouble(this.rand, this.posZ - 10.0D, this.posZ + 10.0D);
-                     this.launchWitherSkullToCoords(var14 + 1, var6, var8, var10, true);
-                     this.idleHeadUpdates[var14 - 1] = 0;
+                  int k = i - 1;
+                  int l = this.idleHeadUpdates[i - 1];
+                  this.idleHeadUpdates[k] = this.idleHeadUpdates[i - 1] + 1;
+                  if (l > 15) {
+                     double d0 = MathHelper.nextDouble(this.rand, this.posX - 10.0D, this.posX + 10.0D);
+                     double d1 = MathHelper.nextDouble(this.rand, this.posY - 5.0D, this.posY + 5.0D);
+                     double d2 = MathHelper.nextDouble(this.rand, this.posZ - 10.0D, this.posZ + 10.0D);
+                     this.launchWitherSkullToCoords(i + 1, d0, d1, d2, true);
+                     this.idleHeadUpdates[i - 1] = 0;
                   }
                }
 
-               int var16 = this.getWatchedTargetId(var14);
-               if (var16 > 0) {
-                  Entity var19 = this.world.getEntityByID(var16);
-                  if (var19 != null && var19.isEntityAlive() && this.getDistanceSqToEntity(var19) <= 900.0D && this.canEntityBeSeen(var19)) {
-                     if (var19 instanceof EntityPlayer && ((EntityPlayer)var19).capabilities.disableDamage) {
-                        this.updateWatchedTargetId(var14, 0);
+               int j = this.getWatchedTargetId(i);
+               if (j > 0) {
+                  Entity entity = this.world.getEntityByID(j);
+                  if (entity != null && entity.isEntityAlive() && this.getDistanceSqToEntity(entity) <= 900.0D && this.canEntityBeSeen(entity)) {
+                     if (entity instanceof EntityPlayer && ((EntityPlayer)entity).capabilities.disableDamage) {
+                        this.updateWatchedTargetId(i, 0);
                      } else {
-                        this.launchWitherSkullToEntity(var14 + 1, (EntityLivingBase)var19);
-                        this.nextHeadUpdate[var14 - 1] = this.ticksExisted + 40 + this.rand.nextInt(20);
-                        this.idleHeadUpdates[var14 - 1] = 0;
+                        this.launchWitherSkullToEntity(i + 1, (EntityLivingBase)entity);
+                        this.nextHeadUpdate[i - 1] = this.ticksExisted + 40 + this.rand.nextInt(20);
+                        this.idleHeadUpdates[i - 1] = 0;
                      }
                   } else {
-                     this.updateWatchedTargetId(var14, 0);
+                     this.updateWatchedTargetId(i, 0);
                   }
                } else {
-                  List var18 = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(20.0D, 8.0D, 20.0D), Predicates.and(NOT_UNDEAD, EntitySelectors.NOT_SPECTATING));
+                  List list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(20.0D, 8.0D, 20.0D), Predicates.and(NOT_UNDEAD, EntitySelectors.NOT_SPECTATING));
 
-                  for(int var21 = 0; var21 < 10 && !var18.isEmpty(); ++var21) {
-                     EntityLivingBase var23 = (EntityLivingBase)var18.get(this.rand.nextInt(var18.size()));
-                     if (var23 != this && var23.isEntityAlive() && this.canEntityBeSeen(var23)) {
-                        if (var23 instanceof EntityPlayer) {
-                           if (!((EntityPlayer)var23).capabilities.disableDamage) {
-                              this.updateWatchedTargetId(var14, var23.getEntityId());
+                  for(int i1 = 0; i1 < 10 && !list.isEmpty(); ++i1) {
+                     EntityLivingBase entityliving = (EntityLivingBase)list.get(this.rand.nextInt(list.size()));
+                     if (entityliving != this && entityliving.isEntityAlive() && this.canEntityBeSeen(entityliving)) {
+                        if (entityliving instanceof EntityPlayer) {
+                           if (!((EntityPlayer)entityliving).capabilities.disableDamage) {
+                              this.updateWatchedTargetId(i, entityliving.getEntityId());
                            }
                         } else {
-                           this.updateWatchedTargetId(var14, var23.getEntityId());
+                           this.updateWatchedTargetId(i, entityliving.getEntityId());
                         }
                         break;
                      }
 
-                     var18.remove(var23);
+                     list.remove(entityliving);
                   }
                }
             }
@@ -281,35 +307,35 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
          if (this.blockBreakCounter > 0) {
             --this.blockBreakCounter;
             if (this.blockBreakCounter == 0 && this.world.getGameRules().getBoolean("mobGriefing")) {
-               int var15 = MathHelper.floor(this.posY);
-               int var17 = MathHelper.floor(this.posX);
-               int var20 = MathHelper.floor(this.posZ);
-               boolean var22 = false;
+               int var33 = MathHelper.floor(this.posY);
+               int j = MathHelper.floor(this.posX);
+               int j1 = MathHelper.floor(this.posZ);
+               boolean flag = false;
 
-               for(int var24 = -1; var24 <= 1; ++var24) {
-                  for(int var25 = -1; var25 <= 1; ++var25) {
-                     for(int var7 = 0; var7 <= 3; ++var7) {
-                        int var26 = var17 + var24;
-                        int var9 = var15 + var7;
-                        int var27 = var20 + var25;
-                        BlockPos var11 = new BlockPos(var26, var9, var27);
-                        IBlockState var12 = this.world.getBlockState(var11);
-                        Block var13 = var12.getBlock();
-                        if (!var13.isAir(var12, this.world, var11) && var13.canEntityDestroy(var12, this.world, var11, this)) {
-                           var22 = this.world.destroyBlock(var11, true) || var22;
+               for(int k1 = -1; k1 <= 1; ++k1) {
+                  for(int l1 = -1; l1 <= 1; ++l1) {
+                     for(int i2 = 0; i2 <= 3; ++i2) {
+                        int j2 = j + k1;
+                        int k2 = var33 + i2;
+                        int l2 = j1 + l1;
+                        BlockPos blockposition = new BlockPos(j2, k2, l2);
+                        IBlockState iblockdata = this.world.getBlockState(blockposition);
+                        Block block = iblockdata.getBlock();
+                        if (iblockdata.getMaterial() != Material.AIR && canDestroyBlock(block) && !CraftEventFactory.callEntityChangeBlockEvent(this, blockposition, Blocks.AIR, 0).isCancelled()) {
+                           flag = this.world.destroyBlock(blockposition, true) || flag;
                         }
                      }
                   }
                }
 
-               if (var22) {
+               if (flag) {
                   this.world.playEvent((EntityPlayer)null, 1022, new BlockPos(this), 0);
                }
             }
          }
 
          if (this.ticksExisted % 20 == 0) {
-            this.heal(1.0F);
+            this.heal(1.0F, RegainReason.REGEN);
          }
 
          this.bossInfo.setPercent(this.getHealth() / this.getMaxHealth());
@@ -317,8 +343,8 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
 
    }
 
-   public static boolean canDestroyBlock(Block var0) {
-      return var0 != Blocks.BEDROCK && var0 != Blocks.END_PORTAL && var0 != Blocks.END_PORTAL_FRAME && var0 != Blocks.COMMAND_BLOCK && var0 != Blocks.REPEATING_COMMAND_BLOCK && var0 != Blocks.CHAIN_COMMAND_BLOCK && var0 != Blocks.BARRIER;
+   public static boolean canDestroyBlock(Block block) {
+      return block != Blocks.BEDROCK && block != Blocks.END_PORTAL && block != Blocks.END_PORTAL_FRAME && block != Blocks.COMMAND_BLOCK && block != Blocks.REPEATING_COMMAND_BLOCK && block != Blocks.CHAIN_COMMAND_BLOCK && block != Blocks.BARRIER;
    }
 
    public void ignite() {
@@ -329,107 +355,107 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
    public void setInWeb() {
    }
 
-   public void addTrackingPlayer(EntityPlayerMP var1) {
-      super.addTrackingPlayer(var1);
-      this.bossInfo.addPlayer(var1);
+   public void addTrackingPlayer(EntityPlayerMP entityplayer) {
+      super.addTrackingPlayer(entityplayer);
+      this.bossInfo.addPlayer(entityplayer);
    }
 
-   public void removeTrackingPlayer(EntityPlayerMP var1) {
-      super.removeTrackingPlayer(var1);
-      this.bossInfo.removePlayer(var1);
+   public void removeTrackingPlayer(EntityPlayerMP entityplayer) {
+      super.removeTrackingPlayer(entityplayer);
+      this.bossInfo.removePlayer(entityplayer);
    }
 
-   private double getHeadX(int var1) {
-      if (var1 <= 0) {
+   private double getHeadX(int i) {
+      if (i <= 0) {
          return this.posX;
       } else {
-         float var2 = (this.renderYawOffset + (float)(180 * (var1 - 1))) * 0.017453292F;
-         float var3 = MathHelper.cos(var2);
-         return this.posX + (double)var3 * 1.3D;
+         float f = (this.renderYawOffset + (float)(180 * (i - 1))) * 0.017453292F;
+         float f1 = MathHelper.cos(f);
+         return this.posX + (double)f1 * 1.3D;
       }
    }
 
-   private double getHeadY(int var1) {
-      return var1 <= 0 ? this.posY + 3.0D : this.posY + 2.2D;
+   private double getHeadY(int i) {
+      return i <= 0 ? this.posY + 3.0D : this.posY + 2.2D;
    }
 
-   private double getHeadZ(int var1) {
-      if (var1 <= 0) {
+   private double getHeadZ(int i) {
+      if (i <= 0) {
          return this.posZ;
       } else {
-         float var2 = (this.renderYawOffset + (float)(180 * (var1 - 1))) * 0.017453292F;
-         float var3 = MathHelper.sin(var2);
-         return this.posZ + (double)var3 * 1.3D;
+         float f = (this.renderYawOffset + (float)(180 * (i - 1))) * 0.017453292F;
+         float f1 = MathHelper.sin(f);
+         return this.posZ + (double)f1 * 1.3D;
       }
    }
 
-   private float rotlerp(float var1, float var2, float var3) {
-      float var4 = MathHelper.wrapDegrees(var2 - var1);
-      if (var4 > var3) {
-         var4 = var3;
+   private float rotlerp(float f, float f1, float f2) {
+      float f3 = MathHelper.wrapDegrees(f1 - f);
+      if (f3 > f2) {
+         f3 = f2;
       }
 
-      if (var4 < -var3) {
-         var4 = -var3;
+      if (f3 < -f2) {
+         f3 = -f2;
       }
 
-      return var1 + var4;
+      return f + f3;
    }
 
-   private void launchWitherSkullToEntity(int var1, EntityLivingBase var2) {
-      this.launchWitherSkullToCoords(var1, var2.posX, var2.posY + (double)var2.getEyeHeight() * 0.5D, var2.posZ, var1 == 0 && this.rand.nextFloat() < 0.001F);
+   private void launchWitherSkullToEntity(int i, EntityLivingBase entityliving) {
+      this.launchWitherSkullToCoords(i, entityliving.posX, entityliving.posY + (double)entityliving.getEyeHeight() * 0.5D, entityliving.posZ, i == 0 && this.rand.nextFloat() < 0.001F);
    }
 
-   private void launchWitherSkullToCoords(int var1, double var2, double var4, double var6, boolean var8) {
+   private void launchWitherSkullToCoords(int i, double d0, double d1, double d2, boolean flag) {
       this.world.playEvent((EntityPlayer)null, 1024, new BlockPos(this), 0);
-      double var9 = this.getHeadX(var1);
-      double var11 = this.getHeadY(var1);
-      double var13 = this.getHeadZ(var1);
-      double var15 = var2 - var9;
-      double var17 = var4 - var11;
-      double var19 = var6 - var13;
-      EntityWitherSkull var21 = new EntityWitherSkull(this.world, this, var15, var17, var19);
-      if (var8) {
-         var21.setInvulnerable(true);
+      double d3 = this.getHeadX(i);
+      double d4 = this.getHeadY(i);
+      double d5 = this.getHeadZ(i);
+      double d6 = d0 - d3;
+      double d7 = d1 - d4;
+      double d8 = d2 - d5;
+      EntityWitherSkull entitywitherskull = new EntityWitherSkull(this.world, this, d6, d7, d8);
+      if (flag) {
+         entitywitherskull.setInvulnerable(true);
       }
 
-      var21.posY = var11;
-      var21.posX = var9;
-      var21.posZ = var13;
-      this.world.spawnEntity(var21);
+      entitywitherskull.posY = d4;
+      entitywitherskull.posX = d3;
+      entitywitherskull.posZ = d5;
+      this.world.spawnEntity(entitywitherskull);
    }
 
-   public void attackEntityWithRangedAttack(EntityLivingBase var1, float var2) {
-      this.launchWitherSkullToEntity(0, var1);
+   public void attackEntityWithRangedAttack(EntityLivingBase entityliving, float f) {
+      this.launchWitherSkullToEntity(0, entityliving);
    }
 
-   public boolean attackEntityFrom(DamageSource var1, float var2) {
-      if (this.isEntityInvulnerable(var1)) {
+   public boolean attackEntityFrom(DamageSource damagesource, float f) {
+      if (this.isEntityInvulnerable(damagesource)) {
          return false;
-      } else if (var1 != DamageSource.drown && !(var1.getEntity() instanceof EntityWither)) {
-         if (this.getInvulTime() > 0 && var1 != DamageSource.outOfWorld) {
+      } else if (damagesource != DamageSource.drown && !(damagesource.getEntity() instanceof EntityWither)) {
+         if (this.getInvulTime() > 0 && damagesource != DamageSource.outOfWorld) {
             return false;
          } else {
             if (this.isArmored()) {
-               Entity var3 = var1.getSourceOfDamage();
-               if (var3 instanceof EntityArrow) {
+               Entity entity = damagesource.getSourceOfDamage();
+               if (entity instanceof EntityArrow) {
                   return false;
                }
             }
 
-            Entity var5 = var1.getEntity();
-            if (var5 != null && !(var5 instanceof EntityPlayer) && var5 instanceof EntityLivingBase && ((EntityLivingBase)var5).getCreatureAttribute() == this.getCreatureAttribute()) {
+            Entity entity = damagesource.getEntity();
+            if (entity != null && !(entity instanceof EntityPlayer) && entity instanceof EntityLivingBase && ((EntityLivingBase)entity).getCreatureAttribute() == this.getCreatureAttribute()) {
                return false;
             } else {
                if (this.blockBreakCounter <= 0) {
                   this.blockBreakCounter = 20;
                }
 
-               for(int var4 = 0; var4 < this.idleHeadUpdates.length; ++var4) {
-                  this.idleHeadUpdates[var4] += 3;
+               for(int i = 0; i < this.idleHeadUpdates.length; ++i) {
+                  this.idleHeadUpdates[i] += 3;
                }
 
-               return super.attackEntityFrom(var1, var2);
+               return super.attackEntityFrom(damagesource, f);
             }
          }
       } else {
@@ -437,15 +463,15 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       }
    }
 
-   protected void dropFewItems(boolean var1, int var2) {
-      EntityItem var3 = this.dropItem(Items.NETHER_STAR, 1);
-      if (var3 != null) {
-         var3.setNoDespawn();
+   protected void dropFewItems(boolean flag, int i) {
+      EntityItem entityitem = this.dropItem(Items.NETHER_STAR, 1);
+      if (entityitem != null) {
+         entityitem.setNoDespawn();
       }
 
       if (!this.world.isRemote) {
-         for(EntityPlayer var5 : this.world.getEntitiesWithinAABB(EntityPlayer.class, this.getEntityBoundingBox().expand(50.0D, 100.0D, 50.0D))) {
-            var5.addStat(AchievementList.KILL_WITHER);
+         for(EntityPlayer entityhuman : this.world.getEntitiesWithinAABB(EntityPlayer.class, this.getEntityBoundingBox().expand(50.0D, 100.0D, 50.0D))) {
+            entityhuman.addStat(AchievementList.KILL_WITHER);
          }
       }
 
@@ -455,15 +481,10 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       this.entityAge = 0;
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return 15728880;
+   public void fall(float f, float f1) {
    }
 
-   public void fall(float var1, float var2) {
-   }
-
-   public void addPotionEffect(PotionEffect var1) {
+   public void addPotionEffect(PotionEffect mobeffect) {
    }
 
    protected void applyEntityAttributes() {
@@ -474,30 +495,20 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(4.0D);
    }
 
-   @SideOnly(Side.CLIENT)
-   public float getHeadYRotation(int var1) {
-      return this.yRotationHeads[var1];
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getHeadXRotation(int var1) {
-      return this.xRotationHeads[var1];
-   }
-
    public int getInvulTime() {
       return ((Integer)this.dataManager.get(INVULNERABILITY_TIME)).intValue();
    }
 
-   public void setInvulTime(int var1) {
-      this.dataManager.set(INVULNERABILITY_TIME, Integer.valueOf(var1));
+   public void setInvulTime(int i) {
+      this.dataManager.set(INVULNERABILITY_TIME, Integer.valueOf(i));
    }
 
-   public int getWatchedTargetId(int var1) {
-      return ((Integer)this.dataManager.get(HEAD_TARGETS[var1])).intValue();
+   public int getWatchedTargetId(int i) {
+      return ((Integer)this.dataManager.get(HEAD_TARGETS[i])).intValue();
    }
 
-   public void updateWatchedTargetId(int var1, int var2) {
-      this.dataManager.set(HEAD_TARGETS[var1], Integer.valueOf(var2));
+   public void updateWatchedTargetId(int i, int j) {
+      this.dataManager.set(HEAD_TARGETS[i], Integer.valueOf(j));
    }
 
    public boolean isArmored() {
@@ -508,7 +519,7 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       return EnumCreatureAttribute.UNDEAD;
    }
 
-   protected boolean canBeRidden(Entity var1) {
+   protected boolean canBeRidden(Entity entity) {
       return false;
    }
 

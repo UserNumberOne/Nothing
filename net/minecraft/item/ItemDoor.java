@@ -37,7 +37,7 @@ public class ItemDoor extends Item {
             int var14 = var12.getFrontOffsetZ();
             boolean var15 = var13 < 0 && var9 < 0.5F || var13 > 0 && var9 > 0.5F || var14 < 0 && var7 > 0.5F || var14 > 0 && var7 < 0.5F;
             placeDoor(var3, var4, var12, this.block, var15);
-            SoundType var16 = var3.getBlockState(var4).getBlock().getSoundType(var3.getBlockState(var4), var3, var4, var2);
+            SoundType var16 = this.block.getSoundType();
             var3.playSound(var2, var4, var16.getPlaceSound(), SoundCategory.BLOCKS, (var16.getVolume() + 1.0F) / 2.0F, var16.getPitch() * 0.8F);
             --var1.stackSize;
             return EnumActionResult.SUCCESS;

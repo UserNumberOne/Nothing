@@ -49,14 +49,14 @@ public abstract class EntityFlying extends EntityLiving {
       }
 
       this.prevLimbSwingAmount = this.limbSwingAmount;
-      double var9 = this.posX - this.prevPosX;
-      double var5 = this.posZ - this.prevPosZ;
-      float var7 = MathHelper.sqrt(var9 * var9 + var5 * var5) * 4.0F;
-      if (var7 > 1.0F) {
-         var7 = 1.0F;
+      double var5 = this.posX - this.prevPosX;
+      double var7 = this.posZ - this.prevPosZ;
+      float var9 = MathHelper.sqrt(var5 * var5 + var7 * var7) * 4.0F;
+      if (var9 > 1.0F) {
+         var9 = 1.0F;
       }
 
-      this.limbSwingAmount += (var7 - this.limbSwingAmount) * 0.4F;
+      this.limbSwingAmount += (var9 - this.limbSwingAmount) * 0.4F;
       this.limbSwing += this.limbSwingAmount;
    }
 

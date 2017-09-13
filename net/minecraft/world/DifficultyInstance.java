@@ -22,7 +22,11 @@ public class DifficultyInstance {
    }
 
    public float getClampedAdditionalDifficulty() {
-      return this.additionalDifficulty < 2.0F ? 0.0F : (this.additionalDifficulty > 4.0F ? 1.0F : (this.additionalDifficulty - 2.0F) / 2.0F);
+      if (this.additionalDifficulty < 2.0F) {
+         return 0.0F;
+      } else {
+         return this.additionalDifficulty > 4.0F ? 1.0F : (this.additionalDifficulty - 2.0F) / 2.0F;
+      }
    }
 
    private float calculateAdditionalDifficulty(EnumDifficulty var1, long var2, long var4, float var6) {

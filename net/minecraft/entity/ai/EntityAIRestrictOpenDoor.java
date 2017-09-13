@@ -27,13 +27,21 @@ public class EntityAIRestrictOpenDoor extends EntityAIBase {
             return false;
          } else {
             this.frontDoor = var2.getNearestDoor(var1);
-            return this.frontDoor == null ? false : (double)this.frontDoor.getDistanceToInsideBlockSq(var1) < 2.25D;
+            if (this.frontDoor == null) {
+               return false;
+            } else {
+               return (double)this.frontDoor.getDistanceToInsideBlockSq(var1) < 2.25D;
+            }
          }
       }
    }
 
    public boolean continueExecuting() {
-      return this.entityObj.world.isDaytime() ? false : !this.frontDoor.getIsDetachedFromVillageFlag() && this.frontDoor.isInsideSide(new BlockPos(this.entityObj));
+      if (this.entityObj.world.isDaytime()) {
+         return false;
+      } else {
+         return !this.frontDoor.getIsDetachedFromVillageFlag() && this.frontDoor.isInsideSide(new BlockPos(this.entityObj));
+      }
    }
 
    public void startExecuting() {

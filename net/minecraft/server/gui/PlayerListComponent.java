@@ -3,19 +3,16 @@ package net.minecraft.server.gui;
 import java.util.Vector;
 import javax.swing.JList;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.ITickable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.SERVER)
 public class PlayerListComponent extends JList implements ITickable {
    private final MinecraftServer server;
    private int ticks;
 
    public PlayerListComponent(MinecraftServer var1) {
       this.server = var1;
-      var1.registerTickable(this);
+      var1.a(this);
    }
 
    public void update() {

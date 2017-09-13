@@ -5,8 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityVelocity implements Packet {
    private int entityID;
@@ -69,25 +67,5 @@ public class SPacketEntityVelocity implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleEntityVelocity(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityID() {
-      return this.entityID;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getMotionX() {
-      return this.motionX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getMotionY() {
-      return this.motionY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getMotionZ() {
-      return this.motionZ;
    }
 }

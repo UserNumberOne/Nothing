@@ -24,6 +24,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.AreaEffectCloudApplyEvent;
 
 public class EntityAreaEffectCloud extends Entity {
    private static final DataParameter RADIUS = EntityDataManager.createKey(EntityAreaEffectCloud.class, DataSerializers.FLOAT);
@@ -33,20 +37,20 @@ public class EntityAreaEffectCloud extends Entity {
    private static final DataParameter PARTICLE_PARAM_1 = EntityDataManager.createKey(EntityAreaEffectCloud.class, DataSerializers.VARINT);
    private static final DataParameter PARTICLE_PARAM_2 = EntityDataManager.createKey(EntityAreaEffectCloud.class, DataSerializers.VARINT);
    private PotionType potion;
-   private final List effects;
+   public List effects;
    private final Map reapplicationDelayMap;
    private int duration;
-   private int waitTime;
-   private int reapplicationDelay;
+   public int waitTime;
+   public int reapplicationDelay;
    private boolean colorSet;
-   private int durationOnUse;
-   private float radiusOnUse;
-   private float radiusPerTick;
+   public int durationOnUse;
+   public float radiusOnUse;
+   public float radiusPerTick;
    private EntityLivingBase owner;
    private UUID ownerUniqueId;
 
-   public EntityAreaEffectCloud(World var1) {
-      super(var1);
+   public EntityAreaEffectCloud(World world) {
+      super(world);
       this.potion = PotionTypes.EMPTY;
       this.effects = Lists.newArrayList();
       this.reapplicationDelayMap = Maps.newHashMap();
@@ -58,9 +62,9 @@ public class EntityAreaEffectCloud extends Entity {
       this.setRadius(3.0F);
    }
 
-   public EntityAreaEffectCloud(World var1, double var2, double var4, double var6) {
-      this(var1);
-      this.setPosition(var2, var4, var6);
+   public EntityAreaEffectCloud(World world, double d0, double d1, double d2) {
+      this(world);
+      this.setPosition(d0, d1, d2);
    }
 
    protected void entityInit() {
@@ -72,14 +76,14 @@ public class EntityAreaEffectCloud extends Entity {
       this.getDataManager().register(PARTICLE_PARAM_2, Integer.valueOf(0));
    }
 
-   public void setRadius(float var1) {
-      double var2 = this.posX;
-      double var4 = this.posY;
-      double var6 = this.posZ;
-      this.setSize(var1 * 2.0F, 0.5F);
-      this.setPosition(var2, var4, var6);
+   public void setRadius(float f) {
+      double d0 = this.posX;
+      double d1 = this.posY;
+      double d2 = this.posZ;
+      this.setSize(f * 2.0F, 0.5F);
+      this.setPosition(d0, d1, d2);
       if (!this.world.isRemote) {
-         this.getDataManager().set(RADIUS, Float.valueOf(var1));
+         this.getDataManager().set(RADIUS, Float.valueOf(f));
       }
 
    }
@@ -88,61 +92,76 @@ public class EntityAreaEffectCloud extends Entity {
       return ((Float)this.getDataManager().get(RADIUS)).floatValue();
    }
 
-   public void setPotion(PotionType var1) {
-      this.potion = var1;
+   public void setPotion(PotionType potionregistry) {
+      this.potion = potionregistry;
       if (!this.colorSet) {
-         if (var1 == PotionTypes.EMPTY && this.effects.isEmpty()) {
+         if (potionregistry == PotionTypes.EMPTY && this.effects.isEmpty()) {
             this.getDataManager().set(COLOR, Integer.valueOf(0));
          } else {
-            this.getDataManager().set(COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(var1, this.effects))));
+            this.getDataManager().set(COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(potionregistry, this.effects))));
          }
       }
 
    }
 
-   public void addEffect(PotionEffect var1) {
-      this.effects.add(var1);
+   public void addEffect(PotionEffect mobeffect) {
+      this.effects.add(mobeffect);
       if (!this.colorSet) {
          this.getDataManager().set(COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(this.potion, this.effects))));
       }
 
    }
 
+   public void refreshEffects() {
+      if (!this.colorSet) {
+         this.getDataManager().set(COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(this.potion, this.effects))));
+      }
+
+   }
+
+   public String getType() {
+      return ((ResourceLocation)PotionType.REGISTRY.getNameForObject(this.potion)).toString();
+   }
+
+   public void setType(String string) {
+      this.setPotion((PotionType)PotionType.REGISTRY.getObject(new ResourceLocation(string)));
+   }
+
    public int getColor() {
       return ((Integer)this.getDataManager().get(COLOR)).intValue();
    }
 
-   public void setColor(int var1) {
+   public void setColor(int i) {
       this.colorSet = true;
-      this.getDataManager().set(COLOR, Integer.valueOf(var1));
+      this.getDataManager().set(COLOR, Integer.valueOf(i));
    }
 
    public EnumParticleTypes getParticle() {
       return EnumParticleTypes.getParticleFromId(((Integer)this.getDataManager().get(PARTICLE)).intValue());
    }
 
-   public void setParticle(EnumParticleTypes var1) {
-      this.getDataManager().set(PARTICLE, Integer.valueOf(var1.getParticleID()));
+   public void setParticle(EnumParticleTypes enumparticle) {
+      this.getDataManager().set(PARTICLE, Integer.valueOf(enumparticle.getParticleID()));
    }
 
    public int getParticleParam1() {
       return ((Integer)this.getDataManager().get(PARTICLE_PARAM_1)).intValue();
    }
 
-   public void setParticleParam1(int var1) {
-      this.getDataManager().set(PARTICLE_PARAM_1, Integer.valueOf(var1));
+   public void setParticleParam1(int i) {
+      this.getDataManager().set(PARTICLE_PARAM_1, Integer.valueOf(i));
    }
 
    public int getParticleParam2() {
       return ((Integer)this.getDataManager().get(PARTICLE_PARAM_2)).intValue();
    }
 
-   public void setParticleParam2(int var1) {
-      this.getDataManager().set(PARTICLE_PARAM_2, Integer.valueOf(var1));
+   public void setParticleParam2(int i) {
+      this.getDataManager().set(PARTICLE_PARAM_2, Integer.valueOf(i));
    }
 
-   protected void setIgnoreRadius(boolean var1) {
-      this.getDataManager().set(IGNORE_RADIUS, Boolean.valueOf(var1));
+   protected void setIgnoreRadius(boolean flag) {
+      this.getDataManager().set(IGNORE_RADIUS, Boolean.valueOf(flag));
    }
 
    public boolean shouldIgnoreRadius() {
@@ -153,59 +172,59 @@ public class EntityAreaEffectCloud extends Entity {
       return this.duration;
    }
 
-   public void setDuration(int var1) {
-      this.duration = var1;
+   public void setDuration(int i) {
+      this.duration = i;
    }
 
    public void onUpdate() {
       super.onUpdate();
-      boolean var1 = this.shouldIgnoreRadius();
-      float var2 = this.getRadius();
+      boolean flag = this.shouldIgnoreRadius();
+      float f = this.getRadius();
       if (this.world.isRemote) {
-         EnumParticleTypes var3 = this.getParticle();
-         int[] var4 = new int[var3.getArgumentCount()];
-         if (var4.length > 0) {
-            var4[0] = this.getParticleParam1();
+         EnumParticleTypes enumparticle = this.getParticle();
+         int[] aint = new int[enumparticle.getArgumentCount()];
+         if (aint.length > 0) {
+            aint[0] = this.getParticleParam1();
          }
 
-         if (var4.length > 1) {
-            var4[1] = this.getParticleParam2();
+         if (aint.length > 1) {
+            aint[1] = this.getParticleParam2();
          }
 
-         if (var1) {
+         if (flag) {
             if (this.rand.nextBoolean()) {
-               for(int var5 = 0; var5 < 2; ++var5) {
-                  float var6 = this.rand.nextFloat() * 6.2831855F;
-                  float var7 = MathHelper.sqrt(this.rand.nextFloat()) * 0.2F;
-                  float var8 = MathHelper.cos(var6) * var7;
-                  float var9 = MathHelper.sin(var6) * var7;
-                  if (var3 == EnumParticleTypes.SPELL_MOB) {
-                     int var10 = this.rand.nextBoolean() ? 16777215 : this.getColor();
-                     int var11 = var10 >> 16 & 255;
-                     int var12 = var10 >> 8 & 255;
-                     int var13 = var10 & 255;
-                     this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + (double)var8, this.posY, this.posZ + (double)var9, (double)((float)var11 / 255.0F), (double)((float)var12 / 255.0F), (double)((float)var13 / 255.0F));
+               for(int l = 0; l < 2; ++l) {
+                  float f4 = this.rand.nextFloat() * 6.2831855F;
+                  float f1 = MathHelper.sqrt(this.rand.nextFloat()) * 0.2F;
+                  float f2 = MathHelper.cos(f4) * f1;
+                  float f3 = MathHelper.sin(f4) * f1;
+                  if (enumparticle == EnumParticleTypes.SPELL_MOB) {
+                     int i1 = this.rand.nextBoolean() ? 16777215 : this.getColor();
+                     int i = i1 >> 16 & 255;
+                     int j = i1 >> 8 & 255;
+                     int k = i1 & 255;
+                     this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + (double)f2, this.posY, this.posZ + (double)f3, (double)((float)i / 255.0F), (double)((float)j / 255.0F), (double)((float)k / 255.0F));
                   } else {
-                     this.world.spawnParticle(var3, this.posX + (double)var8, this.posY, this.posZ + (double)var9, 0.0D, 0.0D, 0.0D, var4);
+                     this.world.spawnParticle(enumparticle, this.posX + (double)f2, this.posY, this.posZ + (double)f3, 0.0D, 0.0D, 0.0D, aint);
                   }
                }
             }
          } else {
-            float var19 = 3.1415927F * var2 * var2;
+            float f5 = 3.1415927F * f * f;
 
-            for(int var22 = 0; (float)var22 < var19; ++var22) {
-               float var25 = this.rand.nextFloat() * 6.2831855F;
-               float var28 = MathHelper.sqrt(this.rand.nextFloat()) * var2;
-               float var30 = MathHelper.cos(var25) * var28;
-               float var32 = MathHelper.sin(var25) * var28;
-               if (var3 == EnumParticleTypes.SPELL_MOB) {
-                  int var33 = this.getColor();
-                  int var35 = var33 >> 16 & 255;
-                  int var36 = var33 >> 8 & 255;
-                  int var14 = var33 & 255;
-                  this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + (double)var30, this.posY, this.posZ + (double)var32, (double)((float)var35 / 255.0F), (double)((float)var36 / 255.0F), (double)((float)var14 / 255.0F));
+            for(int j1 = 0; (float)j1 < f5; ++j1) {
+               float f1 = this.rand.nextFloat() * 6.2831855F;
+               float f2 = MathHelper.sqrt(this.rand.nextFloat()) * f;
+               float f3 = MathHelper.cos(f1) * f2;
+               float f6 = MathHelper.sin(f1) * f2;
+               if (enumparticle == EnumParticleTypes.SPELL_MOB) {
+                  int i = this.getColor();
+                  int j = i >> 16 & 255;
+                  int k = i >> 8 & 255;
+                  int k1 = i & 255;
+                  this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + (double)f3, this.posY, this.posZ + (double)f6, (double)((float)j / 255.0F), (double)((float)k / 255.0F), (double)((float)k1 / 255.0F));
                } else {
-                  this.world.spawnParticle(var3, this.posX + (double)var30, this.posY, this.posZ + (double)var32, (0.5D - this.rand.nextDouble()) * 0.15D, 0.009999999776482582D, (0.5D - this.rand.nextDouble()) * 0.15D, var4);
+                  this.world.spawnParticle(enumparticle, this.posX + (double)f3, this.posY, this.posZ + (double)f6, (0.5D - this.rand.nextDouble()) * 0.15D, 0.009999999776482582D, (0.5D - this.rand.nextDouble()) * 0.15D, aint);
                }
             }
          }
@@ -215,79 +234,92 @@ public class EntityAreaEffectCloud extends Entity {
             return;
          }
 
-         boolean var17 = this.ticksExisted < this.waitTime;
-         if (var1 != var17) {
-            this.setIgnoreRadius(var17);
+         boolean flag1 = this.ticksExisted < this.waitTime;
+         if (flag != flag1) {
+            this.setIgnoreRadius(flag1);
          }
 
-         if (var17) {
+         if (flag1) {
             return;
          }
 
          if (this.radiusPerTick != 0.0F) {
-            var2 += this.radiusPerTick;
-            if (var2 < 0.5F) {
+            f += this.radiusPerTick;
+            if (f < 0.5F) {
                this.setDead();
                return;
             }
 
-            this.setRadius(var2);
+            this.setRadius(f);
          }
 
          if (this.ticksExisted % 5 == 0) {
-            Iterator var18 = this.reapplicationDelayMap.entrySet().iterator();
+            Iterator iterator = this.reapplicationDelayMap.entrySet().iterator();
 
-            while(var18.hasNext()) {
-               Entry var20 = (Entry)var18.next();
-               if (this.ticksExisted >= ((Integer)var20.getValue()).intValue()) {
-                  var18.remove();
+            while(iterator.hasNext()) {
+               Entry entry = (Entry)iterator.next();
+               if (this.ticksExisted >= ((Integer)entry.getValue()).intValue()) {
+                  iterator.remove();
                }
             }
 
-            ArrayList var21 = Lists.newArrayList();
+            ArrayList arraylist = Lists.newArrayList();
 
-            for(PotionEffect var26 : this.potion.getEffects()) {
-               var21.add(new PotionEffect(var26.getPotion(), var26.getDuration() / 4, var26.getAmplifier(), var26.getIsAmbient(), var26.doesShowParticles()));
+            for(PotionEffect mobeffect : this.potion.getEffects()) {
+               arraylist.add(new PotionEffect(mobeffect.getPotion(), mobeffect.getDuration() / 4, mobeffect.getAmplifier(), mobeffect.getIsAmbient(), mobeffect.doesShowParticles()));
             }
 
-            var21.addAll(this.effects);
-            if (var21.isEmpty()) {
+            arraylist.addAll(this.effects);
+            if (arraylist.isEmpty()) {
                this.reapplicationDelayMap.clear();
             } else {
-               List var24 = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox());
-               if (!var24.isEmpty()) {
-                  for(EntityLivingBase var29 : var24) {
-                     if (!this.reapplicationDelayMap.containsKey(var29) && var29.canBeHitWithPotion()) {
-                        double var31 = var29.posX - this.posX;
-                        double var34 = var29.posZ - this.posZ;
-                        double var37 = var31 * var31 + var34 * var34;
-                        if (var37 <= (double)(var2 * var2)) {
-                           this.reapplicationDelayMap.put(var29, Integer.valueOf(this.ticksExisted + this.reapplicationDelay));
+               List list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox());
+               if (!list.isEmpty()) {
+                  Iterator iterator2 = list.iterator();
+                  List entities = new ArrayList();
 
-                           for(PotionEffect var16 : var21) {
-                              if (var16.getPotion().isInstant()) {
-                                 var16.getPotion().affectEntity(this, this.getOwner(), var29, var16.getAmplifier(), 0.5D);
-                              } else {
-                                 var29.addPotionEffect(new PotionEffect(var16));
-                              }
+                  while(iterator2.hasNext()) {
+                     EntityLivingBase entityliving = (EntityLivingBase)iterator2.next();
+                     if (!this.reapplicationDelayMap.containsKey(entityliving) && entityliving.canBeHitWithPotion()) {
+                        double d0 = entityliving.posX - this.posX;
+                        double d1 = entityliving.posZ - this.posZ;
+                        double d2 = d0 * d0 + d1 * d1;
+                        if (d2 <= (double)(f * f)) {
+                           entities.add((LivingEntity)entityliving.getBukkitEntity());
+                        }
+                     }
+                  }
+
+                  AreaEffectCloudApplyEvent event = CraftEventFactory.callAreaEffectCloudApplyEvent(this, entities);
+
+                  for(LivingEntity entity : event.getAffectedEntities()) {
+                     if (entity instanceof CraftLivingEntity) {
+                        EntityLivingBase entityliving = ((CraftLivingEntity)entity).getHandle();
+                        this.reapplicationDelayMap.put(entityliving, Integer.valueOf(this.ticksExisted + this.reapplicationDelay));
+
+                        for(PotionEffect mobeffect1 : arraylist) {
+                           if (mobeffect1.getPotion().isInstant()) {
+                              mobeffect1.getPotion().affectEntity(this, this.getOwner(), entityliving, mobeffect1.getAmplifier(), 0.5D);
+                           } else {
+                              entityliving.addPotionEffect(new PotionEffect(mobeffect1));
+                           }
+                        }
+
+                        if (this.radiusOnUse != 0.0F) {
+                           f += this.radiusOnUse;
+                           if (f < 0.5F) {
+                              this.setDead();
+                              return;
                            }
 
-                           if (this.radiusOnUse != 0.0F) {
-                              var2 += this.radiusOnUse;
-                              if (var2 < 0.5F) {
-                                 this.setDead();
-                                 return;
-                              }
+                           this.setRadius(f);
+                        }
 
-                              this.setRadius(var2);
-                           }
-
-                           if (this.durationOnUse != 0) {
-                              this.duration += this.durationOnUse;
-                              if (this.duration <= 0) {
-                                 this.setDead();
-                                 return;
-                              }
+                        if (this.durationOnUse != 0) {
+                           this.duration += this.durationOnUse;
+                           if (this.duration <= 0) {
+                              this.setDead();
+                              return;
                            }
                         }
                      }
@@ -299,118 +331,118 @@ public class EntityAreaEffectCloud extends Entity {
 
    }
 
-   public void setRadiusOnUse(float var1) {
-      this.radiusOnUse = var1;
+   public void setRadiusOnUse(float f) {
+      this.radiusOnUse = f;
    }
 
-   public void setRadiusPerTick(float var1) {
-      this.radiusPerTick = var1;
+   public void setRadiusPerTick(float f) {
+      this.radiusPerTick = f;
    }
 
-   public void setWaitTime(int var1) {
-      this.waitTime = var1;
+   public void setWaitTime(int i) {
+      this.waitTime = i;
    }
 
-   public void setOwner(@Nullable EntityLivingBase var1) {
-      this.owner = var1;
-      this.ownerUniqueId = var1 == null ? null : var1.getUniqueID();
+   public void setOwner(@Nullable EntityLivingBase entityliving) {
+      this.owner = entityliving;
+      this.ownerUniqueId = entityliving == null ? null : entityliving.getUniqueID();
    }
 
    @Nullable
    public EntityLivingBase getOwner() {
       if (this.owner == null && this.ownerUniqueId != null && this.world instanceof WorldServer) {
-         Entity var1 = ((WorldServer)this.world).getEntityFromUuid(this.ownerUniqueId);
-         if (var1 instanceof EntityLivingBase) {
-            this.owner = (EntityLivingBase)var1;
+         Entity entity = ((WorldServer)this.world).getEntityFromUuid(this.ownerUniqueId);
+         if (entity instanceof EntityLivingBase) {
+            this.owner = (EntityLivingBase)entity;
          }
       }
 
       return this.owner;
    }
 
-   protected void readEntityFromNBT(NBTTagCompound var1) {
-      this.ticksExisted = var1.getInteger("Age");
-      this.duration = var1.getInteger("Duration");
-      this.waitTime = var1.getInteger("WaitTime");
-      this.reapplicationDelay = var1.getInteger("ReapplicationDelay");
-      this.durationOnUse = var1.getInteger("DurationOnUse");
-      this.radiusOnUse = var1.getFloat("RadiusOnUse");
-      this.radiusPerTick = var1.getFloat("RadiusPerTick");
-      this.setRadius(var1.getFloat("Radius"));
-      this.ownerUniqueId = var1.getUniqueId("OwnerUUID");
-      if (var1.hasKey("Particle", 8)) {
-         EnumParticleTypes var2 = EnumParticleTypes.getByName(var1.getString("Particle"));
-         if (var2 != null) {
-            this.setParticle(var2);
-            this.setParticleParam1(var1.getInteger("ParticleParam1"));
-            this.setParticleParam2(var1.getInteger("ParticleParam2"));
+   protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      this.ticksExisted = nbttagcompound.getInteger("Age");
+      this.duration = nbttagcompound.getInteger("Duration");
+      this.waitTime = nbttagcompound.getInteger("WaitTime");
+      this.reapplicationDelay = nbttagcompound.getInteger("ReapplicationDelay");
+      this.durationOnUse = nbttagcompound.getInteger("DurationOnUse");
+      this.radiusOnUse = nbttagcompound.getFloat("RadiusOnUse");
+      this.radiusPerTick = nbttagcompound.getFloat("RadiusPerTick");
+      this.setRadius(nbttagcompound.getFloat("Radius"));
+      this.ownerUniqueId = nbttagcompound.getUniqueId("OwnerUUID");
+      if (nbttagcompound.hasKey("Particle", 8)) {
+         EnumParticleTypes enumparticle = EnumParticleTypes.getByName(nbttagcompound.getString("Particle"));
+         if (enumparticle != null) {
+            this.setParticle(enumparticle);
+            this.setParticleParam1(nbttagcompound.getInteger("ParticleParam1"));
+            this.setParticleParam2(nbttagcompound.getInteger("ParticleParam2"));
          }
       }
 
-      if (var1.hasKey("Color", 99)) {
-         this.setColor(var1.getInteger("Color"));
+      if (nbttagcompound.hasKey("Color", 99)) {
+         this.setColor(nbttagcompound.getInteger("Color"));
       }
 
-      if (var1.hasKey("Potion", 8)) {
-         this.setPotion(PotionUtils.getPotionTypeFromNBT(var1));
+      if (nbttagcompound.hasKey("Potion", 8)) {
+         this.setPotion(PotionUtils.getPotionTypeFromNBT(nbttagcompound));
       }
 
-      if (var1.hasKey("Effects", 9)) {
-         NBTTagList var5 = var1.getTagList("Effects", 10);
+      if (nbttagcompound.hasKey("Effects", 9)) {
+         NBTTagList nbttaglist = nbttagcompound.getTagList("Effects", 10);
          this.effects.clear();
 
-         for(int var3 = 0; var3 < var5.tagCount(); ++var3) {
-            PotionEffect var4 = PotionEffect.readCustomPotionEffectFromNBT(var5.getCompoundTagAt(var3));
-            if (var4 != null) {
-               this.addEffect(var4);
+         for(int i = 0; i < nbttaglist.tagCount(); ++i) {
+            PotionEffect mobeffect = PotionEffect.readCustomPotionEffectFromNBT(nbttaglist.getCompoundTagAt(i));
+            if (mobeffect != null) {
+               this.addEffect(mobeffect);
             }
          }
       }
 
    }
 
-   protected void writeEntityToNBT(NBTTagCompound var1) {
-      var1.setInteger("Age", this.ticksExisted);
-      var1.setInteger("Duration", this.duration);
-      var1.setInteger("WaitTime", this.waitTime);
-      var1.setInteger("ReapplicationDelay", this.reapplicationDelay);
-      var1.setInteger("DurationOnUse", this.durationOnUse);
-      var1.setFloat("RadiusOnUse", this.radiusOnUse);
-      var1.setFloat("RadiusPerTick", this.radiusPerTick);
-      var1.setFloat("Radius", this.getRadius());
-      var1.setString("Particle", this.getParticle().getParticleName());
-      var1.setInteger("ParticleParam1", this.getParticleParam1());
-      var1.setInteger("ParticleParam2", this.getParticleParam2());
+   protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      nbttagcompound.setInteger("Age", this.ticksExisted);
+      nbttagcompound.setInteger("Duration", this.duration);
+      nbttagcompound.setInteger("WaitTime", this.waitTime);
+      nbttagcompound.setInteger("ReapplicationDelay", this.reapplicationDelay);
+      nbttagcompound.setInteger("DurationOnUse", this.durationOnUse);
+      nbttagcompound.setFloat("RadiusOnUse", this.radiusOnUse);
+      nbttagcompound.setFloat("RadiusPerTick", this.radiusPerTick);
+      nbttagcompound.setFloat("Radius", this.getRadius());
+      nbttagcompound.setString("Particle", this.getParticle().getParticleName());
+      nbttagcompound.setInteger("ParticleParam1", this.getParticleParam1());
+      nbttagcompound.setInteger("ParticleParam2", this.getParticleParam2());
       if (this.ownerUniqueId != null) {
-         var1.setUniqueId("OwnerUUID", this.ownerUniqueId);
+         nbttagcompound.setUniqueId("OwnerUUID", this.ownerUniqueId);
       }
 
       if (this.colorSet) {
-         var1.setInteger("Color", this.getColor());
+         nbttagcompound.setInteger("Color", this.getColor());
       }
 
       if (this.potion != PotionTypes.EMPTY && this.potion != null) {
-         var1.setString("Potion", ((ResourceLocation)PotionType.REGISTRY.getNameForObject(this.potion)).toString());
+         nbttagcompound.setString("Potion", ((ResourceLocation)PotionType.REGISTRY.getNameForObject(this.potion)).toString());
       }
 
       if (!this.effects.isEmpty()) {
-         NBTTagList var2 = new NBTTagList();
+         NBTTagList nbttaglist = new NBTTagList();
 
-         for(PotionEffect var4 : this.effects) {
-            var2.appendTag(var4.writeCustomPotionEffectToNBT(new NBTTagCompound()));
+         for(PotionEffect mobeffect : this.effects) {
+            nbttaglist.appendTag(mobeffect.writeCustomPotionEffectToNBT(new NBTTagCompound()));
          }
 
-         var1.setTag("Effects", var2);
+         nbttagcompound.setTag("Effects", nbttaglist);
       }
 
    }
 
-   public void notifyDataManagerChange(DataParameter var1) {
-      if (RADIUS.equals(var1)) {
+   public void notifyDataManagerChange(DataParameter datawatcherobject) {
+      if (RADIUS.equals(datawatcherobject)) {
          this.setRadius(this.getRadius());
       }
 
-      super.notifyDataManagerChange(var1);
+      super.notifyDataManagerChange(datawatcherobject);
    }
 
    public EnumPushReaction getPushReaction() {

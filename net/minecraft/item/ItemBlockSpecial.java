@@ -31,7 +31,7 @@ public class ItemBlockSpecial extends Item {
       }
 
       if (var2.canPlayerEdit(var4, var6, var1) && var1.stackSize != 0 && var3.canBlockBePlaced(this.block, var4, false, var6, (Entity)null, var1)) {
-         IBlockState var12 = this.block.getStateForPlacement(var3, var4, var6, var7, var8, var9, 0, var2, var1);
+         IBlockState var12 = this.block.getStateForPlacement(var3, var4, var6, var7, var8, var9, 0, var2);
          if (!var3.setBlockState(var4, var12, 11)) {
             return EnumActionResult.FAIL;
          } else {
@@ -41,7 +41,7 @@ public class ItemBlockSpecial extends Item {
                var12.getBlock().onBlockPlacedBy(var3, var4, var12, var2, var1);
             }
 
-            SoundType var13 = var12.getBlock().getSoundType(var12, var3, var4, var2);
+            SoundType var13 = this.block.getSoundType();
             var3.playSound(var2, var4, var13.getPlaceSound(), SoundCategory.BLOCKS, (var13.getVolume() + 1.0F) / 2.0F, var13.getPitch() * 0.8F);
             --var1.stackSize;
             return EnumActionResult.SUCCESS;
@@ -49,9 +49,5 @@ public class ItemBlockSpecial extends Item {
       } else {
          return EnumActionResult.FAIL;
       }
-   }
-
-   public Block getBlock() {
-      return this.block;
    }
 }

@@ -53,20 +53,4 @@ public class RegistryNamespacedDefaultedByKey extends RegistryNamespaced {
       Object var2 = super.getRandomObject(var1);
       return var2 == null ? this.defaultValue : var2;
    }
-
-   public int getIDForObjectBypass(Object var1) {
-      return super.getIDForObject(var1);
-   }
-
-   public Object getNameForObjectBypass(Object var1) {
-      return super.getNameForObject(var1);
-   }
-
-   public Object getObjectBypass(Object var1) {
-      return super.getObject(var1);
-   }
-
-   public Object getObjectByIdBypass(int var1) {
-      return super.getObjectById(var1);
-   }
 }

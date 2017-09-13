@@ -1,24 +1,16 @@
 package net.minecraft.world;
 
 import net.minecraft.init.Biomes;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.biome.BiomeProviderSingle;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderHell;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class WorldProviderHell extends WorldProvider {
    public void createBiomeProvider() {
       this.biomeProvider = new BiomeProviderSingle(Biomes.HELL);
       this.doesWaterVaporize = true;
       this.hasNoSky = true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Vec3d getFogColor(float var1, float var2) {
-      return new Vec3d(0.20000000298023224D, 0.029999999329447746D, 0.029999999329447746D);
    }
 
    protected void generateLightBrightnessTable() {
@@ -49,11 +41,6 @@ public class WorldProviderHell extends WorldProvider {
 
    public boolean canRespawnHere() {
       return false;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean doesXZShowFog(int var1, int var2) {
-      return true;
    }
 
    public WorldBorder createWorldBorder() {

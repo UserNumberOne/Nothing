@@ -59,4 +59,9 @@ public class LowerStringMap implements Map {
    public Set entrySet() {
       return this.internalMap.entrySet();
    }
+
+   // $FF: synthetic method
+   public Object put(Object var1, Object var2) {
+      return this.put((String)var1, var2);
+   }
 }

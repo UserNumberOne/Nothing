@@ -14,8 +14,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.projectiles.ProjectileSource;
 
 public abstract class EntityFireball extends Entity {
    private int xTile = -1;
@@ -29,53 +30,49 @@ public abstract class EntityFireball extends Entity {
    public double accelerationX;
    public double accelerationY;
    public double accelerationZ;
+   public float bukkitYield = 1.0F;
+   public boolean isIncendiary = true;
 
-   public EntityFireball(World var1) {
-      super(var1);
+   public EntityFireball(World world) {
+      super(world);
       this.setSize(1.0F, 1.0F);
    }
 
    protected void entityInit() {
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      double var3 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
-      if (Double.isNaN(var3)) {
-         var3 = 4.0D;
-      }
-
-      var3 = var3 * 64.0D;
-      return var1 < var3 * var3;
+   public EntityFireball(World world, double d0, double d1, double d2, double d3, double d4, double d5) {
+      super(world);
+      this.setSize(1.0F, 1.0F);
+      this.setLocationAndAngles(d0, d1, d2, this.rotationYaw, this.rotationPitch);
+      this.setPosition(d0, d1, d2);
+      double d6 = (double)MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
+      this.accelerationX = d3 / d6 * 0.1D;
+      this.accelerationY = d4 / d6 * 0.1D;
+      this.accelerationZ = d5 / d6 * 0.1D;
    }
 
-   public EntityFireball(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
-      super(var1);
+   public EntityFireball(World world, EntityLivingBase entityliving, double d0, double d1, double d2) {
+      super(world);
+      this.shootingEntity = entityliving;
+      this.projectileSource = (LivingEntity)entityliving.getBukkitEntity();
       this.setSize(1.0F, 1.0F);
-      this.setLocationAndAngles(var2, var4, var6, this.rotationYaw, this.rotationPitch);
-      this.setPosition(var2, var4, var6);
-      double var14 = (double)MathHelper.sqrt(var8 * var8 + var10 * var10 + var12 * var12);
-      this.accelerationX = var8 / var14 * 0.1D;
-      this.accelerationY = var10 / var14 * 0.1D;
-      this.accelerationZ = var12 / var14 * 0.1D;
-   }
-
-   public EntityFireball(World var1, EntityLivingBase var2, double var3, double var5, double var7) {
-      super(var1);
-      this.shootingEntity = var2;
-      this.setSize(1.0F, 1.0F);
-      this.setLocationAndAngles(var2.posX, var2.posY, var2.posZ, var2.rotationYaw, var2.rotationPitch);
+      this.setLocationAndAngles(entityliving.posX, entityliving.posY, entityliving.posZ, entityliving.rotationYaw, entityliving.rotationPitch);
       this.setPosition(this.posX, this.posY, this.posZ);
       this.motionX = 0.0D;
       this.motionY = 0.0D;
       this.motionZ = 0.0D;
-      var3 = var3 + this.rand.nextGaussian() * 0.4D;
-      var5 = var5 + this.rand.nextGaussian() * 0.4D;
-      var7 = var7 + this.rand.nextGaussian() * 0.4D;
-      double var9 = (double)MathHelper.sqrt(var3 * var3 + var5 * var5 + var7 * var7);
-      this.accelerationX = var3 / var9 * 0.1D;
-      this.accelerationY = var5 / var9 * 0.1D;
-      this.accelerationZ = var7 / var9 * 0.1D;
+      this.setDirection(d0, d1, d2);
+   }
+
+   public void setDirection(double d0, double d1, double d2) {
+      d0 = d0 + this.rand.nextGaussian() * 0.4D;
+      d1 = d1 + this.rand.nextGaussian() * 0.4D;
+      d2 = d2 + this.rand.nextGaussian() * 0.4D;
+      double d3 = (double)MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+      this.accelerationX = d0 / d3 * 0.1D;
+      this.accelerationY = d1 / d3 * 0.1D;
+      this.accelerationZ = d2 / d3 * 0.1D;
    }
 
    public void onUpdate() {
@@ -105,31 +102,33 @@ public abstract class EntityFireball extends Entity {
             ++this.ticksInAir;
          }
 
-         RayTraceResult var1 = ProjectileHelper.forwardsRaycast(this, true, this.ticksInAir >= 25, this.shootingEntity);
-         if (var1 != null) {
-            this.onImpact(var1);
+         RayTraceResult movingobjectposition = ProjectileHelper.forwardsRaycast(this, true, this.ticksInAir >= 25, this.shootingEntity);
+         if (movingobjectposition != null) {
+            this.onImpact(movingobjectposition);
+            if (this.isDead) {
+               CraftEventFactory.callProjectileHitEvent(this);
+            }
          }
 
          this.posX += this.motionX;
          this.posY += this.motionY;
          this.posZ += this.motionZ;
          ProjectileHelper.rotateTowardsMovement(this, 0.2F);
-         float var2 = this.getMotionFactor();
+         float f = this.getMotionFactor();
          if (this.isInWater()) {
-            for(int var3 = 0; var3 < 4; ++var3) {
-               float var4 = 0.25F;
+            for(int i = 0; i < 4; ++i) {
                this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
             }
 
-            var2 = 0.8F;
+            f = 0.8F;
          }
 
          this.motionX += this.accelerationX;
          this.motionY += this.accelerationY;
          this.motionZ += this.accelerationZ;
-         this.motionX *= (double)var2;
-         this.motionY *= (double)var2;
-         this.motionZ *= (double)var2;
+         this.motionX *= (double)f;
+         this.motionY *= (double)f;
+         this.motionZ *= (double)f;
          this.world.spawnParticle(this.getParticleType(), this.posX, this.posY + 0.5D, this.posZ, 0.0D, 0.0D, 0.0D);
          this.setPosition(this.posX, this.posY, this.posZ);
       } else {
@@ -152,47 +151,47 @@ public abstract class EntityFireball extends Entity {
 
    protected abstract void onImpact(RayTraceResult var1);
 
-   public static void registerFixesFireball(DataFixer var0, String var1) {
+   public static void registerFixesFireball(DataFixer dataconvertermanager, String s) {
    }
 
-   public void writeEntityToNBT(NBTTagCompound var1) {
-      var1.setInteger("xTile", this.xTile);
-      var1.setInteger("yTile", this.yTile);
-      var1.setInteger("zTile", this.zTile);
-      ResourceLocation var2 = (ResourceLocation)Block.REGISTRY.getNameForObject(this.inTile);
-      var1.setString("inTile", var2 == null ? "" : var2.toString());
-      var1.setByte("inGround", (byte)(this.inGround ? 1 : 0));
-      var1.setTag("direction", this.newDoubleNBTList(new double[]{this.motionX, this.motionY, this.motionZ}));
-      var1.setTag("power", this.newDoubleNBTList(new double[]{this.accelerationX, this.accelerationY, this.accelerationZ}));
-      var1.setInteger("life", this.ticksAlive);
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      nbttagcompound.setInteger("xTile", this.xTile);
+      nbttagcompound.setInteger("yTile", this.yTile);
+      nbttagcompound.setInteger("zTile", this.zTile);
+      ResourceLocation minecraftkey = (ResourceLocation)Block.REGISTRY.getNameForObject(this.inTile);
+      nbttagcompound.setString("inTile", minecraftkey == null ? "" : minecraftkey.toString());
+      nbttagcompound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
+      nbttagcompound.setTag("direction", this.newDoubleNBTList(new double[]{this.motionX, this.motionY, this.motionZ}));
+      nbttagcompound.setTag("power", this.newDoubleNBTList(new double[]{this.accelerationX, this.accelerationY, this.accelerationZ}));
+      nbttagcompound.setInteger("life", this.ticksAlive);
    }
 
-   public void readEntityFromNBT(NBTTagCompound var1) {
-      this.xTile = var1.getInteger("xTile");
-      this.yTile = var1.getInteger("yTile");
-      this.zTile = var1.getInteger("zTile");
-      if (var1.hasKey("inTile", 8)) {
-         this.inTile = Block.getBlockFromName(var1.getString("inTile"));
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      this.xTile = nbttagcompound.getInteger("xTile");
+      this.yTile = nbttagcompound.getInteger("yTile");
+      this.zTile = nbttagcompound.getInteger("zTile");
+      if (nbttagcompound.hasKey("inTile", 8)) {
+         this.inTile = Block.getBlockFromName(nbttagcompound.getString("inTile"));
       } else {
-         this.inTile = Block.getBlockById(var1.getByte("inTile") & 255);
+         this.inTile = Block.getBlockById(nbttagcompound.getByte("inTile") & 255);
       }
 
-      this.inGround = var1.getByte("inGround") == 1;
-      if (var1.hasKey("power", 9)) {
-         NBTTagList var2 = var1.getTagList("power", 6);
-         if (var2.tagCount() == 3) {
-            this.accelerationX = var2.getDoubleAt(0);
-            this.accelerationY = var2.getDoubleAt(1);
-            this.accelerationZ = var2.getDoubleAt(2);
+      this.inGround = nbttagcompound.getByte("inGround") == 1;
+      if (nbttagcompound.hasKey("power", 9)) {
+         NBTTagList nbttaglist = nbttagcompound.getTagList("power", 6);
+         if (nbttaglist.tagCount() == 3) {
+            this.accelerationX = nbttaglist.getDoubleAt(0);
+            this.accelerationY = nbttaglist.getDoubleAt(1);
+            this.accelerationZ = nbttaglist.getDoubleAt(2);
          }
       }
 
-      this.ticksAlive = var1.getInteger("life");
-      if (var1.hasKey("direction", 9) && var1.getTagList("direction", 6).tagCount() == 3) {
-         NBTTagList var3 = var1.getTagList("direction", 6);
-         this.motionX = var3.getDoubleAt(0);
-         this.motionY = var3.getDoubleAt(1);
-         this.motionZ = var3.getDoubleAt(2);
+      this.ticksAlive = nbttagcompound.getInteger("life");
+      if (nbttagcompound.hasKey("direction", 9) && nbttagcompound.getTagList("direction", 6).tagCount() == 3) {
+         NBTTagList nbttaglist = nbttagcompound.getTagList("direction", 6);
+         this.motionX = nbttaglist.getDoubleAt(0);
+         this.motionY = nbttaglist.getDoubleAt(1);
+         this.motionZ = nbttaglist.getDoubleAt(2);
       } else {
          this.setDead();
       }
@@ -207,39 +206,39 @@ public abstract class EntityFireball extends Entity {
       return 1.0F;
    }
 
-   public boolean attackEntityFrom(DamageSource var1, float var2) {
-      if (this.isEntityInvulnerable(var1)) {
+   public boolean attackEntityFrom(DamageSource damagesource, float f) {
+      if (this.isEntityInvulnerable(damagesource)) {
          return false;
       } else {
          this.setBeenAttacked();
-         if (var1.getEntity() != null) {
-            Vec3d var3 = var1.getEntity().getLookVec();
-            if (var3 != null) {
-               this.motionX = var3.xCoord;
-               this.motionY = var3.yCoord;
-               this.motionZ = var3.zCoord;
-               this.accelerationX = this.motionX * 0.1D;
-               this.accelerationY = this.motionY * 0.1D;
-               this.accelerationZ = this.motionZ * 0.1D;
-            }
+         if (damagesource.getEntity() != null) {
+            if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, damagesource, (double)f)) {
+               return false;
+            } else {
+               Vec3d vec3d = damagesource.getEntity().getLookVec();
+               if (vec3d != null) {
+                  this.motionX = vec3d.xCoord;
+                  this.motionY = vec3d.yCoord;
+                  this.motionZ = vec3d.zCoord;
+                  this.accelerationX = this.motionX * 0.1D;
+                  this.accelerationY = this.motionY * 0.1D;
+                  this.accelerationZ = this.motionZ * 0.1D;
+               }
 
-            if (var1.getEntity() instanceof EntityLivingBase) {
-               this.shootingEntity = (EntityLivingBase)var1.getEntity();
-            }
+               if (damagesource.getEntity() instanceof EntityLivingBase) {
+                  this.shootingEntity = (EntityLivingBase)damagesource.getEntity();
+                  this.projectileSource = (ProjectileSource)this.shootingEntity.getBukkitEntity();
+               }
 
-            return true;
+               return true;
+            }
          } else {
             return false;
          }
       }
    }
 
-   public float getBrightness(float var1) {
+   public float getBrightness(float f) {
       return 1.0F;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return 15728880;
    }
 }

@@ -34,7 +34,13 @@ public class EnchantmentDamage extends Enchantment {
    }
 
    public float calcDamageByCreature(int var1, EnumCreatureAttribute var2) {
-      return this.damageType == 0 ? 1.0F + (float)Math.max(0, var1 - 1) * 0.5F : (this.damageType == 1 && var2 == EnumCreatureAttribute.UNDEAD ? (float)var1 * 2.5F : (this.damageType == 2 && var2 == EnumCreatureAttribute.ARTHROPOD ? (float)var1 * 2.5F : 0.0F));
+      if (this.damageType == 0) {
+         return 1.0F + (float)Math.max(0, var1 - 1) * 0.5F;
+      } else if (this.damageType == 1 && var2 == EnumCreatureAttribute.UNDEAD) {
+         return (float)var1 * 2.5F;
+      } else {
+         return this.damageType == 2 && var2 == EnumCreatureAttribute.ARTHROPOD ? (float)var1 * 2.5F : 0.0F;
+      }
    }
 
    public String getName() {

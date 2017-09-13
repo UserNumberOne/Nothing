@@ -3,7 +3,6 @@ package net.minecraft.entity;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Set;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -42,9 +41,6 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,253 +48,243 @@ public class EntityTracker {
    private static final Logger LOGGER = LogManager.getLogger();
    private final WorldServer world;
    private final Set entries = Sets.newHashSet();
-   private final IntHashMap trackedEntityHashTable = new IntHashMap();
+   public final IntHashMap trackedEntityHashTable = new IntHashMap();
    private int maxTrackingDistanceThreshold;
 
-   public EntityTracker(WorldServer var1) {
-      this.world = var1;
-      this.maxTrackingDistanceThreshold = var1.getMinecraftServer().getPlayerList().getEntityViewDistance();
+   public EntityTracker(WorldServer worldserver) {
+      this.world = worldserver;
+      this.maxTrackingDistanceThreshold = worldserver.getMinecraftServer().getPlayerList().getEntityViewDistance();
    }
 
-   public static long getPositionLong(double var0) {
-      return MathHelper.lfloor(var0 * 4096.0D);
+   public static long getPositionLong(double d0) {
+      return MathHelper.lfloor(d0 * 4096.0D);
    }
 
-   @SideOnly(Side.CLIENT)
-   public static void updateServerPosition(Entity var0, double var1, double var3, double var5) {
-      var0.serverPosX = getPositionLong(var1);
-      var0.serverPosY = getPositionLong(var3);
-      var0.serverPosZ = getPositionLong(var5);
-   }
+   public void track(Entity entity) {
+      if (entity instanceof EntityPlayerMP) {
+         this.track(entity, 512, 2);
+         EntityPlayerMP entityplayer = (EntityPlayerMP)entity;
 
-   public void track(Entity var1) {
-      if (!EntityRegistry.instance().tryTrackingEntity(this, var1)) {
-         if (var1 instanceof EntityPlayerMP) {
-            this.track(var1, 512, 2);
-            EntityPlayerMP var2 = (EntityPlayerMP)var1;
-
-            for(EntityTrackerEntry var4 : this.entries) {
-               if (var4.getTrackedEntity() != var2) {
-                  var4.updatePlayerEntity(var2);
-               }
+         for(EntityTrackerEntry entitytrackerentry : this.entries) {
+            if (entitytrackerentry.getTrackedEntity() != entityplayer) {
+               entitytrackerentry.updatePlayerEntity(entityplayer);
             }
-         } else if (var1 instanceof EntityFishHook) {
-            this.track(var1, 64, 5, true);
-         } else if (var1 instanceof EntityArrow) {
-            this.track(var1, 64, 20, false);
-         } else if (var1 instanceof EntitySmallFireball) {
-            this.track(var1, 64, 10, false);
-         } else if (var1 instanceof EntityFireball) {
-            this.track(var1, 64, 10, false);
-         } else if (var1 instanceof EntitySnowball) {
-            this.track(var1, 64, 10, true);
-         } else if (var1 instanceof EntityEnderPearl) {
-            this.track(var1, 64, 10, true);
-         } else if (var1 instanceof EntityEnderEye) {
-            this.track(var1, 64, 4, true);
-         } else if (var1 instanceof EntityEgg) {
-            this.track(var1, 64, 10, true);
-         } else if (var1 instanceof EntityPotion) {
-            this.track(var1, 64, 10, true);
-         } else if (var1 instanceof EntityExpBottle) {
-            this.track(var1, 64, 10, true);
-         } else if (var1 instanceof EntityFireworkRocket) {
-            this.track(var1, 64, 10, true);
-         } else if (var1 instanceof EntityItem) {
-            this.track(var1, 64, 20, true);
-         } else if (var1 instanceof EntityMinecart) {
-            this.track(var1, 80, 3, true);
-         } else if (var1 instanceof EntityBoat) {
-            this.track(var1, 80, 3, true);
-         } else if (var1 instanceof EntitySquid) {
-            this.track(var1, 64, 3, true);
-         } else if (var1 instanceof EntityWither) {
-            this.track(var1, 80, 3, false);
-         } else if (var1 instanceof EntityShulkerBullet) {
-            this.track(var1, 80, 3, true);
-         } else if (var1 instanceof EntityBat) {
-            this.track(var1, 80, 3, false);
-         } else if (var1 instanceof EntityDragon) {
-            this.track(var1, 160, 3, true);
-         } else if (var1 instanceof IAnimals) {
-            this.track(var1, 80, 3, true);
-         } else if (var1 instanceof EntityTNTPrimed) {
-            this.track(var1, 160, 10, true);
-         } else if (var1 instanceof EntityFallingBlock) {
-            this.track(var1, 160, 20, true);
-         } else if (var1 instanceof EntityHanging) {
-            this.track(var1, 160, Integer.MAX_VALUE, false);
-         } else if (var1 instanceof EntityArmorStand) {
-            this.track(var1, 160, 3, true);
-         } else if (var1 instanceof EntityXPOrb) {
-            this.track(var1, 160, 20, true);
-         } else if (var1 instanceof EntityAreaEffectCloud) {
-            this.track(var1, 160, Integer.MAX_VALUE, true);
-         } else if (var1 instanceof EntityEnderCrystal) {
-            this.track(var1, 256, Integer.MAX_VALUE, false);
          }
-
+      } else if (entity instanceof EntityFishHook) {
+         this.track(entity, 64, 5, true);
+      } else if (entity instanceof EntityArrow) {
+         this.track(entity, 64, 20, false);
+      } else if (entity instanceof EntitySmallFireball) {
+         this.track(entity, 64, 10, false);
+      } else if (entity instanceof EntityFireball) {
+         this.track(entity, 64, 10, false);
+      } else if (entity instanceof EntitySnowball) {
+         this.track(entity, 64, 10, true);
+      } else if (entity instanceof EntityEnderPearl) {
+         this.track(entity, 64, 10, true);
+      } else if (entity instanceof EntityEnderEye) {
+         this.track(entity, 64, 4, true);
+      } else if (entity instanceof EntityEgg) {
+         this.track(entity, 64, 10, true);
+      } else if (entity instanceof EntityPotion) {
+         this.track(entity, 64, 10, true);
+      } else if (entity instanceof EntityExpBottle) {
+         this.track(entity, 64, 10, true);
+      } else if (entity instanceof EntityFireworkRocket) {
+         this.track(entity, 64, 10, true);
+      } else if (entity instanceof EntityItem) {
+         this.track(entity, 64, 20, true);
+      } else if (entity instanceof EntityMinecart) {
+         this.track(entity, 80, 3, true);
+      } else if (entity instanceof EntityBoat) {
+         this.track(entity, 80, 3, true);
+      } else if (entity instanceof EntitySquid) {
+         this.track(entity, 64, 3, true);
+      } else if (entity instanceof EntityWither) {
+         this.track(entity, 80, 3, false);
+      } else if (entity instanceof EntityShulkerBullet) {
+         this.track(entity, 80, 3, true);
+      } else if (entity instanceof EntityBat) {
+         this.track(entity, 80, 3, false);
+      } else if (entity instanceof EntityDragon) {
+         this.track(entity, 160, 3, true);
+      } else if (entity instanceof IAnimals) {
+         this.track(entity, 80, 3, true);
+      } else if (entity instanceof EntityTNTPrimed) {
+         this.track(entity, 160, 10, true);
+      } else if (entity instanceof EntityFallingBlock) {
+         this.track(entity, 160, 20, true);
+      } else if (entity instanceof EntityHanging) {
+         this.track(entity, 160, Integer.MAX_VALUE, false);
+      } else if (entity instanceof EntityArmorStand) {
+         this.track(entity, 160, 3, true);
+      } else if (entity instanceof EntityXPOrb) {
+         this.track(entity, 160, 20, true);
+      } else if (entity instanceof EntityAreaEffectCloud) {
+         this.track(entity, 160, Integer.MAX_VALUE, true);
+      } else if (entity instanceof EntityEnderCrystal) {
+         this.track(entity, 256, Integer.MAX_VALUE, false);
       }
+
    }
 
-   public void track(Entity var1, int var2, int var3) {
-      this.track(var1, var2, var3, false);
+   public void track(Entity entity, int i, int j) {
+      this.track(entity, i, j, false);
    }
 
-   public void track(Entity var1, int var2, final int var3, boolean var4) {
+   public void track(Entity entity, final int i, int j, boolean flag) {
       try {
-         if (this.trackedEntityHashTable.containsItem(var1.getEntityId())) {
+         if (this.trackedEntityHashTable.containsItem(entity.getEntityId())) {
             throw new IllegalStateException("Entity is already tracked!");
          }
 
-         EntityTrackerEntry var5 = new EntityTrackerEntry(var1, var2, this.maxTrackingDistanceThreshold, var3, var4);
-         this.entries.add(var5);
-         this.trackedEntityHashTable.addKey(var1.getEntityId(), var5);
-         var5.updatePlayerEntities(this.world.playerEntities);
-      } catch (Throwable var10) {
-         CrashReport var6 = CrashReport.makeCrashReport(var10, "Adding entity to track");
-         CrashReportCategory var7 = var6.makeCategory("Entity To Track");
-         var7.addCrashSection("Tracking range", var2 + " blocks");
-         var7.setDetail("Update interval", new ICrashReportDetail() {
+         EntityTrackerEntry entitytrackerentry = new EntityTrackerEntry(entity, i, this.maxTrackingDistanceThreshold, j, flag);
+         this.entries.add(entitytrackerentry);
+         this.trackedEntityHashTable.addKey(entity.getEntityId(), entitytrackerentry);
+         entitytrackerentry.updatePlayerEntities(this.world.playerEntities);
+      } catch (Throwable var11) {
+         CrashReport crashreport = CrashReport.makeCrashReport(var11, "Adding entity to track");
+         CrashReportCategory crashreportsystemdetails = crashreport.makeCategory("Entity To Track");
+         crashreportsystemdetails.addCrashSection("Tracking range", i + " blocks");
+         crashreportsystemdetails.setDetail("Update interval", new ICrashReportDetail() {
             public String call() throws Exception {
-               String var1 = "Once per " + var3 + " ticks";
-               if (var3 == Integer.MAX_VALUE) {
-                  var1 = "Maximum (" + var1 + ")";
+               String s = "Once per " + i + " ticks";
+               if (i == Integer.MAX_VALUE) {
+                  s = "Maximum (" + s + ")";
                }
 
-               return var1;
+               return s;
+            }
+
+            public Object call() throws Exception {
+               return this.call();
             }
          });
-         var1.addEntityCrashInfo(var7);
-         ((EntityTrackerEntry)this.trackedEntityHashTable.lookup(var1.getEntityId())).getTrackedEntity().addEntityCrashInfo(var6.makeCategory("Entity That Is Already Tracked"));
+         entity.addEntityCrashInfo(crashreportsystemdetails);
+         ((EntityTrackerEntry)this.trackedEntityHashTable.lookup(entity.getEntityId())).getTrackedEntity().addEntityCrashInfo(crashreport.makeCategory("Entity That Is Already Tracked"));
 
          try {
-            throw new ReportedException(var6);
-         } catch (ReportedException var9) {
-            LOGGER.error("\"Silently\" catching entity tracking error.", var9);
+            throw new ReportedException(crashreport);
+         } catch (ReportedException var10) {
+            LOGGER.error("\"Silently\" catching entity tracking error.", var10);
          }
       }
 
    }
 
-   public void untrack(Entity var1) {
-      if (var1 instanceof EntityPlayerMP) {
-         EntityPlayerMP var2 = (EntityPlayerMP)var1;
+   public void untrack(Entity entity) {
+      if (entity instanceof EntityPlayerMP) {
+         EntityPlayerMP entityplayer = (EntityPlayerMP)entity;
 
-         for(EntityTrackerEntry var4 : this.entries) {
-            var4.removeFromTrackedPlayers(var2);
+         for(EntityTrackerEntry entitytrackerentry : this.entries) {
+            entitytrackerentry.removeFromTrackedPlayers(entityplayer);
          }
       }
 
-      EntityTrackerEntry var5 = (EntityTrackerEntry)this.trackedEntityHashTable.removeObject(var1.getEntityId());
-      if (var5 != null) {
-         this.entries.remove(var5);
-         var5.sendDestroyEntityPacketToTrackedPlayers();
+      EntityTrackerEntry entitytrackerentry1 = (EntityTrackerEntry)this.trackedEntityHashTable.removeObject(entity.getEntityId());
+      if (entitytrackerentry1 != null) {
+         this.entries.remove(entitytrackerentry1);
+         entitytrackerentry1.sendDestroyEntityPacketToTrackedPlayers();
       }
 
    }
 
    public void tick() {
-      ArrayList var1 = Lists.newArrayList();
+      ArrayList arraylist = Lists.newArrayList();
 
-      for(EntityTrackerEntry var3 : this.entries) {
-         var3.updatePlayerList(this.world.playerEntities);
-         if (var3.playerEntitiesUpdated) {
-            Entity var4 = var3.getTrackedEntity();
-            if (var4 instanceof EntityPlayerMP) {
-               var1.add((EntityPlayerMP)var4);
+      for(EntityTrackerEntry entitytrackerentry : this.entries) {
+         entitytrackerentry.updatePlayerList(this.world.playerEntities);
+         if (entitytrackerentry.playerEntitiesUpdated) {
+            Entity entity = entitytrackerentry.getTrackedEntity();
+            if (entity instanceof EntityPlayerMP) {
+               arraylist.add((EntityPlayerMP)entity);
             }
          }
       }
 
-      for(int var6 = 0; var6 < var1.size(); ++var6) {
-         EntityPlayerMP var7 = (EntityPlayerMP)var1.get(var6);
+      for(int i = 0; i < arraylist.size(); ++i) {
+         EntityPlayerMP entityplayer = (EntityPlayerMP)arraylist.get(i);
 
-         for(EntityTrackerEntry var5 : this.entries) {
-            if (var5.getTrackedEntity() != var7) {
-               var5.updatePlayerEntity(var7);
+         for(EntityTrackerEntry entitytrackerentry1 : this.entries) {
+            if (entitytrackerentry1.getTrackedEntity() != entityplayer) {
+               entitytrackerentry1.updatePlayerEntity(entityplayer);
             }
          }
       }
 
    }
 
-   public void updateVisibility(EntityPlayerMP var1) {
-      for(EntityTrackerEntry var3 : this.entries) {
-         if (var3.getTrackedEntity() == var1) {
-            var3.updatePlayerEntities(this.world.playerEntities);
+   public void updateVisibility(EntityPlayerMP entityplayer) {
+      for(EntityTrackerEntry entitytrackerentry : this.entries) {
+         if (entitytrackerentry.getTrackedEntity() == entityplayer) {
+            entitytrackerentry.updatePlayerEntities(this.world.playerEntities);
          } else {
-            var3.updatePlayerEntity(var1);
+            entitytrackerentry.updatePlayerEntity(entityplayer);
          }
       }
 
    }
 
-   public void sendToTracking(Entity var1, Packet var2) {
-      EntityTrackerEntry var3 = (EntityTrackerEntry)this.trackedEntityHashTable.lookup(var1.getEntityId());
-      if (var3 != null) {
-         var3.sendPacketToTrackedPlayers(var2);
+   public void sendToTracking(Entity entity, Packet packet) {
+      EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry)this.trackedEntityHashTable.lookup(entity.getEntityId());
+      if (entitytrackerentry != null) {
+         entitytrackerentry.sendPacketToTrackedPlayers(packet);
       }
 
    }
 
-   public Set getTrackingPlayers(Entity var1) {
-      EntityTrackerEntry var2 = (EntityTrackerEntry)this.trackedEntityHashTable.lookup(var1.getEntityId());
-      return var2 == null ? Collections.emptySet() : Collections.unmodifiableSet(var2.trackingPlayers);
-   }
-
-   public void sendToTrackingAndSelf(Entity var1, Packet var2) {
-      EntityTrackerEntry var3 = (EntityTrackerEntry)this.trackedEntityHashTable.lookup(var1.getEntityId());
-      if (var3 != null) {
-         var3.sendToTrackingAndSelf(var2);
+   public void sendToTrackingAndSelf(Entity entity, Packet packet) {
+      EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry)this.trackedEntityHashTable.lookup(entity.getEntityId());
+      if (entitytrackerentry != null) {
+         entitytrackerentry.sendToTrackingAndSelf(packet);
       }
 
    }
 
-   public void removePlayerFromTrackers(EntityPlayerMP var1) {
-      for(EntityTrackerEntry var3 : this.entries) {
-         var3.removeTrackedPlayerSymmetric(var1);
+   public void removePlayerFromTrackers(EntityPlayerMP entityplayer) {
+      for(EntityTrackerEntry entitytrackerentry : this.entries) {
+         entitytrackerentry.removeTrackedPlayerSymmetric(entityplayer);
       }
 
    }
 
-   public void sendLeashedEntitiesInChunk(EntityPlayerMP var1, Chunk var2) {
-      ArrayList var3 = Lists.newArrayList();
-      ArrayList var4 = Lists.newArrayList();
+   public void sendLeashedEntitiesInChunk(EntityPlayerMP entityplayer, Chunk chunk) {
+      ArrayList arraylist = Lists.newArrayList();
+      ArrayList arraylist1 = Lists.newArrayList();
 
-      for(EntityTrackerEntry var6 : this.entries) {
-         Entity var7 = var6.getTrackedEntity();
-         if (var7 != var1 && var7.chunkCoordX == var2.xPosition && var7.chunkCoordZ == var2.zPosition) {
-            var6.updatePlayerEntity(var1);
-            if (var7 instanceof EntityLiving && ((EntityLiving)var7).getLeashedToEntity() != null) {
-               var3.add(var7);
+      for(EntityTrackerEntry entitytrackerentry : this.entries) {
+         Entity entity = entitytrackerentry.getTrackedEntity();
+         if (entity != entityplayer && entity.chunkCoordX == chunk.xPosition && entity.chunkCoordZ == chunk.zPosition) {
+            entitytrackerentry.updatePlayerEntity(entityplayer);
+            if (entity instanceof EntityLiving && ((EntityLiving)entity).getLeashedToEntity() != null) {
+               arraylist.add(entity);
             }
 
-            if (!var7.getPassengers().isEmpty()) {
-               var4.add(var7);
+            if (!entity.getPassengers().isEmpty()) {
+               arraylist1.add(entity);
             }
          }
       }
 
-      if (!var3.isEmpty()) {
-         for(Entity var10 : var3) {
-            var1.connection.sendPacket(new SPacketEntityAttach(var10, ((EntityLiving)var10).getLeashedToEntity()));
+      if (!arraylist.isEmpty()) {
+         for(Entity entity1 : arraylist) {
+            entityplayer.connection.sendPacket(new SPacketEntityAttach(entity1, ((EntityLiving)entity1).getLeashedToEntity()));
          }
       }
 
-      if (!var4.isEmpty()) {
-         for(Entity var11 : var4) {
-            var1.connection.sendPacket(new SPacketSetPassengers(var11));
+      if (!arraylist1.isEmpty()) {
+         for(Entity entity1 : arraylist1) {
+            entityplayer.connection.sendPacket(new SPacketSetPassengers(entity1));
          }
       }
 
    }
 
-   public void setViewDistance(int var1) {
-      this.maxTrackingDistanceThreshold = (var1 - 1) * 16;
+   public void setViewDistance(int i) {
+      this.maxTrackingDistanceThreshold = (i - 1) * 16;
 
-      for(EntityTrackerEntry var3 : this.entries) {
-         var3.setMaxRange(this.maxTrackingDistanceThreshold);
+      for(EntityTrackerEntry entitytrackerentry : this.entries) {
+         entitytrackerentry.setMaxRange(this.maxTrackingDistanceThreshold);
       }
 
    }

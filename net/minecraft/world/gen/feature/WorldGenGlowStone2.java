@@ -1,6 +1,7 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -17,7 +18,7 @@ public class WorldGenGlowStone2 extends WorldGenerator {
 
          for(int var4 = 0; var4 < 1500; ++var4) {
             BlockPos var5 = var3.add(var2.nextInt(8) - var2.nextInt(8), -var2.nextInt(12), var2.nextInt(8) - var2.nextInt(8));
-            if (var1.isAirBlock(var5)) {
+            if (var1.getBlockState(var5).getMaterial() == Material.AIR) {
                int var6 = 0;
 
                for(EnumFacing var10 : EnumFacing.values()) {

@@ -47,7 +47,13 @@ public class EntityAIWatchClosest extends EntityAIBase {
    }
 
    public boolean continueExecuting() {
-      return !this.closestEntity.isEntityAlive() ? false : (this.theWatcher.getDistanceSqToEntity(this.closestEntity) > (double)(this.maxDistanceForPlayer * this.maxDistanceForPlayer) ? false : this.lookTime > 0);
+      if (!this.closestEntity.isEntityAlive()) {
+         return false;
+      } else if (this.theWatcher.getDistanceSqToEntity(this.closestEntity) > (double)(this.maxDistanceForPlayer * this.maxDistanceForPlayer)) {
+         return false;
+      } else {
+         return this.lookTime > 0;
+      }
    }
 
    public void startExecuting() {

@@ -27,7 +27,13 @@ public class EntityAIBeg extends EntityAIBase {
    }
 
    public boolean continueExecuting() {
-      return !this.player.isEntityAlive() ? false : (this.theWolf.getDistanceSqToEntity(this.player) > (double)(this.minPlayerDistance * this.minPlayerDistance) ? false : this.timeoutCounter > 0 && this.hasTemptationItemInHand(this.player));
+      if (!this.player.isEntityAlive()) {
+         return false;
+      } else if (this.theWolf.getDistanceSqToEntity(this.player) > (double)(this.minPlayerDistance * this.minPlayerDistance)) {
+         return false;
+      } else {
+         return this.timeoutCounter > 0 && this.hasTemptationItemInHand(this.player);
+      }
    }
 
    public void startExecuting() {

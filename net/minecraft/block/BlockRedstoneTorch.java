@@ -1,10 +1,10 @@
 package net.minecraft.block;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.WeakHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
@@ -19,30 +19,30 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.plugin.PluginManager;
 
 public class BlockRedstoneTorch extends BlockTorch {
-   private static final Map toggles = new WeakHashMap();
+   private static final Map toggles = Maps.newHashMap();
    private final boolean isOn;
 
-   private boolean isBurnedOut(World var1, BlockPos var2, boolean var3) {
-      if (!toggles.containsKey(var1)) {
-         toggles.put(var1, Lists.newArrayList());
+   private boolean isBurnedOut(World world, BlockPos blockposition, boolean flag) {
+      if (!toggles.containsKey(world)) {
+         toggles.put(world, Lists.newArrayList());
       }
 
-      List var4 = (List)toggles.get(var1);
-      if (var3) {
-         var4.add(new BlockRedstoneTorch.Toggle(var2, var1.getTotalWorldTime()));
+      List list = (List)toggles.get(world);
+      if (flag) {
+         list.add(new BlockRedstoneTorch.Toggle(blockposition, world.getTotalWorldTime()));
       }
 
-      int var5 = 0;
+      int i = 0;
 
-      for(int var6 = 0; var6 < var4.size(); ++var6) {
-         BlockRedstoneTorch.Toggle var7 = (BlockRedstoneTorch.Toggle)var4.get(var6);
-         if (var7.pos.equals(var2)) {
-            ++var5;
-            if (var5 >= 8) {
+      for(int j = 0; j < list.size(); ++j) {
+         BlockRedstoneTorch.Toggle blockredstonetorch_redstoneupdateinfo = (BlockRedstoneTorch.Toggle)list.get(j);
+         if (blockredstonetorch_redstoneupdateinfo.pos.equals(blockposition)) {
+            ++i;
+            if (i >= 8) {
                return true;
             }
          }
@@ -51,131 +51,131 @@ public class BlockRedstoneTorch extends BlockTorch {
       return false;
    }
 
-   protected BlockRedstoneTorch(boolean var1) {
-      this.isOn = var1;
+   protected BlockRedstoneTorch(boolean flag) {
+      this.isOn = flag;
       this.setTickRandomly(true);
       this.setCreativeTab((CreativeTabs)null);
    }
 
-   public int tickRate(World var1) {
+   public int tickRate(World world) {
       return 2;
    }
 
-   public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
+   public void onBlockAdded(World world, BlockPos blockposition, IBlockState iblockdata) {
       if (this.isOn) {
-         for(EnumFacing var7 : EnumFacing.values()) {
-            var1.notifyNeighborsOfStateChange(var2.offset(var7), this);
+         for(EnumFacing enumdirection : EnumFacing.values()) {
+            world.notifyNeighborsOfStateChange(blockposition.offset(enumdirection), this);
          }
       }
 
    }
 
-   public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
+   public void breakBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
       if (this.isOn) {
-         for(EnumFacing var7 : EnumFacing.values()) {
-            var1.notifyNeighborsOfStateChange(var2.offset(var7), this);
+         for(EnumFacing enumdirection : EnumFacing.values()) {
+            world.notifyNeighborsOfStateChange(blockposition.offset(enumdirection), this);
          }
       }
 
    }
 
-   public int getWeakPower(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return this.isOn && var1.getValue(FACING) != var4 ? 15 : 0;
+   public int getWeakPower(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
+      return this.isOn && iblockdata.getValue(FACING) != enumdirection ? 15 : 0;
    }
 
-   private boolean shouldBeOff(World var1, BlockPos var2, IBlockState var3) {
-      EnumFacing var4 = ((EnumFacing)var3.getValue(FACING)).getOpposite();
-      return var1.isSidePowered(var2.offset(var4), var4);
+   private boolean shouldBeOff(World world, BlockPos blockposition, IBlockState iblockdata) {
+      EnumFacing enumdirection = ((EnumFacing)iblockdata.getValue(FACING)).getOpposite();
+      return world.isSidePowered(blockposition.offset(enumdirection), enumdirection);
    }
 
-   public void randomTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
+   public void randomTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
    }
 
-   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
-      boolean var5 = this.shouldBeOff(var1, var2, var3);
-      List var6 = (List)toggles.get(var1);
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      boolean flag = this.shouldBeOff(world, blockposition, iblockdata);
+      List list = (List)toggles.get(world);
 
-      while(var6 != null && !var6.isEmpty() && var1.getTotalWorldTime() - ((BlockRedstoneTorch.Toggle)var6.get(0)).time > 60L) {
-         var6.remove(0);
+      while(list != null && !list.isEmpty() && world.getTotalWorldTime() - ((BlockRedstoneTorch.Toggle)list.get(0)).time > 60L) {
+         list.remove(0);
       }
 
+      PluginManager manager = world.getServer().getPluginManager();
+      org.bukkit.block.Block block = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+      int oldCurrent = this.isOn ? 15 : 0;
+      BlockRedstoneEvent event = new BlockRedstoneEvent(block, oldCurrent, oldCurrent);
       if (this.isOn) {
-         if (var5) {
-            var1.setBlockState(var2, Blocks.UNLIT_REDSTONE_TORCH.getDefaultState().withProperty(FACING, var3.getValue(FACING)), 3);
-            if (this.isBurnedOut(var1, var2, true)) {
-               var1.playSound((EntityPlayer)null, var2, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5F, 2.6F + (var1.rand.nextFloat() - var1.rand.nextFloat()) * 0.8F);
+         if (flag) {
+            if (oldCurrent != 0) {
+               event.setNewCurrent(0);
+               manager.callEvent(event);
+               if (event.getNewCurrent() != 0) {
+                  return;
+               }
+            }
 
-               for(int var7 = 0; var7 < 5; ++var7) {
-                  double var8 = (double)var2.getX() + var4.nextDouble() * 0.6D + 0.2D;
-                  double var10 = (double)var2.getY() + var4.nextDouble() * 0.6D + 0.2D;
-                  double var12 = (double)var2.getZ() + var4.nextDouble() * 0.6D + 0.2D;
-                  var1.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var8, var10, var12, 0.0D, 0.0D, 0.0D);
+            world.setBlockState(blockposition, Blocks.UNLIT_REDSTONE_TORCH.getDefaultState().withProperty(FACING, (EnumFacing)iblockdata.getValue(FACING)), 3);
+            if (this.isBurnedOut(world, blockposition, true)) {
+               world.playSound((EntityPlayer)null, blockposition, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
+
+               for(int i = 0; i < 5; ++i) {
+                  double d0 = (double)blockposition.getX() + random.nextDouble() * 0.6D + 0.2D;
+                  double d1 = (double)blockposition.getY() + random.nextDouble() * 0.6D + 0.2D;
+                  double d2 = (double)blockposition.getZ() + random.nextDouble() * 0.6D + 0.2D;
+                  world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, 0.0D, 0.0D, 0.0D);
                }
 
-               var1.scheduleUpdate(var2, var1.getBlockState(var2).getBlock(), 160);
+               world.scheduleUpdate(blockposition, world.getBlockState(blockposition).getBlock(), 160);
             }
          }
-      } else if (!var5 && !this.isBurnedOut(var1, var2, false)) {
-         var1.setBlockState(var2, Blocks.REDSTONE_TORCH.getDefaultState().withProperty(FACING, var3.getValue(FACING)), 3);
+      } else if (!flag && !this.isBurnedOut(world, blockposition, false)) {
+         if (oldCurrent != 15) {
+            event.setNewCurrent(15);
+            manager.callEvent(event);
+            if (event.getNewCurrent() != 15) {
+               return;
+            }
+         }
+
+         world.setBlockState(blockposition, Blocks.REDSTONE_TORCH.getDefaultState().withProperty(FACING, (EnumFacing)iblockdata.getValue(FACING)), 3);
       }
 
    }
 
-   public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      if (!this.onNeighborChangeInternal(var2, var3, var1) && this.isOn == this.shouldBeOff(var2, var3, var1)) {
-         var2.scheduleUpdate(var3, this, this.tickRate(var2));
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      if (!this.onNeighborChangeInternal(world, blockposition, iblockdata) && this.isOn == this.shouldBeOff(world, blockposition, iblockdata)) {
+         world.scheduleUpdate(blockposition, this, this.tickRate(world));
       }
 
    }
 
-   public int getStrongPower(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return var4 == EnumFacing.DOWN ? var1.getWeakPower(var2, var3, var4) : 0;
+   public int getStrongPower(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
+      return enumdirection == EnumFacing.DOWN ? iblockdata.getWeakPower(iblockaccess, blockposition, enumdirection) : 0;
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
       return Item.getItemFromBlock(Blocks.REDSTONE_TORCH);
    }
 
-   public boolean canProvidePower(IBlockState var1) {
+   public boolean canProvidePower(IBlockState iblockdata) {
       return true;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      if (this.isOn) {
-         double var5 = (double)var3.getX() + 0.5D + (var4.nextDouble() - 0.5D) * 0.2D;
-         double var7 = (double)var3.getY() + 0.7D + (var4.nextDouble() - 0.5D) * 0.2D;
-         double var9 = (double)var3.getZ() + 0.5D + (var4.nextDouble() - 0.5D) * 0.2D;
-         EnumFacing var11 = (EnumFacing)var1.getValue(FACING);
-         if (var11.getAxis().isHorizontal()) {
-            EnumFacing var12 = var11.getOpposite();
-            double var13 = 0.27D;
-            var5 += 0.27D * (double)var12.getFrontOffsetX();
-            var7 += 0.22D;
-            var9 += 0.27D * (double)var12.getFrontOffsetZ();
-         }
-
-         var2.spawnParticle(EnumParticleTypes.REDSTONE, var5, var7, var9, 0.0D, 0.0D, 0.0D);
-      }
-
-   }
-
-   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return new ItemStack(Blocks.REDSTONE_TORCH);
    }
 
-   public boolean isAssociatedBlock(Block var1) {
-      return var1 == Blocks.UNLIT_REDSTONE_TORCH || var1 == Blocks.REDSTONE_TORCH;
+   public boolean isAssociatedBlock(Block block) {
+      return block == Blocks.UNLIT_REDSTONE_TORCH || block == Blocks.REDSTONE_TORCH;
    }
 
    static class Toggle {
       BlockPos pos;
       long time;
 
-      public Toggle(BlockPos var1, long var2) {
-         this.pos = var1;
-         this.time = var2;
+      public Toggle(BlockPos blockposition, long i) {
+         this.pos = blockposition;
+         this.time = i;
       }
    }
 }

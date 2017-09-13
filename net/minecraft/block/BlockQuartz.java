@@ -1,7 +1,5 @@
 package net.minecraft.block;
 
-import com.google.common.collect.UnmodifiableIterator;
-import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -17,8 +15,6 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockQuartz extends Block {
    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockQuartz.EnumType.class);
@@ -54,13 +50,6 @@ public class BlockQuartz extends Block {
       return var2 != BlockQuartz.EnumType.LINES_X && var2 != BlockQuartz.EnumType.LINES_Z ? super.getSilkTouchDrop(var1) : new ItemStack(Item.getItemFromBlock(this), 1, BlockQuartz.EnumType.LINES_Y.getMetadata());
    }
 
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
-      var3.add(new ItemStack(var1, 1, BlockQuartz.EnumType.DEFAULT.getMetadata()));
-      var3.add(new ItemStack(var1, 1, BlockQuartz.EnumType.CHISELED.getMetadata()));
-      var3.add(new ItemStack(var1, 1, BlockQuartz.EnumType.LINES_Y.getMetadata()));
-   }
-
    public MapColor getMapColor(IBlockState var1) {
       return MapColor.QUARTZ;
    }
@@ -92,27 +81,6 @@ public class BlockQuartz extends Block {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{VARIANT});
-   }
-
-   public boolean rotateBlock(World var1, BlockPos var2, EnumFacing var3) {
-      IBlockState var4 = var1.getBlockState(var2);
-      UnmodifiableIterator var5 = var4.getProperties().keySet().iterator();
-
-      while(var5.hasNext()) {
-         IProperty var6 = (IProperty)var5.next();
-         if (var6.getName().equals("variant") && var6.getValueClass() == BlockQuartz.EnumType.class) {
-            BlockQuartz.EnumType var7 = (BlockQuartz.EnumType)var4.getValue(var6);
-            BlockQuartz.EnumType var8 = var7 == BlockQuartz.EnumType.LINES_X ? BlockQuartz.EnumType.LINES_Y : (var7 == BlockQuartz.EnumType.LINES_Y ? BlockQuartz.EnumType.LINES_Z : (var7 == BlockQuartz.EnumType.LINES_Z ? BlockQuartz.EnumType.LINES_X : var7));
-            if (var8 == var7) {
-               return false;
-            }
-
-            var1.setBlockState(var2, var4.withProperty(var6, var8));
-            return true;
-         }
-      }
-
-      return false;
    }
 
    public static enum EnumType implements IStringSerializable {

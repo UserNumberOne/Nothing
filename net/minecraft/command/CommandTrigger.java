@@ -11,7 +11,7 @@ import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandTrigger extends CommandBase {
@@ -43,7 +43,7 @@ public class CommandTrigger extends CommandBase {
             var4 = (EntityPlayerMP)var5;
          }
 
-         Scoreboard var9 = var1.worldServerForDimension(0).getScoreboard();
+         Scoreboard var9 = var1.getWorldServer(0).getScoreboard();
          ScoreObjective var6 = var9.getObjective(var3[0]);
          if (var6 != null && var6.getCriteria() == IScoreCriteria.TRIGGER) {
             int var7 = parseInt(var3[2]);
@@ -77,9 +77,9 @@ public class CommandTrigger extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       if (var3.length == 1) {
-         Scoreboard var5 = var1.worldServerForDimension(0).getScoreboard();
+         Scoreboard var5 = var1.getWorldServer(0).getScoreboard();
          ArrayList var6 = Lists.newArrayList();
 
          for(ScoreObjective var8 : var5.getScoreObjectives()) {

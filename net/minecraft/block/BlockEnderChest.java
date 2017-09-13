@@ -20,15 +20,12 @@ import net.minecraft.tileentity.TileEntityEnderChest;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockEnderChest extends BlockContainer {
    public static final PropertyDirection FACING = BlockHorizontal.FACING;
@@ -98,22 +95,6 @@ public class BlockEnderChest extends BlockContainer {
 
    public TileEntity createNewTileEntity(World var1, int var2) {
       return new TileEntityEnderChest();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      for(int var5 = 0; var5 < 3; ++var5) {
-         int var6 = var4.nextInt(2) * 2 - 1;
-         int var7 = var4.nextInt(2) * 2 - 1;
-         double var8 = (double)var3.getX() + 0.5D + 0.25D * (double)var6;
-         double var10 = (double)((float)var3.getY() + var4.nextFloat());
-         double var12 = (double)var3.getZ() + 0.5D + 0.25D * (double)var7;
-         double var14 = (double)(var4.nextFloat() * (float)var6);
-         double var16 = ((double)var4.nextFloat() - 0.5D) * 0.125D;
-         double var18 = (double)(var4.nextFloat() * (float)var7);
-         var2.spawnParticle(EnumParticleTypes.PORTAL, var8, var10, var12, var14, var16, var18);
-      }
-
    }
 
    public IBlockState getStateFromMeta(int var1) {

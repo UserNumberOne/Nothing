@@ -5,53 +5,89 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.util.Vector;
 
 public class BehaviorDefaultDispenseItem implements IBehaviorDispenseItem {
-   public final ItemStack dispense(IBlockSource var1, ItemStack var2) {
-      ItemStack var3 = this.dispenseStack(var1, var2);
-      this.playDispenseSound(var1);
-      this.spawnDispenseParticles(var1, (EnumFacing)var1.getBlockState().getValue(BlockDispenser.FACING));
-      return var3;
+   public final ItemStack dispense(IBlockSource isourceblock, ItemStack itemstack) {
+      ItemStack itemstack1 = this.dispenseStack(isourceblock, itemstack);
+      this.playDispenseSound(isourceblock);
+      this.spawnDispenseParticles(isourceblock, (EnumFacing)isourceblock.getBlockState().getValue(BlockDispenser.FACING));
+      return itemstack1;
    }
 
-   protected ItemStack dispenseStack(IBlockSource var1, ItemStack var2) {
-      EnumFacing var3 = (EnumFacing)var1.getBlockState().getValue(BlockDispenser.FACING);
-      IPosition var4 = BlockDispenser.getDispensePosition(var1);
-      ItemStack var5 = var2.splitStack(1);
-      doDispense(var1.getWorld(), var5, 6, var3, var4);
-      return var2;
-   }
-
-   public static void doDispense(World var0, ItemStack var1, int var2, EnumFacing var3, IPosition var4) {
-      double var5 = var4.getX();
-      double var7 = var4.getY();
-      double var9 = var4.getZ();
-      if (var3.getAxis() == EnumFacing.Axis.Y) {
-         var7 = var7 - 0.125D;
-      } else {
-         var7 = var7 - 0.15625D;
+   protected ItemStack dispenseStack(IBlockSource isourceblock, ItemStack itemstack) {
+      EnumFacing enumdirection = (EnumFacing)isourceblock.getBlockState().getValue(BlockDispenser.FACING);
+      BlockDispenser.getDispensePosition(isourceblock);
+      ItemStack itemstack1 = itemstack.splitStack(1);
+      if (!a(isourceblock.getWorld(), itemstack1, 6, enumdirection, isourceblock)) {
+         ++itemstack.stackSize;
       }
 
-      EntityItem var11 = new EntityItem(var0, var5, var7, var9, var1);
-      double var12 = var0.rand.nextDouble() * 0.1D + 0.2D;
-      var11.motionX = (double)var3.getFrontOffsetX() * var12;
-      var11.motionY = 0.20000000298023224D;
-      var11.motionZ = (double)var3.getFrontOffsetZ() * var12;
-      var11.motionX += var0.rand.nextGaussian() * 0.007499999832361937D * (double)var2;
-      var11.motionY += var0.rand.nextGaussian() * 0.007499999832361937D * (double)var2;
-      var11.motionZ += var0.rand.nextGaussian() * 0.007499999832361937D * (double)var2;
-      var0.spawnEntity(var11);
+      return itemstack;
    }
 
-   protected void playDispenseSound(IBlockSource var1) {
-      var1.getWorld().playEvent(1000, var1.getBlockPos(), 0);
+   public static boolean a(World world, ItemStack itemstack, int i, EnumFacing enumdirection, IBlockSource isourceblock) {
+      IPosition iposition = BlockDispenser.getDispensePosition(isourceblock);
+      double d0 = iposition.getX();
+      double d1 = iposition.getY();
+      double d2 = iposition.getZ();
+      if (enumdirection.getAxis() == EnumFacing.Axis.Y) {
+         d1 = d1 - 0.125D;
+      } else {
+         d1 = d1 - 0.15625D;
+      }
+
+      EntityItem entityitem = new EntityItem(world, d0, d1, d2, itemstack);
+      double d3 = world.rand.nextDouble() * 0.1D + 0.2D;
+      entityitem.motionX = (double)enumdirection.getFrontOffsetX() * d3;
+      entityitem.motionY = 0.20000000298023224D;
+      entityitem.motionZ = (double)enumdirection.getFrontOffsetZ() * d3;
+      entityitem.motionX += world.rand.nextGaussian() * 0.007499999832361937D * (double)i;
+      entityitem.motionY += world.rand.nextGaussian() * 0.007499999832361937D * (double)i;
+      entityitem.motionZ += world.rand.nextGaussian() * 0.007499999832361937D * (double)i;
+      Block block = world.getWorld().getBlockAt(isourceblock.getBlockPos().getX(), isourceblock.getBlockPos().getY(), isourceblock.getBlockPos().getZ());
+      CraftItemStack craftItem = CraftItemStack.asCraftMirror(itemstack);
+      BlockDispenseEvent event = new BlockDispenseEvent(block, craftItem.clone(), new Vector(entityitem.motionX, entityitem.motionY, entityitem.motionZ));
+      if (!BlockDispenser.eventFired) {
+         world.getServer().getPluginManager().callEvent(event);
+      }
+
+      if (event.isCancelled()) {
+         return false;
+      } else {
+         entityitem.setEntityItemStack(CraftItemStack.asNMSCopy(event.getItem()));
+         entityitem.motionX = event.getVelocity().getX();
+         entityitem.motionY = event.getVelocity().getY();
+         entityitem.motionZ = event.getVelocity().getZ();
+         if (event.getItem().getType().equals(craftItem.getType())) {
+            world.spawnEntity(entityitem);
+            return true;
+         } else {
+            ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
+            IBehaviorDispenseItem idispensebehavior = (IBehaviorDispenseItem)BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(eventStack.getItem());
+            if (idispensebehavior != IBehaviorDispenseItem.DEFAULT_BEHAVIOR && idispensebehavior.getClass() != BehaviorDefaultDispenseItem.class) {
+               idispensebehavior.dispense(isourceblock, eventStack);
+            } else {
+               world.spawnEntity(entityitem);
+            }
+
+            return false;
+         }
+      }
    }
 
-   protected void spawnDispenseParticles(IBlockSource var1, EnumFacing var2) {
-      var1.getWorld().playEvent(2000, var1.getBlockPos(), this.getWorldEventDataFrom(var2));
+   protected void playDispenseSound(IBlockSource isourceblock) {
+      isourceblock.getWorld().playEvent(1000, isourceblock.getBlockPos(), 0);
    }
 
-   private int getWorldEventDataFrom(EnumFacing var1) {
-      return var1.getFrontOffsetX() + 1 + (var1.getFrontOffsetZ() + 1) * 3;
+   protected void spawnDispenseParticles(IBlockSource isourceblock, EnumFacing enumdirection) {
+      isourceblock.getWorld().playEvent(2000, isourceblock.getBlockPos(), this.getWorldEventDataFrom(enumdirection));
+   }
+
+   private int getWorldEventDataFrom(EnumFacing enumdirection) {
+      return enumdirection.getFrontOffsetX() + 1 + (enumdirection.getFrontOffsetZ() + 1) * 3;
    }
 }

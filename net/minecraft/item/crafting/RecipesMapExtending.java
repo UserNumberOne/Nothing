@@ -30,7 +30,11 @@ public class RecipesMapExtending extends ShapedRecipes {
             return false;
          } else {
             MapData var6 = Items.FILLED_MAP.getMapData(var3, var2);
-            return var6 == null ? false : var6.scale < 4;
+            if (var6 == null) {
+               return false;
+            } else {
+               return var6.scale < 4;
+            }
          }
       }
    }

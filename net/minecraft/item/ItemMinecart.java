@@ -15,85 +15,112 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.util.Vector;
 
 public class ItemMinecart extends Item {
    private static final IBehaviorDispenseItem MINECART_DISPENSER_BEHAVIOR = new BehaviorDefaultDispenseItem() {
       private final BehaviorDefaultDispenseItem behaviourDefaultDispenseItem = new BehaviorDefaultDispenseItem();
 
-      public ItemStack dispenseStack(IBlockSource var1, ItemStack var2) {
-         EnumFacing var3 = (EnumFacing)var1.getBlockState().getValue(BlockDispenser.FACING);
-         World var4 = var1.getWorld();
-         double var5 = var1.getX() + (double)var3.getFrontOffsetX() * 1.125D;
-         double var7 = Math.floor(var1.getY()) + (double)var3.getFrontOffsetY();
-         double var9 = var1.getZ() + (double)var3.getFrontOffsetZ() * 1.125D;
-         BlockPos var11 = var1.getBlockPos().offset(var3);
-         IBlockState var12 = var4.getBlockState(var11);
-         BlockRailBase.EnumRailDirection var13 = var12.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)var12.getValue(((BlockRailBase)var12.getBlock()).getShapeProperty()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
-         double var14;
-         if (BlockRailBase.isRailBlock(var12)) {
-            if (var13.isAscending()) {
-               var14 = 0.6D;
+      public ItemStack dispenseStack(IBlockSource isourceblock, ItemStack itemstack) {
+         EnumFacing enumdirection = (EnumFacing)isourceblock.getBlockState().getValue(BlockDispenser.FACING);
+         World world = isourceblock.getWorld();
+         double d0 = isourceblock.getX() + (double)enumdirection.getFrontOffsetX() * 1.125D;
+         double d1 = Math.floor(isourceblock.getY()) + (double)enumdirection.getFrontOffsetY();
+         double d2 = isourceblock.getZ() + (double)enumdirection.getFrontOffsetZ() * 1.125D;
+         BlockPos blockposition = isourceblock.getBlockPos().offset(enumdirection);
+         IBlockState iblockdata = world.getBlockState(blockposition);
+         BlockRailBase.EnumRailDirection blockminecarttrackabstract_enumtrackposition = iblockdata.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)iblockdata.getValue(((BlockRailBase)iblockdata.getBlock()).getShapeProperty()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+         double d3;
+         if (BlockRailBase.isRailBlock(iblockdata)) {
+            if (blockminecarttrackabstract_enumtrackposition.isAscending()) {
+               d3 = 0.6D;
             } else {
-               var14 = 0.1D;
+               d3 = 0.1D;
             }
          } else {
-            if (var12.getMaterial() != Material.AIR || !BlockRailBase.isRailBlock(var4.getBlockState(var11.down()))) {
-               return this.behaviourDefaultDispenseItem.dispense(var1, var2);
+            if (iblockdata.getMaterial() != Material.AIR || !BlockRailBase.isRailBlock(world.getBlockState(blockposition.down()))) {
+               return this.behaviourDefaultDispenseItem.dispense(isourceblock, itemstack);
             }
 
-            IBlockState var16 = var4.getBlockState(var11.down());
-            BlockRailBase.EnumRailDirection var17 = var16.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)var16.getValue(((BlockRailBase)var16.getBlock()).getShapeProperty()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
-            if (var3 != EnumFacing.DOWN && var17.isAscending()) {
-               var14 = -0.4D;
+            IBlockState iblockdata1 = world.getBlockState(blockposition.down());
+            BlockRailBase.EnumRailDirection blockminecarttrackabstract_enumtrackposition1 = iblockdata1.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)iblockdata1.getValue(((BlockRailBase)iblockdata1.getBlock()).getShapeProperty()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+            if (enumdirection != EnumFacing.DOWN && blockminecarttrackabstract_enumtrackposition1.isAscending()) {
+               d3 = -0.4D;
             } else {
-               var14 = -0.9D;
+               d3 = -0.9D;
             }
          }
 
-         EntityMinecart var18 = EntityMinecart.create(var4, var5, var7 + var14, var9, ((ItemMinecart)var2.getItem()).minecartType);
-         if (var2.hasDisplayName()) {
-            var18.setCustomNameTag(var2.getDisplayName());
+         ItemStack itemstack1 = itemstack.splitStack(1);
+         Block block2 = world.getWorld().getBlockAt(isourceblock.getBlockPos().getX(), isourceblock.getBlockPos().getY(), isourceblock.getBlockPos().getZ());
+         CraftItemStack craftItem = CraftItemStack.asCraftMirror(itemstack1);
+         BlockDispenseEvent event = new BlockDispenseEvent(block2, craftItem.clone(), new Vector(d0, d1 + d3, d2));
+         if (!BlockDispenser.eventFired) {
+            world.getServer().getPluginManager().callEvent(event);
          }
 
-         var4.spawnEntity(var18);
-         var2.splitStack(1);
-         return var2;
+         if (event.isCancelled()) {
+            ++itemstack.stackSize;
+            return itemstack;
+         } else {
+            if (!event.getItem().equals(craftItem)) {
+               ++itemstack.stackSize;
+               ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
+               IBehaviorDispenseItem idispensebehavior = (IBehaviorDispenseItem)BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(eventStack.getItem());
+               if (idispensebehavior != IBehaviorDispenseItem.DEFAULT_BEHAVIOR && idispensebehavior != this) {
+                  idispensebehavior.dispense(isourceblock, eventStack);
+                  return itemstack;
+               }
+            }
+
+            itemstack1 = CraftItemStack.asNMSCopy(event.getItem());
+            EntityMinecart entityminecartabstract = EntityMinecart.create(world, event.getVelocity().getX(), event.getVelocity().getY(), event.getVelocity().getZ(), ((ItemMinecart)itemstack1.getItem()).minecartType);
+            if (itemstack.hasDisplayName()) {
+               entityminecartabstract.setCustomNameTag(itemstack.getDisplayName());
+            }
+
+            world.spawnEntity(entityminecartabstract);
+            return itemstack;
+         }
       }
 
-      protected void playDispenseSound(IBlockSource var1) {
-         var1.getWorld().playEvent(1000, var1.getBlockPos(), 0);
+      protected void playDispenseSound(IBlockSource isourceblock) {
+         isourceblock.getWorld().playEvent(1000, isourceblock.getBlockPos(), 0);
       }
    };
    private final EntityMinecart.Type minecartType;
 
-   public ItemMinecart(EntityMinecart.Type var1) {
+   public ItemMinecart(EntityMinecart.Type entityminecartabstract_enumminecarttype) {
       this.maxStackSize = 1;
-      this.minecartType = var1;
+      this.minecartType = entityminecartabstract_enumminecarttype;
       this.setCreativeTab(CreativeTabs.TRANSPORTATION);
       BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, MINECART_DISPENSER_BEHAVIOR);
    }
 
-   public EnumActionResult onItemUse(ItemStack var1, EntityPlayer var2, World var3, BlockPos var4, EnumHand var5, EnumFacing var6, float var7, float var8, float var9) {
-      IBlockState var10 = var3.getBlockState(var4);
-      if (!BlockRailBase.isRailBlock(var10)) {
+   public EnumActionResult onItemUse(ItemStack itemstack, EntityPlayer entityhuman, World world, BlockPos blockposition, EnumHand enumhand, EnumFacing enumdirection, float f, float f1, float f2) {
+      IBlockState iblockdata = world.getBlockState(blockposition);
+      if (!BlockRailBase.isRailBlock(iblockdata)) {
          return EnumActionResult.FAIL;
       } else {
-         if (!var3.isRemote) {
-            BlockRailBase.EnumRailDirection var11 = var10.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)var10.getValue(((BlockRailBase)var10.getBlock()).getShapeProperty()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
-            double var12 = 0.0D;
-            if (var11.isAscending()) {
-               var12 = 0.5D;
+         if (!world.isRemote) {
+            BlockRailBase.EnumRailDirection blockminecarttrackabstract_enumtrackposition = iblockdata.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)iblockdata.getValue(((BlockRailBase)iblockdata.getBlock()).getShapeProperty()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+            double d0 = 0.0D;
+            if (blockminecarttrackabstract_enumtrackposition.isAscending()) {
+               d0 = 0.5D;
             }
 
-            EntityMinecart var14 = EntityMinecart.create(var3, (double)var4.getX() + 0.5D, (double)var4.getY() + 0.0625D + var12, (double)var4.getZ() + 0.5D, this.minecartType);
-            if (var1.hasDisplayName()) {
-               var14.setCustomNameTag(var1.getDisplayName());
+            EntityMinecart entityminecartabstract = EntityMinecart.create(world, (double)blockposition.getX() + 0.5D, (double)blockposition.getY() + 0.0625D + d0, (double)blockposition.getZ() + 0.5D, this.minecartType);
+            if (itemstack.hasDisplayName()) {
+               entityminecartabstract.setCustomNameTag(itemstack.getDisplayName());
             }
 
-            var3.spawnEntity(var14);
+            world.spawnEntity(entityminecartabstract);
          }
 
-         --var1.stackSize;
+         --itemstack.stackSize;
          return EnumActionResult.SUCCESS;
       }
    }

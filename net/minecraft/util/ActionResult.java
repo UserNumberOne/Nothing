@@ -16,8 +16,4 @@ public class ActionResult {
    public Object getResult() {
       return this.result;
    }
-
-   public static ActionResult newResult(EnumActionResult var0, Object var1) {
-      return new ActionResult(var0, var1);
-   }
 }

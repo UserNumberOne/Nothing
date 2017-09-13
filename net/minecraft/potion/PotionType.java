@@ -1,31 +1,18 @@
 package net.minecraft.potion;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.UnmodifiableIterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.init.MobEffects;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
-import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry.Impl;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class PotionType extends Impl {
-   /** @deprecated */
-   @Deprecated
+public class PotionType {
    private static final ResourceLocation WATER = new ResourceLocation("water");
-   public static final RegistryNamespacedDefaultedByKey REGISTRY = GameData.getPotionTypesRegistry();
+   public static final RegistryNamespacedDefaultedByKey REGISTRY = new RegistryNamespacedDefaultedByKey(WATER);
    private static int nextPotionTypeId;
    private final String baseName;
    private final ImmutableList effects;
-
-   @Nullable
-   @SideOnly(Side.CLIENT)
-   public static PotionType getPotionTypeForID(int var0) {
-      return (PotionType)REGISTRY.getObjectById(var0);
-   }
 
    public static int getID(PotionType var0) {
       return REGISTRY.getIDForObject(var0);
@@ -96,21 +83,5 @@ public class PotionType extends Impl {
 
    protected static void registerPotionType(String var0, PotionType var1) {
       REGISTRY.register(nextPotionTypeId++, new ResourceLocation(var0), var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasInstantEffect() {
-      if (!this.effects.isEmpty()) {
-         UnmodifiableIterator var1 = this.effects.iterator();
-
-         while(var1.hasNext()) {
-            PotionEffect var2 = (PotionEffect)var1.next();
-            if (var2.getPotion().isInstant()) {
-               return true;
-            }
-         }
-      }
-
-      return false;
    }
 }

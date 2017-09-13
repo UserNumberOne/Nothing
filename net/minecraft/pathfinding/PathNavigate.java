@@ -177,7 +177,6 @@ public abstract class PathNavigate {
             }
          }
       }
-
    }
 
    protected void pathFollow() {

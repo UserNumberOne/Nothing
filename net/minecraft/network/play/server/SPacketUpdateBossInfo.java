@@ -7,8 +7,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.BossInfo;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketUpdateBossInfo implements Packet {
    private UUID uniqueId;
@@ -119,51 +117,6 @@ public class SPacketUpdateBossInfo implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleUpdateBossInfo(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public UUID getUniqueId() {
-      return this.uniqueId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SPacketUpdateBossInfo.Operation getOperation() {
-      return this.operation;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getName() {
-      return this.name;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getPercent() {
-      return this.percent;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BossInfo.Color getColor() {
-      return this.color;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BossInfo.Overlay getOverlay() {
-      return this.overlay;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldDarkenSky() {
-      return this.darkenSky;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldPlayEndBossMusic() {
-      return this.playEndBossMusic;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldCreateFog() {
-      return this.createFog;
    }
 
    public static enum Operation {

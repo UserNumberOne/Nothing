@@ -109,6 +109,11 @@ public class BlockPattern {
       public BlockWorldState load(BlockPos var1) throws Exception {
          return new BlockWorldState(this.world, var1, this.forceLoad);
       }
+
+      // $FF: synthetic method
+      public Object load(Object var1) throws Exception {
+         return this.load((BlockPos)var1);
+      }
    }
 
    public static class PatternHelper {

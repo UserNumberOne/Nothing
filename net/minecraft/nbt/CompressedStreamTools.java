@@ -6,9 +6,6 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,24 +40,6 @@ public class CompressedStreamTools {
 
    }
 
-   public static void safeWrite(NBTTagCompound var0, File var1) throws IOException {
-      File var2 = new File(var1.getAbsolutePath() + "_tmp");
-      if (var2.exists()) {
-         var2.delete();
-      }
-
-      write(var0, var2);
-      if (var1.exists()) {
-         var1.delete();
-      }
-
-      if (var1.exists()) {
-         throw new IOException("Failed to delete " + var1);
-      } else {
-         var2.renameTo(var1);
-      }
-   }
-
    public static NBTTagCompound read(DataInputStream var0) throws IOException {
       return read(var0, NBTSizeTracker.INFINITE);
    }
@@ -84,17 +63,14 @@ public class CompressedStreamTools {
          var1.writeUTF("");
          var0.write(var1);
       }
-
    }
 
    private static NBTBase read(DataInput var0, int var1, NBTSizeTracker var2) throws IOException {
       byte var3 = var0.readByte();
-      var2.read(8L);
       if (var3 == 0) {
          return new NBTTagEnd();
       } else {
-         NBTSizeTracker.readUTF(var2, var0.readUTF());
-         var2.read(32L);
+         var0.readUTF();
          NBTBase var4 = NBTBase.createNewByType(var3);
 
          try {
@@ -107,34 +83,6 @@ public class CompressedStreamTools {
             var7.addCrashSection("Tag type", Byte.valueOf(var3));
             throw new ReportedException(var6);
          }
-      }
-   }
-
-   public static void write(NBTTagCompound var0, File var1) throws IOException {
-      DataOutputStream var2 = new DataOutputStream(new FileOutputStream(var1));
-
-      try {
-         write(var0, var2);
-      } finally {
-         var2.close();
-      }
-
-   }
-
-   public static NBTTagCompound read(File var0) throws IOException {
-      if (!var0.exists()) {
-         return null;
-      } else {
-         DataInputStream var1 = new DataInputStream(new FileInputStream(var0));
-
-         NBTTagCompound var2;
-         try {
-            var2 = read(var1, NBTSizeTracker.INFINITE);
-         } finally {
-            var1.close();
-         }
-
-         return var2;
       }
    }
 }

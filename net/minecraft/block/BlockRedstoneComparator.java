@@ -95,7 +95,11 @@ public class BlockRedstoneComparator extends BlockRedstoneDiode implements ITile
          return false;
       } else {
          int var5 = this.getPowerOnSides(var1, var2, var3);
-         return var5 == 0 ? true : var4 >= var5;
+         if (var5 == 0) {
+            return true;
+         } else {
+            return var4 >= var5;
+         }
       }
    }
 
@@ -128,6 +132,11 @@ public class BlockRedstoneComparator extends BlockRedstoneDiode implements ITile
          public boolean apply(@Nullable Entity var1) {
             return var1 != null && var1.getHorizontalFacing() == var2;
          }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1) {
+            return this.apply((Entity)var1);
+         }
       });
       return var4.size() == 1 ? (EntityItemFrame)var4.get(0) : null;
    }
@@ -157,8 +166,8 @@ public class BlockRedstoneComparator extends BlockRedstoneDiode implements ITile
                var1.updateBlockTick(var2, this, 2, 0);
             }
          }
-      }
 
+      }
    }
 
    private void onStateChange(World var1, BlockPos var2, IBlockState var3) {
@@ -246,17 +255,6 @@ public class BlockRedstoneComparator extends BlockRedstoneDiode implements ITile
 
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
       return this.getDefaultState().withProperty(FACING, var8.getHorizontalFacing().getOpposite()).withProperty(POWERED, Boolean.valueOf(false)).withProperty(MODE, BlockRedstoneComparator.Mode.COMPARE);
-   }
-
-   public void onNeighborChange(IBlockAccess var1, BlockPos var2, BlockPos var3) {
-      if (var2.getY() == var3.getY() && var1 instanceof World) {
-         this.neighborChanged(var1.getBlockState(var2), (World)var1, var2, var1.getBlockState(var3).getBlock());
-      }
-
-   }
-
-   public boolean getWeakChanges(IBlockAccess var1, BlockPos var2) {
-      return true;
    }
 
    public static enum Mode implements IStringSerializable {

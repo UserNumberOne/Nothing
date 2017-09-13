@@ -12,19 +12,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BlockLiquid extends Block {
    public static final PropertyInteger LEVEL = PropertyInteger.create("level", 0, 15);
@@ -79,12 +75,13 @@ public abstract class BlockLiquid extends Block {
 
    public boolean isBlockSolid(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
       Material var4 = var1.getBlockState(var2).getMaterial();
-      return var4 == this.blockMaterial ? false : (var3 == EnumFacing.UP ? true : (var4 == Material.ICE ? false : super.isBlockSolid(var1, var2, var3)));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return var2.getBlockState(var3.offset(var4)).getMaterial() == this.blockMaterial ? false : (var4 == EnumFacing.UP ? true : super.shouldSideBeRendered(var1, var2, var3, var4));
+      if (var4 == this.blockMaterial) {
+         return false;
+      } else if (var3 == EnumFacing.UP) {
+         return true;
+      } else {
+         return var4 == Material.ICE ? false : super.isBlockSolid(var1, var2, var3);
+      }
    }
 
    public EnumBlockRenderType getRenderType(IBlockState var1) {
@@ -148,21 +145,13 @@ public abstract class BlockLiquid extends Block {
    }
 
    public int tickRate(World var1) {
-      return this.blockMaterial == Material.WATER ? 5 : (this.blockMaterial == Material.LAVA ? (var1.provider.hasNoSky() ? 10 : 30) : 0);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldRenderSides(IBlockAccess var1, BlockPos var2) {
-      for(int var3 = -1; var3 <= 1; ++var3) {
-         for(int var4 = -1; var4 <= 1; ++var4) {
-            IBlockState var5 = var1.getBlockState(var2.add(var3, 0, var4));
-            if (var5.getMaterial() != this.blockMaterial && !var5.isFullBlock()) {
-               return true;
-            }
-         }
+      if (this.blockMaterial == Material.WATER) {
+         return 5;
+      } else if (this.blockMaterial == Material.LAVA) {
+         return var1.provider.hasNoSky() ? 10 : 30;
+      } else {
+         return 0;
       }
-
-      return false;
    }
 
    public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
@@ -171,74 +160,6 @@ public abstract class BlockLiquid extends Block {
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
       this.checkForMixing(var2, var3, var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getPackedLightmapCoords(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      int var4 = var2.getCombinedLight(var3, 0);
-      int var5 = var2.getCombinedLight(var3.up(), 0);
-      int var6 = var4 & 255;
-      int var7 = var5 & 255;
-      int var8 = var4 >> 16 & 255;
-      int var9 = var5 >> 16 & 255;
-      return (var6 > var7 ? var6 : var7) | (var8 > var9 ? var8 : var9) << 16;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return this.blockMaterial == Material.WATER ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      double var5 = (double)var3.getX();
-      double var7 = (double)var3.getY();
-      double var9 = (double)var3.getZ();
-      if (this.blockMaterial == Material.WATER) {
-         int var11 = ((Integer)var1.getValue(LEVEL)).intValue();
-         if (var11 > 0 && var11 < 8) {
-            if (var4.nextInt(64) == 0) {
-               var2.playSound(var5 + 0.5D, var7 + 0.5D, var9 + 0.5D, SoundEvents.BLOCK_WATER_AMBIENT, SoundCategory.BLOCKS, var4.nextFloat() * 0.25F + 0.75F, var4.nextFloat() + 0.5F, false);
-            }
-         } else if (var4.nextInt(10) == 0) {
-            var2.spawnParticle(EnumParticleTypes.SUSPENDED, var5 + (double)var4.nextFloat(), var7 + (double)var4.nextFloat(), var9 + (double)var4.nextFloat(), 0.0D, 0.0D, 0.0D);
-         }
-      }
-
-      if (this.blockMaterial == Material.LAVA && var2.getBlockState(var3.up()).getMaterial() == Material.AIR && !var2.getBlockState(var3.up()).isOpaqueCube()) {
-         if (var4.nextInt(100) == 0) {
-            double var18 = var5 + (double)var4.nextFloat();
-            double var13 = var7 + var1.getBoundingBox(var2, var3).maxY;
-            double var15 = var9 + (double)var4.nextFloat();
-            var2.spawnParticle(EnumParticleTypes.LAVA, var18, var13, var15, 0.0D, 0.0D, 0.0D);
-            var2.playSound(var18, var13, var15, SoundEvents.BLOCK_LAVA_POP, SoundCategory.BLOCKS, 0.2F + var4.nextFloat() * 0.2F, 0.9F + var4.nextFloat() * 0.15F, false);
-         }
-
-         if (var4.nextInt(200) == 0) {
-            var2.playSound(var5, var7, var9, SoundEvents.BLOCK_LAVA_AMBIENT, SoundCategory.BLOCKS, 0.2F + var4.nextFloat() * 0.2F, 0.9F + var4.nextFloat() * 0.15F, false);
-         }
-      }
-
-      if (var4.nextInt(10) == 0 && var2.getBlockState(var3.down()).isFullyOpaque()) {
-         Material var19 = var2.getBlockState(var3.down(2)).getMaterial();
-         if (!var19.blocksMovement() && !var19.isLiquid()) {
-            double var12 = var5 + (double)var4.nextFloat();
-            double var14 = var7 - 1.05D;
-            double var16 = var9 + (double)var4.nextFloat();
-            if (this.blockMaterial == Material.WATER) {
-               var2.spawnParticle(EnumParticleTypes.DRIP_WATER, var12, var14, var16, 0.0D, 0.0D, 0.0D);
-            } else {
-               var2.spawnParticle(EnumParticleTypes.DRIP_LAVA, var12, var14, var16, 0.0D, 0.0D, 0.0D);
-            }
-         }
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static float getSlopeAngle(IBlockAccess var0, BlockPos var1, Material var2, IBlockState var3) {
-      Vec3d var4 = getFlowingBlock(var2).getFlow(var0, var1, var3);
-      return var4.xCoord == 0.0D && var4.zCoord == 0.0D ? -1000.0F : (float)MathHelper.atan2(var4.zCoord, var4.xCoord) - 1.5707964F;
    }
 
    public boolean checkForMixing(World var1, BlockPos var2, IBlockState var3) {

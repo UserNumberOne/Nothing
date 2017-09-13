@@ -1,13 +1,14 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntityAIVillagerMate extends EntityAIBase {
    private final EntityVillager villagerObj;
@@ -16,9 +17,9 @@ public class EntityAIVillagerMate extends EntityAIBase {
    private int matingTimeout;
    Village villageObj;
 
-   public EntityAIVillagerMate(EntityVillager var1) {
-      this.villagerObj = var1;
-      this.world = var1.world;
+   public EntityAIVillagerMate(EntityVillager entityvillager) {
+      this.villagerObj = entityvillager;
+      this.world = entityvillager.world;
       this.setMutexBits(3);
    }
 
@@ -32,11 +33,11 @@ public class EntityAIVillagerMate extends EntityAIBase {
          if (this.villageObj == null) {
             return false;
          } else if (this.checkSufficientDoorsPresentForNewVillager() && this.villagerObj.getIsWillingToMate(true)) {
-            Entity var1 = this.world.findNearestEntityWithinAABB(EntityVillager.class, this.villagerObj.getEntityBoundingBox().expand(8.0D, 3.0D, 8.0D), this.villagerObj);
-            if (var1 == null) {
+            Entity entity = this.world.findNearestEntityWithinAABB(EntityVillager.class, this.villagerObj.getEntityBoundingBox().expand(8.0D, 3.0D, 8.0D), this.villagerObj);
+            if (entity == null) {
                return false;
             } else {
-               this.mate = (EntityVillager)var1;
+               this.mate = (EntityVillager)entity;
                return this.mate.getGrowingAge() == 0 && this.mate.getIsWillingToMate(true);
             }
          } else {
@@ -79,24 +80,22 @@ public class EntityAIVillagerMate extends EntityAIBase {
       if (!this.villageObj.isMatingSeason()) {
          return false;
       } else {
-         int var1 = (int)((double)((float)this.villageObj.getNumVillageDoors()) * 0.35D);
-         return this.villageObj.getNumVillagers() < var1;
+         int i = (int)((double)((float)this.villageObj.getNumVillageDoors()) * 0.35D);
+         return this.villageObj.getNumVillagers() < i;
       }
    }
 
    private void giveBirth() {
-      EntityVillager var1 = this.villagerObj.createChild(this.mate);
-      this.mate.setGrowingAge(6000);
-      this.villagerObj.setGrowingAge(6000);
-      this.mate.setIsWillingToMate(false);
-      this.villagerObj.setIsWillingToMate(false);
-      BabyEntitySpawnEvent var2 = new BabyEntitySpawnEvent(this.villagerObj, this.mate, var1);
-      if (!MinecraftForge.EVENT_BUS.post(var2) && var2.getChild() != null) {
-         EntityAgeable var3 = var2.getChild();
-         var3.setGrowingAge(-24000);
-         var3.setLocationAndAngles(this.villagerObj.posX, this.villagerObj.posY, this.villagerObj.posZ, 0.0F, 0.0F);
-         this.world.spawnEntity(var3);
-         this.world.setEntityState(var3, (byte)12);
+      EntityVillager entityvillager = this.villagerObj.createChild(this.mate);
+      if (!CraftEventFactory.callEntityBreedEvent(entityvillager, this.villagerObj, this.mate, (EntityLivingBase)null, (ItemStack)null, 0).isCancelled()) {
+         this.mate.setGrowingAge(6000);
+         this.villagerObj.setGrowingAge(6000);
+         this.mate.setIsWillingToMate(false);
+         this.villagerObj.setIsWillingToMate(false);
+         entityvillager.setGrowingAge(-24000);
+         entityvillager.setLocationAndAngles(this.villagerObj.posX, this.villagerObj.posY, this.villagerObj.posZ, 0.0F, 0.0F);
+         this.world.addEntity(entityvillager, SpawnReason.BREEDING);
+         this.world.setEntityState(entityvillager, (byte)12);
       }
    }
 }

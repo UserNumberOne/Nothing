@@ -15,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.Team;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIFindEntityNearestPlayer extends EntityAIBase {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -23,74 +24,78 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase {
    private final EntityAINearestAttackableTarget.Sorter sorter;
    private EntityLivingBase entityTarget;
 
-   public EntityAIFindEntityNearestPlayer(EntityLiving var1) {
-      this.entityLiving = var1;
-      if (var1 instanceof EntityCreature) {
+   public EntityAIFindEntityNearestPlayer(EntityLiving entityinsentient) {
+      this.entityLiving = entityinsentient;
+      if (entityinsentient instanceof EntityCreature) {
          LOGGER.warn("Use NearestAttackableTargetGoal.class for PathfinerMob mobs!");
       }
 
       this.predicate = new Predicate() {
-         public boolean apply(@Nullable Entity var1) {
-            if (!(var1 instanceof EntityPlayer)) {
+         public boolean apply(@Nullable Entity entity) {
+            if (!(entity instanceof EntityPlayer)) {
                return false;
-            } else if (((EntityPlayer)var1).capabilities.disableDamage) {
+            } else if (((EntityPlayer)entity).capabilities.disableDamage) {
                return false;
             } else {
-               double var2 = EntityAIFindEntityNearestPlayer.this.maxTargetRange();
-               if (var1.isSneaking()) {
-                  var2 *= 0.800000011920929D;
+               double d0 = EntityAIFindEntityNearestPlayer.this.maxTargetRange();
+               if (entity.isSneaking()) {
+                  d0 *= 0.800000011920929D;
                }
 
-               if (var1.isInvisible()) {
-                  float var4 = ((EntityPlayer)var1).getArmorVisibility();
-                  if (var4 < 0.1F) {
-                     var4 = 0.1F;
+               if (entity.isInvisible()) {
+                  float f = ((EntityPlayer)entity).getArmorVisibility();
+                  if (f < 0.1F) {
+                     f = 0.1F;
                   }
 
-                  var2 *= (double)(0.7F * var4);
+                  d0 *= (double)(0.7F * f);
                }
 
-               return (double)var1.getDistanceToEntity(EntityAIFindEntityNearestPlayer.this.entityLiving) > var2 ? false : EntityAITarget.isSuitableTarget(EntityAIFindEntityNearestPlayer.this.entityLiving, (EntityLivingBase)var1, false, true);
+               return (double)entity.getDistanceToEntity(EntityAIFindEntityNearestPlayer.this.entityLiving) > d0 ? false : EntityAITarget.isSuitableTarget(EntityAIFindEntityNearestPlayer.this.entityLiving, (EntityLivingBase)entity, false, true);
             }
          }
+
+         public boolean apply(Object object) {
+            return this.apply((Entity)object);
+         }
       };
-      this.sorter = new EntityAINearestAttackableTarget.Sorter(var1);
+      this.sorter = new EntityAINearestAttackableTarget.Sorter(entityinsentient);
    }
 
    public boolean shouldExecute() {
-      double var1 = this.maxTargetRange();
-      List var3 = this.entityLiving.world.getEntitiesWithinAABB(EntityPlayer.class, this.entityLiving.getEntityBoundingBox().expand(var1, 4.0D, var1), this.predicate);
-      Collections.sort(var3, this.sorter);
-      if (var3.isEmpty()) {
+      double d0 = this.maxTargetRange();
+      List list = this.entityLiving.world.getEntitiesWithinAABB(EntityPlayer.class, this.entityLiving.getEntityBoundingBox().expand(d0, 4.0D, d0), this.predicate);
+      Collections.sort(list, this.sorter);
+      if (list.isEmpty()) {
          return false;
       } else {
-         this.entityTarget = (EntityLivingBase)var3.get(0);
+         this.entityTarget = (EntityLivingBase)list.get(0);
          return true;
       }
    }
 
    public boolean continueExecuting() {
-      EntityLivingBase var1 = this.entityLiving.getAttackTarget();
-      if (var1 == null) {
+      EntityLivingBase entityliving = this.entityLiving.getAttackTarget();
+      if (entityliving == null) {
          return false;
-      } else if (!var1.isEntityAlive()) {
+      } else if (!entityliving.isEntityAlive()) {
          return false;
-      } else if (var1 instanceof EntityPlayer && ((EntityPlayer)var1).capabilities.disableDamage) {
+      } else if (entityliving instanceof EntityPlayer && ((EntityPlayer)entityliving).capabilities.disableDamage) {
          return false;
       } else {
-         Team var2 = this.entityLiving.getTeam();
-         Team var3 = var1.getTeam();
-         if (var2 != null && var3 == var2) {
+         Team scoreboardteambase = this.entityLiving.getTeam();
+         Team scoreboardteambase1 = entityliving.getTeam();
+         if (scoreboardteambase != null && scoreboardteambase1 == scoreboardteambase) {
             return false;
          } else {
-            double var4 = this.maxTargetRange();
-            return this.entityLiving.getDistanceSqToEntity(var1) > var4 * var4 ? false : !(var1 instanceof EntityPlayerMP) || !((EntityPlayerMP)var1).interactionManager.isCreative();
+            double d0 = this.maxTargetRange();
+            return this.entityLiving.getDistanceSqToEntity(entityliving) > d0 * d0 ? false : !(entityliving instanceof EntityPlayerMP) || !((EntityPlayerMP)entityliving).interactionManager.isCreative();
          }
       }
    }
 
    public void startExecuting() {
-      this.entityLiving.setAttackTarget(this.entityTarget);
+      this.entityLiving.setGoalTarget(this.entityTarget, TargetReason.CLOSEST_PLAYER, true);
       super.startExecuting();
    }
 
@@ -100,7 +105,7 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase {
    }
 
    protected double maxTargetRange() {
-      IAttributeInstance var1 = this.entityLiving.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
-      return var1 == null ? 16.0D : var1.getAttributeValue();
+      IAttributeInstance attributeinstance = this.entityLiving.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
+      return attributeinstance == null ? 16.0D : attributeinstance.getAttributeValue();
    }
 }

@@ -7,7 +7,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandEnchant extends CommandBase {
@@ -27,7 +27,7 @@ public class CommandEnchant extends CommandBase {
       if (var3.length < 2) {
          throw new WrongUsageException("commands.enchant.usage", new Object[0]);
       } else {
-         EntityLivingBase var4 = (EntityLivingBase)getEntity(var1, var2, var3[0], EntityLivingBase.class);
+         EntityLivingBase var4 = (EntityLivingBase)a(var1, var2, var3[0], EntityLivingBase.class);
          var2.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 0);
 
          Enchantment var5;
@@ -58,7 +58,7 @@ public class CommandEnchant extends CommandBase {
                         short var10 = var8.getCompoundTagAt(var9).getShort("id");
                         if (Enchantment.getEnchantmentByID(var10) != null) {
                            Enchantment var11 = Enchantment.getEnchantmentByID(var10);
-                           if (!var5.canApplyTogether(var11) || !var11.canApplyTogether(var5)) {
+                           if (!var5.canApplyTogether(var11)) {
                               throw new CommandException("commands.enchant.cantCombine", new Object[]{var5.getTranslatedName(var6), var11.getTranslatedName(var8.getCompoundTagAt(var9).getShort("lvl"))});
                            }
                         }
@@ -74,8 +74,12 @@ public class CommandEnchant extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : (var3.length == 2 ? getListOfStringsMatchingLastWord(var3, Enchantment.REGISTRY.getKeys()) : Collections.emptyList());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else {
+         return var3.length == 2 ? getListOfStringsMatchingLastWord(var3, Enchantment.REGISTRY.getKeys()) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

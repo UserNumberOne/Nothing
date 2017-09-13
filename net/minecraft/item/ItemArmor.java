@@ -27,17 +27,19 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.util.Vector;
 
 public class ItemArmor extends Item {
    private static final int[] MAX_DAMAGE_ARRAY = new int[]{13, 15, 16, 11};
    private static final UUID[] ARMOR_MODIFIERS = new UUID[]{UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"), UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"), UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"), UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150")};
    public static final String[] EMPTY_SLOT_NAMES = new String[]{"minecraft:items/empty_armor_slot_boots", "minecraft:items/empty_armor_slot_leggings", "minecraft:items/empty_armor_slot_chestplate", "minecraft:items/empty_armor_slot_helmet"};
    public static final IBehaviorDispenseItem DISPENSER_BEHAVIOR = new BehaviorDefaultDispenseItem() {
-      protected ItemStack dispenseStack(IBlockSource var1, ItemStack var2) {
-         ItemStack var3 = ItemArmor.dispenseArmor(var1, var2);
-         return var3 != null ? var3 : super.dispenseStack(var1, var2);
+      protected ItemStack dispenseStack(IBlockSource isourceblock, ItemStack itemstack) {
+         ItemStack itemstack1 = ItemArmor.dispenseArmor(isourceblock, itemstack);
+         return itemstack1 != null ? itemstack1 : super.dispenseStack(isourceblock, itemstack);
       }
    };
    public final EntityEquipmentSlot armorType;
@@ -46,41 +48,58 @@ public class ItemArmor extends Item {
    public final int renderIndex;
    private final ItemArmor.ArmorMaterial material;
 
-   public static ItemStack dispenseArmor(IBlockSource var0, ItemStack var1) {
-      BlockPos var2 = var0.getBlockPos().offset((EnumFacing)var0.getBlockState().getValue(BlockDispenser.FACING));
-      List var3 = var0.getWorld().getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(var2), Predicates.and(EntitySelectors.NOT_SPECTATING, new EntitySelectors.ArmoredMob(var1)));
-      if (var3.isEmpty()) {
+   public static ItemStack dispenseArmor(IBlockSource isourceblock, ItemStack itemstack) {
+      BlockPos blockposition = isourceblock.getBlockPos().offset((EnumFacing)isourceblock.getBlockState().getValue(BlockDispenser.FACING));
+      List list = isourceblock.getWorld().getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(blockposition), Predicates.and(EntitySelectors.NOT_SPECTATING, new EntitySelectors.ArmoredMob(itemstack)));
+      if (list.isEmpty()) {
          return null;
       } else {
-         EntityLivingBase var4 = (EntityLivingBase)var3.get(0);
-         EntityEquipmentSlot var5 = EntityLiving.getSlotForItemStack(var1);
-         ItemStack var6 = var1.copy();
-         var6.stackSize = 1;
-         var4.setItemStackToSlot(var5, var6);
-         if (var4 instanceof EntityLiving) {
-            ((EntityLiving)var4).setDropChance(var5, 2.0F);
+         EntityLivingBase entityliving = (EntityLivingBase)list.get(0);
+         EntityEquipmentSlot enumitemslot = EntityLiving.getSlotForItemStack(itemstack);
+         ItemStack itemstack1 = itemstack.splitStack(1);
+         World world = isourceblock.getWorld();
+         Block block = world.getWorld().getBlockAt(isourceblock.getBlockPos().getX(), isourceblock.getBlockPos().getY(), isourceblock.getBlockPos().getZ());
+         CraftItemStack craftItem = CraftItemStack.asCraftMirror(itemstack1);
+         BlockDispenseEvent event = new BlockDispenseEvent(block, craftItem.clone(), new Vector(0, 0, 0));
+         if (!BlockDispenser.eventFired) {
+            world.getServer().getPluginManager().callEvent(event);
          }
 
-         --var1.stackSize;
-         return var1;
+         if (event.isCancelled()) {
+            ++itemstack.stackSize;
+            return itemstack;
+         } else {
+            if (!event.getItem().equals(craftItem)) {
+               ++itemstack.stackSize;
+               ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
+               IBehaviorDispenseItem idispensebehavior = (IBehaviorDispenseItem)BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(eventStack.getItem());
+               if (idispensebehavior != IBehaviorDispenseItem.DEFAULT_BEHAVIOR && idispensebehavior != DISPENSER_BEHAVIOR) {
+                  idispensebehavior.dispense(isourceblock, eventStack);
+                  return itemstack;
+               }
+            }
+
+            itemstack1.stackSize = 1;
+            entityliving.setItemStackToSlot(enumitemslot, itemstack1);
+            if (entityliving instanceof EntityLiving) {
+               ((EntityLiving)entityliving).setDropChance(enumitemslot, 2.0F);
+            }
+
+            return itemstack;
+         }
       }
    }
 
-   public ItemArmor(ItemArmor.ArmorMaterial var1, int var2, EntityEquipmentSlot var3) {
-      this.material = var1;
-      this.armorType = var3;
-      this.renderIndex = var2;
-      this.damageReduceAmount = var1.getDamageReductionAmount(var3);
-      this.setMaxDamage(var1.getDurability(var3));
-      this.toughness = var1.getToughness();
+   public ItemArmor(ItemArmor.ArmorMaterial itemarmor_enumarmormaterial, int i, EntityEquipmentSlot enumitemslot) {
+      this.material = itemarmor_enumarmormaterial;
+      this.armorType = enumitemslot;
+      this.renderIndex = i;
+      this.damageReduceAmount = itemarmor_enumarmormaterial.getDamageReductionAmount(enumitemslot);
+      this.setMaxDamage(itemarmor_enumarmormaterial.getDurability(enumitemslot));
+      this.toughness = itemarmor_enumarmormaterial.getToughness();
       this.maxStackSize = 1;
       this.setCreativeTab(CreativeTabs.COMBAT);
       BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, DISPENSER_BEHAVIOR);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EntityEquipmentSlot getEquipmentSlot() {
-      return this.armorType;
    }
 
    public int getItemEnchantability() {
@@ -91,24 +110,24 @@ public class ItemArmor extends Item {
       return this.material;
    }
 
-   public boolean hasColor(ItemStack var1) {
+   public boolean hasColor(ItemStack itemstack) {
       if (this.material != ItemArmor.ArmorMaterial.LEATHER) {
          return false;
       } else {
-         NBTTagCompound var2 = var1.getTagCompound();
-         return var2 != null && var2.hasKey("display", 10) ? var2.getCompoundTag("display").hasKey("color", 3) : false;
+         NBTTagCompound nbttagcompound = itemstack.getTagCompound();
+         return nbttagcompound != null && nbttagcompound.hasKey("display", 10) ? nbttagcompound.getCompoundTag("display").hasKey("color", 3) : false;
       }
    }
 
-   public int getColor(ItemStack var1) {
+   public int getColor(ItemStack itemstack) {
       if (this.material != ItemArmor.ArmorMaterial.LEATHER) {
          return 16777215;
       } else {
-         NBTTagCompound var2 = var1.getTagCompound();
-         if (var2 != null) {
-            NBTTagCompound var3 = var2.getCompoundTag("display");
-            if (var3 != null && var3.hasKey("color", 3)) {
-               return var3.getInteger("color");
+         NBTTagCompound nbttagcompound = itemstack.getTagCompound();
+         if (nbttagcompound != null) {
+            NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("display");
+            if (nbttagcompound1 != null && nbttagcompound1.hasKey("color", 3)) {
+               return nbttagcompound1.getInteger("color");
             }
          }
 
@@ -116,66 +135,62 @@ public class ItemArmor extends Item {
       }
    }
 
-   public void removeColor(ItemStack var1) {
+   public void removeColor(ItemStack itemstack) {
       if (this.material == ItemArmor.ArmorMaterial.LEATHER) {
-         NBTTagCompound var2 = var1.getTagCompound();
-         if (var2 != null) {
-            NBTTagCompound var3 = var2.getCompoundTag("display");
-            if (var3.hasKey("color")) {
-               var3.removeTag("color");
+         NBTTagCompound nbttagcompound = itemstack.getTagCompound();
+         if (nbttagcompound != null) {
+            NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("display");
+            if (nbttagcompound1.hasKey("color")) {
+               nbttagcompound1.removeTag("color");
             }
          }
       }
 
    }
 
-   public void setColor(ItemStack var1, int var2) {
+   public void setColor(ItemStack itemstack, int i) {
       if (this.material != ItemArmor.ArmorMaterial.LEATHER) {
          throw new UnsupportedOperationException("Can't dye non-leather!");
       } else {
-         NBTTagCompound var3 = var1.getTagCompound();
-         if (var3 == null) {
-            var3 = new NBTTagCompound();
-            var1.setTagCompound(var3);
+         NBTTagCompound nbttagcompound = itemstack.getTagCompound();
+         if (nbttagcompound == null) {
+            nbttagcompound = new NBTTagCompound();
+            itemstack.setTagCompound(nbttagcompound);
          }
 
-         NBTTagCompound var4 = var3.getCompoundTag("display");
-         if (!var3.hasKey("display", 10)) {
-            var3.setTag("display", var4);
+         NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("display");
+         if (!nbttagcompound.hasKey("display", 10)) {
+            nbttagcompound.setTag("display", nbttagcompound1);
          }
 
-         var4.setInteger("color", var2);
+         nbttagcompound1.setInteger("color", i);
       }
    }
 
-   public boolean getIsRepairable(ItemStack var1, ItemStack var2) {
-      return this.material.getRepairItem() == var2.getItem() ? true : super.getIsRepairable(var1, var2);
+   public boolean getIsRepairable(ItemStack itemstack, ItemStack itemstack1) {
+      return this.material.getRepairItem() == itemstack1.getItem() ? true : super.getIsRepairable(itemstack, itemstack1);
    }
 
-   public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      EntityEquipmentSlot var5 = EntityLiving.getSlotForItemStack(var1);
-      ItemStack var6 = var3.getItemStackFromSlot(var5);
-      if (var6 == null) {
-         var3.setItemStackToSlot(var5, var1.copy());
-         var1.stackSize = 0;
-         return new ActionResult(EnumActionResult.SUCCESS, var1);
+   public ActionResult onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityhuman, EnumHand enumhand) {
+      EntityEquipmentSlot enumitemslot = EntityLiving.getSlotForItemStack(itemstack);
+      ItemStack itemstack1 = entityhuman.getItemStackFromSlot(enumitemslot);
+      if (itemstack1 == null) {
+         entityhuman.setItemStackToSlot(enumitemslot, itemstack.copy());
+         itemstack.stackSize = 0;
+         return new ActionResult(EnumActionResult.SUCCESS, itemstack);
       } else {
-         return new ActionResult(EnumActionResult.FAIL, var1);
+         return new ActionResult(EnumActionResult.FAIL, itemstack);
       }
    }
 
-   public Multimap getItemAttributeModifiers(EntityEquipmentSlot var1) {
-      Multimap var2 = super.getItemAttributeModifiers(var1);
-      if (var1 == this.armorType) {
-         var2.put(SharedMonsterAttributes.ARMOR.getName(), new AttributeModifier(ARMOR_MODIFIERS[var1.getIndex()], "Armor modifier", (double)this.damageReduceAmount, 0));
-         var2.put(SharedMonsterAttributes.ARMOR_TOUGHNESS.getName(), new AttributeModifier(ARMOR_MODIFIERS[var1.getIndex()], "Armor toughness", (double)this.toughness, 0));
+   public Multimap getItemAttributeModifiers(EntityEquipmentSlot enumitemslot) {
+      Multimap multimap = super.getItemAttributeModifiers(enumitemslot);
+      if (enumitemslot == this.armorType) {
+         multimap.put(SharedMonsterAttributes.ARMOR.getName(), new AttributeModifier(ARMOR_MODIFIERS[enumitemslot.getIndex()], "Armor modifier", (double)this.damageReduceAmount, 0));
+         multimap.put(SharedMonsterAttributes.ARMOR_TOUGHNESS.getName(), new AttributeModifier(ARMOR_MODIFIERS[enumitemslot.getIndex()], "Armor toughness", (double)this.toughness, 0));
       }
 
-      return var2;
-   }
-
-   public boolean hasOverlay(ItemStack var1) {
-      return this.material == ItemArmor.ArmorMaterial.LEATHER || this.getColor(var1) != 16777215;
+      return multimap;
    }
 
    public static enum ArmorMaterial {
@@ -191,23 +206,22 @@ public class ItemArmor extends Item {
       private final int enchantability;
       private final SoundEvent soundEvent;
       private final float toughness;
-      public Item customCraftingMaterial = null;
 
-      private ArmorMaterial(String var3, int var4, int[] var5, int var6, SoundEvent var7, float var8) {
-         this.name = var3;
-         this.maxDamageFactor = var4;
-         this.damageReductionAmountArray = var5;
-         this.enchantability = var6;
-         this.soundEvent = var7;
-         this.toughness = var8;
+      private ArmorMaterial(String s, int i, int[] aint, int j, SoundEvent soundeffect, float f) {
+         this.name = s;
+         this.maxDamageFactor = i;
+         this.damageReductionAmountArray = aint;
+         this.enchantability = j;
+         this.soundEvent = soundeffect;
+         this.toughness = f;
       }
 
-      public int getDurability(EntityEquipmentSlot var1) {
-         return ItemArmor.MAX_DAMAGE_ARRAY[var1.getIndex()] * this.maxDamageFactor;
+      public int getDurability(EntityEquipmentSlot enumitemslot) {
+         return ItemArmor.MAX_DAMAGE_ARRAY[enumitemslot.getIndex()] * this.maxDamageFactor;
       }
 
-      public int getDamageReductionAmount(EntityEquipmentSlot var1) {
-         return this.damageReductionAmountArray[var1.getIndex()];
+      public int getDamageReductionAmount(EntityEquipmentSlot enumitemslot) {
+         return this.damageReductionAmountArray[enumitemslot.getIndex()];
       }
 
       public int getEnchantability() {
@@ -219,25 +233,7 @@ public class ItemArmor extends Item {
       }
 
       public Item getRepairItem() {
-         switch(this) {
-         case LEATHER:
-            return Items.LEATHER;
-         case CHAIN:
-            return Items.IRON_INGOT;
-         case GOLD:
-            return Items.GOLD_INGOT;
-         case IRON:
-            return Items.IRON_INGOT;
-         case DIAMOND:
-            return Items.DIAMOND;
-         default:
-            return this.customCraftingMaterial;
-         }
-      }
-
-      @SideOnly(Side.CLIENT)
-      public String getName() {
-         return this.name;
+         return this == LEATHER ? Items.LEATHER : (this == CHAIN ? Items.IRON_INGOT : (this == GOLD ? Items.GOLD_INGOT : (this == IRON ? Items.IRON_INGOT : (this == DIAMOND ? Items.DIAMOND : null))));
       }
 
       public float getToughness() {

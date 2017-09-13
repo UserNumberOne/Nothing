@@ -8,73 +8,51 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
-import net.minecraftforge.common.ISpecialArmor;
 
 public class EnchantmentThorns extends Enchantment {
-   public EnchantmentThorns(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
-      super(var1, EnumEnchantmentType.ARMOR_CHEST, var2);
+   public EnchantmentThorns(Enchantment.Rarity enchantment_rarity, EntityEquipmentSlot... aenumitemslot) {
+      super(enchantment_rarity, EnumEnchantmentType.ARMOR_CHEST, aenumitemslot);
       this.setName("thorns");
    }
 
-   public int getMinEnchantability(int var1) {
-      return 10 + 20 * (var1 - 1);
+   public int getMinEnchantability(int i) {
+      return 10 + 20 * (i - 1);
    }
 
-   public int getMaxEnchantability(int var1) {
-      return super.getMinEnchantability(var1) + 50;
+   public int getMaxEnchantability(int i) {
+      return super.getMinEnchantability(i) + 50;
    }
 
    public int getMaxLevel() {
       return 3;
    }
 
-   public boolean canApply(ItemStack var1) {
-      return var1.getItem() instanceof ItemArmor ? true : super.canApply(var1);
+   public boolean canApply(ItemStack itemstack) {
+      return itemstack.getItem() instanceof ItemArmor ? true : super.canApply(itemstack);
    }
 
-   public void onUserHurt(EntityLivingBase var1, Entity var2, int var3) {
-      Random var4 = var1.getRNG();
-      ItemStack var5 = EnchantmentHelper.getEnchantedItem(Enchantments.THORNS, var1);
-      if (shouldHit(var3, var4)) {
-         if (var2 != null) {
-            var2.attackEntityFrom(DamageSource.causeThornsDamage(var1), (float)getDamage(var3, var4));
+   public void onUserHurt(EntityLivingBase entityliving, Entity entity, int i) {
+      Random random = entityliving.getRNG();
+      ItemStack itemstack = EnchantmentHelper.getEnchantedItem(Enchantments.THORNS, entityliving);
+      if (entity != null && shouldHit(i, random)) {
+         if (entity != null) {
+            entity.attackEntityFrom(DamageSource.causeThornsDamage(entityliving), (float)getDamage(i, random));
          }
 
-         if (var5 != null) {
-            this.damageArmor(var5, 3, var1);
+         if (itemstack != null) {
+            itemstack.damageItem(3, entityliving);
          }
-      } else if (var5 != null) {
-         this.damageArmor(var5, 1, var1);
+      } else if (itemstack != null) {
+         itemstack.damageItem(1, entityliving);
       }
 
    }
 
-   public static boolean shouldHit(int var0, Random var1) {
-      return var0 <= 0 ? false : var1.nextFloat() < 0.15F * (float)var0;
+   public static boolean shouldHit(int i, Random random) {
+      return i <= 0 ? false : random.nextFloat() < 0.15F * (float)i;
    }
 
-   public static int getDamage(int var0, Random var1) {
-      return var0 > 10 ? var0 - 10 : 1 + var1.nextInt(4);
-   }
-
-   private void damageArmor(ItemStack var1, int var2, EntityLivingBase var3) {
-      int var4 = -1;
-      int var5 = 0;
-
-      for(ItemStack var7 : var3.getArmorInventoryList()) {
-         if (var7 == var1) {
-            var4 = var5;
-            break;
-         }
-
-         ++var5;
-      }
-
-      if (var4 != -1 && var1.getItem() instanceof ISpecialArmor) {
-         ISpecialArmor var8 = (ISpecialArmor)var1.getItem();
-         var8.damageArmor(var3, var1, DamageSource.causeThornsDamage(var3), var2, var4);
-      } else {
-         var1.damageItem(1, var3);
-      }
+   public static int getDamage(int i, Random random) {
+      return i > 10 ? i - 10 : 1 + random.nextInt(4);
    }
 }

@@ -104,15 +104,15 @@ public class PathFinder {
          ++var3;
       }
 
-      PathPoint[] var7 = new PathPoint[var3];
-      PathPoint var5 = var2;
+      PathPoint[] var5 = new PathPoint[var3];
+      PathPoint var7 = var2;
       --var3;
 
-      for(var7[var3] = var2; var5.previous != null; var7[var3] = var5) {
-         var5 = var5.previous;
+      for(var5[var3] = var2; var7.previous != null; var5[var3] = var7) {
+         var7 = var7.previous;
          --var3;
       }
 
-      return new Path(var7);
+      return new Path(var5);
    }
 }

@@ -19,18 +19,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBrewingStand;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockBrewingStand extends BlockContainer {
    public static final PropertyBool[] HAS_BOTTLE = new PropertyBool[]{PropertyBool.create("has_bottle_0"), PropertyBool.create("has_bottle_1"), PropertyBool.create("has_bottle_2")};
@@ -95,14 +91,6 @@ public class BlockBrewingStand extends BlockContainer {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      double var5 = (double)((float)var3.getX() + 0.4F + var4.nextFloat() * 0.2F);
-      double var7 = (double)((float)var3.getY() + 0.7F + var4.nextFloat() * 0.3F);
-      double var9 = (double)((float)var3.getZ() + 0.4F + var4.nextFloat() * 0.2F);
-      var2.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var5, var7, var9, 0.0D, 0.0D, 0.0D);
-   }
-
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
       TileEntity var4 = var1.getTileEntity(var2);
       if (var4 instanceof TileEntityBrewingStand) {
@@ -127,11 +115,6 @@ public class BlockBrewingStand extends BlockContainer {
 
    public int getComparatorInputOverride(IBlockState var1, World var2, BlockPos var3) {
       return Container.calcRedstone(var2.getTileEntity(var3));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 
    public IBlockState getStateFromMeta(int var1) {

@@ -7,8 +7,6 @@ import java.util.List;
 import javax.annotation.concurrent.Immutable;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -165,6 +163,11 @@ public class BlockPos extends Vec3i {
                      return this.lastReturned;
                   }
                }
+
+               // $FF: synthetic method
+               protected Object computeNext() {
+                  return this.computeNext();
+               }
             };
          }
       };
@@ -209,9 +212,19 @@ public class BlockPos extends Vec3i {
                      return this.theBlockPos;
                   }
                }
+
+               // $FF: synthetic method
+               protected Object computeNext() {
+                  return this.computeNext();
+               }
             };
          }
       };
+   }
+
+   // $FF: synthetic method
+   public Vec3i crossProduct(Vec3i var1) {
+      return this.crossProduct(var1);
    }
 
    public static class MutableBlockPos extends BlockPos {
@@ -257,11 +270,6 @@ public class BlockPos extends Vec3i {
          return this.setPos(MathHelper.floor(var1), MathHelper.floor(var3), MathHelper.floor(var5));
       }
 
-      @SideOnly(Side.CLIENT)
-      public BlockPos.MutableBlockPos setPos(Entity var1) {
-         return this.setPos(var1.posX, var1.posY, var1.posZ);
-      }
-
       public BlockPos.MutableBlockPos setPos(Vec3i var1) {
          return this.setPos(var1.getX(), var1.getY(), var1.getZ());
       }
@@ -281,6 +289,11 @@ public class BlockPos extends Vec3i {
       public BlockPos toImmutable() {
          return new BlockPos(this);
       }
+
+      // $FF: synthetic method
+      public Vec3i crossProduct(Vec3i var1) {
+         return super.crossProduct(var1);
+      }
    }
 
    public static final class PooledMutableBlockPos extends BlockPos.MutableBlockPos {
@@ -297,11 +310,6 @@ public class BlockPos extends Vec3i {
 
       public static BlockPos.PooledMutableBlockPos retain(double var0, double var2, double var4) {
          return retain(MathHelper.floor(var0), MathHelper.floor(var2), MathHelper.floor(var4));
-      }
-
-      @SideOnly(Side.CLIENT)
-      public static BlockPos.PooledMutableBlockPos retain(Vec3i var0) {
-         return retain(var0.getX(), var0.getY(), var0.getZ());
       }
 
       public static BlockPos.PooledMutableBlockPos retain(int var0, int var1, int var2) {
@@ -338,11 +346,6 @@ public class BlockPos extends Vec3i {
          return (BlockPos.PooledMutableBlockPos)super.setPos(var1, var2, var3);
       }
 
-      @SideOnly(Side.CLIENT)
-      public BlockPos.PooledMutableBlockPos setPos(Entity var1) {
-         return (BlockPos.PooledMutableBlockPos)super.setPos(var1);
-      }
-
       public BlockPos.PooledMutableBlockPos setPos(double var1, double var3, double var5) {
          return (BlockPos.PooledMutableBlockPos)super.setPos(var1, var3, var5);
       }
@@ -357,6 +360,31 @@ public class BlockPos extends Vec3i {
 
       public BlockPos.PooledMutableBlockPos move(EnumFacing var1, int var2) {
          return (BlockPos.PooledMutableBlockPos)super.move(var1, var2);
+      }
+
+      // $FF: synthetic method
+      public BlockPos.MutableBlockPos move(EnumFacing var1, int var2) {
+         return this.move(var1, var2);
+      }
+
+      // $FF: synthetic method
+      public BlockPos.MutableBlockPos move(EnumFacing var1) {
+         return this.move(var1);
+      }
+
+      // $FF: synthetic method
+      public BlockPos.MutableBlockPos setPos(Vec3i var1) {
+         return this.setPos(var1);
+      }
+
+      // $FF: synthetic method
+      public BlockPos.MutableBlockPos setPos(double var1, double var3, double var5) {
+         return this.setPos(var1, var3, var5);
+      }
+
+      // $FF: synthetic method
+      public BlockPos.MutableBlockPos setPos(int var1, int var2, int var3) {
+         return this.setPos(var1, var2, var3);
       }
    }
 }

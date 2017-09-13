@@ -21,7 +21,15 @@ public class EntityAILeapAtTarget extends EntityAIBase {
          return false;
       } else {
          double var1 = this.leaper.getDistanceSqToEntity(this.leapTarget);
-         return var1 >= 4.0D && var1 <= 16.0D ? (!this.leaper.onGround ? false : this.leaper.getRNG().nextInt(5) == 0) : false;
+         if (var1 >= 4.0D && var1 <= 16.0D) {
+            if (!this.leaper.onGround) {
+               return false;
+            } else {
+               return this.leaper.getRNG().nextInt(5) == 0;
+            }
+         } else {
+            return false;
+         }
       }
    }
 

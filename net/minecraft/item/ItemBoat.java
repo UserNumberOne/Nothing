@@ -16,74 +16,80 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 public class ItemBoat extends Item {
    private final EntityBoat.Type type;
 
-   public ItemBoat(EntityBoat.Type var1) {
-      this.type = var1;
+   public ItemBoat(EntityBoat.Type entityboat_enumboattype) {
+      this.type = entityboat_enumboattype;
       this.maxStackSize = 1;
       this.setCreativeTab(CreativeTabs.TRANSPORTATION);
-      this.setUnlocalizedName("boat." + var1.getName());
+      this.setUnlocalizedName("boat." + entityboat_enumboattype.getName());
    }
 
-   public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      float var5 = 1.0F;
-      float var6 = var3.prevRotationPitch + (var3.rotationPitch - var3.prevRotationPitch) * 1.0F;
-      float var7 = var3.prevRotationYaw + (var3.rotationYaw - var3.prevRotationYaw) * 1.0F;
-      double var8 = var3.prevPosX + (var3.posX - var3.prevPosX) * 1.0D;
-      double var10 = var3.prevPosY + (var3.posY - var3.prevPosY) * 1.0D + (double)var3.getEyeHeight();
-      double var12 = var3.prevPosZ + (var3.posZ - var3.prevPosZ) * 1.0D;
-      Vec3d var14 = new Vec3d(var8, var10, var12);
-      float var15 = MathHelper.cos(-var7 * 0.017453292F - 3.1415927F);
-      float var16 = MathHelper.sin(-var7 * 0.017453292F - 3.1415927F);
-      float var17 = -MathHelper.cos(-var6 * 0.017453292F);
-      float var18 = MathHelper.sin(-var6 * 0.017453292F);
-      float var19 = var16 * var17;
-      float var20 = var15 * var17;
-      double var21 = 5.0D;
-      Vec3d var23 = var14.addVector((double)var19 * 5.0D, (double)var18 * 5.0D, (double)var20 * 5.0D);
-      RayTraceResult var24 = var2.rayTraceBlocks(var14, var23, true);
-      if (var24 == null) {
-         return new ActionResult(EnumActionResult.PASS, var1);
+   public ActionResult onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityhuman, EnumHand enumhand) {
+      float f1 = entityhuman.prevRotationPitch + (entityhuman.rotationPitch - entityhuman.prevRotationPitch) * 1.0F;
+      float f2 = entityhuman.prevRotationYaw + (entityhuman.rotationYaw - entityhuman.prevRotationYaw) * 1.0F;
+      double d0 = entityhuman.prevPosX + (entityhuman.posX - entityhuman.prevPosX) * 1.0D;
+      double d1 = entityhuman.prevPosY + (entityhuman.posY - entityhuman.prevPosY) * 1.0D + (double)entityhuman.getEyeHeight();
+      double d2 = entityhuman.prevPosZ + (entityhuman.posZ - entityhuman.prevPosZ) * 1.0D;
+      Vec3d vec3d = new Vec3d(d0, d1, d2);
+      float f3 = MathHelper.cos(-f2 * 0.017453292F - 3.1415927F);
+      float f4 = MathHelper.sin(-f2 * 0.017453292F - 3.1415927F);
+      float f5 = -MathHelper.cos(-f1 * 0.017453292F);
+      float f6 = MathHelper.sin(-f1 * 0.017453292F);
+      float f7 = f4 * f5;
+      float f8 = f3 * f5;
+      Vec3d vec3d1 = vec3d.addVector((double)f7 * 5.0D, (double)f6 * 5.0D, (double)f8 * 5.0D);
+      RayTraceResult movingobjectposition = world.rayTraceBlocks(vec3d, vec3d1, true);
+      if (movingobjectposition == null) {
+         return new ActionResult(EnumActionResult.PASS, itemstack);
       } else {
-         Vec3d var25 = var3.getLook(1.0F);
-         boolean var26 = false;
-         List var27 = var2.getEntitiesWithinAABBExcludingEntity(var3, var3.getEntityBoundingBox().addCoord(var25.xCoord * 5.0D, var25.yCoord * 5.0D, var25.zCoord * 5.0D).expandXyz(1.0D));
+         Vec3d vec3d2 = entityhuman.getLook(1.0F);
+         boolean flag = false;
+         List list = world.getEntitiesWithinAABBExcludingEntity(entityhuman, entityhuman.getEntityBoundingBox().addCoord(vec3d2.xCoord * 5.0D, vec3d2.yCoord * 5.0D, vec3d2.zCoord * 5.0D).expandXyz(1.0D));
 
-         for(int var28 = 0; var28 < var27.size(); ++var28) {
-            Entity var29 = (Entity)var27.get(var28);
-            if (var29.canBeCollidedWith()) {
-               AxisAlignedBB var30 = var29.getEntityBoundingBox().expandXyz((double)var29.getCollisionBorderSize());
-               if (var30.isVecInside(var14)) {
-                  var26 = true;
+         for(int i = 0; i < list.size(); ++i) {
+            Entity entity = (Entity)list.get(i);
+            if (entity.canBeCollidedWith()) {
+               AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().expandXyz((double)entity.getCollisionBorderSize());
+               if (axisalignedbb.isVecInside(vec3d)) {
+                  flag = true;
                }
             }
          }
 
-         if (var26) {
-            return new ActionResult(EnumActionResult.PASS, var1);
-         } else if (var24.typeOfHit != RayTraceResult.Type.BLOCK) {
-            return new ActionResult(EnumActionResult.PASS, var1);
+         if (flag) {
+            return new ActionResult(EnumActionResult.PASS, itemstack);
+         } else if (movingobjectposition.typeOfHit != RayTraceResult.Type.BLOCK) {
+            return new ActionResult(EnumActionResult.PASS, itemstack);
          } else {
-            Block var31 = var2.getBlockState(var24.getBlockPos()).getBlock();
-            boolean var32 = var31 == Blocks.WATER || var31 == Blocks.FLOWING_WATER;
-            EntityBoat var33 = new EntityBoat(var2, var24.hitVec.xCoord, var32 ? var24.hitVec.yCoord - 0.12D : var24.hitVec.yCoord, var24.hitVec.zCoord);
-            var33.setBoatType(this.type);
-            var33.rotationYaw = var3.rotationYaw;
-            if (!var2.getCollisionBoxes(var33, var33.getEntityBoundingBox().expandXyz(-0.1D)).isEmpty()) {
-               return new ActionResult(EnumActionResult.FAIL, var1);
+            PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(entityhuman, Action.RIGHT_CLICK_BLOCK, movingobjectposition.getBlockPos(), movingobjectposition.sideHit, itemstack, enumhand);
+            if (event.isCancelled()) {
+               return new ActionResult(EnumActionResult.PASS, itemstack);
             } else {
-               if (!var2.isRemote) {
-                  var2.spawnEntity(var33);
-               }
+               Block block = world.getBlockState(movingobjectposition.getBlockPos()).getBlock();
+               boolean flag1 = block == Blocks.WATER || block == Blocks.FLOWING_WATER;
+               EntityBoat entityboat = new EntityBoat(world, movingobjectposition.hitVec.xCoord, flag1 ? movingobjectposition.hitVec.yCoord - 0.12D : movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+               entityboat.setBoatType(this.type);
+               entityboat.rotationYaw = entityhuman.rotationYaw;
+               if (!world.getCollisionBoxes(entityboat, entityboat.getEntityBoundingBox().expandXyz(-0.1D)).isEmpty()) {
+                  return new ActionResult(EnumActionResult.FAIL, itemstack);
+               } else {
+                  if (!world.isRemote) {
+                     world.spawnEntity(entityboat);
+                  }
 
-               if (!var3.capabilities.isCreativeMode) {
-                  --var1.stackSize;
-               }
+                  if (!entityhuman.capabilities.isCreativeMode) {
+                     --itemstack.stackSize;
+                  }
 
-               var3.addStat(StatList.getObjectUseStats(this));
-               return new ActionResult(EnumActionResult.SUCCESS, var1);
+                  entityhuman.addStat(StatList.getObjectUseStats(this));
+                  return new ActionResult(EnumActionResult.SUCCESS, itemstack);
+               }
             }
          }
       }

@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketCustomSound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -35,7 +35,7 @@ public class CommandPlaySound extends CommandBase {
          if (var7 == null) {
             throw new CommandException("commands.playsound.unknownSoundSource", new Object[]{var6});
          } else {
-            EntityPlayerMP var8 = getPlayer(var1, var2, var3[var4++]);
+            EntityPlayerMP var8 = a(var1, var2, var3[var4++]);
             Vec3d var9 = var2.getPositionVector();
             double var10 = var9.xCoord;
             if (var3.length > var4) {
@@ -93,8 +93,16 @@ public class CommandPlaySound extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, SoundEvent.REGISTRY.getKeys()) : (var3.length == 2 ? getListOfStringsMatchingLastWord(var3, SoundCategory.getSoundCategoryNames()) : (var3.length == 3 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : (var3.length > 3 && var3.length <= 6 ? getTabCompletionCoordinate(var3, 3, var4) : Collections.emptyList())));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, SoundEvent.REGISTRY.getKeys());
+      } else if (var3.length == 2) {
+         return getListOfStringsMatchingLastWord(var3, SoundCategory.getSoundCategoryNames());
+      } else if (var3.length == 3) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else {
+         return var3.length > 3 && var3.length <= 6 ? getTabCompletionCoordinate(var3, 3, var4) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

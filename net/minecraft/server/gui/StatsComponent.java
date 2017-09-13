@@ -8,11 +8,8 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import javax.swing.JComponent;
 import javax.swing.Timer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.src.MinecraftServer;
 
-@SideOnly(Side.SERVER)
 public class StatsComponent extends JComponent {
    private static final DecimalFormat FORMATTER = new DecimalFormat("########0.000");
    private final int[] values = new int[256];
@@ -37,7 +34,7 @@ public class StatsComponent extends JComponent {
       long var1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
       System.gc();
       this.msgs[0] = "Memory use: " + var1 / 1024L / 1024L + " mb (" + Runtime.getRuntime().freeMemory() * 100L / Runtime.getRuntime().maxMemory() + "% free)";
-      this.msgs[1] = "Avg tick: " + FORMATTER.format(this.mean(this.server.tickTimeArray) * 1.0E-6D) + " ms";
+      this.msgs[1] = "Avg tick: " + FORMATTER.format(this.mean(this.server.h) * 1.0E-6D) + " ms";
       this.repaint();
    }
 

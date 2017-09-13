@@ -20,15 +20,17 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import org.bukkit.Bukkit;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
 
 public abstract class EntityMob extends EntityCreature implements IMob {
-   public EntityMob(World var1) {
-      super(var1);
+   public EntityMob(World world) {
+      super(world);
       this.experienceValue = 5;
    }
 
-   public static void registerFixesMonster(DataFixer var0) {
-      EntityLiving.registerFixesMob(var0, "Monster");
+   public static void registerFixesMonster(DataFixer dataconvertermanager) {
+      EntityLiving.registerFixesMob(dataconvertermanager, "Monster");
    }
 
    public SoundCategory getSoundCategory() {
@@ -37,8 +39,8 @@ public abstract class EntityMob extends EntityCreature implements IMob {
 
    public void onLivingUpdate() {
       this.updateArmSwingProgress();
-      float var1 = this.getBrightness(1.0F);
-      if (var1 > 0.5F) {
+      float f = this.getBrightness(1.0F);
+      if (f > 0.5F) {
          this.entityAge += 2;
       }
 
@@ -61,8 +63,8 @@ public abstract class EntityMob extends EntityCreature implements IMob {
       return SoundEvents.ENTITY_HOSTILE_SPLASH;
    }
 
-   public boolean attackEntityFrom(DamageSource var1, float var2) {
-      return this.isEntityInvulnerable(var1) ? false : super.attackEntityFrom(var1, var2);
+   public boolean attackEntityFrom(DamageSource damagesource, float f) {
+      return this.isEntityInvulnerable(damagesource) ? false : super.attackEntityFrom(damagesource, f);
    }
 
    protected SoundEvent getHurtSound() {
@@ -73,68 +75,72 @@ public abstract class EntityMob extends EntityCreature implements IMob {
       return SoundEvents.ENTITY_HOSTILE_DEATH;
    }
 
-   protected SoundEvent getFallSound(int var1) {
-      return var1 > 4 ? SoundEvents.ENTITY_HOSTILE_BIG_FALL : SoundEvents.ENTITY_HOSTILE_SMALL_FALL;
+   protected SoundEvent getFallSound(int i) {
+      return i > 4 ? SoundEvents.ENTITY_HOSTILE_BIG_FALL : SoundEvents.ENTITY_HOSTILE_SMALL_FALL;
    }
 
-   public boolean attackEntityAsMob(Entity var1) {
-      float var2 = (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
-      int var3 = 0;
-      if (var1 instanceof EntityLivingBase) {
-         var2 += EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), ((EntityLivingBase)var1).getCreatureAttribute());
-         var3 += EnchantmentHelper.getKnockbackModifier(this);
+   public boolean attackEntityAsMob(Entity entity) {
+      float f = (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
+      int i = 0;
+      if (entity instanceof EntityLivingBase) {
+         f += EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), ((EntityLivingBase)entity).getCreatureAttribute());
+         i += EnchantmentHelper.getKnockbackModifier(this);
       }
 
-      boolean var4 = var1.attackEntityFrom(DamageSource.causeMobDamage(this), var2);
-      if (var4) {
-         if (var3 > 0 && var1 instanceof EntityLivingBase) {
-            ((EntityLivingBase)var1).knockBack(this, (float)var3 * 0.5F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
+      boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), f);
+      if (flag) {
+         if (i > 0 && entity instanceof EntityLivingBase) {
+            ((EntityLivingBase)entity).knockBack(this, (float)i * 0.5F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
             this.motionX *= 0.6D;
             this.motionZ *= 0.6D;
          }
 
-         int var5 = EnchantmentHelper.getFireAspectModifier(this);
-         if (var5 > 0) {
-            var1.setFire(var5 * 4);
+         int j = EnchantmentHelper.getFireAspectModifier(this);
+         if (j > 0) {
+            EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), entity.getBukkitEntity(), j * 4);
+            Bukkit.getPluginManager().callEvent(combustEvent);
+            if (!combustEvent.isCancelled()) {
+               entity.setFire(combustEvent.getDuration());
+            }
          }
 
-         if (var1 instanceof EntityPlayer) {
-            EntityPlayer var6 = (EntityPlayer)var1;
-            ItemStack var7 = this.getHeldItemMainhand();
-            ItemStack var8 = var6.isHandActive() ? var6.getActiveItemStack() : null;
-            if (var7 != null && var8 != null && var7.getItem() instanceof ItemAxe && var8.getItem() == Items.SHIELD) {
-               float var9 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier(this) * 0.05F;
-               if (this.rand.nextFloat() < var9) {
-                  var6.getCooldownTracker().setCooldown(Items.SHIELD, 100);
-                  this.world.setEntityState(var6, (byte)30);
+         if (entity instanceof EntityPlayer) {
+            EntityPlayer entityhuman = (EntityPlayer)entity;
+            ItemStack itemstack = this.getHeldItemMainhand();
+            ItemStack itemstack1 = entityhuman.isHandActive() ? entityhuman.getActiveItemStack() : null;
+            if (itemstack != null && itemstack1 != null && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.SHIELD) {
+               float f1 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier(this) * 0.05F;
+               if (this.rand.nextFloat() < f1) {
+                  entityhuman.getCooldownTracker().setCooldown(Items.SHIELD, 100);
+                  this.world.setEntityState(entityhuman, (byte)30);
                }
             }
          }
 
-         this.applyEnchantments(this, var1);
+         this.applyEnchantments(this, entity);
       }
 
-      return var4;
+      return flag;
    }
 
-   public float getBlockPathWeight(BlockPos var1) {
-      return 0.5F - this.world.getLightBrightness(var1);
+   public float getBlockPathWeight(BlockPos blockposition) {
+      return 0.5F - this.world.getLightBrightness(blockposition);
    }
 
    protected boolean isValidLightLevel() {
-      BlockPos var1 = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
-      if (this.world.getLightFor(EnumSkyBlock.SKY, var1) > this.rand.nextInt(32)) {
+      BlockPos blockposition = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+      if (this.world.getLightFor(EnumSkyBlock.SKY, blockposition) > this.rand.nextInt(32)) {
          return false;
       } else {
-         int var2 = this.world.getLightFromNeighbors(var1);
+         int i = this.world.getLightFromNeighbors(blockposition);
          if (this.world.isThundering()) {
-            int var3 = this.world.getSkylightSubtracted();
+            int j = this.world.getSkylightSubtracted();
             this.world.setSkylightSubtracted(10);
-            var2 = this.world.getLightFromNeighbors(var1);
-            this.world.setSkylightSubtracted(var3);
+            i = this.world.getLightFromNeighbors(blockposition);
+            this.world.setSkylightSubtracted(j);
          }
 
-         return var2 <= this.rand.nextInt(8);
+         return i <= this.rand.nextInt(8);
       }
    }
 

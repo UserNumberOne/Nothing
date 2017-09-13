@@ -8,7 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -26,7 +26,7 @@ public class CommandClearInventory extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      EntityPlayerMP var4 = var3.length == 0 ? getCommandSenderAsPlayer(var2) : getPlayer(var1, var2, var3[0]);
+      EntityPlayerMP var4 = var3.length == 0 ? getCommandSenderAsPlayer(var2) : a(var1, var2, var3[0]);
       Item var5 = var3.length >= 2 ? getItemByText(var2, var3[1]) : null;
       int var6 = var3.length >= 3 ? parseInt(var3[2], -1) : -1;
       int var7 = var3.length >= 4 ? parseInt(var3[3], -1) : -1;
@@ -62,8 +62,12 @@ public class CommandClearInventory extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : (var3.length == 2 ? getListOfStringsMatchingLastWord(var3, Item.REGISTRY.getKeys()) : Collections.emptyList());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else {
+         return var3.length == 2 ? getListOfStringsMatchingLastWord(var3, Item.REGISTRY.getKeys()) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

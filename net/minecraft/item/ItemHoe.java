@@ -3,6 +3,7 @@ package net.minecraft.item;
 import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
@@ -18,9 +19,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemHoe extends Item {
    private final float speed;
@@ -38,32 +36,27 @@ public class ItemHoe extends Item {
       if (!var2.canPlayerEdit(var4.offset(var6), var6, var1)) {
          return EnumActionResult.FAIL;
       } else {
-         int var10 = ForgeEventFactory.onHoeUse(var1, var2, var3, var4);
-         if (var10 != 0) {
-            return var10 > 0 ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
-         } else {
-            IBlockState var11 = var3.getBlockState(var4);
-            Block var12 = var11.getBlock();
-            if (var6 != EnumFacing.DOWN && var3.isAirBlock(var4.up())) {
-               if (var12 == Blocks.GRASS || var12 == Blocks.GRASS_PATH) {
-                  this.setBlock(var1, var2, var3, var4, Blocks.FARMLAND.getDefaultState());
-                  return EnumActionResult.SUCCESS;
-               }
-
-               if (var12 == Blocks.DIRT) {
-                  switch((BlockDirt.DirtType)var11.getValue(BlockDirt.VARIANT)) {
-                  case DIRT:
-                     this.setBlock(var1, var2, var3, var4, Blocks.FARMLAND.getDefaultState());
-                     return EnumActionResult.SUCCESS;
-                  case COARSE_DIRT:
-                     this.setBlock(var1, var2, var3, var4, Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT));
-                     return EnumActionResult.SUCCESS;
-                  }
-               }
+         IBlockState var10 = var3.getBlockState(var4);
+         Block var11 = var10.getBlock();
+         if (var6 != EnumFacing.DOWN && var3.getBlockState(var4.up()).getMaterial() == Material.AIR) {
+            if (var11 == Blocks.GRASS || var11 == Blocks.GRASS_PATH) {
+               this.setBlock(var1, var2, var3, var4, Blocks.FARMLAND.getDefaultState());
+               return EnumActionResult.SUCCESS;
             }
 
-            return EnumActionResult.PASS;
+            if (var11 == Blocks.DIRT) {
+               switch((BlockDirt.DirtType)var10.getValue(BlockDirt.VARIANT)) {
+               case DIRT:
+                  this.setBlock(var1, var2, var3, var4, Blocks.FARMLAND.getDefaultState());
+                  return EnumActionResult.SUCCESS;
+               case COARSE_DIRT:
+                  this.setBlock(var1, var2, var3, var4, Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT));
+                  return EnumActionResult.SUCCESS;
+               }
+            }
          }
+
+         return EnumActionResult.PASS;
       }
    }
 
@@ -79,11 +72,6 @@ public class ItemHoe extends Item {
          var1.damageItem(1, var2);
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isFull3D() {
-      return true;
    }
 
    public String getMaterialName() {

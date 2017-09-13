@@ -183,5 +183,10 @@ public class SetAttributes extends LootFunction {
             return new SetAttributes(var3, var5);
          }
       }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
+      }
    }
 }

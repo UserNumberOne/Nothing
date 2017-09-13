@@ -36,18 +36,14 @@ public abstract class StructureComponent {
    }
 
    public final NBTTagCompound createStructureBaseNBT() {
-      if (MapGenStructureIO.getStructureComponentName(this) == null) {
-         throw new RuntimeException("StructureComponent \"" + this.getClass().getName() + "\" missing ID Mapping, Modder see MapGenStructureIO");
-      } else {
-         NBTTagCompound var1 = new NBTTagCompound();
-         var1.setString("id", MapGenStructureIO.getStructureComponentName(this));
-         var1.setTag("BB", this.boundingBox.toNBTTagIntArray());
-         EnumFacing var2 = this.getCoordBaseMode();
-         var1.setInteger("O", var2 == null ? -1 : var2.getHorizontalIndex());
-         var1.setInteger("GD", this.componentType);
-         this.writeStructureToNBT(var1);
-         return var1;
-      }
+      NBTTagCompound var1 = new NBTTagCompound();
+      var1.setString("id", MapGenStructureIO.getStructureComponentName(this));
+      var1.setTag("BB", this.boundingBox.toNBTTagIntArray());
+      EnumFacing var2 = this.getCoordBaseMode();
+      var1.setInteger("O", var2 == null ? -1 : var2.getHorizontalIndex());
+      var1.setInteger("GD", this.componentType);
+      this.writeStructureToNBT(var1);
+      return var1;
    }
 
    protected abstract void writeStructureToNBT(NBTTagCompound var1);
@@ -195,7 +191,6 @@ public abstract class StructureComponent {
 
          var1.setBlockState(var7, var2, 2);
       }
-
    }
 
    protected IBlockState getBlockStateFromPos(World var1, int var2, int var3, int var4, StructureBoundingBox var5) {
@@ -314,8 +309,8 @@ public abstract class StructureComponent {
             var1.setBlockState(var6, Blocks.AIR.getDefaultState(), 2);
             var6 = var6.up();
          }
-      }
 
+      }
    }
 
    protected void replaceAirAndLiquidDownwards(World var1, IBlockState var2, int var3, int var4, int var5, StructureBoundingBox var6) {
@@ -327,8 +322,8 @@ public abstract class StructureComponent {
             var1.setBlockState(new BlockPos(var7, var8, var9), var2, 2);
             --var8;
          }
-      }
 
+      }
    }
 
    protected boolean generateChest(World var1, StructureBoundingBox var2, Random var3, int var4, int var5, int var6, ResourceLocation var7) {

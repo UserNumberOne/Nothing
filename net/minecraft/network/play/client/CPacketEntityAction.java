@@ -1,32 +1,14 @@
 package net.minecraft.network.play.client;
 
 import java.io.IOException;
-import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketEntityAction implements Packet {
    private int entityID;
    private CPacketEntityAction.Action action;
    private int auxData;
-
-   public CPacketEntityAction() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketEntityAction(Entity var1, CPacketEntityAction.Action var2) {
-      this(var1, var2, 0);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketEntityAction(Entity var1, CPacketEntityAction.Action var2, int var3) {
-      this.entityID = var1.getEntityId();
-      this.action = var2;
-      this.auxData = var3;
-   }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
       this.entityID = var1.readVarInt();

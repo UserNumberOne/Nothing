@@ -32,6 +32,11 @@ public class EntityAIAvoidEntity extends EntityAIBase {
          public boolean apply(@Nullable Entity var1) {
             return var1.isEntityAlive() && EntityAIAvoidEntity.this.theEntity.getEntitySenses().canSee(var1);
          }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1) {
+            return this.apply((Entity)var1);
+         }
       };
       this.theEntity = var1;
       this.classToAvoid = var2;

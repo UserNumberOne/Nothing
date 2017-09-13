@@ -25,15 +25,6 @@ import net.minecraft.world.gen.feature.WorldGenHellLava;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.ChunkGeneratorEvent.InitNoiseField;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Post;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Pre;
-import net.minecraftforge.event.terraingen.InitMapGenEvent.EventType;
-import net.minecraftforge.event.terraingen.InitNoiseGensEvent.ContextHell;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
 
 public class ChunkProviderHell implements IChunkGenerator {
    protected static final IBlockState AIR = Blocks.AIR.getDefaultState();
@@ -49,13 +40,13 @@ public class ChunkProviderHell implements IChunkGenerator {
    private double[] gravelNoise = new double[256];
    private double[] depthBuffer = new double[256];
    private double[] buffer;
-   private NoiseGeneratorOctaves lperlinNoise1;
-   private NoiseGeneratorOctaves lperlinNoise2;
-   private NoiseGeneratorOctaves perlinNoise1;
-   private NoiseGeneratorOctaves slowsandGravelNoiseGen;
-   private NoiseGeneratorOctaves netherrackExculsivityNoiseGen;
-   public NoiseGeneratorOctaves scaleNoise;
-   public NoiseGeneratorOctaves depthNoise;
+   private final NoiseGeneratorOctaves lperlinNoise1;
+   private final NoiseGeneratorOctaves lperlinNoise2;
+   private final NoiseGeneratorOctaves perlinNoise1;
+   private final NoiseGeneratorOctaves slowsandGravelNoiseGen;
+   private final NoiseGeneratorOctaves netherrackExculsivityNoiseGen;
+   public final NoiseGeneratorOctaves scaleNoise;
+   public final NoiseGeneratorOctaves depthNoise;
    private final WorldGenFire fireFeature = new WorldGenFire();
    private final WorldGenGlowStone1 lightGemGen = new WorldGenGlowStone1();
    private final WorldGenGlowStone2 hellPortalGen = new WorldGenGlowStone2();
@@ -65,8 +56,8 @@ public class ChunkProviderHell implements IChunkGenerator {
    private final WorldGenHellLava hellSpringGen = new WorldGenHellLava(Blocks.FLOWING_LAVA, false);
    private final WorldGenBush brownMushroomFeature = new WorldGenBush(Blocks.BROWN_MUSHROOM);
    private final WorldGenBush redMushroomFeature = new WorldGenBush(Blocks.RED_MUSHROOM);
-   private MapGenNetherBridge genNetherBridge = new MapGenNetherBridge();
-   private MapGenBase genNetherCaves = new MapGenCavesHell();
+   private final MapGenNetherBridge genNetherBridge = new MapGenNetherBridge();
+   private final MapGenBase genNetherCaves = new MapGenCavesHell();
    double[] pnr;
    double[] ar;
    double[] br;
@@ -85,17 +76,6 @@ public class ChunkProviderHell implements IChunkGenerator {
       this.scaleNoise = new NoiseGeneratorOctaves(this.rand, 10);
       this.depthNoise = new NoiseGeneratorOctaves(this.rand, 16);
       var1.setSeaLevel(63);
-      ContextHell var5 = new ContextHell(this.lperlinNoise1, this.lperlinNoise2, this.perlinNoise1, this.slowsandGravelNoiseGen, this.netherrackExculsivityNoiseGen, this.scaleNoise, this.depthNoise);
-      var5 = (ContextHell)TerrainGen.getModdedNoiseGenerators(var1, this.rand, var5);
-      this.lperlinNoise1 = var5.getLPerlin1();
-      this.lperlinNoise2 = var5.getLPerlin2();
-      this.perlinNoise1 = var5.getPerlin();
-      this.slowsandGravelNoiseGen = var5.getPerlin2();
-      this.netherrackExculsivityNoiseGen = var5.getPerlin3();
-      this.scaleNoise = var5.getScale();
-      this.depthNoise = var5.getDepth();
-      this.genNetherBridge = (MapGenNetherBridge)TerrainGen.getModdedMapGen(this.genNetherBridge, EventType.NETHER_BRIDGE);
-      this.genNetherCaves = TerrainGen.getModdedMapGen(this.genNetherCaves, EventType.NETHER_CAVE);
    }
 
    public void prepareHeights(int var1, int var2, ChunkPrimer var3) {
@@ -164,71 +144,69 @@ public class ChunkProviderHell implements IChunkGenerator {
    }
 
    public void buildSurfaces(int var1, int var2, ChunkPrimer var3) {
-      if (ForgeEventFactory.onReplaceBiomeBlocks(this, var1, var2, var3, this.world)) {
-         int var4 = this.world.getSeaLevel() + 1;
-         double var5 = 0.03125D;
-         this.slowsandNoise = this.slowsandGravelNoiseGen.generateNoiseOctaves(this.slowsandNoise, var1 * 16, var2 * 16, 0, 16, 16, 1, 0.03125D, 0.03125D, 1.0D);
-         this.gravelNoise = this.slowsandGravelNoiseGen.generateNoiseOctaves(this.gravelNoise, var1 * 16, 109, var2 * 16, 16, 1, 16, 0.03125D, 1.0D, 0.03125D);
-         this.depthBuffer = this.netherrackExculsivityNoiseGen.generateNoiseOctaves(this.depthBuffer, var1 * 16, var2 * 16, 0, 16, 16, 1, 0.0625D, 0.0625D, 0.0625D);
+      int var4 = this.world.getSeaLevel() + 1;
+      double var5 = 0.03125D;
+      this.slowsandNoise = this.slowsandGravelNoiseGen.generateNoiseOctaves(this.slowsandNoise, var1 * 16, var2 * 16, 0, 16, 16, 1, 0.03125D, 0.03125D, 1.0D);
+      this.gravelNoise = this.slowsandGravelNoiseGen.generateNoiseOctaves(this.gravelNoise, var1 * 16, 109, var2 * 16, 16, 1, 16, 0.03125D, 1.0D, 0.03125D);
+      this.depthBuffer = this.netherrackExculsivityNoiseGen.generateNoiseOctaves(this.depthBuffer, var1 * 16, var2 * 16, 0, 16, 16, 1, 0.0625D, 0.0625D, 0.0625D);
 
-         for(int var7 = 0; var7 < 16; ++var7) {
-            for(int var8 = 0; var8 < 16; ++var8) {
-               boolean var9 = this.slowsandNoise[var7 + var8 * 16] + this.rand.nextDouble() * 0.2D > 0.0D;
-               boolean var10 = this.gravelNoise[var7 + var8 * 16] + this.rand.nextDouble() * 0.2D > 0.0D;
-               int var11 = (int)(this.depthBuffer[var7 + var8 * 16] / 3.0D + 3.0D + this.rand.nextDouble() * 0.25D);
-               int var12 = -1;
-               IBlockState var13 = NETHERRACK;
-               IBlockState var14 = NETHERRACK;
+      for(int var7 = 0; var7 < 16; ++var7) {
+         for(int var8 = 0; var8 < 16; ++var8) {
+            boolean var9 = this.slowsandNoise[var7 + var8 * 16] + this.rand.nextDouble() * 0.2D > 0.0D;
+            boolean var10 = this.gravelNoise[var7 + var8 * 16] + this.rand.nextDouble() * 0.2D > 0.0D;
+            int var11 = (int)(this.depthBuffer[var7 + var8 * 16] / 3.0D + 3.0D + this.rand.nextDouble() * 0.25D);
+            int var12 = -1;
+            IBlockState var13 = NETHERRACK;
+            IBlockState var14 = NETHERRACK;
 
-               for(int var15 = 127; var15 >= 0; --var15) {
-                  if (var15 < 127 - this.rand.nextInt(5) && var15 > this.rand.nextInt(5)) {
-                     IBlockState var16 = var3.getBlockState(var8, var15, var7);
-                     if (var16.getBlock() != null && var16.getMaterial() != Material.AIR) {
-                        if (var16.getBlock() == Blocks.NETHERRACK) {
-                           if (var12 == -1) {
-                              if (var11 <= 0) {
-                                 var13 = AIR;
+            for(int var15 = 127; var15 >= 0; --var15) {
+               if (var15 < 127 - this.rand.nextInt(5) && var15 > this.rand.nextInt(5)) {
+                  IBlockState var16 = var3.getBlockState(var8, var15, var7);
+                  if (var16.getBlock() != null && var16.getMaterial() != Material.AIR) {
+                     if (var16.getBlock() == Blocks.NETHERRACK) {
+                        if (var12 == -1) {
+                           if (var11 <= 0) {
+                              var13 = AIR;
+                              var14 = NETHERRACK;
+                           } else if (var15 >= var4 - 4 && var15 <= var4 + 1) {
+                              var13 = NETHERRACK;
+                              var14 = NETHERRACK;
+                              if (var10) {
+                                 var13 = GRAVEL;
                                  var14 = NETHERRACK;
-                              } else if (var15 >= var4 - 4 && var15 <= var4 + 1) {
-                                 var13 = NETHERRACK;
-                                 var14 = NETHERRACK;
-                                 if (var10) {
-                                    var13 = GRAVEL;
-                                    var14 = NETHERRACK;
-                                 }
-
-                                 if (var9) {
-                                    var13 = SOUL_SAND;
-                                    var14 = SOUL_SAND;
-                                 }
                               }
 
-                              if (var15 < var4 && (var13 == null || var13.getMaterial() == Material.AIR)) {
-                                 var13 = LAVA;
+                              if (var9) {
+                                 var13 = SOUL_SAND;
+                                 var14 = SOUL_SAND;
                               }
+                           }
 
-                              var12 = var11;
-                              if (var15 >= var4 - 1) {
-                                 var3.setBlockState(var8, var15, var7, var13);
-                              } else {
-                                 var3.setBlockState(var8, var15, var7, var14);
-                              }
-                           } else if (var12 > 0) {
-                              --var12;
+                           if (var15 < var4 && (var13 == null || var13.getMaterial() == Material.AIR)) {
+                              var13 = LAVA;
+                           }
+
+                           var12 = var11;
+                           if (var15 >= var4 - 1) {
+                              var3.setBlockState(var8, var15, var7, var13);
+                           } else {
                               var3.setBlockState(var8, var15, var7, var14);
                            }
+                        } else if (var12 > 0) {
+                           --var12;
+                           var3.setBlockState(var8, var15, var7, var14);
                         }
-                     } else {
-                        var12 = -1;
                      }
                   } else {
-                     var3.setBlockState(var8, var15, var7, BEDROCK);
+                     var12 = -1;
                   }
+               } else {
+                  var3.setBlockState(var8, var15, var7, BEDROCK);
                }
             }
          }
-
       }
+
    }
 
    public Chunk provideChunk(int var1, int var2) {
@@ -258,138 +236,116 @@ public class ChunkProviderHell implements IChunkGenerator {
          var1 = new double[var5 * var6 * var7];
       }
 
-      InitNoiseField var8 = new InitNoiseField(this, var1, var2, var3, var4, var5, var6, var7);
-      MinecraftForge.EVENT_BUS.post(var8);
-      if (var8.getResult() == Result.DENY) {
-         return var8.getNoisefield();
-      } else {
-         double var9 = 684.412D;
-         double var11 = 2053.236D;
-         this.noiseData4 = this.scaleNoise.generateNoiseOctaves(this.noiseData4, var2, var3, var4, var5, 1, var7, 1.0D, 0.0D, 1.0D);
-         this.dr = this.depthNoise.generateNoiseOctaves(this.dr, var2, var3, var4, var5, 1, var7, 100.0D, 0.0D, 100.0D);
-         this.pnr = this.perlinNoise1.generateNoiseOctaves(this.pnr, var2, var3, var4, var5, var6, var7, 8.555150000000001D, 34.2206D, 8.555150000000001D);
-         this.ar = this.lperlinNoise1.generateNoiseOctaves(this.ar, var2, var3, var4, var5, var6, var7, 684.412D, 2053.236D, 684.412D);
-         this.br = this.lperlinNoise2.generateNoiseOctaves(this.br, var2, var3, var4, var5, var6, var7, 684.412D, 2053.236D, 684.412D);
-         int var13 = 0;
-         double[] var14 = new double[var6];
+      double var8 = 684.412D;
+      double var10 = 2053.236D;
+      this.noiseData4 = this.scaleNoise.generateNoiseOctaves(this.noiseData4, var2, var3, var4, var5, 1, var7, 1.0D, 0.0D, 1.0D);
+      this.dr = this.depthNoise.generateNoiseOctaves(this.dr, var2, var3, var4, var5, 1, var7, 100.0D, 0.0D, 100.0D);
+      this.pnr = this.perlinNoise1.generateNoiseOctaves(this.pnr, var2, var3, var4, var5, var6, var7, 8.555150000000001D, 34.2206D, 8.555150000000001D);
+      this.ar = this.lperlinNoise1.generateNoiseOctaves(this.ar, var2, var3, var4, var5, var6, var7, 684.412D, 2053.236D, 684.412D);
+      this.br = this.lperlinNoise2.generateNoiseOctaves(this.br, var2, var3, var4, var5, var6, var7, 684.412D, 2053.236D, 684.412D);
+      int var12 = 0;
+      double[] var13 = new double[var6];
 
-         for(int var15 = 0; var15 < var6; ++var15) {
-            var14[var15] = Math.cos((double)var15 * 3.141592653589793D * 6.0D / (double)var6) * 2.0D;
-            double var16 = (double)var15;
-            if (var15 > var6 / 2) {
-               var16 = (double)(var6 - 1 - var15);
-            }
-
-            if (var16 < 4.0D) {
-               var16 = 4.0D - var16;
-               var14[var15] -= var16 * var16 * var16 * 10.0D;
-            }
+      for(int var14 = 0; var14 < var6; ++var14) {
+         var13[var14] = Math.cos((double)var14 * 3.141592653589793D * 6.0D / (double)var6) * 2.0D;
+         double var15 = (double)var14;
+         if (var14 > var6 / 2) {
+            var15 = (double)(var6 - 1 - var14);
          }
 
-         for(int var32 = 0; var32 < var5; ++var32) {
-            for(int var34 = 0; var34 < var7; ++var34) {
-               double var17 = 0.0D;
-
-               for(int var19 = 0; var19 < var6; ++var19) {
-                  double var20 = var14[var19];
-                  double var22 = this.ar[var13] / 512.0D;
-                  double var24 = this.br[var13] / 512.0D;
-                  double var26 = (this.pnr[var13] / 10.0D + 1.0D) / 2.0D;
-                  double var28;
-                  if (var26 < 0.0D) {
-                     var28 = var22;
-                  } else if (var26 > 1.0D) {
-                     var28 = var24;
-                  } else {
-                     var28 = var22 + (var24 - var22) * var26;
-                  }
-
-                  var28 = var28 - var20;
-                  if (var19 > var6 - 4) {
-                     double var30 = (double)((float)(var19 - (var6 - 4)) / 3.0F);
-                     var28 = var28 * (1.0D - var30) + -10.0D * var30;
-                  }
-
-                  if ((double)var19 < 0.0D) {
-                     double var36 = (0.0D - (double)var19) / 4.0D;
-                     var36 = MathHelper.clamp(var36, 0.0D, 1.0D);
-                     var28 = var28 * (1.0D - var36) + -10.0D * var36;
-                  }
-
-                  var1[var13] = var28;
-                  ++var13;
-               }
-            }
+         if (var15 < 4.0D) {
+            var15 = 4.0D - var15;
+            var13[var14] -= var15 * var15 * var15 * 10.0D;
          }
-
-         return var1;
       }
+
+      for(int var33 = 0; var33 < var5; ++var33) {
+         for(int var17 = 0; var17 < var7; ++var17) {
+            double var18 = 0.0D;
+
+            for(int var20 = 0; var20 < var6; ++var20) {
+               double var21 = var13[var20];
+               double var23 = this.ar[var12] / 512.0D;
+               double var25 = this.br[var12] / 512.0D;
+               double var27 = (this.pnr[var12] / 10.0D + 1.0D) / 2.0D;
+               double var29;
+               if (var27 < 0.0D) {
+                  var29 = var23;
+               } else if (var27 > 1.0D) {
+                  var29 = var25;
+               } else {
+                  var29 = var23 + (var25 - var23) * var27;
+               }
+
+               var29 = var29 - var21;
+               if (var20 > var6 - 4) {
+                  double var31 = (double)((float)(var20 - (var6 - 4)) / 3.0F);
+                  var29 = var29 * (1.0D - var31) + -10.0D * var31;
+               }
+
+               if ((double)var20 < 0.0D) {
+                  double var36 = (0.0D - (double)var20) / 4.0D;
+                  var36 = MathHelper.clamp(var36, 0.0D, 1.0D);
+                  var29 = var29 * (1.0D - var36) + -10.0D * var36;
+               }
+
+               var1[var12] = var29;
+               ++var12;
+            }
+         }
+      }
+
+      return var1;
    }
 
    public void populate(int var1, int var2) {
       BlockFalling.fallInstantly = true;
-      ForgeEventFactory.onChunkPopulate(true, this, this.world, this.rand, var1, var2, false);
       int var3 = var1 * 16;
       int var4 = var2 * 16;
       BlockPos var5 = new BlockPos(var3, 0, var4);
       Biome var6 = this.world.getBiome(var5.add(16, 0, 16));
       ChunkPos var7 = new ChunkPos(var1, var2);
       this.genNetherBridge.generateStructure(this.world, this.rand, var7);
-      if (TerrainGen.populate(this, this.world, this.rand, var1, var2, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.NETHER_LAVA)) {
-         for(int var8 = 0; var8 < 8; ++var8) {
-            this.hellSpringGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
-         }
+
+      for(int var8 = 0; var8 < 8; ++var8) {
+         this.hellSpringGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
       }
 
-      if (TerrainGen.populate(this, this.world, this.rand, var1, var2, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.FIRE)) {
-         for(int var10 = 0; var10 < this.rand.nextInt(this.rand.nextInt(10) + 1) + 1; ++var10) {
-            this.fireFeature.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
-         }
+      for(int var10 = 0; var10 < this.rand.nextInt(this.rand.nextInt(10) + 1) + 1; ++var10) {
+         this.fireFeature.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
       }
 
-      if (TerrainGen.populate(this, this.world, this.rand, var1, var2, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.GLOWSTONE)) {
-         for(int var11 = 0; var11 < this.rand.nextInt(this.rand.nextInt(10) + 1); ++var11) {
-            this.lightGemGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
-         }
-
-         for(int var12 = 0; var12 < 10; ++var12) {
-            this.hellPortalGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
-         }
+      for(int var11 = 0; var11 < this.rand.nextInt(this.rand.nextInt(10) + 1); ++var11) {
+         this.lightGemGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
       }
 
-      ForgeEventFactory.onChunkPopulate(false, this, this.world, this.rand, var1, var2, false);
-      MinecraftForge.EVENT_BUS.post(new Pre(this.world, this.rand, var5));
-      if (TerrainGen.decorate(this.world, this.rand, var5, net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate.EventType.SHROOM)) {
-         if (this.rand.nextBoolean()) {
-            this.brownMushroomFeature.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
-         }
-
-         if (this.rand.nextBoolean()) {
-            this.redMushroomFeature.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
-         }
+      for(int var12 = 0; var12 < 10; ++var12) {
+         this.hellPortalGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
       }
 
-      if (TerrainGen.generateOre(this.world, this.rand, this.quartzGen, var5, net.minecraftforge.event.terraingen.OreGenEvent.GenerateMinable.EventType.QUARTZ)) {
-         for(int var13 = 0; var13 < 16; ++var13) {
-            this.quartzGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16), this.rand.nextInt(108) + 10, this.rand.nextInt(16)));
-         }
+      if (this.rand.nextBoolean()) {
+         this.brownMushroomFeature.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
+      }
+
+      if (this.rand.nextBoolean()) {
+         this.redMushroomFeature.generate(this.world, this.rand, var5.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
+      }
+
+      for(int var13 = 0; var13 < 16; ++var13) {
+         this.quartzGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16), this.rand.nextInt(108) + 10, this.rand.nextInt(16)));
       }
 
       int var14 = this.world.getSeaLevel() / 2 + 1;
-      if (TerrainGen.populate(this, this.world, this.rand, var1, var2, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.NETHER_MAGMA)) {
-         for(int var9 = 0; var9 < 4; ++var9) {
-            this.magmaGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16), var14 - 5 + this.rand.nextInt(10), this.rand.nextInt(16)));
-         }
+
+      for(int var9 = 0; var9 < 4; ++var9) {
+         this.magmaGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16), var14 - 5 + this.rand.nextInt(10), this.rand.nextInt(16)));
       }
 
-      if (TerrainGen.populate(this, this.world, this.rand, var1, var2, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.NETHER_LAVA2)) {
-         for(int var15 = 0; var15 < 16; ++var15) {
-            this.lavaTrapGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16), this.rand.nextInt(108) + 10, this.rand.nextInt(16)));
-         }
+      for(int var15 = 0; var15 < 16; ++var15) {
+         this.lavaTrapGen.generate(this.world, this.rand, var5.add(this.rand.nextInt(16), this.rand.nextInt(108) + 10, this.rand.nextInt(16)));
       }
 
       var6.decorate(this.world, this.rand, new BlockPos(var3, 0, var4));
-      MinecraftForge.EVENT_BUS.post(new Post(this.world, this.rand, var5));
       BlockFalling.fallInstantly = false;
    }
 

@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginClient;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketDisconnect implements Packet {
    private ITextComponent reason;
@@ -28,10 +26,5 @@ public class SPacketDisconnect implements Packet {
 
    public void processPacket(INetHandlerLoginClient var1) {
       var1.handleDisconnect(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getReason() {
-      return this.reason;
    }
 }

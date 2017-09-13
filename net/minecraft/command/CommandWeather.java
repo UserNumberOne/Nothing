@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.WorldInfo;
@@ -29,7 +29,7 @@ public class CommandWeather extends CommandBase {
             var4 = parseInt(var3[1], 1, 1000000) * 20;
          }
 
-         WorldServer var5 = var1.worlds[0];
+         WorldServer var5 = var1.worldServer[0];
          WorldInfo var6 = var5.getWorldInfo();
          if ("clear".equalsIgnoreCase(var3[0])) {
             var6.setCleanWeatherTime(var4);
@@ -63,7 +63,7 @@ public class CommandWeather extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, new String[]{"clear", "rain", "thunder"}) : Collections.emptyList();
    }
 }

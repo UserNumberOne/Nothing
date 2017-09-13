@@ -15,7 +15,7 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -54,7 +54,7 @@ public class CommandTestForBlock extends CommandBase {
             } else {
                NBTTagCompound var8 = new NBTTagCompound();
                boolean var9 = false;
-               if (var3.length >= 6 && var5.hasTileEntity(var5.getStateFromMeta(var6))) {
+               if (var3.length >= 6 && var5.hasTileEntity()) {
                   String var10 = getChatComponentFromNthArg(var2, var3, 5).getUnformattedText();
 
                   try {
@@ -97,7 +97,11 @@ public class CommandTestForBlock extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length > 0 && var3.length <= 3 ? getTabCompletionCoordinate(var3, 0, var4) : (var3.length == 4 ? getListOfStringsMatchingLastWord(var3, Block.REGISTRY.getKeys()) : Collections.emptyList());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length > 0 && var3.length <= 3) {
+         return getTabCompletionCoordinate(var3, 0, var4);
+      } else {
+         return var3.length == 4 ? getListOfStringsMatchingLastWord(var3, Block.REGISTRY.getKeys()) : Collections.emptyList();
+      }
    }
 }

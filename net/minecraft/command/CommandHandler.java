@@ -1,6 +1,5 @@
 package net.minecraft.command;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -12,12 +11,10 @@ import java.util.Set;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CommandEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,33 +39,20 @@ public abstract class CommandHandler implements ICommandManager {
          TextComponentTranslation var8 = new TextComponentTranslation("commands.generic.notFound", new Object[0]);
          var8.getStyle().setColor(TextFormatting.RED);
          var1.sendMessage(var8);
-      } else if (var5.checkPermission(this.getServer(), var1)) {
-         CommandEvent var15 = new CommandEvent(var5, var1, var3);
-         if (MinecraftForge.EVENT_BUS.post(var15)) {
-            if (var15.getException() != null) {
-               Throwables.propagateIfPossible(var15.getException());
-            }
-
-            return 1;
-         }
-
-         if (var15.getParameters() != null) {
-            var3 = var15.getParameters();
-         }
-
+      } else if (var5.canUse(this.a(), var1)) {
          if (var6 > -1) {
-            List var9 = EntitySelector.matchEntities(var1, var3[var6], Entity.class);
-            String var10 = var3[var6];
-            var1.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, var9.size());
+            List var14 = EntitySelector.matchEntities(var1, var3[var6], Entity.class);
+            String var9 = var3[var6];
+            var1.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, var14.size());
 
-            for(Entity var12 : var9) {
-               var3[var6] = var12.getCachedUniqueIdString();
+            for(Entity var11 : var14) {
+               var3[var6] = var11.getCachedUniqueIdString();
                if (this.tryExecute(var1, var3, var5, var2)) {
                   ++var7;
                }
             }
 
-            var3[var6] = var10;
+            var3[var6] = var9;
          } else {
             var1.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, 1);
             if (this.tryExecute(var1, var3, var5, var2)) {
@@ -76,9 +60,9 @@ public abstract class CommandHandler implements ICommandManager {
             }
          }
       } else {
-         TextComponentTranslation var16 = new TextComponentTranslation("commands.generic.permission", new Object[0]);
-         var16.getStyle().setColor(TextFormatting.RED);
-         var1.sendMessage(var16);
+         TextComponentTranslation var15 = new TextComponentTranslation("commands.generic.permission", new Object[0]);
+         var15.getStyle().setColor(TextFormatting.RED);
+         var1.sendMessage(var15);
       }
 
       var1.setCommandStat(CommandResultStats.Type.SUCCESS_COUNT, var7);
@@ -87,7 +71,7 @@ public abstract class CommandHandler implements ICommandManager {
 
    protected boolean tryExecute(ICommandSender var1, String[] var2, ICommand var3, String var4) {
       try {
-         var3.execute(this.getServer(), var1, var2);
+         var3.execute(this.a(), var1, var2);
          return true;
       } catch (WrongUsageException var7) {
          TextComponentTranslation var11 = new TextComponentTranslation("commands.generic.usage", new Object[]{new TextComponentTranslation(var7.getMessage(), var7.getErrorObjects())});
@@ -101,13 +85,13 @@ public abstract class CommandHandler implements ICommandManager {
          TextComponentTranslation var6 = new TextComponentTranslation("commands.generic.exception", new Object[0]);
          var6.getStyle().setColor(TextFormatting.RED);
          var1.sendMessage(var6);
-         LOGGER.warn("Couldn't process command: '" + var4 + "'", var9);
+         LOGGER.warn("Couldn't process command: '{}'", new Object[]{var4});
       }
 
       return false;
    }
 
-   protected abstract MinecraftServer getServer();
+   protected abstract MinecraftServer a();
 
    public ICommand registerCommand(ICommand var1) {
       this.commandMap.put(var1.getName(), var1);
@@ -136,7 +120,7 @@ public abstract class CommandHandler implements ICommandManager {
          ArrayList var9 = Lists.newArrayList();
 
          for(Entry var8 : this.commandMap.entrySet()) {
-            if (CommandBase.doesStringStartWith(var5, (String)var8.getKey()) && ((ICommand)var8.getValue()).checkPermission(this.getServer(), var1)) {
+            if (CommandBase.doesStringStartWith(var5, (String)var8.getKey()) && ((ICommand)var8.getValue()).canUse(this.a(), var1)) {
                var9.add(var8.getKey());
             }
          }
@@ -145,8 +129,8 @@ public abstract class CommandHandler implements ICommandManager {
       } else {
          if (var4.length > 1) {
             ICommand var6 = (ICommand)this.commandMap.get(var5);
-            if (var6 != null && var6.checkPermission(this.getServer(), var1)) {
-               return var6.getTabCompletions(this.getServer(), var1, dropFirstString(var4), var3);
+            if (var6 != null && var6.canUse(this.a(), var1)) {
+               return var6.tabComplete(this.a(), var1, dropFirstString(var4), var3);
             }
          }
 
@@ -158,7 +142,7 @@ public abstract class CommandHandler implements ICommandManager {
       ArrayList var2 = Lists.newArrayList();
 
       for(ICommand var4 : this.commandSet) {
-         if (var4.checkPermission(this.getServer(), var1)) {
+         if (var4.canUse(this.a(), var1)) {
             var2.add(var4);
          }
       }

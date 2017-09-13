@@ -5,22 +5,10 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketUpdateSign implements Packet {
    private BlockPos pos;
    private String[] lines;
-
-   public CPacketUpdateSign() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketUpdateSign(BlockPos var1, ITextComponent[] var2) {
-      this.pos = var1;
-      this.lines = new String[]{var2[0].getUnformattedText(), var2[1].getUnformattedText(), var2[2].getUnformattedText(), var2[3].getUnformattedText()};
-   }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
       this.pos = var1.readBlockPos();

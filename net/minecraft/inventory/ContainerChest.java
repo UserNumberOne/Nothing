@@ -2,68 +2,94 @@ package net.minecraft.inventory;
 
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryDoubleChest;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryPlayer;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerChest extends Container {
    private final IInventory lowerChestInventory;
    private final int numRows;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
 
-   public ContainerChest(IInventory var1, IInventory var2, EntityPlayer var3) {
-      this.lowerChestInventory = var2;
-      this.numRows = var2.getSizeInventory() / 9;
-      var2.openInventory(var3);
-      int var4 = (this.numRows - 4) * 18;
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventory inventory;
+         if (this.lowerChestInventory instanceof InventoryPlayer) {
+            inventory = new CraftInventoryPlayer((InventoryPlayer)this.lowerChestInventory);
+         } else if (this.lowerChestInventory instanceof InventoryLargeChest) {
+            inventory = new CraftInventoryDoubleChest((InventoryLargeChest)this.lowerChestInventory);
+         } else {
+            inventory = new CraftInventory(this.lowerChestInventory);
+         }
 
-      for(int var5 = 0; var5 < this.numRows; ++var5) {
-         for(int var6 = 0; var6 < 9; ++var6) {
-            this.addSlotToContainer(new Slot(var2, var6 + var5 * 9, 8 + var6 * 18, 18 + var5 * 18));
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
+         return this.bukkitEntity;
+      }
+   }
+
+   public ContainerChest(IInventory iinventory, IInventory iinventory1, EntityPlayer entityhuman) {
+      this.lowerChestInventory = iinventory1;
+      this.numRows = iinventory1.getSizeInventory() / 9;
+      iinventory1.openInventory(entityhuman);
+      int i = (this.numRows - 4) * 18;
+      this.player = (InventoryPlayer)iinventory;
+
+      for(int j = 0; j < this.numRows; ++j) {
+         for(int k = 0; k < 9; ++k) {
+            this.addSlotToContainer(new Slot(iinventory1, k + j * 9, 8 + k * 18, 18 + j * 18));
          }
       }
 
       for(int var7 = 0; var7 < 3; ++var7) {
-         for(int var9 = 0; var9 < 9; ++var9) {
-            this.addSlotToContainer(new Slot(var1, var9 + var7 * 9 + 9, 8 + var9 * 18, 103 + var7 * 18 + var4));
+         for(int k = 0; k < 9; ++k) {
+            this.addSlotToContainer(new Slot(iinventory, k + var7 * 9 + 9, 8 + k * 18, 103 + var7 * 18 + i));
          }
       }
 
       for(int var8 = 0; var8 < 9; ++var8) {
-         this.addSlotToContainer(new Slot(var1, var8, 8 + var8 * 18, 161 + var4));
+         this.addSlotToContainer(new Slot(iinventory, var8, 8 + var8 * 18, 161 + i));
       }
 
    }
 
-   public boolean canInteractWith(EntityPlayer var1) {
-      return this.lowerChestInventory.isUsableByPlayer(var1);
+   public boolean canInteractWith(EntityPlayer entityhuman) {
+      return !this.checkReachable ? true : this.lowerChestInventory.isUsableByPlayer(entityhuman);
    }
 
    @Nullable
-   public ItemStack transferStackInSlot(EntityPlayer var1, int var2) {
-      ItemStack var3 = null;
-      Slot var4 = (Slot)this.inventorySlots.get(var2);
-      if (var4 != null && var4.getHasStack()) {
-         ItemStack var5 = var4.getStack();
-         var3 = var5.copy();
-         if (var2 < this.numRows * 9) {
-            if (!this.mergeItemStack(var5, this.numRows * 9, this.inventorySlots.size(), true)) {
+   public ItemStack transferStackInSlot(EntityPlayer entityhuman, int i) {
+      ItemStack itemstack = null;
+      Slot slot = (Slot)this.inventorySlots.get(i);
+      if (slot != null && slot.getHasStack()) {
+         ItemStack itemstack1 = slot.getStack();
+         itemstack = itemstack1.copy();
+         if (i < this.numRows * 9) {
+            if (!this.mergeItemStack(itemstack1, this.numRows * 9, this.inventorySlots.size(), true)) {
                return null;
             }
-         } else if (!this.mergeItemStack(var5, 0, this.numRows * 9, false)) {
+         } else if (!this.mergeItemStack(itemstack1, 0, this.numRows * 9, false)) {
             return null;
          }
 
-         if (var5.stackSize == 0) {
-            var4.putStack((ItemStack)null);
+         if (itemstack1.stackSize == 0) {
+            slot.putStack((ItemStack)null);
          } else {
-            var4.onSlotChanged();
+            slot.onSlotChanged();
          }
       }
 
-      return var3;
+      return itemstack;
    }
 
-   public void onContainerClosed(EntityPlayer var1) {
-      super.onContainerClosed(var1);
-      this.lowerChestInventory.closeInventory(var1);
+   public void onContainerClosed(EntityPlayer entityhuman) {
+      super.onContainerClosed(entityhuman);
+      this.lowerChestInventory.closeInventory(entityhuman);
    }
 
    public IInventory getLowerChestInventory() {

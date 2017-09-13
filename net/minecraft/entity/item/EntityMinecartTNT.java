@@ -16,8 +16,6 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityMinecartTNT extends EntityMinecart {
    private int minecartTNTFuse = -1;
@@ -114,16 +112,6 @@ public class EntityMinecartTNT extends EntityMinecart {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 10) {
-         this.ignite();
-      } else {
-         super.handleStatusUpdate(var1);
-      }
-
-   }
-
    public void ignite() {
       this.minecartTNTFuse = 80;
       if (!this.world.isRemote) {
@@ -135,21 +123,16 @@ public class EntityMinecartTNT extends EntityMinecart {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getFuseTicks() {
-      return this.minecartTNTFuse;
-   }
-
    public boolean isIgnited() {
       return this.minecartTNTFuse > -1;
    }
 
    public float getExplosionResistance(Explosion var1, World var2, BlockPos var3, IBlockState var4) {
-      return this.isIgnited() && (BlockRailBase.isRailBlock(var4) || BlockRailBase.isRailBlock(var2, var3.up())) ? 0.0F : super.getExplosionResistance(var1, var2, var3, var4);
+      return !this.isIgnited() || !BlockRailBase.isRailBlock(var4) && !BlockRailBase.isRailBlock(var2, var3.up()) ? super.getExplosionResistance(var1, var2, var3, var4) : 0.0F;
    }
 
    public boolean verifyExplosion(Explosion var1, World var2, BlockPos var3, IBlockState var4, float var5) {
-      return this.isIgnited() && (BlockRailBase.isRailBlock(var4) || BlockRailBase.isRailBlock(var2, var3.up())) ? false : super.verifyExplosion(var1, var2, var3, var4, var5);
+      return !this.isIgnited() || !BlockRailBase.isRailBlock(var4) && !BlockRailBase.isRailBlock(var2, var3.up()) ? super.verifyExplosion(var1, var2, var3, var4, var5) : false;
    }
 
    protected void readEntityFromNBT(NBTTagCompound var1) {

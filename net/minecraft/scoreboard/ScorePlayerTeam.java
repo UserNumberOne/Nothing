@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ScorePlayerTeam extends Team {
    private final Scoreboard theScoreboard;
@@ -135,12 +133,6 @@ public class ScorePlayerTeam extends Team {
       }
 
       return var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setFriendlyFlags(int var1) {
-      this.setAllowFriendlyFire((var1 & 1) > 0);
-      this.setSeeFriendlyInvisiblesEnabled((var1 & 2) > 0);
    }
 
    public void setChatFormat(TextFormatting var1) {

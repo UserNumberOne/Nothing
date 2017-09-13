@@ -1,70 +1,78 @@
 package net.minecraft.item.crafting;
 
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 
-public class RecipesMapCloning implements IRecipe {
-   public boolean matches(InventoryCrafting var1, World var2) {
-      int var3 = 0;
-      ItemStack var4 = null;
+public class RecipesMapCloning extends ShapelessRecipes implements IRecipe {
+   public RecipesMapCloning() {
+      super(new ItemStack(Items.MAP, 0, -1), Arrays.asList(new ItemStack(Items.MAP, 0, 0)));
+   }
 
-      for(int var5 = 0; var5 < var1.getSizeInventory(); ++var5) {
-         ItemStack var6 = var1.getStackInSlot(var5);
-         if (var6 != null) {
-            if (var6.getItem() == Items.FILLED_MAP) {
-               if (var4 != null) {
+   public boolean matches(InventoryCrafting inventorycrafting, World world) {
+      int i = 0;
+      ItemStack itemstack = null;
+
+      for(int j = 0; j < inventorycrafting.getSizeInventory(); ++j) {
+         ItemStack itemstack1 = inventorycrafting.getStackInSlot(j);
+         if (itemstack1 != null) {
+            if (itemstack1.getItem() == Items.FILLED_MAP) {
+               if (itemstack != null) {
                   return false;
                }
 
-               var4 = var6;
+               itemstack = itemstack1;
             } else {
-               if (var6.getItem() != Items.MAP) {
+               if (itemstack1.getItem() != Items.MAP) {
                   return false;
                }
 
-               ++var3;
+               ++i;
             }
          }
       }
 
-      return var4 != null && var3 > 0;
+      if (itemstack != null && i > 0) {
+         return true;
+      } else {
+         return false;
+      }
    }
 
    @Nullable
-   public ItemStack getCraftingResult(InventoryCrafting var1) {
-      int var2 = 0;
-      ItemStack var3 = null;
+   public ItemStack getCraftingResult(InventoryCrafting inventorycrafting) {
+      int i = 0;
+      ItemStack itemstack = null;
 
-      for(int var4 = 0; var4 < var1.getSizeInventory(); ++var4) {
-         ItemStack var5 = var1.getStackInSlot(var4);
-         if (var5 != null) {
-            if (var5.getItem() == Items.FILLED_MAP) {
-               if (var3 != null) {
+      for(int j = 0; j < inventorycrafting.getSizeInventory(); ++j) {
+         ItemStack itemstack1 = inventorycrafting.getStackInSlot(j);
+         if (itemstack1 != null) {
+            if (itemstack1.getItem() == Items.FILLED_MAP) {
+               if (itemstack != null) {
                   return null;
                }
 
-               var3 = var5;
+               itemstack = itemstack1;
             } else {
-               if (var5.getItem() != Items.MAP) {
+               if (itemstack1.getItem() != Items.MAP) {
                   return null;
                }
 
-               ++var2;
+               ++i;
             }
          }
       }
 
-      if (var3 != null && var2 >= 1) {
-         ItemStack var6 = new ItemStack(Items.FILLED_MAP, var2 + 1, var3.getMetadata());
-         if (var3.hasDisplayName()) {
-            var6.setStackDisplayName(var3.getDisplayName());
+      if (itemstack != null && i >= 1) {
+         ItemStack itemstack2 = new ItemStack(Items.FILLED_MAP, i + 1, itemstack.getMetadata());
+         if (itemstack.hasDisplayName()) {
+            itemstack2.setStackDisplayName(itemstack.getDisplayName());
          }
 
-         return var6;
+         return itemstack2;
       } else {
          return null;
       }
@@ -79,14 +87,16 @@ public class RecipesMapCloning implements IRecipe {
       return null;
    }
 
-   public ItemStack[] getRemainingItems(InventoryCrafting var1) {
-      ItemStack[] var2 = new ItemStack[var1.getSizeInventory()];
+   public ItemStack[] getRemainingItems(InventoryCrafting inventorycrafting) {
+      ItemStack[] aitemstack = new ItemStack[inventorycrafting.getSizeInventory()];
 
-      for(int var3 = 0; var3 < var2.length; ++var3) {
-         ItemStack var4 = var1.getStackInSlot(var3);
-         var2[var3] = ForgeHooks.getContainerItem(var4);
+      for(int i = 0; i < aitemstack.length; ++i) {
+         ItemStack itemstack = inventorycrafting.getStackInSlot(i);
+         if (itemstack != null && itemstack.getItem().hasContainerItem()) {
+            aitemstack[i] = new ItemStack(itemstack.getItem().getContainerItem());
+         }
       }
 
-      return var2;
+      return aitemstack;
    }
 }

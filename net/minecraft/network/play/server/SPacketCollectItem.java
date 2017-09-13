@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketCollectItem implements Packet {
    private int collectedItemEntityId;
@@ -31,15 +29,5 @@ public class SPacketCollectItem implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleCollectItem(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getCollectedItemEntityID() {
-      return this.collectedItemEntityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityID() {
-      return this.entityId;
    }
 }

@@ -5,8 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityTeleport implements Packet {
    private int entityId;
@@ -52,40 +50,5 @@ public class SPacketEntityTeleport implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleEntityTeleport(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.posX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.posY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.posZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getYaw() {
-      return this.yaw;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getPitch() {
-      return this.pitch;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean getOnGround() {
-      return this.onGround;
    }
 }

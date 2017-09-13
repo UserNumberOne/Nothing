@@ -41,4 +41,9 @@ public class UserListBans extends UserList {
 
       return null;
    }
+
+   // $FF: synthetic method
+   protected String getObjectKey(Object var1) {
+      return this.getObjectKey((GameProfile)var1);
+   }
 }

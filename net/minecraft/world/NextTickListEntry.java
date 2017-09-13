@@ -40,7 +40,17 @@ public class NextTickListEntry implements Comparable {
    }
 
    public int compareTo(NextTickListEntry var1) {
-      return this.scheduledTime < var1.scheduledTime ? -1 : (this.scheduledTime > var1.scheduledTime ? 1 : (this.priority != var1.priority ? this.priority - var1.priority : (this.tickEntryID < var1.tickEntryID ? -1 : (this.tickEntryID > var1.tickEntryID ? 1 : 0))));
+      if (this.scheduledTime < var1.scheduledTime) {
+         return -1;
+      } else if (this.scheduledTime > var1.scheduledTime) {
+         return 1;
+      } else if (this.priority != var1.priority) {
+         return this.priority - var1.priority;
+      } else if (this.tickEntryID < var1.tickEntryID) {
+         return -1;
+      } else {
+         return this.tickEntryID > var1.tickEntryID ? 1 : 0;
+      }
    }
 
    public String toString() {
@@ -49,5 +59,10 @@ public class NextTickListEntry implements Comparable {
 
    public Block getBlock() {
       return this.block;
+   }
+
+   // $FF: synthetic method
+   public int compareTo(Object var1) {
+      return this.compareTo((NextTickListEntry)var1);
    }
 }

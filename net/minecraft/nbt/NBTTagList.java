@@ -83,7 +83,6 @@ public class NBTTagList extends NBTBase {
 
          this.tagList.add(var1);
       }
-
    }
 
    public void set(int var1, NBTBase var2) {
@@ -101,7 +100,6 @@ public class NBTTagList extends NBTBase {
       } else {
          LOGGER.warn("index out of bounds to set tag in tag list");
       }
-
    }
 
    public NBTBase removeTag(int var1) {
@@ -213,5 +211,10 @@ public class NBTTagList extends NBTBase {
 
    public int getTagType() {
       return this.tagType;
+   }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
    }
 }

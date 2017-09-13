@@ -6,9 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketUseBed implements Packet {
    private int playerID;
@@ -34,15 +31,5 @@ public class SPacketUseBed implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleUseBed(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EntityPlayer getPlayer(World var1) {
-      return (EntityPlayer)var1.getEntityByID(this.playerID);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockPos getBedPosition() {
-      return this.bedPos;
    }
 }

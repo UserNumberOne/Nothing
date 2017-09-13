@@ -31,7 +31,19 @@ public class EnchantmentProtection extends Enchantment {
    }
 
    public int calcModifierDamage(int var1, DamageSource var2) {
-      return var2.canHarmInCreative() ? 0 : (this.protectionType == EnchantmentProtection.Type.ALL ? var1 : (this.protectionType == EnchantmentProtection.Type.FIRE && var2.isFireDamage() ? var1 * 2 : (this.protectionType == EnchantmentProtection.Type.FALL && var2 == DamageSource.fall ? var1 * 3 : (this.protectionType == EnchantmentProtection.Type.EXPLOSION && var2.isExplosion() ? var1 * 2 : (this.protectionType == EnchantmentProtection.Type.PROJECTILE && var2.isProjectile() ? var1 * 2 : 0)))));
+      if (var2.canHarmInCreative()) {
+         return 0;
+      } else if (this.protectionType == EnchantmentProtection.Type.ALL) {
+         return var1;
+      } else if (this.protectionType == EnchantmentProtection.Type.FIRE && var2.isFireDamage()) {
+         return var1 * 2;
+      } else if (this.protectionType == EnchantmentProtection.Type.FALL && var2 == DamageSource.fall) {
+         return var1 * 3;
+      } else if (this.protectionType == EnchantmentProtection.Type.EXPLOSION && var2.isExplosion()) {
+         return var1 * 2;
+      } else {
+         return this.protectionType == EnchantmentProtection.Type.PROJECTILE && var2.isProjectile() ? var1 * 2 : 0;
+      }
    }
 
    public String getName() {
@@ -39,11 +51,15 @@ public class EnchantmentProtection extends Enchantment {
    }
 
    public boolean canApplyTogether(Enchantment var1) {
-      if (!(var1 instanceof EnchantmentProtection)) {
-         return super.canApplyTogether(var1);
-      } else {
+      if (var1 instanceof EnchantmentProtection) {
          EnchantmentProtection var2 = (EnchantmentProtection)var1;
-         return this.protectionType == var2.protectionType ? false : this.protectionType == EnchantmentProtection.Type.FALL || var2.protectionType == EnchantmentProtection.Type.FALL;
+         if (this.protectionType == var2.protectionType) {
+            return false;
+         } else {
+            return this.protectionType == EnchantmentProtection.Type.FALL || var2.protectionType == EnchantmentProtection.Type.FALL;
+         }
+      } else {
+         return super.canApplyTogether(var1);
       }
    }
 

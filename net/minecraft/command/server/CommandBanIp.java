@@ -12,8 +12,8 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListIPBansEntry;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 
@@ -28,8 +28,8 @@ public class CommandBanIp extends CommandBase {
       return 3;
    }
 
-   public boolean checkPermission(MinecraftServer var1, ICommandSender var2) {
-      return var1.getPlayerList().getBannedIPs().isLanServer() && super.checkPermission(var1, var2);
+   public boolean canUse(MinecraftServer var1, ICommandSender var2) {
+      return var1.getPlayerList().getBannedIPs().isLanServer() && super.canUse(var1, var2);
    }
 
    public String getUsage(ICommandSender var1) {
@@ -41,14 +41,14 @@ public class CommandBanIp extends CommandBase {
          ITextComponent var4 = var3.length >= 2 ? getChatComponentFromNthArg(var2, var3, 1) : null;
          Matcher var5 = IP_PATTERN.matcher(var3[0]);
          if (var5.matches()) {
-            this.banIp(var1, var2, var3[0], var4 == null ? null : var4.getUnformattedText());
+            this.a(var1, var2, var3[0], var4 == null ? null : var4.getUnformattedText());
          } else {
             EntityPlayerMP var6 = var1.getPlayerList().getPlayerByUsername(var3[0]);
             if (var6 == null) {
                throw new PlayerNotFoundException("commands.banip.invalid", new Object[0]);
             }
 
-            this.banIp(var1, var2, var6.getPlayerIP(), var4 == null ? null : var4.getUnformattedText());
+            this.a(var1, var2, var6.getPlayerIP(), var4 == null ? null : var4.getUnformattedText());
          }
 
       } else {
@@ -56,11 +56,11 @@ public class CommandBanIp extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : Collections.emptyList();
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getPlayers()) : Collections.emptyList();
    }
 
-   protected void banIp(MinecraftServer var1, ICommandSender var2, String var3, @Nullable String var4) {
+   protected void a(MinecraftServer var1, ICommandSender var2, String var3, @Nullable String var4) {
       UserListIPBansEntry var5 = new UserListIPBansEntry(var3, (Date)null, var2.getName(), (Date)null, var4);
       var1.getPlayerList().getBannedIPs().addEntry(var5);
       List var6 = var1.getPlayerList().getPlayersMatchingAddress(var3);

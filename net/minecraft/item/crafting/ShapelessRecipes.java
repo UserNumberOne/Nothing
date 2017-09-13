@@ -7,15 +7,31 @@ import javax.annotation.Nullable;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftShapelessRecipe;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.inventory.ShapelessRecipe;
 
 public class ShapelessRecipes implements IRecipe {
    private final ItemStack recipeOutput;
-   public final List recipeItems;
+   private final List recipeItems;
 
-   public ShapelessRecipes(ItemStack var1, List var2) {
-      this.recipeOutput = var1;
-      this.recipeItems = var2;
+   public ShapelessRecipes(ItemStack itemstack, List list) {
+      this.recipeOutput = itemstack;
+      this.recipeItems = list;
+   }
+
+   public ShapelessRecipe toBukkitRecipe() {
+      CraftItemStack result = CraftItemStack.asCraftMirror(this.recipeOutput);
+      CraftShapelessRecipe recipe = new CraftShapelessRecipe(result, this);
+
+      for(ItemStack stack : this.recipeItems) {
+         if (stack != null) {
+            recipe.addIngredient(CraftMagicNumbers.getMaterial(stack.getItem()), stack.getMetadata());
+         }
+      }
+
+      return recipe;
    }
 
    @Nullable
@@ -23,46 +39,48 @@ public class ShapelessRecipes implements IRecipe {
       return this.recipeOutput;
    }
 
-   public ItemStack[] getRemainingItems(InventoryCrafting var1) {
-      ItemStack[] var2 = new ItemStack[var1.getSizeInventory()];
+   public ItemStack[] getRemainingItems(InventoryCrafting inventorycrafting) {
+      ItemStack[] aitemstack = new ItemStack[inventorycrafting.getSizeInventory()];
 
-      for(int var3 = 0; var3 < var2.length; ++var3) {
-         ItemStack var4 = var1.getStackInSlot(var3);
-         var2[var3] = ForgeHooks.getContainerItem(var4);
+      for(int i = 0; i < aitemstack.length; ++i) {
+         ItemStack itemstack = inventorycrafting.getStackInSlot(i);
+         if (itemstack != null && itemstack.getItem().hasContainerItem()) {
+            aitemstack[i] = new ItemStack(itemstack.getItem().getContainerItem());
+         }
       }
 
-      return var2;
+      return aitemstack;
    }
 
-   public boolean matches(InventoryCrafting var1, World var2) {
-      ArrayList var3 = Lists.newArrayList(this.recipeItems);
+   public boolean matches(InventoryCrafting inventorycrafting, World world) {
+      ArrayList arraylist = Lists.newArrayList(this.recipeItems);
 
-      for(int var4 = 0; var4 < var1.getHeight(); ++var4) {
-         for(int var5 = 0; var5 < var1.getWidth(); ++var5) {
-            ItemStack var6 = var1.getStackInRowAndColumn(var5, var4);
-            if (var6 != null) {
-               boolean var7 = false;
+      for(int i = 0; i < inventorycrafting.getHeight(); ++i) {
+         for(int j = 0; j < inventorycrafting.getWidth(); ++j) {
+            ItemStack itemstack = inventorycrafting.getStackInRowAndColumn(j, i);
+            if (itemstack != null) {
+               boolean flag = false;
 
-               for(ItemStack var9 : var3) {
-                  if (var6.getItem() == var9.getItem() && (var9.getMetadata() == 32767 || var6.getMetadata() == var9.getMetadata())) {
-                     var7 = true;
-                     var3.remove(var9);
+               for(ItemStack itemstack1 : arraylist) {
+                  if (itemstack.getItem() == itemstack1.getItem() && (itemstack1.getMetadata() == 32767 || itemstack.getMetadata() == itemstack1.getMetadata())) {
+                     flag = true;
+                     arraylist.remove(itemstack1);
                      break;
                   }
                }
 
-               if (!var7) {
+               if (!flag) {
                   return false;
                }
             }
          }
       }
 
-      return var3.isEmpty();
+      return arraylist.isEmpty();
    }
 
    @Nullable
-   public ItemStack getCraftingResult(InventoryCrafting var1) {
+   public ItemStack getCraftingResult(InventoryCrafting inventorycrafting) {
       return this.recipeOutput.copy();
    }
 

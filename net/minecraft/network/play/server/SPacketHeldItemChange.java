@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketHeldItemChange implements Packet {
    private int heldItemHotbarIndex;
@@ -27,10 +25,5 @@ public class SPacketHeldItemChange implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleHeldItemChange(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getHeldItemHotbarIndex() {
-      return this.heldItemHotbarIndex;
    }
 }

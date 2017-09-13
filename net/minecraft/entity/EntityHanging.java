@@ -3,6 +3,7 @@ package net.minecraft.entity;
 import com.google.common.base.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockRedstoneDiode;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityItem;
@@ -18,76 +19,90 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.Validate;
+import org.bukkit.entity.Hanging;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
+import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 
 public abstract class EntityHanging extends Entity {
    private static final Predicate IS_HANGING_ENTITY = new Predicate() {
-      public boolean apply(@Nullable Entity var1) {
-         return var1 instanceof EntityHanging;
+      public boolean apply(@Nullable Entity entity) {
+         return entity instanceof EntityHanging;
+      }
+
+      public boolean apply(Object object) {
+         return this.apply((Entity)object);
       }
    };
    private int tickCounter1;
-   protected BlockPos hangingPosition;
+   public BlockPos hangingPosition;
    @Nullable
    public EnumFacing facingDirection;
 
-   public EntityHanging(World var1) {
-      super(var1);
+   public EntityHanging(World world) {
+      super(world);
       this.setSize(0.5F, 0.5F);
    }
 
-   public EntityHanging(World var1, BlockPos var2) {
-      this(var1);
-      this.hangingPosition = var2;
+   public EntityHanging(World world, BlockPos blockposition) {
+      this(world);
+      this.hangingPosition = blockposition;
    }
 
    protected void entityInit() {
    }
 
-   protected void updateFacingWithBoundingBox(EnumFacing var1) {
-      Validate.notNull(var1);
-      Validate.isTrue(var1.getAxis().isHorizontal());
-      this.facingDirection = var1;
+   public void updateFacingWithBoundingBox(EnumFacing enumdirection) {
+      Validate.notNull(enumdirection);
+      Validate.isTrue(enumdirection.getAxis().isHorizontal());
+      this.facingDirection = enumdirection;
       this.rotationYaw = (float)(this.facingDirection.getHorizontalIndex() * 90);
       this.prevRotationYaw = this.rotationYaw;
       this.updateBoundingBox();
    }
 
+   public static AxisAlignedBB calculateBoundingBox(Entity entity, BlockPos blockPosition, EnumFacing direction, int width, int height) {
+      double d0 = (double)blockPosition.getX() + 0.5D;
+      double d1 = (double)blockPosition.getY() + 0.5D;
+      double d2 = (double)blockPosition.getZ() + 0.5D;
+      double d4 = offs(width);
+      double d5 = offs(height);
+      d0 = d0 - (double)direction.getFrontOffsetX() * 0.46875D;
+      d2 = d2 - (double)direction.getFrontOffsetZ() * 0.46875D;
+      d1 = d1 + d5;
+      EnumFacing enumdirection = direction.rotateYCCW();
+      d0 = d0 + d4 * (double)enumdirection.getFrontOffsetX();
+      d2 = d2 + d4 * (double)enumdirection.getFrontOffsetZ();
+      if (entity != null) {
+         entity.posX = d0;
+         entity.posY = d1;
+         entity.posZ = d2;
+      }
+
+      double d6 = (double)width;
+      double d7 = (double)height;
+      double d8 = (double)width;
+      if (direction.getAxis() == EnumFacing.Axis.Z) {
+         d8 = 1.0D;
+      } else {
+         d6 = 1.0D;
+      }
+
+      d6 = d6 / 32.0D;
+      d7 = d7 / 32.0D;
+      d8 = d8 / 32.0D;
+      return new AxisAlignedBB(d0 - d6, d1 - d7, d2 - d8, d0 + d6, d1 + d7, d2 + d8);
+   }
+
    protected void updateBoundingBox() {
       if (this.facingDirection != null) {
-         double var1 = (double)this.hangingPosition.getX() + 0.5D;
-         double var3 = (double)this.hangingPosition.getY() + 0.5D;
-         double var5 = (double)this.hangingPosition.getZ() + 0.5D;
-         double var7 = 0.46875D;
-         double var9 = this.offs(this.getWidthPixels());
-         double var11 = this.offs(this.getHeightPixels());
-         var1 = var1 - (double)this.facingDirection.getFrontOffsetX() * 0.46875D;
-         var5 = var5 - (double)this.facingDirection.getFrontOffsetZ() * 0.46875D;
-         var3 = var3 + var11;
-         EnumFacing var13 = this.facingDirection.rotateYCCW();
-         var1 = var1 + var9 * (double)var13.getFrontOffsetX();
-         var5 = var5 + var9 * (double)var13.getFrontOffsetZ();
-         this.posX = var1;
-         this.posY = var3;
-         this.posZ = var5;
-         double var14 = (double)this.getWidthPixels();
-         double var16 = (double)this.getHeightPixels();
-         double var18 = (double)this.getWidthPixels();
-         if (this.facingDirection.getAxis() == EnumFacing.Axis.Z) {
-            var18 = 1.0D;
-         } else {
-            var14 = 1.0D;
-         }
-
-         var14 = var14 / 32.0D;
-         var16 = var16 / 32.0D;
-         var18 = var18 / 32.0D;
-         this.setEntityBoundingBox(new AxisAlignedBB(var1 - var14, var3 - var16, var5 - var18, var1 + var14, var3 + var16, var5 + var18));
+         this.setEntityBoundingBox(calculateBoundingBox(this, this.hangingPosition, this.facingDirection, this.getWidthPixels(), this.getHeightPixels()));
       }
 
    }
 
-   private double offs(int var1) {
-      return var1 % 32 == 0 ? 0.5D : 0.0D;
+   private static double offs(int i) {
+      return i % 32 == 0 ? 0.5D : 0.0D;
    }
 
    public void onUpdate() {
@@ -97,6 +112,20 @@ public abstract class EntityHanging extends Entity {
       if (this.tickCounter1++ == 100 && !this.world.isRemote) {
          this.tickCounter1 = 0;
          if (!this.isDead && !this.onValidSurface()) {
+            Material material = this.world.getBlockState(new BlockPos(this)).getMaterial();
+            RemoveCause cause;
+            if (!material.equals(Material.AIR)) {
+               cause = RemoveCause.OBSTRUCTION;
+            } else {
+               cause = RemoveCause.PHYSICS;
+            }
+
+            HangingBreakEvent event = new HangingBreakEvent((Hanging)this.getBukkitEntity(), cause);
+            this.world.getServer().getPluginManager().callEvent(event);
+            if (this.isDead || event.isCancelled()) {
+               return;
+            }
+
             this.setDead();
             this.onBroken((Entity)null);
          }
@@ -108,19 +137,19 @@ public abstract class EntityHanging extends Entity {
       if (!this.world.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty()) {
          return false;
       } else {
-         int var1 = Math.max(1, this.getWidthPixels() / 16);
-         int var2 = Math.max(1, this.getHeightPixels() / 16);
-         BlockPos var3 = this.hangingPosition.offset(this.facingDirection.getOpposite());
-         EnumFacing var4 = this.facingDirection.rotateYCCW();
-         BlockPos.MutableBlockPos var5 = new BlockPos.MutableBlockPos();
+         int i = Math.max(1, this.getWidthPixels() / 16);
+         int j = Math.max(1, this.getHeightPixels() / 16);
+         BlockPos blockposition = this.hangingPosition.offset(this.facingDirection.getOpposite());
+         EnumFacing enumdirection = this.facingDirection.rotateYCCW();
+         BlockPos.MutableBlockPos blockposition_mutableblockposition = new BlockPos.MutableBlockPos();
 
-         for(int var6 = 0; var6 < var1; ++var6) {
-            for(int var7 = 0; var7 < var2; ++var7) {
-               int var8 = (var1 - 1) / -2;
-               int var9 = (var2 - 1) / -2;
-               var5.setPos(var3).move(var4, var6 + var8).move(EnumFacing.UP, var7 + var9);
-               IBlockState var10 = this.world.getBlockState(var5);
-               if (!var10.isSideSolid(this.world, var5, this.facingDirection) && !var10.getMaterial().isSolid() && !BlockRedstoneDiode.isDiode(var10)) {
+         for(int k = 0; k < i; ++k) {
+            for(int l = 0; l < j; ++l) {
+               int i1 = (i - 1) / -2;
+               int j1 = (j - 1) / -2;
+               blockposition_mutableblockposition.setPos(blockposition).move(enumdirection, k + i1).move(EnumFacing.UP, l + j1);
+               IBlockState iblockdata = this.world.getBlockState(blockposition_mutableblockposition);
+               if (!iblockdata.getMaterial().isSolid() && !BlockRedstoneDiode.isDiode(iblockdata)) {
                   return false;
                }
             }
@@ -134,55 +163,72 @@ public abstract class EntityHanging extends Entity {
       return true;
    }
 
-   public boolean hitByEntity(Entity var1) {
-      return var1 instanceof EntityPlayer ? this.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer)var1), 0.0F) : false;
+   public boolean hitByEntity(Entity entity) {
+      return entity instanceof EntityPlayer ? this.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer)entity), 0.0F) : false;
    }
 
    public EnumFacing getHorizontalFacing() {
       return this.facingDirection;
    }
 
-   public boolean attackEntityFrom(DamageSource var1, float var2) {
-      if (this.isEntityInvulnerable(var1)) {
+   public boolean attackEntityFrom(DamageSource damagesource, float f) {
+      if (this.isEntityInvulnerable(damagesource)) {
          return false;
       } else {
          if (!this.isDead && !this.world.isRemote) {
+            HangingBreakEvent event = new HangingBreakEvent((Hanging)this.getBukkitEntity(), RemoveCause.DEFAULT);
+            if (damagesource.getEntity() != null) {
+               event = new HangingBreakByEntityEvent((Hanging)this.getBukkitEntity(), damagesource.getEntity() == null ? null : damagesource.getEntity().getBukkitEntity());
+            } else if (damagesource.isExplosion()) {
+               event = new HangingBreakEvent((Hanging)this.getBukkitEntity(), RemoveCause.EXPLOSION);
+            }
+
+            this.world.getServer().getPluginManager().callEvent(event);
+            if (this.isDead || event.isCancelled()) {
+               return true;
+            }
+
             this.setDead();
             this.setBeenAttacked();
-            this.onBroken(var1.getEntity());
+            this.onBroken(damagesource.getEntity());
          }
 
          return true;
       }
    }
 
-   public void move(double var1, double var3, double var5) {
-      if (!this.world.isRemote && !this.isDead && var1 * var1 + var3 * var3 + var5 * var5 > 0.0D) {
+   public void move(double d0, double d1, double d2) {
+      if (!this.world.isRemote && !this.isDead && d0 * d0 + d1 * d1 + d2 * d2 > 0.0D) {
+         if (this.isDead) {
+            return;
+         }
+
+         HangingBreakEvent event = new HangingBreakEvent((Hanging)this.getBukkitEntity(), RemoveCause.PHYSICS);
+         this.world.getServer().getPluginManager().callEvent(event);
+         if (this.isDead || event.isCancelled()) {
+            return;
+         }
+
          this.setDead();
          this.onBroken((Entity)null);
       }
 
    }
 
-   public void addVelocity(double var1, double var3, double var5) {
-      if (!this.world.isRemote && !this.isDead && var1 * var1 + var3 * var3 + var5 * var5 > 0.0D) {
-         this.setDead();
-         this.onBroken((Entity)null);
-      }
-
+   public void addVelocity(double d0, double d1, double d2) {
    }
 
-   public void writeEntityToNBT(NBTTagCompound var1) {
-      var1.setByte("Facing", (byte)this.facingDirection.getHorizontalIndex());
-      BlockPos var2 = this.getHangingPosition();
-      var1.setInteger("TileX", var2.getX());
-      var1.setInteger("TileY", var2.getY());
-      var1.setInteger("TileZ", var2.getZ());
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      nbttagcompound.setByte("Facing", (byte)this.facingDirection.getHorizontalIndex());
+      BlockPos blockposition = this.getHangingPosition();
+      nbttagcompound.setInteger("TileX", blockposition.getX());
+      nbttagcompound.setInteger("TileY", blockposition.getY());
+      nbttagcompound.setInteger("TileZ", blockposition.getZ());
    }
 
-   public void readEntityFromNBT(NBTTagCompound var1) {
-      this.hangingPosition = new BlockPos(var1.getInteger("TileX"), var1.getInteger("TileY"), var1.getInteger("TileZ"));
-      this.updateFacingWithBoundingBox(EnumFacing.getHorizontal(var1.getByte("Facing")));
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      this.hangingPosition = new BlockPos(nbttagcompound.getInteger("TileX"), nbttagcompound.getInteger("TileY"), nbttagcompound.getInteger("TileZ"));
+      this.updateFacingWithBoundingBox(EnumFacing.getHorizontal(nbttagcompound.getByte("Facing")));
    }
 
    public abstract int getWidthPixels();
@@ -193,19 +239,19 @@ public abstract class EntityHanging extends Entity {
 
    public abstract void playPlaceSound();
 
-   public EntityItem entityDropItem(ItemStack var1, float var2) {
-      EntityItem var3 = new EntityItem(this.world, this.posX + (double)((float)this.facingDirection.getFrontOffsetX() * 0.15F), this.posY + (double)var2, this.posZ + (double)((float)this.facingDirection.getFrontOffsetZ() * 0.15F), var1);
-      var3.setDefaultPickupDelay();
-      this.world.spawnEntity(var3);
-      return var3;
+   public EntityItem entityDropItem(ItemStack itemstack, float f) {
+      EntityItem entityitem = new EntityItem(this.world, this.posX + (double)((float)this.facingDirection.getFrontOffsetX() * 0.15F), this.posY + (double)f, this.posZ + (double)((float)this.facingDirection.getFrontOffsetZ() * 0.15F), itemstack);
+      entityitem.setDefaultPickupDelay();
+      this.world.spawnEntity(entityitem);
+      return entityitem;
    }
 
    protected boolean shouldSetPosAfterLoading() {
       return false;
    }
 
-   public void setPosition(double var1, double var3, double var5) {
-      this.hangingPosition = new BlockPos(var1, var3, var5);
+   public void setPosition(double d0, double d1, double d2) {
+      this.hangingPosition = new BlockPos(d0, d1, d2);
       this.updateBoundingBox();
       this.isAirBorne = true;
    }
@@ -214,37 +260,62 @@ public abstract class EntityHanging extends Entity {
       return this.hangingPosition;
    }
 
-   public float getRotatedYaw(Rotation var1) {
+   public float getRotatedYaw(Rotation enumblockrotation) {
       if (this.facingDirection != null && this.facingDirection.getAxis() != EnumFacing.Axis.Y) {
-         switch(var1) {
-         case CLOCKWISE_180:
+         switch(EntityHanging.SyntheticClass_1.a[enumblockrotation.ordinal()]) {
+         case 1:
             this.facingDirection = this.facingDirection.getOpposite();
             break;
-         case COUNTERCLOCKWISE_90:
+         case 2:
             this.facingDirection = this.facingDirection.rotateYCCW();
             break;
-         case CLOCKWISE_90:
+         case 3:
             this.facingDirection = this.facingDirection.rotateY();
          }
       }
 
-      float var2 = MathHelper.wrapDegrees(this.rotationYaw);
-      switch(var1) {
-      case CLOCKWISE_180:
-         return var2 + 180.0F;
-      case COUNTERCLOCKWISE_90:
-         return var2 + 90.0F;
-      case CLOCKWISE_90:
-         return var2 + 270.0F;
+      float f = MathHelper.wrapDegrees(this.rotationYaw);
+      switch(EntityHanging.SyntheticClass_1.a[enumblockrotation.ordinal()]) {
+      case 1:
+         return f + 180.0F;
+      case 2:
+         return f + 90.0F;
+      case 3:
+         return f + 270.0F;
       default:
-         return var2;
+         return f;
       }
    }
 
-   public float getMirroredYaw(Mirror var1) {
-      return this.getRotatedYaw(var1.toRotation(this.facingDirection));
+   public float getMirroredYaw(Mirror enumblockmirror) {
+      return this.getRotatedYaw(enumblockmirror.toRotation(this.facingDirection));
    }
 
-   public void onStruckByLightning(EntityLightningBolt var1) {
+   public void onStruckByLightning(EntityLightningBolt entitylightning) {
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[Rotation.values().length];
+
+      static {
+         try {
+            a[Rotation.CLOCKWISE_180.ordinal()] = 1;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[Rotation.COUNTERCLOCKWISE_90.ordinal()] = 2;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[Rotation.CLOCKWISE_90.ordinal()] = 3;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

@@ -1,6 +1,7 @@
 package net.minecraft.inventory;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,74 +9,108 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.inventory.InventoryHolder;
 
 public class InventoryBasic implements IInventory {
    private String inventoryTitle;
    private final int slotsCount;
-   private final ItemStack[] inventoryContents;
+   public final ItemStack[] inventoryContents;
    private List changeListeners;
    private boolean hasCustomName;
+   public List transaction;
+   private int maxStack;
+   protected InventoryHolder bukkitOwner;
 
-   public InventoryBasic(String var1, boolean var2, int var3) {
-      this.inventoryTitle = var1;
-      this.hasCustomName = var2;
-      this.slotsCount = var3;
-      this.inventoryContents = new ItemStack[var3];
+   public ItemStack[] getContents() {
+      return this.inventoryContents;
    }
 
-   @SideOnly(Side.CLIENT)
-   public InventoryBasic(ITextComponent var1, int var2) {
-      this(var1.getUnformattedText(), true, var2);
+   public void onOpen(CraftHumanEntity who) {
+      this.transaction.add(who);
    }
 
-   public void addInventoryChangeListener(IInventoryChangedListener var1) {
+   public void onClose(CraftHumanEntity who) {
+      this.transaction.remove(who);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public void setMaxStackSize(int i) {
+      this.maxStack = i;
+   }
+
+   public InventoryHolder getOwner() {
+      return this.bukkitOwner;
+   }
+
+   public Location getLocation() {
+      return null;
+   }
+
+   public InventoryBasic(String s, boolean flag, int i) {
+      this(s, flag, i, (InventoryHolder)null);
+   }
+
+   public InventoryBasic(String s, boolean flag, int i, InventoryHolder owner) {
+      this.transaction = new ArrayList();
+      this.maxStack = 64;
+      this.bukkitOwner = owner;
+      this.inventoryTitle = s;
+      this.hasCustomName = flag;
+      this.slotsCount = i;
+      this.inventoryContents = new ItemStack[i];
+   }
+
+   public void addInventoryChangeListener(IInventoryChangedListener iinventorylistener) {
       if (this.changeListeners == null) {
          this.changeListeners = Lists.newArrayList();
       }
 
-      this.changeListeners.add(var1);
+      this.changeListeners.add(iinventorylistener);
    }
 
-   public void removeInventoryChangeListener(IInventoryChangedListener var1) {
-      this.changeListeners.remove(var1);
-   }
-
-   @Nullable
-   public ItemStack getStackInSlot(int var1) {
-      return var1 >= 0 && var1 < this.inventoryContents.length ? this.inventoryContents[var1] : null;
+   public void removeInventoryChangeListener(IInventoryChangedListener iinventorylistener) {
+      this.changeListeners.remove(iinventorylistener);
    }
 
    @Nullable
-   public ItemStack decrStackSize(int var1, int var2) {
-      ItemStack var3 = ItemStackHelper.getAndSplit(this.inventoryContents, var1, var2);
-      if (var3 != null) {
+   public ItemStack getStackInSlot(int i) {
+      return i >= 0 && i < this.inventoryContents.length ? this.inventoryContents[i] : null;
+   }
+
+   @Nullable
+   public ItemStack decrStackSize(int i, int j) {
+      ItemStack itemstack = ItemStackHelper.getAndSplit(this.inventoryContents, i, j);
+      if (itemstack != null) {
          this.markDirty();
       }
 
-      return var3;
+      return itemstack;
    }
 
    @Nullable
-   public ItemStack addItem(ItemStack var1) {
-      ItemStack var2 = var1.copy();
+   public ItemStack addItem(ItemStack itemstack) {
+      ItemStack itemstack1 = itemstack.copy();
 
-      for(int var3 = 0; var3 < this.slotsCount; ++var3) {
-         ItemStack var4 = this.getStackInSlot(var3);
-         if (var4 == null) {
-            this.setInventorySlotContents(var3, var2);
+      for(int i = 0; i < this.slotsCount; ++i) {
+         ItemStack itemstack2 = this.getStackInSlot(i);
+         if (itemstack2 == null) {
+            this.setInventorySlotContents(i, itemstack1);
             this.markDirty();
             return null;
          }
 
-         if (ItemStack.areItemsEqual(var4, var2)) {
-            int var5 = Math.min(this.getInventoryStackLimit(), var4.getMaxStackSize());
-            int var6 = Math.min(var2.stackSize, var5 - var4.stackSize);
-            if (var6 > 0) {
-               var4.stackSize += var6;
-               var2.stackSize -= var6;
-               if (var2.stackSize <= 0) {
+         if (ItemStack.areItemsEqual(itemstack2, itemstack1)) {
+            int j = Math.min(this.getInventoryStackLimit(), itemstack2.getMaxStackSize());
+            int k = Math.min(itemstack1.stackSize, j - itemstack2.stackSize);
+            if (k > 0) {
+               itemstack2.stackSize += k;
+               itemstack1.stackSize -= k;
+               if (itemstack1.stackSize <= 0) {
                   this.markDirty();
                   return null;
                }
@@ -83,28 +118,28 @@ public class InventoryBasic implements IInventory {
          }
       }
 
-      if (var2.stackSize != var1.stackSize) {
+      if (itemstack1.stackSize != itemstack.stackSize) {
          this.markDirty();
       }
 
-      return var2;
+      return itemstack1;
    }
 
    @Nullable
-   public ItemStack removeStackFromSlot(int var1) {
-      if (this.inventoryContents[var1] != null) {
-         ItemStack var2 = this.inventoryContents[var1];
-         this.inventoryContents[var1] = null;
-         return var2;
+   public ItemStack removeStackFromSlot(int i) {
+      if (this.inventoryContents[i] != null) {
+         ItemStack itemstack = this.inventoryContents[i];
+         this.inventoryContents[i] = null;
+         return itemstack;
       } else {
          return null;
       }
    }
 
-   public void setInventorySlotContents(int var1, @Nullable ItemStack var2) {
-      this.inventoryContents[var1] = var2;
-      if (var2 != null && var2.stackSize > this.getInventoryStackLimit()) {
-         var2.stackSize = this.getInventoryStackLimit();
+   public void setInventorySlotContents(int i, @Nullable ItemStack itemstack) {
+      this.inventoryContents[i] = itemstack;
+      if (itemstack != null && itemstack.stackSize > this.getInventoryStackLimit()) {
+         itemstack.stackSize = this.getInventoryStackLimit();
       }
 
       this.markDirty();
@@ -122,9 +157,9 @@ public class InventoryBasic implements IInventory {
       return this.hasCustomName;
    }
 
-   public void setCustomName(String var1) {
+   public void setCustomName(String s) {
       this.hasCustomName = true;
-      this.inventoryTitle = var1;
+      this.inventoryTitle = s;
    }
 
    public ITextComponent getDisplayName() {
@@ -137,32 +172,32 @@ public class InventoryBasic implements IInventory {
 
    public void markDirty() {
       if (this.changeListeners != null) {
-         for(int var1 = 0; var1 < this.changeListeners.size(); ++var1) {
-            ((IInventoryChangedListener)this.changeListeners.get(var1)).onInventoryChanged(this);
+         for(int i = 0; i < this.changeListeners.size(); ++i) {
+            ((IInventoryChangedListener)this.changeListeners.get(i)).onInventoryChanged(this);
          }
       }
 
    }
 
-   public boolean isUsableByPlayer(EntityPlayer var1) {
+   public boolean isUsableByPlayer(EntityPlayer entityhuman) {
       return true;
    }
 
-   public void openInventory(EntityPlayer var1) {
+   public void openInventory(EntityPlayer entityhuman) {
    }
 
-   public void closeInventory(EntityPlayer var1) {
+   public void closeInventory(EntityPlayer entityhuman) {
    }
 
-   public boolean isItemValidForSlot(int var1, ItemStack var2) {
+   public boolean isItemValidForSlot(int i, ItemStack itemstack) {
       return true;
    }
 
-   public int getField(int var1) {
+   public int getField(int i) {
       return 0;
    }
 
-   public void setField(int var1, int var2) {
+   public void setField(int i, int j) {
    }
 
    public int getFieldCount() {
@@ -170,8 +205,8 @@ public class InventoryBasic implements IInventory {
    }
 
    public void clear() {
-      for(int var1 = 0; var1 < this.inventoryContents.length; ++var1) {
-         this.inventoryContents[var1] = null;
+      for(int i = 0; i < this.inventoryContents.length; ++i) {
+         this.inventoryContents[i] = null;
       }
 
    }

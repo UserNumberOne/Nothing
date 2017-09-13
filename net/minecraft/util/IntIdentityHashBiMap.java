@@ -2,7 +2,6 @@ package net.minecraft.util;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
-import java.util.Arrays;
 import java.util.Iterator;
 import javax.annotation.Nullable;
 import net.minecraft.util.math.MathHelper;
@@ -134,13 +133,6 @@ public class IntIdentityHashBiMap implements IObjectIntIterable, Iterable {
 
    public Iterator iterator() {
       return Iterators.filter(Iterators.forArray(this.byId), Predicates.notNull());
-   }
-
-   public void clear() {
-      Arrays.fill(this.values, (Object)null);
-      Arrays.fill(this.byId, (Object)null);
-      this.nextFreeIndex = 0;
-      this.mapSize = 0;
    }
 
    public int size() {

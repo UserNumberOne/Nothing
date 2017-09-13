@@ -32,15 +32,12 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityWitch extends EntityMob implements IRangedAttackMob {
    private static final UUID MODIFIER_UUID = UUID.fromString("5CD17E52-A79A-43D3-A529-90FDE04B181E");
@@ -147,18 +144,6 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob {
       super.onLivingUpdate();
    }
 
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 15) {
-         for(int var2 = 0; var2 < this.rand.nextInt(35) + 10; ++var2) {
-            this.world.spawnParticle(EnumParticleTypes.SPELL_WITCH, this.posX + this.rand.nextGaussian() * 0.12999999523162842D, this.getEntityBoundingBox().maxY + 0.5D + this.rand.nextGaussian() * 0.12999999523162842D, this.posZ + this.rand.nextGaussian() * 0.12999999523162842D, 0.0D, 0.0D, 0.0D);
-         }
-      } else {
-         super.handleStatusUpdate(var1);
-      }
-
-   }
-
    protected float applyPotionDamageCalculations(DamageSource var1, float var2) {
       var2 = super.applyPotionDamageCalculations(var1, var2);
       if (var1.getEntity() == this) {
@@ -199,7 +184,6 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob {
          this.world.playSound((EntityPlayer)null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_WITCH_THROW, this.getSoundCategory(), 1.0F, 0.8F + this.rand.nextFloat() * 0.4F);
          this.world.spawnEntity(var13);
       }
-
    }
 
    public float getEyeHeight() {

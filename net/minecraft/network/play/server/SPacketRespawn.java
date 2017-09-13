@@ -7,8 +7,6 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketRespawn implements Packet {
    private int dimensionID;
@@ -46,25 +44,5 @@ public class SPacketRespawn implements Packet {
       var1.writeByte(this.difficulty.getDifficultyId());
       var1.writeByte(this.gameType.getID());
       var1.writeString(this.worldType.getName());
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getDimensionID() {
-      return this.dimensionID;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EnumDifficulty getDifficulty() {
-      return this.difficulty;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public GameType getGameType() {
-      return this.gameType;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public WorldType getWorldType() {
-      return this.worldType;
    }
 }

@@ -19,8 +19,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
 
 public class EntityMinecartHopper extends EntityMinecartContainer implements IHopper {
    private boolean isBlocked = true;
@@ -52,15 +50,11 @@ public class EntityMinecartHopper extends EntityMinecartContainer implements IHo
    }
 
    public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
-      if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, var1, var2, var3))) {
-         return true;
-      } else {
-         if (!this.world.isRemote) {
-            var1.displayGUIChest(this);
-         }
-
-         return true;
+      if (!this.world.isRemote) {
+         var1.displayGUIChest(this);
       }
+
+      return true;
    }
 
    public void onActivatorRailPass(int var1, int var2, int var3, boolean var4) {

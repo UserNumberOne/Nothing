@@ -25,6 +25,11 @@ public class PotionHelper {
 
          return false;
       }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((ItemStack)var1);
+      }
    };
 
    public static boolean isReagent(ItemStack var0) {
@@ -56,7 +61,11 @@ public class PotionHelper {
    }
 
    public static boolean hasConversions(ItemStack var0, ItemStack var1) {
-      return !IS_POTION_ITEM.apply(var0) ? false : hasItemConversions(var0, var1) || hasTypeConversions(var0, var1);
+      if (!IS_POTION_ITEM.apply(var0)) {
+         return false;
+      } else {
+         return hasItemConversions(var0, var1) || hasTypeConversions(var0, var1);
+      }
    }
 
    protected static boolean hasItemConversions(ItemStack var0, ItemStack var1) {
@@ -184,19 +193,19 @@ public class PotionHelper {
       registerPotionTypeConversion(PotionTypes.WEAKNESS, var2, PotionTypes.LONG_WEAKNESS);
    }
 
-   public static void registerPotionItemConversion(ItemPotion var0, PotionHelper.ItemPredicateInstance var1, ItemPotion var2) {
+   private static void registerPotionItemConversion(ItemPotion var0, PotionHelper.ItemPredicateInstance var1, ItemPotion var2) {
       POTION_ITEM_CONVERSIONS.add(new PotionHelper.MixPredicate(var0, var1, var2));
    }
 
-   public static void registerPotionItem(PotionHelper.ItemPredicateInstance var0) {
+   private static void registerPotionItem(PotionHelper.ItemPredicateInstance var0) {
       POTION_ITEMS.add(var0);
    }
 
-   public static void registerPotionTypeConversion(PotionType var0, Predicate var1, PotionType var2) {
+   private static void registerPotionTypeConversion(PotionType var0, Predicate var1, PotionType var2) {
       POTION_TYPE_CONVERSIONS.add(new PotionHelper.MixPredicate(var0, var1, var2));
    }
 
-   public static class ItemPredicateInstance implements Predicate {
+   static class ItemPredicateInstance implements Predicate {
       private final Item item;
       private final int meta;
 
@@ -212,9 +221,14 @@ public class PotionHelper {
       public boolean apply(@Nullable ItemStack var1) {
          return var1 != null && var1.getItem() == this.item && (this.meta == -1 || this.meta == var1.getMetadata());
       }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((ItemStack)var1);
+      }
    }
 
-   public static class MixPredicate {
+   static class MixPredicate {
       final Object input;
       final Predicate reagent;
       final Object output;

@@ -67,4 +67,9 @@ public class NBTTagIntArray extends NBTBase {
    public int[] getIntArray() {
       return this.intArray;
    }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
+   }
 }

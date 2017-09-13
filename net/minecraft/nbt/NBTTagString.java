@@ -3,7 +3,6 @@ package net.minecraft.nbt;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import org.apache.commons.lang3.StringUtils;
 
 public class NBTTagString extends NBTBase {
    private String data;
@@ -26,7 +25,7 @@ public class NBTTagString extends NBTBase {
    void read(DataInput var1, int var2, NBTSizeTracker var3) throws IOException {
       var3.read(288L);
       this.data = var1.readUTF();
-      NBTSizeTracker.readUTF(var3, this.data);
+      var3.read((long)(16 * this.data.length()));
    }
 
    public byte getId() {
@@ -34,7 +33,7 @@ public class NBTTagString extends NBTBase {
    }
 
    public String toString() {
-      return "\"" + StringUtils.replaceEach(this.data, new String[]{"\\", "\""}, new String[]{"\\\\", "\\\""}) + "\"";
+      return "\"" + this.data.replace("\"", "\\\"") + "\"";
    }
 
    public NBTTagString copy() {
@@ -60,5 +59,10 @@ public class NBTTagString extends NBTBase {
 
    public String getString() {
       return this.data;
+   }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
    }
 }

@@ -1,9 +1,6 @@
 package net.minecraft.pathfinding;
 
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class PathPoint {
    public final int xCoord;
@@ -87,17 +84,5 @@ public class PathPoint {
 
    public String toString() {
       return this.xCoord + ", " + this.yCoord + ", " + this.zCoord;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static PathPoint createFromBuffer(PacketBuffer var0) {
-      PathPoint var1 = new PathPoint(var0.readInt(), var0.readInt(), var0.readInt());
-      var1.distanceFromOrigin = var0.readFloat();
-      var1.cost = var0.readFloat();
-      var1.costMalus = var0.readFloat();
-      var1.visited = var0.readBoolean();
-      var1.nodeType = PathNodeType.values()[var0.readInt()];
-      var1.distanceToTarget = var0.readFloat();
-      return var1;
    }
 }

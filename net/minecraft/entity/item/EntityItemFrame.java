@@ -23,21 +23,20 @@ import net.minecraft.util.datafix.walkers.ItemStackData;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityItemFrame extends EntityHanging {
    private static final DataParameter ITEM = EntityDataManager.createKey(EntityItemFrame.class, DataSerializers.OPTIONAL_ITEM_STACK);
    private static final DataParameter ROTATION = EntityDataManager.createKey(EntityItemFrame.class, DataSerializers.VARINT);
    private float itemDropChance = 1.0F;
 
-   public EntityItemFrame(World var1) {
-      super(var1);
+   public EntityItemFrame(World world) {
+      super(world);
    }
 
-   public EntityItemFrame(World var1, BlockPos var2, EnumFacing var3) {
-      super(var1, var2);
-      this.updateFacingWithBoundingBox(var3);
+   public EntityItemFrame(World world, BlockPos blockposition, EnumFacing enumdirection) {
+      super(world, blockposition);
+      this.updateFacingWithBoundingBox(enumdirection);
    }
 
    protected void entityInit() {
@@ -49,19 +48,23 @@ public class EntityItemFrame extends EntityHanging {
       return 0.0F;
    }
 
-   public boolean attackEntityFrom(DamageSource var1, float var2) {
-      if (this.isEntityInvulnerable(var1)) {
+   public boolean attackEntityFrom(DamageSource damagesource, float f) {
+      if (this.isEntityInvulnerable(damagesource)) {
          return false;
-      } else if (!var1.isExplosion() && this.getDisplayedItem() != null) {
+      } else if (!damagesource.isExplosion() && this.getDisplayedItem() != null) {
          if (!this.world.isRemote) {
-            this.dropItemOrSelf(var1.getEntity(), false);
+            if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, damagesource, (double)f, false) || this.isDead) {
+               return true;
+            }
+
+            this.dropItemOrSelf(damagesource.getEntity(), false);
             this.playSound(SoundEvents.ENTITY_ITEMFRAME_REMOVE_ITEM, 1.0F, 1.0F);
             this.setDisplayedItem((ItemStack)null);
          }
 
          return true;
       } else {
-         return super.attackEntityFrom(var1, var2);
+         return super.attackEntityFrom(damagesource, f);
       }
    }
 
@@ -73,54 +76,47 @@ public class EntityItemFrame extends EntityHanging {
       return 12;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      double var3 = 16.0D;
-      var3 = var3 * 64.0D * getRenderDistanceWeight();
-      return var1 < var3 * var3;
-   }
-
-   public void onBroken(@Nullable Entity var1) {
+   public void onBroken(@Nullable Entity entity) {
       this.playSound(SoundEvents.ENTITY_ITEMFRAME_BREAK, 1.0F, 1.0F);
-      this.dropItemOrSelf(var1, true);
+      this.dropItemOrSelf(entity, true);
    }
 
    public void playPlaceSound() {
       this.playSound(SoundEvents.ENTITY_ITEMFRAME_PLACE, 1.0F, 1.0F);
    }
 
-   public void dropItemOrSelf(@Nullable Entity var1, boolean var2) {
+   public void dropItemOrSelf(@Nullable Entity entity, boolean flag) {
       if (this.world.getGameRules().getBoolean("doEntityDrops")) {
-         ItemStack var3 = this.getDisplayedItem();
-         if (var1 instanceof EntityPlayer) {
-            EntityPlayer var4 = (EntityPlayer)var1;
-            if (var4.capabilities.isCreativeMode) {
-               this.removeFrameFromMap(var3);
+         ItemStack itemstack = this.getDisplayedItem();
+         if (entity instanceof EntityPlayer) {
+            EntityPlayer entityhuman = (EntityPlayer)entity;
+            if (entityhuman.capabilities.isCreativeMode) {
+               this.removeFrameFromMap(itemstack);
                return;
             }
          }
 
-         if (var2) {
+         if (flag) {
             this.entityDropItem(new ItemStack(Items.ITEM_FRAME), 0.0F);
          }
 
-         if (var3 != null && this.rand.nextFloat() < this.itemDropChance) {
-            var3 = var3.copy();
-            this.removeFrameFromMap(var3);
-            this.entityDropItem(var3, 0.0F);
+         if (itemstack != null && this.rand.nextFloat() < this.itemDropChance) {
+            itemstack = itemstack.copy();
+            this.removeFrameFromMap(itemstack);
+            this.entityDropItem(itemstack, 0.0F);
          }
       }
 
    }
 
-   private void removeFrameFromMap(ItemStack var1) {
-      if (var1 != null) {
-         if (var1.getItem() instanceof ItemMap) {
-            MapData var2 = ((ItemMap)var1.getItem()).getMapData(var1, this.world);
-            var2.mapDecorations.remove("frame-" + this.getEntityId());
+   private void removeFrameFromMap(ItemStack itemstack) {
+      if (itemstack != null) {
+         if (itemstack.getItem() == Items.FILLED_MAP) {
+            MapData worldmap = ((ItemMap)itemstack.getItem()).getMapData(itemstack, this.world);
+            worldmap.mapDecorations.remove("frame-" + this.getEntityId());
          }
 
-         var1.setItemFrame((EntityItemFrame)null);
+         itemstack.setItemFrame((EntityItemFrame)null);
       }
 
    }
@@ -130,34 +126,34 @@ public class EntityItemFrame extends EntityHanging {
       return (ItemStack)((Optional)this.getDataManager().get(ITEM)).orNull();
    }
 
-   public void setDisplayedItem(@Nullable ItemStack var1) {
-      this.setDisplayedItemWithUpdate(var1, true);
+   public void setDisplayedItem(@Nullable ItemStack itemstack) {
+      this.setDisplayedItemWithUpdate(itemstack, true);
    }
 
-   private void setDisplayedItemWithUpdate(@Nullable ItemStack var1, boolean var2) {
-      if (var1 != null) {
-         var1 = var1.copy();
-         var1.stackSize = 1;
-         var1.setItemFrame(this);
+   private void setDisplayedItemWithUpdate(@Nullable ItemStack itemstack, boolean flag) {
+      if (itemstack != null) {
+         itemstack = itemstack.copy();
+         itemstack.stackSize = 1;
+         itemstack.setItemFrame(this);
       }
 
-      this.getDataManager().set(ITEM, Optional.fromNullable(var1));
+      this.getDataManager().set(ITEM, Optional.fromNullable(itemstack));
       this.getDataManager().setDirty(ITEM);
-      if (var1 != null) {
+      if (itemstack != null) {
          this.playSound(SoundEvents.ENTITY_ITEMFRAME_ADD_ITEM, 1.0F, 1.0F);
       }
 
-      if (var2 && this.hangingPosition != null) {
+      if (flag && this.hangingPosition != null) {
          this.world.updateComparatorOutputLevel(this.hangingPosition, Blocks.AIR);
       }
 
    }
 
-   public void notifyDataManagerChange(DataParameter var1) {
-      if (var1.equals(ITEM)) {
-         ItemStack var2 = this.getDisplayedItem();
-         if (var2 != null && var2.getItemFrame() != this) {
-            var2.setItemFrame(this);
+   public void notifyDataManagerChange(DataParameter datawatcherobject) {
+      if (datawatcherobject.equals(ITEM)) {
+         ItemStack itemstack = this.getDisplayedItem();
+         if (itemstack != null && itemstack.getItemFrame() != this) {
+            itemstack.setItemFrame(this);
          }
       }
 
@@ -167,51 +163,51 @@ public class EntityItemFrame extends EntityHanging {
       return ((Integer)this.getDataManager().get(ROTATION)).intValue();
    }
 
-   public void setItemRotation(int var1) {
-      this.setRotation(var1, true);
+   public void setItemRotation(int i) {
+      this.setRotation(i, true);
    }
 
-   private void setRotation(int var1, boolean var2) {
-      this.getDataManager().set(ROTATION, Integer.valueOf(var1 % 8));
-      if (var2 && this.hangingPosition != null) {
+   private void setRotation(int i, boolean flag) {
+      this.getDataManager().set(ROTATION, Integer.valueOf(i % 8));
+      if (flag && this.hangingPosition != null) {
          this.world.updateComparatorOutputLevel(this.hangingPosition, Blocks.AIR);
       }
 
    }
 
-   public static void registerFixesItemFrame(DataFixer var0) {
-      var0.registerWalker(FixTypes.ENTITY, new ItemStackData("ItemFrame", new String[]{"Item"}));
+   public static void registerFixesItemFrame(DataFixer dataconvertermanager) {
+      dataconvertermanager.registerWalker(FixTypes.ENTITY, new ItemStackData("ItemFrame", new String[]{"Item"}));
    }
 
-   public void writeEntityToNBT(NBTTagCompound var1) {
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
       if (this.getDisplayedItem() != null) {
-         var1.setTag("Item", this.getDisplayedItem().writeToNBT(new NBTTagCompound()));
-         var1.setByte("ItemRotation", (byte)this.getRotation());
-         var1.setFloat("ItemDropChance", this.itemDropChance);
+         nbttagcompound.setTag("Item", this.getDisplayedItem().writeToNBT(new NBTTagCompound()));
+         nbttagcompound.setByte("ItemRotation", (byte)this.getRotation());
+         nbttagcompound.setFloat("ItemDropChance", this.itemDropChance);
       }
 
-      super.writeEntityToNBT(var1);
+      super.writeEntityToNBT(nbttagcompound);
    }
 
-   public void readEntityFromNBT(NBTTagCompound var1) {
-      NBTTagCompound var2 = var1.getCompoundTag("Item");
-      if (var2 != null && !var2.hasNoTags()) {
-         this.setDisplayedItemWithUpdate(ItemStack.loadItemStackFromNBT(var2), false);
-         this.setRotation(var1.getByte("ItemRotation"), false);
-         if (var1.hasKey("ItemDropChance", 99)) {
-            this.itemDropChance = var1.getFloat("ItemDropChance");
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("Item");
+      if (nbttagcompound1 != null && !nbttagcompound1.hasNoTags()) {
+         this.setDisplayedItemWithUpdate(ItemStack.loadItemStackFromNBT(nbttagcompound1), false);
+         this.setRotation(nbttagcompound.getByte("ItemRotation"), false);
+         if (nbttagcompound.hasKey("ItemDropChance", 99)) {
+            this.itemDropChance = nbttagcompound.getFloat("ItemDropChance");
          }
       }
 
-      super.readEntityFromNBT(var1);
+      super.readEntityFromNBT(nbttagcompound);
    }
 
-   public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
+   public boolean processInitialInteract(EntityPlayer entityhuman, @Nullable ItemStack itemstack, EnumHand enumhand) {
       if (this.getDisplayedItem() == null) {
-         if (var2 != null && !this.world.isRemote) {
-            this.setDisplayedItem(var2);
-            if (!var1.capabilities.isCreativeMode) {
-               --var2.stackSize;
+         if (itemstack != null && !this.world.isRemote) {
+            this.setDisplayedItem(itemstack);
+            if (!entityhuman.capabilities.isCreativeMode) {
+               --itemstack.stackSize;
             }
          }
       } else if (!this.world.isRemote) {

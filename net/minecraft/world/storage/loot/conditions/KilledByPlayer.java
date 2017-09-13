@@ -32,5 +32,10 @@ public class KilledByPlayer implements LootCondition {
       public KilledByPlayer deserialize(JsonObject var1, JsonDeserializationContext var2) {
          return new KilledByPlayer(JsonUtils.getBoolean(var1, "inverse", false));
       }
+
+      // $FF: synthetic method
+      public LootCondition deserialize(JsonObject var1, JsonDeserializationContext var2) {
+         return this.deserialize(var1, var2);
+      }
    }
 }

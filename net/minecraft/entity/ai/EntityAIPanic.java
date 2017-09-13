@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -16,9 +17,9 @@ public class EntityAIPanic extends EntityAIBase {
    private double randPosY;
    private double randPosZ;
 
-   public EntityAIPanic(EntityCreature var1, double var2) {
-      this.theEntityCreature = var1;
-      this.speed = var2;
+   public EntityAIPanic(EntityCreature entitycreature, double d0) {
+      this.theEntityCreature = entitycreature;
+      this.speed = d0;
       this.setMutexBits(1);
    }
 
@@ -26,23 +27,23 @@ public class EntityAIPanic extends EntityAIBase {
       if (this.theEntityCreature.getAITarget() == null && !this.theEntityCreature.isBurning()) {
          return false;
       } else if (!this.theEntityCreature.isBurning()) {
-         Vec3d var2 = RandomPositionGenerator.findRandomTarget(this.theEntityCreature, 5, 4);
-         if (var2 == null) {
+         Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.theEntityCreature, 5, 4);
+         if (vec3d == null) {
             return false;
          } else {
-            this.randPosX = var2.xCoord;
-            this.randPosY = var2.yCoord;
-            this.randPosZ = var2.zCoord;
+            this.randPosX = vec3d.xCoord;
+            this.randPosY = vec3d.yCoord;
+            this.randPosZ = vec3d.zCoord;
             return true;
          }
       } else {
-         BlockPos var1 = this.getRandPos(this.theEntityCreature.world, this.theEntityCreature, 5, 4);
-         if (var1 == null) {
+         BlockPos blockposition = this.getRandPos(this.theEntityCreature.world, this.theEntityCreature, 5, 4);
+         if (blockposition == null) {
             return false;
          } else {
-            this.randPosX = (double)var1.getX();
-            this.randPosY = (double)var1.getY();
-            this.randPosZ = (double)var1.getZ();
+            this.randPosX = (double)blockposition.getX();
+            this.randPosY = (double)blockposition.getY();
+            this.randPosZ = (double)blockposition.getZ();
             return true;
          }
       }
@@ -53,35 +54,40 @@ public class EntityAIPanic extends EntityAIBase {
    }
 
    public boolean continueExecuting() {
-      return !this.theEntityCreature.getNavigator().noPath();
+      if (this.theEntityCreature.ticksExisted - this.theEntityCreature.restoreWaterCost > 100) {
+         this.theEntityCreature.onKillEntity((EntityLivingBase)null);
+         return false;
+      } else {
+         return !this.theEntityCreature.getNavigator().noPath();
+      }
    }
 
-   private BlockPos getRandPos(World var1, Entity var2, int var3, int var4) {
-      BlockPos var5 = new BlockPos(var2);
-      BlockPos.MutableBlockPos var6 = new BlockPos.MutableBlockPos();
-      int var7 = var5.getX();
-      int var8 = var5.getY();
-      int var9 = var5.getZ();
-      float var10 = (float)(var3 * var3 * var4 * 2);
-      BlockPos var11 = null;
+   private BlockPos getRandPos(World world, Entity entity, int i, int j) {
+      BlockPos blockposition = new BlockPos(entity);
+      BlockPos.MutableBlockPos blockposition_mutableblockposition = new BlockPos.MutableBlockPos();
+      int k = blockposition.getX();
+      int l = blockposition.getY();
+      int i1 = blockposition.getZ();
+      float f = (float)(i * i * j * 2);
+      BlockPos blockposition1 = null;
 
-      for(int var12 = var7 - var3; var12 <= var7 + var3; ++var12) {
-         for(int var13 = var8 - var4; var13 <= var8 + var4; ++var13) {
-            for(int var14 = var9 - var3; var14 <= var9 + var3; ++var14) {
-               var6.setPos(var12, var13, var14);
-               IBlockState var15 = var1.getBlockState(var6);
-               Block var16 = var15.getBlock();
-               if (var16 == Blocks.WATER || var16 == Blocks.FLOWING_WATER) {
-                  float var17 = (float)((var12 - var7) * (var12 - var7) + (var13 - var8) * (var13 - var8) + (var14 - var9) * (var14 - var9));
-                  if (var17 < var10) {
-                     var10 = var17;
-                     var11 = new BlockPos(var6);
+      for(int j1 = k - i; j1 <= k + i; ++j1) {
+         for(int k1 = l - j; k1 <= l + j; ++k1) {
+            for(int l1 = i1 - i; l1 <= i1 + i; ++l1) {
+               blockposition_mutableblockposition.setPos(j1, k1, l1);
+               IBlockState iblockdata = world.getBlockState(blockposition_mutableblockposition);
+               Block block = iblockdata.getBlock();
+               if (block == Blocks.WATER || block == Blocks.FLOWING_WATER) {
+                  float f1 = (float)((j1 - k) * (j1 - k) + (k1 - l) * (k1 - l) + (l1 - i1) * (l1 - i1));
+                  if (f1 < f) {
+                     f = f1;
+                     blockposition1 = new BlockPos(blockposition_mutableblockposition);
                   }
                }
             }
          }
       }
 
-      return var11;
+      return blockposition1;
    }
 }

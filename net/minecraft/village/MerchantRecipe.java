@@ -4,40 +4,49 @@ import javax.annotation.Nullable;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftMerchantRecipe;
 
 public class MerchantRecipe {
-   private ItemStack itemToBuy;
-   private ItemStack secondItemToBuy;
-   private ItemStack itemToSell;
-   private int toolUses;
-   private int maxTradeUses;
-   private boolean rewardsExp;
+   public ItemStack itemToBuy;
+   public ItemStack secondItemToBuy;
+   public ItemStack itemToSell;
+   public int toolUses;
+   public int maxTradeUses;
+   public boolean rewardsExp;
+   private CraftMerchantRecipe bukkitHandle;
 
-   public MerchantRecipe(NBTTagCompound var1) {
-      this.readFromTags(var1);
+   public CraftMerchantRecipe asBukkit() {
+      return this.bukkitHandle == null ? (this.bukkitHandle = new CraftMerchantRecipe(this)) : this.bukkitHandle;
    }
 
-   public MerchantRecipe(ItemStack var1, @Nullable ItemStack var2, ItemStack var3) {
-      this(var1, var2, var3, 0, 7);
+   public MerchantRecipe(ItemStack itemstack, ItemStack itemstack1, ItemStack itemstack2, int i, int j, CraftMerchantRecipe bukkit) {
+      this(itemstack, itemstack1, itemstack2, i, j);
+      this.bukkitHandle = bukkit;
    }
 
-   public MerchantRecipe(ItemStack var1, @Nullable ItemStack var2, ItemStack var3, int var4, int var5) {
-      this.itemToBuy = var1;
-      this.secondItemToBuy = var2;
-      this.itemToSell = var3;
-      this.toolUses = var4;
-      this.maxTradeUses = var5;
+   public MerchantRecipe(NBTTagCompound nbttagcompound) {
+      this.readFromTags(nbttagcompound);
+   }
+
+   public MerchantRecipe(ItemStack itemstack, @Nullable ItemStack itemstack1, ItemStack itemstack2) {
+      this(itemstack, itemstack1, itemstack2, 0, 7);
+   }
+
+   public MerchantRecipe(ItemStack itemstack, @Nullable ItemStack itemstack1, ItemStack itemstack2, int i, int j) {
+      this.itemToBuy = itemstack;
+      this.secondItemToBuy = itemstack1;
+      this.itemToSell = itemstack2;
+      this.toolUses = i;
+      this.maxTradeUses = j;
       this.rewardsExp = true;
    }
 
-   public MerchantRecipe(ItemStack var1, ItemStack var2) {
-      this(var1, (ItemStack)null, var2);
+   public MerchantRecipe(ItemStack itemstack, ItemStack itemstack1) {
+      this(itemstack, (ItemStack)null, itemstack1);
    }
 
-   public MerchantRecipe(ItemStack var1, Item var2) {
-      this(var1, new ItemStack(var2));
+   public MerchantRecipe(ItemStack itemstack, Item item) {
+      this(itemstack, new ItemStack(item));
    }
 
    public ItemStack getItemToBuy() {
@@ -68,44 +77,39 @@ public class MerchantRecipe {
       ++this.toolUses;
    }
 
-   public void increaseMaxTradeUses(int var1) {
-      this.maxTradeUses += var1;
+   public void increaseMaxTradeUses(int i) {
+      this.maxTradeUses += i;
    }
 
    public boolean isRecipeDisabled() {
       return this.toolUses >= this.maxTradeUses;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void compensateToolUses() {
-      this.toolUses = this.maxTradeUses;
-   }
-
    public boolean getRewardsExp() {
       return this.rewardsExp;
    }
 
-   public void readFromTags(NBTTagCompound var1) {
-      NBTTagCompound var2 = var1.getCompoundTag("buy");
-      this.itemToBuy = ItemStack.loadItemStackFromNBT(var2);
-      NBTTagCompound var3 = var1.getCompoundTag("sell");
-      this.itemToSell = ItemStack.loadItemStackFromNBT(var3);
-      if (var1.hasKey("buyB", 10)) {
-         this.secondItemToBuy = ItemStack.loadItemStackFromNBT(var1.getCompoundTag("buyB"));
+   public void readFromTags(NBTTagCompound nbttagcompound) {
+      NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("buy");
+      this.itemToBuy = ItemStack.loadItemStackFromNBT(nbttagcompound1);
+      NBTTagCompound nbttagcompound2 = nbttagcompound.getCompoundTag("sell");
+      this.itemToSell = ItemStack.loadItemStackFromNBT(nbttagcompound2);
+      if (nbttagcompound.hasKey("buyB", 10)) {
+         this.secondItemToBuy = ItemStack.loadItemStackFromNBT(nbttagcompound.getCompoundTag("buyB"));
       }
 
-      if (var1.hasKey("uses", 99)) {
-         this.toolUses = var1.getInteger("uses");
+      if (nbttagcompound.hasKey("uses", 99)) {
+         this.toolUses = nbttagcompound.getInteger("uses");
       }
 
-      if (var1.hasKey("maxUses", 99)) {
-         this.maxTradeUses = var1.getInteger("maxUses");
+      if (nbttagcompound.hasKey("maxUses", 99)) {
+         this.maxTradeUses = nbttagcompound.getInteger("maxUses");
       } else {
          this.maxTradeUses = 7;
       }
 
-      if (var1.hasKey("rewardExp", 1)) {
-         this.rewardsExp = var1.getBoolean("rewardExp");
+      if (nbttagcompound.hasKey("rewardExp", 1)) {
+         this.rewardsExp = nbttagcompound.getBoolean("rewardExp");
       } else {
          this.rewardsExp = true;
       }
@@ -113,16 +117,16 @@ public class MerchantRecipe {
    }
 
    public NBTTagCompound writeToTags() {
-      NBTTagCompound var1 = new NBTTagCompound();
-      var1.setTag("buy", this.itemToBuy.writeToNBT(new NBTTagCompound()));
-      var1.setTag("sell", this.itemToSell.writeToNBT(new NBTTagCompound()));
+      NBTTagCompound nbttagcompound = new NBTTagCompound();
+      nbttagcompound.setTag("buy", this.itemToBuy.writeToNBT(new NBTTagCompound()));
+      nbttagcompound.setTag("sell", this.itemToSell.writeToNBT(new NBTTagCompound()));
       if (this.secondItemToBuy != null) {
-         var1.setTag("buyB", this.secondItemToBuy.writeToNBT(new NBTTagCompound()));
+         nbttagcompound.setTag("buyB", this.secondItemToBuy.writeToNBT(new NBTTagCompound()));
       }
 
-      var1.setInteger("uses", this.toolUses);
-      var1.setInteger("maxUses", this.maxTradeUses);
-      var1.setBoolean("rewardExp", this.rewardsExp);
-      return var1;
+      nbttagcompound.setInteger("uses", this.toolUses);
+      nbttagcompound.setInteger("maxUses", this.maxTradeUses);
+      nbttagcompound.setBoolean("rewardExp", this.rewardsExp);
+      return nbttagcompound;
    }
 }

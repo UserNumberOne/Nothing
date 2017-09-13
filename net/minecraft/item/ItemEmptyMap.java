@@ -8,33 +8,38 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.MapData;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.server.MapInitializeEvent;
 
 public class ItemEmptyMap extends ItemMapBase {
    protected ItemEmptyMap() {
       this.setCreativeTab(CreativeTabs.MISC);
    }
 
-   public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      ItemStack var5 = new ItemStack(Items.FILLED_MAP, 1, var2.getUniqueDataId("map"));
-      String var6 = "map_" + var5.getMetadata();
-      MapData var7 = new MapData(var6);
-      var2.setData(var6, var7);
-      var7.scale = 0;
-      var7.calculateMapCenter(var3.posX, var3.posZ, var7.scale);
-      var7.dimension = var2.provider.getDimension();
-      var7.trackingPosition = true;
-      var7.markDirty();
-      --var1.stackSize;
-      if (var1.stackSize <= 0) {
-         return new ActionResult(EnumActionResult.SUCCESS, var5);
+   public ActionResult onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityhuman, EnumHand enumhand) {
+      World worldMain = (World)world.getServer().getServer().worlds.get(0);
+      ItemStack itemstack1 = new ItemStack(Items.FILLED_MAP, 1, worldMain.getUniqueDataId("map"));
+      String s = "map_" + itemstack1.getMetadata();
+      MapData worldmap = new MapData(s);
+      worldMain.setData(s, worldmap);
+      worldmap.scale = 0;
+      worldmap.calculateMapCenter(entityhuman.posX, entityhuman.posZ, worldmap.scale);
+      worldmap.dimension = (byte)((WorldServer)world).dimension;
+      worldmap.trackingPosition = true;
+      worldmap.markDirty();
+      CraftEventFactory.callEvent(new MapInitializeEvent(worldmap.mapView));
+      --itemstack.stackSize;
+      if (itemstack.stackSize <= 0) {
+         return new ActionResult(EnumActionResult.SUCCESS, itemstack1);
       } else {
-         if (!var3.inventory.addItemStackToInventory(var5.copy())) {
-            var3.dropItem(var5, false);
+         if (!entityhuman.inventory.addItemStackToInventory(itemstack1.copy())) {
+            entityhuman.dropItem(itemstack1, false);
          }
 
-         var3.addStat(StatList.getObjectUseStats(this));
-         return new ActionResult(EnumActionResult.SUCCESS, var1);
+         entityhuman.addStat(StatList.getObjectUseStats(this));
+         return new ActionResult(EnumActionResult.SUCCESS, itemstack);
       }
    }
 }

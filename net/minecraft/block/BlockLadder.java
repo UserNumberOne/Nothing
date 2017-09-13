@@ -7,7 +7,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -15,8 +14,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockLadder extends Block {
    public static final PropertyDirection FACING = BlockHorizontal.FACING;
@@ -54,7 +51,15 @@ public class BlockLadder extends Block {
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      return var1.getBlockState(var2.west()).isSideSolid(var1, var2.west(), EnumFacing.EAST) || var1.getBlockState(var2.east()).isSideSolid(var1, var2.east(), EnumFacing.WEST) || var1.getBlockState(var2.north()).isSideSolid(var1, var2.north(), EnumFacing.SOUTH) || var1.getBlockState(var2.south()).isSideSolid(var1, var2.south(), EnumFacing.NORTH);
+      if (var1.getBlockState(var2.west()).isNormalCube()) {
+         return true;
+      } else if (var1.getBlockState(var2.east()).isNormalCube()) {
+         return true;
+      } else if (var1.getBlockState(var2.north()).isNormalCube()) {
+         return true;
+      } else {
+         return var1.getBlockState(var2.south()).isNormalCube();
+      }
    }
 
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
@@ -82,7 +87,7 @@ public class BlockLadder extends Block {
    }
 
    protected boolean canBlockStay(World var1, BlockPos var2, EnumFacing var3) {
-      return var1.getBlockState(var2.offset(var3.getOpposite())).isSideSolid(var1, var2.offset(var3.getOpposite()), var3);
+      return var1.getBlockState(var2.offset(var3.getOpposite())).isNormalCube();
    }
 
    public IBlockState getStateFromMeta(int var1) {
@@ -92,11 +97,6 @@ public class BlockLadder extends Block {
       }
 
       return this.getDefaultState().withProperty(FACING, var2);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 
    public int getMetaFromState(IBlockState var1) {
@@ -113,9 +113,5 @@ public class BlockLadder extends Block {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING});
-   }
-
-   public boolean isLadder(IBlockState var1, IBlockAccess var2, BlockPos var3, EntityLivingBase var4) {
-      return true;
    }
 }

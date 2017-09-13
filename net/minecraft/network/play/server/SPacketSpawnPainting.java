@@ -8,8 +8,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSpawnPainting implements Packet {
    private int entityID;
@@ -47,30 +45,5 @@ public class SPacketSpawnPainting implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleSpawnPainting(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityID() {
-      return this.entityID;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public UUID getUniqueId() {
-      return this.uniqueId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockPos getPosition() {
-      return this.position;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EnumFacing getFacing() {
-      return this.facing;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getTitle() {
-      return this.title;
    }
 }

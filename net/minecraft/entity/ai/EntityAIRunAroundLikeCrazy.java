@@ -4,6 +4,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityAIRunAroundLikeCrazy extends EntityAIBase {
    private final EntityHorse horseHost;
@@ -12,21 +14,21 @@ public class EntityAIRunAroundLikeCrazy extends EntityAIBase {
    private double targetY;
    private double targetZ;
 
-   public EntityAIRunAroundLikeCrazy(EntityHorse var1, double var2) {
-      this.horseHost = var1;
-      this.speed = var2;
+   public EntityAIRunAroundLikeCrazy(EntityHorse entityhorse, double d0) {
+      this.horseHost = entityhorse;
+      this.speed = d0;
       this.setMutexBits(1);
    }
 
    public boolean shouldExecute() {
       if (!this.horseHost.isTame() && this.horseHost.isBeingRidden()) {
-         Vec3d var1 = RandomPositionGenerator.findRandomTarget(this.horseHost, 5, 4);
-         if (var1 == null) {
+         Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.horseHost, 5, 4);
+         if (vec3d == null) {
             return false;
          } else {
-            this.targetX = var1.xCoord;
-            this.targetY = var1.yCoord;
-            this.targetZ = var1.zCoord;
+            this.targetX = vec3d.xCoord;
+            this.targetY = vec3d.yCoord;
+            this.targetZ = vec3d.zCoord;
             return true;
          }
       } else {
@@ -44,16 +46,16 @@ public class EntityAIRunAroundLikeCrazy extends EntityAIBase {
 
    public void updateTask() {
       if (this.horseHost.getRNG().nextInt(50) == 0) {
-         Entity var1 = (Entity)this.horseHost.getPassengers().get(0);
-         if (var1 == null) {
+         Entity entity = (Entity)this.horseHost.getPassengers().get(0);
+         if (entity == null) {
             return;
          }
 
-         if (var1 instanceof EntityPlayer) {
-            int var2 = this.horseHost.getTemper();
-            int var3 = this.horseHost.getMaxTemper();
-            if (var3 > 0 && this.horseHost.getRNG().nextInt(var3) < var2) {
-               this.horseHost.setTamedBy((EntityPlayer)var1);
+         if (entity instanceof EntityPlayer) {
+            int i = this.horseHost.getTemper();
+            int j = this.horseHost.getMaxTemper();
+            if (j > 0 && this.horseHost.getRNG().nextInt(j) < i && !CraftEventFactory.callEntityTameEvent(this.horseHost, ((CraftHumanEntity)this.horseHost.getBukkitEntity().getPassenger()).getHandle()).isCancelled()) {
+               this.horseHost.setTamedBy((EntityPlayer)entity);
                this.horseHost.world.setEntityState(this.horseHost, (byte)7);
                return;
             }

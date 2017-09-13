@@ -19,12 +19,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.common.ForgeHooks;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public abstract class CommandBase implements ICommand {
@@ -63,11 +62,11 @@ public abstract class CommandBase implements ICommand {
       return Collections.emptyList();
    }
 
-   public boolean checkPermission(MinecraftServer var1, ICommandSender var2) {
+   public boolean canUse(MinecraftServer var1, ICommandSender var2) {
       return var2.canUseCommand(this.getRequiredPermissionLevel(), this.getName());
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       return Collections.emptyList();
    }
 
@@ -126,7 +125,7 @@ public abstract class CommandBase implements ICommand {
          } else {
             return var1;
          }
-      } catch (NumberFormatException var3) {
+      } catch (NumberFormatException var4) {
          throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{var0});
       }
    }
@@ -166,7 +165,7 @@ public abstract class CommandBase implements ICommand {
       }
    }
 
-   public static EntityPlayerMP getPlayer(MinecraftServer var0, ICommandSender var1, String var2) throws PlayerNotFoundException {
+   public static EntityPlayerMP a(MinecraftServer var0, ICommandSender var1, String var2) throws PlayerNotFoundException {
       EntityPlayerMP var3 = EntitySelector.matchOnePlayer(var1, var2);
       if (var3 == null) {
          try {
@@ -187,11 +186,11 @@ public abstract class CommandBase implements ICommand {
       }
    }
 
-   public static Entity getEntity(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
-      return getEntity(var0, var1, var2, Entity.class);
+   public static Entity b(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
+      return a(var0, var1, var2, Entity.class);
    }
 
-   public static Entity getEntity(MinecraftServer var0, ICommandSender var1, String var2, Class var3) throws EntityNotFoundException {
+   public static Entity a(MinecraftServer var0, ICommandSender var1, String var2, Class var3) throws EntityNotFoundException {
       Object var4 = EntitySelector.matchOneEntity(var1, var2, var3);
       if (var4 == null) {
          var4 = var0.getPlayerList().getPlayerByUsername(var2);
@@ -200,7 +199,7 @@ public abstract class CommandBase implements ICommand {
       if (var4 == null) {
          try {
             UUID var5 = UUID.fromString(var2);
-            var4 = var0.getEntityFromUuid(var5);
+            var4 = var0.a(var5);
             if (var4 == null) {
                var4 = var0.getPlayerList().getPlayerByUUID(var5);
             }
@@ -216,13 +215,13 @@ public abstract class CommandBase implements ICommand {
       }
    }
 
-   public static List getEntityList(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
-      return (List)(EntitySelector.hasArguments(var2) ? EntitySelector.matchEntities(var1, var2, Entity.class) : Lists.newArrayList(new Entity[]{getEntity(var0, var1, var2)}));
+   public static List c(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
+      return (List)(EntitySelector.hasArguments(var2) ? EntitySelector.matchEntities(var1, var2, Entity.class) : Lists.newArrayList(new Entity[]{b(var0, var1, var2)}));
    }
 
-   public static String getPlayerName(MinecraftServer var0, ICommandSender var1, String var2) throws PlayerNotFoundException {
+   public static String d(MinecraftServer var0, ICommandSender var1, String var2) throws PlayerNotFoundException {
       try {
-         return getPlayer(var0, var1, var2).getName();
+         return a(var0, var1, var2).getName();
       } catch (PlayerNotFoundException var4) {
          if (var2 != null && !var2.startsWith("@")) {
             return var2;
@@ -232,12 +231,12 @@ public abstract class CommandBase implements ICommand {
       }
    }
 
-   public static String getEntityName(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
+   public static String e(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
       try {
-         return getPlayer(var0, var1, var2).getName();
+         return a(var0, var1, var2).getName();
       } catch (PlayerNotFoundException var6) {
          try {
-            return getEntity(var0, var1, var2).getCachedUniqueIdString();
+            return b(var0, var1, var2).getCachedUniqueIdString();
          } catch (EntityNotFoundException var5) {
             if (var2 != null && !var2.startsWith("@")) {
                return var2;
@@ -248,7 +247,7 @@ public abstract class CommandBase implements ICommand {
       }
    }
 
-   public static ITextComponent getChatComponentFromNthArg(ICommandSender var0, String[] var1, int var2) throws CommandException, PlayerNotFoundException {
+   public static ITextComponent getChatComponentFromNthArg(ICommandSender var0, String[] var1, int var2) throws PlayerNotFoundException {
       return getChatComponentFromNthArg(var0, var1, var2, false);
    }
 
@@ -260,7 +259,7 @@ public abstract class CommandBase implements ICommand {
             var4.appendText(" ");
          }
 
-         ITextComponent var6 = ForgeHooks.newChatWithLinks(var1[var5]);
+         Object var6 = new TextComponentString(var1[var5]);
          if (var3) {
             ITextComponent var7 = EntitySelector.matchEntitiesToTextComponent(var0, var1[var5]);
             if (var7 == null) {
@@ -272,7 +271,7 @@ public abstract class CommandBase implements ICommand {
             }
          }
 
-         var4.appendSibling(var6);
+         var4.appendSibling((ITextComponent)var6);
       }
 
       return var4;
@@ -315,18 +314,18 @@ public abstract class CommandBase implements ICommand {
             }
          }
 
-         double var11 = var7 + (var6 ? var0 : 0.0D);
+         double var10 = var7 + (var6 ? var0 : 0.0D);
          if (var3 != 0 || var4 != 0) {
-            if (var11 < (double)var3) {
-               throw new NumberInvalidException("commands.generic.double.tooSmall", new Object[]{var11, var3});
+            if (var10 < (double)var3) {
+               throw new NumberInvalidException("commands.generic.double.tooSmall", new Object[]{var10, var3});
             }
 
-            if (var11 > (double)var4) {
-               throw new NumberInvalidException("commands.generic.double.tooBig", new Object[]{var11, var4});
+            if (var10 > (double)var4) {
+               throw new NumberInvalidException("commands.generic.double.tooBig", new Object[]{var10, var4});
             }
          }
 
-         return new CommandBase.CoordinateArg(var11, var7, var6);
+         return new CommandBase.CoordinateArg(var10, var7, var6);
       }
    }
 
@@ -525,6 +524,11 @@ public abstract class CommandBase implements ICommand {
 
    public int compareTo(ICommand var1) {
       return this.getName().compareTo(var1.getName());
+   }
+
+   // $FF: synthetic method
+   public int compareTo(Object var1) {
+      return this.compareTo((ICommand)var1);
    }
 
    public static class CoordinateArg {

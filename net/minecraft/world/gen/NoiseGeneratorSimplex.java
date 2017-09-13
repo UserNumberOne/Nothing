@@ -166,8 +166,8 @@ public class NoiseGeneratorSimplex {
                var60 = var58 * var58 * dot(grad3[var49], var41, var43);
             }
 
-            int var62 = var14++;
-            var1[var62] += 70.0D * (var52 + var56 + var60) * var12;
+            int var10001 = var14++;
+            var1[var10001] += 70.0D * (var52 + var56 + var60) * var12;
          }
       }
 

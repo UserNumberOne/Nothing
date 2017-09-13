@@ -70,11 +70,8 @@ public class IntHashMap {
          IntHashMap.Entry[] var4 = new IntHashMap.Entry[var1];
          this.copyTo(var4);
          this.slots = var4;
-         float var10001 = (float)var1;
-         this.getClass();
-         this.threshold = (int)(var10001 * 0.75F);
+         this.threshold = (int)((float)var1 * this.growFactor);
       }
-
    }
 
    private void copyTo(IntHashMap.Entry[] var1) {

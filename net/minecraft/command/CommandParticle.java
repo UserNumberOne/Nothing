@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -54,7 +54,7 @@ public class CommandParticle extends CommandBase {
 
             EntityPlayerMP var24;
             if (var3.length > 10) {
-               var24 = getPlayer(var1, var2, var3[10]);
+               var24 = a(var1, var2, var3[10]);
             } else {
                var24 = null;
             }
@@ -87,8 +87,16 @@ public class CommandParticle extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, EnumParticleTypes.getParticleNames()) : (var3.length > 1 && var3.length <= 4 ? getTabCompletionCoordinate(var3, 1, var4) : (var3.length == 10 ? getListOfStringsMatchingLastWord(var3, new String[]{"normal", "force"}) : (var3.length == 11 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : Collections.emptyList())));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, EnumParticleTypes.getParticleNames());
+      } else if (var3.length > 1 && var3.length <= 4) {
+         return getTabCompletionCoordinate(var3, 1, var4);
+      } else if (var3.length == 10) {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"normal", "force"});
+      } else {
+         return var3.length == 11 ? getListOfStringsMatchingLastWord(var3, var1.getPlayers()) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

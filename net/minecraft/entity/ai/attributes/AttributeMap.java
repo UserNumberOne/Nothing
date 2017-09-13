@@ -66,4 +66,14 @@ public class AttributeMap extends AbstractAttributeMap {
 
       return var1;
    }
+
+   // $FF: synthetic method
+   public IAttributeInstance getAttributeInstanceByName(String var1) {
+      return this.getAttributeInstanceByName(var1);
+   }
+
+   // $FF: synthetic method
+   public IAttributeInstance getAttributeInstance(IAttribute var1) {
+      return this.getAttributeInstance(var1);
+   }
 }

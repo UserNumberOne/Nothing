@@ -44,16 +44,16 @@ public class PhaseLandingApproach extends PhaseBase {
          int var1 = this.dragon.initPathPoints();
          BlockPos var2 = this.dragon.world.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
          EntityPlayer var3 = this.dragon.world.getNearestAttackablePlayer(var2, 128.0D, 128.0D);
-         int var4;
+         int var5;
          if (var3 != null) {
-            Vec3d var5 = (new Vec3d(var3.posX, 0.0D, var3.posZ)).normalize();
-            var4 = this.dragon.getNearestPpIdx(-var5.xCoord * 40.0D, 105.0D, -var5.zCoord * 40.0D);
+            Vec3d var4 = (new Vec3d(var3.posX, 0.0D, var3.posZ)).normalize();
+            var5 = this.dragon.getNearestPpIdx(-var4.xCoord * 40.0D, 105.0D, -var4.zCoord * 40.0D);
          } else {
-            var4 = this.dragon.getNearestPpIdx(40.0D, (double)var2.getY(), 0.0D);
+            var5 = this.dragon.getNearestPpIdx(40.0D, (double)var2.getY(), 0.0D);
          }
 
          PathPoint var6 = new PathPoint(var2.getX(), var2.getY(), var2.getZ());
-         this.currentPath = this.dragon.findPath(var1, var4, var6);
+         this.currentPath = this.dragon.findPath(var1, var5, var6);
          if (this.currentPath != null) {
             this.currentPath.incrementPathIndex();
          }

@@ -10,53 +10,54 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.ForgeEventFactory;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_10_R1.block.CraftBlockState;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.block.BlockPlaceEvent;
 
 public class ItemLilyPad extends ItemColored {
-   public ItemLilyPad(Block var1) {
-      super(var1, false);
+   public ItemLilyPad(Block block) {
+      super(block, false);
    }
 
-   public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      RayTraceResult var5 = this.rayTrace(var2, var3, true);
-      if (var5 == null) {
-         return new ActionResult(EnumActionResult.PASS, var1);
+   public ActionResult onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityhuman, EnumHand enumhand) {
+      RayTraceResult movingobjectposition = this.rayTrace(world, entityhuman, true);
+      if (movingobjectposition == null) {
+         return new ActionResult(EnumActionResult.PASS, itemstack);
       } else {
-         if (var5.typeOfHit == RayTraceResult.Type.BLOCK) {
-            BlockPos var6 = var5.getBlockPos();
-            if (!var2.isBlockModifiable(var3, var6) || !var3.canPlayerEdit(var6.offset(var5.sideHit), var5.sideHit, var1)) {
-               return new ActionResult(EnumActionResult.FAIL, var1);
+         if (movingobjectposition.typeOfHit == RayTraceResult.Type.BLOCK) {
+            BlockPos blockposition = movingobjectposition.getBlockPos();
+            if (!world.isBlockModifiable(entityhuman, blockposition) || !entityhuman.canPlayerEdit(blockposition.offset(movingobjectposition.sideHit), movingobjectposition.sideHit, itemstack)) {
+               return new ActionResult(EnumActionResult.FAIL, itemstack);
             }
 
-            BlockPos var7 = var6.up();
-            IBlockState var8 = var2.getBlockState(var6);
-            if (var8.getMaterial() == Material.WATER && ((Integer)var8.getValue(BlockLiquid.LEVEL)).intValue() == 0 && var2.isAirBlock(var7)) {
-               BlockSnapshot var9 = BlockSnapshot.getBlockSnapshot(var2, var7);
-               var2.setBlockState(var7, Blocks.WATERLILY.getDefaultState());
-               if (ForgeEventFactory.onPlayerBlockPlace(var3, var9, EnumFacing.UP, var4).isCanceled()) {
-                  var9.restore(true, false);
-                  return new ActionResult(EnumActionResult.FAIL, var1);
+            BlockPos blockposition1 = blockposition.up();
+            IBlockState iblockdata = world.getBlockState(blockposition);
+            if (iblockdata.getMaterial() == Material.WATER && ((Integer)iblockdata.getValue(BlockLiquid.LEVEL)).intValue() == 0 && world.isAirBlock(blockposition1)) {
+               BlockState blockstate = CraftBlockState.getBlockState(world, blockposition1.getX(), blockposition1.getY(), blockposition1.getZ());
+               world.setBlockState(blockposition1, Blocks.WATERLILY.getDefaultState(), 11);
+               BlockPlaceEvent placeEvent = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, enumhand, blockstate, blockposition.getX(), blockposition.getY(), blockposition.getZ());
+               if (placeEvent == null || !placeEvent.isCancelled() && placeEvent.canBuild()) {
+                  if (!entityhuman.capabilities.isCreativeMode) {
+                     --itemstack.stackSize;
+                  }
+
+                  entityhuman.addStat(StatList.getObjectUseStats(this));
+                  world.playSound(entityhuman, blockposition, SoundEvents.BLOCK_WATERLILY_PLACE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                  return new ActionResult(EnumActionResult.SUCCESS, itemstack);
                }
 
-               var2.setBlockState(var7, Blocks.WATERLILY.getDefaultState(), 11);
-               if (!var3.capabilities.isCreativeMode) {
-                  --var1.stackSize;
-               }
-
-               var3.addStat(StatList.getObjectUseStats(this));
-               var2.playSound(var3, var6, SoundEvents.BLOCK_WATERLILY_PLACE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-               return new ActionResult(EnumActionResult.SUCCESS, var1);
+               blockstate.update(true, false);
+               return new ActionResult(EnumActionResult.PASS, itemstack);
             }
          }
 
-         return new ActionResult(EnumActionResult.FAIL, var1);
+         return new ActionResult(EnumActionResult.FAIL, itemstack);
       }
    }
 }

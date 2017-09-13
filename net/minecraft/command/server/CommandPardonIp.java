@@ -9,7 +9,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.SyntaxErrorException;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandPardonIp extends CommandBase {
@@ -21,8 +21,8 @@ public class CommandPardonIp extends CommandBase {
       return 3;
    }
 
-   public boolean checkPermission(MinecraftServer var1, ICommandSender var2) {
-      return var1.getPlayerList().getBannedIPs().isLanServer() && super.checkPermission(var1, var2);
+   public boolean canUse(MinecraftServer var1, ICommandSender var2) {
+      return var1.getPlayerList().getBannedIPs().isLanServer() && super.canUse(var1, var2);
    }
 
    public String getUsage(ICommandSender var1) {
@@ -43,7 +43,7 @@ public class CommandPardonIp extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getPlayerList().getBannedIPs().getKeys()) : Collections.emptyList();
    }
 }

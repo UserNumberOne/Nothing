@@ -1,6 +1,6 @@
 package net.minecraft.command;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 
 public class CommandSetPlayerTimeout extends CommandBase {
    public String getName() {
@@ -20,7 +20,7 @@ public class CommandSetPlayerTimeout extends CommandBase {
          throw new WrongUsageException("commands.setidletimeout.usage", new Object[0]);
       } else {
          int var4 = parseInt(var3[0], 0);
-         var1.setPlayerIdleTimeout(var4);
+         var1.setIdleTimeout(var4);
          notifyCommandListener(var2, this, "commands.setidletimeout.success", new Object[]{var4});
       }
    }

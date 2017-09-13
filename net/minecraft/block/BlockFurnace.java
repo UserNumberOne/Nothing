@@ -10,7 +10,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
@@ -21,14 +20,10 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockFurnace extends BlockContainer {
    public static final PropertyDirection FACING = BlockHorizontal.FACING;
@@ -69,41 +64,6 @@ public class BlockFurnace extends BlockContainer {
 
          var1.setBlockState(var2, var3.withProperty(FACING, var8), 2);
       }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      if (this.isBurning) {
-         EnumFacing var5 = (EnumFacing)var1.getValue(FACING);
-         double var6 = (double)var3.getX() + 0.5D;
-         double var8 = (double)var3.getY() + var4.nextDouble() * 6.0D / 16.0D;
-         double var10 = (double)var3.getZ() + 0.5D;
-         double var12 = 0.52D;
-         double var14 = var4.nextDouble() * 0.6D - 0.3D;
-         if (var4.nextDouble() < 0.1D) {
-            var2.playSound((double)var3.getX() + 0.5D, (double)var3.getY(), (double)var3.getZ() + 0.5D, SoundEvents.BLOCK_FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
-         }
-
-         switch(var5) {
-         case WEST:
-            var2.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6 - 0.52D, var8, var10 + var14, 0.0D, 0.0D, 0.0D);
-            var2.spawnParticle(EnumParticleTypes.FLAME, var6 - 0.52D, var8, var10 + var14, 0.0D, 0.0D, 0.0D);
-            break;
-         case EAST:
-            var2.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6 + 0.52D, var8, var10 + var14, 0.0D, 0.0D, 0.0D);
-            var2.spawnParticle(EnumParticleTypes.FLAME, var6 + 0.52D, var8, var10 + var14, 0.0D, 0.0D, 0.0D);
-            break;
-         case NORTH:
-            var2.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6 + var14, var8, var10 - 0.52D, 0.0D, 0.0D, 0.0D);
-            var2.spawnParticle(EnumParticleTypes.FLAME, var6 + var14, var8, var10 - 0.52D, 0.0D, 0.0D, 0.0D);
-            break;
-         case SOUTH:
-            var2.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6 + var14, var8, var10 + 0.52D, 0.0D, 0.0D, 0.0D);
-            var2.spawnParticle(EnumParticleTypes.FLAME, var6 + var14, var8, var10 + 0.52D, 0.0D, 0.0D, 0.0D);
-         }
-      }
-
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {

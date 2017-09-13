@@ -13,60 +13,45 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityPainting extends EntityHanging {
    public EntityPainting.EnumArt art;
 
-   public EntityPainting(World var1) {
-      super(var1);
+   public EntityPainting(World world) {
+      super(world);
+      this.art = EntityPainting.EnumArt.values()[this.rand.nextInt(EntityPainting.EnumArt.values().length)];
    }
 
-   public EntityPainting(World var1, BlockPos var2, EnumFacing var3) {
-      super(var1, var2);
-      ArrayList var4 = Lists.newArrayList();
+   public EntityPainting(World world, BlockPos blockposition, EnumFacing enumdirection) {
+      super(world, blockposition);
+      ArrayList arraylist = Lists.newArrayList();
 
-      for(EntityPainting.EnumArt var8 : EntityPainting.EnumArt.values()) {
-         this.art = var8;
-         this.updateFacingWithBoundingBox(var3);
+      for(EntityPainting.EnumArt entitypainting_enumart : EntityPainting.EnumArt.values()) {
+         this.art = entitypainting_enumart;
+         this.updateFacingWithBoundingBox(enumdirection);
          if (this.onValidSurface()) {
-            var4.add(var8);
+            arraylist.add(entitypainting_enumart);
          }
       }
 
-      if (!var4.isEmpty()) {
-         this.art = (EntityPainting.EnumArt)var4.get(this.rand.nextInt(var4.size()));
+      if (!arraylist.isEmpty()) {
+         this.art = (EntityPainting.EnumArt)arraylist.get(this.rand.nextInt(arraylist.size()));
       }
 
-      this.updateFacingWithBoundingBox(var3);
+      this.updateFacingWithBoundingBox(enumdirection);
    }
 
-   @SideOnly(Side.CLIENT)
-   public EntityPainting(World var1, BlockPos var2, EnumFacing var3, String var4) {
-      this(var1, var2, var3);
-
-      for(EntityPainting.EnumArt var8 : EntityPainting.EnumArt.values()) {
-         if (var8.title.equals(var4)) {
-            this.art = var8;
-            break;
-         }
-      }
-
-      this.updateFacingWithBoundingBox(var3);
+   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+      nbttagcompound.setString("Motive", this.art.title);
+      super.writeEntityToNBT(nbttagcompound);
    }
 
-   public void writeEntityToNBT(NBTTagCompound var1) {
-      var1.setString("Motive", this.art.title);
-      super.writeEntityToNBT(var1);
-   }
+   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+      String s = nbttagcompound.getString("Motive");
 
-   public void readEntityFromNBT(NBTTagCompound var1) {
-      String var2 = var1.getString("Motive");
-
-      for(EntityPainting.EnumArt var6 : EntityPainting.EnumArt.values()) {
-         if (var6.title.equals(var2)) {
-            this.art = var6;
+      for(EntityPainting.EnumArt entitypainting_enumart : EntityPainting.EnumArt.values()) {
+         if (entitypainting_enumart.title.equals(s)) {
+            this.art = entitypainting_enumart;
          }
       }
 
@@ -74,7 +59,7 @@ public class EntityPainting extends EntityHanging {
          this.art = EntityPainting.EnumArt.KEBAB;
       }
 
-      super.readEntityFromNBT(var1);
+      super.readEntityFromNBT(nbttagcompound);
    }
 
    public int getWidthPixels() {
@@ -85,12 +70,12 @@ public class EntityPainting extends EntityHanging {
       return this.art.sizeY;
    }
 
-   public void onBroken(@Nullable Entity var1) {
+   public void onBroken(@Nullable Entity entity) {
       if (this.world.getGameRules().getBoolean("doEntityDrops")) {
          this.playSound(SoundEvents.ENTITY_PAINTING_BREAK, 1.0F, 1.0F);
-         if (var1 instanceof EntityPlayer) {
-            EntityPlayer var2 = (EntityPlayer)var1;
-            if (var2.capabilities.isCreativeMode) {
+         if (entity instanceof EntityPlayer) {
+            EntityPlayer entityhuman = (EntityPlayer)entity;
+            if (entityhuman.capabilities.isCreativeMode) {
                return;
             }
          }
@@ -104,14 +89,8 @@ public class EntityPainting extends EntityHanging {
       this.playSound(SoundEvents.ENTITY_PAINTING_PLACE, 1.0F, 1.0F);
    }
 
-   public void setLocationAndAngles(double var1, double var3, double var5, float var7, float var8) {
-      this.setPosition(var1, var3, var5);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setPositionAndRotationDirect(double var1, double var3, double var5, float var7, float var8, int var9, boolean var10) {
-      BlockPos var11 = this.hangingPosition.add(var1 - this.posX, var3 - this.posY, var5 - this.posZ);
-      this.setPosition((double)var11.getX(), (double)var11.getY(), (double)var11.getZ());
+   public void setLocationAndAngles(double d0, double d1, double d2, float f, float f1) {
+      this.setPosition(d0, d1, d2);
    }
 
    public static enum EnumArt {
@@ -149,12 +128,12 @@ public class EntityPainting extends EntityHanging {
       public final int offsetX;
       public final int offsetY;
 
-      private EnumArt(String var3, int var4, int var5, int var6, int var7) {
-         this.title = var3;
-         this.sizeX = var4;
-         this.sizeY = var5;
-         this.offsetX = var6;
-         this.offsetY = var7;
+      private EnumArt(String s, int i, int j, int k, int l) {
+         this.title = s;
+         this.sizeX = i;
+         this.sizeY = j;
+         this.offsetX = k;
+         this.offsetY = l;
       }
    }
 }

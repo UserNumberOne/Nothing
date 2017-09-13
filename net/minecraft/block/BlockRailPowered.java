@@ -11,11 +11,16 @@ import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockRailPowered extends BlockRailBase {
    public static final PropertyEnum SHAPE = PropertyEnum.create("shape", BlockRailBase.EnumRailDirection.class, new Predicate() {
-      public boolean apply(@Nullable BlockRailBase.EnumRailDirection var1) {
-         return var1 != BlockRailBase.EnumRailDirection.NORTH_EAST && var1 != BlockRailBase.EnumRailDirection.NORTH_WEST && var1 != BlockRailBase.EnumRailDirection.SOUTH_EAST && var1 != BlockRailBase.EnumRailDirection.SOUTH_WEST;
+      public boolean apply(@Nullable BlockRailBase.EnumRailDirection blockminecarttrackabstract_enumtrackposition) {
+         return blockminecarttrackabstract_enumtrackposition != BlockRailBase.EnumRailDirection.NORTH_EAST && blockminecarttrackabstract_enumtrackposition != BlockRailBase.EnumRailDirection.NORTH_WEST && blockminecarttrackabstract_enumtrackposition != BlockRailBase.EnumRailDirection.SOUTH_EAST && blockminecarttrackabstract_enumtrackposition != BlockRailBase.EnumRailDirection.SOUTH_WEST;
+      }
+
+      public boolean apply(Object object) {
+         return this.apply((BlockRailBase.EnumRailDirection)object);
       }
    });
    public static final PropertyBool POWERED = PropertyBool.create("powered");
@@ -25,97 +30,103 @@ public class BlockRailPowered extends BlockRailBase {
       this.setDefaultState(this.blockState.getBaseState().withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_SOUTH).withProperty(POWERED, Boolean.valueOf(false)));
    }
 
-   protected boolean findPoweredRailSignal(World var1, BlockPos var2, IBlockState var3, boolean var4, int var5) {
-      if (var5 >= 8) {
+   protected boolean findPoweredRailSignal(World world, BlockPos blockposition, IBlockState iblockdata, boolean flag, int i) {
+      if (i >= 8) {
          return false;
       } else {
-         int var6 = var2.getX();
-         int var7 = var2.getY();
-         int var8 = var2.getZ();
-         boolean var9 = true;
-         BlockRailBase.EnumRailDirection var10 = (BlockRailBase.EnumRailDirection)var3.getValue(SHAPE);
-         switch(var10) {
-         case NORTH_SOUTH:
-            if (var4) {
-               ++var8;
+         int j = blockposition.getX();
+         int k = blockposition.getY();
+         int l = blockposition.getZ();
+         boolean flag1 = true;
+         BlockRailBase.EnumRailDirection blockminecarttrackabstract_enumtrackposition = (BlockRailBase.EnumRailDirection)iblockdata.getValue(SHAPE);
+         switch(BlockRailPowered.SyntheticClass_1.a[blockminecarttrackabstract_enumtrackposition.ordinal()]) {
+         case 1:
+            if (flag) {
+               ++l;
             } else {
-               --var8;
+               --l;
             }
             break;
-         case EAST_WEST:
-            if (var4) {
-               --var6;
+         case 2:
+            if (flag) {
+               --j;
             } else {
-               ++var6;
+               ++j;
             }
             break;
-         case ASCENDING_EAST:
-            if (var4) {
-               --var6;
+         case 3:
+            if (flag) {
+               --j;
             } else {
-               ++var6;
-               ++var7;
-               var9 = false;
+               ++j;
+               ++k;
+               flag1 = false;
             }
 
-            var10 = BlockRailBase.EnumRailDirection.EAST_WEST;
+            blockminecarttrackabstract_enumtrackposition = BlockRailBase.EnumRailDirection.EAST_WEST;
             break;
-         case ASCENDING_WEST:
-            if (var4) {
-               --var6;
-               ++var7;
-               var9 = false;
+         case 4:
+            if (flag) {
+               --j;
+               ++k;
+               flag1 = false;
             } else {
-               ++var6;
+               ++j;
             }
 
-            var10 = BlockRailBase.EnumRailDirection.EAST_WEST;
+            blockminecarttrackabstract_enumtrackposition = BlockRailBase.EnumRailDirection.EAST_WEST;
             break;
-         case ASCENDING_NORTH:
-            if (var4) {
-               ++var8;
+         case 5:
+            if (flag) {
+               ++l;
             } else {
-               --var8;
-               ++var7;
-               var9 = false;
+               --l;
+               ++k;
+               flag1 = false;
             }
 
-            var10 = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+            blockminecarttrackabstract_enumtrackposition = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
             break;
-         case ASCENDING_SOUTH:
-            if (var4) {
-               ++var8;
-               ++var7;
-               var9 = false;
+         case 6:
+            if (flag) {
+               ++l;
+               ++k;
+               flag1 = false;
             } else {
-               --var8;
+               --l;
             }
 
-            var10 = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+            blockminecarttrackabstract_enumtrackposition = BlockRailBase.EnumRailDirection.NORTH_SOUTH;
          }
 
-         return this.isSameRailWithPower(var1, new BlockPos(var6, var7, var8), var4, var5, var10) ? true : var9 && this.isSameRailWithPower(var1, new BlockPos(var6, var7 - 1, var8), var4, var5, var10);
+         return this.isSameRailWithPower(world, new BlockPos(j, k, l), flag, i, blockminecarttrackabstract_enumtrackposition) ? true : flag1 && this.isSameRailWithPower(world, new BlockPos(j, k - 1, l), flag, i, blockminecarttrackabstract_enumtrackposition);
       }
    }
 
-   protected boolean isSameRailWithPower(World var1, BlockPos var2, boolean var3, int var4, BlockRailBase.EnumRailDirection var5) {
-      IBlockState var6 = var1.getBlockState(var2);
-      if (var6.getBlock() != this) {
+   protected boolean isSameRailWithPower(World world, BlockPos blockposition, boolean flag, int i, BlockRailBase.EnumRailDirection blockminecarttrackabstract_enumtrackposition) {
+      IBlockState iblockdata = world.getBlockState(blockposition);
+      if (iblockdata.getBlock() != this) {
          return false;
       } else {
-         BlockRailBase.EnumRailDirection var7 = (BlockRailBase.EnumRailDirection)var6.getValue(SHAPE);
-         return var5 != BlockRailBase.EnumRailDirection.EAST_WEST || var7 != BlockRailBase.EnumRailDirection.NORTH_SOUTH && var7 != BlockRailBase.EnumRailDirection.ASCENDING_NORTH && var7 != BlockRailBase.EnumRailDirection.ASCENDING_SOUTH ? (var5 != BlockRailBase.EnumRailDirection.NORTH_SOUTH || var7 != BlockRailBase.EnumRailDirection.EAST_WEST && var7 != BlockRailBase.EnumRailDirection.ASCENDING_EAST && var7 != BlockRailBase.EnumRailDirection.ASCENDING_WEST ? (((Boolean)var6.getValue(POWERED)).booleanValue() ? (var1.isBlockPowered(var2) ? true : this.findPoweredRailSignal(var1, var2, var6, var3, var4 + 1)) : false) : false) : false;
+         BlockRailBase.EnumRailDirection blockminecarttrackabstract_enumtrackposition1 = (BlockRailBase.EnumRailDirection)iblockdata.getValue(SHAPE);
+         return blockminecarttrackabstract_enumtrackposition != BlockRailBase.EnumRailDirection.EAST_WEST || blockminecarttrackabstract_enumtrackposition1 != BlockRailBase.EnumRailDirection.NORTH_SOUTH && blockminecarttrackabstract_enumtrackposition1 != BlockRailBase.EnumRailDirection.ASCENDING_NORTH && blockminecarttrackabstract_enumtrackposition1 != BlockRailBase.EnumRailDirection.ASCENDING_SOUTH ? (blockminecarttrackabstract_enumtrackposition != BlockRailBase.EnumRailDirection.NORTH_SOUTH || blockminecarttrackabstract_enumtrackposition1 != BlockRailBase.EnumRailDirection.EAST_WEST && blockminecarttrackabstract_enumtrackposition1 != BlockRailBase.EnumRailDirection.ASCENDING_EAST && blockminecarttrackabstract_enumtrackposition1 != BlockRailBase.EnumRailDirection.ASCENDING_WEST ? (((Boolean)iblockdata.getValue(POWERED)).booleanValue() ? (world.isBlockPowered(blockposition) ? true : this.findPoweredRailSignal(world, blockposition, iblockdata, flag, i + 1)) : false) : false) : false;
       }
    }
 
-   protected void updateState(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      boolean var5 = ((Boolean)var1.getValue(POWERED)).booleanValue();
-      boolean var6 = var2.isBlockPowered(var3) || this.findPoweredRailSignal(var2, var3, var1, true, 0) || this.findPoweredRailSignal(var2, var3, var1, false, 0);
-      if (var6 != var5) {
-         var2.setBlockState(var3, var1.withProperty(POWERED, Boolean.valueOf(var6)), 3);
-         var2.notifyNeighborsOfStateChange(var3.down(), this);
-         if (((BlockRailBase.EnumRailDirection)var1.getValue(SHAPE)).isAscending()) {
-            var2.notifyNeighborsOfStateChange(var3.up(), this);
+   protected void updateState(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      boolean flag = ((Boolean)iblockdata.getValue(POWERED)).booleanValue();
+      boolean flag1 = world.isBlockPowered(blockposition) || this.findPoweredRailSignal(world, blockposition, iblockdata, true, 0) || this.findPoweredRailSignal(world, blockposition, iblockdata, false, 0);
+      if (flag1 != flag) {
+         int power = ((Boolean)iblockdata.getValue(POWERED)).booleanValue() ? 15 : 0;
+         int newPower = CraftEventFactory.callRedstoneChange(world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), power, 15 - power).getNewCurrent();
+         if (newPower == power) {
+            return;
+         }
+
+         world.setBlockState(blockposition, iblockdata.withProperty(POWERED, Boolean.valueOf(flag1)), 3);
+         world.notifyNeighborsOfStateChange(blockposition.down(), this);
+         if (((BlockRailBase.EnumRailDirection)iblockdata.getValue(SHAPE)).isAscending()) {
+            world.notifyNeighborsOfStateChange(blockposition.up(), this);
          }
       }
 
@@ -125,137 +136,240 @@ public class BlockRailPowered extends BlockRailBase {
       return SHAPE;
    }
 
-   public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(SHAPE, BlockRailBase.EnumRailDirection.byMetadata(var1 & 7)).withProperty(POWERED, Boolean.valueOf((var1 & 8) > 0));
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(SHAPE, BlockRailBase.EnumRailDirection.byMetadata(i & 7)).withProperty(POWERED, Boolean.valueOf((i & 8) > 0));
    }
 
-   public int getMetaFromState(IBlockState var1) {
-      int var2 = 0;
-      var2 = var2 | ((BlockRailBase.EnumRailDirection)var1.getValue(SHAPE)).getMetadata();
-      if (((Boolean)var1.getValue(POWERED)).booleanValue()) {
-         var2 |= 8;
+   public int getMetaFromState(IBlockState iblockdata) {
+      byte b0 = 0;
+      int i = b0 | ((BlockRailBase.EnumRailDirection)iblockdata.getValue(SHAPE)).getMetadata();
+      if (((Boolean)iblockdata.getValue(POWERED)).booleanValue()) {
+         i |= 8;
       }
 
-      return var2;
+      return i;
    }
 
-   public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      switch(var2) {
-      case CLOCKWISE_180:
-         switch((BlockRailBase.EnumRailDirection)var1.getValue(SHAPE)) {
-         case ASCENDING_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_WEST);
-         case ASCENDING_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_EAST);
-         case ASCENDING_NORTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_SOUTH);
-         case ASCENDING_SOUTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_NORTH);
-         case SOUTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
-         case SOUTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
-         case NORTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
-         case NORTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
+   public IBlockState withRotation(IBlockState iblockdata, Rotation enumblockrotation) {
+      switch(BlockRailPowered.SyntheticClass_1.b[enumblockrotation.ordinal()]) {
+      case 1:
+         switch(BlockRailPowered.SyntheticClass_1.a[((BlockRailBase.EnumRailDirection)iblockdata.getValue(SHAPE)).ordinal()]) {
+         case 3:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_WEST);
+         case 4:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_EAST);
+         case 5:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_SOUTH);
+         case 6:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_NORTH);
+         case 7:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
+         case 8:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
+         case 9:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
+         case 10:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
          }
-      case COUNTERCLOCKWISE_90:
-         switch((BlockRailBase.EnumRailDirection)var1.getValue(SHAPE)) {
-         case NORTH_SOUTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.EAST_WEST);
-         case EAST_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_SOUTH);
-         case ASCENDING_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_NORTH);
-         case ASCENDING_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_SOUTH);
-         case ASCENDING_NORTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_WEST);
-         case ASCENDING_SOUTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_EAST);
-         case SOUTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
-         case SOUTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
-         case NORTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
-         case NORTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
+      case 2:
+         switch(BlockRailPowered.SyntheticClass_1.a[((BlockRailBase.EnumRailDirection)iblockdata.getValue(SHAPE)).ordinal()]) {
+         case 1:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.EAST_WEST);
+         case 2:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_SOUTH);
+         case 3:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_NORTH);
+         case 4:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_SOUTH);
+         case 5:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_WEST);
+         case 6:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_EAST);
+         case 7:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
+         case 8:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
+         case 9:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
+         case 10:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
          }
-      case CLOCKWISE_90:
-         switch((BlockRailBase.EnumRailDirection)var1.getValue(SHAPE)) {
-         case NORTH_SOUTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.EAST_WEST);
-         case EAST_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_SOUTH);
-         case ASCENDING_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_SOUTH);
-         case ASCENDING_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_NORTH);
-         case ASCENDING_NORTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_EAST);
-         case ASCENDING_SOUTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_WEST);
-         case SOUTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
-         case SOUTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
-         case NORTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
-         case NORTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
+      case 3:
+         switch(BlockRailPowered.SyntheticClass_1.a[((BlockRailBase.EnumRailDirection)iblockdata.getValue(SHAPE)).ordinal()]) {
+         case 1:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.EAST_WEST);
+         case 2:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_SOUTH);
+         case 3:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_SOUTH);
+         case 4:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_NORTH);
+         case 5:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_EAST);
+         case 6:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_WEST);
+         case 7:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
+         case 8:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
+         case 9:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
+         case 10:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
          }
       default:
-         return var1;
+         return iblockdata;
       }
    }
 
-   public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      BlockRailBase.EnumRailDirection var3 = (BlockRailBase.EnumRailDirection)var1.getValue(SHAPE);
-      switch(var2) {
-      case LEFT_RIGHT:
-         switch(var3) {
-         case ASCENDING_NORTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_SOUTH);
-         case ASCENDING_SOUTH:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_NORTH);
-         case SOUTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
-         case SOUTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
-         case NORTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
-         case NORTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
+   public IBlockState withMirror(IBlockState iblockdata, Mirror enumblockmirror) {
+      BlockRailBase.EnumRailDirection blockminecarttrackabstract_enumtrackposition = (BlockRailBase.EnumRailDirection)iblockdata.getValue(SHAPE);
+      switch(BlockRailPowered.SyntheticClass_1.c[enumblockmirror.ordinal()]) {
+      case 1:
+         switch(BlockRailPowered.SyntheticClass_1.a[blockminecarttrackabstract_enumtrackposition.ordinal()]) {
+         case 5:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_SOUTH);
+         case 6:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_NORTH);
+         case 7:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
+         case 8:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
+         case 9:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
+         case 10:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
          default:
-            return super.withMirror(var1, var2);
+            return super.withMirror(iblockdata, enumblockmirror);
          }
-      case FRONT_BACK:
-         switch(var3) {
-         case ASCENDING_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_WEST);
-         case ASCENDING_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_EAST);
-         case ASCENDING_NORTH:
-         case ASCENDING_SOUTH:
+      case 2:
+         switch(BlockRailPowered.SyntheticClass_1.a[blockminecarttrackabstract_enumtrackposition.ordinal()]) {
+         case 3:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_WEST);
+         case 4:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.ASCENDING_EAST);
+         case 5:
+         case 6:
          default:
             break;
-         case SOUTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
-         case SOUTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
-         case NORTH_WEST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
-         case NORTH_EAST:
-            return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
+         case 7:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_WEST);
+         case 8:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.SOUTH_EAST);
+         case 9:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_EAST);
+         case 10:
+            return iblockdata.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
          }
       default:
-         return super.withMirror(var1, var2);
+         return super.withMirror(iblockdata, enumblockmirror);
       }
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{SHAPE, POWERED});
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a;
+      static final int[] b;
+      static final int[] c = new int[Mirror.values().length];
+
+      static {
+         try {
+            c[Mirror.LEFT_RIGHT.ordinal()] = 1;
+         } catch (NoSuchFieldError var14) {
+            ;
+         }
+
+         try {
+            c[Mirror.FRONT_BACK.ordinal()] = 2;
+         } catch (NoSuchFieldError var13) {
+            ;
+         }
+
+         b = new int[Rotation.values().length];
+
+         try {
+            b[Rotation.CLOCKWISE_180.ordinal()] = 1;
+         } catch (NoSuchFieldError var12) {
+            ;
+         }
+
+         try {
+            b[Rotation.COUNTERCLOCKWISE_90.ordinal()] = 2;
+         } catch (NoSuchFieldError var11) {
+            ;
+         }
+
+         try {
+            b[Rotation.CLOCKWISE_90.ordinal()] = 3;
+         } catch (NoSuchFieldError var10) {
+            ;
+         }
+
+         a = new int[BlockRailBase.EnumRailDirection.values().length];
+
+         try {
+            a[BlockRailBase.EnumRailDirection.NORTH_SOUTH.ordinal()] = 1;
+         } catch (NoSuchFieldError var9) {
+            ;
+         }
+
+         try {
+            a[BlockRailBase.EnumRailDirection.EAST_WEST.ordinal()] = 2;
+         } catch (NoSuchFieldError var8) {
+            ;
+         }
+
+         try {
+            a[BlockRailBase.EnumRailDirection.ASCENDING_EAST.ordinal()] = 3;
+         } catch (NoSuchFieldError var7) {
+            ;
+         }
+
+         try {
+            a[BlockRailBase.EnumRailDirection.ASCENDING_WEST.ordinal()] = 4;
+         } catch (NoSuchFieldError var6) {
+            ;
+         }
+
+         try {
+            a[BlockRailBase.EnumRailDirection.ASCENDING_NORTH.ordinal()] = 5;
+         } catch (NoSuchFieldError var5) {
+            ;
+         }
+
+         try {
+            a[BlockRailBase.EnumRailDirection.ASCENDING_SOUTH.ordinal()] = 6;
+         } catch (NoSuchFieldError var4) {
+            ;
+         }
+
+         try {
+            a[BlockRailBase.EnumRailDirection.SOUTH_EAST.ordinal()] = 7;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[BlockRailBase.EnumRailDirection.SOUTH_WEST.ordinal()] = 8;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[BlockRailBase.EnumRailDirection.NORTH_WEST.ordinal()] = 9;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[BlockRailBase.EnumRailDirection.NORTH_EAST.ordinal()] = 10;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

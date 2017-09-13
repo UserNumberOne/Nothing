@@ -3,7 +3,7 @@ package net.minecraft.command.server;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.MinecraftException;
@@ -25,9 +25,9 @@ public class CommandSaveAll extends CommandBase {
       }
 
       try {
-         for(int var4 = 0; var4 < var1.worlds.length; ++var4) {
-            if (var1.worlds[var4] != null) {
-               WorldServer var5 = var1.worlds[var4];
+         for(int var4 = 0; var4 < var1.worldServer.length; ++var4) {
+            if (var1.worldServer[var4] != null) {
+               WorldServer var5 = var1.worldServer[var4];
                boolean var6 = var5.disableLevelSaving;
                var5.disableLevelSaving = false;
                var5.saveAllChunks(true, (IProgressUpdate)null);
@@ -38,9 +38,9 @@ public class CommandSaveAll extends CommandBase {
          if (var3.length > 0 && "flush".equals(var3[0])) {
             var2.sendMessage(new TextComponentTranslation("commands.save.flushStart", new Object[0]));
 
-            for(int var8 = 0; var8 < var1.worlds.length; ++var8) {
-               if (var1.worlds[var8] != null) {
-                  WorldServer var9 = var1.worlds[var8];
+            for(int var8 = 0; var8 < var1.worldServer.length; ++var8) {
+               if (var1.worldServer[var8] != null) {
+                  WorldServer var9 = var1.worldServer[var8];
                   boolean var10 = var9.disableLevelSaving;
                   var9.disableLevelSaving = false;
                   var9.saveChunkData();

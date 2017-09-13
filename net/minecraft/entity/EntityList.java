@@ -79,43 +79,37 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLLog;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class EntityList {
    private static final Logger LOGGER = LogManager.getLogger();
-   public static final Map NAME_TO_CLASS = Maps.newHashMap();
-   public static final Map CLASS_TO_NAME = Maps.newHashMap();
-   public static final Map ID_TO_CLASS = Maps.newHashMap();
+   private static final Map NAME_TO_CLASS = Maps.newHashMap();
+   private static final Map CLASS_TO_NAME = Maps.newHashMap();
+   private static final Map ID_TO_CLASS = Maps.newHashMap();
    private static final Map CLASS_TO_ID = Maps.newHashMap();
    private static final Map NAME_TO_ID = Maps.newHashMap();
    public static final Map ENTITY_EGGS = Maps.newLinkedHashMap();
 
-   public static void addMapping(Class var0, String var1, int var2) {
-      if (var2 >= 0 && var2 <= 255) {
-         if (NAME_TO_CLASS.containsKey(var1)) {
-            throw new IllegalArgumentException("ID is already registered: " + var1);
-         } else if (ID_TO_CLASS.containsKey(Integer.valueOf(var2))) {
-            throw new IllegalArgumentException("ID is already registered: " + var2);
-         } else if (var2 == 0) {
-            throw new IllegalArgumentException("Cannot register to reserved id: " + var2);
-         } else if (var0 == null) {
-            throw new IllegalArgumentException("Cannot register null clazz for id: " + var2);
-         } else {
-            NAME_TO_CLASS.put(var1, var0);
-            CLASS_TO_NAME.put(var0, var1);
-            ID_TO_CLASS.put(Integer.valueOf(var2), var0);
-            CLASS_TO_ID.put(var0, Integer.valueOf(var2));
-            NAME_TO_ID.put(var1, Integer.valueOf(var2));
-         }
+   private static void addMapping(Class var0, String var1, int var2) {
+      if (NAME_TO_CLASS.containsKey(var1)) {
+         throw new IllegalArgumentException("ID is already registered: " + var1);
+      } else if (ID_TO_CLASS.containsKey(Integer.valueOf(var2))) {
+         throw new IllegalArgumentException("ID is already registered: " + var2);
+      } else if (var2 == 0) {
+         throw new IllegalArgumentException("Cannot register to reserved id: " + var2);
+      } else if (var0 == null) {
+         throw new IllegalArgumentException("Cannot register null clazz for id: " + var2);
       } else {
-         throw new IllegalArgumentException("Attempted to register a entity with invalid ID: " + var2 + " Name: " + var1 + " Class: " + var0);
+         NAME_TO_CLASS.put(var1, var0);
+         CLASS_TO_NAME.put(var0, var1);
+         ID_TO_CLASS.put(Integer.valueOf(var2), var0);
+         CLASS_TO_ID.put(var0, Integer.valueOf(var2));
+         NAME_TO_ID.put(var1, Integer.valueOf(var2));
       }
    }
 
-   public static void addMapping(Class var0, String var1, int var2, int var3, int var4) {
+   private static void addMapping(Class var0, String var1, int var2, int var3, int var4) {
       addMapping(var0, var1, var2);
       ENTITY_EGGS.put(var1, new EntityList.EntityEggInfo(var1, var3, var4));
    }
@@ -139,24 +133,18 @@ public class EntityList {
    @Nullable
    public static Entity createEntityFromNBT(NBTTagCompound var0, World var1) {
       Entity var2 = null;
-      Class var3 = null;
 
       try {
-         var3 = (Class)NAME_TO_CLASS.get(var0.getString("id"));
+         Class var3 = (Class)NAME_TO_CLASS.get(var0.getString("id"));
          if (var3 != null) {
             var2 = (Entity)var3.getConstructor(World.class).newInstance(var1);
          }
-      } catch (Exception var6) {
-         var6.printStackTrace();
+      } catch (Exception var4) {
+         var4.printStackTrace();
       }
 
       if (var2 != null) {
-         try {
-            var2.readFromNBT(var0);
-         } catch (Exception var5) {
-            FMLLog.log(Level.ERROR, var5, "An Entity %s(%s) has thrown an exception during loading, its state cannot be restored. Report this to the mod author", new Object[]{var0.getString("id"), var3.getName()});
-            var2 = null;
-         }
+         var2.readFromNBT(var0);
       } else {
          LOGGER.warn("Skipping Entity with id {}", new Object[]{var0.getString("id")});
       }
@@ -186,8 +174,7 @@ public class EntityList {
 
    @Nullable
    public static Entity createEntityByIDFromName(String var0, World var1) {
-      Entity var2 = createEntityByName(var0, var1);
-      return var2 == null ? createEntityByName("Pig", var1) : var2;
+      return createEntityByID(getIDFromString(var0), var1);
    }
 
    public static int getEntityID(Entity var0) {

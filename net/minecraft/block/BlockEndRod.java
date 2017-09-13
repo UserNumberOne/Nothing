@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.Random;
 import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -9,17 +8,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockEndRod extends BlockDirectional {
    protected static final AxisAlignedBB END_ROD_VERTICAL_AABB = new AxisAlignedBB(0.375D, 0.0D, 0.375D, 0.625D, 1.0D, 0.625D);
@@ -82,28 +77,10 @@ public class BlockEndRod extends BlockDirectional {
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
    }
 
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      EnumFacing var5 = (EnumFacing)var1.getValue(FACING);
-      double var6 = (double)var3.getX() + 0.55D - (double)(var4.nextFloat() * 0.1F);
-      double var8 = (double)var3.getY() + 0.55D - (double)(var4.nextFloat() * 0.1F);
-      double var10 = (double)var3.getZ() + 0.55D - (double)(var4.nextFloat() * 0.1F);
-      double var12 = (double)(0.4F - (var4.nextFloat() + var4.nextFloat()) * 0.4F);
-      if (var4.nextInt(5) == 0) {
-         var2.spawnParticle(EnumParticleTypes.END_ROD, var6 + (double)var5.getFrontOffsetX() * var12, var8 + (double)var5.getFrontOffsetY() * var12, var10 + (double)var5.getFrontOffsetZ() * var12, var4.nextGaussian() * 0.005D, var4.nextGaussian() * 0.005D, var4.nextGaussian() * 0.005D);
-      }
-
-   }
-
    public IBlockState getStateFromMeta(int var1) {
       IBlockState var2 = this.getDefaultState();
       var2 = var2.withProperty(FACING, EnumFacing.getFront(var1));
       return var2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 
    public int getMetaFromState(IBlockState var1) {

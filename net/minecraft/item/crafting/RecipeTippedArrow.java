@@ -8,24 +8,28 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.world.World;
 
-public class RecipeTippedArrow implements IRecipe {
+class RecipeTippedArrow extends ShapedRecipes implements IRecipe {
    private static final ItemStack[] EMPTY_ITEMS = new ItemStack[9];
 
-   public boolean matches(InventoryCrafting var1, World var2) {
-      if (var1.getWidth() == 3 && var1.getHeight() == 3) {
-         for(int var3 = 0; var3 < var1.getWidth(); ++var3) {
-            for(int var4 = 0; var4 < var1.getHeight(); ++var4) {
-               ItemStack var5 = var1.getStackInRowAndColumn(var3, var4);
-               if (var5 == null) {
+   RecipeTippedArrow() {
+      super(3, 3, new ItemStack[]{new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.LINGERING_POTION, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0)}, new ItemStack(Items.TIPPED_ARROW, 8));
+   }
+
+   public boolean matches(InventoryCrafting inventorycrafting, World world) {
+      if (inventorycrafting.getWidth() == 3 && inventorycrafting.getHeight() == 3) {
+         for(int i = 0; i < inventorycrafting.getWidth(); ++i) {
+            for(int j = 0; j < inventorycrafting.getHeight(); ++j) {
+               ItemStack itemstack = inventorycrafting.getStackInRowAndColumn(i, j);
+               if (itemstack == null) {
                   return false;
                }
 
-               Item var6 = var5.getItem();
-               if (var3 == 1 && var4 == 1) {
-                  if (var6 != Items.LINGERING_POTION) {
+               Item item = itemstack.getItem();
+               if (i == 1 && j == 1) {
+                  if (item != Items.LINGERING_POTION) {
                      return false;
                   }
-               } else if (var6 != Items.ARROW) {
+               } else if (item != Items.ARROW) {
                   return false;
                }
             }
@@ -38,13 +42,13 @@ public class RecipeTippedArrow implements IRecipe {
    }
 
    @Nullable
-   public ItemStack getCraftingResult(InventoryCrafting var1) {
-      ItemStack var2 = var1.getStackInRowAndColumn(1, 1);
-      if (var2 != null && var2.getItem() == Items.LINGERING_POTION) {
-         ItemStack var3 = new ItemStack(Items.TIPPED_ARROW, 8);
-         PotionUtils.addPotionToItemStack(var3, PotionUtils.getPotionFromItem(var2));
-         PotionUtils.appendEffects(var3, PotionUtils.getFullEffectsFromItem(var2));
-         return var3;
+   public ItemStack getCraftingResult(InventoryCrafting inventorycrafting) {
+      ItemStack itemstack = inventorycrafting.getStackInRowAndColumn(1, 1);
+      if (itemstack != null && itemstack.getItem() == Items.LINGERING_POTION) {
+         ItemStack itemstack1 = new ItemStack(Items.TIPPED_ARROW, 8);
+         PotionUtils.addPotionToItemStack(itemstack1, PotionUtils.getPotionFromItem(itemstack));
+         PotionUtils.appendEffects(itemstack1, PotionUtils.getFullEffectsFromItem(itemstack));
+         return itemstack1;
       } else {
          return null;
       }
@@ -59,7 +63,7 @@ public class RecipeTippedArrow implements IRecipe {
       return null;
    }
 
-   public ItemStack[] getRemainingItems(InventoryCrafting var1) {
+   public ItemStack[] getRemainingItems(InventoryCrafting inventorycrafting) {
       return EMPTY_ITEMS;
    }
 }

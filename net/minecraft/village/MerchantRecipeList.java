@@ -1,6 +1,5 @@
 package net.minecraft.village;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import javax.annotation.Nullable;
 import net.minecraft.item.ItemStack;
@@ -8,8 +7,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class MerchantRecipeList extends ArrayList {
    public MerchantRecipeList() {
@@ -23,7 +20,7 @@ public class MerchantRecipeList extends ArrayList {
    public MerchantRecipe canRecipeBeUsed(ItemStack var1, @Nullable ItemStack var2, int var3) {
       if (var3 > 0 && var3 < this.size()) {
          MerchantRecipe var6 = (MerchantRecipe)this.get(var3);
-         return this.areItemStacksExactlyEqual(var1, var6.getItemToBuy()) && (var2 == null && !var6.hasSecondItemToBuy() || var6.hasSecondItemToBuy() && this.areItemStacksExactlyEqual(var2, var6.getSecondItemToBuy())) && var1.stackSize >= var6.getItemToBuy().stackSize && (!var6.hasSecondItemToBuy() || var2.stackSize >= var6.getSecondItemToBuy().stackSize) ? var6 : null;
+         return !this.areItemStacksExactlyEqual(var1, var6.getItemToBuy()) || (var2 != null || var6.hasSecondItemToBuy()) && (!var6.hasSecondItemToBuy() || !this.areItemStacksExactlyEqual(var2, var6.getSecondItemToBuy())) || var1.stackSize < var6.getItemToBuy().stackSize || var6.hasSecondItemToBuy() && var2.stackSize < var6.getSecondItemToBuy().stackSize ? null : var6;
       } else {
          for(int var4 = 0; var4 < this.size(); ++var4) {
             MerchantRecipe var5 = (MerchantRecipe)this.get(var4);
@@ -80,33 +77,6 @@ public class MerchantRecipeList extends ArrayList {
       }
 
       var1.setTag("Recipes", var2);
-      return var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static MerchantRecipeList readFromBuf(PacketBuffer var0) throws IOException {
-      MerchantRecipeList var1 = new MerchantRecipeList();
-      int var2 = var0.readByte() & 255;
-
-      for(int var3 = 0; var3 < var2; ++var3) {
-         ItemStack var4 = var0.readItemStack();
-         ItemStack var5 = var0.readItemStack();
-         ItemStack var6 = null;
-         if (var0.readBoolean()) {
-            var6 = var0.readItemStack();
-         }
-
-         boolean var7 = var0.readBoolean();
-         int var8 = var0.readInt();
-         int var9 = var0.readInt();
-         MerchantRecipe var10 = new MerchantRecipe(var4, var6, var5, var8, var9);
-         if (var7) {
-            var10.compensateToolUses();
-         }
-
-         var1.add(var10);
-      }
-
       return var1;
    }
 }

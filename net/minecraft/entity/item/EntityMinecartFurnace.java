@@ -19,8 +19,6 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
 
 public class EntityMinecartFurnace extends EntityMinecart {
    private static final DataParameter POWERED = EntityDataManager.createKey(EntityMinecartFurnace.class, DataSerializers.BOOLEAN);
@@ -120,21 +118,17 @@ public class EntityMinecartFurnace extends EntityMinecart {
    }
 
    public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
-      if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, var1, var2, var3))) {
-         return true;
-      } else {
-         if (var2 != null && var2.getItem() == Items.COAL && this.fuel + 3600 <= 32000) {
-            if (!var1.capabilities.isCreativeMode) {
-               --var2.stackSize;
-            }
-
-            this.fuel += 3600;
+      if (var2 != null && var2.getItem() == Items.COAL && this.fuel + 3600 <= 32000) {
+         if (!var1.capabilities.isCreativeMode) {
+            --var2.stackSize;
          }
 
-         this.pushX = this.posX - var1.posX;
-         this.pushZ = this.posZ - var1.posZ;
-         return true;
+         this.fuel += 3600;
       }
+
+      this.pushX = this.posX - var1.posX;
+      this.pushZ = this.posZ - var1.posZ;
+      return true;
    }
 
    protected void writeEntityToNBT(NBTTagCompound var1) {

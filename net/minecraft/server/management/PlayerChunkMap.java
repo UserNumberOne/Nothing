@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -23,13 +24,21 @@ import net.minecraft.world.chunk.Chunk;
 
 public class PlayerChunkMap {
    private static final Predicate NOT_SPECTATOR = new Predicate() {
-      public boolean apply(@Nullable EntityPlayerMP var1) {
-         return var1 != null && !var1.isSpectator();
+      public boolean apply(@Nullable EntityPlayerMP entityplayer) {
+         return entityplayer != null && !entityplayer.isSpectator();
+      }
+
+      public boolean apply(Object object) {
+         return this.apply((EntityPlayerMP)object);
       }
    };
    private static final Predicate CAN_GENERATE_CHUNKS = new Predicate() {
-      public boolean apply(@Nullable EntityPlayerMP var1) {
-         return var1 != null && (!var1.isSpectator() || var1.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
+      public boolean apply(@Nullable EntityPlayerMP entityplayer) {
+         return entityplayer != null && (!entityplayer.isSpectator() || entityplayer.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
+      }
+
+      public boolean apply(Object object) {
+         return this.apply((EntityPlayerMP)object);
       }
    };
    private final WorldServer world;
@@ -43,10 +52,11 @@ public class PlayerChunkMap {
    private long previousTotalWorldTime;
    private boolean sortMissingChunks = true;
    private boolean sortSendToPlayers = true;
+   private boolean wasNotEmpty;
 
-   public PlayerChunkMap(WorldServer var1) {
-      this.world = var1;
-      this.setPlayerViewRadius(var1.getMinecraftServer().getPlayerList().getViewDistance());
+   public PlayerChunkMap(WorldServer worldserver) {
+      this.world = worldserver;
+      this.setPlayerViewRadius(worldserver.getMinecraftServer().getPlayerList().getViewDistance());
    }
 
    public WorldServer getWorldServer() {
@@ -54,93 +64,105 @@ public class PlayerChunkMap {
    }
 
    public Iterator getChunkIterator() {
-      final Iterator var1 = this.entries.iterator();
+      final Iterator iterator = this.entries.iterator();
       return new AbstractIterator() {
          protected Chunk computeNext() {
             while(true) {
-               if (var1.hasNext()) {
-                  PlayerChunkMapEntry var1x = (PlayerChunkMapEntry)var1.next();
-                  Chunk var2 = var1x.getChunk();
-                  if (var2 == null) {
+               if (iterator.hasNext()) {
+                  PlayerChunkMapEntry playerchunk = (PlayerChunkMapEntry)iterator.next();
+                  Chunk chunk = playerchunk.getChunk();
+                  if (chunk == null) {
                      continue;
                   }
 
-                  if (!var2.isLightPopulated() && var2.isTerrainPopulated()) {
-                     return var2;
+                  if (!chunk.isLightPopulated() && chunk.isTerrainPopulated()) {
+                     return chunk;
                   }
 
-                  if (!var2.isChunkTicked()) {
-                     return var2;
+                  if (!chunk.isChunkTicked()) {
+                     return chunk;
                   }
 
-                  if (!var1x.hasPlayerMatchingInRange(128.0D, PlayerChunkMap.NOT_SPECTATOR)) {
+                  if (!playerchunk.hasPlayerMatchingInRange(128.0D, PlayerChunkMap.NOT_SPECTATOR)) {
                      continue;
                   }
 
-                  return var2;
+                  return chunk;
                }
 
                return (Chunk)this.endOfData();
             }
          }
+
+         protected Object computeNext() {
+            return this.computeNext();
+         }
       };
    }
 
    public void tick() {
-      long var1 = this.world.getTotalWorldTime();
-      if (var1 - this.previousTotalWorldTime > 8000L) {
-         this.previousTotalWorldTime = var1;
+      long i = this.world.getTotalWorldTime();
+      if (i - this.previousTotalWorldTime > 8000L) {
+         this.previousTotalWorldTime = i;
 
-         for(int var3 = 0; var3 < this.entries.size(); ++var3) {
-            PlayerChunkMapEntry var4 = (PlayerChunkMapEntry)this.entries.get(var3);
-            var4.update();
-            var4.updateChunkInhabitedTime();
+         for(int j = 0; j < this.entries.size(); ++j) {
+            PlayerChunkMapEntry playerchunk = (PlayerChunkMapEntry)this.entries.get(j);
+            playerchunk.update();
+            playerchunk.updateChunkInhabitedTime();
          }
       }
 
       if (!this.dirtyEntries.isEmpty()) {
-         for(PlayerChunkMapEntry var13 : this.dirtyEntries) {
-            var13.update();
+         for(PlayerChunkMapEntry playerchunk : this.dirtyEntries) {
+            playerchunk.update();
          }
 
          this.dirtyEntries.clear();
       }
 
-      if (this.sortMissingChunks && var1 % 4L == 0L) {
+      if (this.sortMissingChunks && i % 4L == 0L) {
          this.sortMissingChunks = false;
          Collections.sort(this.entriesWithoutChunks, new Comparator() {
-            public int compare(PlayerChunkMapEntry var1, PlayerChunkMapEntry var2) {
-               return ComparisonChain.start().compare(var1.getClosestPlayerDistance(), var2.getClosestPlayerDistance()).result();
+            public int compare(PlayerChunkMapEntry playerchunk, PlayerChunkMapEntry playerchunk1) {
+               return ComparisonChain.start().compare(playerchunk.getClosestPlayerDistance(), playerchunk1.getClosestPlayerDistance()).result();
+            }
+
+            public int compare(Object object, Object object1) {
+               return this.compare((PlayerChunkMapEntry)object, (PlayerChunkMapEntry)object1);
             }
          });
       }
 
-      if (this.sortSendToPlayers && var1 % 4L == 2L) {
+      if (this.sortSendToPlayers && i % 4L == 2L) {
          this.sortSendToPlayers = false;
          Collections.sort(this.pendingSendToPlayers, new Comparator() {
-            public int compare(PlayerChunkMapEntry var1, PlayerChunkMapEntry var2) {
-               return ComparisonChain.start().compare(var1.getClosestPlayerDistance(), var2.getClosestPlayerDistance()).result();
+            public int compare(PlayerChunkMapEntry playerchunk, PlayerChunkMapEntry playerchunk1) {
+               return ComparisonChain.start().compare(playerchunk.getClosestPlayerDistance(), playerchunk1.getClosestPlayerDistance()).result();
+            }
+
+            public int compare(Object object, Object object1) {
+               return this.compare((PlayerChunkMapEntry)object, (PlayerChunkMapEntry)object1);
             }
          });
       }
 
       if (!this.entriesWithoutChunks.isEmpty()) {
-         long var10 = System.nanoTime() + 50000000L;
-         int var5 = 49;
-         Iterator var6 = this.entriesWithoutChunks.iterator();
+         long k = System.nanoTime() + 50000000L;
+         int l = 49;
+         Iterator iterator1 = this.entriesWithoutChunks.iterator();
 
-         while(var6.hasNext()) {
-            PlayerChunkMapEntry var7 = (PlayerChunkMapEntry)var6.next();
-            if (var7.getChunk() == null) {
-               boolean var8 = var7.hasPlayerMatching(CAN_GENERATE_CHUNKS);
-               if (var7.providePlayerChunk(var8)) {
-                  var6.remove();
-                  if (var7.sendToPlayers()) {
-                     this.pendingSendToPlayers.remove(var7);
+         while(iterator1.hasNext()) {
+            PlayerChunkMapEntry playerchunk1 = (PlayerChunkMapEntry)iterator1.next();
+            if (playerchunk1.getChunk() == null) {
+               boolean flag = playerchunk1.hasPlayerMatching(CAN_GENERATE_CHUNKS);
+               if (playerchunk1.providePlayerChunk(flag)) {
+                  iterator1.remove();
+                  if (playerchunk1.sendToPlayers()) {
+                     this.pendingSendToPlayers.remove(playerchunk1);
                   }
 
-                  --var5;
-                  if (var5 < 0 || System.nanoTime() > var10) {
+                  --l;
+                  if (l < 0 || System.nanoTime() > k) {
                      break;
                   }
                }
@@ -149,15 +171,15 @@ public class PlayerChunkMap {
       }
 
       if (!this.pendingSendToPlayers.isEmpty()) {
-         int var11 = 81;
-         Iterator var14 = this.pendingSendToPlayers.iterator();
+         int j = 81;
+         Iterator iterator2 = this.pendingSendToPlayers.iterator();
 
-         while(var14.hasNext()) {
-            PlayerChunkMapEntry var15 = (PlayerChunkMapEntry)var14.next();
-            if (var15.sendToPlayers()) {
-               var14.remove();
-               --var11;
-               if (var11 < 0) {
+         while(iterator2.hasNext()) {
+            PlayerChunkMapEntry playerchunk2 = (PlayerChunkMapEntry)iterator2.next();
+            if (playerchunk2.sendToPlayers()) {
+               iterator2.remove();
+               --j;
+               if (j < 0) {
                   break;
                }
             }
@@ -165,162 +187,184 @@ public class PlayerChunkMap {
       }
 
       if (this.players.isEmpty()) {
-         WorldProvider var12 = this.world.provider;
-         if (!var12.canRespawnHere()) {
+         WorldProvider worldprovider = this.world.provider;
+         if (!worldprovider.canRespawnHere()) {
             this.world.getChunkProvider().unloadAllChunks();
          }
       }
 
    }
 
-   public boolean contains(int var1, int var2) {
-      long var3 = getIndex(var1, var2);
-      return this.entryMap.get(var3) != null;
+   public boolean contains(int i, int j) {
+      long k = getIndex(i, j);
+      return this.entryMap.get(k) != null;
    }
 
    @Nullable
-   public PlayerChunkMapEntry getEntry(int var1, int var2) {
-      return (PlayerChunkMapEntry)this.entryMap.get(getIndex(var1, var2));
+   public PlayerChunkMapEntry getEntry(int i, int j) {
+      return (PlayerChunkMapEntry)this.entryMap.get(getIndex(i, j));
    }
 
-   private PlayerChunkMapEntry getOrCreateEntry(int var1, int var2) {
-      long var3 = getIndex(var1, var2);
-      PlayerChunkMapEntry var5 = (PlayerChunkMapEntry)this.entryMap.get(var3);
-      if (var5 == null) {
-         var5 = new PlayerChunkMapEntry(this, var1, var2);
-         this.entryMap.put(var3, var5);
-         this.entries.add(var5);
-         if (var5.getChunk() == null) {
-            this.entriesWithoutChunks.add(var5);
+   private PlayerChunkMapEntry getOrCreateEntry(int i, int j) {
+      long k = getIndex(i, j);
+      PlayerChunkMapEntry playerchunk = (PlayerChunkMapEntry)this.entryMap.get(k);
+      if (playerchunk == null) {
+         playerchunk = new PlayerChunkMapEntry(this, i, j);
+         this.entryMap.put(k, playerchunk);
+         this.entries.add(playerchunk);
+         if (playerchunk.getChunk() == null) {
+            this.entriesWithoutChunks.add(playerchunk);
          }
 
-         if (!var5.sendToPlayers()) {
-            this.pendingSendToPlayers.add(var5);
-         }
-      }
-
-      return var5;
-   }
-
-   public void markBlockForUpdate(BlockPos var1) {
-      int var2 = var1.getX() >> 4;
-      int var3 = var1.getZ() >> 4;
-      PlayerChunkMapEntry var4 = this.getEntry(var2, var3);
-      if (var4 != null) {
-         var4.blockChanged(var1.getX() & 15, var1.getY(), var1.getZ() & 15);
-      }
-
-   }
-
-   public void addPlayer(EntityPlayerMP var1) {
-      int var2 = (int)var1.posX >> 4;
-      int var3 = (int)var1.posZ >> 4;
-      var1.managedPosX = var1.posX;
-      var1.managedPosZ = var1.posZ;
-
-      for(int var4 = var2 - this.playerViewRadius; var4 <= var2 + this.playerViewRadius; ++var4) {
-         for(int var5 = var3 - this.playerViewRadius; var5 <= var3 + this.playerViewRadius; ++var5) {
-            this.getOrCreateEntry(var4, var5).addPlayer(var1);
+         if (!playerchunk.sendToPlayers()) {
+            this.pendingSendToPlayers.add(playerchunk);
          }
       }
 
-      this.players.add(var1);
+      return playerchunk;
+   }
+
+   public final boolean isChunkInUse(int x, int z) {
+      PlayerChunkMapEntry pi = this.getEntry(x, z);
+      if (pi != null) {
+         return pi.players.size() > 0;
+      } else {
+         return false;
+      }
+   }
+
+   public void markBlockForUpdate(BlockPos blockposition) {
+      int i = blockposition.getX() >> 4;
+      int j = blockposition.getZ() >> 4;
+      PlayerChunkMapEntry playerchunk = this.getEntry(i, j);
+      if (playerchunk != null) {
+         playerchunk.blockChanged(blockposition.getX() & 15, blockposition.getY(), blockposition.getZ() & 15);
+      }
+
+   }
+
+   public void addPlayer(EntityPlayerMP entityplayer) {
+      int i = (int)entityplayer.posX >> 4;
+      int j = (int)entityplayer.posZ >> 4;
+      entityplayer.managedPosX = entityplayer.posX;
+      entityplayer.managedPosZ = entityplayer.posZ;
+      List chunkList = new LinkedList();
+
+      for(int k = i - this.playerViewRadius; k <= i + this.playerViewRadius; ++k) {
+         for(int l = j - this.playerViewRadius; l <= j + this.playerViewRadius; ++l) {
+            chunkList.add(new ChunkPos(k, l));
+         }
+      }
+
+      Collections.sort(chunkList, new PlayerChunkMap.ChunkCoordComparator(entityplayer));
+
+      for(ChunkPos pair : chunkList) {
+         this.getOrCreateEntry(pair.chunkXPos, pair.chunkZPos).addPlayer(entityplayer);
+      }
+
+      this.players.add(entityplayer);
       this.markSortPending();
    }
 
-   public void removePlayer(EntityPlayerMP var1) {
-      int var2 = (int)var1.managedPosX >> 4;
-      int var3 = (int)var1.managedPosZ >> 4;
+   public void removePlayer(EntityPlayerMP entityplayer) {
+      int i = (int)entityplayer.managedPosX >> 4;
+      int j = (int)entityplayer.managedPosZ >> 4;
 
-      for(int var4 = var2 - this.playerViewRadius; var4 <= var2 + this.playerViewRadius; ++var4) {
-         for(int var5 = var3 - this.playerViewRadius; var5 <= var3 + this.playerViewRadius; ++var5) {
-            PlayerChunkMapEntry var6 = this.getEntry(var4, var5);
-            if (var6 != null) {
-               var6.removePlayer(var1);
+      for(int k = i - this.playerViewRadius; k <= i + this.playerViewRadius; ++k) {
+         for(int l = j - this.playerViewRadius; l <= j + this.playerViewRadius; ++l) {
+            PlayerChunkMapEntry playerchunk = this.getEntry(k, l);
+            if (playerchunk != null) {
+               playerchunk.removePlayer(entityplayer);
             }
          }
       }
 
-      this.players.remove(var1);
+      this.players.remove(entityplayer);
       this.markSortPending();
    }
 
-   private boolean overlaps(int var1, int var2, int var3, int var4, int var5) {
-      int var6 = var1 - var3;
-      int var7 = var2 - var4;
-      return var6 >= -var5 && var6 <= var5 ? var7 >= -var5 && var7 <= var5 : false;
+   private boolean overlaps(int i, int j, int k, int l, int i1) {
+      int j1 = i - k;
+      int k1 = j - l;
+      return j1 >= -i1 && j1 <= i1 ? k1 >= -i1 && k1 <= i1 : false;
    }
 
-   public void updateMovingPlayer(EntityPlayerMP var1) {
-      int var2 = (int)var1.posX >> 4;
-      int var3 = (int)var1.posZ >> 4;
-      double var4 = var1.managedPosX - var1.posX;
-      double var6 = var1.managedPosZ - var1.posZ;
-      double var8 = var4 * var4 + var6 * var6;
-      if (var8 >= 64.0D) {
-         int var10 = (int)var1.managedPosX >> 4;
-         int var11 = (int)var1.managedPosZ >> 4;
-         int var12 = this.playerViewRadius;
-         int var13 = var2 - var10;
-         int var14 = var3 - var11;
-         if (var13 != 0 || var14 != 0) {
-            for(int var15 = var2 - var12; var15 <= var2 + var12; ++var15) {
-               for(int var16 = var3 - var12; var16 <= var3 + var12; ++var16) {
-                  if (!this.overlaps(var15, var16, var10, var11, var12)) {
-                     this.getOrCreateEntry(var15, var16).addPlayer(var1);
+   public void updateMovingPlayer(EntityPlayerMP entityplayer) {
+      int i = (int)entityplayer.posX >> 4;
+      int j = (int)entityplayer.posZ >> 4;
+      double d0 = entityplayer.managedPosX - entityplayer.posX;
+      double d1 = entityplayer.managedPosZ - entityplayer.posZ;
+      double d2 = d0 * d0 + d1 * d1;
+      if (d2 >= 64.0D) {
+         int k = (int)entityplayer.managedPosX >> 4;
+         int l = (int)entityplayer.managedPosZ >> 4;
+         int i1 = this.playerViewRadius;
+         int j1 = i - k;
+         int k1 = j - l;
+         List chunksToLoad = new LinkedList();
+         if (j1 != 0 || k1 != 0) {
+            for(int l1 = i - i1; l1 <= i + i1; ++l1) {
+               for(int i2 = j - i1; i2 <= j + i1; ++i2) {
+                  if (!this.overlaps(l1, i2, k, l, i1)) {
+                     chunksToLoad.add(new ChunkPos(l1, i2));
                   }
 
-                  if (!this.overlaps(var15 - var13, var16 - var14, var2, var3, var12)) {
-                     PlayerChunkMapEntry var17 = this.getEntry(var15 - var13, var16 - var14);
-                     if (var17 != null) {
-                        var17.removePlayer(var1);
+                  if (!this.overlaps(l1 - j1, i2 - k1, i, j, i1)) {
+                     PlayerChunkMapEntry playerchunk = this.getEntry(l1 - j1, i2 - k1);
+                     if (playerchunk != null) {
+                        playerchunk.removePlayer(entityplayer);
                      }
                   }
                }
             }
 
-            var1.managedPosX = var1.posX;
-            var1.managedPosZ = var1.posZ;
+            entityplayer.managedPosX = entityplayer.posX;
+            entityplayer.managedPosZ = entityplayer.posZ;
             this.markSortPending();
+            Collections.sort(chunksToLoad, new PlayerChunkMap.ChunkCoordComparator(entityplayer));
+
+            for(ChunkPos pair : chunksToLoad) {
+               this.getOrCreateEntry(pair.chunkXPos, pair.chunkZPos).addPlayer(entityplayer);
+            }
          }
       }
 
    }
 
-   public boolean isPlayerWatchingChunk(EntityPlayerMP var1, int var2, int var3) {
-      PlayerChunkMapEntry var4 = this.getEntry(var2, var3);
-      return var4 != null && var4.containsPlayer(var1) && var4.isSentToPlayers();
+   public boolean isPlayerWatchingChunk(EntityPlayerMP entityplayer, int i, int j) {
+      PlayerChunkMapEntry playerchunk = this.getEntry(i, j);
+      return playerchunk != null && playerchunk.containsPlayer(entityplayer) && playerchunk.isSentToPlayers();
    }
 
-   public void setPlayerViewRadius(int var1) {
-      var1 = MathHelper.clamp(var1, 3, 32);
-      if (var1 != this.playerViewRadius) {
-         int var2 = var1 - this.playerViewRadius;
+   public void setPlayerViewRadius(int i) {
+      i = MathHelper.clamp(i, 3, 32);
+      if (i != this.playerViewRadius) {
+         int j = i - this.playerViewRadius;
 
-         for(EntityPlayerMP var4 : Lists.newArrayList(this.players)) {
-            int var5 = (int)var4.posX >> 4;
-            int var6 = (int)var4.posZ >> 4;
-            if (var2 > 0) {
-               for(int var11 = var5 - var1; var11 <= var5 + var1; ++var11) {
-                  for(int var12 = var6 - var1; var12 <= var6 + var1; ++var12) {
-                     PlayerChunkMapEntry var9 = this.getOrCreateEntry(var11, var12);
-                     if (!var9.containsPlayer(var4)) {
-                        var9.addPlayer(var4);
+         for(EntityPlayerMP entityplayer : Lists.newArrayList(this.players)) {
+            int k = (int)entityplayer.posX >> 4;
+            int l = (int)entityplayer.posZ >> 4;
+            if (j > 0) {
+               for(int i1 = k - i; i1 <= k + i; ++i1) {
+                  for(int j1 = l - i; j1 <= l + i; ++j1) {
+                     PlayerChunkMapEntry playerchunk = this.getOrCreateEntry(i1, j1);
+                     if (!playerchunk.containsPlayer(entityplayer)) {
+                        playerchunk.addPlayer(entityplayer);
                      }
                   }
                }
             } else {
-               for(int var7 = var5 - this.playerViewRadius; var7 <= var5 + this.playerViewRadius; ++var7) {
-                  for(int var8 = var6 - this.playerViewRadius; var8 <= var6 + this.playerViewRadius; ++var8) {
-                     if (!this.overlaps(var7, var8, var5, var6, var1)) {
-                        this.getOrCreateEntry(var7, var8).removePlayer(var4);
+               for(int i1 = k - this.playerViewRadius; i1 <= k + this.playerViewRadius; ++i1) {
+                  for(int j1 = l - this.playerViewRadius; j1 <= l + this.playerViewRadius; ++j1) {
+                     if (!this.overlaps(i1, j1, k, l, i)) {
+                        this.getOrCreateEntry(i1, j1).removePlayer(entityplayer);
                      }
                   }
                }
             }
          }
 
-         this.playerViewRadius = var1;
+         this.playerViewRadius = i;
          this.markSortPending();
       }
 
@@ -331,31 +375,60 @@ public class PlayerChunkMap {
       this.sortSendToPlayers = true;
    }
 
-   public static int getFurthestViewableBlock(int var0) {
-      return var0 * 16 - 16;
+   public static int getFurthestViewableBlock(int i) {
+      return i * 16 - 16;
    }
 
-   private static long getIndex(int var0, int var1) {
-      return (long)var0 + 2147483647L | (long)var1 + 2147483647L << 32;
+   private static long getIndex(int i, int j) {
+      return (long)i + 2147483647L | (long)j + 2147483647L << 32;
    }
 
-   public void entryChanged(PlayerChunkMapEntry var1) {
-      this.dirtyEntries.add(var1);
+   public void entryChanged(PlayerChunkMapEntry playerchunk) {
+      this.dirtyEntries.add(playerchunk);
    }
 
-   public void removeEntry(PlayerChunkMapEntry var1) {
-      ChunkPos var2 = var1.getPos();
-      long var3 = getIndex(var2.chunkXPos, var2.chunkZPos);
-      var1.updateChunkInhabitedTime();
-      this.entryMap.remove(var3);
-      this.entries.remove(var1);
-      this.dirtyEntries.remove(var1);
-      this.pendingSendToPlayers.remove(var1);
-      this.entriesWithoutChunks.remove(var1);
-      Chunk var5 = var1.getChunk();
-      if (var5 != null) {
-         this.getWorldServer().getChunkProvider().unload(var5);
+   public void removeEntry(PlayerChunkMapEntry playerchunk) {
+      ChunkPos chunkcoordintpair = playerchunk.getPos();
+      long i = getIndex(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
+      playerchunk.updateChunkInhabitedTime();
+      this.entryMap.remove(i);
+      this.entries.remove(playerchunk);
+      this.dirtyEntries.remove(playerchunk);
+      this.pendingSendToPlayers.remove(playerchunk);
+      this.entriesWithoutChunks.remove(playerchunk);
+      Chunk chunk = playerchunk.getChunk();
+      if (chunk != null) {
+         this.getWorldServer().getChunkProvider().unload(chunk);
       }
 
+   }
+
+   private static class ChunkCoordComparator implements Comparator {
+      private int x;
+      private int z;
+
+      public ChunkCoordComparator(EntityPlayerMP entityplayer) {
+         this.x = (int)entityplayer.posX >> 4;
+         this.z = (int)entityplayer.posZ >> 4;
+      }
+
+      public int compare(ChunkPos a, ChunkPos b) {
+         if (a.equals(b)) {
+            return 0;
+         } else {
+            int ax = a.chunkXPos - this.x;
+            int az = a.chunkZPos - this.z;
+            int bx = b.chunkXPos - this.x;
+            int bz = b.chunkZPos - this.z;
+            int result = (ax - bx) * (ax + bx) + (az - bz) * (az + bz);
+            if (result != 0) {
+               return result;
+            } else if (ax < 0) {
+               return bx < 0 ? bz - az : -1;
+            } else {
+               return bx < 0 ? 1 : az - bz;
+            }
+         }
+      }
    }
 }

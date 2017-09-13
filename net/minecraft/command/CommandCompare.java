@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -101,7 +101,15 @@ public class CommandCompare extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length > 0 && var3.length <= 3 ? getTabCompletionCoordinate(var3, 0, var4) : (var3.length > 3 && var3.length <= 6 ? getTabCompletionCoordinate(var3, 3, var4) : (var3.length > 6 && var3.length <= 9 ? getTabCompletionCoordinate(var3, 6, var4) : (var3.length == 10 ? getListOfStringsMatchingLastWord(var3, new String[]{"masked", "all"}) : Collections.emptyList())));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length > 0 && var3.length <= 3) {
+         return getTabCompletionCoordinate(var3, 0, var4);
+      } else if (var3.length > 3 && var3.length <= 6) {
+         return getTabCompletionCoordinate(var3, 3, var4);
+      } else if (var3.length > 6 && var3.length <= 9) {
+         return getTabCompletionCoordinate(var3, 6, var4);
+      } else {
+         return var3.length == 10 ? getListOfStringsMatchingLastWord(var3, new String[]{"masked", "all"}) : Collections.emptyList();
+      }
    }
 }

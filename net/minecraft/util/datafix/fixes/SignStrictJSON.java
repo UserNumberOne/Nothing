@@ -37,6 +37,11 @@ public class SignStrictJSON implements IFixableData {
             throw new JsonParseException("Don't know how to turn " + var1 + " into a Component");
          }
       }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
+      }
    }).create();
 
    public int getFixVersion() {

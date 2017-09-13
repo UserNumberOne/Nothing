@@ -22,8 +22,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockFence extends Block {
    public static final PropertyBool NORTH = PropertyBool.create("north");
@@ -105,12 +103,17 @@ public class BlockFence extends Block {
    public boolean canConnectTo(IBlockAccess var1, BlockPos var2) {
       IBlockState var3 = var1.getBlockState(var2);
       Block var4 = var3.getBlock();
-      return var4 == Blocks.BARRIER ? false : ((!(var4 instanceof BlockFence) || var4.blockMaterial != this.blockMaterial) && !(var4 instanceof BlockFenceGate) ? (var4.blockMaterial.isOpaque() && var3.isFullCube() ? var4.blockMaterial != Material.GOURD : false) : true);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return true;
+      if (var4 == Blocks.BARRIER) {
+         return false;
+      } else if ((!(var4 instanceof BlockFence) || var4.blockMaterial != this.blockMaterial) && !(var4 instanceof BlockFenceGate)) {
+         if (var4.blockMaterial.isOpaque() && var3.isFullCube()) {
+            return var4.blockMaterial != Material.GOURD;
+         } else {
+            return false;
+         }
+      } else {
+         return true;
+      }
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {

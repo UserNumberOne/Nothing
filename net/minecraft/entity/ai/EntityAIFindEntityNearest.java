@@ -12,6 +12,7 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIFindEntityNearest extends EntityAIBase {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -21,52 +22,56 @@ public class EntityAIFindEntityNearest extends EntityAIBase {
    private EntityLivingBase target;
    private final Class classToCheck;
 
-   public EntityAIFindEntityNearest(EntityLiving var1, Class var2) {
-      this.mob = var1;
-      this.classToCheck = var2;
-      if (var1 instanceof EntityCreature) {
+   public EntityAIFindEntityNearest(EntityLiving entityinsentient, Class oclass) {
+      this.mob = entityinsentient;
+      this.classToCheck = oclass;
+      if (entityinsentient instanceof EntityCreature) {
          LOGGER.warn("Use NearestAttackableTargetGoal.class for PathfinerMob mobs!");
       }
 
       this.predicate = new Predicate() {
-         public boolean apply(@Nullable EntityLivingBase var1) {
-            double var2 = EntityAIFindEntityNearest.this.getFollowRange();
-            if (var1.isSneaking()) {
-               var2 *= 0.800000011920929D;
+         public boolean apply(@Nullable EntityLivingBase entityliving) {
+            double d0 = EntityAIFindEntityNearest.this.getFollowRange();
+            if (entityliving.isSneaking()) {
+               d0 *= 0.800000011920929D;
             }
 
-            return var1.isInvisible() ? false : ((double)var1.getDistanceToEntity(EntityAIFindEntityNearest.this.mob) > var2 ? false : EntityAITarget.isSuitableTarget(EntityAIFindEntityNearest.this.mob, var1, false, true));
+            return entityliving.isInvisible() ? false : ((double)entityliving.getDistanceToEntity(EntityAIFindEntityNearest.this.mob) > d0 ? false : EntityAITarget.isSuitableTarget(EntityAIFindEntityNearest.this.mob, entityliving, false, true));
+         }
+
+         public boolean apply(Object object) {
+            return this.apply((EntityLivingBase)object);
          }
       };
-      this.sorter = new EntityAINearestAttackableTarget.Sorter(var1);
+      this.sorter = new EntityAINearestAttackableTarget.Sorter(entityinsentient);
    }
 
    public boolean shouldExecute() {
-      double var1 = this.getFollowRange();
-      List var3 = this.mob.world.getEntitiesWithinAABB(this.classToCheck, this.mob.getEntityBoundingBox().expand(var1, 4.0D, var1), this.predicate);
-      Collections.sort(var3, this.sorter);
-      if (var3.isEmpty()) {
+      double d0 = this.getFollowRange();
+      List list = this.mob.world.getEntitiesWithinAABB(this.classToCheck, this.mob.getEntityBoundingBox().expand(d0, 4.0D, d0), this.predicate);
+      Collections.sort(list, this.sorter);
+      if (list.isEmpty()) {
          return false;
       } else {
-         this.target = (EntityLivingBase)var3.get(0);
+         this.target = (EntityLivingBase)list.get(0);
          return true;
       }
    }
 
    public boolean continueExecuting() {
-      EntityLivingBase var1 = this.mob.getAttackTarget();
-      if (var1 == null) {
+      EntityLivingBase entityliving = this.mob.getAttackTarget();
+      if (entityliving == null) {
          return false;
-      } else if (!var1.isEntityAlive()) {
+      } else if (!entityliving.isEntityAlive()) {
          return false;
       } else {
-         double var2 = this.getFollowRange();
-         return this.mob.getDistanceSqToEntity(var1) > var2 * var2 ? false : !(var1 instanceof EntityPlayerMP) || !((EntityPlayerMP)var1).interactionManager.isCreative();
+         double d0 = this.getFollowRange();
+         return this.mob.getDistanceSqToEntity(entityliving) > d0 * d0 ? false : !(entityliving instanceof EntityPlayerMP) || !((EntityPlayerMP)entityliving).interactionManager.isCreative();
       }
    }
 
    public void startExecuting() {
-      this.mob.setAttackTarget(this.target);
+      this.mob.setGoalTarget(this.target, TargetReason.CLOSEST_ENTITY, true);
       super.startExecuting();
    }
 
@@ -76,7 +81,7 @@ public class EntityAIFindEntityNearest extends EntityAIBase {
    }
 
    protected double getFollowRange() {
-      IAttributeInstance var1 = this.mob.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
-      return var1 == null ? 16.0D : var1.getAttributeValue();
+      IAttributeInstance attributeinstance = this.mob.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
+      return attributeinstance == null ? 16.0D : attributeinstance.getAttributeValue();
    }
 }

@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -41,7 +41,7 @@ public class CommandHelp extends CommandBase {
       if (var2 instanceof CommandBlockBaseLogic) {
          var2.sendMessage((new TextComponentString("Searge says: ")).appendText(seargeSays[this.rand.nextInt(seargeSays.length) % seargeSays.length]));
       } else {
-         List var4 = this.getSortedPossibleCommands(var2, var1);
+         List var4 = this.a(var2, var1);
          boolean var5 = true;
          int var6 = (var4.size() - 1) / 7;
          int var7 = 0;
@@ -49,7 +49,7 @@ public class CommandHelp extends CommandBase {
          try {
             var7 = var3.length == 0 ? 0 : parseInt(var3[0], 1, var6 + 1) - 1;
          } catch (NumberInvalidException var13) {
-            Map var9 = this.getCommandMap(var1);
+            Map var9 = this.a(var1);
             ICommand var10 = (ICommand)var9.get(var3[0]);
             if (var10 != null) {
                throw new WrongUsageException(var10.getUsage(var2), new Object[0]);
@@ -79,23 +79,23 @@ public class CommandHelp extends CommandBase {
             var17.getStyle().setColor(TextFormatting.GREEN);
             var2.sendMessage(var17);
          }
-      }
 
+      }
    }
 
-   protected List getSortedPossibleCommands(ICommandSender var1, MinecraftServer var2) {
-      List var3 = var2.getCommandManager().getPossibleCommands(var1);
+   protected List a(ICommandSender var1, MinecraftServer var2) {
+      List var3 = var2.getCommandHandler().getPossibleCommands(var1);
       Collections.sort(var3);
       return var3;
    }
 
-   protected Map getCommandMap(MinecraftServer var1) {
-      return var1.getCommandManager().getCommands();
+   protected Map a(MinecraftServer var1) {
+      return var1.getCommandHandler().getCommands();
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       if (var3.length == 1) {
-         Set var5 = this.getCommandMap(var1).keySet();
+         Set var5 = this.a(var1).keySet();
          return getListOfStringsMatchingLastWord(var3, (String[])var5.toArray(new String[var5.size()]));
       } else {
          return Collections.emptyList();

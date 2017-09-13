@@ -5,8 +5,6 @@ import net.minecraft.item.Item;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketCooldown implements Packet {
    private Item item;
@@ -32,15 +30,5 @@ public class SPacketCooldown implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleCooldown(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Item getItem() {
-      return this.item;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getTicks() {
-      return this.ticks;
    }
 }

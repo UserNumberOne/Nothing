@@ -15,11 +15,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
-import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.src.MinecraftServer;
 
-@SideOnly(Side.SERVER)
 public class RConThreadQuery extends RConThreadBase {
    private long lastAuthCheckTime;
    private int queryPort;
@@ -122,7 +119,7 @@ public class RConThreadQuery extends RConThreadBase {
    }
 
    private byte[] createQueryResponse(DatagramPacket var1) throws IOException {
-      long var2 = MinecraftServer.getCurrentTimeMillis();
+      long var2 = MinecraftServer.av();
       if (var2 < this.lastQueryResponseTime + 5000L) {
          byte[] var9 = this.output.toByteArray();
          byte[] var10 = this.getRequestID(var1.getSocketAddress());
@@ -196,7 +193,7 @@ public class RConThreadQuery extends RConThreadBase {
 
    private void cleanQueryClientsMap() {
       if (this.running) {
-         long var1 = MinecraftServer.getCurrentTimeMillis();
+         long var1 = MinecraftServer.av();
          if (var1 >= this.lastAuthCheckTime + 30000L) {
             this.lastAuthCheckTime = var1;
             Iterator var3 = this.queryClients.entrySet().iterator();
@@ -207,14 +204,14 @@ public class RConThreadQuery extends RConThreadBase {
                   var3.remove();
                }
             }
+
          }
       }
-
    }
 
    public void run() {
       this.logInfo("Query running on " + this.serverHostname + ":" + this.queryPort);
-      this.lastAuthCheckTime = MinecraftServer.getCurrentTimeMillis();
+      this.lastAuthCheckTime = MinecraftServer.av();
       this.incomingPacket = new DatagramPacket(this.buffer, this.buffer.length);
 
       try {
@@ -243,11 +240,11 @@ public class RConThreadQuery extends RConThreadBase {
             if (this.initQuerySystem()) {
                super.startThread();
             }
+
          } else {
             this.logWarning("Invalid query port " + this.queryPort + " found in '" + this.server.getSettingsFilename() + "' (queries disabled)");
          }
       }
-
    }
 
    private void stopWithException(Exception var1) {
@@ -257,8 +254,8 @@ public class RConThreadQuery extends RConThreadBase {
             this.logSevere("Failed to recover from buggy JRE, shutting down!");
             this.running = false;
          }
-      }
 
+      }
    }
 
    private boolean initQuerySystem() {
@@ -278,7 +275,6 @@ public class RConThreadQuery extends RConThreadBase {
       return false;
    }
 
-   @SideOnly(Side.SERVER)
    class Auth {
       private final long timestamp = (new Date()).getTime();
       private final int randomChallenge;

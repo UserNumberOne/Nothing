@@ -40,4 +40,9 @@ public class TextComponentString extends TextComponentBase {
    public String toString() {
       return "TextComponent{text='" + this.text + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
    }
+
+   // $FF: synthetic method
+   public ITextComponent createCopy() {
+      return this.createCopy();
+   }
 }

@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CooldownTracker {
    private final Map cooldowns = Maps.newHashMap();
@@ -47,12 +45,6 @@ public class CooldownTracker {
    public void setCooldown(Item var1, int var2) {
       this.cooldowns.put(var1, new CooldownTracker.Cooldown(this.ticks, this.ticks + var2));
       this.notifyOnSet(var1, var2);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void removeCooldown(Item var1) {
-      this.cooldowns.remove(var1);
-      this.notifyOnRemove(var1);
    }
 
    protected void notifyOnSet(Item var1, int var2) {

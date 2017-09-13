@@ -42,10 +42,12 @@ public class VillageCollection extends WorldSavedData {
    }
 
    public void addToVillagerPositionList(BlockPos var1) {
-      if (this.villagerPositionsList.size() <= 64 && !this.positionInList(var1)) {
-         this.villagerPositionsList.add(var1);
-      }
+      if (this.villagerPositionsList.size() <= 64) {
+         if (!this.positionInList(var1)) {
+            this.villagerPositionsList.add(var1);
+         }
 
+      }
    }
 
    public void tick() {
@@ -103,7 +105,6 @@ public class VillageCollection extends WorldSavedData {
       if (!this.villagerPositionsList.isEmpty()) {
          this.addDoorsAround((BlockPos)this.villagerPositionsList.remove(0));
       }
-
    }
 
    private void addNewDoorsToVillageOrCreateVillage() {
@@ -201,7 +202,11 @@ public class VillageCollection extends WorldSavedData {
    private boolean isWoodDoor(BlockPos var1) {
       IBlockState var2 = this.world.getBlockState(var1);
       Block var3 = var2.getBlock();
-      return var3 instanceof BlockDoor ? var2.getMaterial() == Material.WOOD : false;
+      if (var3 instanceof BlockDoor) {
+         return var2.getMaterial() == Material.WOOD;
+      } else {
+         return false;
+      }
    }
 
    public void readFromNBT(NBTTagCompound var1) {

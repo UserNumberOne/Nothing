@@ -6,8 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketTitle implements Packet {
    private SPacketTitle.Type type;
@@ -65,31 +63,6 @@ public class SPacketTitle implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleTitle(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SPacketTitle.Type getType() {
-      return this.type;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getMessage() {
-      return this.message;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFadeInTime() {
-      return this.fadeInTime;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getDisplayTime() {
-      return this.displayTime;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFadeOutTime() {
-      return this.fadeOutTime;
    }
 
    public static enum Type {

@@ -5,11 +5,11 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -20,61 +20,59 @@ import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.feature.WorldGenEndGateway;
 import net.minecraft.world.gen.feature.WorldGenEndIsland;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 public class TileEntityEndGateway extends TileEntity implements ITickable {
    private static final Logger LOG = LogManager.getLogger();
    private long age;
    private int teleportCooldown;
-   private BlockPos exitPortal;
-   private boolean exactTeleport;
+   public BlockPos exitPortal;
+   public boolean exactTeleport;
 
-   public NBTTagCompound writeToNBT(NBTTagCompound var1) {
-      super.writeToNBT(var1);
-      var1.setLong("Age", this.age);
+   public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
+      super.writeToNBT(nbttagcompound);
+      nbttagcompound.setLong("Age", this.age);
       if (this.exitPortal != null) {
-         var1.setTag("ExitPortal", NBTUtil.createPosTag(this.exitPortal));
+         nbttagcompound.setTag("ExitPortal", NBTUtil.createPosTag(this.exitPortal));
       }
 
       if (this.exactTeleport) {
-         var1.setBoolean("ExactTeleport", this.exactTeleport);
+         nbttagcompound.setBoolean("ExactTeleport", this.exactTeleport);
       }
 
-      return var1;
+      return nbttagcompound;
    }
 
-   public void readFromNBT(NBTTagCompound var1) {
-      super.readFromNBT(var1);
-      this.age = var1.getLong("Age");
-      if (var1.hasKey("ExitPortal", 10)) {
-         this.exitPortal = NBTUtil.getPosFromTag(var1.getCompoundTag("ExitPortal"));
+   public void readFromNBT(NBTTagCompound nbttagcompound) {
+      super.readFromNBT(nbttagcompound);
+      this.age = nbttagcompound.getLong("Age");
+      if (nbttagcompound.hasKey("ExitPortal", 10)) {
+         this.exitPortal = NBTUtil.getPosFromTag(nbttagcompound.getCompoundTag("ExitPortal"));
       }
 
-      this.exactTeleport = var1.getBoolean("ExactTeleport");
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getMaxRenderDistanceSquared() {
-      return 65536.0D;
+      this.exactTeleport = nbttagcompound.getBoolean("ExactTeleport");
    }
 
    public void update() {
-      boolean var1 = this.isSpawning();
-      boolean var2 = this.isCoolingDown();
+      boolean flag = this.isSpawning();
+      boolean flag1 = this.isCoolingDown();
       ++this.age;
-      if (var2) {
+      if (flag1) {
          --this.teleportCooldown;
       } else if (!this.world.isRemote) {
-         List var3 = this.world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(this.getPos()));
-         if (!var3.isEmpty()) {
-            this.teleportEntity((Entity)var3.get(0));
+         List list = this.world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(this.getPos()));
+         if (!list.isEmpty()) {
+            this.teleportEntity((Entity)list.get(0));
          }
       }
 
-      if (var1 != this.isSpawning() || var2 != this.isCoolingDown()) {
+      if (flag != this.isSpawning() || flag1 != this.isCoolingDown()) {
          this.markDirty();
       }
 
@@ -86,16 +84,6 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
 
    public boolean isCoolingDown() {
       return this.teleportCooldown > 0;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getSpawnPercent() {
-      return MathHelper.clamp((float)this.age / 200.0F, 0.0F, 1.0F);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getCooldownPercent() {
-      return 1.0F - MathHelper.clamp((float)this.teleportCooldown / 20.0F, 0.0F, 1.0F);
    }
 
    @Nullable
@@ -116,16 +104,16 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
 
    }
 
-   public boolean receiveClientEvent(int var1, int var2) {
-      if (var1 == 1) {
+   public boolean receiveClientEvent(int i, int j) {
+      if (i == 1) {
          this.teleportCooldown = 20;
          return true;
       } else {
-         return super.receiveClientEvent(var1, var2);
+         return super.receiveClientEvent(i, j);
       }
    }
 
-   public void teleportEntity(Entity var1) {
+   public void teleportEntity(Entity entity) {
       if (!this.world.isRemote && !this.isCoolingDown()) {
          this.teleportCooldown = 100;
          if (this.exitPortal == null && this.world.provider instanceof WorldProviderEnd) {
@@ -133,8 +121,24 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
          }
 
          if (this.exitPortal != null) {
-            BlockPos var2 = this.exactTeleport ? this.exitPortal : this.findExitPosition();
-            var1.setPositionAndUpdate((double)var2.getX() + 0.5D, (double)var2.getY() + 0.5D, (double)var2.getZ() + 0.5D);
+            BlockPos blockposition = this.exactTeleport ? this.exitPortal : this.findExitPosition();
+            if (entity instanceof EntityPlayerMP) {
+               CraftPlayer player = (CraftPlayer)entity.getBukkitEntity();
+               Location location = new Location(this.world.getWorld(), (double)blockposition.getX() + 0.5D, (double)blockposition.getY() + 0.5D, (double)blockposition.getZ() + 0.5D);
+               location.setPitch(player.getLocation().getPitch());
+               location.setYaw(player.getLocation().getYaw());
+               PlayerTeleportEvent teleEvent = new PlayerTeleportEvent(player, player.getLocation(), location, TeleportCause.END_GATEWAY);
+               Bukkit.getPluginManager().callEvent(teleEvent);
+               if (teleEvent.isCancelled()) {
+                  return;
+               }
+
+               ((EntityPlayerMP)entity).connection.teleport(teleEvent.getTo());
+               this.triggerCooldown();
+               return;
+            }
+
+            entity.setPositionAndUpdate((double)blockposition.getX() + 0.5D, (double)blockposition.getY() + 0.5D, (double)blockposition.getZ() + 0.5D);
          }
 
          this.triggerCooldown();
@@ -143,28 +147,28 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
    }
 
    private BlockPos findExitPosition() {
-      BlockPos var1 = findHighestBlock(this.world, this.exitPortal, 5, false);
-      LOG.debug("Best exit position for portal at {} is {}", new Object[]{this.exitPortal, var1});
-      return var1.up();
+      BlockPos blockposition = findHighestBlock(this.world, this.exitPortal, 5, false);
+      LOG.debug("Best exit position for portal at {} is {}", new Object[]{this.exitPortal, blockposition});
+      return blockposition.up();
    }
 
    private void findExitPortal() {
-      Vec3d var1 = (new Vec3d((double)this.getPos().getX(), 0.0D, (double)this.getPos().getZ())).normalize();
-      Vec3d var2 = var1.scale(1024.0D);
+      Vec3d vec3d = (new Vec3d((double)this.getPos().getX(), 0.0D, (double)this.getPos().getZ())).normalize();
+      Vec3d vec3d1 = vec3d.scale(1024.0D);
 
-      for(int var3 = 16; getChunk(this.world, var2).getTopFilledSegment() > 0 && var3-- > 0; var2 = var2.add(var1.scale(-16.0D))) {
-         LOG.debug("Skipping backwards past nonempty chunk at {}", new Object[]{var2});
+      for(int i = 16; getChunk(this.world, vec3d1).getTopFilledSegment() > 0 && i-- > 0; vec3d1 = vec3d1.add(vec3d.scale(-16.0D))) {
+         LOG.debug("Skipping backwards past nonempty chunk at {}", new Object[]{vec3d1});
       }
 
-      for(int var4 = 16; getChunk(this.world, var2).getTopFilledSegment() == 0 && var4-- > 0; var2 = var2.add(var1.scale(16.0D))) {
-         LOG.debug("Skipping forward past empty chunk at {}", new Object[]{var2});
+      for(int var5 = 16; getChunk(this.world, vec3d1).getTopFilledSegment() == 0 && var5-- > 0; vec3d1 = vec3d1.add(vec3d.scale(16.0D))) {
+         LOG.debug("Skipping forward past empty chunk at {}", new Object[]{vec3d1});
       }
 
-      LOG.debug("Found chunk at {}", new Object[]{var2});
-      Chunk var5 = getChunk(this.world, var2);
-      this.exitPortal = findSpawnpointInChunk(var5);
+      LOG.debug("Found chunk at {}", new Object[]{vec3d1});
+      Chunk chunk = getChunk(this.world, vec3d1);
+      this.exitPortal = findSpawnpointInChunk(chunk);
       if (this.exitPortal == null) {
-         this.exitPortal = new BlockPos(var2.xCoord + 0.5D, 75.0D, var2.zCoord + 0.5D);
+         this.exitPortal = new BlockPos(vec3d1.xCoord + 0.5D, 75.0D, vec3d1.zCoord + 0.5D);
          LOG.debug("Failed to find suitable block, settling on {}", new Object[]{this.exitPortal});
          (new WorldGenEndIsland()).generate(this.world, new Random(this.exitPortal.toLong()), this.exitPortal);
       } else {
@@ -178,17 +182,17 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
       this.markDirty();
    }
 
-   private static BlockPos findHighestBlock(World var0, BlockPos var1, int var2, boolean var3) {
-      BlockPos var4 = null;
+   private static BlockPos findHighestBlock(World world, BlockPos blockposition, int i, boolean flag) {
+      BlockPos blockposition1 = null;
 
-      for(int var5 = -var2; var5 <= var2; ++var5) {
-         for(int var6 = -var2; var6 <= var2; ++var6) {
-            if (var5 != 0 || var6 != 0 || var3) {
-               for(int var7 = 255; var7 > (var4 == null ? 0 : var4.getY()); --var7) {
-                  BlockPos var8 = new BlockPos(var1.getX() + var5, var7, var1.getZ() + var6);
-                  IBlockState var9 = var0.getBlockState(var8);
-                  if (var9.isBlockNormalCube() && (var3 || var9.getBlock() != Blocks.BEDROCK)) {
-                     var4 = var8;
+      for(int j = -i; j <= i; ++j) {
+         for(int k = -i; k <= i; ++k) {
+            if (j != 0 || k != 0 || flag) {
+               for(int l = 255; l > (blockposition1 == null ? 0 : blockposition1.getY()); --l) {
+                  BlockPos blockposition2 = new BlockPos(blockposition.getX() + j, l, blockposition.getZ() + k);
+                  IBlockState iblockdata = world.getBlockState(blockposition2);
+                  if (iblockdata.isBlockNormalCube() && (flag || iblockdata.getBlock() != Blocks.BEDROCK)) {
+                     blockposition1 = blockposition2;
                      break;
                   }
                }
@@ -196,61 +200,45 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
          }
       }
 
-      return var4 == null ? var1 : var4;
+      return blockposition1 == null ? blockposition : blockposition1;
    }
 
-   private static Chunk getChunk(World var0, Vec3d var1) {
-      return var0.getChunkFromChunkCoords(MathHelper.floor(var1.xCoord / 16.0D), MathHelper.floor(var1.zCoord / 16.0D));
+   private static Chunk getChunk(World world, Vec3d vec3d) {
+      return world.getChunkFromChunkCoords(MathHelper.floor(vec3d.xCoord / 16.0D), MathHelper.floor(vec3d.zCoord / 16.0D));
    }
 
    @Nullable
-   private static BlockPos findSpawnpointInChunk(Chunk var0) {
-      BlockPos var1 = new BlockPos(var0.xPosition * 16, 30, var0.zPosition * 16);
-      int var2 = var0.getTopFilledSegment() + 16 - 1;
-      BlockPos var3 = new BlockPos(var0.xPosition * 16 + 16 - 1, var2, var0.zPosition * 16 + 16 - 1);
-      BlockPos var4 = null;
-      double var5 = 0.0D;
+   private static BlockPos findSpawnpointInChunk(Chunk chunk) {
+      BlockPos blockposition = new BlockPos(chunk.xPosition * 16, 30, chunk.zPosition * 16);
+      int i = chunk.getTopFilledSegment() + 16 - 1;
+      BlockPos blockposition1 = new BlockPos(chunk.xPosition * 16 + 16 - 1, i, chunk.zPosition * 16 + 16 - 1);
+      BlockPos blockposition2 = null;
+      double d0 = 0.0D;
 
-      for(BlockPos var8 : BlockPos.getAllInBox(var1, var3)) {
-         IBlockState var9 = var0.getBlockState(var8);
-         if (var9.getBlock() == Blocks.END_STONE && !var0.getBlockState(var8.up(1)).isBlockNormalCube() && !var0.getBlockState(var8.up(2)).isBlockNormalCube()) {
-            double var10 = var8.distanceSqToCenter(0.0D, 0.0D, 0.0D);
-            if (var4 == null || var10 < var5) {
-               var4 = var8;
-               var5 = var10;
+      for(BlockPos blockposition3 : BlockPos.getAllInBox(blockposition, blockposition1)) {
+         IBlockState iblockdata = chunk.getBlockState(blockposition3);
+         if (iblockdata.getBlock() == Blocks.END_STONE && !chunk.getBlockState(blockposition3.up(1)).isBlockNormalCube() && !chunk.getBlockState(blockposition3.up(2)).isBlockNormalCube()) {
+            double d1 = blockposition3.distanceSqToCenter(0.0D, 0.0D, 0.0D);
+            if (blockposition2 == null || d1 < d0) {
+               blockposition2 = blockposition3;
+               d0 = d1;
             }
          }
       }
 
-      return var4;
+      return blockposition2;
    }
 
-   private void createExitPortal(BlockPos var1) {
-      (new WorldGenEndGateway()).generate(this.world, new Random(), var1);
-      TileEntity var2 = this.world.getTileEntity(var1);
-      if (var2 instanceof TileEntityEndGateway) {
-         TileEntityEndGateway var3 = (TileEntityEndGateway)var2;
-         var3.exitPortal = new BlockPos(this.getPos());
-         var3.markDirty();
+   private void createExitPortal(BlockPos blockposition) {
+      (new WorldGenEndGateway()).generate(this.world, new Random(), blockposition);
+      TileEntity tileentity = this.world.getTileEntity(blockposition);
+      if (tileentity instanceof TileEntityEndGateway) {
+         TileEntityEndGateway tileentityendgateway = (TileEntityEndGateway)tileentity;
+         tileentityendgateway.exitPortal = new BlockPos(this.getPos());
+         tileentityendgateway.markDirty();
       } else {
-         LOG.warn("Couldn't save exit portal at {}", new Object[]{var1});
+         LOG.warn("Couldn't save exit portal at {}", new Object[]{blockposition});
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldRenderFace(EnumFacing var1) {
-      return this.getBlockType().getDefaultState().shouldSideBeRendered(this.world, this.getPos(), var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getParticleAmount() {
-      int var1 = 0;
-
-      for(EnumFacing var5 : EnumFacing.values()) {
-         var1 += this.shouldRenderFace(var5) ? 1 : 0;
-      }
-
-      return var1;
    }
 }

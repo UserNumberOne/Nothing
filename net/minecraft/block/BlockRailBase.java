@@ -1,7 +1,6 @@
 package net.minecraft.block;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.UnmodifiableIterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.EnumPushReaction;
@@ -9,16 +8,13 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BlockRailBase extends Block {
    protected static final AxisAlignedBB FLAT_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D);
@@ -30,7 +26,7 @@ public abstract class BlockRailBase extends Block {
 
    public static boolean isRailBlock(IBlockState var0) {
       Block var1 = var0.getBlock();
-      return var1 instanceof BlockRailBase;
+      return var1 == Blocks.RAIL || var1 == Blocks.GOLDEN_RAIL || var1 == Blocks.DETECTOR_RAIL || var1 == Blocks.ACTIVATOR_RAIL;
    }
 
    protected BlockRailBase(boolean var1) {
@@ -58,7 +54,7 @@ public abstract class BlockRailBase extends Block {
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      return var1.getBlockState(var2.down()).isSideSolid(var1, var2.down(), EnumFacing.UP);
+      return var1.getBlockState(var2.down()).isFullyOpaque();
    }
 
    public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
@@ -75,17 +71,17 @@ public abstract class BlockRailBase extends Block {
       if (!var2.isRemote) {
          BlockRailBase.EnumRailDirection var5 = (BlockRailBase.EnumRailDirection)var1.getValue(this.getShapeProperty());
          boolean var6 = false;
-         if (!var2.getBlockState(var3.down()).isSideSolid(var2, var3.down(), EnumFacing.UP)) {
+         if (!var2.getBlockState(var3.down()).isFullyOpaque()) {
             var6 = true;
          }
 
-         if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_EAST && !var2.getBlockState(var3.east()).isSideSolid(var2, var3.east(), EnumFacing.UP)) {
+         if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_EAST && !var2.getBlockState(var3.east()).isFullyOpaque()) {
             var6 = true;
-         } else if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_WEST && !var2.getBlockState(var3.west()).isSideSolid(var2, var3.west(), EnumFacing.UP)) {
+         } else if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_WEST && !var2.getBlockState(var3.west()).isFullyOpaque()) {
             var6 = true;
-         } else if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_NORTH && !var2.getBlockState(var3.north()).isSideSolid(var2, var3.north(), EnumFacing.UP)) {
+         } else if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_NORTH && !var2.getBlockState(var3.north()).isFullyOpaque()) {
             var6 = true;
-         } else if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_SOUTH && !var2.getBlockState(var3.south()).isSideSolid(var2, var3.south(), EnumFacing.UP)) {
+         } else if (var5 == BlockRailBase.EnumRailDirection.ASCENDING_SOUTH && !var2.getBlockState(var3.south()).isFullyOpaque()) {
             var6 = true;
          }
 
@@ -95,8 +91,8 @@ public abstract class BlockRailBase extends Block {
          } else {
             this.updateState(var1, var2, var3, var4);
          }
-      }
 
+      }
    }
 
    protected void updateState(IBlockState var1, World var2, BlockPos var3, Block var4) {
@@ -108,11 +104,6 @@ public abstract class BlockRailBase extends Block {
 
    public EnumPushReaction getMobilityFlag(IBlockState var1) {
       return EnumPushReaction.NORMAL;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
@@ -129,40 +120,6 @@ public abstract class BlockRailBase extends Block {
    }
 
    public abstract IProperty getShapeProperty();
-
-   public boolean isFlexibleRail(IBlockAccess var1, BlockPos var2) {
-      return !this.isPowered;
-   }
-
-   public boolean canMakeSlopes(IBlockAccess var1, BlockPos var2) {
-      return true;
-   }
-
-   public BlockRailBase.EnumRailDirection getRailDirection(IBlockAccess var1, BlockPos var2, IBlockState var3, @Nullable EntityMinecart var4) {
-      return (BlockRailBase.EnumRailDirection)var3.getValue(this.getShapeProperty());
-   }
-
-   public float getRailMaxSpeed(World var1, EntityMinecart var2, BlockPos var3) {
-      return 0.4F;
-   }
-
-   public void onMinecartPass(World var1, EntityMinecart var2, BlockPos var3) {
-   }
-
-   public boolean rotateBlock(World var1, BlockPos var2, EnumFacing var3) {
-      IBlockState var4 = var1.getBlockState(var2);
-      UnmodifiableIterator var5 = var4.getProperties().keySet().iterator();
-
-      while(var5.hasNext()) {
-         IProperty var6 = (IProperty)var5.next();
-         if (var6.getName().equals("shape")) {
-            var1.setBlockState(var2, var4.cycleProperty(var6));
-            return true;
-         }
-      }
-
-      return false;
-   }
 
    public static enum EnumRailDirection implements IStringSerializable {
       NORTH_SOUTH(0, "north_south"),
@@ -224,16 +181,14 @@ public abstract class BlockRailBase extends Block {
       private IBlockState state;
       private final boolean isPowered;
       private final List connectedRails = Lists.newArrayList();
-      private final boolean canMakeSlopes;
 
       public Rail(World var2, BlockPos var3, IBlockState var4) {
          this.world = var2;
          this.pos = var3;
          this.state = var4;
          this.block = (BlockRailBase)var4.getBlock();
-         BlockRailBase.EnumRailDirection var5 = this.block.getRailDirection(var2, var3, var4, (EntityMinecart)null);
-         this.isPowered = !this.block.isFlexibleRail(var2, var3);
-         this.canMakeSlopes = this.block.canMakeSlopes(var2, var3);
+         BlockRailBase.EnumRailDirection var5 = (BlockRailBase.EnumRailDirection)var4.getValue(this.block.getShapeProperty());
+         this.isPowered = this.block.isPowered;
          this.updateConnectedRails(var5);
       }
 
@@ -305,31 +260,18 @@ public abstract class BlockRailBase extends Block {
 
       @Nullable
       private BlockRailBase.Rail findRailAt(BlockPos var1) {
-         IBlockState var2 = this.world.getBlockState(var1);
-         if (BlockRailBase.isRailBlock(var2)) {
-            BlockRailBase var8 = BlockRailBase.this;
-            BlockRailBase.this.getClass();
-            return var8.new Rail(this.world, var1, var2);
+         IBlockState var3 = this.world.getBlockState(var1);
+         if (BlockRailBase.isRailBlock(var3)) {
+            return BlockRailBase.this.new Rail(this.world, var1, var3);
          } else {
-            BlockPos var3 = var1.up();
-            var2 = this.world.getBlockState(var3);
-            if (BlockRailBase.isRailBlock(var2)) {
-               BlockRailBase var7 = BlockRailBase.this;
-               BlockRailBase.this.getClass();
-               return var7.new Rail(this.world, var3, var2);
+            BlockPos var2 = var1.up();
+            var3 = this.world.getBlockState(var2);
+            if (BlockRailBase.isRailBlock(var3)) {
+               return BlockRailBase.this.new Rail(this.world, var2, var3);
             } else {
-               var3 = var1.down();
-               var2 = this.world.getBlockState(var3);
-               BlockRailBase.Rail var10000;
-               if (BlockRailBase.isRailBlock(var2)) {
-                  BlockRailBase var10002 = BlockRailBase.this;
-                  BlockRailBase.this.getClass();
-                  var10000 = var10002.new Rail(this.world, var3, var2);
-               } else {
-                  var10000 = null;
-               }
-
-               return var10000;
+               var2 = var1.down();
+               var3 = this.world.getBlockState(var2);
+               return BlockRailBase.isRailBlock(var3) ? BlockRailBase.this.new Rail(this.world, var2, var3) : null;
             }
          }
       }
@@ -402,7 +344,7 @@ public abstract class BlockRailBase extends Block {
             }
          }
 
-         if (var10 == BlockRailBase.EnumRailDirection.NORTH_SOUTH && this.canMakeSlopes) {
+         if (var10 == BlockRailBase.EnumRailDirection.NORTH_SOUTH) {
             if (BlockRailBase.isRailBlock(this.world, var2.up())) {
                var10 = BlockRailBase.EnumRailDirection.ASCENDING_NORTH;
             }
@@ -412,7 +354,7 @@ public abstract class BlockRailBase extends Block {
             }
          }
 
-         if (var10 == BlockRailBase.EnumRailDirection.EAST_WEST && this.canMakeSlopes) {
+         if (var10 == BlockRailBase.EnumRailDirection.EAST_WEST) {
             if (BlockRailBase.isRailBlock(this.world, var5.up())) {
                var10 = BlockRailBase.EnumRailDirection.ASCENDING_EAST;
             }
@@ -522,7 +464,7 @@ public abstract class BlockRailBase extends Block {
             }
          }
 
-         if (var11 == BlockRailBase.EnumRailDirection.NORTH_SOUTH && this.canMakeSlopes) {
+         if (var11 == BlockRailBase.EnumRailDirection.NORTH_SOUTH) {
             if (BlockRailBase.isRailBlock(this.world, var3.up())) {
                var11 = BlockRailBase.EnumRailDirection.ASCENDING_NORTH;
             }
@@ -532,7 +474,7 @@ public abstract class BlockRailBase extends Block {
             }
          }
 
-         if (var11 == BlockRailBase.EnumRailDirection.EAST_WEST && this.canMakeSlopes) {
+         if (var11 == BlockRailBase.EnumRailDirection.EAST_WEST) {
             if (BlockRailBase.isRailBlock(this.world, var6.up())) {
                var11 = BlockRailBase.EnumRailDirection.ASCENDING_EAST;
             }

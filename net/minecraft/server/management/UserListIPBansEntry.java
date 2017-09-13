@@ -25,6 +25,5 @@ public class UserListIPBansEntry extends UserListEntryBan {
          var1.addProperty("ip", (String)this.getValue());
          super.onSerialization(var1);
       }
-
    }
 }

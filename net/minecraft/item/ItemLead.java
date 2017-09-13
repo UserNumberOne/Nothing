@@ -12,44 +12,56 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.entity.Hanging;
+import org.bukkit.entity.Player;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 
 public class ItemLead extends Item {
    public ItemLead() {
       this.setCreativeTab(CreativeTabs.TOOLS);
    }
 
-   public EnumActionResult onItemUse(ItemStack var1, EntityPlayer var2, World var3, BlockPos var4, EnumHand var5, EnumFacing var6, float var7, float var8, float var9) {
-      Block var10 = var3.getBlockState(var4).getBlock();
-      if (!(var10 instanceof BlockFence)) {
+   public EnumActionResult onItemUse(ItemStack itemstack, EntityPlayer entityhuman, World world, BlockPos blockposition, EnumHand enumhand, EnumFacing enumdirection, float f, float f1, float f2) {
+      Block block = world.getBlockState(blockposition).getBlock();
+      if (!(block instanceof BlockFence)) {
          return EnumActionResult.PASS;
       } else {
-         if (!var3.isRemote) {
-            attachToFence(var2, var3, var4);
+         if (!world.isRemote) {
+            attachToFence(entityhuman, world, blockposition);
          }
 
          return EnumActionResult.SUCCESS;
       }
    }
 
-   public static boolean attachToFence(EntityPlayer var0, World var1, BlockPos var2) {
-      EntityLeashKnot var3 = EntityLeashKnot.getKnotForPosition(var1, var2);
-      boolean var4 = false;
-      double var5 = 7.0D;
-      int var7 = var2.getX();
-      int var8 = var2.getY();
-      int var9 = var2.getZ();
+   public static boolean attachToFence(EntityPlayer entityhuman, World world, BlockPos blockposition) {
+      EntityLeashKnot entityleash = EntityLeashKnot.getKnotForPosition(world, blockposition);
+      boolean flag = false;
+      int i = blockposition.getX();
+      int j = blockposition.getY();
+      int k = blockposition.getZ();
 
-      for(EntityLiving var11 : var1.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double)var7 - 7.0D, (double)var8 - 7.0D, (double)var9 - 7.0D, (double)var7 + 7.0D, (double)var8 + 7.0D, (double)var9 + 7.0D))) {
-         if (var11.getLeashed() && var11.getLeashedToEntity() == var0) {
-            if (var3 == null) {
-               var3 = EntityLeashKnot.createKnot(var1, var2);
+      for(EntityLiving entityinsentient : world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double)i - 7.0D, (double)j - 7.0D, (double)k - 7.0D, (double)i + 7.0D, (double)j + 7.0D, (double)k + 7.0D))) {
+         if (entityinsentient.getLeashed() && entityinsentient.getLeashedToEntity() == entityhuman) {
+            if (entityleash == null) {
+               entityleash = EntityLeashKnot.createKnot(world, blockposition);
+               HangingPlaceEvent event = new HangingPlaceEvent((Hanging)entityleash.getBukkitEntity(), entityhuman != null ? (Player)entityhuman.getBukkitEntity() : null, world.getWorld().getBlockAt(i, j, k), BlockFace.SELF);
+               world.getServer().getPluginManager().callEvent(event);
+               if (event.isCancelled()) {
+                  entityleash.setDead();
+                  return false;
+               }
             }
 
-            var11.setLeashedToEntity(var3, true);
-            var4 = true;
+            if (!CraftEventFactory.callPlayerLeashEntityEvent(entityinsentient, entityleash, entityhuman).isCancelled()) {
+               entityinsentient.setLeashedToEntity(entityleash, true);
+               flag = true;
+            }
          }
       }
 
-      return var4;
+      return flag;
    }
 }

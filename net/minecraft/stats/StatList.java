@@ -3,7 +3,6 @@ package net.minecraft.stats;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.common.registry.GameData;
 
 public class StatList {
    protected static final Map ID_TO_STAT_MAP = Maps.newHashMap();
@@ -148,11 +146,11 @@ public class StatList {
          }
       }
 
-      replaceAllSimilarBlocks(CRAFTS_STATS, true);
+      replaceAllSimilarBlocks(CRAFTS_STATS);
    }
 
    private static void initMiningStats() {
-      for(Block var1 : GameData.getBlockRegistry().typeSafeIterable()) {
+      for(Block var1 : Block.REGISTRY) {
          Item var2 = Item.getItemFromBlock(var1);
          if (var2 != null) {
             int var3 = Block.getIdFromBlock(var1);
@@ -164,11 +162,11 @@ public class StatList {
          }
       }
 
-      replaceAllSimilarBlocks(BLOCKS_STATS, false);
+      replaceAllSimilarBlocks(BLOCKS_STATS);
    }
 
    private static void initStats() {
-      for(Item var1 : GameData.getItemRegistry().typeSafeIterable()) {
+      for(Item var1 : Item.REGISTRY) {
          if (var1 != null) {
             int var2 = Item.getIdFromItem(var1);
             String var3 = getItemName(var1);
@@ -181,11 +179,11 @@ public class StatList {
          }
       }
 
-      replaceAllSimilarBlocks(OBJECT_USE_STATS, true);
+      replaceAllSimilarBlocks(OBJECT_USE_STATS);
    }
 
    private static void initItemDepleteStats() {
-      for(Item var1 : GameData.getItemRegistry().typeSafeIterable()) {
+      for(Item var1 : Item.REGISTRY) {
          if (var1 != null) {
             int var2 = Item.getIdFromItem(var1);
             String var3 = getItemName(var1);
@@ -195,11 +193,11 @@ public class StatList {
          }
       }
 
-      replaceAllSimilarBlocks(OBJECT_BREAK_STATS, true);
+      replaceAllSimilarBlocks(OBJECT_BREAK_STATS);
    }
 
    private static void initPickedUpAndDroppedStats() {
-      for(Item var1 : GameData.getItemRegistry().typeSafeIterable()) {
+      for(Item var1 : Item.REGISTRY) {
          if (var1 != null) {
             int var2 = Item.getIdFromItem(var1);
             String var3 = getItemName(var1);
@@ -210,7 +208,7 @@ public class StatList {
          }
       }
 
-      replaceAllSimilarBlocks(OBJECT_BREAK_STATS, true);
+      replaceAllSimilarBlocks(OBJECT_BREAK_STATS);
    }
 
    private static String getItemName(Item var0) {
@@ -218,43 +216,34 @@ public class StatList {
       return var1 != null ? var1.toString().replace(':', '.') : null;
    }
 
-   private static void replaceAllSimilarBlocks(StatBase[] var0, boolean var1) {
-      mergeStatBases(var0, Blocks.WATER, Blocks.FLOWING_WATER, var1);
-      mergeStatBases(var0, Blocks.LAVA, Blocks.FLOWING_LAVA, var1);
-      mergeStatBases(var0, Blocks.LIT_PUMPKIN, Blocks.PUMPKIN, var1);
-      mergeStatBases(var0, Blocks.LIT_FURNACE, Blocks.FURNACE, var1);
-      mergeStatBases(var0, Blocks.LIT_REDSTONE_ORE, Blocks.REDSTONE_ORE, var1);
-      mergeStatBases(var0, Blocks.POWERED_REPEATER, Blocks.UNPOWERED_REPEATER, var1);
-      mergeStatBases(var0, Blocks.POWERED_COMPARATOR, Blocks.UNPOWERED_COMPARATOR, var1);
-      mergeStatBases(var0, Blocks.REDSTONE_TORCH, Blocks.UNLIT_REDSTONE_TORCH, var1);
-      mergeStatBases(var0, Blocks.LIT_REDSTONE_LAMP, Blocks.REDSTONE_LAMP, var1);
-      mergeStatBases(var0, Blocks.DOUBLE_STONE_SLAB, Blocks.STONE_SLAB, var1);
-      mergeStatBases(var0, Blocks.DOUBLE_WOODEN_SLAB, Blocks.WOODEN_SLAB, var1);
-      mergeStatBases(var0, Blocks.DOUBLE_STONE_SLAB2, Blocks.STONE_SLAB2, var1);
-      mergeStatBases(var0, Blocks.GRASS, Blocks.DIRT, var1);
-      mergeStatBases(var0, Blocks.FARMLAND, Blocks.DIRT, var1);
+   private static void replaceAllSimilarBlocks(StatBase[] var0) {
+      mergeStatBases(var0, Blocks.WATER, Blocks.FLOWING_WATER);
+      mergeStatBases(var0, Blocks.LAVA, Blocks.FLOWING_LAVA);
+      mergeStatBases(var0, Blocks.LIT_PUMPKIN, Blocks.PUMPKIN);
+      mergeStatBases(var0, Blocks.LIT_FURNACE, Blocks.FURNACE);
+      mergeStatBases(var0, Blocks.LIT_REDSTONE_ORE, Blocks.REDSTONE_ORE);
+      mergeStatBases(var0, Blocks.POWERED_REPEATER, Blocks.UNPOWERED_REPEATER);
+      mergeStatBases(var0, Blocks.POWERED_COMPARATOR, Blocks.UNPOWERED_COMPARATOR);
+      mergeStatBases(var0, Blocks.REDSTONE_TORCH, Blocks.UNLIT_REDSTONE_TORCH);
+      mergeStatBases(var0, Blocks.LIT_REDSTONE_LAMP, Blocks.REDSTONE_LAMP);
+      mergeStatBases(var0, Blocks.DOUBLE_STONE_SLAB, Blocks.STONE_SLAB);
+      mergeStatBases(var0, Blocks.DOUBLE_WOODEN_SLAB, Blocks.WOODEN_SLAB);
+      mergeStatBases(var0, Blocks.DOUBLE_STONE_SLAB2, Blocks.STONE_SLAB2);
+      mergeStatBases(var0, Blocks.GRASS, Blocks.DIRT);
+      mergeStatBases(var0, Blocks.FARMLAND, Blocks.DIRT);
    }
 
-   private static void mergeStatBases(StatBase[] var0, Block var1, Block var2, boolean var3) {
-      int var4;
-      int var5;
-      if (var3) {
-         var4 = Item.getIdFromItem(Item.getItemFromBlock(var1));
-         var5 = Item.getIdFromItem(Item.getItemFromBlock(var2));
+   private static void mergeStatBases(StatBase[] var0, Block var1, Block var2) {
+      int var3 = Block.getIdFromBlock(var1);
+      int var4 = Block.getIdFromBlock(var2);
+      if (var0[var3] != null && var0[var4] == null) {
+         var0[var4] = var0[var3];
       } else {
-         var4 = Block.getIdFromBlock(var1);
-         var5 = Block.getIdFromBlock(var2);
+         ALL_STATS.remove(var0[var3]);
+         MINE_BLOCK_STATS.remove(var0[var3]);
+         BASIC_STATS.remove(var0[var3]);
+         var0[var3] = var0[var4];
       }
-
-      if (var0[var4] != null && var0[var5] == null) {
-         var0[var5] = var0[var4];
-      } else {
-         ALL_STATS.remove(var0[var4]);
-         MINE_BLOCK_STATS.remove(var0[var4]);
-         BASIC_STATS.remove(var0[var4]);
-         var0[var4] = var0[var5];
-      }
-
    }
 
    public static StatBase getStatKillEntity(EntityList.EntityEggInfo var0) {
@@ -267,36 +256,5 @@ public class StatList {
 
    public static StatBase getOneShotStat(String var0) {
       return (StatBase)ID_TO_STAT_MAP.get(var0);
-   }
-
-   /** @deprecated */
-   @Deprecated
-   public static void reinit() {
-      ID_TO_STAT_MAP.clear();
-      BASIC_STATS.clear();
-      USE_ITEM_STATS.clear();
-      MINE_BLOCK_STATS.clear();
-
-      for(StatBase[] var3 : new StatBase[][]{BLOCKS_STATS, CRAFTS_STATS, OBJECT_USE_STATS, OBJECT_BREAK_STATS, OBJECTS_PICKED_UP_STATS, OBJECTS_DROPPED_STATS}) {
-         for(int var4 = 0; var4 < var3.length; ++var4) {
-            if (var3[var4] != null) {
-               ALL_STATS.remove(var3[var4]);
-               var3[var4] = null;
-            }
-         }
-      }
-
-      ArrayList var5 = Lists.newArrayList(ALL_STATS);
-      ALL_STATS.clear();
-
-      for(StatBase var7 : var5) {
-         var7.registerStat();
-      }
-
-      initMiningStats();
-      initStats();
-      initItemDepleteStats();
-      initCraftableStats();
-      initPickedUpAndDroppedStats();
    }
 }

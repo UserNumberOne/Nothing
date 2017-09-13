@@ -8,7 +8,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import net.minecraft.tileentity.TileEntitySign;
@@ -86,26 +86,26 @@ public class CommandStats extends CommandBase {
             throw new CommandException("commands.stats.failed", new Object[0]);
          } else {
             World var8 = var2.getEntityWorld();
-            CommandResultStats var9;
+            CommandResultStats var11;
             if (var4) {
-               BlockPos var10 = parseBlockPos(var2, var3, 1, false);
-               TileEntity var11 = var8.getTileEntity(var10);
-               if (var11 == null) {
-                  throw new CommandException("commands.stats.noCompatibleBlock", new Object[]{var10.getX(), var10.getY(), var10.getZ()});
+               BlockPos var9 = parseBlockPos(var2, var3, 1, false);
+               TileEntity var10 = var8.getTileEntity(var9);
+               if (var10 == null) {
+                  throw new CommandException("commands.stats.noCompatibleBlock", new Object[]{var9.getX(), var9.getY(), var9.getZ()});
                }
 
-               if (var11 instanceof TileEntityCommandBlock) {
-                  var9 = ((TileEntityCommandBlock)var11).getCommandResultStats();
+               if (var10 instanceof TileEntityCommandBlock) {
+                  var11 = ((TileEntityCommandBlock)var10).getCommandResultStats();
                } else {
-                  if (!(var11 instanceof TileEntitySign)) {
-                     throw new CommandException("commands.stats.noCompatibleBlock", new Object[]{var10.getX(), var10.getY(), var10.getZ()});
+                  if (!(var10 instanceof TileEntitySign)) {
+                     throw new CommandException("commands.stats.noCompatibleBlock", new Object[]{var9.getX(), var9.getY(), var9.getZ()});
                   }
 
-                  var9 = ((TileEntitySign)var11).getStats();
+                  var11 = ((TileEntitySign)var10).getStats();
                }
             } else {
-               Entity var15 = getEntity(var1, var2, var3[1]);
-               var9 = var15.getCommandStats();
+               Entity var15 = b(var1, var2, var3[1]);
+               var11 = var15.getCommandStats();
             }
 
             if ("set".equals(var6)) {
@@ -115,10 +115,10 @@ public class CommandStats extends CommandBase {
                   throw new CommandException("commands.stats.failed", new Object[0]);
                }
 
-               CommandResultStats.setScoreBoardStat(var9, var7, var16, var18);
+               CommandResultStats.setScoreBoardStat(var11, var7, var16, var18);
                notifyCommandListener(var2, this, "commands.stats.success", new Object[]{var7.getTypeName(), var18, var16});
             } else if ("clear".equals(var6)) {
-               CommandResultStats.setScoreBoardStat(var9, var7, (String)null, (String)null);
+               CommandResultStats.setScoreBoardStat(var11, var7, (String)null, (String)null);
                notifyCommandListener(var2, this, "commands.stats.cleared", new Object[]{var7.getTypeName()});
             }
 
@@ -132,12 +132,26 @@ public class CommandStats extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, new String[]{"entity", "block"}) : (var3.length == 2 && "entity".equals(var3[0]) ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : (var3.length >= 2 && var3.length <= 4 && "block".equals(var3[0]) ? getTabCompletionCoordinate(var3, 1, var4) : ((var3.length != 3 || !"entity".equals(var3[0])) && (var3.length != 5 || !"block".equals(var3[0])) ? ((var3.length != 4 || !"entity".equals(var3[0])) && (var3.length != 6 || !"block".equals(var3[0])) ? (var3.length == 6 && "entity".equals(var3[0]) || var3.length == 8 && "block".equals(var3[0]) ? getListOfStringsMatchingLastWord(var3, this.getObjectiveNames(var1)) : Collections.emptyList()) : getListOfStringsMatchingLastWord(var3, CommandResultStats.Type.getTypeNames())) : getListOfStringsMatchingLastWord(var3, new String[]{"set", "clear"}))));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"entity", "block"});
+      } else if (var3.length == 2 && "entity".equals(var3[0])) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else if (var3.length >= 2 && var3.length <= 4 && "block".equals(var3[0])) {
+         return getTabCompletionCoordinate(var3, 1, var4);
+      } else if ((var3.length != 3 || !"entity".equals(var3[0])) && (var3.length != 5 || !"block".equals(var3[0]))) {
+         if ((var3.length != 4 || !"entity".equals(var3[0])) && (var3.length != 6 || !"block".equals(var3[0]))) {
+            return (var3.length != 6 || !"entity".equals(var3[0])) && (var3.length != 8 || !"block".equals(var3[0])) ? Collections.emptyList() : getListOfStringsMatchingLastWord(var3, this.a(var1));
+         } else {
+            return getListOfStringsMatchingLastWord(var3, CommandResultStats.Type.getTypeNames());
+         }
+      } else {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"set", "clear"});
+      }
    }
 
-   protected List getObjectiveNames(MinecraftServer var1) {
-      Collection var2 = var1.worldServerForDimension(0).getScoreboard().getScoreObjectives();
+   protected List a(MinecraftServer var1) {
+      Collection var2 = var1.getWorldServer(0).getScoreboard().getScoreObjectives();
       ArrayList var3 = Lists.newArrayList();
 
       for(ScoreObjective var5 : var2) {

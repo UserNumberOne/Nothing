@@ -9,58 +9,71 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockRedstoneLight extends Block {
    private final boolean isOn;
 
-   public BlockRedstoneLight(boolean var1) {
+   public BlockRedstoneLight(boolean flag) {
       super(Material.REDSTONE_LIGHT);
-      this.isOn = var1;
-      if (var1) {
+      this.isOn = flag;
+      if (flag) {
          this.setLightLevel(1.0F);
       }
 
    }
 
-   public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
-      if (!var1.isRemote) {
-         if (this.isOn && !var1.isBlockPowered(var2)) {
-            var1.setBlockState(var2, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
-         } else if (!this.isOn && var1.isBlockPowered(var2)) {
-            var1.setBlockState(var2, Blocks.LIT_REDSTONE_LAMP.getDefaultState(), 2);
+   public void onBlockAdded(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (!world.isRemote) {
+         if (this.isOn && !world.isBlockPowered(blockposition)) {
+            world.setBlockState(blockposition, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
+         } else if (!this.isOn && world.isBlockPowered(blockposition)) {
+            if (CraftEventFactory.callRedstoneChange(world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), 0, 15).getNewCurrent() != 15) {
+               return;
+            }
+
+            world.setBlockState(blockposition, Blocks.LIT_REDSTONE_LAMP.getDefaultState(), 2);
          }
       }
 
    }
 
-   public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      if (!var2.isRemote) {
-         if (this.isOn && !var2.isBlockPowered(var3)) {
-            var2.scheduleUpdate(var3, this, 4);
-         } else if (!this.isOn && var2.isBlockPowered(var3)) {
-            var2.setBlockState(var3, Blocks.LIT_REDSTONE_LAMP.getDefaultState(), 2);
+   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+      if (!world.isRemote) {
+         if (this.isOn && !world.isBlockPowered(blockposition)) {
+            world.scheduleUpdate(blockposition, this, 4);
+         } else if (!this.isOn && world.isBlockPowered(blockposition)) {
+            if (CraftEventFactory.callRedstoneChange(world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), 0, 15).getNewCurrent() != 15) {
+               return;
+            }
+
+            world.setBlockState(blockposition, Blocks.LIT_REDSTONE_LAMP.getDefaultState(), 2);
          }
       }
 
    }
 
-   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
-      if (!var1.isRemote && this.isOn && !var1.isBlockPowered(var2)) {
-         var1.setBlockState(var2, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
+   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+      if (!world.isRemote && this.isOn && !world.isBlockPowered(blockposition)) {
+         if (CraftEventFactory.callRedstoneChange(world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), 15, 0).getNewCurrent() != 0) {
+            return;
+         }
+
+         world.setBlockState(blockposition, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
       }
 
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
+   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
       return Item.getItemFromBlock(Blocks.REDSTONE_LAMP);
    }
 
-   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
+   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
       return new ItemStack(Blocks.REDSTONE_LAMP);
    }
 
-   protected ItemStack getSilkTouchDrop(IBlockState var1) {
+   protected ItemStack getSilkTouchDrop(IBlockState iblockdata) {
       return new ItemStack(Blocks.REDSTONE_LAMP);
    }
 }

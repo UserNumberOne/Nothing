@@ -28,8 +28,8 @@ import net.minecraft.world.World;
 public class BlockJukebox extends BlockContainer {
    public static final PropertyBool HAS_RECORD = PropertyBool.create("has_record");
 
-   public static void registerFixesJukebox(DataFixer var0) {
-      var0.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackData("RecordPlayer", new String[]{"RecordItem"}));
+   public static void registerFixesJukebox(DataFixer dataconvertermanager) {
+      dataconvertermanager.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackData("RecordPlayer", new String[]{"RecordItem"}));
    }
 
    protected BlockJukebox() {
@@ -38,94 +38,93 @@ public class BlockJukebox extends BlockContainer {
       this.setCreativeTab(CreativeTabs.DECORATIONS);
    }
 
-   public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
-      if (((Boolean)var3.getValue(HAS_RECORD)).booleanValue()) {
-         this.dropRecord(var1, var2, var3);
-         var3 = var3.withProperty(HAS_RECORD, Boolean.valueOf(false));
-         var1.setBlockState(var2, var3, 2);
+   public boolean onBlockActivated(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack, EnumFacing enumdirection, float f, float f1, float f2) {
+      if (((Boolean)iblockdata.getValue(HAS_RECORD)).booleanValue()) {
+         this.dropRecord(world, blockposition, iblockdata);
+         iblockdata = iblockdata.withProperty(HAS_RECORD, Boolean.valueOf(false));
+         world.setBlockState(blockposition, iblockdata, 2);
          return true;
       } else {
          return false;
       }
    }
 
-   public void insertRecord(World var1, BlockPos var2, IBlockState var3, ItemStack var4) {
-      if (!var1.isRemote) {
-         TileEntity var5 = var1.getTileEntity(var2);
-         if (var5 instanceof BlockJukebox.TileEntityJukebox) {
-            ((BlockJukebox.TileEntityJukebox)var5).setRecord(var4.copy());
-            var1.setBlockState(var2, var3.withProperty(HAS_RECORD, Boolean.valueOf(true)), 2);
+   public void insertRecord(World world, BlockPos blockposition, IBlockState iblockdata, ItemStack itemstack) {
+      if (!world.isRemote) {
+         TileEntity tileentity = world.getTileEntity(blockposition);
+         if (tileentity instanceof BlockJukebox.TileEntityJukebox) {
+            ((BlockJukebox.TileEntityJukebox)tileentity).setRecord(itemstack.copy());
+            world.setBlockState(blockposition, iblockdata.withProperty(HAS_RECORD, Boolean.valueOf(true)), 2);
          }
       }
 
    }
 
-   private void dropRecord(World var1, BlockPos var2, IBlockState var3) {
-      if (!var1.isRemote) {
-         TileEntity var4 = var1.getTileEntity(var2);
-         if (var4 instanceof BlockJukebox.TileEntityJukebox) {
-            BlockJukebox.TileEntityJukebox var5 = (BlockJukebox.TileEntityJukebox)var4;
-            ItemStack var6 = var5.getRecord();
-            if (var6 != null) {
-               var1.playEvent(1010, var2, 0);
-               var1.playRecord(var2, (SoundEvent)null);
-               var5.setRecord((ItemStack)null);
-               float var7 = 0.7F;
-               double var8 = (double)(var1.rand.nextFloat() * 0.7F) + 0.15000000596046448D;
-               double var10 = (double)(var1.rand.nextFloat() * 0.7F) + 0.06000000238418579D + 0.6D;
-               double var12 = (double)(var1.rand.nextFloat() * 0.7F) + 0.15000000596046448D;
-               ItemStack var14 = var6.copy();
-               EntityItem var15 = new EntityItem(var1, (double)var2.getX() + var8, (double)var2.getY() + var10, (double)var2.getZ() + var12, var14);
-               var15.setDefaultPickupDelay();
-               var1.spawnEntity(var15);
+   public void dropRecord(World world, BlockPos blockposition, IBlockState iblockdata) {
+      if (!world.isRemote) {
+         TileEntity tileentity = world.getTileEntity(blockposition);
+         if (tileentity instanceof BlockJukebox.TileEntityJukebox) {
+            BlockJukebox.TileEntityJukebox blockjukebox_tileentityrecordplayer = (BlockJukebox.TileEntityJukebox)tileentity;
+            ItemStack itemstack = blockjukebox_tileentityrecordplayer.getRecord();
+            if (itemstack != null) {
+               world.playEvent(1010, blockposition, 0);
+               world.playRecord(blockposition, (SoundEvent)null);
+               blockjukebox_tileentityrecordplayer.setRecord((ItemStack)null);
+               double d0 = (double)(world.rand.nextFloat() * 0.7F) + 0.15000000596046448D;
+               double d1 = (double)(world.rand.nextFloat() * 0.7F) + 0.06000000238418579D + 0.6D;
+               double d2 = (double)(world.rand.nextFloat() * 0.7F) + 0.15000000596046448D;
+               ItemStack itemstack1 = itemstack.copy();
+               EntityItem entityitem = new EntityItem(world, (double)blockposition.getX() + d0, (double)blockposition.getY() + d1, (double)blockposition.getZ() + d2, itemstack1);
+               entityitem.setDefaultPickupDelay();
+               world.spawnEntity(entityitem);
             }
          }
       }
 
    }
 
-   public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      this.dropRecord(var1, var2, var3);
-      super.breakBlock(var1, var2, var3);
+   public void breakBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
+      this.dropRecord(world, blockposition, iblockdata);
+      super.breakBlock(world, blockposition, iblockdata);
    }
 
-   public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
-      if (!var1.isRemote) {
-         super.dropBlockAsItemWithChance(var1, var2, var3, var4, 0);
+   public void dropBlockAsItemWithChance(World world, BlockPos blockposition, IBlockState iblockdata, float f, int i) {
+      if (!world.isRemote) {
+         super.dropBlockAsItemWithChance(world, blockposition, iblockdata, f, 0);
       }
 
    }
 
-   public TileEntity createNewTileEntity(World var1, int var2) {
+   public TileEntity createNewTileEntity(World world, int i) {
       return new BlockJukebox.TileEntityJukebox();
    }
 
-   public boolean hasComparatorInputOverride(IBlockState var1) {
+   public boolean hasComparatorInputOverride(IBlockState iblockdata) {
       return true;
    }
 
-   public int getComparatorInputOverride(IBlockState var1, World var2, BlockPos var3) {
-      TileEntity var4 = var2.getTileEntity(var3);
-      if (var4 instanceof BlockJukebox.TileEntityJukebox) {
-         ItemStack var5 = ((BlockJukebox.TileEntityJukebox)var4).getRecord();
-         if (var5 != null) {
-            return Item.getIdFromItem(var5.getItem()) + 1 - Item.getIdFromItem(Items.RECORD_13);
+   public int getComparatorInputOverride(IBlockState iblockdata, World world, BlockPos blockposition) {
+      TileEntity tileentity = world.getTileEntity(blockposition);
+      if (tileentity instanceof BlockJukebox.TileEntityJukebox) {
+         ItemStack itemstack = ((BlockJukebox.TileEntityJukebox)tileentity).getRecord();
+         if (itemstack != null) {
+            return Item.getIdFromItem(itemstack.getItem()) + 1 - Item.getIdFromItem(Items.RECORD_13);
          }
       }
 
       return 0;
    }
 
-   public EnumBlockRenderType getRenderType(IBlockState var1) {
+   public EnumBlockRenderType getRenderType(IBlockState iblockdata) {
       return EnumBlockRenderType.MODEL;
    }
 
-   public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(HAS_RECORD, Boolean.valueOf(var1 > 0));
+   public IBlockState getStateFromMeta(int i) {
+      return this.getDefaultState().withProperty(HAS_RECORD, Boolean.valueOf(i > 0));
    }
 
-   public int getMetaFromState(IBlockState var1) {
-      return ((Boolean)var1.getValue(HAS_RECORD)).booleanValue() ? 1 : 0;
+   public int getMetaFromState(IBlockState iblockdata) {
+      return ((Boolean)iblockdata.getValue(HAS_RECORD)).booleanValue() ? 1 : 0;
    }
 
    protected BlockStateContainer createBlockState() {
@@ -135,23 +134,23 @@ public class BlockJukebox extends BlockContainer {
    public static class TileEntityJukebox extends TileEntity {
       private ItemStack record;
 
-      public void readFromNBT(NBTTagCompound var1) {
-         super.readFromNBT(var1);
-         if (var1.hasKey("RecordItem", 10)) {
-            this.setRecord(ItemStack.loadItemStackFromNBT(var1.getCompoundTag("RecordItem")));
-         } else if (var1.getInteger("Record") > 0) {
-            this.setRecord(new ItemStack(Item.getItemById(var1.getInteger("Record"))));
+      public void readFromNBT(NBTTagCompound nbttagcompound) {
+         super.readFromNBT(nbttagcompound);
+         if (nbttagcompound.hasKey("RecordItem", 10)) {
+            this.setRecord(ItemStack.loadItemStackFromNBT(nbttagcompound.getCompoundTag("RecordItem")));
+         } else if (nbttagcompound.getInteger("Record") > 0) {
+            this.setRecord(new ItemStack(Item.getItemById(nbttagcompound.getInteger("Record"))));
          }
 
       }
 
-      public NBTTagCompound writeToNBT(NBTTagCompound var1) {
-         super.writeToNBT(var1);
+      public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
+         super.writeToNBT(nbttagcompound);
          if (this.getRecord() != null) {
-            var1.setTag("RecordItem", this.getRecord().writeToNBT(new NBTTagCompound()));
+            nbttagcompound.setTag("RecordItem", this.getRecord().writeToNBT(new NBTTagCompound()));
          }
 
-         return var1;
+         return nbttagcompound;
       }
 
       @Nullable
@@ -159,8 +158,12 @@ public class BlockJukebox extends BlockContainer {
          return this.record;
       }
 
-      public void setRecord(@Nullable ItemStack var1) {
-         this.record = var1;
+      public void setRecord(@Nullable ItemStack itemstack) {
+         if (itemstack != null) {
+            itemstack.stackSize = 1;
+         }
+
+         this.record = itemstack;
          this.markDirty();
       }
    }

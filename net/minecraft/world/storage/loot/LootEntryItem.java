@@ -12,14 +12,13 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.conditions.LootConditionManager;
 import net.minecraft.world.storage.loot.functions.LootFunction;
-import net.minecraftforge.common.ForgeHooks;
 
 public class LootEntryItem extends LootEntry {
    protected final Item item;
    protected final LootFunction[] functions;
 
-   public LootEntryItem(Item var1, int var2, int var3, LootFunction[] var4, LootCondition[] var5, String var6) {
-      super(var2, var3, var5, var6);
+   public LootEntryItem(Item var1, int var2, int var3, LootFunction[] var4, LootCondition[] var5) {
+      super(var2, var3, var5);
       this.item = var1;
       this.functions = var4;
    }
@@ -34,7 +33,7 @@ public class LootEntryItem extends LootEntry {
       }
 
       if (var4.stackSize > 0) {
-         if (var4.stackSize < this.item.getItemStackLimit(var4)) {
+         if (var4.stackSize < this.item.getItemStackLimit()) {
             var1.add(var4);
          } else {
             int var9 = var4.stackSize;
@@ -64,15 +63,14 @@ public class LootEntryItem extends LootEntry {
    }
 
    public static LootEntryItem deserialize(JsonObject var0, JsonDeserializationContext var1, int var2, int var3, LootCondition[] var4) {
-      String var5 = ForgeHooks.readLootEntryName(var0, "item");
-      Item var6 = JsonUtils.getItem(var0, "name");
-      LootFunction[] var7;
+      Item var5 = JsonUtils.getItem(var0, "name");
+      LootFunction[] var6;
       if (var0.has("functions")) {
-         var7 = (LootFunction[])JsonUtils.deserializeClass(var0, "functions", var1, LootFunction[].class);
+         var6 = (LootFunction[])JsonUtils.deserializeClass(var0, "functions", var1, LootFunction[].class);
       } else {
-         var7 = new LootFunction[0];
+         var6 = new LootFunction[0];
       }
 
-      return new LootEntryItem(var6, var2, var3, var7, var4, var5);
+      return new LootEntryItem(var5, var2, var3, var6, var4);
    }
 }

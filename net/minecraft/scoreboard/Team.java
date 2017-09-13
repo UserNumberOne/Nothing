@@ -5,25 +5,21 @@ import java.util.Collection;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class Team {
    public boolean isSameTeam(@Nullable Team var1) {
-      return var1 == null ? false : this == var1;
+      if (var1 == null) {
+         return false;
+      } else {
+         return this == var1;
+      }
    }
 
    public abstract String getRegisteredName();
 
    public abstract String formatString(String var1);
 
-   @SideOnly(Side.CLIENT)
-   public abstract boolean getSeeFriendlyInvisiblesEnabled();
-
    public abstract boolean getAllowFriendlyFire();
-
-   @SideOnly(Side.CLIENT)
-   public abstract Team.EnumVisible getNameTagVisibility();
 
    public abstract TextFormatting getChatFormat();
 

@@ -15,7 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -111,7 +111,7 @@ public class CommandReplaceItem extends CommandBase {
                var15.setInventorySlotContents(var7, var11);
             }
          } else {
-            Entity var21 = getEntity(var1, var2, var3[1]);
+            Entity var21 = b(var1, var2, var3[1]);
             var2.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 0);
             if (var21 instanceof EntityPlayer) {
                ((EntityPlayer)var21).inventoryContainer.detectAndSendChanges();
@@ -139,8 +139,18 @@ public class CommandReplaceItem extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, new String[]{"entity", "block"}) : (var3.length == 2 && "entity".equals(var3[0]) ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : (var3.length >= 2 && var3.length <= 4 && "block".equals(var3[0]) ? getTabCompletionCoordinate(var3, 1, var4) : ((var3.length != 3 || !"entity".equals(var3[0])) && (var3.length != 5 || !"block".equals(var3[0])) ? (var3.length == 4 && "entity".equals(var3[0]) || var3.length == 6 && "block".equals(var3[0]) ? getListOfStringsMatchingLastWord(var3, Item.REGISTRY.getKeys()) : Collections.emptyList()) : getListOfStringsMatchingLastWord(var3, SHORTCUTS.keySet()))));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, new String[]{"entity", "block"});
+      } else if (var3.length == 2 && "entity".equals(var3[0])) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else if (var3.length >= 2 && var3.length <= 4 && "block".equals(var3[0])) {
+         return getTabCompletionCoordinate(var3, 1, var4);
+      } else if ((var3.length != 3 || !"entity".equals(var3[0])) && (var3.length != 5 || !"block".equals(var3[0]))) {
+         return (var3.length != 4 || !"entity".equals(var3[0])) && (var3.length != 6 || !"block".equals(var3[0])) ? Collections.emptyList() : getListOfStringsMatchingLastWord(var3, Item.REGISTRY.getKeys());
+      } else {
+         return getListOfStringsMatchingLastWord(var3, SHORTCUTS.keySet());
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

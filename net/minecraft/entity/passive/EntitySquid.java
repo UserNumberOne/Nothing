@@ -12,8 +12,6 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntitySquid extends EntityWaterMob {
    public float squidPitch;
@@ -156,16 +154,6 @@ public class EntitySquid extends EntityWaterMob {
 
    public boolean getCanSpawnHere() {
       return this.posY > 45.0D && this.posY < (double)this.world.getSeaLevel() && super.getCanSpawnHere();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 19) {
-         this.squidRotation = 0.0F;
-      } else {
-         super.handleStatusUpdate(var1);
-      }
-
    }
 
    public void setMovementVector(float var1, float var2, float var3) {

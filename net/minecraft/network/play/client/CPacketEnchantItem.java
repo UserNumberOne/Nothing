@@ -4,21 +4,10 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketEnchantItem implements Packet {
    private int windowId;
    private int button;
-
-   public CPacketEnchantItem() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketEnchantItem(int var1, int var2) {
-      this.windowId = var1;
-      this.button = var2;
-   }
 
    public void processPacket(INetHandlerPlayServer var1) {
       var1.processEnchantItem(this);

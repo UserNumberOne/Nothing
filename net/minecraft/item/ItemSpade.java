@@ -24,7 +24,11 @@ public class ItemSpade extends ItemTool {
 
    public boolean canHarvestBlock(IBlockState var1) {
       Block var2 = var1.getBlock();
-      return var2 == Blocks.SNOW_LAYER ? true : var2 == Blocks.SNOW;
+      if (var2 == Blocks.SNOW_LAYER) {
+         return true;
+      } else {
+         return var2 == Blocks.SNOW;
+      }
    }
 
    public EnumActionResult onItemUse(ItemStack var1, EntityPlayer var2, World var3, BlockPos var4, EnumHand var5, EnumFacing var6, float var7, float var8, float var9) {

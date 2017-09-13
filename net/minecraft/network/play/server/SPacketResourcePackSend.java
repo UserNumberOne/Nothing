@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketResourcePackSend implements Packet {
    private String url;
@@ -34,15 +32,5 @@ public class SPacketResourcePackSend implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleResourcePack(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getURL() {
-      return this.url;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getHash() {
-      return this.hash;
    }
 }

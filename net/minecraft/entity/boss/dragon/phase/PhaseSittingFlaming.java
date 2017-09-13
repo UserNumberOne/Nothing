@@ -58,7 +58,7 @@ public class PhaseSittingFlaming extends PhaseSittingBase {
          double var7 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F);
          BlockPos.MutableBlockPos var9 = new BlockPos.MutableBlockPos(MathHelper.floor(var3), MathHelper.floor(var7), MathHelper.floor(var5));
 
-         while(this.dragon.world.isAirBlock(var9) && var7 >= 0.0D) {
+         while(this.dragon.world.isAirBlock(var9)) {
             --var7;
             var9.setPos(MathHelper.floor(var3), MathHelper.floor(var7), MathHelper.floor(var5));
          }

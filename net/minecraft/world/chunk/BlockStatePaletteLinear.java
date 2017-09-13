@@ -4,8 +4,6 @@ import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockStatePaletteLinear implements IBlockStatePalette {
    private final IBlockState[] states;
@@ -39,16 +37,6 @@ public class BlockStatePaletteLinear implements IBlockStatePalette {
    @Nullable
    public IBlockState getBlockState(int var1) {
       return var1 >= 0 && var1 < this.arraySize ? this.states[var1] : null;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void read(PacketBuffer var1) {
-      this.arraySize = var1.readVarInt();
-
-      for(int var2 = 0; var2 < this.arraySize; ++var2) {
-         this.states[var2] = (IBlockState)Block.BLOCK_STATE_IDS.getByValue(var1.readVarInt());
-      }
-
    }
 
    public void write(PacketBuffer var1) {

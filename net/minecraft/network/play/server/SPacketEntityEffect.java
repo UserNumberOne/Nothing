@@ -6,8 +6,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityEffect implements Packet {
    private int entityId;
@@ -56,42 +54,7 @@ public class SPacketEntityEffect implements Packet {
       var1.writeByte(this.flags);
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isMaxDuration() {
-      return this.duration == 32767;
-   }
-
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleEntityEffect(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getEffectId() {
-      return this.effectId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getAmplifier() {
-      return this.amplifier;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getDuration() {
-      return this.duration;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean doesShowParticles() {
-      return (this.flags & 2) == 2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean getIsAmbient() {
-      return (this.flags & 1) == 1;
    }
 }

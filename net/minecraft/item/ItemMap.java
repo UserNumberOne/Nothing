@@ -3,7 +3,6 @@ package net.minecraft.item;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multisets;
-import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockStone;
@@ -18,159 +17,151 @@ import net.minecraft.network.Packet;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Bukkit;
+import org.bukkit.event.server.MapInitializeEvent;
 
 public class ItemMap extends ItemMapBase {
    protected ItemMap() {
       this.setHasSubtypes(true);
    }
 
-   @SideOnly(Side.CLIENT)
-   public static MapData loadMapData(int var0, World var1) {
-      String var2 = "map_" + var0;
-      MapData var3 = (MapData)var1.loadData(MapData.class, var2);
-      if (var3 == null) {
-         var3 = new MapData(var2);
-         var1.setData(var2, var3);
+   public MapData getMapData(ItemStack itemstack, World world) {
+      World worldMain = (World)world.getServer().getServer().worlds.get(0);
+      String s = "map_" + itemstack.getMetadata();
+      MapData worldmap = (MapData)worldMain.loadData(MapData.class, s);
+      if (worldmap == null && !world.isRemote) {
+         itemstack.setItemDamage(worldMain.getUniqueDataId("map"));
+         s = "map_" + itemstack.getMetadata();
+         worldmap = new MapData(s);
+         worldmap.scale = 3;
+         worldmap.calculateMapCenter((double)world.getWorldInfo().getSpawnX(), (double)world.getWorldInfo().getSpawnZ(), worldmap.scale);
+         worldmap.dimension = (byte)((WorldServer)world).dimension;
+         worldmap.markDirty();
+         worldMain.setData(s, worldmap);
+         MapInitializeEvent event = new MapInitializeEvent(worldmap.mapView);
+         Bukkit.getServer().getPluginManager().callEvent(event);
       }
 
-      return var3;
+      return worldmap;
    }
 
-   public MapData getMapData(ItemStack var1, World var2) {
-      String var3 = "map_" + var1.getMetadata();
-      MapData var4 = (MapData)var2.loadData(MapData.class, var3);
-      if (var4 == null && !var2.isRemote) {
-         var1.setItemDamage(var2.getUniqueDataId("map"));
-         var3 = "map_" + var1.getMetadata();
-         var4 = new MapData(var3);
-         var4.scale = 3;
-         var4.calculateMapCenter((double)var2.getWorldInfo().getSpawnX(), (double)var2.getWorldInfo().getSpawnZ(), var4.scale);
-         var4.dimension = var2.provider.getDimension();
-         var4.markDirty();
-         var2.setData(var3, var4);
-      }
-
-      return var4;
-   }
-
-   public void updateMapData(World var1, Entity var2, MapData var3) {
-      if (var1.provider.getDimension() == var3.dimension && var2 instanceof EntityPlayer) {
-         int var4 = 1 << var3.scale;
-         int var5 = var3.xCenter;
-         int var6 = var3.zCenter;
-         int var7 = MathHelper.floor(var2.posX - (double)var5) / var4 + 64;
-         int var8 = MathHelper.floor(var2.posZ - (double)var6) / var4 + 64;
-         int var9 = 128 / var4;
-         if (var1.provider.hasNoSky()) {
-            var9 /= 2;
+   public void updateMapData(World world, Entity entity, MapData worldmap) {
+      if (((WorldServer)world).dimension == worldmap.dimension && entity instanceof EntityPlayer) {
+         int i = 1 << worldmap.scale;
+         int j = worldmap.xCenter;
+         int k = worldmap.zCenter;
+         int l = MathHelper.floor(entity.posX - (double)j) / i + 64;
+         int i1 = MathHelper.floor(entity.posZ - (double)k) / i + 64;
+         int j1 = 128 / i;
+         if (world.provider.hasNoSky()) {
+            j1 /= 2;
          }
 
-         MapData.MapInfo var10 = var3.getMapInfo((EntityPlayer)var2);
-         ++var10.step;
-         boolean var11 = false;
+         MapData.MapInfo worldmap_worldmaphumantracker = worldmap.getMapInfo((EntityPlayer)entity);
+         ++worldmap_worldmaphumantracker.step;
+         boolean flag = false;
 
-         for(int var12 = var7 - var9 + 1; var12 < var7 + var9; ++var12) {
-            if ((var12 & 15) == (var10.step & 15) || var11) {
-               var11 = false;
-               double var13 = 0.0D;
+         for(int k1 = l - j1 + 1; k1 < l + j1; ++k1) {
+            if ((k1 & 15) == (worldmap_worldmaphumantracker.step & 15) || flag) {
+               flag = false;
+               double d0 = 0.0D;
 
-               for(int var15 = var8 - var9 - 1; var15 < var8 + var9; ++var15) {
-                  if (var12 >= 0 && var15 >= -1 && var12 < 128 && var15 < 128) {
-                     int var16 = var12 - var7;
-                     int var17 = var15 - var8;
-                     boolean var18 = var16 * var16 + var17 * var17 > (var9 - 2) * (var9 - 2);
-                     int var19 = (var5 / var4 + var12 - 64) * var4;
-                     int var20 = (var6 / var4 + var15 - 64) * var4;
-                     HashMultiset var21 = HashMultiset.create();
-                     Chunk var22 = var1.getChunkFromBlockCoords(new BlockPos(var19, 0, var20));
-                     if (!var22.isEmpty()) {
-                        int var23 = var19 & 15;
-                        int var24 = var20 & 15;
-                        int var25 = 0;
-                        double var26 = 0.0D;
-                        if (var1.provider.hasNoSky()) {
-                           int var28 = var19 + var20 * 231871;
-                           var28 = var28 * var28 * 31287121 + var28 * 11;
-                           if ((var28 >> 20 & 1) == 0) {
-                              var21.add(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT).getMapColor(), 10);
+               for(int l1 = i1 - j1 - 1; l1 < i1 + j1; ++l1) {
+                  if (k1 >= 0 && l1 >= -1 && k1 < 128 && l1 < 128) {
+                     int i2 = k1 - l;
+                     int j2 = l1 - i1;
+                     boolean flag1 = i2 * i2 + j2 * j2 > (j1 - 2) * (j1 - 2);
+                     int k2 = (j / i + k1 - 64) * i;
+                     int l2 = (k / i + l1 - 64) * i;
+                     HashMultiset hashmultiset = HashMultiset.create();
+                     Chunk chunk = world.getChunkFromBlockCoords(new BlockPos(k2, 0, l2));
+                     if (!chunk.isEmpty()) {
+                        int i3 = k2 & 15;
+                        int j3 = l2 & 15;
+                        int k3 = 0;
+                        double d1 = 0.0D;
+                        if (world.provider.hasNoSky()) {
+                           int l3 = k2 + l2 * 231871;
+                           l3 = l3 * l3 * 31287121 + l3 * 11;
+                           if ((l3 >> 20 & 1) == 0) {
+                              hashmultiset.add(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT).getMapColor(), 10);
                            } else {
-                              var21.add(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.STONE).getMapColor(), 100);
+                              hashmultiset.add(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.STONE).getMapColor(), 100);
                            }
 
-                           var26 = 100.0D;
+                           d1 = 100.0D;
                         } else {
-                           BlockPos.MutableBlockPos var37 = new BlockPos.MutableBlockPos();
+                           BlockPos.MutableBlockPos blockposition_mutableblockposition = new BlockPos.MutableBlockPos();
 
-                           for(int var29 = 0; var29 < var4; ++var29) {
-                              for(int var30 = 0; var30 < var4; ++var30) {
-                                 int var31 = var22.getHeightValue(var29 + var23, var30 + var24) + 1;
-                                 IBlockState var32 = Blocks.AIR.getDefaultState();
-                                 if (var31 > 1) {
-                                    label168: {
+                           for(int i4 = 0; i4 < i; ++i4) {
+                              for(int j4 = 0; j4 < i; ++j4) {
+                                 int k4 = chunk.getHeightValue(i4 + i3, j4 + j3) + 1;
+                                 IBlockState iblockdata = Blocks.AIR.getDefaultState();
+                                 if (k4 > 1) {
+                                    label165: {
                                        while(true) {
-                                          --var31;
-                                          var32 = var22.getBlockState(var37.setPos(var29 + var23, var31, var30 + var24));
-                                          if (var32.getMapColor() != MapColor.AIR || var31 <= 0) {
+                                          --k4;
+                                          iblockdata = chunk.getBlockState(blockposition_mutableblockposition.setPos(i4 + i3, k4, j4 + j3));
+                                          if (iblockdata.getMapColor() != MapColor.AIR || k4 <= 0) {
                                              break;
                                           }
                                        }
 
-                                       if (var31 > 0 && var32.getMaterial().isLiquid()) {
-                                          int var33 = var31 - 1;
+                                       if (k4 > 0 && iblockdata.getMaterial().isLiquid()) {
+                                          int l4 = k4 - 1;
 
                                           while(true) {
-                                             IBlockState var34 = var22.getBlockState(var29 + var23, var33--, var30 + var24);
-                                             ++var25;
-                                             if (var33 <= 0 || !var34.getMaterial().isLiquid()) {
-                                                break label168;
+                                             IBlockState iblockdata1 = chunk.getBlockState(i4 + i3, l4--, j4 + j3);
+                                             ++k3;
+                                             if (l4 <= 0 || !iblockdata1.getMaterial().isLiquid()) {
+                                                break label165;
                                              }
                                           }
                                        }
                                     }
                                  }
 
-                                 var26 += (double)var31 / (double)(var4 * var4);
-                                 var21.add(var32.getMapColor());
+                                 d1 += (double)k4 / (double)(i * i);
+                                 hashmultiset.add(iblockdata.getMapColor());
                               }
                            }
                         }
 
-                        var25 = var25 / (var4 * var4);
-                        double var38 = (var26 - var13) * 4.0D / (double)(var4 + 4) + ((double)(var12 + var15 & 1) - 0.5D) * 0.4D;
-                        byte var40 = 1;
-                        if (var38 > 0.6D) {
-                           var40 = 2;
+                        k3 = k3 / (i * i);
+                        double d2 = (d1 - d0) * 4.0D / (double)(i + 4) + ((double)(k1 + l1 & 1) - 0.5D) * 0.4D;
+                        byte b0 = 1;
+                        if (d2 > 0.6D) {
+                           b0 = 2;
                         }
 
-                        if (var38 < -0.6D) {
-                           var40 = 0;
+                        if (d2 < -0.6D) {
+                           b0 = 0;
                         }
 
-                        MapColor var41 = (MapColor)Iterables.getFirst(Multisets.copyHighestCountFirst(var21), MapColor.AIR);
-                        if (var41 == MapColor.WATER) {
-                           var38 = (double)var25 * 0.1D + (double)(var12 + var15 & 1) * 0.2D;
-                           var40 = 1;
-                           if (var38 < 0.5D) {
-                              var40 = 2;
+                        MapColor materialmapcolor = (MapColor)Iterables.getFirst(Multisets.copyHighestCountFirst(hashmultiset), MapColor.AIR);
+                        if (materialmapcolor == MapColor.WATER) {
+                           d2 = (double)k3 * 0.1D + (double)(k1 + l1 & 1) * 0.2D;
+                           b0 = 1;
+                           if (d2 < 0.5D) {
+                              b0 = 2;
                            }
 
-                           if (var38 > 0.9D) {
-                              var40 = 0;
+                           if (d2 > 0.9D) {
+                              b0 = 0;
                            }
                         }
 
-                        var13 = var26;
-                        if (var15 >= 0 && var16 * var16 + var17 * var17 < var9 * var9 && (!var18 || (var12 + var15 & 1) != 0)) {
-                           byte var42 = var3.colors[var12 + var15 * 128];
-                           byte var43 = (byte)(var41.colorIndex * 4 + var40);
-                           if (var42 != var43) {
-                              var3.colors[var12 + var15 * 128] = var43;
-                              var3.updateMapData(var12, var15);
-                              var11 = true;
+                        d0 = d1;
+                        if (l1 >= 0 && i2 * i2 + j2 * j2 < j1 * j1 && (!flag1 || (k1 + l1 & 1) != 0)) {
+                           byte b1 = worldmap.colors[k1 + l1 * 128];
+                           byte b2 = (byte)(materialmapcolor.colorIndex * 4 + b0);
+                           if (b1 != b2) {
+                              worldmap.colors[k1 + l1 * 128] = b2;
+                              worldmap.updateMapData(k1, l1);
+                              flag = true;
                            }
                         }
                      }
@@ -182,76 +173,68 @@ public class ItemMap extends ItemMapBase {
 
    }
 
-   public void onUpdate(ItemStack var1, World var2, Entity var3, int var4, boolean var5) {
-      if (!var2.isRemote) {
-         MapData var6 = this.getMapData(var1, var2);
-         if (var3 instanceof EntityPlayer) {
-            EntityPlayer var7 = (EntityPlayer)var3;
-            var6.updateVisiblePlayers(var7, var1);
+   public void onUpdate(ItemStack itemstack, World world, Entity entity, int i, boolean flag) {
+      if (!world.isRemote) {
+         MapData worldmap = this.getMapData(itemstack, world);
+         if (entity instanceof EntityPlayer) {
+            EntityPlayer entityhuman = (EntityPlayer)entity;
+            worldmap.updateVisiblePlayers(entityhuman, itemstack);
          }
 
-         if (var5 || var3 instanceof EntityPlayer && ((EntityPlayer)var3).getHeldItemOffhand() == var1) {
-            this.updateMapData(var2, var3, var6);
+         if (flag || entity instanceof EntityPlayer && ((EntityPlayer)entity).getHeldItemOffhand() == itemstack) {
+            this.updateMapData(world, entity, worldmap);
          }
       }
 
    }
 
    @Nullable
-   public Packet createMapDataPacket(ItemStack var1, World var2, EntityPlayer var3) {
-      return this.getMapData(var1, var2).getMapPacket(var1, var2, var3);
+   public Packet createMapDataPacket(ItemStack itemstack, World world, EntityPlayer entityhuman) {
+      return this.getMapData(itemstack, world).getMapPacket(itemstack, world, entityhuman);
    }
 
-   public void onCreated(ItemStack var1, World var2, EntityPlayer var3) {
-      NBTTagCompound var4 = var1.getTagCompound();
-      if (var4 != null) {
-         if (var4.hasKey("map_scale_direction", 99)) {
-            scaleMap(var1, var2, var4.getInteger("map_scale_direction"));
-            var4.removeTag("map_scale_direction");
-         } else if (var4.getBoolean("map_tracking_position")) {
-            enableMapTracking(var1, var2);
-            var4.removeTag("map_tracking_position");
+   public void onCreated(ItemStack itemstack, World world, EntityPlayer entityhuman) {
+      NBTTagCompound nbttagcompound = itemstack.getTagCompound();
+      if (nbttagcompound != null) {
+         if (nbttagcompound.hasKey("map_scale_direction", 99)) {
+            scaleMap(itemstack, world, nbttagcompound.getInteger("map_scale_direction"));
+            nbttagcompound.removeTag("map_scale_direction");
+         } else if (nbttagcompound.getBoolean("map_tracking_position")) {
+            enableMapTracking(itemstack, world);
+            nbttagcompound.removeTag("map_tracking_position");
          }
       }
 
    }
 
-   protected static void scaleMap(ItemStack var0, World var1, int var2) {
-      MapData var3 = Items.FILLED_MAP.getMapData(var0, var1);
-      var0.setItemDamage(var1.getUniqueDataId("map"));
-      MapData var4 = new MapData("map_" + var0.getMetadata());
-      var4.scale = (byte)MathHelper.clamp(var3.scale + var2, 0, 4);
-      var4.trackingPosition = var3.trackingPosition;
-      var4.calculateMapCenter((double)var3.xCenter, (double)var3.zCenter, var4.scale);
-      var4.dimension = var3.dimension;
-      var4.markDirty();
-      var1.setData("map_" + var0.getMetadata(), var4);
+   protected static void scaleMap(ItemStack itemstack, World world, int i) {
+      MapData worldmap = Items.FILLED_MAP.getMapData(itemstack, world);
+      world = (World)world.getServer().getServer().worlds.get(0);
+      itemstack.setItemDamage(world.getUniqueDataId("map"));
+      MapData worldmap1 = new MapData("map_" + itemstack.getMetadata());
+      worldmap1.scale = (byte)MathHelper.clamp(worldmap.scale + i, 0, 4);
+      worldmap1.trackingPosition = worldmap.trackingPosition;
+      worldmap1.calculateMapCenter((double)worldmap.xCenter, (double)worldmap.zCenter, worldmap1.scale);
+      worldmap1.dimension = worldmap.dimension;
+      worldmap1.markDirty();
+      world.setData("map_" + itemstack.getMetadata(), worldmap1);
+      MapInitializeEvent event = new MapInitializeEvent(worldmap1.mapView);
+      Bukkit.getServer().getPluginManager().callEvent(event);
    }
 
-   protected static void enableMapTracking(ItemStack var0, World var1) {
-      MapData var2 = Items.FILLED_MAP.getMapData(var0, var1);
-      var0.setItemDamage(var1.getUniqueDataId("map"));
-      MapData var3 = new MapData("map_" + var0.getMetadata());
-      var3.trackingPosition = true;
-      var3.xCenter = var2.xCenter;
-      var3.zCenter = var2.zCenter;
-      var3.scale = var2.scale;
-      var3.dimension = var2.dimension;
-      var3.markDirty();
-      var1.setData("map_" + var0.getMetadata(), var3);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void addInformation(ItemStack var1, EntityPlayer var2, List var3, boolean var4) {
-      MapData var5 = this.getMapData(var1, var2.world);
-      if (var4) {
-         if (var5 == null) {
-            var3.add("Unknown map");
-         } else {
-            var3.add("Scaling at 1:" + (1 << var5.scale));
-            var3.add("(Level " + var5.scale + "/" + 4 + ")");
-         }
-      }
-
+   protected static void enableMapTracking(ItemStack itemstack, World world) {
+      MapData worldmap = Items.FILLED_MAP.getMapData(itemstack, world);
+      world = (World)world.getServer().getServer().worlds.get(0);
+      itemstack.setItemDamage(world.getUniqueDataId("map"));
+      MapData worldmap1 = new MapData("map_" + itemstack.getMetadata());
+      worldmap1.trackingPosition = true;
+      worldmap1.xCenter = worldmap.xCenter;
+      worldmap1.zCenter = worldmap.zCenter;
+      worldmap1.scale = worldmap.scale;
+      worldmap1.dimension = worldmap.dimension;
+      worldmap1.markDirty();
+      world.setData("map_" + itemstack.getMetadata(), worldmap1);
+      MapInitializeEvent event = new MapInitializeEvent(worldmap1.mapView);
+      Bukkit.getServer().getPluginManager().callEvent(event);
    }
 }

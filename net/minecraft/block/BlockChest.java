@@ -60,7 +60,15 @@ public class BlockChest extends BlockContainer {
    }
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return var2.getBlockState(var3.north()).getBlock() == this ? NORTH_CHEST_AABB : (var2.getBlockState(var3.south()).getBlock() == this ? SOUTH_CHEST_AABB : (var2.getBlockState(var3.west()).getBlock() == this ? WEST_CHEST_AABB : (var2.getBlockState(var3.east()).getBlock() == this ? EAST_CHEST_AABB : NOT_CONNECTED_AABB)));
+      if (var2.getBlockState(var3.north()).getBlock() == this) {
+         return NORTH_CHEST_AABB;
+      } else if (var2.getBlockState(var3.south()).getBlock() == this) {
+         return SOUTH_CHEST_AABB;
+      } else if (var2.getBlockState(var3.west()).getBlock() == this) {
+         return WEST_CHEST_AABB;
+      } else {
+         return var2.getBlockState(var3.east()).getBlock() == this ? EAST_CHEST_AABB : NOT_CONNECTED_AABB;
+      }
    }
 
    public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
@@ -390,7 +398,7 @@ public class BlockChest extends BlockContainer {
    }
 
    private boolean isBelowSolidBlock(World var1, BlockPos var2) {
-      return var1.getBlockState(var2.up()).isSideSolid(var1, var2.up(), EnumFacing.DOWN);
+      return var1.getBlockState(var2.up()).isNormalCube();
    }
 
    private boolean isOcelotSittingOnChest(World var1, BlockPos var2) {

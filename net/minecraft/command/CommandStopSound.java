@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketCustomPayload;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -28,7 +28,7 @@ public class CommandStopSound extends CommandBase {
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
       if (var3.length >= 1 && var3.length <= 3) {
          int var4 = 0;
-         EntityPlayerMP var5 = getPlayer(var1, var2, var3[var4++]);
+         EntityPlayerMP var5 = a(var1, var2, var3[var4++]);
          String var6 = "";
          String var7 = "";
          if (var3.length >= 2) {
@@ -62,8 +62,14 @@ public class CommandStopSound extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : (var3.length == 2 ? getListOfStringsMatchingLastWord(var3, SoundCategory.getSoundCategoryNames()) : (var3.length == 3 ? getListOfStringsMatchingLastWord(var3, SoundEvent.REGISTRY.getKeys()) : Collections.emptyList()));
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else if (var3.length == 2) {
+         return getListOfStringsMatchingLastWord(var3, SoundCategory.getSoundCategoryNames());
+      } else {
+         return var3.length == 3 ? getListOfStringsMatchingLastWord(var3, SoundEvent.REGISTRY.getKeys()) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

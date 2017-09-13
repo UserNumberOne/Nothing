@@ -586,7 +586,7 @@ public class StructureOceanMonumentPieces {
          var7.add(new StructureOceanMonumentPieces.FitSimpleRoomTopHelper());
          var7.add(new StructureOceanMonumentPieces.FitSimpleRoomHelper());
 
-         label48:
+         label47:
          for(StructureOceanMonumentPieces.RoomDefinition var9 : var6) {
             if (!var9.claimed && !var9.isSpecial()) {
                Iterator var10 = var7.iterator();
@@ -594,7 +594,7 @@ public class StructureOceanMonumentPieces {
                StructureOceanMonumentPieces.MonumentRoomFitHelper var11;
                while(true) {
                   if (!var10.hasNext()) {
-                     continue label48;
+                     continue label47;
                   }
 
                   var11 = (StructureOceanMonumentPieces.MonumentRoomFitHelper)var10.next();

@@ -1,17 +1,12 @@
 package net.minecraft.pathfinding;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class Path {
    private final PathPoint[] points;
    private PathPoint[] openSet = new PathPoint[0];
    private PathPoint[] closedSet = new PathPoint[0];
-   @SideOnly(Side.CLIENT)
-   private PathPoint target;
    private int currentPathIndex;
    private int pathLength;
 
@@ -86,50 +81,5 @@ public class Path {
 
          return true;
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public PathPoint[] getOpenSet() {
-      return this.openSet;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public PathPoint[] getClosedSet() {
-      return this.closedSet;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public PathPoint getTarget() {
-      return this.target;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static Path read(PacketBuffer var0) {
-      int var1 = var0.readInt();
-      PathPoint var2 = PathPoint.createFromBuffer(var0);
-      PathPoint[] var3 = new PathPoint[var0.readInt()];
-
-      for(int var4 = 0; var4 < var3.length; ++var4) {
-         var3[var4] = PathPoint.createFromBuffer(var0);
-      }
-
-      PathPoint[] var7 = new PathPoint[var0.readInt()];
-
-      for(int var5 = 0; var5 < var7.length; ++var5) {
-         var7[var5] = PathPoint.createFromBuffer(var0);
-      }
-
-      PathPoint[] var8 = new PathPoint[var0.readInt()];
-
-      for(int var6 = 0; var6 < var8.length; ++var6) {
-         var8[var6] = PathPoint.createFromBuffer(var0);
-      }
-
-      Path var9 = new Path(var3);
-      var9.openSet = var7;
-      var9.closedSet = var8;
-      var9.target = var2;
-      var9.currentPathIndex = var1;
-      return var9;
    }
 }

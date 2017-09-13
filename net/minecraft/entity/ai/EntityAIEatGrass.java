@@ -9,6 +9,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityAIEatGrass extends EntityAIBase {
    private static final Predicate IS_TALL_GRASS = BlockStateMatcher.forBlock(Blocks.TALLGRASS).where(BlockTallGrass.TYPE, Predicates.equalTo(BlockTallGrass.EnumType.GRASS));
@@ -16,9 +18,9 @@ public class EntityAIEatGrass extends EntityAIBase {
    private final World entityWorld;
    int eatingGrassTimer;
 
-   public EntityAIEatGrass(EntityLiving var1) {
-      this.grassEaterEntity = var1;
-      this.entityWorld = var1.world;
+   public EntityAIEatGrass(EntityLiving entityinsentient) {
+      this.grassEaterEntity = entityinsentient;
+      this.entityWorld = entityinsentient.world;
       this.setMutexBits(7);
    }
 
@@ -26,8 +28,8 @@ public class EntityAIEatGrass extends EntityAIBase {
       if (this.grassEaterEntity.getRNG().nextInt(this.grassEaterEntity.isChild() ? 50 : 1000) != 0) {
          return false;
       } else {
-         BlockPos var1 = new BlockPos(this.grassEaterEntity.posX, this.grassEaterEntity.posY, this.grassEaterEntity.posZ);
-         return IS_TALL_GRASS.apply(this.entityWorld.getBlockState(var1)) ? true : this.entityWorld.getBlockState(var1.down()).getBlock() == Blocks.GRASS;
+         BlockPos blockposition = new BlockPos(this.grassEaterEntity.posX, this.grassEaterEntity.posY, this.grassEaterEntity.posZ);
+         return IS_TALL_GRASS.apply(this.entityWorld.getBlockState(blockposition)) ? true : this.entityWorld.getBlockState(blockposition.down()).getBlock() == Blocks.GRASS;
       }
    }
 
@@ -52,19 +54,19 @@ public class EntityAIEatGrass extends EntityAIBase {
    public void updateTask() {
       this.eatingGrassTimer = Math.max(0, this.eatingGrassTimer - 1);
       if (this.eatingGrassTimer == 4) {
-         BlockPos var1 = new BlockPos(this.grassEaterEntity.posX, this.grassEaterEntity.posY, this.grassEaterEntity.posZ);
-         if (IS_TALL_GRASS.apply(this.entityWorld.getBlockState(var1))) {
-            if (this.entityWorld.getGameRules().getBoolean("mobGriefing")) {
-               this.entityWorld.destroyBlock(var1, false);
+         BlockPos blockposition = new BlockPos(this.grassEaterEntity.posX, this.grassEaterEntity.posY, this.grassEaterEntity.posZ);
+         if (IS_TALL_GRASS.apply(this.entityWorld.getBlockState(blockposition))) {
+            if (!CraftEventFactory.callEntityChangeBlockEvent(this.grassEaterEntity, this.grassEaterEntity.world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), Material.AIR, !this.entityWorld.getGameRules().getBoolean("mobGriefing")).isCancelled()) {
+               this.entityWorld.destroyBlock(blockposition, false);
             }
 
             this.grassEaterEntity.eatGrassBonus();
          } else {
-            BlockPos var2 = var1.down();
-            if (this.entityWorld.getBlockState(var2).getBlock() == Blocks.GRASS) {
-               if (this.entityWorld.getGameRules().getBoolean("mobGriefing")) {
-                  this.entityWorld.playEvent(2001, var2, Block.getIdFromBlock(Blocks.GRASS));
-                  this.entityWorld.setBlockState(var2, Blocks.DIRT.getDefaultState(), 2);
+            BlockPos blockposition1 = blockposition.down();
+            if (this.entityWorld.getBlockState(blockposition1).getBlock() == Blocks.GRASS) {
+               if (!CraftEventFactory.callEntityChangeBlockEvent(this.grassEaterEntity, this.grassEaterEntity.world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), Material.AIR, !this.entityWorld.getGameRules().getBoolean("mobGriefing")).isCancelled()) {
+                  this.entityWorld.playEvent(2001, blockposition1, Block.getIdFromBlock(Blocks.GRASS));
+                  this.entityWorld.setBlockState(blockposition1, Blocks.DIRT.getDefaultState(), 2);
                }
 
                this.grassEaterEntity.eatGrassBonus();

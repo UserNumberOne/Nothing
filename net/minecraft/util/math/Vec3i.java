@@ -27,7 +27,13 @@ public class Vec3i implements Comparable {
          return false;
       } else {
          Vec3i var2 = (Vec3i)var1;
-         return this.getX() != var2.getX() ? false : (this.getY() != var2.getY() ? false : this.getZ() == var2.getZ());
+         if (this.getX() != var2.getX()) {
+            return false;
+         } else if (this.getY() != var2.getY()) {
+            return false;
+         } else {
+            return this.getZ() == var2.getZ();
+         }
       }
    }
 
@@ -36,7 +42,11 @@ public class Vec3i implements Comparable {
    }
 
    public int compareTo(Vec3i var1) {
-      return this.getY() == var1.getY() ? (this.getZ() == var1.getZ() ? this.getX() - var1.getX() : this.getZ() - var1.getZ()) : this.getY() - var1.getY();
+      if (this.getY() == var1.getY()) {
+         return this.getZ() == var1.getZ() ? this.getX() - var1.getX() : this.getZ() - var1.getZ();
+      } else {
+         return this.getY() - var1.getY();
+      }
    }
 
    public int getX() {
@@ -82,5 +92,10 @@ public class Vec3i implements Comparable {
 
    public String toString() {
       return Objects.toStringHelper(this).add("x", this.getX()).add("y", this.getY()).add("z", this.getZ()).toString();
+   }
+
+   // $FF: synthetic method
+   public int compareTo(Object var1) {
+      return this.compareTo((Vec3i)var1);
    }
 }

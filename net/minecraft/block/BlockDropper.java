@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityDispenser;
@@ -12,51 +13,68 @@ import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.items.VanillaInventoryCodeHooks;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryDoubleChest;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.inventory.Inventory;
 
 public class BlockDropper extends BlockDispenser {
    private final IBehaviorDispenseItem dropBehavior = new BehaviorDefaultDispenseItem();
 
-   protected IBehaviorDispenseItem getBehavior(@Nullable ItemStack var1) {
+   protected IBehaviorDispenseItem getBehavior(@Nullable ItemStack itemstack) {
       return this.dropBehavior;
    }
 
-   public TileEntity createNewTileEntity(World var1, int var2) {
+   public TileEntity createNewTileEntity(World world, int i) {
       return new TileEntityDropper();
    }
 
-   protected void dispense(World var1, BlockPos var2) {
-      BlockSourceImpl var3 = new BlockSourceImpl(var1, var2);
-      TileEntityDispenser var4 = (TileEntityDispenser)var3.getBlockTileEntity();
-      if (var4 != null) {
-         int var5 = var4.getDispenseSlot();
-         if (var5 < 0) {
-            var1.playEvent(1001, var2, 0);
+   public void dispense(World world, BlockPos blockposition) {
+      BlockSourceImpl sourceblock = new BlockSourceImpl(world, blockposition);
+      TileEntityDispenser tileentitydispenser = (TileEntityDispenser)sourceblock.getBlockTileEntity();
+      if (tileentitydispenser != null) {
+         int i = tileentitydispenser.getDispenseSlot();
+         if (i < 0) {
+            world.playEvent(1001, blockposition, 0);
          } else {
-            ItemStack var6 = var4.getStackInSlot(var5);
-            if (var6 != null && VanillaInventoryCodeHooks.dropperInsertHook(var1, var2, var4, var5, var6)) {
-               EnumFacing var7 = (EnumFacing)var1.getBlockState(var2).getValue(FACING);
-               BlockPos var8 = var2.offset(var7);
-               IInventory var9 = TileEntityHopper.getInventoryAtPosition(var1, (double)var8.getX(), (double)var8.getY(), (double)var8.getZ());
-               ItemStack var10;
-               if (var9 == null) {
-                  var10 = this.dropBehavior.dispense(var3, var6);
-                  if (var10 != null && var10.stackSize <= 0) {
-                     var10 = null;
+            ItemStack itemstack = tileentitydispenser.getStackInSlot(i);
+            if (itemstack != null) {
+               EnumFacing enumdirection = (EnumFacing)world.getBlockState(blockposition).getValue(FACING);
+               BlockPos blockposition1 = blockposition.offset(enumdirection);
+               IInventory iinventory = TileEntityHopper.getInventoryAtPosition(world, (double)blockposition1.getX(), (double)blockposition1.getY(), (double)blockposition1.getZ());
+               ItemStack itemstack1;
+               if (iinventory == null) {
+                  itemstack1 = this.dropBehavior.dispense(sourceblock, itemstack);
+                  if (itemstack1 != null && itemstack1.stackSize <= 0) {
+                     itemstack1 = null;
                   }
                } else {
-                  var10 = TileEntityHopper.putStackInInventoryAllSlots(var9, var6.copy().splitStack(1), var7.getOpposite());
-                  if (var10 == null) {
-                     var10 = var6.copy();
-                     if (--var10.stackSize <= 0) {
-                        var10 = null;
+                  CraftItemStack oitemstack = CraftItemStack.asCraftMirror(itemstack.copy().splitStack(1));
+                  Inventory destinationInventory;
+                  if (iinventory instanceof InventoryLargeChest) {
+                     destinationInventory = new CraftInventoryDoubleChest((InventoryLargeChest)iinventory);
+                  } else {
+                     destinationInventory = iinventory.getOwner().getInventory();
+                  }
+
+                  InventoryMoveItemEvent event = new InventoryMoveItemEvent(tileentitydispenser.getOwner().getInventory(), oitemstack.clone(), destinationInventory, true);
+                  world.getServer().getPluginManager().callEvent(event);
+                  if (event.isCancelled()) {
+                     return;
+                  }
+
+                  itemstack1 = TileEntityHopper.putStackInInventoryAllSlots(iinventory, CraftItemStack.asNMSCopy(event.getItem()), enumdirection.getOpposite());
+                  if (event.getItem().equals(oitemstack) && itemstack1 == null) {
+                     itemstack1 = itemstack.copy();
+                     if (--itemstack1.stackSize <= 0) {
+                        itemstack1 = null;
                      }
                   } else {
-                     var10 = var6.copy();
+                     itemstack1 = itemstack.copy();
                   }
                }
 
-               var4.setInventorySlotContents(var5, var10);
+               tileentitydispenser.setInventorySlotContents(i, itemstack1);
             }
          }
       }

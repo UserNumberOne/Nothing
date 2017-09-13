@@ -2,6 +2,7 @@ package net.minecraft.world.gen.feature;
 
 import java.util.Random;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -19,7 +20,7 @@ public class WorldGenHellLava extends WorldGenerator {
    public boolean generate(World var1, Random var2, BlockPos var3) {
       if (var1.getBlockState(var3.up()).getBlock() != Blocks.NETHERRACK) {
          return false;
-      } else if (!var1.isAirBlock(var3) && var1.getBlockState(var3).getBlock() != Blocks.NETHERRACK) {
+      } else if (var1.getBlockState(var3).getMaterial() != Material.AIR && var1.getBlockState(var3).getBlock() != Blocks.NETHERRACK) {
          return false;
       } else {
          int var4 = 0;

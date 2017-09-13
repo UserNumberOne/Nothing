@@ -20,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityHopper;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -30,13 +29,16 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockHopper extends BlockContainer {
    public static final PropertyDirection FACING = PropertyDirection.create("facing", new Predicate() {
       public boolean apply(@Nullable EnumFacing var1) {
          return var1 != EnumFacing.UP;
+      }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((EnumFacing)var1);
       }
    });
    public static final PropertyBool ENABLED = PropertyBool.create("enabled");
@@ -144,11 +146,6 @@ public class BlockHopper extends BlockContainer {
       return false;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return true;
-   }
-
    public static EnumFacing getFacing(int var0) {
       return EnumFacing.getFront(var0 & 7);
    }
@@ -163,11 +160,6 @@ public class BlockHopper extends BlockContainer {
 
    public int getComparatorInputOverride(IBlockState var1, World var2, BlockPos var3) {
       return Container.calcRedstone(var2.getTileEntity(var3));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT_MIPPED;
    }
 
    public IBlockState getStateFromMeta(int var1) {

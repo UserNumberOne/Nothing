@@ -1178,7 +1178,7 @@ public class StructureStrongholdPieces {
       }
    }
 
-   public abstract static class Stronghold extends StructureComponent {
+   abstract static class Stronghold extends StructureComponent {
       protected StructureStrongholdPieces.Stronghold.Door entryDoor = StructureStrongholdPieces.Stronghold.Door.OPENING;
 
       public Stronghold() {

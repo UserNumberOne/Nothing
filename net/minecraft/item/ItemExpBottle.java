@@ -10,17 +10,10 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemExpBottle extends Item {
    public ItemExpBottle() {
       this.setCreativeTab(CreativeTabs.MISC);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasEffect(ItemStack var1) {
-      return true;
    }
 
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {

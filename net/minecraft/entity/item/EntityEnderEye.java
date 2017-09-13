@@ -8,8 +8,6 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityEnderEye extends Entity {
    private double targetX;
@@ -24,17 +22,6 @@ public class EntityEnderEye extends Entity {
    }
 
    protected void entityInit() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      double var3 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
-      if (Double.isNaN(var3)) {
-         var3 = 4.0D;
-      }
-
-      var3 = var3 * 64.0D;
-      return var1 < var3 * var3;
    }
 
    public EntityEnderEye(World var1, double var2, double var4, double var6) {
@@ -65,21 +52,6 @@ public class EntityEnderEye extends Entity {
       this.shatterOrDrop = this.rand.nextInt(5) > 0;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setVelocity(double var1, double var3, double var5) {
-      this.motionX = var1;
-      this.motionY = var3;
-      this.motionZ = var5;
-      if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F) {
-         float var7 = MathHelper.sqrt(var1 * var1 + var5 * var5);
-         this.rotationYaw = (float)(MathHelper.atan2(var1, var5) * 57.29577951308232D);
-         this.rotationPitch = (float)(MathHelper.atan2(var3, (double)var7) * 57.29577951308232D);
-         this.prevRotationYaw = this.rotationYaw;
-         this.prevRotationPitch = this.rotationPitch;
-      }
-
-   }
-
    public void onUpdate() {
       this.lastTickPosX = this.posX;
       this.lastTickPosY = this.posY;
@@ -89,9 +61,9 @@ public class EntityEnderEye extends Entity {
       this.posY += this.motionY;
       this.posZ += this.motionZ;
       float var1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-      this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.29577951308232D);
+      this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.2957763671875D);
 
-      for(this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)var1) * 57.29577951308232D); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
+      for(this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)var1) * 57.2957763671875D); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
          ;
       }
 
@@ -131,7 +103,7 @@ public class EntityEnderEye extends Entity {
 
       float var10 = 0.25F;
       if (this.isInWater()) {
-         for(int var3 = 0; var3 < 4; ++var3) {
+         for(int var11 = 0; var11 < 4; ++var11) {
             this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
          }
       } else {
@@ -161,11 +133,6 @@ public class EntityEnderEye extends Entity {
 
    public float getBrightness(float var1) {
       return 1.0F;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return 15728880;
    }
 
    public boolean canBeAttackedWithItem() {
