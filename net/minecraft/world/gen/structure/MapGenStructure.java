@@ -44,16 +44,28 @@ public abstract class MapGenStructure extends MapGenBase {
                public String call() throws Exception {
                   return MapGenStructure.this.canSpawnStructureAtCoords(var2, var3) ? "True" : "False";
                }
+
+               public Object call() throws Exception {
+                  return this.call();
+               }
             });
             var9.addCrashSection("Chunk location", String.format("%d,%d", var2, var3));
             var9.setDetail("Chunk pos hash", new ICrashReportDetail() {
                public String call() throws Exception {
                   return String.valueOf(ChunkPos.asLong(var2, var3));
                }
+
+               public Object call() throws Exception {
+                  return this.call();
+               }
             });
             var9.setDetail("Structure type", new ICrashReportDetail() {
                public String call() throws Exception {
                   return MapGenStructure.this.getClass().getCanonicalName();
+               }
+
+               public Object call() throws Exception {
+                  return this.call();
                }
             });
             throw new ReportedException(var8);
@@ -87,10 +99,10 @@ public abstract class MapGenStructure extends MapGenBase {
       return this.getStructureAt(var1) != null;
    }
 
-   protected StructureStart getStructureAt(BlockPos var1) {
+   protected synchronized StructureStart getStructureAt(BlockPos var1) {
       ObjectIterator var2 = this.structureMap.values().iterator();
 
-      label33:
+      label29:
       while(var2.hasNext()) {
          StructureStart var3 = (StructureStart)var2.next();
          if (var3.isSizeableStructure() && var3.getBoundingBox().isVecInside(var1)) {
@@ -98,7 +110,7 @@ public abstract class MapGenStructure extends MapGenBase {
 
             while(true) {
                if (!var4.hasNext()) {
-                  continue label33;
+                  continue label29;
                }
 
                StructureComponent var5 = (StructureComponent)var4.next();
@@ -114,7 +126,7 @@ public abstract class MapGenStructure extends MapGenBase {
       return null;
    }
 
-   public boolean isPositionInStructure(World var1, BlockPos var2) {
+   public synchronized boolean isPositionInStructure(World var1, BlockPos var2) {
       this.initializeStructureData(var1);
       ObjectIterator var3 = this.structureMap.values().iterator();
 
@@ -128,7 +140,7 @@ public abstract class MapGenStructure extends MapGenBase {
       return false;
    }
 
-   public BlockPos getClosestStrongholdPos(World var1, BlockPos var2) {
+   public synchronized BlockPos getClosestStrongholdPos(World var1, BlockPos var2) {
       this.world = var1;
       this.initializeStructureData(var1);
       this.rand.setSeed(var1.getSeed());
@@ -158,19 +170,19 @@ public abstract class MapGenStructure extends MapGenBase {
       if (var13 != null) {
          return var13;
       } else {
-         List var20 = this.getCoordList();
-         if (var20 != null) {
-            BlockPos var21 = null;
+         List var21 = this.getCoordList();
+         if (var21 != null) {
+            BlockPos var22 = null;
 
-            for(BlockPos var23 : var20) {
+            for(BlockPos var23 : var21) {
                double var24 = var23.distanceSq(var2);
                if (var24 < var11) {
                   var11 = var24;
-                  var21 = var23;
+                  var22 = var23;
                }
             }
 
-            return var21;
+            return var22;
          } else {
             return null;
          }
@@ -181,12 +193,12 @@ public abstract class MapGenStructure extends MapGenBase {
       return null;
    }
 
-   protected void initializeStructureData(World var1) {
+   protected synchronized void initializeStructureData(World var1) {
       if (this.structureData == null) {
-         this.structureData = (MapGenStructureData)var1.getPerWorldStorage().getOrLoadData(MapGenStructureData.class, this.getStructureName());
+         this.structureData = (MapGenStructureData)var1.loadData(MapGenStructureData.class, this.getStructureName());
          if (this.structureData == null) {
             this.structureData = new MapGenStructureData(this.getStructureName());
-            var1.getPerWorldStorage().setData(this.getStructureName(), this.structureData);
+            var1.setData(this.getStructureName(), this.structureData);
          } else {
             NBTTagCompound var2 = this.structureData.getTagCompound();
 

@@ -36,7 +36,7 @@ public class WeightedRandom {
          }
       }
 
-      return (WeightedRandom.Item)null;
+      return null;
    }
 
    public static WeightedRandom.Item getRandomItem(Random var0, List var1) {
@@ -44,7 +44,7 @@ public class WeightedRandom {
    }
 
    public static class Item {
-      public int itemWeight;
+      protected int itemWeight;
 
       public Item(int var1) {
          this.itemWeight = var1;

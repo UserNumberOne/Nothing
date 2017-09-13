@@ -13,7 +13,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockOre extends Block {
@@ -52,23 +51,22 @@ public class BlockOre extends Block {
       super.dropBlockAsItemWithChance(var1, var2, var3, var4, var5);
    }
 
-   public int getExpDrop(IBlockState var1, IBlockAccess var2, BlockPos var3, int var4) {
-      Random var5 = var2 instanceof World ? ((World)var2).rand : new Random();
-      if (this.getItemDropped(var1, var5, var4) != Item.getItemFromBlock(this)) {
-         int var6 = 0;
+   public int getExpDrop(World var1, IBlockState var2, int var3) {
+      if (this.getItemDropped(var2, var1.rand, var3) != Item.getItemFromBlock(this)) {
+         int var4 = 0;
          if (this == Blocks.COAL_ORE) {
-            var6 = MathHelper.getInt(var5, 0, 2);
+            var4 = MathHelper.getInt(var1.rand, 0, 2);
          } else if (this == Blocks.DIAMOND_ORE) {
-            var6 = MathHelper.getInt(var5, 3, 7);
+            var4 = MathHelper.getInt(var1.rand, 3, 7);
          } else if (this == Blocks.EMERALD_ORE) {
-            var6 = MathHelper.getInt(var5, 3, 7);
+            var4 = MathHelper.getInt(var1.rand, 3, 7);
          } else if (this == Blocks.LAPIS_ORE) {
-            var6 = MathHelper.getInt(var5, 2, 5);
+            var4 = MathHelper.getInt(var1.rand, 2, 5);
          } else if (this == Blocks.QUARTZ_ORE) {
-            var6 = MathHelper.getInt(var5, 2, 5);
+            var4 = MathHelper.getInt(var1.rand, 2, 5);
          }
 
-         return var6;
+         return var4;
       } else {
          return 0;
       }

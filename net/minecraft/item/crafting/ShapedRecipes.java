@@ -4,12 +4,15 @@ import javax.annotation.Nullable;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftShapedRecipe;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.inventory.ShapedRecipe;
 
 public class ShapedRecipes implements IRecipe {
-   public final int recipeWidth;
-   public final int recipeHeight;
-   public final ItemStack[] recipeItems;
+   private final int recipeWidth;
+   private final int recipeHeight;
+   private final ItemStack[] recipeItems;
    private final ItemStack recipeOutput;
    private boolean copyIngredientNBT;
 
@@ -18,6 +21,64 @@ public class ShapedRecipes implements IRecipe {
       this.recipeHeight = var2;
       this.recipeItems = var3;
       this.recipeOutput = var4;
+   }
+
+   public ShapedRecipe toBukkitRecipe() {
+      CraftShapedRecipe var2;
+      CraftItemStack var1 = CraftItemStack.asCraftMirror(this.recipeOutput);
+      var2 = new CraftShapedRecipe(var1, this);
+      label40:
+      switch(this.recipeHeight) {
+      case 1:
+         switch(this.recipeWidth) {
+         case 1:
+            var2.shape(new String[]{"a"});
+            break label40;
+         case 2:
+            var2.shape(new String[]{"ab"});
+            break label40;
+         case 3:
+            var2.shape(new String[]{"abc"});
+         default:
+            break label40;
+         }
+      case 2:
+         switch(this.recipeWidth) {
+         case 1:
+            var2.shape(new String[]{"a", "b"});
+            break label40;
+         case 2:
+            var2.shape(new String[]{"ab", "cd"});
+            break label40;
+         case 3:
+            var2.shape(new String[]{"abc", "def"});
+         default:
+            break label40;
+         }
+      case 3:
+         switch(this.recipeWidth) {
+         case 1:
+            var2.shape(new String[]{"a", "b", "c"});
+            break;
+         case 2:
+            var2.shape(new String[]{"ab", "cd", "ef"});
+            break;
+         case 3:
+            var2.shape(new String[]{"abc", "def", "ghi"});
+         }
+      }
+
+      char var3 = 'a';
+
+      for(ItemStack var7 : this.recipeItems) {
+         if (var7 != null) {
+            var2.setIngredient(var3, CraftMagicNumbers.getMaterial(var7.getItem()), var7.getMetadata());
+         }
+
+         ++var3;
+      }
+
+      return var2;
    }
 
    @Nullable
@@ -30,7 +91,9 @@ public class ShapedRecipes implements IRecipe {
 
       for(int var3 = 0; var3 < var2.length; ++var3) {
          ItemStack var4 = var1.getStackInSlot(var3);
-         var2[var3] = ForgeHooks.getContainerItem(var4);
+         if (var4 != null && var4.getItem().hasContainerItem()) {
+            var2[var3] = new ItemStack(var4.getItem().getContainerItem());
+         }
       }
 
       return var2;

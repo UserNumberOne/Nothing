@@ -31,9 +31,13 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.bukkit.entity.Slime;
+import org.bukkit.event.entity.SlimeSplitEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntitySlime extends EntityLiving implements IMob {
    private static final DataParameter SLIME_SIZE = EntityDataManager.createKey(EntitySlime.class, DataSerializers.VARINT);
@@ -61,7 +65,7 @@ public class EntitySlime extends EntityLiving implements IMob {
       this.dataManager.register(SLIME_SIZE, Integer.valueOf(1));
    }
 
-   protected void setSlimeSize(int var1) {
+   public void setSlimeSize(int var1) {
       this.dataManager.set(SLIME_SIZE, Integer.valueOf(var1));
       this.setSize(0.51000005F * (float)var1, 0.51000005F * (float)var1);
       this.setPosition(this.posX, this.posY, this.posZ);
@@ -114,9 +118,6 @@ public class EntitySlime extends EntityLiving implements IMob {
       super.onUpdate();
       if (this.onGround && !this.wasOnGround) {
          int var1 = this.getSlimeSize();
-         if (this.spawnCustomParticles()) {
-            var1 = 0;
-         }
 
          for(int var2 = 0; var2 < var1 * 8; ++var2) {
             float var3 = this.rand.nextFloat() * 6.2831855F;
@@ -170,22 +171,30 @@ public class EntitySlime extends EntityLiving implements IMob {
       int var1 = this.getSlimeSize();
       if (!this.world.isRemote && var1 > 1 && this.getHealth() <= 0.0F) {
          int var2 = 2 + this.rand.nextInt(3);
+         SlimeSplitEvent var3 = new SlimeSplitEvent((Slime)this.getBukkitEntity(), var2);
+         this.world.getServer().getPluginManager().callEvent(var3);
+         if (var3.isCancelled() || var3.getCount() <= 0) {
+            super.setDead();
+            return;
+         }
 
-         for(int var3 = 0; var3 < var2; ++var3) {
-            float var4 = ((float)(var3 % 2) - 0.5F) * (float)var1 / 4.0F;
-            float var5 = ((float)(var3 / 2) - 0.5F) * (float)var1 / 4.0F;
-            EntitySlime var6 = this.createInstance();
+         var2 = var3.getCount();
+
+         for(int var4 = 0; var4 < var2; ++var4) {
+            float var5 = ((float)(var4 % 2) - 0.5F) * (float)var1 / 4.0F;
+            float var6 = ((float)(var4 / 2) - 0.5F) * (float)var1 / 4.0F;
+            EntitySlime var7 = this.createInstance();
             if (this.hasCustomName()) {
-               var6.setCustomNameTag(this.getCustomNameTag());
+               var7.setCustomNameTag(this.getCustomNameTag());
             }
 
             if (this.isNoDespawnRequired()) {
-               var6.enablePersistence();
+               var7.enablePersistence();
             }
 
-            var6.setSlimeSize(var1 / 2);
-            var6.setLocationAndAngles(this.posX + (double)var4, this.posY + 0.5D, this.posZ + (double)var5, this.rand.nextFloat() * 360.0F, 0.0F);
-            this.world.spawnEntity(var6);
+            var7.setSlimeSize(var1 / 2);
+            var7.setLocationAndAngles(this.posX + (double)var5, this.posY + 0.5D, this.posZ + (double)var6, this.rand.nextFloat() * 360.0F, 0.0F);
+            this.world.addEntity(var7, SpawnReason.SLIME_SPLIT);
          }
       }
 
@@ -252,7 +261,7 @@ public class EntitySlime extends EntityLiving implements IMob {
    public boolean getCanSpawnHere() {
       BlockPos var1 = new BlockPos(MathHelper.floor(this.posX), 0, MathHelper.floor(this.posZ));
       Chunk var2 = this.world.getChunkFromBlockCoords(var1);
-      if (this.world.getWorldInfo().getTerrainType().handleSlimeSpawnReduction(this.rand, this.world)) {
+      if (this.world.getWorldInfo().getTerrainType() == WorldType.FLAT && this.rand.nextInt(4) != 1) {
          return false;
       } else {
          if (this.world.getDifficulty() != EnumDifficulty.PEACEFUL) {
@@ -301,10 +310,6 @@ public class EntitySlime extends EntityLiving implements IMob {
 
    protected SoundEvent getJumpSound() {
       return this.isSmallSlime() ? SoundEvents.ENTITY_SMALL_SLIME_JUMP : SoundEvents.ENTITY_SLIME_JUMP;
-   }
-
-   protected boolean spawnCustomParticles() {
-      return false;
    }
 
    static class AISlimeAttack extends EntityAIBase {

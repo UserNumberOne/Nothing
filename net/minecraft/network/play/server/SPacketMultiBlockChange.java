@@ -9,8 +9,6 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketMultiBlockChange implements Packet {
    private ChunkPos chunkPos;
@@ -53,11 +51,6 @@ public class SPacketMultiBlockChange implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleMultiBlockChange(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SPacketMultiBlockChange.BlockUpdateData[] getChangedBlocks() {
-      return this.changedBlocks;
    }
 
    public class BlockUpdateData {

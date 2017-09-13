@@ -4,6 +4,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityAIRunAroundLikeCrazy extends EntityAIBase {
    private final EntityHorse horseHost;
@@ -52,7 +54,7 @@ public class EntityAIRunAroundLikeCrazy extends EntityAIBase {
          if (var1 instanceof EntityPlayer) {
             int var2 = this.horseHost.getTemper();
             int var3 = this.horseHost.getMaxTemper();
-            if (var3 > 0 && this.horseHost.getRNG().nextInt(var3) < var2) {
+            if (var3 > 0 && this.horseHost.getRNG().nextInt(var3) < var2 && !CraftEventFactory.callEntityTameEvent(this.horseHost, ((CraftHumanEntity)this.horseHost.getBukkitEntity().getPassenger()).getHandle()).isCancelled()) {
                this.horseHost.setTamedBy((EntityPlayer)var1);
                this.horseHost.world.setEntityState(this.horseHost, (byte)7);
                return;

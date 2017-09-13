@@ -6,32 +6,33 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.structure.template.TemplateManager;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
 
 public class SaveHandler implements ISaveHandler, IPlayerFileData {
    private static final Logger LOGGER = LogManager.getLogger();
    private final File worldDirectory;
    private final File playersDirectory;
    private final File mapDataDir;
-   private final long initializationTime = MinecraftServer.getCurrentTimeMillis();
+   private final long initializationTime = MinecraftServer.av();
    private final String saveDirectoryName;
    private final TemplateManager structureTemplateManager;
    protected final DataFixer dataFixer;
+   private UUID uuid = null;
 
    public SaveHandler(File var1, String var2, boolean var3, DataFixer var4) {
       this.dataFixer = var4;
@@ -97,22 +98,20 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData {
    public WorldInfo loadWorldInfo() {
       File var1 = new File(this.worldDirectory, "level.dat");
       if (var1.exists()) {
-         WorldInfo var2 = SaveFormatOld.loadAndFix(var1, this.dataFixer, this);
+         WorldInfo var2 = SaveFormatOld.getWorldData(var1, this.dataFixer);
          if (var2 != null) {
             return var2;
          }
       }
 
-      FMLCommonHandler.instance().confirmBackupLevelDatUse(this);
       var1 = new File(this.worldDirectory, "level.dat_old");
-      return var1.exists() ? SaveFormatOld.loadAndFix(var1, this.dataFixer, this) : null;
+      return var1.exists() ? SaveFormatOld.getWorldData(var1, this.dataFixer) : null;
    }
 
    public void saveWorldInfoWithPlayer(WorldInfo var1, @Nullable NBTTagCompound var2) {
       NBTTagCompound var3 = var1.cloneNBTCompound(var2);
       NBTTagCompound var4 = new NBTTagCompound();
       var4.setTag("Data", var3);
-      FMLCommonHandler.instance().handleWorldDataSave(this, var1, var4);
 
       try {
          File var5 = new File(this.worldDirectory, "level.dat_new");
@@ -153,7 +152,6 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData {
          }
 
          var3.renameTo(var4);
-         ForgeEventFactory.firePlayerSavingEvent(var1, this.playersDirectory, var1.getUniqueID().toString());
       } catch (Exception var5) {
          LOGGER.warn("Failed to save player data for {}", new Object[]{var1.getName()});
       }
@@ -168,16 +166,36 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData {
          if (var3.exists() && var3.isFile()) {
             var2 = CompressedStreamTools.readCompressed(new FileInputStream(var3));
          }
-      } catch (Exception var4) {
+      } catch (Exception var6) {
          LOGGER.warn("Failed to load player data for {}", new Object[]{var1.getName()});
       }
 
       if (var2 != null) {
+         if (var1 instanceof EntityPlayerMP) {
+            CraftPlayer var7 = (CraftPlayer)var1.getBukkitEntity();
+            long var4 = (new File(this.playersDirectory, var1.getUniqueID().toString() + ".dat")).lastModified();
+            if (var4 < var7.getFirstPlayed()) {
+               var7.setFirstPlayed(var4);
+            }
+         }
+
          var1.readFromNBT(this.dataFixer.process(FixTypes.PLAYER, var2));
       }
 
-      ForgeEventFactory.firePlayerLoadingEvent(var1, this.playersDirectory, var1.getUniqueID().toString());
       return var2;
+   }
+
+   public NBTTagCompound getPlayerData(String var1) {
+      try {
+         File var2 = new File(this.playersDirectory, var1 + ".dat");
+         if (var2.exists()) {
+            return CompressedStreamTools.readCompressed(new FileInputStream(var2));
+         }
+      } catch (Exception var3) {
+         LOGGER.warn("Failed to load player data for " + var1);
+      }
+
+      return null;
    }
 
    public IPlayerFileData getPlayerNBTManager() {
@@ -210,16 +228,62 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData {
       return this.structureTemplateManager;
    }
 
-   public NBTTagCompound getPlayerNBT(EntityPlayerMP var1) {
-      try {
-         File var2 = new File(this.playersDirectory, var1.getUniqueID().toString() + ".dat");
-         if (var2.exists() && var2.isFile()) {
-            return CompressedStreamTools.readCompressed(new FileInputStream(var2));
-         }
-      } catch (Exception var3) {
-         LOGGER.warn("Failed to load player data for " + var1.getName());
-      }
+   public UUID getUUID() {
+      if (this.uuid != null) {
+         return this.uuid;
+      } else {
+         File var1 = new File(this.worldDirectory, "uid.dat");
+         if (var1.exists()) {
+            label204: {
+               DataInputStream var2 = null;
 
-      return null;
+               UUID var3;
+               try {
+                  var2 = new DataInputStream(new FileInputStream(var1));
+                  var3 = this.uuid = new UUID(var2.readLong(), var2.readLong());
+               } catch (IOException var28) {
+                  LOGGER.warn("Failed to read " + var1 + ", generating new random UUID", var28);
+                  break label204;
+               } finally {
+                  if (var2 != null) {
+                     try {
+                        var2.close();
+                     } catch (IOException var25) {
+                        ;
+                     }
+                  }
+
+               }
+
+               return var3;
+            }
+         }
+
+         this.uuid = UUID.randomUUID();
+         DataOutputStream var30 = null;
+
+         try {
+            var30 = new DataOutputStream(new FileOutputStream(var1));
+            var30.writeLong(this.uuid.getMostSignificantBits());
+            var30.writeLong(this.uuid.getLeastSignificantBits());
+         } catch (IOException var26) {
+            LOGGER.warn("Failed to write " + var1, var26);
+         } finally {
+            if (var30 != null) {
+               try {
+                  var30.close();
+               } catch (IOException var24) {
+                  ;
+               }
+            }
+
+         }
+
+         return this.uuid;
+      }
+   }
+
+   public File getPlayerDir() {
+      return this.playersDirectory;
    }
 }

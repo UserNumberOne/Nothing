@@ -36,8 +36,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityIronGolem extends EntityGolem {
    protected static final DataParameter PLAYER_CREATED = EntityDataManager.createKey(EntityIronGolem.class, DataSerializers.BYTE);
@@ -65,6 +64,10 @@ public class EntityIronGolem extends EntityGolem {
       this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 10, false, true, new Predicate() {
          public boolean apply(@Nullable EntityLiving var1) {
             return var1 != null && IMob.VISIBLE_MOB_SELECTOR.apply(var1) && !(var1 instanceof EntityCreeper);
+         }
+
+         public boolean apply(Object var1) {
+            return this.apply((EntityLiving)var1);
          }
       }));
    }
@@ -102,7 +105,7 @@ public class EntityIronGolem extends EntityGolem {
 
    protected void collideWithEntity(Entity var1) {
       if (var1 instanceof IMob && !(var1 instanceof EntityCreeper) && this.getRNG().nextInt(20) == 0) {
-         this.setAttackTarget((EntityLivingBase)var1);
+         this.setGoalTarget((EntityLivingBase)var1, TargetReason.COLLISION, true);
       }
 
       super.collideWithEntity(var1);
@@ -161,26 +164,8 @@ public class EntityIronGolem extends EntityGolem {
       return var2;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 4) {
-         this.attackTimer = 10;
-         this.playSound(SoundEvents.ENTITY_IRONGOLEM_ATTACK, 1.0F, 1.0F);
-      } else if (var1 == 11) {
-         this.holdRoseTick = 400;
-      } else {
-         super.handleStatusUpdate(var1);
-      }
-
-   }
-
    public Village getVillage() {
       return this.villageObj;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getAttackTimer() {
-      return this.attackTimer;
    }
 
    public void setHoldingRose(boolean var1) {

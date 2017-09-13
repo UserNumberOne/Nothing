@@ -1,10 +1,10 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
-import net.minecraft.block.BlockSapling;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -44,7 +44,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
 
             for(int var7 = -var6; var7 <= var6 && var4; ++var7) {
                for(int var8 = -var6; var8 <= var6 && var4; ++var8) {
-                  if (var2.getY() + var5 < 0 || var2.getY() + var5 >= 256 || !this.isReplaceable(var1, var2.add(var7, var5, var8))) {
+                  if (var2.getY() + var5 < 0 || var2.getY() + var5 >= 256 || !this.canGrowInto(var1.getBlockState(var2.add(var7, var5, var8)).getBlock()) && var1.getBlockState(var2.add(var7, var5, var8)).getBlock() != Blocks.SAPLING) {
                      var4 = false;
                   }
                }
@@ -59,13 +59,12 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
 
    private boolean ensureDirtsUnderneath(BlockPos var1, World var2) {
       BlockPos var3 = var1.down();
-      IBlockState var4 = var2.getBlockState(var3);
-      boolean var5 = var4.getBlock().canSustainPlant(var4, var2, var3, EnumFacing.UP, (BlockSapling)Blocks.SAPLING);
-      if (var5 && var1.getY() >= 2) {
-         this.onPlantGrow(var2, var3, var1);
-         this.onPlantGrow(var2, var3.east(), var1);
-         this.onPlantGrow(var2, var3.south(), var1);
-         this.onPlantGrow(var2, var3.south().east(), var1);
+      Block var4 = var2.getBlockState(var3).getBlock();
+      if ((var4 == Blocks.GRASS || var4 == Blocks.DIRT) && var1.getY() >= 2) {
+         this.setDirtAt(var2, var3);
+         this.setDirtAt(var2, var3.east());
+         this.setDirtAt(var2, var3.south());
+         this.setDirtAt(var2, var3.south().east());
          return true;
       } else {
          return false;
@@ -85,8 +84,8 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
             int var8 = var6 - 1;
             if (var5 * var5 + var6 * var6 <= var4 || var7 * var7 + var8 * var8 <= var4 || var5 * var5 + var8 * var8 <= var4 || var7 * var7 + var6 * var6 <= var4) {
                BlockPos var9 = var2.add(var5, 0, var6);
-               IBlockState var10 = var1.getBlockState(var9);
-               if (var10.getBlock().isAir(var10, var1, var9) || var10.getBlock().isLeaves(var10, var1, var9)) {
+               Material var10 = var1.getBlockState(var9).getMaterial();
+               if (var10 == Material.AIR || var10 == Material.LEAVES) {
                   this.setBlockAndNotifyAdequately(var1, var9, this.leavesMetadata);
                }
             }
@@ -102,18 +101,13 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
          for(int var6 = -var3; var6 <= var3; ++var6) {
             if (var5 * var5 + var6 * var6 <= var4) {
                BlockPos var7 = var2.add(var5, 0, var6);
-               IBlockState var8 = var1.getBlockState(var7);
-               if (var8.getBlock().isAir(var8, var1, var7) || var8.getBlock().isLeaves(var8, var1, var7)) {
+               Material var8 = var1.getBlockState(var7).getMaterial();
+               if (var8 == Material.AIR || var8 == Material.LEAVES) {
                   this.setBlockAndNotifyAdequately(var1, var7, this.leavesMetadata);
                }
             }
          }
       }
 
-   }
-
-   private void onPlantGrow(World var1, BlockPos var2, BlockPos var3) {
-      IBlockState var4 = var1.getBlockState(var2);
-      var4.getBlock().onPlantGrow(var4, var1, var2, var3);
    }
 }

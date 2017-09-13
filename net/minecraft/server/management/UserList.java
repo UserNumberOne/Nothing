@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,7 +51,7 @@ public class UserList {
    public UserList(File var1) {
       this.saveFile = var1;
       GsonBuilder var2 = (new GsonBuilder()).setPrettyPrinting();
-      var2.registerTypeHierarchyAdapter(UserListEntry.class, new UserList.Serializer());
+      var2.registerTypeHierarchyAdapter(UserListEntry.class, new UserList.Serializer((Object)null));
       this.gson = var2.create();
    }
 
@@ -63,6 +61,10 @@ public class UserList {
 
    public void setLanServer(boolean var1) {
       this.lanServer = var1;
+   }
+
+   public File getSaveFile() {
+      return this.saveFile;
    }
 
    public void addEntry(UserListEntry var1) {
@@ -92,13 +94,16 @@ public class UserList {
 
    }
 
-   @SideOnly(Side.SERVER)
-   public File getSaveFile() {
-      return this.saveFile;
-   }
-
    public String[] getKeys() {
       return (String[])this.values.keySet().toArray(new String[this.values.size()]);
+   }
+
+   public Collection getValues() {
+      return this.values.values();
+   }
+
+   public boolean isEmpty() {
+      return this.values.size() < 1;
    }
 
    protected String getObjectKey(Object var1) {
@@ -146,13 +151,7 @@ public class UserList {
 
    }
 
-   @SideOnly(Side.SERVER)
-   public boolean isEmpty() {
-      return this.values.size() < 1;
-   }
-
-   @SideOnly(Side.SERVER)
-   public void readSavedFile() throws IOException, FileNotFoundException {
+   public void readSavedFile() throws FileNotFoundException {
       Collection var1 = null;
       BufferedReader var2 = null;
 
@@ -179,19 +178,24 @@ public class UserList {
       private Serializer() {
       }
 
-      public JsonElement serialize(UserListEntry var1, Type var2, JsonSerializationContext var3) {
-         JsonObject var4 = new JsonObject();
-         var1.onSerialization(var4);
-         return var4;
+      public JsonElement serialize(UserListEntry param1, Type param2, JsonSerializationContext param3) {
+         // $FF: Couldn't be decompiled
       }
 
-      public UserListEntry deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-         if (var1.isJsonObject()) {
-            JsonObject var4 = var1.getAsJsonObject();
-            return UserList.this.createEntry(var4);
-         } else {
-            return null;
-         }
+      public UserListEntry deserialize(JsonElement param1, Type param2, JsonDeserializationContext param3) throws JsonParseException {
+         // $FF: Couldn't be decompiled
+      }
+
+      public JsonElement serialize(UserListEntry param1, Type param2, JsonSerializationContext param3) {
+         // $FF: Couldn't be decompiled
+      }
+
+      public UserListEntry deserialize(JsonElement param1, Type param2, JsonDeserializationContext param3) throws JsonParseException {
+         // $FF: Couldn't be decompiled
+      }
+
+      Serializer(Object var2) {
+         this();
       }
    }
 }

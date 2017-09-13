@@ -23,6 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class Village {
    private World world;
@@ -67,7 +68,7 @@ public class Village {
          if (var3 != null) {
             EntityIronGolem var4 = new EntityIronGolem(this.world);
             var4.setPosition(var3.xCoord, var3.yCoord, var3.zCoord);
-            this.world.spawnEntity(var4);
+            this.world.addEntity(var4, SpawnReason.VILLAGE_DEFENSE);
             ++this.numIronGolems;
          }
       }
@@ -359,7 +360,7 @@ public class Village {
       for(int var9 = 0; var9 < var8.tagCount(); ++var9) {
          NBTTagCompound var10 = var8.getCompoundTagAt(var9);
          if (var10.hasKey("UUID") && this.world != null && this.world.getMinecraftServer() != null) {
-            PlayerProfileCache var6 = this.world.getMinecraftServer().getPlayerProfileCache();
+            PlayerProfileCache var6 = this.world.getMinecraftServer().getUserCache();
             GameProfile var7 = var6.getProfileByUUID(UUID.fromString(var10.getString("UUID")));
             if (var7 != null) {
                this.playerReputation.put(var7.getName(), Integer.valueOf(var10.getInteger("S")));
@@ -398,20 +399,20 @@ public class Village {
       }
 
       var1.setTag("Doors", var2);
-      NBTTagList var9 = new NBTTagList();
+      NBTTagList var10 = new NBTTagList();
 
-      for(String var11 : this.playerReputation.keySet()) {
-         NBTTagCompound var6 = new NBTTagCompound();
-         PlayerProfileCache var7 = this.world.getMinecraftServer().getPlayerProfileCache();
-         GameProfile var8 = var7.getGameProfileForUsername(var11);
-         if (var8 != null) {
-            var6.setString("UUID", var8.getId().toString());
-            var6.setInteger("S", ((Integer)this.playerReputation.get(var11)).intValue());
-            var9.appendTag(var6);
+      for(String var6 : this.playerReputation.keySet()) {
+         NBTTagCompound var7 = new NBTTagCompound();
+         PlayerProfileCache var8 = this.world.getMinecraftServer().getUserCache();
+         GameProfile var9 = var8.getGameProfileForUsername(var6);
+         if (var9 != null) {
+            var7.setString("UUID", var9.getId().toString());
+            var7.setInteger("S", ((Integer)this.playerReputation.get(var6)).intValue());
+            var10.appendTag(var7);
          }
       }
 
-      var1.setTag("Players", var9);
+      var1.setTag("Players", var10);
    }
 
    public void endMatingSeason() {

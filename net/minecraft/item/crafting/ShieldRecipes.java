@@ -1,5 +1,6 @@
 package net.minecraft.item.crafting;
 
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -13,11 +14,12 @@ import net.minecraft.world.World;
 public class ShieldRecipes {
    public void addRecipes(CraftingManager var1) {
       var1.addRecipe(new ItemStack(Items.SHIELD), "WoW", "WWW", " W ", 'W', Blocks.PLANKS, 'o', Items.IRON_INGOT);
-      var1.addRecipe(new ShieldRecipes.Decoration());
+      var1.addRecipe(new ShieldRecipes.Decoration((ShieldRecipes.SyntheticClass_1)null));
    }
 
-   public static class Decoration implements IRecipe {
+   static class Decoration extends ShapelessRecipes implements IRecipe {
       private Decoration() {
+         super(new ItemStack(Items.SHIELD, 0, 0), Arrays.asList(new ItemStack(Items.BANNER, 0, 0)));
       }
 
       public boolean matches(InventoryCrafting var1, World var2) {
@@ -106,5 +108,12 @@ public class ShieldRecipes {
 
          return var2;
       }
+
+      Decoration(ShieldRecipes.SyntheticClass_1 var1) {
+         this();
+      }
+   }
+
+   static class SyntheticClass_1 {
    }
 }

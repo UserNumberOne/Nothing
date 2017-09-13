@@ -47,7 +47,7 @@ public class ItemBed extends Item {
                   var3.setBlockState(var15, var20, 11);
                }
 
-               SoundType var21 = var19.getBlock().getSoundType(var19, var3, var4, var2);
+               SoundType var21 = var19.getBlock().getSoundType();
                var3.playSound((EntityPlayer)null, var4, var21.getPlaceSound(), SoundCategory.BLOCKS, (var21.getVolume() + 1.0F) / 2.0F, var21.getPitch() * 0.8F);
                --var1.stackSize;
                return EnumActionResult.SUCCESS;

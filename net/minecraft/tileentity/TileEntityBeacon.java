@@ -2,6 +2,7 @@ package net.minecraft.tileentity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,6 +16,7 @@ import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerBeacon;
@@ -24,31 +26,64 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_10_R1.potion.CraftPotionUtil;
+import org.bukkit.potion.PotionEffect;
 
 public class TileEntityBeacon extends TileEntityLockable implements ITickable, ISidedInventory {
    public static final Potion[][] EFFECTS_LIST = new Potion[][]{{MobEffects.SPEED, MobEffects.HASTE}, {MobEffects.RESISTANCE, MobEffects.JUMP_BOOST}, {MobEffects.STRENGTH}, {MobEffects.REGENERATION}};
    private static final Set VALID_EFFECTS = Sets.newHashSet();
    private final List beamSegments = Lists.newArrayList();
-   @SideOnly(Side.CLIENT)
-   private long beamRenderCounter;
-   @SideOnly(Side.CLIENT)
-   private float beamRenderScale;
    private boolean isComplete;
-   private int levels = -1;
+   public int levels = -1;
    @Nullable
-   private Potion primaryEffect;
+   public Potion primaryEffect;
    @Nullable
-   private Potion secondaryEffect;
+   public Potion secondaryEffect;
    private ItemStack payment;
    private String customName;
+   public List transaction = new ArrayList();
+   private int maxStack = 64;
+
+   static {
+      for(Potion[] var3 : EFFECTS_LIST) {
+         Collections.addAll(VALID_EFFECTS, var3);
+      }
+
+   }
+
+   public ItemStack[] getContents() {
+      return new ItemStack[]{this.payment};
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
+   }
+
+   public PotionEffect getPrimaryEffect() {
+      return this.primaryEffect != null ? CraftPotionUtil.toBukkit(new net.minecraft.potion.PotionEffect(this.primaryEffect, this.getLevel(), this.getAmplification(), true, true)) : null;
+   }
+
+   public PotionEffect getSecondaryEffect() {
+      return this.hasSecondaryEffect() ? CraftPotionUtil.toBukkit(new net.minecraft.potion.PotionEffect(this.secondaryEffect, this.getLevel(), this.getAmplification(), true, true)) : null;
+   }
 
    public void update() {
       if (this.world.getTotalWorldTime() % 80L == 0L) {
@@ -65,29 +100,49 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
 
    }
 
+   private byte getAmplification() {
+      byte var1 = 0;
+      if (this.levels >= 4 && this.primaryEffect == this.secondaryEffect) {
+         var1 = 1;
+      }
+
+      return var1;
+   }
+
+   private int getLevel() {
+      int var1 = (9 + this.levels * 2) * 20;
+      return var1;
+   }
+
+   public List getHumansInRange() {
+      double var1 = (double)(this.levels * 10 + 10);
+      int var3 = this.pos.getX();
+      int var4 = this.pos.getY();
+      int var5 = this.pos.getZ();
+      AxisAlignedBB var6 = (new AxisAlignedBB((double)var3, (double)var4, (double)var5, (double)(var3 + 1), (double)(var4 + 1), (double)(var5 + 1))).expandXyz(var1).addCoord(0.0D, (double)this.world.getHeight(), 0.0D);
+      List var7 = this.world.getEntitiesWithinAABB(EntityPlayer.class, var6);
+      return var7;
+   }
+
+   private void applyEffect(List var1, Potion var2, int var3, int var4) {
+      for(EntityPlayer var6 : var1) {
+         var6.addPotionEffect(new net.minecraft.potion.PotionEffect(var2, var3, var4, true, true));
+      }
+
+   }
+
+   private boolean hasSecondaryEffect() {
+      return this.levels >= 4 && this.primaryEffect != this.secondaryEffect && this.secondaryEffect != null;
+   }
+
    private void addEffectsToPlayers() {
       if (this.isComplete && this.levels > 0 && !this.world.isRemote && this.primaryEffect != null) {
-         double var1 = (double)(this.levels * 10 + 10);
-         byte var3 = 0;
-         if (this.levels >= 4 && this.primaryEffect == this.secondaryEffect) {
-            var3 = 1;
-         }
-
-         int var4 = (9 + this.levels * 2) * 20;
-         int var5 = this.pos.getX();
-         int var6 = this.pos.getY();
-         int var7 = this.pos.getZ();
-         AxisAlignedBB var8 = (new AxisAlignedBB((double)var5, (double)var6, (double)var7, (double)(var5 + 1), (double)(var6 + 1), (double)(var7 + 1))).expandXyz(var1).addCoord(0.0D, (double)this.world.getHeight(), 0.0D);
-         List var9 = this.world.getEntitiesWithinAABB(EntityPlayer.class, var8);
-
-         for(EntityPlayer var11 : var9) {
-            var11.addPotionEffect(new PotionEffect(this.primaryEffect, var4, var3, true, true));
-         }
-
-         if (this.levels >= 4 && this.primaryEffect != this.secondaryEffect && this.secondaryEffect != null) {
-            for(EntityPlayer var13 : var9) {
-               var13.addPotionEffect(new PotionEffect(this.secondaryEffect, var4, 0, true, true));
-            }
+         byte var1 = this.getAmplification();
+         int var2 = this.getLevel();
+         List var3 = this.getHumansInRange();
+         this.applyEffect(var3, this.primaryEffect, var2, var1);
+         if (this.hasSecondaryEffect()) {
+            this.applyEffect(var3, this.secondaryEffect, var2, 0);
          }
       }
 
@@ -111,21 +166,18 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
          float[] var10;
          if (var9.getBlock() == Blocks.STAINED_GLASS) {
             var10 = EntitySheep.getDyeRgb((EnumDyeColor)var9.getValue(BlockStainedGlass.COLOR));
-         } else if (var9.getBlock() != Blocks.STAINED_GLASS_PANE) {
-            if (var9.getLightOpacity(this.world, var7) >= 15 && var9.getBlock() != Blocks.BEDROCK) {
-               this.isComplete = false;
-               this.beamSegments.clear();
-               break;
-            }
+         } else {
+            if (var9.getBlock() != Blocks.STAINED_GLASS_PANE) {
+               if (var9.getLightOpacity() >= 15 && var9.getBlock() != Blocks.BEDROCK) {
+                  this.isComplete = false;
+                  this.beamSegments.clear();
+                  break;
+               }
 
-            float[] var11 = var9.getBlock().getBeaconColorMultiplier(var9, this.world, var7, this.getPos());
-            if (var11 == null) {
                var5.incrementHeight();
                continue;
             }
 
-            var10 = var11;
-         } else {
             var10 = EntitySheep.getDyeRgb((EnumDyeColor)var9.getValue(BlockStainedGlassPane.COLOR));
          }
 
@@ -145,24 +197,24 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
 
       if (this.isComplete) {
          for(int var14 = 1; var14 <= 4; this.levels = var14++) {
-            int var16 = var3 - var14;
-            if (var16 < 0) {
+            int var15 = var3 - var14;
+            if (var15 < 0) {
                break;
             }
 
-            boolean var18 = true;
+            boolean var17 = true;
 
-            for(int var19 = var2 - var14; var19 <= var2 + var14 && var18; ++var19) {
+            for(int var11 = var2 - var14; var11 <= var2 + var14 && var17; ++var11) {
                for(int var12 = var4 - var14; var12 <= var4 + var14; ++var12) {
-                  Block var13 = this.world.getBlockState(new BlockPos(var19, var16, var12)).getBlock();
-                  if (!var13.isBeaconBase(this.world, new BlockPos(var19, var16, var12), this.getPos())) {
-                     var18 = false;
+                  Block var13 = this.world.getBlockState(new BlockPos(var11, var15, var12)).getBlock();
+                  if (var13 != Blocks.EMERALD_BLOCK && var13 != Blocks.GOLD_BLOCK && var13 != Blocks.DIAMOND_BLOCK && var13 != Blocks.IRON_BLOCK) {
+                     var17 = false;
                      break;
                   }
                }
             }
 
-            if (!var18) {
+            if (!var17) {
                break;
             }
          }
@@ -173,39 +225,11 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
       }
 
       if (!this.world.isRemote && this.levels == 4 && var1 < this.levels) {
-         for(EntityPlayer var17 : this.world.getEntitiesWithinAABB(EntityPlayer.class, (new AxisAlignedBB((double)var2, (double)var3, (double)var4, (double)var2, (double)(var3 - 4), (double)var4)).expand(10.0D, 5.0D, 10.0D))) {
-            var17.addStat(AchievementList.FULL_BEACON);
+         for(EntityPlayer var18 : this.world.getEntitiesWithinAABB(EntityPlayer.class, (new AxisAlignedBB((double)var2, (double)var3, (double)var4, (double)var2, (double)(var3 - 4), (double)var4)).expand(10.0D, 5.0D, 10.0D))) {
+            var18.addStat(AchievementList.FULL_BEACON);
          }
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getBeamSegments() {
-      return this.beamSegments;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float shouldBeamRender() {
-      if (!this.isComplete) {
-         return 0.0F;
-      } else {
-         int var1 = (int)(this.world.getTotalWorldTime() - this.beamRenderCounter);
-         this.beamRenderCounter = this.world.getTotalWorldTime();
-         if (var1 > 1) {
-            this.beamRenderScale -= (float)var1 / 40.0F;
-            if (this.beamRenderScale < 0.0F) {
-               this.beamRenderScale = 0.0F;
-            }
-         }
-
-         this.beamRenderScale += 0.025F;
-         if (this.beamRenderScale > 1.0F) {
-            this.beamRenderScale = 1.0F;
-         }
-
-         return this.beamRenderScale;
-      }
    }
 
    @Nullable
@@ -215,11 +239,6 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
 
    public NBTTagCompound getUpdateTag() {
       return this.writeToNBT(new NBTTagCompound());
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getMaxRenderDistanceSquared() {
-      return 65536.0D;
    }
 
    @Nullable
@@ -313,7 +332,7 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
    }
 
    public boolean isItemValidForSlot(int var1, ItemStack var2) {
-      return var2.getItem() != null && var2.getItem().isBeaconPayment(var2);
+      return var2.getItem() == Items.EMERALD || var2.getItem() == Items.DIAMOND || var2.getItem() == Items.GOLD_INGOT || var2.getItem() == Items.IRON_INGOT;
    }
 
    public String getGuiID() {
@@ -380,13 +399,6 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
       return false;
    }
 
-   static {
-      for(Potion[] var3 : EFFECTS_LIST) {
-         Collections.addAll(VALID_EFFECTS, var3);
-      }
-
-   }
-
    public static class BeamSegment {
       private final float[] colors;
       private int height;
@@ -402,11 +414,6 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
 
       public float[] getColors() {
          return this.colors;
-      }
-
-      @SideOnly(Side.CLIENT)
-      public int getHeight() {
-         return this.height;
       }
    }
 }

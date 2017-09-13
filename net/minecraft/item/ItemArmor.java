@@ -27,8 +27,10 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.util.Vector;
 
 public class ItemArmor extends Item {
    private static final int[] MAX_DAMAGE_ARRAY = new int[]{13, 15, 16, 11};
@@ -54,15 +56,37 @@ public class ItemArmor extends Item {
       } else {
          EntityLivingBase var4 = (EntityLivingBase)var3.get(0);
          EntityEquipmentSlot var5 = EntityLiving.getSlotForItemStack(var1);
-         ItemStack var6 = var1.copy();
-         var6.stackSize = 1;
-         var4.setItemStackToSlot(var5, var6);
-         if (var4 instanceof EntityLiving) {
-            ((EntityLiving)var4).setDropChance(var5, 2.0F);
+         ItemStack var6 = var1.splitStack(1);
+         World var7 = var0.getWorld();
+         Block var8 = var7.getWorld().getBlockAt(var0.getBlockPos().getX(), var0.getBlockPos().getY(), var0.getBlockPos().getZ());
+         CraftItemStack var9 = CraftItemStack.asCraftMirror(var6);
+         BlockDispenseEvent var10 = new BlockDispenseEvent(var8, var9.clone(), new Vector(0, 0, 0));
+         if (!BlockDispenser.eventFired) {
+            var7.getServer().getPluginManager().callEvent(var10);
          }
 
-         --var1.stackSize;
-         return var1;
+         if (var10.isCancelled()) {
+            ++var1.stackSize;
+            return var1;
+         } else {
+            if (!var10.getItem().equals(var9)) {
+               ++var1.stackSize;
+               ItemStack var11 = CraftItemStack.asNMSCopy(var10.getItem());
+               IBehaviorDispenseItem var12 = (IBehaviorDispenseItem)BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(var11.getItem());
+               if (var12 != IBehaviorDispenseItem.DEFAULT_BEHAVIOR && var12 != DISPENSER_BEHAVIOR) {
+                  var12.dispense(var0, var11);
+                  return var1;
+               }
+            }
+
+            var6.stackSize = 1;
+            var4.setItemStackToSlot(var5, var6);
+            if (var4 instanceof EntityLiving) {
+               ((EntityLiving)var4).setDropChance(var5, 2.0F);
+            }
+
+            return var1;
+         }
       }
    }
 
@@ -76,11 +100,6 @@ public class ItemArmor extends Item {
       this.maxStackSize = 1;
       this.setCreativeTab(CreativeTabs.COMBAT);
       BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, DISPENSER_BEHAVIOR);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EntityEquipmentSlot getEquipmentSlot() {
-      return this.armorType;
    }
 
    public int getItemEnchantability() {
@@ -174,10 +193,6 @@ public class ItemArmor extends Item {
       return var2;
    }
 
-   public boolean hasOverlay(ItemStack var1) {
-      return this.material == ItemArmor.ArmorMaterial.LEATHER || this.getColor(var1) != 16777215;
-   }
-
    public static enum ArmorMaterial {
       LEATHER("leather", 5, new int[]{1, 2, 3, 1}, 15, SoundEvents.ITEM_ARMOR_EQUIP_LEATHER, 0.0F),
       CHAIN("chainmail", 15, new int[]{1, 4, 5, 2}, 12, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.0F),
@@ -191,7 +206,6 @@ public class ItemArmor extends Item {
       private final int enchantability;
       private final SoundEvent soundEvent;
       private final float toughness;
-      public Item customCraftingMaterial = null;
 
       private ArmorMaterial(String var3, int var4, int[] var5, int var6, SoundEvent var7, float var8) {
          this.name = var3;
@@ -219,25 +233,7 @@ public class ItemArmor extends Item {
       }
 
       public Item getRepairItem() {
-         switch(this) {
-         case LEATHER:
-            return Items.LEATHER;
-         case CHAIN:
-            return Items.IRON_INGOT;
-         case GOLD:
-            return Items.GOLD_INGOT;
-         case IRON:
-            return Items.IRON_INGOT;
-         case DIAMOND:
-            return Items.DIAMOND;
-         default:
-            return this.customCraftingMaterial;
-         }
-      }
-
-      @SideOnly(Side.CLIENT)
-      public String getName() {
-         return this.name;
+         return this == LEATHER ? Items.LEATHER : (this == CHAIN ? Items.IRON_INGOT : (this == GOLD ? Items.GOLD_INGOT : (this == IRON ? Items.IRON_INGOT : (this == DIAMOND ? Items.DIAMOND : null))));
       }
 
       public float getToughness() {

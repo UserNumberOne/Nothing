@@ -5,11 +5,9 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSpawnPosition implements Packet {
-   private BlockPos spawnBlockPos;
+   public BlockPos spawnBlockPos;
 
    public SPacketSpawnPosition() {
    }
@@ -28,10 +26,5 @@ public class SPacketSpawnPosition implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleSpawnPosition(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockPos getSpawnPos() {
-      return this.spawnBlockPos;
    }
 }

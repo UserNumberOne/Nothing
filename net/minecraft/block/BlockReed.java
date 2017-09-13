@@ -11,19 +11,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.EnumPlantType;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
-public class BlockReed extends Block implements IPlantable {
+public class BlockReed extends Block {
    public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 15);
    protected static final AxisAlignedBB REED_AABB = new AxisAlignedBB(0.125D, 0.0D, 0.125D, 0.875D, 1.0D, 0.875D);
 
@@ -46,15 +41,12 @@ public class BlockReed extends Block implements IPlantable {
 
          if (var5 < 3) {
             int var6 = ((Integer)var3.getValue(AGE)).intValue();
-            if (ForgeHooks.onCropsGrowPre(var1, var2, var3, true)) {
-               if (var6 == 15) {
-                  var1.setBlockState(var2.up(), this.getDefaultState());
-                  var1.setBlockState(var2, var3.withProperty(AGE, Integer.valueOf(0)), 4);
-               } else {
-                  var1.setBlockState(var2, var3.withProperty(AGE, Integer.valueOf(var6 + 1)), 4);
-               }
-
-               ForgeHooks.onCropsGrowPost(var1, var2, var3, var1.getBlockState(var2));
+            if (var6 == 15) {
+               BlockPos var7 = var2.up();
+               CraftEventFactory.handleBlockGrowEvent(var1, var7.getX(), var7.getY(), var7.getZ(), this, 0);
+               var1.setBlockState(var2, var3.withProperty(AGE, Integer.valueOf(0)), 4);
+            } else {
+               var1.setBlockState(var2, var3.withProperty(AGE, Integer.valueOf(var6 + 1)), 4);
             }
          }
       }
@@ -62,20 +54,17 @@ public class BlockReed extends Block implements IPlantable {
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      IBlockState var3 = var1.getBlockState(var2.down());
-      Block var4 = var3.getBlock();
-      if (var4.canSustainPlant(var3, var1, var2.down(), EnumFacing.UP, this)) {
+      Block var3 = var1.getBlockState(var2.down()).getBlock();
+      if (var3 == this) {
          return true;
-      } else if (var4 == this) {
-         return true;
-      } else if (var4 != Blocks.GRASS && var4 != Blocks.DIRT && var4 != Blocks.SAND) {
+      } else if (var3 != Blocks.GRASS && var3 != Blocks.DIRT && var3 != Blocks.SAND) {
          return false;
       } else {
-         BlockPos var5 = var2.down();
+         BlockPos var4 = var2.down();
 
-         for(EnumFacing var7 : EnumFacing.Plane.HORIZONTAL) {
-            IBlockState var8 = var1.getBlockState(var5.offset(var7));
-            if (var8.getMaterial() == Material.WATER || var8.getBlock() == Blocks.FROSTED_ICE) {
+         for(EnumFacing var6 : EnumFacing.Plane.HORIZONTAL) {
+            IBlockState var7 = var1.getBlockState(var4.offset(var6));
+            if (var7.getMaterial() == Material.WATER || var7.getBlock() == Blocks.FROSTED_ICE) {
                return true;
             }
          }
@@ -128,21 +117,8 @@ public class BlockReed extends Block implements IPlantable {
       return this.getDefaultState().withProperty(AGE, Integer.valueOf(var1));
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
-   }
-
    public int getMetaFromState(IBlockState var1) {
       return ((Integer)var1.getValue(AGE)).intValue();
-   }
-
-   public EnumPlantType getPlantType(IBlockAccess var1, BlockPos var2) {
-      return EnumPlantType.Beach;
-   }
-
-   public IBlockState getPlant(IBlockAccess var1, BlockPos var2) {
-      return this.getDefaultState();
    }
 
    protected BlockStateContainer createBlockState() {

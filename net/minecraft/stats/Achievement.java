@@ -6,17 +6,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class Achievement extends StatBase {
    public final int displayColumn;
    public final int displayRow;
    public final Achievement parentAchievement;
    private final String achievementDescription;
-   @SideOnly(Side.CLIENT)
-   private IStatStringFormat statStringFormatter;
    public final ItemStack theItemStack;
    private boolean isSpecial;
 
@@ -83,18 +78,22 @@ public class Achievement extends StatBase {
       return (Achievement)super.setSerializableClazz(var1);
    }
 
-   @SideOnly(Side.CLIENT)
-   public String getDescription() {
-      return this.statStringFormatter != null ? this.statStringFormatter.formatString(I18n.translateToLocal(this.achievementDescription)) : I18n.translateToLocal(this.achievementDescription);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Achievement setStatStringFormatter(IStatStringFormat var1) {
-      this.statStringFormatter = var1;
-      return this;
-   }
-
    public boolean getSpecial() {
       return this.isSpecial;
+   }
+
+   // $FF: synthetic method
+   public StatBase setSerializableClazz(Class var1) {
+      return this.setSerializableClazz(var1);
+   }
+
+   // $FF: synthetic method
+   public StatBase registerStat() {
+      return this.registerStat();
+   }
+
+   // $FF: synthetic method
+   public StatBase initIndependentStat() {
+      return this.initIndependentStat();
    }
 }

@@ -1,7 +1,10 @@
 package net.minecraft.inventory;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.IMerchant;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
@@ -9,13 +12,47 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftVillager;
+import org.bukkit.inventory.InventoryHolder;
 
 public class InventoryMerchant implements IInventory {
    private final IMerchant theMerchant;
    private final ItemStack[] theInventory = new ItemStack[3];
    private final EntityPlayer player;
    private MerchantRecipe currentRecipe;
-   private int currentRecipeIndex;
+   public int currentRecipeIndex;
+   public List transaction = new ArrayList();
+   private int maxStack = 64;
+
+   public ItemStack[] getContents() {
+      return this.theInventory;
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
+   }
+
+   public InventoryHolder getOwner() {
+      return (CraftVillager)((EntityVillager)this.theMerchant).getBukkitEntity();
+   }
+
+   public Location getLocation() {
+      return ((EntityVillager)this.theMerchant).getBukkitEntity().getLocation();
+   }
 
    public InventoryMerchant(EntityPlayer var1, IMerchant var2) {
       this.player = var1;
@@ -79,7 +116,7 @@ public class InventoryMerchant implements IInventory {
    }
 
    public int getInventoryStackLimit() {
-      return 64;
+      return this.maxStack;
    }
 
    public boolean isUsableByPlayer(EntityPlayer var1) {

@@ -2,20 +2,30 @@ package net.minecraft.inventory;
 
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryCrafting;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerWorkbench extends Container {
-   public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
+   public InventoryCrafting craftMatrix;
    public IInventory craftResult = new InventoryCraftResult();
    private final World world;
    private final BlockPos pos;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
 
    public ContainerWorkbench(InventoryPlayer var1, World var2, BlockPos var3) {
+      this.craftMatrix = new InventoryCrafting(this, 3, 3, var1.player);
+      this.craftMatrix.resultInventory = this.craftResult;
+      this.player = var1;
       this.world = var2;
       this.pos = var3;
       this.addSlotToContainer(new SlotCrafting(var1.player, this.craftMatrix, this.craftResult, 0, 124, 35));
@@ -40,7 +50,15 @@ public class ContainerWorkbench extends Container {
    }
 
    public void onCraftMatrixChanged(IInventory var1) {
-      this.craftResult.setInventorySlotContents(0, CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.world));
+      CraftingManager.getInstance().lastCraftView = this.getBukkitView();
+      ItemStack var2 = CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.world);
+      this.craftResult.setInventorySlotContents(0, var2);
+      if (super.listeners.size() >= 1) {
+         if (var2 == null || var2.getItem() != Items.FILLED_MAP) {
+            EntityPlayerMP var3 = (EntityPlayerMP)super.listeners.get(0);
+            var3.connection.sendPacket(new SPacketSetSlot(var3.openContainer.windowId, 0, var2));
+         }
+      }
    }
 
    public void onContainerClosed(EntityPlayer var1) {
@@ -57,7 +75,11 @@ public class ContainerWorkbench extends Container {
    }
 
    public boolean canInteractWith(EntityPlayer var1) {
-      return this.world.getBlockState(this.pos).getBlock() != Blocks.CRAFTING_TABLE ? false : var1.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+      if (!this.checkReachable) {
+         return true;
+      } else {
+         return this.world.getBlockState(this.pos).getBlock() != Blocks.CRAFTING_TABLE ? false : var1.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+      }
    }
 
    @Nullable
@@ -103,5 +125,15 @@ public class ContainerWorkbench extends Container {
 
    public boolean canMergeSlot(ItemStack var1, Slot var2) {
       return var2.inventory != this.craftResult && super.canMergeSlot(var1, var2);
+   }
+
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventoryCrafting var1 = new CraftInventoryCrafting(this.craftMatrix, this.craftResult);
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), var1, this);
+         return this.bukkitEntity;
+      }
    }
 }

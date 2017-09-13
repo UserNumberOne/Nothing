@@ -11,18 +11,10 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityDragonFireball extends EntityFireball {
    public EntityDragonFireball(World var1) {
       super(var1);
-      this.setSize(0.3125F, 0.3125F);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EntityDragonFireball(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
-      super(var1, var2, var4, var6, var8, var10, var12);
       this.setSize(0.3125F, 0.3125F);
    }
 

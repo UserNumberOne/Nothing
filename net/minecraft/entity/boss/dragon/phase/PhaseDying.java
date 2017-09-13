@@ -32,8 +32,8 @@ public class PhaseDying extends PhaseBase {
          this.targetLocation = new Vec3d((double)var1.getX(), (double)var1.getY(), (double)var1.getZ());
       }
 
-      double var3 = this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
-      if (var3 >= 100.0D && var3 <= 22500.0D && !this.dragon.isCollidedHorizontally && !this.dragon.isCollidedVertically) {
+      double var2 = this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
+      if (var2 >= 100.0D && var2 <= 22500.0D && !this.dragon.isCollidedHorizontally && !this.dragon.isCollidedVertically) {
          this.dragon.setHealth(1.0F);
       } else {
          this.dragon.setHealth(0.0F);

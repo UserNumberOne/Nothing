@@ -2,8 +2,6 @@ package net.minecraft.util.math;
 
 import java.util.Random;
 import java.util.UUID;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class MathHelper {
    public static final float SQRT_2 = sqrt(2.0F);
@@ -35,11 +33,6 @@ public class MathHelper {
       return var0 < (float)var1 ? var1 - 1 : var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public static int fastFloor(double var0) {
-      return (int)(var0 + 1024.0D) - 1024;
-   }
-
    public static int floor(double var0) {
       int var2 = (int)var0;
       return var0 < (double)var2 ? var2 - 1 : var2;
@@ -48,11 +41,6 @@ public class MathHelper {
    public static long lfloor(double var0) {
       long var2 = (long)var0;
       return var0 < (double)var2 ? var2 - 1L : var2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static int absFloor(double var0) {
-      return (int)(var0 >= 0.0D ? var0 : -var0 + 1.0D);
    }
 
    public static float abs(float var0) {
@@ -74,19 +62,35 @@ public class MathHelper {
    }
 
    public static int clamp(int var0, int var1, int var2) {
-      return var0 < var1 ? var1 : (var0 > var2 ? var2 : var0);
+      if (var0 < var1) {
+         return var1;
+      } else {
+         return var0 > var2 ? var2 : var0;
+      }
    }
 
    public static float clamp(float var0, float var1, float var2) {
-      return var0 < var1 ? var1 : (var0 > var2 ? var2 : var0);
+      if (var0 < var1) {
+         return var1;
+      } else {
+         return var0 > var2 ? var2 : var0;
+      }
    }
 
    public static double clamp(double var0, double var2, double var4) {
-      return var0 < var2 ? var2 : (var0 > var4 ? var4 : var0);
+      if (var0 < var2) {
+         return var2;
+      } else {
+         return var0 > var4 ? var4 : var0;
+      }
    }
 
    public static double clampedLerp(double var0, double var2, double var4) {
-      return var4 < 0.0D ? var0 : (var4 > 1.0D ? var2 : var0 + (var2 - var0) * var4);
+      if (var4 < 0.0D) {
+         return var0;
+      } else {
+         return var4 > 1.0D ? var2 : var0 + (var2 - var0) * var4;
+      }
    }
 
    public static double absMax(double var0, double var2) {
@@ -99,11 +103,6 @@ public class MathHelper {
       }
 
       return var0 > var2 ? var0 : var2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static int intFloorDiv(int var0, int var1) {
-      return var0 < 0 ? -((-var0 - 1) / var1) - 1 : var0 / var1;
    }
 
    public static int getInt(Random var0, int var1, int var2) {
@@ -126,21 +125,6 @@ public class MathHelper {
       }
 
       return (double)var1 / (double)var0.length;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static boolean epsilonEquals(float var0, float var1) {
-      return abs(var1 - var0) < 1.0E-5F;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static int normalizeAngle(int var0, int var1) {
-      return (var0 % var1 + var1) % var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static float positiveModulo(float var0, float var1) {
-      return (var0 % var1 + var1) % var1;
    }
 
    public static float wrapDegrees(float var0) {
@@ -244,42 +228,6 @@ public class MathHelper {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public static int rgb(float var0, float var1, float var2) {
-      return rgb(floor(var0 * 255.0F), floor(var1 * 255.0F), floor(var2 * 255.0F));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static int rgb(int var0, int var1, int var2) {
-      int var3 = (var0 << 8) + var1;
-      var3 = (var3 << 8) + var2;
-      return var3;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static int multiplyColor(int var0, int var1) {
-      int var2 = (var0 & 16711680) >> 16;
-      int var3 = (var1 & 16711680) >> 16;
-      int var4 = (var0 & '\uff00') >> 8;
-      int var5 = (var1 & '\uff00') >> 8;
-      int var6 = (var0 & 255) >> 0;
-      int var7 = (var1 & 255) >> 0;
-      int var8 = (int)((float)var2 * (float)var3 / 255.0F);
-      int var9 = (int)((float)var4 * (float)var5 / 255.0F);
-      int var10 = (int)((float)var6 * (float)var7 / 255.0F);
-      return var0 & -16777216 | var8 << 16 | var9 << 8 | var10;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static double frac(double var0) {
-      return var0 - Math.floor(var0);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static long getPositionRandom(Vec3i var0) {
-      return getCoordinateRandom(var0.getX(), var0.getY(), var0.getZ());
-   }
-
    public static UUID getRandomUUID(Random var0) {
       long var1 = var0.nextLong() & -61441L | 16384L;
       long var3 = var0.nextLong() & 4611686018427387903L | Long.MIN_VALUE;
@@ -288,13 +236,6 @@ public class MathHelper {
 
    public static UUID getRandomUUID() {
       return getRandomUUID(RANDOM);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static long getCoordinateRandom(int var0, int var1, int var2) {
-      long var3 = (long)(var0 * 3129871) ^ (long)var2 * 116129781L ^ (long)var1;
-      var3 = var3 * var3 * 42317861L + var3 * 11L;
-      return var3;
    }
 
    public static double pct(double var0, double var2, double var4) {
@@ -357,57 +298,6 @@ public class MathHelper {
       var0 = Double.longBitsToDouble(var4);
       var0 = var0 * (1.5D - var2 * var0 * var0);
       return var0;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static int hsvToRGB(float var0, float var1, float var2) {
-      int var3 = (int)(var0 * 6.0F) % 6;
-      float var4 = var0 * 6.0F - (float)var3;
-      float var5 = var2 * (1.0F - var1);
-      float var6 = var2 * (1.0F - var4 * var1);
-      float var7 = var2 * (1.0F - (1.0F - var4) * var1);
-      float var8;
-      float var9;
-      float var10;
-      switch(var3) {
-      case 0:
-         var8 = var2;
-         var9 = var7;
-         var10 = var5;
-         break;
-      case 1:
-         var8 = var6;
-         var9 = var2;
-         var10 = var5;
-         break;
-      case 2:
-         var8 = var5;
-         var9 = var2;
-         var10 = var7;
-         break;
-      case 3:
-         var8 = var5;
-         var9 = var6;
-         var10 = var2;
-         break;
-      case 4:
-         var8 = var7;
-         var9 = var5;
-         var10 = var2;
-         break;
-      case 5:
-         var8 = var2;
-         var9 = var5;
-         var10 = var6;
-         break;
-      default:
-         throw new RuntimeException("Something went wrong when converting from HSV to RGB. Input was " + var0 + ", " + var1 + ", " + var2);
-      }
-
-      int var11 = clamp((int)(var8 * 255.0F), 0, 255);
-      int var12 = clamp((int)(var9 * 255.0F), 0, 255);
-      int var13 = clamp((int)(var10 * 255.0F), 0, 255);
-      return var11 << 16 | var12 << 8 | var13;
    }
 
    public static int hash(int var0) {

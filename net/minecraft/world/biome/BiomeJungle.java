@@ -20,8 +20,6 @@ import net.minecraft.world.gen.feature.WorldGenTallGrass;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 import net.minecraft.world.gen.feature.WorldGenVines;
 import net.minecraft.world.gen.feature.WorldGenerator;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate.EventType;
 
 public class BiomeJungle extends Biome {
    private final boolean isEdge;
@@ -48,7 +46,13 @@ public class BiomeJungle extends Biome {
    }
 
    public WorldGenAbstractTree genBigTreeChance(Random var1) {
-      return (WorldGenAbstractTree)(var1.nextInt(10) == 0 ? BIG_TREE_FEATURE : (var1.nextInt(2) == 0 ? new WorldGenShrub(JUNGLE_LOG, OAK_LEAF) : (!this.isEdge && var1.nextInt(3) == 0 ? new WorldGenMegaJungle(false, 10, 20, JUNGLE_LOG, JUNGLE_LEAF) : new WorldGenTrees(false, 4 + var1.nextInt(7), JUNGLE_LOG, JUNGLE_LEAF, true))));
+      if (var1.nextInt(10) == 0) {
+         return BIG_TREE_FEATURE;
+      } else if (var1.nextInt(2) == 0) {
+         return new WorldGenShrub(JUNGLE_LOG, OAK_LEAF);
+      } else {
+         return (WorldGenAbstractTree)(!this.isEdge && var1.nextInt(3) == 0 ? new WorldGenMegaJungle(false, 10, 20, JUNGLE_LOG, JUNGLE_LEAF) : new WorldGenTrees(false, 4 + var1.nextInt(7), JUNGLE_LOG, JUNGLE_LEAF, true));
+      }
    }
 
    public WorldGenerator getRandomWorldGenForGrass(Random var1) {
@@ -59,24 +63,15 @@ public class BiomeJungle extends Biome {
       super.decorate(var1, var2, var3);
       int var4 = var2.nextInt(16) + 8;
       int var5 = var2.nextInt(16) + 8;
-      int var6 = var1.getHeight(var3.add(var4, 0, var5)).getY() * 2;
-      if (var6 < 1) {
-         var6 = 1;
-      }
+      int var6 = var2.nextInt(var1.getHeight(var3.add(var4, 0, var5)).getY() * 2);
+      (new WorldGenMelon()).generate(var1, var2, var3.add(var4, var6, var5));
+      WorldGenVines var9 = new WorldGenVines();
 
-      int var7 = var2.nextInt(var6);
-      if (TerrainGen.decorate(var1, var2, var3, EventType.PUMPKIN)) {
-         (new WorldGenMelon()).generate(var1, var2, var3.add(var4, var7, var5));
-      }
-
-      WorldGenVines var8 = new WorldGenVines();
-      if (TerrainGen.decorate(var1, var2, var3, EventType.GRASS)) {
-         for(int var11 = 0; var11 < 50; ++var11) {
-            var7 = var2.nextInt(16) + 8;
-            boolean var9 = true;
-            int var10 = var2.nextInt(16) + 8;
-            var8.generate(var1, var2, var3.add(var7, 128, var10));
-         }
+      for(int var10 = 0; var10 < 50; ++var10) {
+         var6 = var2.nextInt(16) + 8;
+         boolean var7 = true;
+         int var8 = var2.nextInt(16) + 8;
+         var9.generate(var1, var2, var3.add(var6, 128, var8));
       }
 
    }

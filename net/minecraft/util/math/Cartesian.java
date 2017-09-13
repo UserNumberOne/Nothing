@@ -47,6 +47,11 @@ public class Cartesian {
       public List apply(@Nullable Object[] var1) {
          return Arrays.asList(var1);
       }
+
+      // $FF: synthetic method
+      public Object apply(Object var1) {
+         return this.apply(var1);
+      }
    }
 
    static class Product implements Iterable {
@@ -135,6 +140,11 @@ public class Cartesian {
 
                return this.results.clone();
             }
+         }
+
+         // $FF: synthetic method
+         public Object next() {
+            return this.next();
          }
       }
    }

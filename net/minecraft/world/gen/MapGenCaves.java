@@ -2,15 +2,12 @@ package net.minecraft.world.gen;
 
 import com.google.common.base.Objects;
 import java.util.Random;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
 
 public class MapGenCaves extends MapGenBase {
@@ -34,10 +31,10 @@ public class MapGenCaves extends MapGenBase {
          var16 = var26 - var25.nextInt(var26 / 4);
       }
 
-      boolean var66 = false;
+      boolean var68 = false;
       if (var15 == -1) {
          var15 = var16 / 2;
-         var66 = true;
+         var68 = true;
       }
 
       int var27 = var25.nextInt(var16 / 2) + var16 / 4;
@@ -62,13 +59,13 @@ public class MapGenCaves extends MapGenBase {
          var23 = var23 * 0.75F;
          var24 = var24 + (var25.nextFloat() - var25.nextFloat()) * var25.nextFloat() * 2.0F;
          var23 = var23 + (var25.nextFloat() - var25.nextFloat()) * var25.nextFloat() * 4.0F;
-         if (!var66 && var15 == var27 && var12 > 1.0F && var16 > 0) {
+         if (!var68 && var15 == var27 && var12 > 1.0F && var16 > 0) {
             this.addTunnel(var25.nextLong(), var3, var4, var5, var6, var8, var10, var25.nextFloat() * 0.5F + 0.5F, var13 - 1.5707964F, var14 / 3.0F, var15, var16, 1.0D);
             this.addTunnel(var25.nextLong(), var3, var4, var5, var6, var8, var10, var25.nextFloat() * 0.5F + 0.5F, var13 + 1.5707964F, var14 / 3.0F, var15, var16, 1.0D);
             return;
          }
 
-         if (var66 || var25.nextInt(4) != 0) {
+         if (var68 || var25.nextInt(4) != 0) {
             double var35 = var6 - var19;
             double var37 = var10 - var21;
             double var39 = (double)(var16 - var15);
@@ -114,7 +111,8 @@ public class MapGenCaves extends MapGenBase {
                   for(int var51 = var47; !var49 && var51 < var48; ++var51) {
                      for(int var52 = var46 + 1; !var49 && var52 >= var45 - 1; --var52) {
                         if (var52 >= 0 && var52 < 256) {
-                           if (this.isOceanBlock(var5, var50, var52, var51, var3, var4)) {
+                           IBlockState var53 = var5.getBlockState(var50, var52, var51);
+                           if (var53.getBlock() == Blocks.FLOWING_WATER || var53.getBlock() == Blocks.WATER) {
                               var49 = true;
                            }
 
@@ -127,32 +125,42 @@ public class MapGenCaves extends MapGenBase {
                }
 
                if (!var49) {
-                  new BlockPos.MutableBlockPos();
+                  BlockPos.MutableBlockPos var69 = new BlockPos.MutableBlockPos();
 
-                  for(int var67 = var43; var67 < var44; ++var67) {
-                     double var68 = ((double)(var67 + var3 * 16) + 0.5D - var6) / var29;
+                  for(int var70 = var43; var70 < var44; ++var70) {
+                     double var54 = ((double)(var70 + var3 * 16) + 0.5D - var6) / var29;
 
-                     for(int var54 = var47; var54 < var48; ++var54) {
-                        double var55 = ((double)(var54 + var4 * 16) + 0.5D - var10) / var29;
-                        boolean var57 = false;
-                        if (var68 * var68 + var55 * var55 < 1.0D) {
-                           for(int var58 = var46; var58 > var45; --var58) {
-                              double var59 = ((double)(var58 - 1) + 0.5D - var8) / var31;
-                              if (var59 > -0.7D && var68 * var68 + var59 * var59 + var55 * var55 < 1.0D) {
-                                 IBlockState var61 = var5.getBlockState(var67, var58, var54);
-                                 IBlockState var62 = (IBlockState)Objects.firstNonNull(var5.getBlockState(var67, var58 + 1, var54), BLK_AIR);
-                                 if (this.isTopBlock(var5, var67, var58, var54, var3, var4)) {
-                                    var57 = true;
+                     for(int var56 = var47; var56 < var48; ++var56) {
+                        double var57 = ((double)(var56 + var4 * 16) + 0.5D - var10) / var29;
+                        boolean var59 = false;
+                        if (var54 * var54 + var57 * var57 < 1.0D) {
+                           for(int var60 = var46; var60 > var45; --var60) {
+                              double var61 = ((double)(var60 - 1) + 0.5D - var8) / var31;
+                              if (var61 > -0.7D && var54 * var54 + var61 * var61 + var57 * var57 < 1.0D) {
+                                 IBlockState var63 = var5.getBlockState(var70, var60, var56);
+                                 IBlockState var64 = (IBlockState)Objects.firstNonNull(var5.getBlockState(var70, var60 + 1, var56), BLK_AIR);
+                                 if (var63.getBlock() == Blocks.GRASS || var63.getBlock() == Blocks.MYCELIUM) {
+                                    var59 = true;
                                  }
 
-                                 this.digBlock(var5, var67, var58, var54, var3, var4, var57, var61, var62);
+                                 if (this.canReplaceBlock(var63, var64)) {
+                                    if (var60 - 1 < 10) {
+                                       var5.setBlockState(var70, var60, var56, BLK_LAVA);
+                                    } else {
+                                       var5.setBlockState(var70, var60, var56, BLK_AIR);
+                                       if (var59 && var5.getBlockState(var70, var60 - 1, var56).getBlock() == Blocks.DIRT) {
+                                          var69.setPos(var70 + var3 * 16, 0, var56 + var4 * 16);
+                                          var5.setBlockState(var70, var60 - 1, var56, this.world.getBiome(var69).topBlock.getBlock().getDefaultState());
+                                       }
+                                    }
+                                 }
                               }
                            }
                         }
                      }
                   }
 
-                  if (var66) {
+                  if (var68) {
                      break;
                   }
                }
@@ -163,7 +171,27 @@ public class MapGenCaves extends MapGenBase {
    }
 
    protected boolean canReplaceBlock(IBlockState var1, IBlockState var2) {
-      return var1.getBlock() == Blocks.STONE ? true : (var1.getBlock() == Blocks.DIRT ? true : (var1.getBlock() == Blocks.GRASS ? true : (var1.getBlock() == Blocks.HARDENED_CLAY ? true : (var1.getBlock() == Blocks.STAINED_HARDENED_CLAY ? true : (var1.getBlock() == Blocks.SANDSTONE ? true : (var1.getBlock() == Blocks.RED_SANDSTONE ? true : (var1.getBlock() == Blocks.MYCELIUM ? true : (var1.getBlock() == Blocks.SNOW_LAYER ? true : (var1.getBlock() == Blocks.SAND || var1.getBlock() == Blocks.GRAVEL) && var2.getMaterial() != Material.WATER))))))));
+      if (var1.getBlock() == Blocks.STONE) {
+         return true;
+      } else if (var1.getBlock() == Blocks.DIRT) {
+         return true;
+      } else if (var1.getBlock() == Blocks.GRASS) {
+         return true;
+      } else if (var1.getBlock() == Blocks.HARDENED_CLAY) {
+         return true;
+      } else if (var1.getBlock() == Blocks.STAINED_HARDENED_CLAY) {
+         return true;
+      } else if (var1.getBlock() == Blocks.SANDSTONE) {
+         return true;
+      } else if (var1.getBlock() == Blocks.RED_SANDSTONE) {
+         return true;
+      } else if (var1.getBlock() == Blocks.MYCELIUM) {
+         return true;
+      } else if (var1.getBlock() == Blocks.SNOW_LAYER) {
+         return true;
+      } else {
+         return (var1.getBlock() == Blocks.SAND || var1.getBlock() == Blocks.GRAVEL) && var2.getMaterial() != Material.WATER;
+      }
    }
 
    protected void recursiveGenerate(World var1, int var2, int var3, int var4, int var5, ChunkPrimer var6) {
@@ -191,42 +219,6 @@ public class MapGenCaves extends MapGenBase {
             }
 
             this.addTunnel(this.rand.nextLong(), var4, var5, var6, var9, var11, var13, var19, var17, var18, 0, 0, 1.0D);
-         }
-      }
-
-   }
-
-   protected boolean isOceanBlock(ChunkPrimer var1, int var2, int var3, int var4, int var5, int var6) {
-      Block var7 = var1.getBlockState(var2, var3, var4).getBlock();
-      return var7 == Blocks.FLOWING_WATER || var7 == Blocks.WATER;
-   }
-
-   private boolean isExceptionBiome(Biome var1) {
-      if (var1 == Biomes.BEACH) {
-         return true;
-      } else {
-         return var1 == Biomes.DESERT;
-      }
-   }
-
-   private boolean isTopBlock(ChunkPrimer var1, int var2, int var3, int var4, int var5, int var6) {
-      Biome var7 = this.world.getBiome(new BlockPos(var2 + var5 * 16, 0, var4 + var6 * 16));
-      IBlockState var8 = var1.getBlockState(var2, var3, var4);
-      return this.isExceptionBiome(var7) ? var8.getBlock() == Blocks.GRASS : var8.getBlock() == var7.topBlock;
-   }
-
-   protected void digBlock(ChunkPrimer var1, int var2, int var3, int var4, int var5, int var6, boolean var7, IBlockState var8, IBlockState var9) {
-      Biome var10 = this.world.getBiome(new BlockPos(var2 + var5 * 16, 0, var4 + var6 * 16));
-      IBlockState var11 = var10.topBlock;
-      IBlockState var12 = var10.fillerBlock;
-      if (this.canReplaceBlock(var8, var9) || var8.getBlock() == var11.getBlock() || var8.getBlock() == var12.getBlock()) {
-         if (var3 - 1 < 10) {
-            var1.setBlockState(var2, var3, var4, BLK_LAVA);
-         } else {
-            var1.setBlockState(var2, var3, var4, BLK_AIR);
-            if (var7 && var1.getBlockState(var2, var3 - 1, var4).getBlock() == var12.getBlock()) {
-               var1.setBlockState(var2, var3 - 1, var4, var11.getBlock().getDefaultState());
-            }
          }
       }
 

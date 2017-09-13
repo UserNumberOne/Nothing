@@ -4,6 +4,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.village.Village;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIDefendVillage extends EntityAITarget {
    EntityIronGolem irongolem;
@@ -35,7 +36,7 @@ public class EntityAIDefendVillage extends EntityAITarget {
    }
 
    public void startExecuting() {
-      this.irongolem.setAttackTarget(this.villageAgressorTarget);
+      this.irongolem.setGoalTarget(this.villageAgressorTarget, TargetReason.DEFEND_VILLAGE, true);
       super.startExecuting();
    }
 }

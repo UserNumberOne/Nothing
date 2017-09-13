@@ -22,6 +22,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 
 public abstract class BlockButton extends BlockDirectional {
    public static final PropertyBool POWERED = PropertyBool.create("powered");
@@ -80,7 +82,7 @@ public abstract class BlockButton extends BlockDirectional {
 
    protected static boolean canPlaceBlock(World var0, BlockPos var1, EnumFacing var2) {
       BlockPos var3 = var1.offset(var2);
-      return var0.getBlockState(var3).isSideSolid(var0, var3, var2.getOpposite());
+      return var2 == EnumFacing.DOWN ? var0.getBlockState(var3).isFullyOpaque() : var0.getBlockState(var3).isNormalCube();
    }
 
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
@@ -108,19 +110,19 @@ public abstract class BlockButton extends BlockDirectional {
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
       EnumFacing var4 = (EnumFacing)var1.getValue(FACING);
       boolean var5 = ((Boolean)var1.getValue(POWERED)).booleanValue();
-      switch(var4) {
-      case EAST:
+      switch(BlockButton.SyntheticClass_1.a[var4.ordinal()]) {
+      case 1:
          return var5 ? AABB_EAST_ON : AABB_EAST_OFF;
-      case WEST:
+      case 2:
          return var5 ? AABB_WEST_ON : AABB_WEST_OFF;
-      case SOUTH:
+      case 3:
          return var5 ? AABB_SOUTH_ON : AABB_SOUTH_OFF;
-      case NORTH:
+      case 4:
       default:
          return var5 ? AABB_NORTH_ON : AABB_NORTH_OFF;
-      case UP:
+      case 5:
          return var5 ? AABB_UP_ON : AABB_UP_OFF;
-      case DOWN:
+      case 6:
          return var5 ? AABB_DOWN_ON : AABB_DOWN_OFF;
       }
    }
@@ -129,12 +131,22 @@ public abstract class BlockButton extends BlockDirectional {
       if (((Boolean)var3.getValue(POWERED)).booleanValue()) {
          return true;
       } else {
-         var1.setBlockState(var2, var3.withProperty(POWERED, Boolean.valueOf(true)), 3);
-         var1.markBlockRangeForRenderUpdate(var2, var2);
-         this.playClickSound(var4, var1, var2);
-         this.notifyNeighbors(var1, var2, (EnumFacing)var3.getValue(FACING));
-         var1.scheduleUpdate(var2, this, this.tickRate(var1));
-         return true;
+         boolean var11 = ((Boolean)var3.getValue(POWERED)).booleanValue();
+         org.bukkit.block.Block var12 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+         int var13 = var11 ? 15 : 0;
+         int var14 = !var11 ? 15 : 0;
+         BlockRedstoneEvent var15 = new BlockRedstoneEvent(var12, var13, var14);
+         var1.getServer().getPluginManager().callEvent(var15);
+         if (var15.getNewCurrent() > 0 != !var11) {
+            return true;
+         } else {
+            var1.setBlockState(var2, var3.withProperty(POWERED, Boolean.valueOf(true)), 3);
+            var1.markBlockRangeForRenderUpdate(var2, var2);
+            this.playClickSound(var4, var1, var2);
+            this.notifyNeighbors(var1, var2, (EnumFacing)var3.getValue(FACING));
+            var1.scheduleUpdate(var2, this, this.tickRate(var1));
+            return true;
+         }
       }
    }
 
@@ -170,6 +182,13 @@ public abstract class BlockButton extends BlockDirectional {
          if (this.wooden) {
             this.checkPressed(var3, var1, var2);
          } else {
+            org.bukkit.block.Block var5 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+            BlockRedstoneEvent var6 = new BlockRedstoneEvent(var5, 15, 0);
+            var1.getServer().getPluginManager().callEvent(var6);
+            if (var6.getNewCurrent() > 0) {
+               return;
+            }
+
             var1.setBlockState(var2, var3.withProperty(POWERED, Boolean.valueOf(false)));
             this.notifyNeighbors(var1, var2, (EnumFacing)var3.getValue(FACING));
             this.playReleaseSound(var1, var2);
@@ -190,7 +209,34 @@ public abstract class BlockButton extends BlockDirectional {
       List var4 = var2.getEntitiesWithinAABB(EntityArrow.class, var1.getBoundingBox(var2, var3).offset(var3));
       boolean var5 = !var4.isEmpty();
       boolean var6 = ((Boolean)var1.getValue(POWERED)).booleanValue();
+      if (var6 != var5 && var5) {
+         org.bukkit.block.Block var7 = var2.getWorld().getBlockAt(var3.getX(), var3.getY(), var3.getZ());
+         boolean var8 = false;
+
+         for(Object var10 : var4) {
+            if (var10 != null) {
+               EntityInteractEvent var11 = new EntityInteractEvent(((Entity)var10).getBukkitEntity(), var7);
+               var2.getServer().getPluginManager().callEvent(var11);
+               if (!var11.isCancelled()) {
+                  var8 = true;
+                  break;
+               }
+            }
+         }
+
+         if (!var8) {
+            return;
+         }
+      }
+
       if (var5 && !var6) {
+         org.bukkit.block.Block var12 = var2.getWorld().getBlockAt(var3.getX(), var3.getY(), var3.getZ());
+         BlockRedstoneEvent var14 = new BlockRedstoneEvent(var12, 0, 15);
+         var2.getServer().getPluginManager().callEvent(var14);
+         if (var14.getNewCurrent() <= 0) {
+            return;
+         }
+
          var2.setBlockState(var3, var1.withProperty(POWERED, Boolean.valueOf(true)));
          this.notifyNeighbors(var2, var3, (EnumFacing)var1.getValue(FACING));
          var2.markBlockRangeForRenderUpdate(var3, var3);
@@ -198,6 +244,13 @@ public abstract class BlockButton extends BlockDirectional {
       }
 
       if (!var5 && var6) {
+         org.bukkit.block.Block var13 = var2.getWorld().getBlockAt(var3.getX(), var3.getY(), var3.getZ());
+         BlockRedstoneEvent var15 = new BlockRedstoneEvent(var13, 15, 0);
+         var2.getServer().getPluginManager().callEvent(var15);
+         if (var15.getNewCurrent() > 0) {
+            return;
+         }
+
          var2.setBlockState(var3, var1.withProperty(POWERED, Boolean.valueOf(false)));
          this.notifyNeighbors(var2, var3, (EnumFacing)var1.getValue(FACING));
          var2.markBlockRangeForRenderUpdate(var3, var3);
@@ -243,24 +296,24 @@ public abstract class BlockButton extends BlockDirectional {
 
    public int getMetaFromState(IBlockState var1) {
       int var2;
-      switch((EnumFacing)var1.getValue(FACING)) {
-      case EAST:
+      switch(BlockButton.SyntheticClass_1.a[((EnumFacing)var1.getValue(FACING)).ordinal()]) {
+      case 1:
          var2 = 1;
          break;
-      case WEST:
+      case 2:
          var2 = 2;
          break;
-      case SOUTH:
+      case 3:
          var2 = 3;
          break;
-      case NORTH:
+      case 4:
          var2 = 4;
          break;
-      case UP:
+      case 5:
       default:
          var2 = 5;
          break;
-      case DOWN:
+      case 6:
          var2 = 0;
       }
 
@@ -281,5 +334,48 @@ public abstract class BlockButton extends BlockDirectional {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, POWERED});
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.EAST.ordinal()] = 1;
+         } catch (NoSuchFieldError var5) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 2;
+         } catch (NoSuchFieldError var4) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 3;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 4;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.UP.ordinal()] = 5;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.DOWN.ordinal()] = 6;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

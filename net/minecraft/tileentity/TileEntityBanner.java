@@ -1,6 +1,5 @@
 package net.minecraft.tileentity;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockFlower;
@@ -11,12 +10,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityBanner extends TileEntity {
-   private int baseColor;
-   private NBTTagList patterns;
+   public int baseColor;
+   public NBTTagList patterns;
    private boolean patternDataSet;
    private List patternList;
    private List colorList;
@@ -28,6 +25,10 @@ public class TileEntityBanner extends TileEntity {
          NBTTagCompound var2 = var1.getTagCompound().getCompoundTag("BlockEntityTag");
          if (var2.hasKey("Patterns")) {
             this.patterns = var2.getTagList("Patterns", 10).copy();
+
+            while(this.patterns.tagCount() > 20) {
+               this.patterns.removeTag(20);
+            }
          }
 
          if (var2.hasKey("Base", 99)) {
@@ -63,6 +64,11 @@ public class TileEntityBanner extends TileEntity {
       super.readFromNBT(var1);
       this.baseColor = var1.getInteger("Base");
       this.patterns = var1.getTagList("Patterns", 10);
+
+      while(this.patterns.tagCount() > 20) {
+         this.patterns.removeTag(20);
+      }
+
       this.patternList = null;
       this.colorList = null;
       this.patternResourceLocation = null;
@@ -92,54 +98,8 @@ public class TileEntityBanner extends TileEntity {
       return var1 != null && var1.hasKey("Patterns") ? var1.getTagList("Patterns", 10).tagCount() : 0;
    }
 
-   @SideOnly(Side.CLIENT)
-   public List getPatternList() {
-      this.initializeBannerData();
-      return this.patternList;
-   }
-
    public NBTTagList getPatterns() {
       return this.patterns;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getColorList() {
-      this.initializeBannerData();
-      return this.colorList;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getPatternResourceLocation() {
-      this.initializeBannerData();
-      return this.patternResourceLocation;
-   }
-
-   @SideOnly(Side.CLIENT)
-   private void initializeBannerData() {
-      if (this.patternList == null || this.colorList == null || this.patternResourceLocation == null) {
-         if (!this.patternDataSet) {
-            this.patternResourceLocation = "";
-         } else {
-            this.patternList = Lists.newArrayList();
-            this.colorList = Lists.newArrayList();
-            this.patternList.add(TileEntityBanner.EnumBannerPattern.BASE);
-            this.colorList.add(EnumDyeColor.byDyeDamage(this.baseColor));
-            this.patternResourceLocation = "b" + this.baseColor;
-            if (this.patterns != null) {
-               for(int var1 = 0; var1 < this.patterns.tagCount(); ++var1) {
-                  NBTTagCompound var2 = this.patterns.getCompoundTagAt(var1);
-                  TileEntityBanner.EnumBannerPattern var3 = TileEntityBanner.EnumBannerPattern.getPatternByID(var2.getString("Pattern"));
-                  if (var3 != null) {
-                     this.patternList.add(var3);
-                     int var4 = var2.getInteger("Color");
-                     this.colorList.add(EnumDyeColor.byDyeDamage(var4));
-                     this.patternResourceLocation = this.patternResourceLocation + var3.getPatternID() + var4;
-                  }
-               }
-            }
-         }
-      }
-
    }
 
    public static void addBaseColorTag(ItemStack var0, EnumDyeColor var1) {
@@ -228,11 +188,6 @@ public class TileEntityBanner extends TileEntity {
          this.craftingLayers[2] = var7;
       }
 
-      @SideOnly(Side.CLIENT)
-      public String getPatternName() {
-         return this.patternName;
-      }
-
       public String getPatternID() {
          return this.patternID;
       }
@@ -251,18 +206,6 @@ public class TileEntityBanner extends TileEntity {
 
       public ItemStack getCraftingStack() {
          return this.patternCraftingStack;
-      }
-
-      @Nullable
-      @SideOnly(Side.CLIENT)
-      public static TileEntityBanner.EnumBannerPattern getPatternByID(String var0) {
-         for(TileEntityBanner.EnumBannerPattern var4 : values()) {
-            if (var4.patternID.equals(var0)) {
-               return var4;
-            }
-         }
-
-         return null;
       }
    }
 }

@@ -36,7 +36,6 @@ public class UserListOpsEntry extends UserListEntry {
          var1.addProperty("level", Integer.valueOf(this.permissionLevel));
          var1.addProperty("bypassesPlayerLimit", Boolean.valueOf(this.bypassesPlayerLimit));
       }
-
    }
 
    private static GameProfile constructProfile(JsonObject var0) {

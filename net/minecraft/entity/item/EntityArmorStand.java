@@ -37,8 +37,13 @@ import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.CraftEquipmentSlot;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 public class EntityArmorStand extends EntityLivingBase {
    private static final Rotations DEFAULT_HEAD_ROTATION = new Rotations(0.0F, 0.0F, 0.0F);
@@ -58,6 +63,10 @@ public class EntityArmorStand extends EntityLivingBase {
       public boolean apply(@Nullable Entity var1) {
          return var1 instanceof EntityMinecart && ((EntityMinecart)var1).getType() == EntityMinecart.Type.RIDEABLE;
       }
+
+      public boolean apply(Object var1) {
+         return this.apply((Entity)var1);
+      }
    };
    private final ItemStack[] handItems;
    private final ItemStack[] armorItems;
@@ -65,12 +74,12 @@ public class EntityArmorStand extends EntityLivingBase {
    public long punchCooldown;
    private int disabledSlots;
    private boolean wasMarker;
-   private Rotations headRotation;
-   private Rotations bodyRotation;
-   private Rotations leftArmRotation;
-   private Rotations rightArmRotation;
-   private Rotations leftLegRotation;
-   private Rotations rightLegRotation;
+   public Rotations headRotation;
+   public Rotations bodyRotation;
+   public Rotations leftArmRotation;
+   public Rotations rightArmRotation;
+   public Rotations leftLegRotation;
+   public Rotations rightLegRotation;
 
    public EntityArmorStand(World var1) {
       super(var1);
@@ -117,11 +126,11 @@ public class EntityArmorStand extends EntityLivingBase {
    @Nullable
    public ItemStack getItemStackFromSlot(EntityEquipmentSlot var1) {
       ItemStack var2 = null;
-      switch(var1.getSlotType()) {
-      case HAND:
+      switch(EntityArmorStand.SyntheticClass_1.a[var1.getSlotType().ordinal()]) {
+      case 1:
          var2 = this.handItems[var1.getIndex()];
          break;
-      case ARMOR:
+      case 2:
          var2 = this.armorItems[var1.getIndex()];
       }
 
@@ -129,12 +138,12 @@ public class EntityArmorStand extends EntityLivingBase {
    }
 
    public void setItemStackToSlot(EntityEquipmentSlot var1, @Nullable ItemStack var2) {
-      switch(var1.getSlotType()) {
-      case HAND:
+      switch(EntityArmorStand.SyntheticClass_1.a[var1.getSlotType().ordinal()]) {
+      case 1:
          this.playEquipSound(var2);
          this.handItems[var1.getIndex()] = var2;
          break;
-      case ARMOR:
+      case 2:
          this.playEquipSound(var2);
          this.armorItems[var1.getIndex()] = var2;
       }
@@ -187,18 +196,18 @@ public class EntityArmorStand extends EntityLivingBase {
       }
 
       var1.setTag("ArmorItems", var2);
-      NBTTagList var9 = new NBTTagList();
+      NBTTagList var12 = new NBTTagList();
 
-      for(ItemStack var13 : this.handItems) {
-         NBTTagCompound var8 = new NBTTagCompound();
-         if (var13 != null) {
-            var13.writeToNBT(var8);
+      for(ItemStack var9 : this.handItems) {
+         NBTTagCompound var10 = new NBTTagCompound();
+         if (var9 != null) {
+            var9.writeToNBT(var10);
          }
 
-         var9.appendTag(var8);
+         var12.appendTag(var10);
       }
 
-      var1.setTag("HandItems", var9);
+      var1.setTag("HandItems", var12);
       if (this.getAlwaysRenderNameTag() && (this.getCustomNameTag() == null || this.getCustomNameTag().isEmpty())) {
          var1.setBoolean("CustomNameVisible", this.getAlwaysRenderNameTag());
       }
@@ -226,10 +235,10 @@ public class EntityArmorStand extends EntityLivingBase {
       }
 
       if (var1.hasKey("HandItems", 9)) {
-         NBTTagList var4 = var1.getTagList("HandItems", 10);
+         NBTTagList var5 = var1.getTagList("HandItems", 10);
 
          for(int var6 = 0; var6 < this.handItems.length; ++var6) {
-            this.handItems[var6] = ItemStack.loadItemStackFromNBT(var4.getCompoundTagAt(var6));
+            this.handItems[var6] = ItemStack.loadItemStackFromNBT(var5.getCompoundTagAt(var6));
          }
       }
 
@@ -241,8 +250,8 @@ public class EntityArmorStand extends EntityLivingBase {
       this.setMarker(var1.getBoolean("Marker"));
       this.wasMarker = !this.hasMarker();
       this.noClip = this.hasNoGravity();
-      NBTTagCompound var5 = var1.getCompoundTag("Pose");
-      this.writePoseToNBT(var5);
+      NBTTagCompound var4 = var1.getCompoundTag("Pose");
+      this.writePoseToNBT(var4);
    }
 
    private void writePoseToNBT(NBTTagCompound var1) {
@@ -323,26 +332,22 @@ public class EntityArmorStand extends EntityLivingBase {
             var5 = EntityEquipmentSlot.HEAD;
          }
 
-         double var8 = 0.1D;
-         double var10 = 0.9D;
-         double var12 = 0.4D;
-         double var14 = 1.6D;
-         EntityEquipmentSlot var16 = EntityEquipmentSlot.MAINHAND;
-         boolean var17 = this.isSmall();
-         double var18 = var17 ? var2.yCoord * 2.0D : var2.yCoord;
-         if (var18 >= 0.1D && var18 < 0.1D + (var17 ? 0.8D : 0.45D) && this.getItemStackFromSlot(EntityEquipmentSlot.FEET) != null) {
-            var16 = EntityEquipmentSlot.FEET;
-         } else if (var18 >= 0.9D + (var17 ? 0.3D : 0.0D) && var18 < 0.9D + (var17 ? 1.0D : 0.7D) && this.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != null) {
-            var16 = EntityEquipmentSlot.CHEST;
-         } else if (var18 >= 0.4D && var18 < 0.4D + (var17 ? 1.0D : 0.8D) && this.getItemStackFromSlot(EntityEquipmentSlot.LEGS) != null) {
-            var16 = EntityEquipmentSlot.LEGS;
-         } else if (var18 >= 1.6D && this.getItemStackFromSlot(EntityEquipmentSlot.HEAD) != null) {
-            var16 = EntityEquipmentSlot.HEAD;
+         EntityEquipmentSlot var8 = EntityEquipmentSlot.MAINHAND;
+         boolean var9 = this.isSmall();
+         double var10 = var9 ? var2.yCoord * 2.0D : var2.yCoord;
+         if (var10 >= 0.1D && var10 < 0.1D + (var9 ? 0.8D : 0.45D) && this.getItemStackFromSlot(EntityEquipmentSlot.FEET) != null) {
+            var8 = EntityEquipmentSlot.FEET;
+         } else if (var10 >= 0.9D + (var9 ? 0.3D : 0.0D) && var10 < 0.9D + (var9 ? 1.0D : 0.7D) && this.getItemStackFromSlot(EntityEquipmentSlot.CHEST) != null) {
+            var8 = EntityEquipmentSlot.CHEST;
+         } else if (var10 >= 0.4D && var10 < 0.4D + (var9 ? 1.0D : 0.8D) && this.getItemStackFromSlot(EntityEquipmentSlot.LEGS) != null) {
+            var8 = EntityEquipmentSlot.LEGS;
+         } else if (var10 >= 1.6D && this.getItemStackFromSlot(EntityEquipmentSlot.HEAD) != null) {
+            var8 = EntityEquipmentSlot.HEAD;
          }
 
-         boolean var20 = this.getItemStackFromSlot(var16) != null;
-         if (this.isDisabled(var16) || this.isDisabled(var5)) {
-            var16 = var5;
+         boolean var12 = this.getItemStackFromSlot(var8) != null;
+         if (this.isDisabled(var8) || this.isDisabled(var5)) {
+            var8 = var5;
             if (this.isDisabled(var5)) {
                return EnumActionResult.FAIL;
             }
@@ -353,8 +358,8 @@ public class EntityArmorStand extends EntityLivingBase {
          } else {
             if (var6) {
                this.swapItem(var1, var5, var3, var4);
-            } else if (var20) {
-               this.swapItem(var1, var16, var3, var4);
+            } else if (var12) {
+               this.swapItem(var1, var8, var3, var4);
             }
 
             return EnumActionResult.SUCCESS;
@@ -371,15 +376,26 @@ public class EntityArmorStand extends EntityLivingBase {
    private void swapItem(EntityPlayer var1, EntityEquipmentSlot var2, @Nullable ItemStack var3, EnumHand var4) {
       ItemStack var5 = this.getItemStackFromSlot(var2);
       if ((var5 == null || (this.disabledSlots & 1 << var2.getSlotIndex() + 8) == 0) && (var5 != null || (this.disabledSlots & 1 << var2.getSlotIndex() + 16) == 0)) {
+         CraftItemStack var6 = CraftItemStack.asCraftMirror(var5);
+         CraftItemStack var7 = CraftItemStack.asCraftMirror(var3);
+         Player var8 = (Player)var1.getBukkitEntity();
+         ArmorStand var9 = (ArmorStand)this.getBukkitEntity();
+         EquipmentSlot var10 = CraftEquipmentSlot.getSlot(var2);
+         PlayerArmorStandManipulateEvent var11 = new PlayerArmorStandManipulateEvent(var8, var9, var7, var6, var10);
+         this.world.getServer().getPluginManager().callEvent(var11);
+         if (var11.isCancelled()) {
+            return;
+         }
+
          if (var1.capabilities.isCreativeMode && (var5 == null || var5.getItem() == Item.getItemFromBlock(Blocks.AIR)) && var3 != null) {
-            ItemStack var7 = var3.copy();
-            var7.stackSize = 1;
-            this.setItemStackToSlot(var2, var7);
+            ItemStack var13 = var3.copy();
+            var13.stackSize = 1;
+            this.setItemStackToSlot(var2, var13);
          } else if (var3 != null && var3.stackSize > 1) {
             if (var5 == null) {
-               ItemStack var6 = var3.copy();
-               var6.stackSize = 1;
-               this.setItemStackToSlot(var2, var6);
+               ItemStack var12 = var3.copy();
+               var12.stackSize = 1;
+               this.setItemStackToSlot(var2, var12);
                --var3.stackSize;
             }
          } else {
@@ -391,7 +407,9 @@ public class EntityArmorStand extends EntityLivingBase {
    }
 
    public boolean attackEntityFrom(DamageSource var1, float var2) {
-      if (!this.world.isRemote && !this.isDead) {
+      if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, var1, (double)var2)) {
+         return false;
+      } else if (!this.world.isRemote && !this.isDead) {
          if (DamageSource.outOfWorld.equals(var1)) {
             this.setDead();
             return false;
@@ -448,30 +466,6 @@ public class EntityArmorStand extends EntityLivingBase {
       } else {
          return false;
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 32) {
-         if (this.world.isRemote) {
-            this.world.playSound(this.posX, this.posY, this.posZ, SoundEvents.ENTITY_ARMORSTAND_HIT, this.getSoundCategory(), 0.3F, 1.0F, false);
-            this.punchCooldown = this.world.getTotalWorldTime();
-         }
-      } else {
-         super.handleStatusUpdate(var1);
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      double var3 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
-      if (Double.isNaN(var3) || var3 == 0.0D) {
-         var3 = 4.0D;
-      }
-
-      var3 = var3 * 64.0D;
-      return var1 < var3 * var3;
    }
 
    private void playParticles() {
@@ -626,7 +620,7 @@ public class EntityArmorStand extends EntityLivingBase {
       return this.isInvisible();
    }
 
-   private void setSmall(boolean var1) {
+   public void setSmall(boolean var1) {
       this.dataManager.set(STATUS, Byte.valueOf(this.setBit(((Byte)this.dataManager.get(STATUS)).byteValue(), 1, var1)));
    }
 
@@ -634,7 +628,7 @@ public class EntityArmorStand extends EntityLivingBase {
       return (((Byte)this.dataManager.get(STATUS)).byteValue() & 1) != 0;
    }
 
-   private void setShowArms(boolean var1) {
+   public void setShowArms(boolean var1) {
       this.dataManager.set(STATUS, Byte.valueOf(this.setBit(((Byte)this.dataManager.get(STATUS)).byteValue(), 4, var1)));
    }
 
@@ -642,7 +636,7 @@ public class EntityArmorStand extends EntityLivingBase {
       return (((Byte)this.dataManager.get(STATUS)).byteValue() & 4) != 0;
    }
 
-   private void setNoBasePlate(boolean var1) {
+   public void setNoBasePlate(boolean var1) {
       this.dataManager.set(STATUS, Byte.valueOf(this.setBit(((Byte)this.dataManager.get(STATUS)).byteValue(), 8, var1)));
    }
 
@@ -650,7 +644,7 @@ public class EntityArmorStand extends EntityLivingBase {
       return (((Byte)this.dataManager.get(STATUS)).byteValue() & 8) != 0;
    }
 
-   private void setMarker(boolean var1) {
+   public void setMarker(boolean var1) {
       this.dataManager.set(STATUS, Byte.valueOf(this.setBit(((Byte)this.dataManager.get(STATUS)).byteValue(), 16, var1)));
    }
 
@@ -706,26 +700,6 @@ public class EntityArmorStand extends EntityLivingBase {
       return this.bodyRotation;
    }
 
-   @SideOnly(Side.CLIENT)
-   public Rotations getLeftArmRotation() {
-      return this.leftArmRotation;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Rotations getRightArmRotation() {
-      return this.rightArmRotation;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Rotations getLeftLegRotation() {
-      return this.leftLegRotation;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Rotations getRightLegRotation() {
-      return this.rightLegRotation;
-   }
-
    public boolean canBeCollidedWith() {
       return super.canBeCollidedWith() && !this.hasMarker();
    }
@@ -753,5 +727,24 @@ public class EntityArmorStand extends EntityLivingBase {
 
    public boolean canBeHitWithPotion() {
       return false;
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EntityEquipmentSlot.Type.values().length];
+
+      static {
+         try {
+            a[EntityEquipmentSlot.Type.HAND.ordinal()] = 1;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EntityEquipmentSlot.Type.ARMOR.ordinal()] = 2;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

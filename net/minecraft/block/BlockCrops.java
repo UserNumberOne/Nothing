@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.properties.IProperty;
@@ -12,14 +11,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.IPlantable;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockCrops extends BlockBush implements IGrowable {
    public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 7);
@@ -68,9 +65,9 @@ public class BlockCrops extends BlockBush implements IGrowable {
          int var5 = this.getAge(var3);
          if (var5 < this.getMaxAge()) {
             float var6 = getGrowthChance(this, var1, var2);
-            if (ForgeHooks.onCropsGrowPre(var1, var2, var3, var4.nextInt((int)(25.0F / var6) + 1) == 0)) {
-               var1.setBlockState(var2, this.withAge(var5 + 1), 2);
-               ForgeHooks.onCropsGrowPost(var1, var2, var3, var1.getBlockState(var2));
+            if (var4.nextInt((int)(25.0F / var6) + 1) == 0) {
+               IBlockState var7 = this.withAge(var5 + 1);
+               CraftEventFactory.handleBlockGrowEvent(var1, var2.getX(), var2.getY(), var2.getZ(), this, this.getMetaFromState(var7));
             }
          }
       }
@@ -84,7 +81,8 @@ public class BlockCrops extends BlockBush implements IGrowable {
          var4 = var5;
       }
 
-      var1.setBlockState(var2, this.withAge(var4), 2);
+      IBlockState var6 = this.withAge(var4);
+      CraftEventFactory.handleBlockGrowEvent(var1, var2.getX(), var2.getY(), var2.getZ(), this, this.getMetaFromState(var6));
    }
 
    protected int getBonemealAgeIncrease(World var1) {
@@ -99,9 +97,9 @@ public class BlockCrops extends BlockBush implements IGrowable {
          for(int var6 = -1; var6 <= 1; ++var6) {
             float var7 = 0.0F;
             IBlockState var8 = var1.getBlockState(var4.add(var5, 0, var6));
-            if (var8.getBlock().canSustainPlant(var8, var1, var4.add(var5, 0, var6), EnumFacing.UP, (IPlantable)var0)) {
+            if (var8.getBlock() == Blocks.FARMLAND) {
                var7 = 1.0F;
-               if (var8.getBlock().isFertile(var1, var4.add(var5, 0, var6))) {
+               if (((Integer)var8.getValue(BlockFarmland.MOISTURE)).intValue() > 0) {
                   var7 = 3.0F;
                }
             }
@@ -133,8 +131,7 @@ public class BlockCrops extends BlockBush implements IGrowable {
    }
 
    public boolean canBlockStay(World var1, BlockPos var2, IBlockState var3) {
-      IBlockState var4 = var1.getBlockState(var2.down());
-      return (var1.getLight(var2) >= 8 || var1.canSeeSky(var2)) && var4.getBlock().canSustainPlant(var4, var1, var2.down(), EnumFacing.UP, this);
+      return (var1.getLight(var2) >= 8 || var1.canSeeSky(var2)) && this.canSustainBush(var1.getBlockState(var2.down()));
    }
 
    protected Item getSeed() {
@@ -145,25 +142,21 @@ public class BlockCrops extends BlockBush implements IGrowable {
       return Items.WHEAT;
    }
 
-   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
-      List var5 = super.getDrops(var1, var2, var3, var4);
-      int var6 = this.getAge(var3);
-      Random var7 = var1 instanceof World ? ((World)var1).rand : new Random();
-      if (var6 >= this.getMaxAge()) {
-         int var8 = 3 + var4;
+   public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
+      super.dropBlockAsItemWithChance(var1, var2, var3, var4, 0);
+      if (!var1.isRemote) {
+         int var6 = this.getAge(var3);
+         if (var6 >= this.getMaxAge()) {
+            int var7 = 3 + var5;
 
-         for(int var9 = 0; var9 < 3 + var4; ++var9) {
-            if (var7.nextInt(2 * this.getMaxAge()) <= var6) {
-               var5.add(new ItemStack(this.getSeed(), 1, 0));
+            for(int var8 = 0; var8 < var7; ++var8) {
+               if (var1.rand.nextInt(2 * this.getMaxAge()) <= var6) {
+                  spawnAsEntity(var1, var2, new ItemStack(this.getSeed()));
+               }
             }
          }
       }
 
-      return var5;
-   }
-
-   public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
-      super.dropBlockAsItemWithChance(var1, var2, var3, var4, 0);
    }
 
    @Nullable

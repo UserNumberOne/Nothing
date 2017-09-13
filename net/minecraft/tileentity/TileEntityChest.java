@@ -1,10 +1,13 @@
 package net.minecraft.tileentity;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
@@ -22,10 +25,8 @@ import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.VanillaDoubleChestItemHandler;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class TileEntityChest extends TileEntityLockableLoot implements ITickable, IInventory {
    private ItemStack[] chestContents = new ItemStack[27];
@@ -40,9 +41,30 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
    private int ticksSinceSync;
    private BlockChest.Type cachedChestType;
    private String customName;
-   public VanillaDoubleChestItemHandler doubleChestHandler;
+   public List transaction = new ArrayList();
+   private int maxStack = 64;
 
    public TileEntityChest() {
+   }
+
+   public ItemStack[] getContents() {
+      return this.chestContents;
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
    }
 
    public TileEntityChest(BlockChest.Type var1) {
@@ -148,40 +170,43 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
    }
 
    public int getInventoryStackLimit() {
-      return 64;
+      return this.maxStack;
    }
 
    public boolean isUsableByPlayer(EntityPlayer var1) {
-      return this.world.getTileEntity(this.pos) != this ? false : var1.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+      if (this.world == null) {
+         return true;
+      } else {
+         return this.world.getTileEntity(this.pos) != this ? false : var1.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+      }
    }
 
    public void updateContainingBlockInfo() {
       super.updateContainingBlockInfo();
       this.adjacentChestChecked = false;
-      this.doubleChestHandler = null;
    }
 
    private void setNeighbor(TileEntityChest var1, EnumFacing var2) {
       if (var1.isInvalid()) {
          this.adjacentChestChecked = false;
       } else if (this.adjacentChestChecked) {
-         switch(var2) {
-         case NORTH:
+         switch(TileEntityChest.SyntheticClass_1.a[var2.ordinal()]) {
+         case 1:
             if (this.adjacentChestZNeg != var1) {
                this.adjacentChestChecked = false;
             }
             break;
-         case SOUTH:
+         case 2:
             if (this.adjacentChestZPos != var1) {
                this.adjacentChestChecked = false;
             }
             break;
-         case EAST:
+         case 3:
             if (this.adjacentChestXPos != var1) {
                this.adjacentChestChecked = false;
             }
             break;
-         case WEST:
+         case 4:
             if (this.adjacentChestXNeg != var1) {
                this.adjacentChestChecked = false;
             }
@@ -233,7 +258,6 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
       ++this.ticksSinceSync;
       if (!this.world.isRemote && this.numPlayersUsing != 0 && (this.ticksSinceSync + var1 + var2 + var3) % 200 == 0) {
          this.numPlayersUsing = 0;
-         float var4 = 5.0F;
 
          for(EntityPlayer var6 : this.world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB((double)((float)var1 - 5.0F), (double)((float)var2 - 5.0F), (double)((float)var3 - 5.0F), (double)((float)(var1 + 1) + 5.0F), (double)((float)(var2 + 1) + 5.0F), (double)((float)(var3 + 1) + 5.0F)))) {
             if (var6.openContainer instanceof ContainerChest) {
@@ -246,23 +270,22 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
       }
 
       this.prevLidAngle = this.lidAngle;
-      float var11 = 0.1F;
       if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
-         double var12 = (double)var1 + 0.5D;
-         double var15 = (double)var3 + 0.5D;
+         double var8 = (double)var1 + 0.5D;
+         double var10 = (double)var3 + 0.5D;
          if (this.adjacentChestZPos != null) {
-            var15 += 0.5D;
+            var10 += 0.5D;
          }
 
          if (this.adjacentChestXPos != null) {
-            var12 += 0.5D;
+            var8 += 0.5D;
          }
 
-         this.world.playSound((EntityPlayer)null, var12, (double)var2 + 0.5D, var15, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+         this.world.playSound((EntityPlayer)null, var8, (double)var2 + 0.5D, var10, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
       }
 
       if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F) {
-         float var13 = this.lidAngle;
+         float var14 = this.lidAngle;
          if (this.numPlayersUsing > 0) {
             this.lidAngle += 0.1F;
          } else {
@@ -273,19 +296,18 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
             this.lidAngle = 1.0F;
          }
 
-         float var14 = 0.5F;
-         if (this.lidAngle < 0.5F && var13 >= 0.5F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
-            double var16 = (double)var1 + 0.5D;
-            double var9 = (double)var3 + 0.5D;
+         if (this.lidAngle < 0.5F && var14 >= 0.5F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
+            double var15 = (double)var1 + 0.5D;
+            double var12 = (double)var3 + 0.5D;
             if (this.adjacentChestZPos != null) {
-               var9 += 0.5D;
+               var12 += 0.5D;
             }
 
             if (this.adjacentChestXPos != null) {
-               var16 += 0.5D;
+               var15 += 0.5D;
             }
 
-            this.world.playSound((EntityPlayer)null, var16, (double)var2 + 0.5D, var9, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound((EntityPlayer)null, var15, (double)var2 + 0.5D, var12, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
          }
 
          if (this.lidAngle < 0.0F) {
@@ -310,8 +332,20 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
             this.numPlayersUsing = 0;
          }
 
+         int var2 = Math.max(0, Math.min(15, this.numPlayersUsing));
          ++this.numPlayersUsing;
+         if (this.world == null) {
+            return;
+         }
+
          this.world.addBlockEvent(this.pos, this.getBlockType(), 1, this.numPlayersUsing);
+         if (this.getBlockType() == Blocks.TRAPPED_CHEST) {
+            int var3 = Math.max(0, Math.min(15, this.numPlayersUsing));
+            if (var2 != var3) {
+               CraftEventFactory.callRedstoneChange(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), var2, var3);
+            }
+         }
+
          this.world.notifyNeighborsOfStateChange(this.pos, this.getBlockType());
          this.world.notifyNeighborsOfStateChange(this.pos.down(), this.getBlockType());
       }
@@ -320,8 +354,20 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
 
    public void closeInventory(EntityPlayer var1) {
       if (!var1.isSpectator() && this.getBlockType() instanceof BlockChest) {
+         int var2 = Math.max(0, Math.min(15, this.numPlayersUsing));
          --this.numPlayersUsing;
+         if (this.world == null) {
+            return;
+         }
+
          this.world.addBlockEvent(this.pos, this.getBlockType(), 1, this.numPlayersUsing);
+         if (this.getBlockType() == Blocks.TRAPPED_CHEST) {
+            int var3 = Math.max(0, Math.min(15, this.numPlayersUsing));
+            if (var2 != var3) {
+               CraftEventFactory.callRedstoneChange(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), var2, var3);
+            }
+         }
+
          this.world.notifyNeighborsOfStateChange(this.pos, this.getBlockType());
          this.world.notifyNeighborsOfStateChange(this.pos.down(), this.getBlockType());
       }
@@ -379,21 +425,38 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
 
    }
 
-   public Object getCapability(Capability var1, EnumFacing var2) {
-      if (var1 == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-         if (this.doubleChestHandler == null || this.doubleChestHandler.needsRefresh()) {
-            this.doubleChestHandler = VanillaDoubleChestItemHandler.get(this);
-         }
-
-         if (this.doubleChestHandler != null && this.doubleChestHandler != VanillaDoubleChestItemHandler.NO_ADJACENT_CHESTS_INSTANCE) {
-            return this.doubleChestHandler;
-         }
-      }
-
-      return super.getCapability(var1, var2);
+   public boolean onlyOpsCanSetNbt() {
+      return true;
    }
 
-   public IItemHandler getSingleChestHandler() {
-      return (IItemHandler)super.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, (EnumFacing)null);
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 1;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 2;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.EAST.ordinal()] = 3;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 4;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

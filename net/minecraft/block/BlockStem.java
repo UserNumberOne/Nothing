@@ -1,9 +1,8 @@
 package net.minecraft.block;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.properties.PropertyInteger;
@@ -20,7 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockStem extends BlockBush implements IGrowable {
    public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 7);
@@ -61,11 +60,11 @@ public class BlockStem extends BlockBush implements IGrowable {
       super.updateTick(var1, var2, var3, var4);
       if (var1.getLightFromNeighbors(var2.up()) >= 9) {
          float var5 = BlockCrops.getGrowthChance(this, var1, var2);
-         if (ForgeHooks.onCropsGrowPre(var1, var2, var3, var4.nextInt((int)(25.0F / var5) + 1) == 0)) {
+         if (var4.nextInt((int)(25.0F / var5) + 1) == 0) {
             int var6 = ((Integer)var3.getValue(AGE)).intValue();
             if (var6 < 7) {
                var3 = var3.withProperty(AGE, Integer.valueOf(var6 + 1));
-               var1.setBlockState(var2, var3, 2);
+               CraftEventFactory.handleBlockGrowEvent(var1, var2.getX(), var2.getY(), var2.getZ(), this, this.getMetaFromState(var3));
             } else {
                for(EnumFacing var8 : EnumFacing.Plane.HORIZONTAL) {
                   if (var1.getBlockState(var2.offset(var8)).getBlock() == this.crop) {
@@ -74,14 +73,11 @@ public class BlockStem extends BlockBush implements IGrowable {
                }
 
                var2 = var2.offset(EnumFacing.Plane.HORIZONTAL.random(var4));
-               IBlockState var9 = var1.getBlockState(var2.down());
-               Block var10 = var9.getBlock();
-               if (var1.isAirBlock(var2) && (var10.canSustainPlant(var9, var1, var2.down(), EnumFacing.UP, this) || var10 == Blocks.DIRT || var10 == Blocks.GRASS)) {
-                  var1.setBlockState(var2, this.crop.getDefaultState());
+               Block var11 = var1.getBlockState(var2.down()).getBlock();
+               if (var1.getBlockState(var2).getBlock().blockMaterial == Material.AIR && (var11 == Blocks.FARMLAND || var11 == Blocks.DIRT || var11 == Blocks.GRASS)) {
+                  CraftEventFactory.handleBlockGrowEvent(var1, var2.getX(), var2.getY(), var2.getZ(), this.crop, 0);
                }
             }
-
-            ForgeHooks.onCropsGrowPost(var1, var2, var3, var1.getBlockState(var2));
          }
       }
 
@@ -89,27 +85,24 @@ public class BlockStem extends BlockBush implements IGrowable {
 
    public void growStem(World var1, BlockPos var2, IBlockState var3) {
       int var4 = ((Integer)var3.getValue(AGE)).intValue() + MathHelper.getInt(var1.rand, 2, 5);
-      var1.setBlockState(var2, var3.withProperty(AGE, Integer.valueOf(Math.min(7, var4))), 2);
+      CraftEventFactory.handleBlockGrowEvent(var1, var2.getX(), var2.getY(), var2.getZ(), this, Math.min(7, var4));
    }
 
    public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
       super.dropBlockAsItemWithChance(var1, var2, var3, var4, var5);
-   }
+      if (!var1.isRemote) {
+         Item var6 = this.getSeedItem();
+         if (var6 != null) {
+            int var7 = ((Integer)var3.getValue(AGE)).intValue();
 
-   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
-      ArrayList var5 = new ArrayList();
-      Item var6 = this.getSeedItem();
-      if (var6 != null) {
-         int var7 = ((Integer)var3.getValue(AGE)).intValue();
-
-         for(int var8 = 0; var8 < 3; ++var8) {
-            if (RANDOM.nextInt(15) <= var7) {
-               var5.add(new ItemStack(var6));
+            for(int var8 = 0; var8 < 3; ++var8) {
+               if (var1.rand.nextInt(15) <= var7) {
+                  spawnAsEntity(var1, var2, new ItemStack(var6));
+               }
             }
          }
       }
 
-      return var5;
    }
 
    @Nullable

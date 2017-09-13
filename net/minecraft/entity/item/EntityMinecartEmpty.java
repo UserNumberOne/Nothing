@@ -6,8 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
 
 public class EntityMinecartEmpty extends EntityMinecart {
    public EntityMinecartEmpty(World var1) {
@@ -23,9 +21,7 @@ public class EntityMinecartEmpty extends EntityMinecart {
    }
 
    public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
-      if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, var1, var2, var3))) {
-         return true;
-      } else if (var1.isSneaking()) {
+      if (var1.isSneaking()) {
          return false;
       } else if (this.isBeingRidden()) {
          return true;

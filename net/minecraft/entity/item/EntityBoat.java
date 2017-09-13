@@ -33,8 +33,17 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.entity.Vehicle;
+import org.bukkit.event.vehicle.VehicleCreateEvent;
+import org.bukkit.event.vehicle.VehicleDamageEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
+import org.bukkit.event.vehicle.VehicleMoveEvent;
+import org.bukkit.event.vehicle.VehicleUpdateEvent;
 
 public class EntityBoat extends Entity {
    private static final DataParameter TIME_SINCE_HIT = EntityDataManager.createKey(EntityBoat.class, DataSerializers.VARINT);
@@ -61,9 +70,18 @@ public class EntityBoat extends Entity {
    private EntityBoat.Status status;
    private EntityBoat.Status previousStatus;
    private double lastYd;
+   public double maxSpeed;
+   public double occupiedDeceleration;
+   public double unoccupiedDeceleration;
+   public boolean landBoats;
+   private Location lastLocation;
 
    public EntityBoat(World var1) {
       super(var1);
+      this.maxSpeed = 0.4D;
+      this.occupiedDeceleration = 0.2D;
+      this.unoccupiedDeceleration = -1.0D;
+      this.landBoats = false;
       this.paddlePositions = new float[2];
       this.preventEntitySpawning = true;
       this.setSize(1.375F, 0.5625F);
@@ -78,6 +96,7 @@ public class EntityBoat extends Entity {
       this.prevPosX = var2;
       this.prevPosY = var4;
       this.prevPosZ = var6;
+      this.world.getServer().getPluginManager().callEvent(new VehicleCreateEvent((Vehicle)this.getBukkitEntity()));
    }
 
    protected boolean canTriggerWalking() {
@@ -121,20 +140,35 @@ public class EntityBoat extends Entity {
          if (var1 instanceof EntityDamageSourceIndirect && var1.getEntity() != null && this.isPassenger(var1.getEntity())) {
             return false;
          } else {
-            this.setForwardDirection(-this.getForwardDirection());
-            this.setTimeSinceHit(10);
-            this.setDamageTaken(this.getDamageTaken() + var2 * 10.0F);
-            this.setBeenAttacked();
-            boolean var3 = var1.getEntity() instanceof EntityPlayer && ((EntityPlayer)var1.getEntity()).capabilities.isCreativeMode;
-            if (var3 || this.getDamageTaken() > 40.0F) {
-               if (!var3 && this.world.getGameRules().getBoolean("doEntityDrops")) {
-                  this.dropItemWithOffset(this.getItemBoat(), 1, 0.0F);
+            Vehicle var3 = (Vehicle)this.getBukkitEntity();
+            CraftEntity var4 = var1.getEntity() == null ? null : var1.getEntity().getBukkitEntity();
+            VehicleDamageEvent var5 = new VehicleDamageEvent(var3, var4, (double)var2);
+            this.world.getServer().getPluginManager().callEvent(var5);
+            if (var5.isCancelled()) {
+               return true;
+            } else {
+               this.setForwardDirection(-this.getForwardDirection());
+               this.setTimeSinceHit(10);
+               this.setDamageTaken(this.getDamageTaken() + var2 * 10.0F);
+               this.setBeenAttacked();
+               boolean var6 = var1.getEntity() instanceof EntityPlayer && ((EntityPlayer)var1.getEntity()).capabilities.isCreativeMode;
+               if (var6 || this.getDamageTaken() > 40.0F) {
+                  VehicleDestroyEvent var7 = new VehicleDestroyEvent(var3, var4);
+                  this.world.getServer().getPluginManager().callEvent(var7);
+                  if (var7.isCancelled()) {
+                     this.setDamageTaken(40.0F);
+                     return true;
+                  }
+
+                  if (!var6 && this.world.getGameRules().getBoolean("doEntityDrops")) {
+                     this.dropItemWithOffset(this.getItemBoat(), 1, 0.0F);
+                  }
+
+                  this.setDead();
                }
 
-               this.setDead();
+               return true;
             }
-
-            return true;
          }
       } else {
          return true;
@@ -144,51 +178,46 @@ public class EntityBoat extends Entity {
    public void applyEntityCollision(Entity var1) {
       if (var1 instanceof EntityBoat) {
          if (var1.getEntityBoundingBox().minY < this.getEntityBoundingBox().maxY) {
+            VehicleEntityCollisionEvent var2 = new VehicleEntityCollisionEvent((Vehicle)this.getBukkitEntity(), var1.getBukkitEntity());
+            this.world.getServer().getPluginManager().callEvent(var2);
+            if (var2.isCancelled()) {
+               return;
+            }
+
             super.applyEntityCollision(var1);
          }
       } else if (var1.getEntityBoundingBox().minY <= this.getEntityBoundingBox().minY) {
+         VehicleEntityCollisionEvent var3 = new VehicleEntityCollisionEvent((Vehicle)this.getBukkitEntity(), var1.getBukkitEntity());
+         this.world.getServer().getPluginManager().callEvent(var3);
+         if (var3.isCancelled()) {
+            return;
+         }
+
          super.applyEntityCollision(var1);
       }
 
    }
 
    public Item getItemBoat() {
-      switch(this.getBoatType()) {
-      case OAK:
+      switch(EntityBoat.SyntheticClass_1.a[this.getBoatType().ordinal()]) {
+      case 1:
       default:
          return Items.BOAT;
-      case SPRUCE:
+      case 2:
          return Items.SPRUCE_BOAT;
-      case BIRCH:
+      case 3:
          return Items.BIRCH_BOAT;
-      case JUNGLE:
+      case 4:
          return Items.JUNGLE_BOAT;
-      case ACACIA:
+      case 5:
          return Items.ACACIA_BOAT;
-      case DARK_OAK:
+      case 6:
          return Items.DARK_OAK_BOAT;
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public void performHurtAnimation() {
-      this.setForwardDirection(-this.getForwardDirection());
-      this.setTimeSinceHit(10);
-      this.setDamageTaken(this.getDamageTaken() * 11.0F);
-   }
-
    public boolean canBeCollidedWith() {
       return !this.isDead;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setPositionAndRotationDirect(double var1, double var3, double var5, float var7, float var8, int var9, boolean var10) {
-      this.boatPitch = var1;
-      this.lerpY = var3;
-      this.lerpZ = var5;
-      this.boatYaw = (double)var7;
-      this.lerpXRot = (double)var8;
-      this.lerpSteps = 10;
    }
 
    public EnumFacing getAdjustedHorizontalFacing() {
@@ -239,26 +268,38 @@ public class EntityBoat extends Entity {
          this.motionZ = 0.0D;
       }
 
-      for(int var1 = 0; var1 <= 1; ++var1) {
-         if (this.getPaddleState(var1)) {
-            this.paddlePositions[var1] = (float)((double)this.paddlePositions[var1] + 0.01D);
+      CraftServer var1 = this.world.getServer();
+      CraftWorld var2 = this.world.getWorld();
+      Location var3 = new Location(var2, this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
+      Vehicle var4 = (Vehicle)this.getBukkitEntity();
+      var1.getPluginManager().callEvent(new VehicleUpdateEvent(var4));
+      if (this.lastLocation != null && !this.lastLocation.equals(var3)) {
+         VehicleMoveEvent var5 = new VehicleMoveEvent(var4, this.lastLocation, var3);
+         var1.getPluginManager().callEvent(var5);
+      }
+
+      this.lastLocation = var4.getLocation();
+
+      for(int var9 = 0; var9 <= 1; ++var9) {
+         if (this.getPaddleState(var9)) {
+            this.paddlePositions[var9] = (float)((double)this.paddlePositions[var9] + 0.01D);
          } else {
-            this.paddlePositions[var1] = 0.0F;
+            this.paddlePositions[var9] = 0.0F;
          }
       }
 
       this.doBlockCollisions();
-      List var5 = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(0.20000000298023224D, -0.009999999776482582D, 0.20000000298023224D), EntitySelectors.getTeamCollisionPredicate(this));
-      if (!var5.isEmpty()) {
-         boolean var2 = !this.world.isRemote && !(this.getControllingPassenger() instanceof EntityPlayer);
+      List var10 = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(0.20000000298023224D, -0.009999999776482582D, 0.20000000298023224D), EntitySelectors.getTeamCollisionPredicate(this));
+      if (!var10.isEmpty()) {
+         boolean var6 = !this.world.isRemote && !(this.getControllingPassenger() instanceof EntityPlayer);
 
-         for(int var3 = 0; var3 < var5.size(); ++var3) {
-            Entity var4 = (Entity)var5.get(var3);
-            if (!var4.isPassenger(this)) {
-               if (var2 && this.getPassengers().size() < 2 && !var4.isRiding() && var4.width < this.width && var4 instanceof EntityLivingBase && !(var4 instanceof EntityWaterMob) && !(var4 instanceof EntityPlayer)) {
-                  var4.startRiding(this);
+         for(int var7 = 0; var7 < var10.size(); ++var7) {
+            Entity var8 = (Entity)var10.get(var7);
+            if (!var8.isPassenger(this)) {
+               if (var6 && this.getPassengers().size() < 2 && !var8.isRiding() && var8.width < this.width && var8 instanceof EntityLivingBase && !(var8 instanceof EntityWaterMob) && !(var8 instanceof EntityPlayer)) {
+                  var8.startRiding(this);
                } else {
-                  this.applyEntityCollision(var4);
+                  this.applyEntityCollision(var8);
                }
             }
          }
@@ -284,11 +325,6 @@ public class EntityBoat extends Entity {
    public void setPaddleState(boolean var1, boolean var2) {
       this.dataManager.set(DATA_ID_PADDLE[0], Boolean.valueOf(var1));
       this.dataManager.set(DATA_ID_PADDLE[1], Boolean.valueOf(var2));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getRowingTime(int var1, float var2) {
-      return this.getPaddleState(var1) ? (float)MathHelper.clampedLerp((double)this.paddlePositions[var1] - 0.01D, (double)this.paddlePositions[var1], (double)var2) : 0.0F;
    }
 
    private EntityBoat.Status getBoatStatus() {
@@ -320,7 +356,7 @@ public class EntityBoat extends Entity {
       BlockPos.PooledMutableBlockPos var8 = BlockPos.PooledMutableBlockPos.retain();
 
       try {
-         label107:
+         label106:
          for(int var9 = var4; var9 < var5; ++var9) {
             float var10 = 0.0F;
             int var11 = var2;
@@ -329,8 +365,8 @@ public class EntityBoat extends Entity {
                if (var11 >= var3) {
                   if (var10 < 1.0F) {
                      float var19 = (float)var8.getY() + var10;
-                     float var20 = var19;
-                     return var20;
+                     float var14 = var19;
+                     return var14;
                   }
                   break;
                }
@@ -343,7 +379,7 @@ public class EntityBoat extends Entity {
                   }
 
                   if (var10 >= 1.0F) {
-                     continue label107;
+                     continue label106;
                   }
                }
 
@@ -351,9 +387,9 @@ public class EntityBoat extends Entity {
             }
          }
 
-         float var17 = (float)(var5 + 1);
-         float var18 = var17;
-         return var18;
+         float var18 = (float)(var5 + 1);
+         float var20 = var18;
+         return var20;
       } finally {
          var8.release();
       }
@@ -465,11 +501,12 @@ public class EntityBoat extends Entity {
                }
             }
          }
+
+         EntityBoat.Status var21 = var10 ? EntityBoat.Status.UNDER_WATER : null;
+         return var21;
       } finally {
          var11.release();
       }
-
-      return var10 ? EntityBoat.Status.UNDER_WATER : null;
    }
 
    public static float getBlockLiquidHeight(IBlockState var0, IBlockAccess var1, BlockPos var2) {
@@ -482,9 +519,8 @@ public class EntityBoat extends Entity {
    }
 
    private void updateMotion() {
-      double var1 = -0.03999999910593033D;
-      double var3 = this.hasNoGravity() ? 0.0D : -0.03999999910593033D;
-      double var5 = 0.0D;
+      double var1 = this.hasNoGravity() ? 0.0D : -0.03999999910593033D;
+      double var3 = 0.0D;
       this.momentum = 0.05F;
       if (this.previousStatus == EntityBoat.Status.IN_AIR && this.status != EntityBoat.Status.IN_AIR && this.status != EntityBoat.Status.ON_LAND) {
          this.waterLevel = this.getEntityBoundingBox().minY + (double)this.height;
@@ -494,13 +530,13 @@ public class EntityBoat extends Entity {
          this.status = EntityBoat.Status.IN_WATER;
       } else {
          if (this.status == EntityBoat.Status.IN_WATER) {
-            var5 = (this.waterLevel - this.getEntityBoundingBox().minY) / (double)this.height;
+            var3 = (this.waterLevel - this.getEntityBoundingBox().minY) / (double)this.height;
             this.momentum = 0.9F;
          } else if (this.status == EntityBoat.Status.UNDER_FLOWING_WATER) {
-            var3 = -7.0E-4D;
+            var1 = -7.0E-4D;
             this.momentum = 0.9F;
          } else if (this.status == EntityBoat.Status.UNDER_WATER) {
-            var5 = 0.009999999776482582D;
+            var3 = 0.009999999776482582D;
             this.momentum = 0.45F;
          } else if (this.status == EntityBoat.Status.IN_AIR) {
             this.momentum = 0.9F;
@@ -514,11 +550,9 @@ public class EntityBoat extends Entity {
          this.motionX *= (double)this.momentum;
          this.motionZ *= (double)this.momentum;
          this.deltaRotation *= this.momentum;
-         this.motionY += var3;
-         if (var5 > 0.0D) {
-            double var7 = 0.65D;
-            this.motionY += var5 * 0.06153846016296973D;
-            double var9 = 0.75D;
+         this.motionY += var1;
+         if (var3 > 0.0D) {
+            this.motionY += var3 * 0.06153846016296973D;
             this.motionY *= 0.75D;
          }
       }
@@ -596,11 +630,6 @@ public class EntityBoat extends Entity {
       var1.setRotationYawHead(var1.rotationYaw);
    }
 
-   @SideOnly(Side.CLIENT)
-   public void applyOrientationToEntity(Entity var1) {
-      this.applyYawToEntity(var1);
-   }
-
    protected void writeEntityToNBT(NBTTagCompound var1) {
       var1.setString("Type", this.getBoatType().getName());
    }
@@ -632,14 +661,19 @@ public class EntityBoat extends Entity {
 
                this.fall(this.fallDistance, 1.0F);
                if (!this.world.isRemote && !this.isDead) {
-                  this.setDead();
-                  if (this.world.getGameRules().getBoolean("doEntityDrops")) {
-                     for(int var6 = 0; var6 < 3; ++var6) {
-                        this.entityDropItem(new ItemStack(Item.getItemFromBlock(Blocks.PLANKS), 1, this.getBoatType().getMetadata()), 0.0F);
-                     }
+                  Vehicle var6 = (Vehicle)this.getBukkitEntity();
+                  VehicleDestroyEvent var7 = new VehicleDestroyEvent(var6, (org.bukkit.entity.Entity)null);
+                  this.world.getServer().getPluginManager().callEvent(var7);
+                  if (!var7.isCancelled()) {
+                     this.setDead();
+                     if (this.world.getGameRules().getBoolean("doEntityDrops")) {
+                        for(int var8 = 0; var8 < 3; ++var8) {
+                           this.entityDropItem(new ItemStack(Item.getItemFromBlock(Blocks.PLANKS), 1, this.getBoatType().getMetadata()), 0.0F);
+                        }
 
-                     for(int var7 = 0; var7 < 2; ++var7) {
-                        this.dropItemWithOffset(Items.STICK, 1, 0.0F);
+                        for(int var9 = 0; var9 < 2; ++var9) {
+                           this.dropItemWithOffset(Items.STICK, 1, 0.0F);
+                        }
                      }
                   }
                }
@@ -699,20 +733,55 @@ public class EntityBoat extends Entity {
       return var1.isEmpty() ? null : (Entity)var1.get(0);
    }
 
-   @SideOnly(Side.CLIENT)
-   public void updateInputs(boolean var1, boolean var2, boolean var3, boolean var4) {
-      this.leftInputDown = var1;
-      this.rightInputDown = var2;
-      this.forwardInputDown = var3;
-      this.backInputDown = var4;
-   }
-
    public static enum Status {
       IN_WATER,
       UNDER_WATER,
       UNDER_FLOWING_WATER,
       ON_LAND,
       IN_AIR;
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EntityBoat.Type.values().length];
+
+      static {
+         try {
+            a[EntityBoat.Type.OAK.ordinal()] = 1;
+         } catch (NoSuchFieldError var5) {
+            ;
+         }
+
+         try {
+            a[EntityBoat.Type.SPRUCE.ordinal()] = 2;
+         } catch (NoSuchFieldError var4) {
+            ;
+         }
+
+         try {
+            a[EntityBoat.Type.BIRCH.ordinal()] = 3;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EntityBoat.Type.JUNGLE.ordinal()] = 4;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EntityBoat.Type.ACACIA.ordinal()] = 5;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EntityBoat.Type.DARK_OAK.ordinal()] = 6;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 
    public static enum Type {

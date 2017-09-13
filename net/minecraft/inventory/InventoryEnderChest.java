@@ -1,13 +1,49 @@
 package net.minecraft.inventory;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntityEnderChest;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 
 public class InventoryEnderChest extends InventoryBasic {
    private TileEntityEnderChest associatedChest;
+   public List transaction = new ArrayList();
+   public Player player;
+   private int maxStack = 64;
+
+   public ItemStack[] getContents() {
+      return this.inventoryContents;
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public InventoryHolder getOwner() {
+      return this.player;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
+   }
+
+   public int getInventoryStackLimit() {
+      return this.maxStack;
+   }
 
    public InventoryEnderChest() {
       super("container.enderchest", false, 27);

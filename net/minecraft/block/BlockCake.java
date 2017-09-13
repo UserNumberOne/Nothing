@@ -8,19 +8,19 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 
 public class BlockCake extends Block {
    public static final PropertyInteger BITES = PropertyInteger.create("bites", 0, 6);
@@ -34,11 +34,6 @@ public class BlockCake extends Block {
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
       return CAKE_AABB[((Integer)var1.getValue(BITES)).intValue()];
-   }
-
-   @SideOnly(Side.CLIENT)
-   public AxisAlignedBB getSelectedBoundingBox(IBlockState var1, World var2, BlockPos var3) {
-      return var1.getCollisionBoundingBox(var2, var3);
    }
 
    public boolean isFullCube(IBlockState var1) {
@@ -57,10 +52,16 @@ public class BlockCake extends Block {
    private void eatCake(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4) {
       if (var4.canEat(false)) {
          var4.addStat(StatList.CAKE_SLICES_EATEN);
-         var4.getFoodStats().addStats(2, 0.1F);
-         int var5 = ((Integer)var3.getValue(BITES)).intValue();
-         if (var5 < 6) {
-            var1.setBlockState(var2, var3.withProperty(BITES, Integer.valueOf(var5 + 1)), 3);
+         int var5 = var4.getFoodStats().foodLevel;
+         FoodLevelChangeEvent var6 = CraftEventFactory.callFoodLevelChangeEvent(var4, 2 + var5);
+         if (!var6.isCancelled()) {
+            var4.getFoodStats().addStats(var6.getFoodLevel() - var5, 0.1F);
+         }
+
+         ((EntityPlayerMP)var4).getBukkitEntity().sendHealthUpdate();
+         int var7 = ((Integer)var3.getValue(BITES)).intValue();
+         if (var7 < 6) {
+            var1.setBlockState(var2, var3.withProperty(BITES, Integer.valueOf(var7 + 1)), 3);
          } else {
             var1.setBlockToAir(var2);
          }
@@ -98,11 +99,6 @@ public class BlockCake extends Block {
 
    public IBlockState getStateFromMeta(int var1) {
       return this.getDefaultState().withProperty(BITES, Integer.valueOf(var1));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 
    public int getMetaFromState(IBlockState var1) {

@@ -1,7 +1,7 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
@@ -40,8 +40,8 @@ public class WorldGenFossils extends WorldGenerator {
       Rotation var7 = var6[var4.nextInt(var6.length)];
       int var8 = var4.nextInt(FOSSILS.length);
       TemplateManager var9 = var1.getSaveHandler().getStructureTemplateManager();
-      Template var10 = var9.getTemplate(var5, FOSSILS[var8]);
-      Template var11 = var9.getTemplate(var5, FOSSILS_COAL[var8]);
+      Template var10 = var9.a(var5, FOSSILS[var8]);
+      Template var11 = var9.a(var5, FOSSILS_COAL[var8]);
       ChunkPos var12 = new ChunkPos(var3);
       StructureBoundingBox var13 = new StructureBoundingBox(var12.getXStart(), 0, var12.getZStart(), var12.getXEnd(), 256, var12.getZEnd());
       PlacementSettings var14 = (new PlacementSettings()).setRotation(var7).setBoundingBox(var13).setRandom(var4);

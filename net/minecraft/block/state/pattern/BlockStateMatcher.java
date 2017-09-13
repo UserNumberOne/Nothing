@@ -15,6 +15,11 @@ public class BlockStateMatcher implements Predicate {
       public boolean apply(@Nullable IBlockState var1) {
          return true;
       }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((IBlockState)var1);
+      }
    };
    private final BlockStateContainer blockstate;
    private final Map propertyPredicates = Maps.newHashMap();
@@ -52,5 +57,10 @@ public class BlockStateMatcher implements Predicate {
          this.propertyPredicates.put(var1, var2);
          return this;
       }
+   }
+
+   // $FF: synthetic method
+   public boolean apply(Object var1) {
+      return this.apply((IBlockState)var1);
    }
 }

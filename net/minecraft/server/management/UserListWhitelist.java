@@ -3,8 +3,6 @@ package net.minecraft.server.management;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import java.io.File;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class UserListWhitelist extends UserList {
    public UserListWhitelist(File var1) {
@@ -13,6 +11,10 @@ public class UserListWhitelist extends UserList {
 
    protected UserListEntry createEntry(JsonObject var1) {
       return new UserListWhitelistEntry(var1);
+   }
+
+   public boolean isWhitelisted(GameProfile var1) {
+      return this.hasEntry(var1);
    }
 
    public String[] getKeys() {
@@ -24,11 +26,6 @@ public class UserListWhitelist extends UserList {
       }
 
       return var1;
-   }
-
-   @SideOnly(Side.SERVER)
-   public boolean isWhitelisted(GameProfile var1) {
-      return this.hasEntry(var1);
    }
 
    protected String getObjectKey(GameProfile var1) {
@@ -43,5 +40,10 @@ public class UserListWhitelist extends UserList {
       }
 
       return null;
+   }
+
+   // $FF: synthetic method
+   protected String getObjectKey(Object var1) {
+      return this.getObjectKey((GameProfile)var1);
    }
 }

@@ -1,14 +1,14 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockSapling;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -41,7 +41,7 @@ public class WorldGenTaiga1 extends WorldGenAbstractTree {
             for(int var12 = var3.getX() - var10; var12 <= var3.getX() + var10 && var8; ++var12) {
                for(int var13 = var3.getZ() - var10; var13 <= var3.getZ() + var10 && var8; ++var13) {
                   if (var9 >= 0 && var9 < 256) {
-                     if (!this.isReplaceable(var1, var11.setPos(var12, var9, var13))) {
+                     if (!this.canGrowInto(var1.getBlockState(var11.setPos(var12, var9, var13)).getBlock())) {
                         var8 = false;
                      }
                   } else {
@@ -54,41 +54,37 @@ public class WorldGenTaiga1 extends WorldGenAbstractTree {
          if (!var8) {
             return false;
          } else {
-            BlockPos var19 = var3.down();
-            IBlockState var21 = var1.getBlockState(var19);
-            boolean var24 = var21.getBlock().canSustainPlant(var21, var1, var19, EnumFacing.UP, (BlockSapling)Blocks.SAPLING);
-            if (var24 && var3.getY() < 256 - var4 - 1) {
-               var21.getBlock().onPlantGrow(var21, var1, var19, var3);
-               int var25 = 0;
+            Block var17 = var1.getBlockState(var3.down()).getBlock();
+            if ((var17 == Blocks.GRASS || var17 == Blocks.DIRT) && var3.getY() < 256 - var4 - 1) {
+               this.setDirtAt(var1, var3.down());
+               int var19 = 0;
 
-               for(int var26 = var3.getY() + var4; var26 >= var3.getY() + var5; --var26) {
-                  for(int var14 = var3.getX() - var25; var14 <= var3.getX() + var25; ++var14) {
-                     int var15 = var14 - var3.getX();
+               for(int var20 = var3.getY() + var4; var20 >= var3.getY() + var5; --var20) {
+                  for(int var22 = var3.getX() - var19; var22 <= var3.getX() + var19; ++var22) {
+                     int var24 = var22 - var3.getX();
 
-                     for(int var16 = var3.getZ() - var25; var16 <= var3.getZ() + var25; ++var16) {
-                        int var17 = var16 - var3.getZ();
-                        if (Math.abs(var15) != var25 || Math.abs(var17) != var25 || var25 <= 0) {
-                           BlockPos var18 = new BlockPos(var14, var26, var16);
-                           var21 = var1.getBlockState(var18);
-                           if (var21.getBlock().canBeReplacedByLeaves(var21, var1, var18)) {
-                              this.setBlockAndNotifyAdequately(var1, var18, LEAF);
+                     for(int var14 = var3.getZ() - var19; var14 <= var3.getZ() + var19; ++var14) {
+                        int var15 = var14 - var3.getZ();
+                        if (Math.abs(var24) != var19 || Math.abs(var15) != var19 || var19 <= 0) {
+                           BlockPos var16 = new BlockPos(var22, var20, var14);
+                           if (!var1.getBlockState(var16).isFullBlock()) {
+                              this.setBlockAndNotifyAdequately(var1, var16, LEAF);
                            }
                         }
                      }
                   }
 
-                  if (var25 >= 1 && var26 == var3.getY() + var5 + 1) {
-                     --var25;
-                  } else if (var25 < var7) {
-                     ++var25;
+                  if (var19 >= 1 && var20 == var3.getY() + var5 + 1) {
+                     --var19;
+                  } else if (var19 < var7) {
+                     ++var19;
                   }
                }
 
-               for(int var27 = 0; var27 < var4 - 1; ++var27) {
-                  BlockPos var28 = var3.up(var27);
-                  var21 = var1.getBlockState(var28);
-                  if (var21.getBlock().isAir(var21, var1, var28) || var21.getBlock().isLeaves(var21, var1, var28)) {
-                     this.setBlockAndNotifyAdequately(var1, var3.up(var27), TRUNK);
+               for(int var21 = 0; var21 < var4 - 1; ++var21) {
+                  Material var23 = var1.getBlockState(var3.up(var21)).getMaterial();
+                  if (var23 == Material.AIR || var23 == Material.LEAVES) {
+                     this.setBlockAndNotifyAdequately(var1, var3.up(var21), TRUNK);
                   }
                }
 

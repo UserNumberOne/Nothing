@@ -116,7 +116,7 @@ public class DamageSource {
       return this.damageIsAbsolute;
    }
 
-   public DamageSource(String var1) {
+   protected DamageSource(String var1) {
       this.damageType = var1;
    }
 
@@ -130,24 +130,24 @@ public class DamageSource {
       return null;
    }
 
-   public DamageSource setDamageBypassesArmor() {
+   protected DamageSource setDamageBypassesArmor() {
       this.isUnblockable = true;
       this.hungerDamage = 0.0F;
       return this;
    }
 
-   public DamageSource setDamageAllowedInCreativeMode() {
+   protected DamageSource setDamageAllowedInCreativeMode() {
       this.isDamageAllowedInCreativeMode = true;
       return this;
    }
 
-   public DamageSource setDamageIsAbsolute() {
+   protected DamageSource setDamageIsAbsolute() {
       this.damageIsAbsolute = true;
       this.hungerDamage = 0.0F;
       return this;
    }
 
-   public DamageSource setFireDamage() {
+   protected DamageSource setFireDamage() {
       this.fireDamage = true;
       return this;
    }

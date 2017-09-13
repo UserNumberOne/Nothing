@@ -1,5 +1,6 @@
 package net.minecraft.block;
 
+import java.util.Iterator;
 import java.util.List;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -10,10 +11,19 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.plugin.PluginManager;
 
 public class BlockPressurePlate extends BlockBasePressurePlate {
    public static final PropertyBool POWERED = PropertyBool.create("powered");
@@ -54,11 +64,11 @@ public class BlockPressurePlate extends BlockBasePressurePlate {
    protected int computeRedstoneStrength(World var1, BlockPos var2) {
       AxisAlignedBB var3 = PRESSURE_AABB.offset(var2);
       List var4;
-      switch(this.sensitivity) {
-      case EVERYTHING:
+      switch(BlockPressurePlate.SyntheticClass_1.a[this.sensitivity.ordinal()]) {
+      case 1:
          var4 = var1.getEntitiesWithinAABBExcludingEntity((Entity)null, var3);
          break;
-      case MOBS:
+      case 2:
          var4 = var1.getEntitiesWithinAABB(EntityLivingBase.class, var3);
          break;
       default:
@@ -66,14 +76,44 @@ public class BlockPressurePlate extends BlockBasePressurePlate {
       }
 
       if (!var4.isEmpty()) {
-         for(Entity var6 : var4) {
+         Iterator var5 = var4.iterator();
+
+         while(true) {
+            Entity var6;
+            while(true) {
+               if (!var5.hasNext()) {
+                  return 0;
+               }
+
+               var6 = (Entity)var5.next();
+               if (this.getRedstoneStrength(var1.getBlockState(var2)) != 0) {
+                  break;
+               }
+
+               CraftWorld var7 = var1.getWorld();
+               PluginManager var8 = var1.getServer().getPluginManager();
+               Object var9;
+               if (var6 instanceof EntityPlayer) {
+                  var9 = CraftEventFactory.callPlayerInteractEvent((EntityPlayer)var6, Action.PHYSICAL, var2, (EnumFacing)null, (ItemStack)null, (EnumHand)null);
+               } else {
+                  var9 = new EntityInteractEvent(var6.getBukkitEntity(), var7.getBlockAt(var2.getX(), var2.getY(), var2.getZ()));
+                  var8.callEvent((EntityInteractEvent)var9);
+               }
+
+               if (!((Cancellable)var9).isCancelled()) {
+                  break;
+               }
+            }
+
             if (!var6.doesEntityNotTriggerPressurePlate()) {
-               return 15;
+               break;
             }
          }
-      }
 
-      return 0;
+         return 15;
+      } else {
+         return 0;
+      }
    }
 
    public IBlockState getStateFromMeta(int var1) {
@@ -91,5 +131,24 @@ public class BlockPressurePlate extends BlockBasePressurePlate {
    public static enum Sensitivity {
       EVERYTHING,
       MOBS;
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[BlockPressurePlate.Sensitivity.values().length];
+
+      static {
+         try {
+            a[BlockPressurePlate.Sensitivity.EVERYTHING.ordinal()] = 1;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[BlockPressurePlate.Sensitivity.MOBS.ordinal()] = 2;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

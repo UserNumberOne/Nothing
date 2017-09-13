@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -10,8 +9,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -19,8 +16,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockWall extends Block {
    public static final PropertyBool UP = PropertyBool.create("up");
@@ -92,24 +87,21 @@ public class BlockWall extends Block {
    private boolean canConnectTo(IBlockAccess var1, BlockPos var2) {
       IBlockState var3 = var1.getBlockState(var2);
       Block var4 = var3.getBlock();
-      return var4 == Blocks.BARRIER ? false : (var4 != this && !(var4 instanceof BlockFenceGate) ? (var4.blockMaterial.isOpaque() && var3.isFullCube() ? var4.blockMaterial != Material.GOURD : false) : true);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
-      for(BlockWall.EnumType var7 : BlockWall.EnumType.values()) {
-         var3.add(new ItemStack(var1, 1, var7.getMetadata()));
+      if (var4 == Blocks.BARRIER) {
+         return false;
+      } else if (var4 != this && !(var4 instanceof BlockFenceGate)) {
+         if (var4.blockMaterial.isOpaque() && var3.isFullCube()) {
+            return var4.blockMaterial != Material.GOURD;
+         } else {
+            return false;
+         }
+      } else {
+         return true;
       }
-
    }
 
    public int damageDropped(IBlockState var1) {
       return ((BlockWall.EnumType)var1.getValue(VARIANT)).getMetadata();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return var4 == EnumFacing.DOWN ? super.shouldSideBeRendered(var1, var2, var3, var4) : true;
    }
 
    public IBlockState getStateFromMeta(int var1) {

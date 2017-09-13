@@ -13,14 +13,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockChorusPlant extends Block {
    public static final PropertyBool NORTH = PropertyBool.create("north");
@@ -157,16 +154,5 @@ public class BlockChorusPlant extends Block {
 
    public boolean isPassable(IBlockAccess var1, BlockPos var2) {
       return false;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      Block var5 = var2.getBlockState(var3.offset(var4)).getBlock();
-      return var5 != this && var5 != Blocks.CHORUS_FLOWER && (var4 != EnumFacing.DOWN || var5 != Blocks.END_STONE);
    }
 }

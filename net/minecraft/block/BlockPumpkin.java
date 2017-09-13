@@ -23,6 +23,8 @@ import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.util.BlockStateListPopulator;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class BlockPumpkin extends BlockHorizontal {
    private BlockPattern snowmanBasePattern;
@@ -32,6 +34,10 @@ public class BlockPumpkin extends BlockHorizontal {
    private static final Predicate IS_PUMPKIN = new Predicate() {
       public boolean apply(@Nullable IBlockState var1) {
          return var1 != null && (var1.getBlock() == Blocks.PUMPKIN || var1.getBlock() == Blocks.LIT_PUMPKIN);
+      }
+
+      public boolean apply(Object var1) {
+         return this.apply((IBlockState)var1);
       }
    };
 
@@ -53,48 +59,55 @@ public class BlockPumpkin extends BlockHorizontal {
 
    private void trySpawnGolem(World var1, BlockPos var2) {
       BlockPattern.PatternHelper var3 = this.getSnowmanPattern().match(var1, var2);
+      BlockStateListPopulator var4 = new BlockStateListPopulator(var1.getWorld());
       if (var3 != null) {
-         for(int var4 = 0; var4 < this.getSnowmanPattern().getThumbLength(); ++var4) {
-            BlockWorldState var5 = var3.translateOffset(0, var4, 0);
-            var1.setBlockState(var5.getPos(), Blocks.AIR.getDefaultState(), 2);
+         for(int var5 = 0; var5 < this.getSnowmanPattern().getThumbLength(); ++var5) {
+            BlockWorldState var6 = var3.translateOffset(0, var5, 0);
+            BlockPos var7 = var6.getPos();
+            var4.setTypeId(var7.getX(), var7.getY(), var7.getZ(), 0);
          }
 
-         EntitySnowman var10 = new EntitySnowman(var1);
-         BlockPos var13 = var3.translateOffset(0, 2, 0).getPos();
-         var10.setLocationAndAngles((double)var13.getX() + 0.5D, (double)var13.getY() + 0.05D, (double)var13.getZ() + 0.5D, 0.0F, 0.0F);
-         var1.spawnEntity(var10);
+         EntitySnowman var13 = new EntitySnowman(var1);
+         BlockPos var16 = var3.translateOffset(0, 2, 0).getPos();
+         var13.setLocationAndAngles((double)var16.getX() + 0.5D, (double)var16.getY() + 0.05D, (double)var16.getZ() + 0.5D, 0.0F, 0.0F);
+         if (var1.addEntity(var13, SpawnReason.BUILD_SNOWMAN)) {
+            var4.updateList();
 
-         for(int var6 = 0; var6 < 120; ++var6) {
-            var1.spawnParticle(EnumParticleTypes.SNOW_SHOVEL, (double)var13.getX() + var1.rand.nextDouble(), (double)var13.getY() + var1.rand.nextDouble() * 2.5D, (double)var13.getZ() + var1.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
-         }
+            for(int var8 = 0; var8 < 120; ++var8) {
+               var1.spawnParticle(EnumParticleTypes.SNOW_SHOVEL, (double)var16.getX() + var1.rand.nextDouble(), (double)var16.getY() + var1.rand.nextDouble() * 2.5D, (double)var16.getZ() + var1.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
+            }
 
-         for(int var16 = 0; var16 < this.getSnowmanPattern().getThumbLength(); ++var16) {
-            BlockWorldState var7 = var3.translateOffset(0, var16, 0);
-            var1.notifyNeighborsRespectDebug(var7.getPos(), Blocks.AIR);
+            for(int var19 = 0; var19 < this.getSnowmanPattern().getThumbLength(); ++var19) {
+               BlockWorldState var9 = var3.translateOffset(0, var19, 0);
+               var1.notifyNeighborsRespectDebug(var9.getPos(), Blocks.AIR);
+            }
          }
       } else {
          var3 = this.getGolemPattern().match(var1, var2);
          if (var3 != null) {
-            for(int var11 = 0; var11 < this.getGolemPattern().getPalmLength(); ++var11) {
+            for(int var12 = 0; var12 < this.getGolemPattern().getPalmLength(); ++var12) {
                for(int var14 = 0; var14 < this.getGolemPattern().getThumbLength(); ++var14) {
-                  var1.setBlockState(var3.translateOffset(var11, var14, 0).getPos(), Blocks.AIR.getDefaultState(), 2);
+                  BlockPos var17 = var3.translateOffset(var12, var14, 0).getPos();
+                  var4.setTypeId(var17.getX(), var17.getY(), var17.getZ(), 0);
                }
             }
 
-            BlockPos var12 = var3.translateOffset(1, 2, 0).getPos();
-            EntityIronGolem var15 = new EntityIronGolem(var1);
-            var15.setPlayerCreated(true);
-            var15.setLocationAndAngles((double)var12.getX() + 0.5D, (double)var12.getY() + 0.05D, (double)var12.getZ() + 0.5D, 0.0F, 0.0F);
-            var1.spawnEntity(var15);
+            BlockPos var15 = var3.translateOffset(1, 2, 0).getPos();
+            EntityIronGolem var18 = new EntityIronGolem(var1);
+            var18.setPlayerCreated(true);
+            var18.setLocationAndAngles((double)var15.getX() + 0.5D, (double)var15.getY() + 0.05D, (double)var15.getZ() + 0.5D, 0.0F, 0.0F);
+            if (var1.addEntity(var18, SpawnReason.BUILD_IRONGOLEM)) {
+               var4.updateList();
 
-            for(int var17 = 0; var17 < 120; ++var17) {
-               var1.spawnParticle(EnumParticleTypes.SNOWBALL, (double)var12.getX() + var1.rand.nextDouble(), (double)var12.getY() + var1.rand.nextDouble() * 3.9D, (double)var12.getZ() + var1.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
-            }
+               for(int var20 = 0; var20 < 120; ++var20) {
+                  var1.spawnParticle(EnumParticleTypes.SNOWBALL, (double)var15.getX() + var1.rand.nextDouble(), (double)var15.getY() + var1.rand.nextDouble() * 3.9D, (double)var15.getZ() + var1.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
+               }
 
-            for(int var18 = 0; var18 < this.getGolemPattern().getPalmLength(); ++var18) {
-               for(int var19 = 0; var19 < this.getGolemPattern().getThumbLength(); ++var19) {
-                  BlockWorldState var8 = var3.translateOffset(var18, var19, 0);
-                  var1.notifyNeighborsRespectDebug(var8.getPos(), Blocks.AIR);
+               for(int var21 = 0; var21 < this.getGolemPattern().getPalmLength(); ++var21) {
+                  for(int var22 = 0; var22 < this.getGolemPattern().getThumbLength(); ++var22) {
+                     BlockWorldState var10 = var3.translateOffset(var21, var22, 0);
+                     var1.notifyNeighborsRespectDebug(var10.getPos(), Blocks.AIR);
+                  }
                }
             }
          }
@@ -103,7 +116,7 @@ public class BlockPumpkin extends BlockHorizontal {
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      return var1.getBlockState(var2).getBlock().isReplaceable(var1, var2) && var1.getBlockState(var2.down()).isSideSolid(var1, var2, EnumFacing.UP);
+      return var1.getBlockState(var2).getBlock().blockMaterial.isReplaceable() && var1.getBlockState(var2.down()).isFullyOpaque();
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {

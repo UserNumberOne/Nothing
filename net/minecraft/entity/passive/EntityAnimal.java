@@ -8,19 +8,17 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
    protected Block spawnableBlock = Blocks.GRASS;
    private int inLove;
    private EntityPlayer playerInLove;
+   public ItemStack breedItem;
 
    public EntityAnimal(World var1) {
       super(var1);
@@ -50,15 +48,6 @@ public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
          }
       }
 
-   }
-
-   public boolean attackEntityFrom(DamageSource var1, float var2) {
-      if (this.isEntityInvulnerable(var1)) {
-         return false;
-      } else {
-         this.inLove = 0;
-         return super.attackEntityFrom(var1, var2);
-      }
    }
 
    public float getBlockPathWeight(BlockPos var1) {
@@ -131,6 +120,7 @@ public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
    public void setInLove(EntityPlayer var1) {
       this.inLove = 600;
       this.playerInLove = var1;
+      this.breedItem = var1.inventory.getCurrentItem();
       this.world.setEntityState(this, (byte)18);
    }
 
@@ -148,20 +138,5 @@ public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
 
    public boolean canMateWith(EntityAnimal var1) {
       return var1 == this ? false : (var1.getClass() != this.getClass() ? false : this.isInLove() && var1.isInLove());
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 18) {
-         for(int var2 = 0; var2 < 7; ++var2) {
-            double var3 = this.rand.nextGaussian() * 0.02D;
-            double var5 = this.rand.nextGaussian() * 0.02D;
-            double var7 = this.rand.nextGaussian() * 0.02D;
-            this.world.spawnParticle(EnumParticleTypes.HEART, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, var3, var5, var7);
-         }
-      } else {
-         super.handleStatusUpdate(var1);
-      }
-
    }
 }

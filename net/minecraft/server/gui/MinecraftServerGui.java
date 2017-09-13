@@ -11,7 +11,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.concurrent.CountDownLatch;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -27,17 +26,13 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@SideOnly(Side.SERVER)
 public class MinecraftServerGui extends JComponent {
    private static final Font SERVER_GUI_FONT = new Font("Monospaced", 0, 12);
    private static final Logger LOGGER = LogManager.getLogger();
    private final DedicatedServer server;
-   private CountDownLatch latch = new CountDownLatch(1);
 
    public static void createServerGui(final DedicatedServer var0) {
       try {
@@ -54,9 +49,9 @@ public class MinecraftServerGui extends JComponent {
       var2.setVisible(true);
       var2.addWindowListener(new WindowAdapter() {
          public void windowClosing(WindowEvent var1) {
-            var0.initiateShutdown();
+            var0.safeShutdown();
 
-            while(!var0.isServerStopped()) {
+            while(!var0.isStopped()) {
                try {
                   Thread.sleep(100L);
                } catch (InterruptedException var3) {
@@ -67,7 +62,6 @@ public class MinecraftServerGui extends JComponent {
             System.exit(0);
          }
       });
-      var1.latch.countDown();
    }
 
    public MinecraftServerGui(DedicatedServer var1) {
@@ -138,12 +132,6 @@ public class MinecraftServerGui extends JComponent {
    }
 
    public void appendLine(final JTextArea var1, final JScrollPane var2, final String var3) {
-      try {
-         this.latch.await();
-      } catch (InterruptedException var9) {
-         ;
-      }
-
       if (!SwingUtilities.isEventDispatchThread()) {
          SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -167,7 +155,7 @@ public class MinecraftServerGui extends JComponent {
          if (var6) {
             var5.setValue(Integer.MAX_VALUE);
          }
-      }
 
+      }
    }
 }

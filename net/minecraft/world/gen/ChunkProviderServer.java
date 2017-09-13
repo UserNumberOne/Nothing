@@ -1,13 +1,10 @@
 package net.minecraft.world.gen;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.collect.UnmodifiableIterator;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -27,21 +24,18 @@ import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.IChunkLoader;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.chunkio.ChunkIOExecutor;
-import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.craftbukkit.v1_10_R1.chunkio.ChunkIOExecutor;
+import org.bukkit.event.world.ChunkUnloadEvent;
 
 public class ChunkProviderServer implements IChunkProvider {
    private static final Logger LOGGER = LogManager.getLogger();
-   private final Set droppedChunksSet = Sets.newHashSet();
+   public final Set droppedChunksSet = Sets.newHashSet();
    public final IChunkGenerator chunkGenerator;
-   public final IChunkLoader chunkLoader;
+   private final IChunkLoader chunkLoader;
    public final Long2ObjectMap id2ChunkMap = new Long2ObjectOpenHashMap(8192);
    public final WorldServer world;
-   private Set loadingChunks = Sets.newHashSet();
 
    public ChunkProviderServer(WorldServer var1, IChunkLoader var2, IChunkGenerator var3) {
       this.world = var1;
@@ -84,51 +78,75 @@ public class ChunkProviderServer implements IChunkProvider {
 
    @Nullable
    public Chunk loadChunk(int var1, int var2) {
-      return this.loadChunk(var1, var2, (Runnable)null);
+      Chunk var3 = this.getLoadedChunk(var1, var2);
+      if (var3 == null) {
+         AnvilChunkLoader var4 = null;
+         if (this.chunkLoader instanceof AnvilChunkLoader) {
+            var4 = (AnvilChunkLoader)this.chunkLoader;
+         }
+
+         if (var4 != null && var4.chunkExists(this.world, var1, var2)) {
+            var3 = ChunkIOExecutor.syncChunkLoad(this.world, var4, this, var1, var2);
+         }
+      }
+
+      return var3;
    }
 
    @Nullable
-   public Chunk loadChunk(int var1, int var2, Runnable var3) {
-      Chunk var4 = this.getLoadedChunk(var1, var2);
-      if (var4 == null) {
-         long var5 = ChunkPos.asLong(var1, var2);
-         var4 = ForgeChunkManager.fetchDormantChunk(var5, this.world);
-         if (var4 == null && this.chunkLoader instanceof AnvilChunkLoader) {
-            AnvilChunkLoader var7 = (AnvilChunkLoader)this.chunkLoader;
-            if (var3 == null) {
-               var4 = ChunkIOExecutor.syncChunkLoad(this.world, var7, this, var1, var2);
-            } else if (var7.chunkExists(this.world, var1, var2)) {
-               ChunkIOExecutor.queueChunkLoad(this.world, var7, this, var1, var2, var3);
-               return null;
-            }
-         } else {
-            if (!this.loadingChunks.add(Long.valueOf(var5))) {
-               FMLLog.bigWarning("There is an attempt to load a chunk (%d,%d) in dimension %d that is already being loaded. This will cause weird chunk breakages.", new Object[]{var1, var2, this.world.provider.getDimension()});
-            }
-
-            if (var4 == null) {
-               var4 = this.loadChunkFromFile(var1, var2);
-            }
-
-            if (var4 != null) {
-               this.id2ChunkMap.put(ChunkPos.asLong(var1, var2), var4);
-               var4.onChunkLoad();
-               var4.populateChunk(this, this.chunkGenerator);
-            }
-
-            this.loadingChunks.remove(Long.valueOf(var5));
+   public Chunk originalGetOrLoadChunkAt(int var1, int var2) {
+      Chunk var3 = this.getLoadedChunk(var1, var2);
+      if (var3 == null) {
+         var3 = this.loadChunkFromFile(var1, var2);
+         if (var3 != null) {
+            this.id2ChunkMap.put(ChunkPos.asLong(var1, var2), var3);
+            var3.onChunkLoad();
+            var3.loadNearby(this, this.chunkGenerator, false);
          }
+      }
+
+      return var3;
+   }
+
+   public Chunk getChunkIfLoaded(int var1, int var2) {
+      return (Chunk)this.id2ChunkMap.get(ChunkPos.asLong(var1, var2));
+   }
+
+   public Chunk provideChunk(int var1, int var2) {
+      return this.getChunkAt(var1, var2, (Runnable)null);
+   }
+
+   public Chunk getChunkAt(int var1, int var2, Runnable var3) {
+      return this.getChunkAt(var1, var2, var3, true);
+   }
+
+   public Chunk getChunkAt(int var1, int var2, Runnable var3, boolean var4) {
+      Chunk var5 = this.getChunkIfLoaded(var1, var2);
+      AnvilChunkLoader var6 = null;
+      if (this.chunkLoader instanceof AnvilChunkLoader) {
+         var6 = (AnvilChunkLoader)this.chunkLoader;
+      }
+
+      if (var5 == null && var6 != null && var6.chunkExists(this.world, var1, var2)) {
+         if (var3 != null) {
+            ChunkIOExecutor.queueChunkLoad(this.world, var6, this, var1, var2, var3);
+            return null;
+         }
+
+         var5 = ChunkIOExecutor.syncChunkLoad(this.world, var6, this, var1, var2);
+      } else if (var5 == null && var4) {
+         var5 = this.originalGetChunkAt(var1, var2);
       }
 
       if (var3 != null) {
          var3.run();
       }
 
-      return var4;
+      return var5;
    }
 
-   public Chunk provideChunk(int var1, int var2) {
-      Chunk var3 = this.loadChunk(var1, var2);
+   public Chunk originalGetChunkAt(int var1, int var2) {
+      Chunk var3 = this.originalGetOrLoadChunkAt(var1, var2);
       if (var3 == null) {
          long var4 = ChunkPos.asLong(var1, var2);
 
@@ -145,14 +163,14 @@ public class ChunkProviderServer implements IChunkProvider {
 
          this.id2ChunkMap.put(var4, var3);
          var3.onChunkLoad();
-         var3.populateChunk(this, this.chunkGenerator);
+         var3.loadNearby(this, this.chunkGenerator, true);
       }
 
       return var3;
    }
 
    @Nullable
-   private Chunk loadChunkFromFile(int var1, int var2) {
+   public Chunk loadChunkFromFile(int var1, int var2) {
       try {
          Chunk var3 = this.chunkLoader.loadChunk(this.world, var1, var2);
          if (var3 != null) {
@@ -167,7 +185,7 @@ public class ChunkProviderServer implements IChunkProvider {
       }
    }
 
-   private void saveChunkExtraData(Chunk var1) {
+   public void saveChunkExtraData(Chunk var1) {
       try {
          this.chunkLoader.saveExtraChunkData(this.world, var1);
       } catch (Exception var3) {
@@ -176,7 +194,7 @@ public class ChunkProviderServer implements IChunkProvider {
 
    }
 
-   private void saveChunkData(Chunk var1) {
+   public void saveChunkData(Chunk var1) {
       try {
          var1.setLastSaveTime(this.world.getTotalWorldTime());
          this.chunkLoader.saveChunk(this.world, var1);
@@ -190,17 +208,17 @@ public class ChunkProviderServer implements IChunkProvider {
 
    public boolean saveChunks(boolean var1) {
       int var2 = 0;
-      ArrayList var3 = Lists.newArrayList(this.id2ChunkMap.values());
+      ObjectIterator var3 = this.id2ChunkMap.values().iterator();
 
-      for(int var4 = 0; var4 < var3.size(); ++var4) {
-         Chunk var5 = (Chunk)var3.get(var4);
+      while(var3.hasNext()) {
+         Chunk var4 = (Chunk)var3.next();
          if (var1) {
-            this.saveChunkExtraData(var5);
+            this.saveChunkExtraData(var4);
          }
 
-         if (var5.needsSaving(var1)) {
-            this.saveChunkData(var5);
-            var5.setModified(false);
+         if (var4.needsSaving(var1)) {
+            this.saveChunkData(var4);
+            var4.setModified(false);
             ++var2;
             if (var2 == 24 && !var1) {
                return false;
@@ -218,29 +236,13 @@ public class ChunkProviderServer implements IChunkProvider {
    public boolean tick() {
       if (!this.world.disableLevelSaving) {
          if (!this.droppedChunksSet.isEmpty()) {
-            UnmodifiableIterator var1 = this.world.getPersistentChunks().keySet().iterator();
+            Iterator var1 = this.droppedChunksSet.iterator();
 
-            while(var1.hasNext()) {
-               ChunkPos var2 = (ChunkPos)var1.next();
-               this.droppedChunksSet.remove(Long.valueOf(ChunkPos.asLong(var2.chunkXPos, var2.chunkZPos)));
-            }
-
-            Iterator var5 = this.droppedChunksSet.iterator();
-
-            for(int var6 = 0; var6 < 100 && var5.hasNext(); var5.remove()) {
-               Long var3 = (Long)var5.next();
+            for(int var2 = 0; var2 < 100 && var1.hasNext(); var1.remove()) {
+               Long var3 = (Long)var1.next();
                Chunk var4 = (Chunk)this.id2ChunkMap.get(var3);
-               if (var4 != null && var4.unloaded) {
-                  var4.onChunkUnload();
-                  this.saveChunkData(var4);
-                  this.saveChunkExtraData(var4);
-                  this.id2ChunkMap.remove(var3);
-                  ++var6;
-                  ForgeChunkManager.putDormantChunk(ChunkPos.asLong(var4.xPosition, var4.zPosition), var4);
-                  if (this.id2ChunkMap.size() == 0 && ForgeChunkManager.getPersistentChunksFor(this.world).size() == 0 && !this.world.provider.getDimensionType().shouldLoadSpawn()) {
-                     DimensionManager.unloadWorld(this.world.provider.getDimension());
-                     break;
-                  }
+               if (var4 != null && var4.unloaded && this.unloadChunk(var4, true)) {
+                  ++var2;
                }
             }
          }
@@ -249,6 +251,37 @@ public class ChunkProviderServer implements IChunkProvider {
       }
 
       return false;
+   }
+
+   public boolean unloadChunk(Chunk var1, boolean var2) {
+      ChunkUnloadEvent var3 = new ChunkUnloadEvent(var1.bukkitChunk, var2);
+      this.world.getServer().getPluginManager().callEvent(var3);
+      if (var3.isCancelled()) {
+         return false;
+      } else {
+         var2 = var3.isSaveChunk();
+
+         for(int var4 = -2; var4 < 3; ++var4) {
+            for(int var5 = -2; var5 < 3; ++var5) {
+               if (var4 != 0 || var5 != 0) {
+                  Chunk var6 = this.getChunkIfLoaded(var1.xPosition + var4, var1.zPosition + var5);
+                  if (var6 != null) {
+                     var6.setNeighborUnloaded(-var4, -var5);
+                     var1.setNeighborUnloaded(var4, var5);
+                  }
+               }
+            }
+         }
+
+         var1.onChunkUnload();
+         if (var2) {
+            this.saveChunkData(var1);
+            this.saveChunkExtraData(var1);
+         }
+
+         this.id2ChunkMap.remove(var1.chunkKey);
+         return true;
+      }
    }
 
    public boolean canSave() {

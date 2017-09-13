@@ -31,10 +31,28 @@ public enum EnumEnchantmentType {
             return true;
          } else {
             ItemArmor var2 = (ItemArmor)var1;
-            return var2.armorType == EntityEquipmentSlot.HEAD ? this == ARMOR_HEAD : (var2.armorType == EntityEquipmentSlot.LEGS ? this == ARMOR_LEGS : (var2.armorType == EntityEquipmentSlot.CHEST ? this == ARMOR_CHEST : (var2.armorType == EntityEquipmentSlot.FEET ? this == ARMOR_FEET : false)));
+            if (var2.armorType == EntityEquipmentSlot.HEAD) {
+               return this == ARMOR_HEAD;
+            } else if (var2.armorType == EntityEquipmentSlot.LEGS) {
+               return this == ARMOR_LEGS;
+            } else if (var2.armorType == EntityEquipmentSlot.CHEST) {
+               return this == ARMOR_CHEST;
+            } else if (var2.armorType == EntityEquipmentSlot.FEET) {
+               return this == ARMOR_FEET;
+            } else {
+               return false;
+            }
          }
+      } else if (var1 instanceof ItemSword) {
+         return this == WEAPON;
+      } else if (var1 instanceof ItemTool) {
+         return this == DIGGER;
+      } else if (var1 instanceof ItemBow) {
+         return this == BOW;
+      } else if (var1 instanceof ItemFishingRod) {
+         return this == FISHING_ROD;
       } else {
-         return var1 instanceof ItemSword ? this == WEAPON : (var1 instanceof ItemTool ? this == DIGGER : (var1 instanceof ItemBow ? this == BOW : (var1 instanceof ItemFishingRod ? this == FISHING_ROD : false)));
+         return false;
       }
    }
 }

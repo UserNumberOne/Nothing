@@ -24,12 +24,12 @@ public class NettyVarint21FrameDecoder extends ByteToMessageDecoder {
 
             try {
                int var7 = var6.readVarInt();
-               if (var2.readableBytes() < var7) {
-                  var2.resetReaderIndex();
+               if (var2.readableBytes() >= var7) {
+                  var3.add(var2.readBytes(var7));
                   return;
                }
 
-               var3.add(var2.readBytes(var7));
+               var2.resetReaderIndex();
             } finally {
                var6.release();
             }

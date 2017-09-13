@@ -3,6 +3,7 @@ package net.minecraft.entity.item;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.SoundEvents;
@@ -13,10 +14,10 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityXPOrb extends Entity {
    public int xpColor;
@@ -50,23 +51,9 @@ public class EntityXPOrb extends Entity {
    protected void entityInit() {
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      float var2 = 0.5F;
-      var2 = MathHelper.clamp(var2, 0.0F, 1.0F);
-      int var3 = super.getBrightnessForRender(var1);
-      int var4 = var3 & 255;
-      int var5 = var3 >> 16 & 255;
-      var4 = var4 + (int)(var2 * 15.0F * 16.0F);
-      if (var4 > 240) {
-         var4 = 240;
-      }
-
-      return var4 | var5 << 16;
-   }
-
    public void onUpdate() {
       super.onUpdate();
+      EntityPlayer var1 = this.closestPlayer;
       if (this.delayBeforeCanPickup > 0) {
          --this.delayBeforeCanPickup;
       }
@@ -86,7 +73,6 @@ public class EntityXPOrb extends Entity {
       }
 
       this.pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
-      double var1 = 8.0D;
       if (this.xpTargetColor < this.xpColor - 20 + this.getEntityId() % 100) {
          if (this.closestPlayer == null || this.closestPlayer.getDistanceSqToEntity(this) > 64.0D) {
             this.closestPlayer = this.world.getClosestPlayerToEntity(this, 8.0D);
@@ -100,28 +86,38 @@ public class EntityXPOrb extends Entity {
       }
 
       if (this.closestPlayer != null) {
-         double var3 = (this.closestPlayer.posX - this.posX) / 8.0D;
-         double var5 = (this.closestPlayer.posY + (double)this.closestPlayer.getEyeHeight() / 2.0D - this.posY) / 8.0D;
-         double var7 = (this.closestPlayer.posZ - this.posZ) / 8.0D;
-         double var9 = Math.sqrt(var3 * var3 + var5 * var5 + var7 * var7);
-         double var11 = 1.0D - var9;
-         if (var11 > 0.0D) {
-            var11 = var11 * var11;
-            this.motionX += var3 / var9 * var11 * 0.1D;
-            this.motionY += var5 / var9 * var11 * 0.1D;
-            this.motionZ += var7 / var9 * var11 * 0.1D;
+         boolean var2 = false;
+         if (this.closestPlayer != var1) {
+            EntityTargetLivingEntityEvent var3 = CraftEventFactory.callEntityTargetLivingEvent(this, this.closestPlayer, TargetReason.CLOSEST_PLAYER);
+            EntityLivingBase var4 = var3.getTarget() == null ? null : ((CraftLivingEntity)var3.getTarget()).getHandle();
+            this.closestPlayer = var4 instanceof EntityPlayer ? (EntityPlayer)var4 : null;
+            var2 = var3.isCancelled();
+         }
+
+         if (!var2 && this.closestPlayer != null) {
+            double var5 = (this.closestPlayer.posX - this.posX) / 8.0D;
+            double var7 = (this.closestPlayer.posY + (double)this.closestPlayer.getEyeHeight() / 2.0D - this.posY) / 8.0D;
+            double var9 = (this.closestPlayer.posZ - this.posZ) / 8.0D;
+            double var11 = Math.sqrt(var5 * var5 + var7 * var7 + var9 * var9);
+            double var13 = 1.0D - var11;
+            if (var13 > 0.0D) {
+               var13 = var13 * var13;
+               this.motionX += var5 / var11 * var13 * 0.1D;
+               this.motionY += var7 / var11 * var13 * 0.1D;
+               this.motionZ += var9 / var11 * var13 * 0.1D;
+            }
          }
       }
 
       this.move(this.motionX, this.motionY, this.motionZ);
-      float var13 = 0.98F;
+      float var15 = 0.98F;
       if (this.onGround) {
-         var13 = this.world.getBlockState(new BlockPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ))).getBlock().slipperiness * 0.98F;
+         var15 = this.world.getBlockState(new BlockPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ))).getBlock().slipperiness * 0.98F;
       }
 
-      this.motionX *= (double)var13;
+      this.motionX *= (double)var15;
       this.motionY *= 0.9800000190734863D;
-      this.motionZ *= (double)var13;
+      this.motionZ *= (double)var15;
       if (this.onGround) {
          this.motionY *= -0.8999999761581421D;
       }
@@ -170,10 +166,6 @@ public class EntityXPOrb extends Entity {
 
    public void onCollideWithPlayer(EntityPlayer var1) {
       if (!this.world.isRemote && this.delayBeforeCanPickup == 0 && var1.xpCooldown == 0) {
-         if (MinecraftForge.EVENT_BUS.post(new PlayerPickupXpEvent(var1, this))) {
-            return;
-         }
-
          var1.xpCooldown = 2;
          this.world.playSound((EntityPlayer)null, var1.posX, var1.posY, var1.posZ, SoundEvents.ENTITY_EXPERIENCE_ORB_TOUCH, SoundCategory.PLAYERS, 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
          var1.onItemPickup(this, 1);
@@ -185,7 +177,7 @@ public class EntityXPOrb extends Entity {
          }
 
          if (this.xpValue > 0) {
-            var1.addExperience(this.xpValue);
+            var1.addExperience(CraftEventFactory.callPlayerExpChangeEvent(var1, this.xpValue).getAmount());
          }
 
          this.setDead();
@@ -205,13 +197,42 @@ public class EntityXPOrb extends Entity {
       return this.xpValue;
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getTextureByXP() {
-      return this.xpValue >= 2477 ? 10 : (this.xpValue >= 1237 ? 9 : (this.xpValue >= 617 ? 8 : (this.xpValue >= 307 ? 7 : (this.xpValue >= 149 ? 6 : (this.xpValue >= 73 ? 5 : (this.xpValue >= 37 ? 4 : (this.xpValue >= 17 ? 3 : (this.xpValue >= 7 ? 2 : (this.xpValue >= 3 ? 1 : 0)))))))));
-   }
-
    public static int getXPSplit(int var0) {
-      return var0 >= 2477 ? 2477 : (var0 >= 1237 ? 1237 : (var0 >= 617 ? 617 : (var0 >= 307 ? 307 : (var0 >= 149 ? 149 : (var0 >= 73 ? 73 : (var0 >= 37 ? 37 : (var0 >= 17 ? 17 : (var0 >= 7 ? 7 : (var0 >= 3 ? 3 : 1)))))))));
+      if (var0 > 162670129) {
+         return var0 - 100000;
+      } else if (var0 > 81335063) {
+         return 81335063;
+      } else if (var0 > 40667527) {
+         return 40667527;
+      } else if (var0 > 20333759) {
+         return 20333759;
+      } else if (var0 > 10166857) {
+         return 10166857;
+      } else if (var0 > 5083423) {
+         return 5083423;
+      } else if (var0 > 2541701) {
+         return 2541701;
+      } else if (var0 > 1270849) {
+         return 1270849;
+      } else if (var0 > 635413) {
+         return 635413;
+      } else if (var0 > 317701) {
+         return 317701;
+      } else if (var0 > 158849) {
+         return 158849;
+      } else if (var0 > 79423) {
+         return 79423;
+      } else if (var0 > 39709) {
+         return 39709;
+      } else if (var0 > 19853) {
+         return 19853;
+      } else if (var0 > 9923) {
+         return 9923;
+      } else if (var0 > 4957) {
+         return 4957;
+      } else {
+         return var0 >= 2477 ? 2477 : (var0 >= 1237 ? 1237 : (var0 >= 617 ? 617 : (var0 >= 307 ? 307 : (var0 >= 149 ? 149 : (var0 >= 73 ? 73 : (var0 >= 37 ? 37 : (var0 >= 17 ? 17 : (var0 >= 7 ? 7 : (var0 >= 3 ? 3 : 1)))))))));
+      }
    }
 
    public boolean canBeAttackedWithItem() {

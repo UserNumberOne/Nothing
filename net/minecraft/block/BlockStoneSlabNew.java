@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.MapColor;
@@ -18,8 +17,6 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BlockStoneSlabNew extends BlockSlab {
    public static final PropertyBool SEAMLESS = PropertyBool.create("seamless");
@@ -61,16 +58,6 @@ public abstract class BlockStoneSlabNew extends BlockSlab {
 
    public Comparable getTypeForItem(ItemStack var1) {
       return BlockStoneSlabNew.EnumType.byMetadata(var1.getMetadata() & 7);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
-      if (var1 != Item.getItemFromBlock(Blocks.DOUBLE_STONE_SLAB2)) {
-         for(BlockStoneSlabNew.EnumType var7 : BlockStoneSlabNew.EnumType.values()) {
-            var3.add(new ItemStack(var1, 1, var7.getMetadata()));
-         }
-      }
-
    }
 
    public IBlockState getStateFromMeta(int var1) {

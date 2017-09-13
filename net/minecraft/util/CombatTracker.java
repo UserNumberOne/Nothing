@@ -66,36 +66,36 @@ public class CombatTracker {
          CombatEntry var2 = (CombatEntry)this.combatEntries.get(this.combatEntries.size() - 1);
          ITextComponent var3 = var2.getDamageSrcDisplayName();
          Entity var4 = var2.getDamageSrc().getEntity();
-         Object var5;
+         Object var6;
          if (var1 != null && var2.getDamageSrc() == DamageSource.fall) {
-            ITextComponent var6 = var1.getDamageSrcDisplayName();
+            ITextComponent var5 = var1.getDamageSrcDisplayName();
             if (var1.getDamageSrc() != DamageSource.fall && var1.getDamageSrc() != DamageSource.outOfWorld) {
-               if (var6 != null && (var3 == null || !var6.equals(var3))) {
+               if (var5 != null && (var3 == null || !var5.equals(var3))) {
                   Entity var9 = var1.getDamageSrc().getEntity();
                   ItemStack var8 = var9 instanceof EntityLivingBase ? ((EntityLivingBase)var9).getHeldItemMainhand() : null;
                   if (var8 != null && var8.hasDisplayName()) {
-                     var5 = new TextComponentTranslation("death.fell.assist.item", new Object[]{this.fighter.getDisplayName(), var6, var8.getTextComponent()});
+                     var6 = new TextComponentTranslation("death.fell.assist.item", new Object[]{this.fighter.getDisplayName(), var5, var8.getTextComponent()});
                   } else {
-                     var5 = new TextComponentTranslation("death.fell.assist", new Object[]{this.fighter.getDisplayName(), var6});
+                     var6 = new TextComponentTranslation("death.fell.assist", new Object[]{this.fighter.getDisplayName(), var5});
                   }
                } else if (var3 != null) {
                   ItemStack var7 = var4 instanceof EntityLivingBase ? ((EntityLivingBase)var4).getHeldItemMainhand() : null;
                   if (var7 != null && var7.hasDisplayName()) {
-                     var5 = new TextComponentTranslation("death.fell.finish.item", new Object[]{this.fighter.getDisplayName(), var3, var7.getTextComponent()});
+                     var6 = new TextComponentTranslation("death.fell.finish.item", new Object[]{this.fighter.getDisplayName(), var3, var7.getTextComponent()});
                   } else {
-                     var5 = new TextComponentTranslation("death.fell.finish", new Object[]{this.fighter.getDisplayName(), var3});
+                     var6 = new TextComponentTranslation("death.fell.finish", new Object[]{this.fighter.getDisplayName(), var3});
                   }
                } else {
-                  var5 = new TextComponentTranslation("death.fell.killer", new Object[]{this.fighter.getDisplayName()});
+                  var6 = new TextComponentTranslation("death.fell.killer", new Object[]{this.fighter.getDisplayName()});
                }
             } else {
-               var5 = new TextComponentTranslation("death.fell.accident." + this.getFallSuffix(var1), new Object[]{this.fighter.getDisplayName()});
+               var6 = new TextComponentTranslation("death.fell.accident." + this.getFallSuffix(var1), new Object[]{this.fighter.getDisplayName()});
             }
          } else {
-            var5 = var2.getDamageSrc().getDeathMessage(this.fighter);
+            var6 = var2.getDamageSrc().getDeathMessage(this.fighter);
          }
 
-         return (ITextComponent)var5;
+         return (ITextComponent)var6;
       }
    }
 

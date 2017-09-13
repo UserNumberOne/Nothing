@@ -23,4 +23,9 @@ public class NBTTagEnd extends NBTBase {
    public NBTTagEnd copy() {
       return new NBTTagEnd();
    }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
+   }
 }

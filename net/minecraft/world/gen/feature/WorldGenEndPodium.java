@@ -38,14 +38,14 @@ public class WorldGenEndPodium extends WorldGenerator {
          }
       }
 
-      for(int var8 = 0; var8 < 4; ++var8) {
-         this.setBlockAndNotifyAdequately(var1, var3.up(var8), Blocks.BEDROCK.getDefaultState());
+      for(int var9 = 0; var9 < 4; ++var9) {
+         this.setBlockAndNotifyAdequately(var1, var3.up(var9), Blocks.BEDROCK.getDefaultState());
       }
 
-      BlockPos var9 = var3.up(2);
+      BlockPos var10 = var3.up(2);
 
-      for(EnumFacing var11 : EnumFacing.Plane.HORIZONTAL) {
-         this.setBlockAndNotifyAdequately(var1, var9.offset(var11), Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, var11));
+      for(EnumFacing var8 : EnumFacing.Plane.HORIZONTAL) {
+         this.setBlockAndNotifyAdequately(var1, var10.offset(var8), Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, var8));
       }
 
       return true;

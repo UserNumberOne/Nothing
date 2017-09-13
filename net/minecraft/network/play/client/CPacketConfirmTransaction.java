@@ -4,23 +4,11 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketConfirmTransaction implements Packet {
    private int windowId;
    private short uid;
    private boolean accepted;
-
-   public CPacketConfirmTransaction() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketConfirmTransaction(int var1, short var2, boolean var3) {
-      this.windowId = var1;
-      this.uid = var2;
-      this.accepted = var3;
-   }
 
    public void processPacket(INetHandlerPlayServer var1) {
       var1.processConfirmTransaction(this);

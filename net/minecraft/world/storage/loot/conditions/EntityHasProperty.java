@@ -66,5 +66,10 @@ public class EntityHasProperty implements LootCondition {
 
          return new EntityHasProperty(var4, (LootContext.EntityTarget)JsonUtils.deserializeClass(var1, "entity", var2, LootContext.EntityTarget.class));
       }
+
+      // $FF: synthetic method
+      public LootCondition deserialize(JsonObject var1, JsonDeserializationContext var2) {
+         return this.deserialize(var1, var2);
+      }
    }
 }

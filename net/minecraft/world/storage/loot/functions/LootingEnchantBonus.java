@@ -4,6 +4,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Random;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
@@ -26,7 +27,7 @@ public class LootingEnchantBonus extends LootFunction {
    public ItemStack apply(ItemStack var1, Random var2, LootContext var3) {
       Entity var4 = var3.getKiller();
       if (var4 instanceof EntityLivingBase) {
-         int var5 = var3.getLootingModifier();
+         int var5 = EnchantmentHelper.getLootingModifier((EntityLivingBase)var4);
          if (var5 == 0) {
             return var1;
          }
@@ -57,6 +58,11 @@ public class LootingEnchantBonus extends LootFunction {
       public LootingEnchantBonus deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
          int var4 = JsonUtils.getInt(var1, "limit", 0);
          return new LootingEnchantBonus(var3, (RandomValueRange)JsonUtils.deserializeClass(var1, "count", var2, RandomValueRange.class), var4);
+      }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

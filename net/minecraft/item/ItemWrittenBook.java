@@ -1,6 +1,5 @@
 package net.minecraft.item;
 
-import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Slot;
@@ -16,11 +15,7 @@ import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentUtils;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemWrittenBook extends Item {
    public ItemWrittenBook() {
@@ -52,20 +47,6 @@ public class ItemWrittenBook extends Item {
       }
 
       return super.getItemStackDisplayName(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void addInformation(ItemStack var1, EntityPlayer var2, List var3, boolean var4) {
-      if (var1.hasTagCompound()) {
-         NBTTagCompound var5 = var1.getTagCompound();
-         String var6 = var5.getString("author");
-         if (!StringUtils.isNullOrEmpty(var6)) {
-            var3.add(TextFormatting.GRAY + I18n.translateToLocalFormatted("book.byAuthor", var6));
-         }
-
-         var3.add(TextFormatting.GRAY + I18n.translateToLocal("book.generation." + var5.getInteger("generation")));
-      }
-
    }
 
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
@@ -105,14 +86,9 @@ public class ItemWrittenBook extends Item {
                   Slot var10 = var2.openContainer.getSlotFromInventory(var2.inventory, var2.inventory.currentItem);
                   ((EntityPlayerMP)var2).connection.sendPacket(new SPacketSetSlot(0, var10.slotNumber, var1));
                }
+
             }
          }
       }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasEffect(ItemStack var1) {
-      return true;
    }
 }

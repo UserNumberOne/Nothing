@@ -5,14 +5,11 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.fluids.capability.wrappers.FluidBucketWrapper;
 
 public class ItemBucketMilk extends Item {
    public ItemBucketMilk() {
@@ -27,7 +24,7 @@ public class ItemBucketMilk extends Item {
       }
 
       if (!var2.isRemote) {
-         var3.curePotionEffects(var1);
+         var3.clearActivePotions();
       }
 
       if (var3 instanceof EntityPlayer) {
@@ -48,9 +45,5 @@ public class ItemBucketMilk extends Item {
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
       var3.setActiveHand(var4);
       return new ActionResult(EnumActionResult.SUCCESS, var1);
-   }
-
-   public ICapabilityProvider initCapabilities(ItemStack var1, NBTTagCompound var2) {
-      return new FluidBucketWrapper(var1);
    }
 }

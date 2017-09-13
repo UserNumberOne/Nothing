@@ -13,37 +13,34 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryAnvil;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerRepair extends Container {
    private static final Logger LOGGER = LogManager.getLogger();
-   private final IInventory outputSlot;
-   private final IInventory inputSlots;
+   private final IInventory outputSlot = new InventoryCraftResult();
+   private final IInventory inputSlots = new InventoryBasic("Repair", true, 2) {
+      public void markDirty() {
+         super.markDirty();
+         ContainerRepair.this.onCraftMatrixChanged(this);
+      }
+   };
    private final World world;
    private final BlockPos selfPosition;
    public int maximumCost;
-   public int materialCost;
+   private int materialCost;
    private String repairedItemName;
    private final EntityPlayer player;
-
-   @SideOnly(Side.CLIENT)
-   public ContainerRepair(InventoryPlayer var1, World var2, EntityPlayer var3) {
-      this(var1, var2, BlockPos.ORIGIN, var3);
-   }
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
 
    public ContainerRepair(InventoryPlayer var1, final World var2, final BlockPos var3, EntityPlayer var4) {
-      this.outputSlot = new InventoryCraftResult();
-      this.inputSlots = new InventoryBasic("Repair", true, 2) {
-         public void markDirty() {
-            super.markDirty();
-            ContainerRepair.this.onCraftMatrixChanged(this);
-         }
-      };
+      this.player = var1;
       this.selfPosition = var3;
       this.world = var2;
       this.player = var4;
@@ -63,13 +60,12 @@ public class ContainerRepair extends Container {
                var1.addExperienceLevel(-ContainerRepair.this.maximumCost);
             }
 
-            float var3x = ForgeHooks.onAnvilRepair(var1, var2x, ContainerRepair.this.inputSlots.getStackInSlot(0), ContainerRepair.this.inputSlots.getStackInSlot(1));
             ContainerRepair.this.inputSlots.setInventorySlotContents(0, (ItemStack)null);
             if (ContainerRepair.this.materialCost > 0) {
-               ItemStack var4 = ContainerRepair.this.inputSlots.getStackInSlot(1);
-               if (var4 != null && var4.stackSize > ContainerRepair.this.materialCost) {
-                  var4.stackSize -= ContainerRepair.this.materialCost;
-                  ContainerRepair.this.inputSlots.setInventorySlotContents(1, var4);
+               ItemStack var3x = ContainerRepair.this.inputSlots.getStackInSlot(1);
+               if (var3x != null && var3x.stackSize > ContainerRepair.this.materialCost) {
+                  var3x.stackSize -= ContainerRepair.this.materialCost;
+                  ContainerRepair.this.inputSlots.setInventorySlotContents(1, var3x);
                } else {
                   ContainerRepair.this.inputSlots.setInventorySlotContents(1, (ItemStack)null);
                }
@@ -78,15 +74,15 @@ public class ContainerRepair extends Container {
             }
 
             ContainerRepair.this.maximumCost = 0;
-            IBlockState var6 = var2.getBlockState(var3);
-            if (!var1.capabilities.isCreativeMode && !var2.isRemote && var6.getBlock() == Blocks.ANVIL && var1.getRNG().nextFloat() < var3x) {
-               int var5 = ((Integer)var6.getValue(BlockAnvil.DAMAGE)).intValue();
-               ++var5;
-               if (var5 > 2) {
+            IBlockState var5 = var2.getBlockState(var3);
+            if (!var1.capabilities.isCreativeMode && !var2.isRemote && var5.getBlock() == Blocks.ANVIL && var1.getRNG().nextFloat() < 0.12F) {
+               int var4 = ((Integer)var5.getValue(BlockAnvil.DAMAGE)).intValue();
+               ++var4;
+               if (var4 > 2) {
                   var2.setBlockToAir(var3);
                   var2.playEvent(1029, var3, 0);
                } else {
-                  var2.setBlockState(var3, var6.withProperty(BlockAnvil.DAMAGE, Integer.valueOf(var5)), 2);
+                  var2.setBlockState(var3, var5.withProperty(BlockAnvil.DAMAGE, Integer.valueOf(var4)), 2);
                   var2.playEvent(1030, var3, 0);
                }
             } else if (!var2.isRemote) {
@@ -120,105 +116,100 @@ public class ContainerRepair extends Container {
       ItemStack var1 = this.inputSlots.getStackInSlot(0);
       this.maximumCost = 1;
       int var2 = 0;
-      int var3 = 0;
+      byte var3 = 0;
       byte var4 = 0;
       if (var1 == null) {
-         this.outputSlot.setInventorySlotContents(0, (ItemStack)null);
+         CraftEventFactory.callPrepareAnvilEvent(this.getBukkitView(), (ItemStack)null);
          this.maximumCost = 0;
       } else {
          ItemStack var5 = var1.copy();
          ItemStack var6 = this.inputSlots.getStackInSlot(1);
          Map var7 = EnchantmentHelper.getEnchantments(var5);
-         var3 = var3 + var1.getRepairCost() + (var6 == null ? 0 : var6.getRepairCost());
+         int var8 = var3 + var1.getRepairCost() + (var6 == null ? 0 : var6.getRepairCost());
          this.materialCost = 0;
-         boolean var8 = false;
          if (var6 != null) {
-            if (!ForgeHooks.onAnvilChange(this, var1, var6, this.outputSlot, this.repairedItemName, var3)) {
-               return;
-            }
-
-            var8 = var6.getItem() == Items.ENCHANTED_BOOK && !Items.ENCHANTED_BOOK.getEnchantments(var6).hasNoTags();
+            boolean var9 = var6.getItem() == Items.ENCHANTED_BOOK && !Items.ENCHANTED_BOOK.getEnchantments(var6).hasNoTags();
             if (var5.isItemStackDamageable() && var5.getItem().getIsRepairable(var1, var6)) {
-               int var19 = Math.min(var5.getItemDamage(), var5.getMaxDamage() / 4);
-               if (var19 <= 0) {
-                  this.outputSlot.setInventorySlotContents(0, (ItemStack)null);
+               int var22 = Math.min(var5.getItemDamage(), var5.getMaxDamage() / 4);
+               if (var22 <= 0) {
+                  CraftEventFactory.callPrepareAnvilEvent(this.getBukkitView(), (ItemStack)null);
                   this.maximumCost = 0;
                   return;
                }
 
-               int var22;
-               for(var22 = 0; var19 > 0 && var22 < var6.stackSize; ++var22) {
-                  int var24 = var5.getItemDamage() - var19;
+               int var23;
+               for(var23 = 0; var22 > 0 && var23 < var6.stackSize; ++var23) {
+                  int var24 = var5.getItemDamage() - var22;
                   var5.setItemDamage(var24);
                   ++var2;
-                  var19 = Math.min(var5.getItemDamage(), var5.getMaxDamage() / 4);
+                  var22 = Math.min(var5.getItemDamage(), var5.getMaxDamage() / 4);
                }
 
-               this.materialCost = var22;
+               this.materialCost = var23;
             } else {
-               if (!var8 && (var5.getItem() != var6.getItem() || !var5.isItemStackDamageable())) {
-                  this.outputSlot.setInventorySlotContents(0, (ItemStack)null);
+               if (!var9 && (var5.getItem() != var6.getItem() || !var5.isItemStackDamageable())) {
+                  CraftEventFactory.callPrepareAnvilEvent(this.getBukkitView(), (ItemStack)null);
                   this.maximumCost = 0;
                   return;
                }
 
-               if (var5.isItemStackDamageable() && !var8) {
-                  int var9 = var1.getMaxDamage() - var1.getItemDamage();
-                  int var10 = var6.getMaxDamage() - var6.getItemDamage();
-                  int var11 = var10 + var5.getMaxDamage() * 12 / 100;
-                  int var12 = var9 + var11;
-                  int var13 = var5.getMaxDamage() - var12;
-                  if (var13 < 0) {
-                     var13 = 0;
+               if (var5.isItemStackDamageable() && !var9) {
+                  int var10 = var1.getMaxDamage() - var1.getItemDamage();
+                  int var11 = var6.getMaxDamage() - var6.getItemDamage();
+                  int var12 = var11 + var5.getMaxDamage() * 12 / 100;
+                  int var13 = var10 + var12;
+                  int var14 = var5.getMaxDamage() - var13;
+                  if (var14 < 0) {
+                     var14 = 0;
                   }
 
-                  if (var13 < var5.getMetadata()) {
-                     var5.setItemDamage(var13);
+                  if (var14 < var5.getMetadata()) {
+                     var5.setItemDamage(var14);
                      var2 += 2;
                   }
                }
 
-               Map var18 = EnchantmentHelper.getEnchantments(var6);
+               Map var15 = EnchantmentHelper.getEnchantments(var6);
 
-               for(Enchantment var23 : var18.keySet()) {
-                  if (var23 != null) {
-                     int var25 = var7.containsKey(var23) ? ((Integer)var7.get(var23)).intValue() : 0;
-                     int var26 = ((Integer)var18.get(var23)).intValue();
+               for(Enchantment var17 : var15.keySet()) {
+                  if (var17 != null) {
+                     int var25 = var7.containsKey(var17) ? ((Integer)var7.get(var17)).intValue() : 0;
+                     int var26 = ((Integer)var15.get(var17)).intValue();
                      var26 = var25 == var26 ? var26 + 1 : Math.max(var26, var25);
-                     boolean var14 = var23.canApply(var1);
+                     boolean var18 = var17.canApply(var1);
                      if (this.player.capabilities.isCreativeMode || var1.getItem() == Items.ENCHANTED_BOOK) {
-                        var14 = true;
+                        var18 = true;
                      }
 
-                     for(Enchantment var16 : var7.keySet()) {
-                        if (var16 != var23 && (!var23.canApplyTogether(var16) || !var16.canApplyTogether(var23))) {
-                           var14 = false;
+                     for(Enchantment var20 : var7.keySet()) {
+                        if (var20 != var17 && !var17.canApplyTogether(var20)) {
+                           var18 = false;
                            ++var2;
                         }
                      }
 
-                     if (var14) {
-                        if (var26 > var23.getMaxLevel()) {
-                           var26 = var23.getMaxLevel();
+                     if (var18) {
+                        if (var26 > var17.getMaxLevel()) {
+                           var26 = var17.getMaxLevel();
                         }
 
-                        var7.put(var23, Integer.valueOf(var26));
+                        var7.put(var17, Integer.valueOf(var26));
                         int var28 = 0;
-                        switch(var23.getRarity()) {
-                        case COMMON:
+                        switch(ContainerRepair.SyntheticClass_1.a[var17.getRarity().ordinal()]) {
+                        case 1:
                            var28 = 1;
                            break;
-                        case UNCOMMON:
+                        case 2:
                            var28 = 2;
                            break;
-                        case RARE:
+                        case 3:
                            var28 = 4;
                            break;
-                        case VERY_RARE:
+                        case 4:
                            var28 = 8;
                         }
 
-                        if (var8) {
+                        if (var9) {
                            var28 = Math.max(1, var28 / 2);
                         }
 
@@ -227,10 +218,6 @@ public class ContainerRepair extends Container {
                   }
                }
             }
-         }
-
-         if (var8 && !var5.getItem().isBookEnchantable(var5, var6)) {
-            var5 = null;
          }
 
          if (StringUtils.isBlank(this.repairedItemName)) {
@@ -245,7 +232,7 @@ public class ContainerRepair extends Container {
             var5.setStackDisplayName(this.repairedItemName);
          }
 
-         this.maximumCost = var3 + var2;
+         this.maximumCost = var8 + var2;
          if (var2 <= 0) {
             var5 = null;
          }
@@ -259,20 +246,20 @@ public class ContainerRepair extends Container {
          }
 
          if (var5 != null) {
-            int var20 = var5.getRepairCost();
-            if (var6 != null && var20 < var6.getRepairCost()) {
-               var20 = var6.getRepairCost();
+            int var21 = var5.getRepairCost();
+            if (var6 != null && var21 < var6.getRepairCost()) {
+               var21 = var6.getRepairCost();
             }
 
             if (var4 != var2 || var4 == 0) {
-               var20 = var20 * 2 + 1;
+               var21 = var21 * 2 + 1;
             }
 
-            var5.setRepairCost(var20);
+            var5.setRepairCost(var21);
             EnchantmentHelper.setEnchantments(var7, var5);
          }
 
-         this.outputSlot.setInventorySlotContents(0, var5);
+         CraftEventFactory.callPrepareAnvilEvent(this.getBukkitView(), var5);
          this.detectAndSendChanges();
       }
 
@@ -281,14 +268,6 @@ public class ContainerRepair extends Container {
    public void addListener(IContainerListener var1) {
       super.addListener(var1);
       var1.sendProgressBarUpdate(this, 0, this.maximumCost);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void updateProgressBar(int var1, int var2) {
-      if (var1 == 0) {
-         this.maximumCost = var2;
-      }
-
    }
 
    public void onContainerClosed(EntityPlayer var1) {
@@ -305,7 +284,11 @@ public class ContainerRepair extends Container {
    }
 
    public boolean canInteractWith(EntityPlayer var1) {
-      return this.world.getBlockState(this.selfPosition).getBlock() != Blocks.ANVIL ? false : var1.getDistanceSq((double)this.selfPosition.getX() + 0.5D, (double)this.selfPosition.getY() + 0.5D, (double)this.selfPosition.getZ() + 0.5D) <= 64.0D;
+      if (!this.checkReachable) {
+         return true;
+      } else {
+         return this.world.getBlockState(this.selfPosition).getBlock() != Blocks.ANVIL ? false : var1.getDistanceSq((double)this.selfPosition.getX() + 0.5D, (double)this.selfPosition.getY() + 0.5D, (double)this.selfPosition.getZ() + 0.5D) <= 64.0D;
+      }
    }
 
    @Nullable
@@ -357,5 +340,46 @@ public class ContainerRepair extends Container {
       }
 
       this.updateRepairOutput();
+   }
+
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventoryAnvil var1 = new CraftInventoryAnvil(new Location(this.world.getWorld(), (double)this.selfPosition.getX(), (double)this.selfPosition.getY(), (double)this.selfPosition.getZ()), this.inputSlots, this.outputSlot);
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), var1, this);
+         return this.bukkitEntity;
+      }
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[Enchantment.Rarity.values().length];
+
+      static {
+         try {
+            a[Enchantment.Rarity.COMMON.ordinal()] = 1;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[Enchantment.Rarity.UNCOMMON.ordinal()] = 2;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[Enchantment.Rarity.RARE.ordinal()] = 3;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[Enchantment.Rarity.VERY_RARE.ordinal()] = 4;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

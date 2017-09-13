@@ -58,8 +58,7 @@ public class WorldGenMinable extends WorldGenerator {
                         double var44 = ((double)var43 + 0.5D - var23) / (var27 / 2.0D);
                         if (var38 * var38 + var41 * var41 + var44 * var44 < 1.0D) {
                            BlockPos var46 = new BlockPos(var37, var40, var43);
-                           IBlockState var47 = var1.getBlockState(var46);
-                           if (var47.getBlock().isReplaceableOreGen(var47, var1, var46, this.predicate)) {
+                           if (this.predicate.apply(var1.getBlockState(var46))) {
                               var1.setBlockState(var46, this.oreBlock, 2);
                            }
                         }

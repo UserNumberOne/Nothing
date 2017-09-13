@@ -1,14 +1,8 @@
 package net.minecraft.potion;
 
 import com.google.common.collect.ComparisonChain;
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,10 +13,7 @@ public class PotionEffect implements Comparable {
    private int amplifier;
    private boolean isSplashPotion;
    private boolean isAmbient;
-   @SideOnly(Side.CLIENT)
-   private boolean isPotionDurationMax;
    private boolean showParticles;
-   private List curativeItems;
 
    public PotionEffect(Potion var1) {
       this(var1, 0, 0);
@@ -50,7 +41,6 @@ public class PotionEffect implements Comparable {
       this.amplifier = var1.amplifier;
       this.isAmbient = var1.isAmbient;
       this.showParticles = var1.showParticles;
-      this.curativeItems = var1.curativeItems;
    }
 
    public void combine(PotionEffect var1) {
@@ -166,7 +156,7 @@ public class PotionEffect implements Comparable {
    }
 
    public static PotionEffect readCustomPotionEffectFromNBT(NBTTagCompound var0) {
-      int var1 = var0.getByte("Id") & 255;
+      byte var1 = var0.getByte("Id");
       Potion var2 = Potion.getPotionById(var1);
       if (var2 == null) {
          return null;
@@ -183,48 +173,13 @@ public class PotionEffect implements Comparable {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setPotionDurationMax(boolean var1) {
-      this.isPotionDurationMax = var1;
-   }
-
    public int compareTo(PotionEffect var1) {
       boolean var2 = true;
-      return this.getDuration() > 32147 && var1.getDuration() > 32147 || this.getIsAmbient() && var1.getIsAmbient() ? ComparisonChain.start().compare(Boolean.valueOf(this.getIsAmbient()), Boolean.valueOf(var1.getIsAmbient())).compare(this.getPotion().getLiquidColor(), var1.getPotion().getLiquidColor()).result() : ComparisonChain.start().compare(Boolean.valueOf(this.getIsAmbient()), Boolean.valueOf(var1.getIsAmbient())).compare(this.getDuration(), var1.getDuration()).compare(this.getPotion().getLiquidColor(), var1.getPotion().getLiquidColor()).result();
+      return (this.getDuration() <= 32147 || var1.getDuration() <= 32147) && (!this.getIsAmbient() || !var1.getIsAmbient()) ? ComparisonChain.start().compare(Boolean.valueOf(this.getIsAmbient()), Boolean.valueOf(var1.getIsAmbient())).compare(this.getDuration(), var1.getDuration()).compare(this.getPotion().getLiquidColor(), var1.getPotion().getLiquidColor()).result() : ComparisonChain.start().compare(Boolean.valueOf(this.getIsAmbient()), Boolean.valueOf(var1.getIsAmbient())).compare(this.getPotion().getLiquidColor(), var1.getPotion().getLiquidColor()).result();
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean getIsPotionDurationMax() {
-      return this.isPotionDurationMax;
-   }
-
-   public List getCurativeItems() {
-      if (this.curativeItems == null) {
-         this.curativeItems = new ArrayList();
-         this.curativeItems.add(new ItemStack(Items.MILK_BUCKET));
-      }
-
-      return this.curativeItems;
-   }
-
-   public boolean isCurativeItem(ItemStack var1) {
-      for(ItemStack var3 : this.getCurativeItems()) {
-         if (var3.isItemEqual(var1)) {
-            return true;
-         }
-      }
-
-      return false;
-   }
-
-   public void setCurativeItems(List var1) {
-      this.curativeItems = var1;
-   }
-
-   public void addCurativeItem(ItemStack var1) {
-      if (!this.isCurativeItem(var1)) {
-         this.getCurativeItems().add(var1);
-      }
-
+   // $FF: synthetic method
+   public int compareTo(Object var1) {
+      return this.compareTo((PotionEffect)var1);
    }
 }

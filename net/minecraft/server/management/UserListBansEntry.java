@@ -24,7 +24,6 @@ public class UserListBansEntry extends UserListEntryBan {
          var1.addProperty("name", ((GameProfile)this.getValue()).getName());
          super.onSerialization(var1);
       }
-
    }
 
    private static GameProfile toGameProfile(JsonObject var0) {

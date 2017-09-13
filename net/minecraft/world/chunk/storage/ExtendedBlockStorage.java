@@ -5,7 +5,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.NibbleArray;
-import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class ExtendedBlockStorage {
    private final int yBase;
@@ -25,15 +24,30 @@ public class ExtendedBlockStorage {
 
    }
 
+   public ExtendedBlockStorage(int var1, boolean var2, char[] var3) {
+      this.yBase = var1;
+      this.data = new BlockStateContainer();
+
+      for(int var4 = 0; var4 < var3.length; ++var4) {
+         int var5 = var4 & 15;
+         int var6 = var4 >> 8 & 15;
+         int var7 = var4 >> 4 & 15;
+         this.data.set(var5, var6, var7, (IBlockState)Block.BLOCK_STATE_IDS.getByValue(var3[var4]));
+      }
+
+      this.blocklightArray = new NibbleArray();
+      if (var2) {
+         this.skylightArray = new NibbleArray();
+      }
+
+      this.removeInvalidBlocks();
+   }
+
    public IBlockState get(int var1, int var2, int var3) {
       return this.data.get(var1, var2, var3);
    }
 
    public void set(int var1, int var2, int var3, IBlockState var4) {
-      if (var4 instanceof IExtendedBlockState) {
-         var4 = ((IExtendedBlockState)var4).getClean();
-      }
-
       IBlockState var5 = this.get(var1, var2, var3);
       Block var6 = var5.getBlock();
       Block var7 = var4.getBlock();
@@ -55,7 +69,7 @@ public class ExtendedBlockStorage {
    }
 
    public boolean isEmpty() {
-      return this.blockRefCount == 0;
+      return false;
    }
 
    public boolean getNeedsRandomTick() {

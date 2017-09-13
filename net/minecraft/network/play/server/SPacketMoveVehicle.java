@@ -5,8 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketMoveVehicle implements Packet {
    private double x;
@@ -44,30 +42,5 @@ public class SPacketMoveVehicle implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleMoveVehicle(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.x;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.y;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.z;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getYaw() {
-      return this.yaw;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getPitch() {
-      return this.pitch;
    }
 }

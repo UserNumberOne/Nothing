@@ -11,7 +11,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 
@@ -32,7 +32,7 @@ public class CommandGive extends CommandBase {
       if (var3.length < 2) {
          throw new WrongUsageException("commands.give.usage", new Object[0]);
       } else {
-         EntityPlayerMP var4 = getPlayer(var1, var2, var3[0]);
+         EntityPlayerMP var4 = a(var1, var2, var3[0]);
          Item var5 = getItemByText(var2, var3[1]);
          int var6 = var3.length >= 3 ? parseInt(var3[2], 1, 64) : 1;
          int var7 = var3.length >= 4 ? parseInt(var3[3]) : 0;
@@ -73,8 +73,12 @@ public class CommandGive extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : (var3.length == 2 ? getListOfStringsMatchingLastWord(var3, Item.REGISTRY.getKeys()) : Collections.emptyList());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else {
+         return var3.length == 2 ? getListOfStringsMatchingLastWord(var3, Item.REGISTRY.getKeys()) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

@@ -8,14 +8,22 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.entity.Explosive;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 public class EntityTNTPrimed extends Entity {
    private static final DataParameter FUSE = EntityDataManager.createKey(EntityTNTPrimed.class, DataSerializers.VARINT);
    private EntityLivingBase tntPlacedBy;
    private int fuse;
+   public float yield;
+   public boolean isIncendiary;
 
    public EntityTNTPrimed(World var1) {
       super(var1);
+      this.yield = 4.0F;
+      this.isIncendiary = false;
       this.fuse = 80;
       this.preventEntitySpawning = true;
       this.setSize(0.98F, 0.98F);
@@ -24,7 +32,7 @@ public class EntityTNTPrimed extends Entity {
    public EntityTNTPrimed(World var1, double var2, double var4, double var6, EntityLivingBase var8) {
       this(var1);
       this.setPosition(var2, var4, var6);
-      float var9 = (float)(Math.random() * 6.283185307179586D);
+      float var9 = (float)(Math.random() * 6.2831854820251465D);
       this.motionX = (double)(-((float)Math.sin((double)var9)) * 0.02F);
       this.motionY = 0.20000000298023224D;
       this.motionZ = (double)(-((float)Math.cos((double)var9)) * 0.02F);
@@ -67,10 +75,11 @@ public class EntityTNTPrimed extends Entity {
 
       --this.fuse;
       if (this.fuse <= 0) {
-         this.setDead();
          if (!this.world.isRemote) {
             this.explode();
          }
+
+         this.setDead();
       } else {
          this.handleWaterMovement();
          this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, this.posX, this.posY + 0.5D, this.posZ, 0.0D, 0.0D, 0.0D);
@@ -79,8 +88,13 @@ public class EntityTNTPrimed extends Entity {
    }
 
    private void explode() {
-      float var1 = 4.0F;
-      this.world.createExplosion(this, this.posX, this.posY + (double)(this.height / 16.0F), this.posZ, 4.0F, true);
+      CraftServer var1 = this.world.getServer();
+      ExplosionPrimeEvent var2 = new ExplosionPrimeEvent((Explosive)CraftEntity.getEntity(var1, this));
+      var1.getPluginManager().callEvent(var2);
+      if (!var2.isCancelled()) {
+         this.world.newExplosion(this, this.posX, this.posY + (double)(this.height / 16.0F), this.posZ, var2.getRadius(), var2.getFire(), true);
+      }
+
    }
 
    protected void writeEntityToNBT(NBTTagCompound var1) {

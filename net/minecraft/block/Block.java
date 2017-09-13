@@ -1,10 +1,7 @@
 package net.minecraft.block;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -15,27 +12,19 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityWitherSkull;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -52,23 +41,11 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.EnumPlantType;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry.Impl;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class Block extends Impl {
+public class Block {
    private static final ResourceLocation AIR_ID = new ResourceLocation("air");
-   public static final RegistryNamespacedDefaultedByKey REGISTRY = GameData.getBlockRegistry();
-   /** @deprecated */
-   @Deprecated
-   public static final ObjectIntIdentityMap BLOCK_STATE_IDS = GameData.getBlockStateIDMap();
+   public static final RegistryNamespacedDefaultedByKey REGISTRY = new RegistryNamespacedDefaultedByKey(AIR_ID);
+   public static final ObjectIntIdentityMap BLOCK_STATE_IDS = new ObjectIntIdentityMap();
    public static final AxisAlignedBB FULL_BLOCK_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
    public static final AxisAlignedBB NULL_AABB = null;
    private CreativeTabs displayOnCreativeTab;
@@ -90,22 +67,6 @@ public class Block extends Impl {
    protected final BlockStateContainer blockState;
    private IBlockState defaultBlockState;
    private String unlocalizedName;
-   protected ThreadLocal harvesters;
-   private ThreadLocal silk_check_state;
-   protected static Random RANDOM = new Random();
-   private boolean isTileProvider;
-   private String[] harvestTool;
-   private int[] harvestLevel;
-   protected static ThreadLocal captureDrops = new ThreadLocal() {
-      protected Boolean initialValue() {
-         return false;
-      }
-   };
-   protected static ThreadLocal capturedDrops = new ThreadLocal() {
-      protected List initialValue() {
-         return new ArrayList();
-      }
-   };
 
    public static int getIdFromBlock(Block var0) {
       return REGISTRY.getIDForObject(var0);
@@ -117,8 +78,7 @@ public class Block extends Impl {
    }
 
    public static Block getBlockById(int var0) {
-      Block var1 = (Block)REGISTRY.getObjectById(var0);
-      return var1 == null ? Blocks.AIR : var1;
+      return (Block)REGISTRY.getObjectById(var0);
    }
 
    public static IBlockState getStateById(int var0) {
@@ -139,7 +99,7 @@ public class Block extends Impl {
       } else {
          try {
             return (Block)REGISTRY.getObjectById(Integer.parseInt(var0));
-         } catch (NumberFormatException var3) {
+         } catch (NumberFormatException var2) {
             return null;
          }
       }
@@ -167,13 +127,6 @@ public class Block extends Impl {
    @Deprecated
    public int getLightOpacity(IBlockState var1) {
       return this.lightOpacity;
-   }
-
-   /** @deprecated */
-   @Deprecated
-   @SideOnly(Side.CLIENT)
-   public boolean isTranslucent(IBlockState var1) {
-      return this.translucent;
    }
 
    /** @deprecated */
@@ -233,11 +186,6 @@ public class Block extends Impl {
    }
 
    public Block(Material var1, MapColor var2) {
-      this.harvesters = new ThreadLocal();
-      this.silk_check_state = new ThreadLocal();
-      this.isTileProvider = this instanceof ITileEntityProvider;
-      this.harvestTool = new String[16];
-      this.harvestLevel = new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
       this.enableStats = true;
       this.blockSoundType = SoundType.STONE;
       this.blockParticleGravity = 1.0F;
@@ -251,7 +199,7 @@ public class Block extends Impl {
       this.translucent = !var1.blocksLight();
    }
 
-   public Block(Material var1) {
+   protected Block(Material var1) {
       this(var1, var1.getMaterialMapColor());
    }
 
@@ -260,17 +208,17 @@ public class Block extends Impl {
       return this;
    }
 
-   public Block setLightOpacity(int var1) {
+   protected Block setLightOpacity(int var1) {
       this.lightOpacity = var1;
       return this;
    }
 
-   public Block setLightLevel(float var1) {
+   protected Block setLightLevel(float var1) {
       this.lightValue = (int)(15.0F * var1);
       return this;
    }
 
-   public Block setResistance(float var1) {
+   protected Block setResistance(float var1) {
       this.blockResistance = var1 * 3.0F;
       return this;
    }
@@ -308,10 +256,10 @@ public class Block extends Impl {
    }
 
    public boolean isReplaceable(IBlockAccess var1, BlockPos var2) {
-      return var1.getBlockState(var2).getMaterial().isReplaceable();
+      return false;
    }
 
-   public Block setHardness(float var1) {
+   protected Block setHardness(float var1) {
       this.blockHardness = var1;
       if (this.blockResistance < var1 * 5.0F) {
          this.blockResistance = var1 * 5.0F;
@@ -320,7 +268,7 @@ public class Block extends Impl {
       return this;
    }
 
-   public Block setBlockUnbreakable() {
+   protected Block setBlockUnbreakable() {
       this.setHardness(-1.0F);
       return this;
    }
@@ -331,7 +279,7 @@ public class Block extends Impl {
       return this.blockHardness;
    }
 
-   public Block setTickRandomly(boolean var1) {
+   protected Block setTickRandomly(boolean var1) {
       this.needsRandomTick = var1;
       return this;
    }
@@ -340,10 +288,8 @@ public class Block extends Impl {
       return this.needsRandomTick;
    }
 
-   /** @deprecated */
-   @Deprecated
    public boolean hasTileEntity() {
-      return this.hasTileEntity(this.getDefaultState());
+      return this.isBlockContainer;
    }
 
    /** @deprecated */
@@ -381,67 +327,6 @@ public class Block extends Impl {
 
    /** @deprecated */
    @Deprecated
-   @SideOnly(Side.CLIENT)
-   public int getPackedLightmapCoords(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      int var4 = var2.getCombinedLight(var3, var1.getLightValue(var2, var3));
-      if (var4 == 0 && var1.getBlock() instanceof BlockSlab) {
-         var3 = var3.down();
-         var1 = var2.getBlockState(var3);
-         return var2.getCombinedLight(var3, var1.getLightValue(var2, var3));
-      } else {
-         return var4;
-      }
-   }
-
-   /** @deprecated */
-   @Deprecated
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      AxisAlignedBB var5 = var1.getBoundingBox(var2, var3);
-      switch(var4) {
-      case DOWN:
-         if (var5.minY > 0.0D) {
-            return true;
-         }
-         break;
-      case UP:
-         if (var5.maxY < 1.0D) {
-            return true;
-         }
-         break;
-      case NORTH:
-         if (var5.minZ > 0.0D) {
-            return true;
-         }
-         break;
-      case SOUTH:
-         if (var5.maxZ < 1.0D) {
-            return true;
-         }
-         break;
-      case WEST:
-         if (var5.minX > 0.0D) {
-            return true;
-         }
-         break;
-      case EAST:
-         if (var5.maxX < 1.0D) {
-            return true;
-         }
-      }
-
-      return !var2.getBlockState(var3.offset(var4)).doesSideBlockRendering(var2, var3.offset(var4), var4.getOpposite());
-   }
-
-   /** @deprecated */
-   @Deprecated
-   @SideOnly(Side.CLIENT)
-   public AxisAlignedBB getSelectedBoundingBox(IBlockState var1, World var2, BlockPos var3) {
-      return var1.getBoundingBox(var2, var3).offset(var3);
-   }
-
-   /** @deprecated */
-   @Deprecated
    public boolean isOpaqueCube(IBlockState var1) {
       return true;
    }
@@ -461,10 +346,6 @@ public class Block extends Impl {
    public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
    }
 
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-   }
-
    public void onBlockDestroyedByPlayer(World var1, BlockPos var2, IBlockState var3) {
    }
 
@@ -481,10 +362,6 @@ public class Block extends Impl {
    }
 
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      if (this.hasTileEntity(var3) && !(this instanceof BlockContainer)) {
-         var1.removeTileEntity(var2);
-      }
-
    }
 
    public int quantityDropped(Random var1) {
@@ -499,7 +376,8 @@ public class Block extends Impl {
    /** @deprecated */
    @Deprecated
    public float getPlayerRelativeBlockHardness(IBlockState var1, EntityPlayer var2, World var3, BlockPos var4) {
-      return ForgeHooks.blockStrength(var1, var2, var3, var4);
+      float var5 = var1.getBlockHardness(var3, var4);
+      return var5 < 0.0F ? 0.0F : (!var2.canHarvestBlock(var1) ? var2.getDigSpeed(var1) / var5 / 100.0F : var2.getDigSpeed(var1) / var5 / 30.0F);
    }
 
    public final void dropBlockAsItem(World var1, BlockPos var2, IBlockState var3, int var4) {
@@ -507,13 +385,15 @@ public class Block extends Impl {
    }
 
    public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
-      if (!var1.isRemote && !var1.restoringBlockSnapshots) {
-         List var6 = this.getDrops(var1, var2, var3, var5);
-         var4 = ForgeEventFactory.fireBlockHarvesting(var6, var1, var2, var3, var5, var4, false, (EntityPlayer)this.harvesters.get());
+      if (!var1.isRemote) {
+         int var6 = this.quantityDroppedWithBonus(var5, var1.rand);
 
-         for(ItemStack var8 : var6) {
-            if (var1.rand.nextFloat() <= var4) {
-               spawnAsEntity(var1, var2, var8);
+         for(int var7 = 0; var7 < var6; ++var7) {
+            if (var1.rand.nextFloat() < var4) {
+               Item var8 = this.getItemDropped(var3, var1.rand, var5);
+               if (var8 != null) {
+                  spawnAsEntity(var1, var2, new ItemStack(var8, 1, this.damageDropped(var3)));
+               }
             }
          }
       }
@@ -521,24 +401,18 @@ public class Block extends Impl {
    }
 
    public static void spawnAsEntity(World var0, BlockPos var1, ItemStack var2) {
-      if (!var0.isRemote && var0.getGameRules().getBoolean("doTileDrops") && !var0.restoringBlockSnapshots) {
-         if (((Boolean)captureDrops.get()).booleanValue()) {
-            ((List)capturedDrops.get()).add(var2);
-            return;
-         }
-
-         float var3 = 0.5F;
-         double var4 = (double)(var0.rand.nextFloat() * 0.5F) + 0.25D;
-         double var6 = (double)(var0.rand.nextFloat() * 0.5F) + 0.25D;
-         double var8 = (double)(var0.rand.nextFloat() * 0.5F) + 0.25D;
-         EntityItem var10 = new EntityItem(var0, (double)var1.getX() + var4, (double)var1.getY() + var6, (double)var1.getZ() + var8, var2);
-         var10.setDefaultPickupDelay();
-         var0.spawnEntity(var10);
+      if (!var0.isRemote && var0.getGameRules().getBoolean("doTileDrops")) {
+         double var3 = (double)(var0.rand.nextFloat() * 0.5F) + 0.25D;
+         double var5 = (double)(var0.rand.nextFloat() * 0.5F) + 0.25D;
+         double var7 = (double)(var0.rand.nextFloat() * 0.5F) + 0.25D;
+         EntityItem var9 = new EntityItem(var0, (double)var1.getX() + var3, (double)var1.getY() + var5, (double)var1.getZ() + var7, var2);
+         var9.setDefaultPickupDelay();
+         var0.spawnEntity(var9);
       }
 
    }
 
-   public void dropXpOnBlockBreak(World var1, BlockPos var2, int var3) {
+   protected void dropXpOnBlockBreak(World var1, BlockPos var2, int var3) {
       if (!var1.isRemote && var1.getGameRules().getBoolean("doTileDrops")) {
          while(var3 > 0) {
             int var4 = EntityXPOrb.getXPSplit(var3);
@@ -579,17 +453,12 @@ public class Block extends Impl {
       return this.canPlaceBlockOnSide(var1, var2, var3);
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.SOLID;
-   }
-
    public boolean canPlaceBlockOnSide(World var1, BlockPos var2, EnumFacing var3) {
       return this.canPlaceBlockAt(var1, var2);
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      return var1.getBlockState(var2).getBlock().isReplaceable(var1, var2);
+      return var1.getBlockState(var2).getBlock().blockMaterial.isReplaceable();
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
@@ -599,8 +468,6 @@ public class Block extends Impl {
    public void onEntityWalk(World var1, BlockPos var2, Entity var3) {
    }
 
-   /** @deprecated */
-   @Deprecated
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
       return this.getStateFromMeta(var7);
    }
@@ -636,31 +503,20 @@ public class Block extends Impl {
    public void harvestBlock(World var1, EntityPlayer var2, BlockPos var3, IBlockState var4, @Nullable TileEntity var5, @Nullable ItemStack var6) {
       var2.addStat(StatList.getBlockStats(this));
       var2.addExhaustion(0.025F);
-      if (this.canSilkHarvest(var1, var3, var4, var2) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, var6) > 0) {
-         ArrayList var11 = new ArrayList();
+      if (this.canSilkHarvest() && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, var6) > 0) {
          ItemStack var8 = this.getSilkTouchDrop(var4);
          if (var8 != null) {
-            var11.add(var8);
-         }
-
-         ForgeEventFactory.fireBlockHarvesting(var11, var1, var3, var4, 0, 1.0F, true, var2);
-
-         for(ItemStack var10 : var11) {
-            spawnAsEntity(var1, var3, var10);
+            spawnAsEntity(var1, var3, var8);
          }
       } else {
-         this.harvesters.set(var2);
          int var7 = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, var6);
          this.dropBlockAsItem(var1, var3, var4, var7);
-         this.harvesters.set((Object)null);
       }
 
    }
 
-   /** @deprecated */
-   @Deprecated
    protected boolean canSilkHarvest() {
-      return this.getDefaultState().isFullCube() && !this.hasTileEntity((IBlockState)this.silk_check_state.get());
+      return this.getDefaultState().isFullCube() && !this.isBlockContainer;
    }
 
    @Nullable
@@ -723,13 +579,6 @@ public class Block extends Impl {
       return this.blockMaterial.getMobilityFlag();
    }
 
-   /** @deprecated */
-   @Deprecated
-   @SideOnly(Side.CLIENT)
-   public float getAmbientOcclusionLightValue(IBlockState var1) {
-      return var1.isBlockNormalCube() ? 0.2F : 1.0F;
-   }
-
    public void onFallenUpon(World var1, BlockPos var2, Entity var3, float var4) {
       var3.fall(var4, 1.0F);
    }
@@ -738,17 +587,9 @@ public class Block extends Impl {
       var2.motionY = 0.0D;
    }
 
-   /** @deprecated */
    @Nullable
-   @Deprecated
    public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
-      Item var4 = Item.getItemFromBlock(this);
-      return var4 == null ? null : new ItemStack(var4, 1, this.damageDropped(var3));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
-      var3.add(new ItemStack(var1));
+      return new ItemStack(Item.getItemFromBlock(this), 1, this.damageDropped(var3));
    }
 
    public Block setCreativeTab(CreativeTabs var1) {
@@ -757,11 +598,6 @@ public class Block extends Impl {
    }
 
    public void onBlockHarvested(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CreativeTabs getCreativeTabToDisplayOn() {
-      return this.displayOnCreativeTab;
    }
 
    public void fillWithRain(World var1, BlockPos var2) {
@@ -811,466 +647,12 @@ public class Block extends Impl {
       return this.defaultBlockState;
    }
 
-   @SideOnly(Side.CLIENT)
-   public Block.EnumOffsetType getOffsetType() {
-      return Block.EnumOffsetType.NONE;
-   }
-
-   /** @deprecated */
-   @Deprecated
    public SoundType getSoundType() {
       return this.blockSoundType;
    }
 
    public String toString() {
       return "Block{" + REGISTRY.getNameForObject(this) + "}";
-   }
-
-   public int getLightValue(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      IBlockState var4 = var2.getBlockState(var3);
-      return var4.getBlock() != this ? var4.getLightValue(var2, var3) : var1.getLightValue();
-   }
-
-   public boolean isLadder(IBlockState var1, IBlockAccess var2, BlockPos var3, EntityLivingBase var4) {
-      return false;
-   }
-
-   public boolean isNormalCube(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return var1.getMaterial().isOpaque() && var1.isFullCube() && !var1.canProvidePower();
-   }
-
-   public boolean doesSideBlockRendering(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return var1.isOpaqueCube();
-   }
-
-   public boolean isSideSolid(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      if (var1.isFullyOpaque() && var4 == EnumFacing.UP) {
-         return true;
-      } else if (this instanceof BlockSlab) {
-         IBlockState var10 = this.getActualState(var1, var2, var3);
-         return var1.isFullBlock() || var10.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP && var4 == EnumFacing.UP || var10.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.BOTTOM && var4 == EnumFacing.DOWN;
-      } else if (!(this instanceof BlockFarmland)) {
-         if (this instanceof BlockStairs) {
-            IBlockState var9 = this.getActualState(var1, var2, var3);
-            boolean var6 = var9.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.TOP;
-            BlockStairs.EnumShape var7 = (BlockStairs.EnumShape)var9.getValue(BlockStairs.SHAPE);
-            EnumFacing var8 = (EnumFacing)var9.getValue(BlockStairs.FACING);
-            if (var4 == EnumFacing.UP) {
-               return var6;
-            } else if (var4 == EnumFacing.DOWN) {
-               return !var6;
-            } else if (var8 == var4) {
-               return true;
-            } else {
-               if (var6) {
-                  if (var7 == BlockStairs.EnumShape.INNER_LEFT) {
-                     return var4 == var8.rotateYCCW();
-                  }
-
-                  if (var7 == BlockStairs.EnumShape.INNER_RIGHT) {
-                     return var4 == var8.rotateY();
-                  }
-               } else {
-                  if (var7 == BlockStairs.EnumShape.INNER_LEFT) {
-                     return var4 == var8.rotateY();
-                  }
-
-                  if (var7 == BlockStairs.EnumShape.INNER_RIGHT) {
-                     return var4 == var8.rotateYCCW();
-                  }
-               }
-
-               return false;
-            }
-         } else if (this instanceof BlockSnow) {
-            IBlockState var5 = this.getActualState(var1, var2, var3);
-            return ((Integer)var5.getValue(BlockSnow.LAYERS)).intValue() >= 8;
-         } else if (this instanceof BlockHopper && var4 == EnumFacing.UP) {
-            return true;
-         } else {
-            return this instanceof BlockCompressedPowered ? true : this.isNormalCube(var1, var2, var3);
-         }
-      } else {
-         return var4 != EnumFacing.DOWN && var4 != EnumFacing.UP;
-      }
-   }
-
-   public boolean isBurning(IBlockAccess var1, BlockPos var2) {
-      return false;
-   }
-
-   public boolean isAir(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return var1.getMaterial() == Material.AIR;
-   }
-
-   public boolean canHarvestBlock(IBlockAccess var1, BlockPos var2, EntityPlayer var3) {
-      return ForgeHooks.canHarvestBlock(this, var3, var1, var2);
-   }
-
-   public boolean removedByPlayer(IBlockState var1, World var2, BlockPos var3, EntityPlayer var4, boolean var5) {
-      this.onBlockHarvested(var2, var3, var1, var4);
-      return var2.setBlockState(var3, Blocks.AIR.getDefaultState(), var2.isRemote ? 11 : 3);
-   }
-
-   public int getFlammability(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
-      return Blocks.FIRE.getFlammability(this);
-   }
-
-   public boolean isFlammable(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
-      return this.getFlammability(var1, var2, var3) > 0;
-   }
-
-   public int getFireSpreadSpeed(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
-      return Blocks.FIRE.getEncouragement(this);
-   }
-
-   public boolean isFireSource(World var1, BlockPos var2, EnumFacing var3) {
-      if (this == Blocks.NETHERRACK && var3 == EnumFacing.UP) {
-         return true;
-      } else {
-         return var1.provider instanceof WorldProviderEnd && this == Blocks.BEDROCK && var3 == EnumFacing.UP;
-      }
-   }
-
-   public boolean hasTileEntity(IBlockState var1) {
-      return this.isTileProvider;
-   }
-
-   public TileEntity createTileEntity(World var1, IBlockState var2) {
-      return this.isTileProvider ? ((ITileEntityProvider)this).createNewTileEntity(var1, this.getMetaFromState(var2)) : null;
-   }
-
-   public int quantityDropped(IBlockState var1, int var2, Random var3) {
-      return this.quantityDroppedWithBonus(var2, var3);
-   }
-
-   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
-      ArrayList var5 = new ArrayList();
-      Random var6 = var1 instanceof World ? ((World)var1).rand : RANDOM;
-      int var7 = this.quantityDropped(var3, var4, var6);
-
-      for(int var8 = 0; var8 < var7; ++var8) {
-         Item var9 = this.getItemDropped(var3, var6, var4);
-         if (var9 != null) {
-            var5.add(new ItemStack(var9, 1, this.damageDropped(var3)));
-         }
-      }
-
-      return var5;
-   }
-
-   public boolean canSilkHarvest(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4) {
-      this.silk_check_state.set(var3);
-      boolean var5 = this.canSilkHarvest();
-      this.silk_check_state.set((Object)null);
-      return var5;
-   }
-
-   public boolean canCreatureSpawn(IBlockState var1, IBlockAccess var2, BlockPos var3, EntityLiving.SpawnPlacementType var4) {
-      return this.isSideSolid(var1, var2, var3, EnumFacing.UP);
-   }
-
-   public boolean isBed(IBlockState var1, IBlockAccess var2, BlockPos var3, Entity var4) {
-      return this == Blocks.BED;
-   }
-
-   public BlockPos getBedSpawnPosition(IBlockState var1, IBlockAccess var2, BlockPos var3, EntityPlayer var4) {
-      return var2 instanceof World ? BlockBed.getSafeExitLocation((World)var2, var3, 0) : null;
-   }
-
-   public void setBedOccupied(IBlockAccess var1, BlockPos var2, EntityPlayer var3, boolean var4) {
-      if (var1 instanceof World) {
-         IBlockState var5 = var1.getBlockState(var2);
-         var5 = var5.getBlock().getActualState(var5, var1, var2);
-         var5 = var5.withProperty(BlockBed.OCCUPIED, Boolean.valueOf(var4));
-         ((World)var1).setBlockState(var2, var5, 4);
-      }
-
-   }
-
-   public EnumFacing getBedDirection(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return (EnumFacing)this.getActualState(var1, var2, var3).getValue(BlockHorizontal.FACING);
-   }
-
-   public boolean isBedFoot(IBlockAccess var1, BlockPos var2) {
-      return this.getActualState(var1.getBlockState(var2), var1, var2).getValue(BlockBed.PART) == BlockBed.EnumPartType.FOOT;
-   }
-
-   public void beginLeavesDecay(IBlockState var1, World var2, BlockPos var3) {
-   }
-
-   public boolean canSustainLeaves(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return false;
-   }
-
-   public boolean isLeaves(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return var1.getMaterial() == Material.LEAVES;
-   }
-
-   public boolean canBeReplacedByLeaves(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return this.isAir(var1, var2, var3) || this.isLeaves(var1, var2, var3);
-   }
-
-   public boolean isWood(IBlockAccess var1, BlockPos var2) {
-      return false;
-   }
-
-   public boolean isReplaceableOreGen(IBlockState var1, IBlockAccess var2, BlockPos var3, Predicate var4) {
-      return var4.apply(var1);
-   }
-
-   public float getExplosionResistance(World var1, BlockPos var2, Entity var3, Explosion var4) {
-      return this.getExplosionResistance(var3);
-   }
-
-   public void onBlockExploded(World var1, BlockPos var2, Explosion var3) {
-      var1.setBlockToAir(var2);
-      this.onBlockDestroyedByExplosion(var1, var2, var3);
-   }
-
-   public boolean canConnectRedstone(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return var1.canProvidePower() && var4 != null;
-   }
-
-   public boolean canPlaceTorchOnTop(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      if (var1.isSideSolid(var2, var3, EnumFacing.UP)) {
-         return true;
-      } else {
-         return this instanceof BlockFence || this == Blocks.GLASS || this == Blocks.COBBLESTONE_WALL || this == Blocks.STAINED_GLASS;
-      }
-   }
-
-   public ItemStack getPickBlock(IBlockState var1, RayTraceResult var2, World var3, BlockPos var4, EntityPlayer var5) {
-      return this.getItem(var3, var4, var1);
-   }
-
-   public boolean isFoliage(IBlockAccess var1, BlockPos var2) {
-      return false;
-   }
-
-   public boolean addLandingEffects(IBlockState var1, WorldServer var2, BlockPos var3, IBlockState var4, EntityLivingBase var5, int var6) {
-      return false;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean addHitEffects(IBlockState var1, World var2, RayTraceResult var3, ParticleManager var4) {
-      return false;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean addDestroyEffects(World var1, BlockPos var2, ParticleManager var3) {
-      return false;
-   }
-
-   public boolean canSustainPlant(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4, IPlantable var5) {
-      IBlockState var6 = var5.getPlant(var2, var3.offset(var4));
-      EnumPlantType var7 = var5.getPlantType(var2, var3.offset(var4));
-      if (var6.getBlock() == Blocks.CACTUS) {
-         return this == Blocks.CACTUS || this == Blocks.SAND;
-      } else if (var6.getBlock() == Blocks.REEDS && this == Blocks.REEDS) {
-         return true;
-      } else if (var5 instanceof BlockBush && ((BlockBush)var5).canSustainBush(var1)) {
-         return true;
-      } else {
-         switch(var7) {
-         case Desert:
-            return this == Blocks.SAND || this == Blocks.HARDENED_CLAY || this == Blocks.STAINED_HARDENED_CLAY;
-         case Nether:
-            return this == Blocks.SOUL_SAND;
-         case Crop:
-            return this == Blocks.FARMLAND;
-         case Cave:
-            return var1.isSideSolid(var2, var3, EnumFacing.UP);
-         case Plains:
-            return this == Blocks.GRASS || this == Blocks.DIRT || this == Blocks.FARMLAND;
-         case Water:
-            return var1.getMaterial() == Material.WATER && ((Integer)var1.getValue(BlockLiquid.LEVEL)).intValue() == 0;
-         case Beach:
-            boolean var8 = this == Blocks.GRASS || this == Blocks.DIRT || this == Blocks.SAND;
-            boolean var9 = var2.getBlockState(var3.east()).getMaterial() == Material.WATER || var2.getBlockState(var3.west()).getMaterial() == Material.WATER || var2.getBlockState(var3.north()).getMaterial() == Material.WATER || var2.getBlockState(var3.south()).getMaterial() == Material.WATER;
-            return var8 && var9;
-         default:
-            return false;
-         }
-      }
-   }
-
-   public void onPlantGrow(IBlockState var1, World var2, BlockPos var3, BlockPos var4) {
-      if (this == Blocks.GRASS || this == Blocks.FARMLAND) {
-         var2.setBlockState(var3, Blocks.DIRT.getDefaultState(), 2);
-      }
-
-   }
-
-   public boolean isFertile(World var1, BlockPos var2) {
-      if (this == Blocks.FARMLAND) {
-         return ((Integer)var1.getBlockState(var2).getValue(BlockFarmland.MOISTURE)).intValue() > 0;
-      } else {
-         return false;
-      }
-   }
-
-   public int getLightOpacity(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return var1.getLightOpacity();
-   }
-
-   public boolean canEntityDestroy(IBlockState var1, IBlockAccess var2, BlockPos var3, Entity var4) {
-      if (!(var4 instanceof EntityDragon)) {
-         return !(var4 instanceof EntityWither) && !(var4 instanceof EntityWitherSkull) ? true : EntityWither.canDestroyBlock(this);
-      } else {
-         return this != Blocks.BARRIER && this != Blocks.OBSIDIAN && this != Blocks.END_STONE && this != Blocks.BEDROCK && this != Blocks.END_PORTAL && this != Blocks.END_PORTAL_FRAME && this != Blocks.COMMAND_BLOCK && this != Blocks.REPEATING_COMMAND_BLOCK && this != Blocks.CHAIN_COMMAND_BLOCK && this != Blocks.IRON_BARS && this != Blocks.END_GATEWAY;
-      }
-   }
-
-   public boolean isBeaconBase(IBlockAccess var1, BlockPos var2, BlockPos var3) {
-      return this == Blocks.EMERALD_BLOCK || this == Blocks.GOLD_BLOCK || this == Blocks.DIAMOND_BLOCK || this == Blocks.IRON_BLOCK;
-   }
-
-   public boolean rotateBlock(World var1, BlockPos var2, EnumFacing var3) {
-      IBlockState var4 = var1.getBlockState(var2);
-      UnmodifiableIterator var5 = var4.getProperties().keySet().iterator();
-
-      while(var5.hasNext()) {
-         IProperty var6 = (IProperty)var5.next();
-         if (var6.getName().equals("facing") || var6.getName().equals("rotation")) {
-            var1.setBlockState(var2, var4.cycleProperty(var6));
-            return true;
-         }
-      }
-
-      return false;
-   }
-
-   public EnumFacing[] getValidRotations(World var1, BlockPos var2) {
-      IBlockState var3 = var1.getBlockState(var2);
-      UnmodifiableIterator var4 = var3.getProperties().keySet().iterator();
-
-      while(var4.hasNext()) {
-         IProperty var5 = (IProperty)var4.next();
-         if (var5.getName().equals("facing") && var5.getValueClass() == EnumFacing.class) {
-            Collection var6 = var5.getAllowedValues();
-            return (EnumFacing[])var6.toArray(new EnumFacing[var6.size()]);
-         }
-      }
-
-      return null;
-   }
-
-   public float getEnchantPowerBonus(World var1, BlockPos var2) {
-      return this == Blocks.BOOKSHELF ? 1.0F : 0.0F;
-   }
-
-   public boolean recolorBlock(World var1, BlockPos var2, EnumFacing var3, EnumDyeColor var4) {
-      IBlockState var5 = var1.getBlockState(var2);
-      UnmodifiableIterator var6 = var5.getProperties().keySet().iterator();
-
-      while(var6.hasNext()) {
-         IProperty var7 = (IProperty)var6.next();
-         if (var7.getName().equals("color") && var7.getValueClass() == EnumDyeColor.class) {
-            EnumDyeColor var8 = (EnumDyeColor)var5.getValue(var7);
-            if (var8 != var4) {
-               var1.setBlockState(var2, var5.withProperty(var7, var4));
-               return true;
-            }
-         }
-      }
-
-      return false;
-   }
-
-   public int getExpDrop(IBlockState var1, IBlockAccess var2, BlockPos var3, int var4) {
-      return 0;
-   }
-
-   public void onNeighborChange(IBlockAccess var1, BlockPos var2, BlockPos var3) {
-   }
-
-   public boolean shouldCheckWeakPower(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return var1.isNormalCube();
-   }
-
-   public boolean getWeakChanges(IBlockAccess var1, BlockPos var2) {
-      return false;
-   }
-
-   public void setHarvestLevel(String var1, int var2) {
-      UnmodifiableIterator var3 = this.getBlockState().getValidStates().iterator();
-
-      while(var3.hasNext()) {
-         this.setHarvestLevel(var1, var2, (IBlockState)var3.next());
-      }
-
-   }
-
-   public void setHarvestLevel(String var1, int var2, IBlockState var3) {
-      int var4 = this.getMetaFromState(var3);
-      this.harvestTool[var4] = var1;
-      this.harvestLevel[var4] = var2;
-   }
-
-   public String getHarvestTool(IBlockState var1) {
-      return this.harvestTool[this.getMetaFromState(var1)];
-   }
-
-   public int getHarvestLevel(IBlockState var1) {
-      return this.harvestLevel[this.getMetaFromState(var1)];
-   }
-
-   public boolean isToolEffective(String var1, IBlockState var2) {
-      if (!"pickaxe".equals(var1) || this != Blocks.REDSTONE_ORE && this != Blocks.LIT_REDSTONE_ORE && this != Blocks.OBSIDIAN) {
-         return var1 != null && var1.equals(this.getHarvestTool(var2));
-      } else {
-         return false;
-      }
-   }
-
-   public IBlockState getExtendedState(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return var1;
-   }
-
-   public Boolean isEntityInsideMaterial(IBlockAccess var1, BlockPos var2, IBlockState var3, Entity var4, double var5, Material var7, boolean var8) {
-      return null;
-   }
-
-   public Boolean isAABBInsideMaterial(World var1, BlockPos var2, AxisAlignedBB var3, Material var4) {
-      return null;
-   }
-
-   /** @deprecated */
-   @Deprecated
-   public boolean canRenderInLayer(BlockRenderLayer var1) {
-      return this.getBlockLayer() == var1;
-   }
-
-   public boolean canRenderInLayer(IBlockState var1, BlockRenderLayer var2) {
-      return this.canRenderInLayer(var2);
-   }
-
-   protected List captureDrops(boolean var1) {
-      if (var1) {
-         captureDrops.set(Boolean.valueOf(true));
-         ((List)capturedDrops.get()).clear();
-         return null;
-      } else {
-         captureDrops.set(Boolean.valueOf(false));
-         return (List)capturedDrops.get();
-      }
-   }
-
-   public void addInformation(ItemStack var1, EntityPlayer var2, List var3, boolean var4) {
-   }
-
-   public SoundType getSoundType(IBlockState var1, World var2, BlockPos var3, @Nullable Entity var4) {
-      return this.getSoundType();
-   }
-
-   @Nullable
-   public float[] getBeaconColorMultiplier(IBlockState var1, World var2, BlockPos var3, BlockPos var4) {
-      return null;
-   }
-
-   public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8, ItemStack var9) {
-      return this.getStateForPlacement(var1, var2, var3, var4, var5, var6, var7, var8);
    }
 
    public static void registerBlocks() {
@@ -1532,13 +914,25 @@ public class Block extends Impl {
 
       for(Block var25 : REGISTRY) {
          if (var23.contains(var25)) {
-            for(int var26 = 0; var26 < 15; ++var26) {
-               int var27 = REGISTRY.getIDForObject(var25) << 4 | var26;
-               BLOCK_STATE_IDS.put(var25.getStateFromMeta(var26), var27);
+            for(int var27 = 0; var27 < 15; ++var27) {
+               int var29 = REGISTRY.getIDForObject(var25) << 4 | var27;
+               BLOCK_STATE_IDS.put(var25.getStateFromMeta(var27), var29);
+            }
+         } else {
+            UnmodifiableIterator var26 = var25.getBlockState().getValidStates().iterator();
+
+            while(var26.hasNext()) {
+               IBlockState var28 = (IBlockState)var26.next();
+               int var30 = REGISTRY.getIDForObject(var25) << 4 | var25.getMetaFromState(var28);
+               BLOCK_STATE_IDS.put(var28, var30);
             }
          }
       }
 
+   }
+
+   public int getExpDrop(World var1, IBlockState var2, int var3) {
+      return 0;
    }
 
    private static void registerBlock(int var0, ResourceLocation var1, Block var2) {
@@ -1547,12 +941,5 @@ public class Block extends Impl {
 
    private static void registerBlock(int var0, String var1, Block var2) {
       registerBlock(var0, new ResourceLocation(var1), var2);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static enum EnumOffsetType {
-      NONE,
-      XZ,
-      XYZ;
    }
 }

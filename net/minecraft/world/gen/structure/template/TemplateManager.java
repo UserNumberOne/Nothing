@@ -10,7 +10,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 
@@ -22,8 +22,8 @@ public class TemplateManager {
       this.baseFolder = var1;
    }
 
-   public Template getTemplate(@Nullable MinecraftServer var1, ResourceLocation var2) {
-      Template var3 = this.get(var1, var2);
+   public Template a(@Nullable MinecraftServer var1, ResourceLocation var2) {
+      Template var3 = this.b(var1, var2);
       if (var3 == null) {
          var3 = new Template();
          this.templates.put(var2.getResourcePath(), var3);
@@ -33,13 +33,13 @@ public class TemplateManager {
    }
 
    @Nullable
-   public Template get(@Nullable MinecraftServer var1, ResourceLocation var2) {
+   public Template b(@Nullable MinecraftServer var1, ResourceLocation var2) {
       String var3 = var2.getResourcePath();
       if (this.templates.containsKey(var3)) {
          return (Template)this.templates.get(var3);
       } else {
          if (var1 != null) {
-            this.readTemplate(var1, var2);
+            this.c(var1, var2);
          } else {
             this.readTemplateFromJar(var2);
          }
@@ -48,7 +48,7 @@ public class TemplateManager {
       }
    }
 
-   public boolean readTemplate(MinecraftServer var1, ResourceLocation var2) {
+   public boolean c(MinecraftServer var1, ResourceLocation var2) {
       String var3 = var2.getResourcePath();
       File var4 = new File(this.baseFolder, var3 + ".nbt");
       if (!var4.exists()) {
@@ -56,19 +56,18 @@ public class TemplateManager {
       } else {
          FileInputStream var5 = null;
 
-         boolean var6;
+         boolean var7;
          try {
             var5 = new FileInputStream(var4);
             this.readTemplateFromStream(var3, var5);
-            boolean var7 = true;
-            return var7;
+            return true;
          } catch (Throwable var11) {
-            var6 = false;
+            var7 = false;
          } finally {
             IOUtils.closeQuietly(var5);
          }
 
-         return var6;
+         return var7;
       }
    }
 
@@ -77,19 +76,18 @@ public class TemplateManager {
       String var3 = var1.getResourcePath();
       InputStream var4 = null;
 
-      boolean var5;
+      boolean var6;
       try {
          var4 = MinecraftServer.class.getResourceAsStream("/assets/" + var2 + "/structures/" + var3 + ".nbt");
          this.readTemplateFromStream(var3, var4);
-         boolean var6 = true;
-         return var6;
+         return true;
       } catch (Throwable var10) {
-         var5 = false;
+         var6 = false;
       } finally {
          IOUtils.closeQuietly(var4);
       }
 
-      return var5;
+      return var6;
    }
 
    private void readTemplateFromStream(String var1, InputStream var2) throws IOException {
@@ -99,7 +97,7 @@ public class TemplateManager {
       this.templates.put(var1, var4);
    }
 
-   public boolean writeTemplate(@Nullable MinecraftServer var1, ResourceLocation var2) {
+   public boolean d(@Nullable MinecraftServer var1, ResourceLocation var2) {
       String var3 = var2.getResourcePath();
       if (var1 != null && this.templates.containsKey(var3)) {
          File var4 = new File(this.baseFolder);
@@ -115,20 +113,19 @@ public class TemplateManager {
          Template var6 = (Template)this.templates.get(var3);
          FileOutputStream var7 = null;
 
-         boolean var8;
+         boolean var9;
          try {
-            NBTTagCompound var9 = var6.writeToNBT(new NBTTagCompound());
+            NBTTagCompound var8 = var6.writeToNBT(new NBTTagCompound());
             var7 = new FileOutputStream(var5);
-            CompressedStreamTools.writeCompressed(var9, var7);
-            boolean var10 = true;
-            return var10;
-         } catch (Throwable var14) {
-            var8 = false;
+            CompressedStreamTools.writeCompressed(var8, var7);
+            return true;
+         } catch (Throwable var13) {
+            var9 = false;
          } finally {
             IOUtils.closeQuietly(var7);
          }
 
-         return var8;
+         return var9;
       } else {
          return false;
       }

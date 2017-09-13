@@ -1,7 +1,5 @@
 package net.minecraft.block;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
@@ -92,7 +90,13 @@ public class BlockBanner extends BlockContainer {
    }
 
    public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
-      super.dropBlockAsItemWithChance(var1, var2, var3, var4, var5);
+      ItemStack var6 = this.getTileDataItemStack(var1, var2, var3);
+      if (var6 != null) {
+         spawnAsEntity(var1, var2, var6);
+      } else {
+         super.dropBlockAsItemWithChance(var1, var2, var3, var4, var5);
+      }
+
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
@@ -111,23 +115,6 @@ public class BlockBanner extends BlockContainer {
          super.harvestBlock(var1, var2, var3, var4, (TileEntity)null, var6);
       }
 
-   }
-
-   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
-      TileEntity var5 = var1.getTileEntity(var2);
-      ArrayList var6 = new ArrayList();
-      if (var5 instanceof TileEntityBanner) {
-         TileEntityBanner var7 = (TileEntityBanner)var5;
-         ItemStack var8 = new ItemStack(Items.BANNER, 1, var7.getBaseColor());
-         NBTTagCompound var9 = new NBTTagCompound();
-         TileEntityBanner.setBaseColorAndPatterns(var9, var7.getBaseColor(), var7.getPatterns());
-         var8.setTagInfo("BlockEntityTag", var9);
-         var6.add(var8);
-      } else {
-         var6.add(new ItemStack(Items.BANNER, 1, 0));
-      }
-
-      return var6;
    }
 
    public static class BlockBannerHanging extends BlockBanner {

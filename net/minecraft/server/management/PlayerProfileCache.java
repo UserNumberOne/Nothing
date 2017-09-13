@@ -10,7 +10,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
@@ -25,7 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -35,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingDeque;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import org.apache.commons.io.IOUtils;
@@ -44,7 +43,7 @@ public class PlayerProfileCache {
    private static boolean onlineMode;
    private final Map usernameToProfileEntryMap = Maps.newHashMap();
    private final Map uuidToProfileEntryMap = Maps.newHashMap();
-   private final Deque gameProfiles = Lists.newLinkedList();
+   private final Deque gameProfiles = new LinkedBlockingDeque();
    private final GameProfileRepository profileRepo;
    protected final Gson gson;
    private final File usercacheFile;
@@ -66,7 +65,7 @@ public class PlayerProfileCache {
       this.profileRepo = var1;
       this.usercacheFile = var2;
       GsonBuilder var3 = new GsonBuilder();
-      var3.registerTypeHierarchyAdapter(PlayerProfileCache.ProfileEntry.class, new PlayerProfileCache.Serializer());
+      var3.registerTypeHierarchyAdapter(PlayerProfileCache.ProfileEntry.class, new PlayerProfileCache.Serializer((Object)null));
       this.gson = var3.create();
       this.load();
    }
@@ -113,16 +112,16 @@ public class PlayerProfileCache {
          var2 = var4.getTime();
       }
 
-      String var7 = var1.getName().toLowerCase(Locale.ROOT);
-      PlayerProfileCache.ProfileEntry var5 = new PlayerProfileCache.ProfileEntry(var1, var2);
+      var1.getName().toLowerCase(Locale.ROOT);
+      PlayerProfileCache.ProfileEntry var6 = new PlayerProfileCache.ProfileEntry(var1, var2, (Object)null);
       if (this.uuidToProfileEntryMap.containsKey(var3)) {
-         PlayerProfileCache.ProfileEntry var6 = (PlayerProfileCache.ProfileEntry)this.uuidToProfileEntryMap.get(var3);
-         this.usernameToProfileEntryMap.remove(var6.getGameProfile().getName().toLowerCase(Locale.ROOT));
+         PlayerProfileCache.ProfileEntry var5 = (PlayerProfileCache.ProfileEntry)this.uuidToProfileEntryMap.get(var3);
+         this.usernameToProfileEntryMap.remove(var5.getGameProfile().getName().toLowerCase(Locale.ROOT));
          this.gameProfiles.remove(var1);
       }
 
-      this.usernameToProfileEntryMap.put(var1.getName().toLowerCase(Locale.ROOT), var5);
-      this.uuidToProfileEntryMap.put(var3, var5);
+      this.usernameToProfileEntryMap.put(var1.getName().toLowerCase(Locale.ROOT), var6);
+      this.uuidToProfileEntryMap.put(var3, var6);
       this.gameProfiles.addFirst(var1);
       this.save();
    }
@@ -210,9 +209,9 @@ public class PlayerProfileCache {
          var2 = Files.newWriter(this.usercacheFile, Charsets.UTF_8);
          var2.write(var1);
          return;
-      } catch (FileNotFoundException var8) {
+      } catch (FileNotFoundException var7) {
          ;
-      } catch (IOException var9) {
+      } catch (IOException var8) {
          return;
       } finally {
          IOUtils.closeQuietly(var2);
@@ -223,10 +222,10 @@ public class PlayerProfileCache {
    private List getEntriesWithLimit(int var1) {
       ArrayList var2 = Lists.newArrayList();
 
-      for(GameProfile var4 : Lists.newArrayList(Iterators.limit(this.gameProfiles.iterator(), var1))) {
-         PlayerProfileCache.ProfileEntry var5 = this.getByUUID(var4.getId());
-         if (var5 != null) {
-            var2.add(var5);
+      for(GameProfile var5 : Lists.newArrayList(Iterators.limit(this.gameProfiles.iterator(), var1))) {
+         PlayerProfileCache.ProfileEntry var6 = this.getByUUID(var5.getId());
+         if (var6 != null) {
+            var2.add(var6);
          }
       }
 
@@ -249,59 +248,34 @@ public class PlayerProfileCache {
       public Date getExpirationDate() {
          return this.expirationDate;
       }
+
+      ProfileEntry(GameProfile var2, Date var3, Object var4) {
+         this(var2, var3);
+      }
    }
 
    class Serializer implements JsonDeserializer, JsonSerializer {
       private Serializer() {
       }
 
-      public JsonElement serialize(PlayerProfileCache.ProfileEntry var1, Type var2, JsonSerializationContext var3) {
-         JsonObject var4 = new JsonObject();
-         var4.addProperty("name", var1.getGameProfile().getName());
-         UUID var5 = var1.getGameProfile().getId();
-         var4.addProperty("uuid", var5 == null ? "" : var5.toString());
-         var4.addProperty("expiresOn", PlayerProfileCache.DATE_FORMAT.format(var1.getExpirationDate()));
-         return var4;
+      public JsonElement serialize(PlayerProfileCache.ProfileEntry param1, Type param2, JsonSerializationContext param3) {
+         // $FF: Couldn't be decompiled
       }
 
-      public PlayerProfileCache.ProfileEntry deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-         if (var1.isJsonObject()) {
-            JsonObject var4 = var1.getAsJsonObject();
-            JsonElement var5 = var4.get("name");
-            JsonElement var6 = var4.get("uuid");
-            JsonElement var7 = var4.get("expiresOn");
-            if (var5 != null && var6 != null) {
-               String var8 = var6.getAsString();
-               String var9 = var5.getAsString();
-               Date var10 = null;
-               if (var7 != null) {
-                  try {
-                     var10 = PlayerProfileCache.DATE_FORMAT.parse(var7.getAsString());
-                  } catch (ParseException var14) {
-                     var10 = null;
-                  }
-               }
+      public PlayerProfileCache.ProfileEntry deserialize(JsonElement param1, Type param2, JsonDeserializationContext param3) throws JsonParseException {
+         // $FF: Couldn't be decompiled
+      }
 
-               if (var9 != null && var8 != null) {
-                  UUID var11;
-                  try {
-                     var11 = UUID.fromString(var8);
-                  } catch (Throwable var13) {
-                     return null;
-                  }
+      public JsonElement serialize(PlayerProfileCache.ProfileEntry param1, Type param2, JsonSerializationContext param3) {
+         // $FF: Couldn't be decompiled
+      }
 
-                  PlayerProfileCache var10002 = PlayerProfileCache.this;
-                  PlayerProfileCache.this.getClass();
-                  return var10002.new ProfileEntry(new GameProfile(var11, var9), var10);
-               } else {
-                  return null;
-               }
-            } else {
-               return null;
-            }
-         } else {
-            return null;
-         }
+      public PlayerProfileCache.ProfileEntry deserialize(JsonElement param1, Type param2, JsonDeserializationContext param3) throws JsonParseException {
+         // $FF: Couldn't be decompiled
+      }
+
+      Serializer(Object var2) {
+         this();
       }
    }
 }

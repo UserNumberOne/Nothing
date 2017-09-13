@@ -6,9 +6,11 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ICrashReportDetail;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.network.play.server.SPacketServerDifficulty;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.IDataFixer;
@@ -18,10 +20,13 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.event.weather.ThunderChangeEvent;
+import org.bukkit.event.weather.WeatherChangeEvent;
 
 public class WorldInfo {
    private String versionName;
@@ -65,7 +70,7 @@ public class WorldInfo {
    private int borderWarningTime = 15;
    private final Map dimensionData = Maps.newEnumMap(DimensionType.class);
    private GameRules theGameRules = new GameRules();
-   private Map additionalProperties;
+   public WorldServer world;
 
    protected WorldInfo() {
    }
@@ -92,17 +97,17 @@ public class WorldInfo {
 
       this.randomSeed = var1.getLong("RandomSeed");
       if (var1.hasKey("generatorName", 8)) {
-         String var5 = var1.getString("generatorName");
-         this.terrainType = WorldType.parseWorldType(var5);
+         String var3 = var1.getString("generatorName");
+         this.terrainType = WorldType.parseWorldType(var3);
          if (this.terrainType == null) {
             this.terrainType = WorldType.DEFAULT;
          } else if (this.terrainType.isVersioned()) {
-            int var3 = 0;
+            int var4 = 0;
             if (var1.hasKey("generatorVersion", 99)) {
-               var3 = var1.getInteger("generatorVersion");
+               var4 = var1.getInteger("generatorVersion");
             }
 
-            this.terrainType = this.terrainType.getWorldTypeForGeneratorVersion(var3);
+            this.terrainType = this.terrainType.getWorldTypeForGeneratorVersion(var4);
          }
 
          if (var1.hasKey("generatorOptions", 8)) {
@@ -203,10 +208,10 @@ public class WorldInfo {
       }
 
       if (var1.hasKey("DimensionData", 10)) {
-         NBTTagCompound var6 = var1.getCompoundTag("DimensionData");
+         NBTTagCompound var5 = var1.getCompoundTag("DimensionData");
 
-         for(String var4 : var6.getKeySet()) {
-            this.dimensionData.put(DimensionType.getById(Integer.parseInt(var4)), var6.getCompoundTag(var4));
+         for(String var7 : var5.getKeySet()) {
+            this.dimensionData.put(DimensionType.getById(Integer.parseInt(var7)), var5.getCompoundTag(var7));
          }
       }
 
@@ -296,7 +301,7 @@ public class WorldInfo {
       var1.setLong("Time", this.totalTime);
       var1.setLong("DayTime", this.worldTime);
       var1.setLong("SizeOnDisk", this.sizeOnDisk);
-      var1.setLong("LastPlayed", MinecraftServer.getCurrentTimeMillis());
+      var1.setLong("LastPlayed", MinecraftServer.av());
       var1.setString("LevelName", this.levelName);
       var1.setInteger("version", this.saveVersion);
       var1.setInteger("clearWeatherTime", this.cleanWeatherTime);
@@ -359,32 +364,12 @@ public class WorldInfo {
       return this.worldTime;
    }
 
-   @SideOnly(Side.CLIENT)
-   public long getSizeOnDisk() {
-      return this.sizeOnDisk;
-   }
-
    public NBTTagCompound getPlayerNBTTagCompound() {
       return this.playerTag;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setSpawnX(int var1) {
-      this.spawnX = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setSpawnY(int var1) {
-      this.spawnY = var1;
-   }
-
    public void setWorldTotalTime(long var1) {
       this.totalTime = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setSpawnZ(int var1) {
-      this.spawnZ = var1;
    }
 
    public void setWorldTime(long var1) {
@@ -413,11 +398,6 @@ public class WorldInfo {
       this.saveVersion = var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public long getLastTimePlayed() {
-      return this.lastTimePlayed;
-   }
-
    public int getCleanWeatherTime() {
       return this.cleanWeatherTime;
    }
@@ -431,6 +411,17 @@ public class WorldInfo {
    }
 
    public void setThundering(boolean var1) {
+      World var2 = Bukkit.getWorld(this.getWorldName());
+      if (var2 != null) {
+         ThunderChangeEvent var3 = new ThunderChangeEvent(var2, var1);
+         Bukkit.getServer().getPluginManager().callEvent(var3);
+         if (var3.isCancelled()) {
+            return;
+         }
+
+         this.setThunderTime(0);
+      }
+
       this.thundering = var1;
    }
 
@@ -447,6 +438,17 @@ public class WorldInfo {
    }
 
    public void setRaining(boolean var1) {
+      World var2 = Bukkit.getWorld(this.getWorldName());
+      if (var2 != null) {
+         WeatherChangeEvent var3 = new WeatherChangeEvent(var2, var1);
+         Bukkit.getServer().getPluginManager().callEvent(var3);
+         if (var3.isCancelled()) {
+            return;
+         }
+
+         this.setRainTime(0);
+      }
+
       this.raining = var1;
    }
 
@@ -592,6 +594,12 @@ public class WorldInfo {
 
    public void setDifficulty(EnumDifficulty var1) {
       this.difficulty = var1;
+      SPacketServerDifficulty var2 = new SPacketServerDifficulty(this.getDifficulty(), this.isDifficultyLocked());
+
+      for(EntityPlayerMP var4 : this.world.playerEntities) {
+         var4.connection.sendPacket(var2);
+      }
+
    }
 
    public boolean isDifficultyLocked() {
@@ -607,30 +615,54 @@ public class WorldInfo {
          public String call() throws Exception {
             return String.valueOf(WorldInfo.this.getSeed());
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var1.setDetail("Level generator", new ICrashReportDetail() {
          public String call() throws Exception {
             return String.format("ID %02d - %s, ver %d. Features enabled: %b", WorldInfo.this.terrainType.getWorldTypeID(), WorldInfo.this.terrainType.getName(), WorldInfo.this.terrainType.getGeneratorVersion(), WorldInfo.this.mapFeaturesEnabled);
+         }
+
+         public Object call() throws Exception {
+            return this.call();
          }
       });
       var1.setDetail("Level generator options", new ICrashReportDetail() {
          public String call() throws Exception {
             return WorldInfo.this.generatorOptions;
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var1.setDetail("Level spawn location", new ICrashReportDetail() {
          public String call() throws Exception {
             return CrashReportCategory.getCoordinateInfo(WorldInfo.this.spawnX, WorldInfo.this.spawnY, WorldInfo.this.spawnZ);
+         }
+
+         public Object call() throws Exception {
+            return this.call();
          }
       });
       var1.setDetail("Level time", new ICrashReportDetail() {
          public String call() throws Exception {
             return String.format("%d game time, %d day time", WorldInfo.this.totalTime, WorldInfo.this.worldTime);
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var1.setDetail("Level dimension", new ICrashReportDetail() {
          public String call() throws Exception {
             return String.valueOf(WorldInfo.this.dimension);
+         }
+
+         public Object call() throws Exception {
+            return this.call();
          }
       });
       var1.setDetail("Level storage version", new ICrashReportDetail() {
@@ -645,34 +677,35 @@ public class WorldInfo {
                case 19133:
                   var1 = "Anvil";
                }
-            } catch (Throwable var3) {
+            } catch (Throwable var2) {
                ;
             }
 
             return String.format("0x%05X - %s", WorldInfo.this.saveVersion, var1);
+         }
+
+         public Object call() throws Exception {
+            return this.call();
          }
       });
       var1.setDetail("Level weather", new ICrashReportDetail() {
          public String call() throws Exception {
             return String.format("Rain time: %d (now: %b), thunder time: %d (now: %b)", WorldInfo.this.rainTime, WorldInfo.this.raining, WorldInfo.this.thunderTime, WorldInfo.this.thundering);
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var1.setDetail("Level game mode", new ICrashReportDetail() {
          public String call() throws Exception {
             return String.format("Game mode: %s (ID %d). Hardcore: %b. Cheats: %b", WorldInfo.this.theGameType.getName(), WorldInfo.this.theGameType.getID(), WorldInfo.this.hardcore, WorldInfo.this.allowCommands);
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
-   }
-
-   public void setAdditionalProperties(Map var1) {
-      if (this.additionalProperties == null) {
-         this.additionalProperties = var1;
-      }
-
-   }
-
-   public NBTBase getAdditionalProperty(String var1) {
-      return this.additionalProperties != null ? (NBTBase)this.additionalProperties.get(var1) : null;
    }
 
    public NBTTagCompound getDimensionData(DimensionType var1) {
@@ -684,18 +717,10 @@ public class WorldInfo {
       this.dimensionData.put(var1, var2);
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getVersionId() {
-      return this.versionId;
-   }
+   public void checkName(String var1) {
+      if (!this.levelName.equals(var1)) {
+         this.levelName = var1;
+      }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isVersionSnapshot() {
-      return this.versionSnapshot;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getVersionName() {
-      return this.versionName;
    }
 }

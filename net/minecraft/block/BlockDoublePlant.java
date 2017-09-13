@@ -1,7 +1,5 @@
 package net.minecraft.block;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
@@ -9,7 +7,6 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -24,11 +21,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IShearable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockDoublePlant extends BlockBush implements IGrowable, IShearable {
+public class BlockDoublePlant extends BlockBush implements IGrowable {
    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockDoublePlant.EnumPlantType.class);
    public static final PropertyEnum HALF = PropertyEnum.create("half", BlockDoublePlant.EnumBlockHalf.class);
    public static final PropertyEnum FACING = BlockHorizontal.FACING;
@@ -75,25 +69,22 @@ public class BlockDoublePlant extends BlockBush implements IGrowable, IShearable
          BlockPos var6 = var4 ? var2.down() : var2;
          Object var7 = var4 ? this : var1.getBlockState(var5).getBlock();
          Object var8 = var4 ? var1.getBlockState(var6).getBlock() : this;
-         if (!var4) {
-            this.dropBlockAsItem(var1, var2, var3, 0);
-         }
-
          if (var7 == this) {
             var1.setBlockState(var5, Blocks.AIR.getDefaultState(), 2);
          }
 
          if (var8 == this) {
             var1.setBlockState(var6, Blocks.AIR.getDefaultState(), 3);
+            if (!var4) {
+               this.dropBlockAsItem(var1, var6, var3, 0);
+            }
          }
-      }
 
+      }
    }
 
    public boolean canBlockStay(World var1, BlockPos var2, IBlockState var3) {
-      if (var3.getBlock() != this) {
-         return super.canBlockStay(var1, var2, var3);
-      } else if (var3.getValue(HALF) == BlockDoublePlant.EnumBlockHalf.UPPER) {
+      if (var3.getValue(HALF) == BlockDoublePlant.EnumBlockHalf.UPPER) {
          return var1.getBlockState(var2.down()).getBlock() == this;
       } else {
          IBlockState var4 = var1.getBlockState(var2.up());
@@ -107,7 +98,13 @@ public class BlockDoublePlant extends BlockBush implements IGrowable, IShearable
          return null;
       } else {
          BlockDoublePlant.EnumPlantType var4 = (BlockDoublePlant.EnumPlantType)var1.getValue(VARIANT);
-         return var4 == BlockDoublePlant.EnumPlantType.FERN ? null : (var4 == BlockDoublePlant.EnumPlantType.GRASS ? (var2.nextInt(8) == 0 ? Items.WHEAT_SEEDS : null) : Item.getItemFromBlock(this));
+         if (var4 == BlockDoublePlant.EnumPlantType.FERN) {
+            return null;
+         } else if (var4 == BlockDoublePlant.EnumPlantType.GRASS) {
+            return var2.nextInt(8) == 0 ? Items.WHEAT_SEEDS : null;
+         } else {
+            return Item.getItemFromBlock(this);
+         }
       }
    }
 
@@ -125,7 +122,9 @@ public class BlockDoublePlant extends BlockBush implements IGrowable, IShearable
    }
 
    public void harvestBlock(World var1, EntityPlayer var2, BlockPos var3, IBlockState var4, @Nullable TileEntity var5, @Nullable ItemStack var6) {
-      super.harvestBlock(var1, var2, var3, var4, var5, var6);
+      if (var1.isRemote || var6 == null || var6.getItem() != Items.SHEARS || var4.getValue(HALF) != BlockDoublePlant.EnumBlockHalf.LOWER || !this.onHarvest(var1, var3, var4, var2)) {
+         super.harvestBlock(var1, var2, var3, var4, var5, var6);
+      }
    }
 
    public void onBlockHarvested(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4) {
@@ -161,16 +160,10 @@ public class BlockDoublePlant extends BlockBush implements IGrowable, IShearable
          return false;
       } else {
          var4.addStat(StatList.getBlockStats(this));
+         int var6 = (var5 == BlockDoublePlant.EnumPlantType.GRASS ? BlockTallGrass.EnumType.GRASS : BlockTallGrass.EnumType.FERN).getMeta();
+         spawnAsEntity(var1, var2, new ItemStack(Blocks.TALLGRASS, 2, var6));
          return true;
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
-      for(BlockDoublePlant.EnumPlantType var7 : BlockDoublePlant.EnumPlantType.values()) {
-         var3.add(new ItemStack(var1, 1, var7.getMeta()));
-      }
-
    }
 
    public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
@@ -211,39 +204,6 @@ public class BlockDoublePlant extends BlockBush implements IGrowable, IShearable
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{HALF, VARIANT, FACING});
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Block.EnumOffsetType getOffsetType() {
-      return Block.EnumOffsetType.XZ;
-   }
-
-   public boolean isShearable(ItemStack var1, IBlockAccess var2, BlockPos var3) {
-      IBlockState var4 = var2.getBlockState(var3);
-      BlockDoublePlant.EnumPlantType var5 = (BlockDoublePlant.EnumPlantType)var4.getValue(VARIANT);
-      return var4.getValue(HALF) == BlockDoublePlant.EnumBlockHalf.LOWER && (var5 == BlockDoublePlant.EnumPlantType.FERN || var5 == BlockDoublePlant.EnumPlantType.GRASS);
-   }
-
-   public List onSheared(ItemStack var1, IBlockAccess var2, BlockPos var3, int var4) {
-      ArrayList var5 = new ArrayList();
-      BlockDoublePlant.EnumPlantType var6 = (BlockDoublePlant.EnumPlantType)var2.getBlockState(var3).getValue(VARIANT);
-      if (var6 == BlockDoublePlant.EnumPlantType.FERN) {
-         var5.add(new ItemStack(Blocks.TALLGRASS, 2, BlockTallGrass.EnumType.FERN.getMeta()));
-      }
-
-      if (var6 == BlockDoublePlant.EnumPlantType.GRASS) {
-         var5.add(new ItemStack(Blocks.TALLGRASS, 2, BlockTallGrass.EnumType.GRASS.getMeta()));
-      }
-
-      return var5;
-   }
-
-   public boolean removedByPlayer(IBlockState var1, World var2, BlockPos var3, EntityPlayer var4, boolean var5) {
-      if (var1.getBlock() == this && var1.getValue(HALF) == BlockDoublePlant.EnumBlockHalf.LOWER && var2.getBlockState(var3.up()).getBlock() == this) {
-         var2.setBlockToAir(var3.up());
-      }
-
-      return var2.setBlockToAir(var3);
    }
 
    public static enum EnumBlockHalf implements IStringSerializable {

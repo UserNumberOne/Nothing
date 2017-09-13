@@ -7,8 +7,6 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketJoinGame implements Packet {
    private int playerId;
@@ -68,45 +66,5 @@ public class SPacketJoinGame implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleJoinGame(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getPlayerId() {
-      return this.playerId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isHardcoreMode() {
-      return this.hardcoreMode;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public GameType getGameType() {
-      return this.gameType;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getDimension() {
-      return this.dimension;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EnumDifficulty getDifficulty() {
-      return this.difficulty;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getMaxPlayers() {
-      return this.maxPlayers;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public WorldType getWorldType() {
-      return this.worldType;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isReducedDebugInfo() {
-      return this.reducedDebugInfo;
    }
 }

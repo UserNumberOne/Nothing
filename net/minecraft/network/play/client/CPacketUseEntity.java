@@ -8,8 +8,6 @@ import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketUseEntity implements Packet {
    private int entityId;
@@ -23,21 +21,6 @@ public class CPacketUseEntity implements Packet {
    public CPacketUseEntity(Entity var1) {
       this.entityId = var1.getEntityId();
       this.action = CPacketUseEntity.Action.ATTACK;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketUseEntity(Entity var1, EnumHand var2) {
-      this.entityId = var1.getEntityId();
-      this.action = CPacketUseEntity.Action.INTERACT;
-      this.hand = var2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketUseEntity(Entity var1, EnumHand var2, Vec3d var3) {
-      this.entityId = var1.getEntityId();
-      this.action = CPacketUseEntity.Action.INTERACT_AT;
-      this.hand = var2;
-      this.hitVec = var3;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {

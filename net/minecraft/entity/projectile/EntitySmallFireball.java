@@ -8,6 +8,9 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
 
 public class EntitySmallFireball extends EntityFireball {
    public EntitySmallFireball(World var1) {
@@ -36,7 +39,11 @@ public class EntitySmallFireball extends EntityFireball {
                boolean var2 = var1.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F);
                if (var2) {
                   this.applyEnchantments(this.shootingEntity, var1.entityHit);
-                  var1.entityHit.setFire(5);
+                  EntityCombustByEntityEvent var3 = new EntityCombustByEntityEvent((Projectile)this.getBukkitEntity(), var1.entityHit.getBukkitEntity(), 5);
+                  var1.entityHit.world.getServer().getPluginManager().callEvent(var3);
+                  if (!var3.isCancelled()) {
+                     var1.entityHit.setFire(var3.getDuration());
+                  }
                }
             }
          } else {
@@ -46,9 +53,9 @@ public class EntitySmallFireball extends EntityFireball {
             }
 
             if (var4) {
-               BlockPos var3 = var1.getBlockPos().offset(var1.sideHit);
-               if (this.world.isAirBlock(var3)) {
-                  this.world.setBlockState(var3, Blocks.FIRE.getDefaultState());
+               BlockPos var5 = var1.getBlockPos().offset(var1.sideHit);
+               if (this.world.isAirBlock(var5) && this.isIncendiary && !CraftEventFactory.callBlockIgniteEvent(this.world, var5.getX(), var5.getY(), var5.getZ(), this).isCancelled()) {
+                  this.world.setBlockState(var5, Blocks.FIRE.getDefaultState());
                }
             }
          }

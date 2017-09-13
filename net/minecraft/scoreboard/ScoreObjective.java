@@ -1,8 +1,5 @@
 package net.minecraft.scoreboard;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 public class ScoreObjective {
    private final Scoreboard theScoreboard;
    private final String name;
@@ -16,11 +13,6 @@ public class ScoreObjective {
       this.objectiveCriteria = var3;
       this.displayName = var2;
       this.renderType = var3.getRenderType();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Scoreboard getScoreboard() {
-      return this.theScoreboard;
    }
 
    public String getName() {

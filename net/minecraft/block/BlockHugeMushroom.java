@@ -183,26 +183,13 @@ public class BlockHugeMushroom extends Block {
          case SOUTH_EAST:
             return var1.withProperty(VARIANT, BlockHugeMushroom.EnumType.SOUTH_WEST);
          }
-      default:
-         return super.withMirror(var1, var2);
       }
+
+      return super.withMirror(var1, var2);
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{VARIANT});
-   }
-
-   public boolean rotateBlock(World var1, BlockPos var2, EnumFacing var3) {
-      IBlockState var4 = var1.getBlockState(var2);
-
-      for(IProperty var6 : var4.getProperties().keySet()) {
-         if (var6.getName().equals("variant")) {
-            var1.setBlockState(var2, var4.cycleProperty(var6));
-            return true;
-         }
-      }
-
-      return false;
    }
 
    public static enum EnumType implements IStringSerializable {

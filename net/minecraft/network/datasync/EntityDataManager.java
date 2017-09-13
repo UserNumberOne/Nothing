@@ -16,8 +16,6 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ReportedException;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -216,43 +214,22 @@ public class EntityDataManager {
    public static List readEntries(PacketBuffer var0) throws IOException {
       ArrayList var1 = null;
 
-      short var2;
-      while((var2 = var0.readUnsignedByte()) != 255) {
+      short var4;
+      while((var4 = var0.readUnsignedByte()) != 255) {
          if (var1 == null) {
             var1 = Lists.newArrayList();
          }
 
-         int var3 = var0.readVarInt();
-         DataSerializer var4 = DataSerializers.getSerializer(var3);
-         if (var4 == null) {
-            throw new DecoderException("Unknown serializer type " + var3);
+         int var2 = var0.readVarInt();
+         DataSerializer var3 = DataSerializers.getSerializer(var2);
+         if (var3 == null) {
+            throw new DecoderException("Unknown serializer type " + var2);
          }
 
-         var1.add(new EntityDataManager.DataEntry(var4.createKey(var2), var4.read(var0)));
+         var1.add(new EntityDataManager.DataEntry(var3.createKey(var4), var3.read(var0)));
       }
 
       return var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setEntryValues(List var1) {
-      this.lock.writeLock().lock();
-
-      for(EntityDataManager.DataEntry var3 : var1) {
-         EntityDataManager.DataEntry var4 = (EntityDataManager.DataEntry)this.entries.get(Integer.valueOf(var3.getKey().getId()));
-         if (var4 != null) {
-            this.setEntryValue(var4, var3);
-            this.entity.notifyDataManagerChange(var3.getKey());
-         }
-      }
-
-      this.lock.writeLock().unlock();
-      this.dirty = true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   protected void setEntryValue(EntityDataManager.DataEntry var1, EntityDataManager.DataEntry var2) {
-      var1.setValue(var2.getValue());
    }
 
    public boolean isEmpty() {

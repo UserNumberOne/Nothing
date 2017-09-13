@@ -12,9 +12,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.local.LocalAddress;
 import io.netty.channel.local.LocalEventLoopGroup;
-import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -22,23 +20,18 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import net.minecraft.client.network.NetHandlerHandshakeMemory;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.network.play.server.SPacketDisconnect;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerHandshakeTCP;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.LazyLoadBase;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,15 +41,30 @@ public class NetworkSystem {
       protected NioEventLoopGroup load() {
          return new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Server IO #%d").setDaemon(true).build());
       }
+
+      // $FF: synthetic method
+      protected Object load() {
+         return this.load();
+      }
    };
    public static final LazyLoadBase SERVER_EPOLL_EVENTLOOP = new LazyLoadBase() {
       protected EpollEventLoopGroup load() {
          return new EpollEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Epoll Server IO #%d").setDaemon(true).build());
       }
+
+      // $FF: synthetic method
+      protected Object load() {
+         return this.load();
+      }
    };
    public static final LazyLoadBase SERVER_LOCAL_EVENTLOOP = new LazyLoadBase() {
       protected LocalEventLoopGroup load() {
          return new LocalEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Local Server IO #%d").setDaemon(true).build());
+      }
+
+      // $FF: synthetic method
+      protected Object load() {
+         return this.load();
       }
    };
    private final MinecraftServer mcServer;
@@ -73,7 +81,7 @@ public class NetworkSystem {
       synchronized(this.endpoints) {
          Class var4;
          LazyLoadBase var5;
-         if (Epoll.isAvailable() && this.mcServer.shouldUseNativeTransport()) {
+         if (Epoll.isAvailable() && this.mcServer.ae()) {
             var4 = EpollServerSocketChannel.class;
             var5 = SERVER_EPOLL_EVENTLOOP;
             LOGGER.info("Using epoll channel type");
@@ -91,7 +99,7 @@ public class NetworkSystem {
                   ;
                }
 
-               var1.pipeline().addLast("timeout", new ReadTimeoutHandler(FMLNetworkHandler.READ_TIMEOUT)).addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this)).addLast("splitter", new NettyVarint21FrameDecoder()).addLast("decoder", new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND)).addLast("prepender", new NettyVarint21FrameEncoder()).addLast("encoder", new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND));
+               var1.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this)).addLast("splitter", new NettyVarint21FrameDecoder()).addLast("decoder", new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND)).addLast("prepender", new NettyVarint21FrameEncoder()).addLast("encoder", new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND));
                NetworkManager var2 = new NetworkManager(EnumPacketDirection.SERVERBOUND);
                NetworkSystem.this.networkManagers.add(var2);
                var1.pipeline().addLast("packet_handler", var2);
@@ -99,24 +107,6 @@ public class NetworkSystem {
             }
          }).group((EventLoopGroup)var5.getValue()).localAddress(var1, var2)).bind().syncUninterruptibly());
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SocketAddress addLocalEndpoint() {
-      ChannelFuture var1;
-      synchronized(this.endpoints) {
-         var1 = ((ServerBootstrap)((ServerBootstrap)(new ServerBootstrap()).channel(LocalServerChannel.class)).childHandler(new ChannelInitializer() {
-            protected void initChannel(Channel var1) throws Exception {
-               NetworkManager var2 = new NetworkManager(EnumPacketDirection.SERVERBOUND);
-               var2.setNetHandler(new NetHandlerHandshakeMemory(NetworkSystem.this.mcServer, var2));
-               NetworkSystem.this.networkManagers.add(var2);
-               var1.pipeline().addLast("packet_handler", var2);
-            }
-         }).group((EventLoopGroup)SERVER_NIO_EVENTLOOP.getValue()).localAddress(LocalAddress.ANY)).bind().syncUninterruptibly();
-         this.endpoints.add(var1);
-      }
-
-      return var1.channel().localAddress();
    }
 
    public void terminateEndpoints() {
@@ -150,6 +140,11 @@ public class NetworkSystem {
                            public String call() throws Exception {
                               return var3.toString();
                            }
+
+                           // $FF: synthetic method
+                           public Object call() throws Exception {
+                              return this.call();
+                           }
                         });
                         throw new ReportedException(var10);
                      }
@@ -173,7 +168,7 @@ public class NetworkSystem {
       }
    }
 
-   public MinecraftServer getServer() {
+   public MinecraftServer d() {
       return this.mcServer;
    }
 }

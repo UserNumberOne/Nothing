@@ -13,14 +13,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityPainting extends EntityHanging {
    public EntityPainting.EnumArt art;
 
    public EntityPainting(World var1) {
       super(var1);
+      this.art = EntityPainting.EnumArt.values()[this.rand.nextInt(EntityPainting.EnumArt.values().length)];
    }
 
    public EntityPainting(World var1, BlockPos var2, EnumFacing var3) {
@@ -37,20 +36,6 @@ public class EntityPainting extends EntityHanging {
 
       if (!var4.isEmpty()) {
          this.art = (EntityPainting.EnumArt)var4.get(this.rand.nextInt(var4.size()));
-      }
-
-      this.updateFacingWithBoundingBox(var3);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EntityPainting(World var1, BlockPos var2, EnumFacing var3, String var4) {
-      this(var1, var2, var3);
-
-      for(EntityPainting.EnumArt var8 : EntityPainting.EnumArt.values()) {
-         if (var8.title.equals(var4)) {
-            this.art = var8;
-            break;
-         }
       }
 
       this.updateFacingWithBoundingBox(var3);
@@ -106,12 +91,6 @@ public class EntityPainting extends EntityHanging {
 
    public void setLocationAndAngles(double var1, double var3, double var5, float var7, float var8) {
       this.setPosition(var1, var3, var5);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setPositionAndRotationDirect(double var1, double var3, double var5, float var7, float var8, int var9, boolean var10) {
-      BlockPos var11 = this.hangingPosition.add(var1 - this.posX, var3 - this.posY, var5 - this.posZ);
-      this.setPosition((double)var11.getX(), (double)var11.getY(), (double)var11.getZ());
    }
 
    public static enum EnumArt {

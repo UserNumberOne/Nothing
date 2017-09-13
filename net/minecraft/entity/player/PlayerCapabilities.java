@@ -1,8 +1,6 @@
 package net.minecraft.entity.player;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class PlayerCapabilities {
    public boolean disableDamage;
@@ -10,8 +8,8 @@ public class PlayerCapabilities {
    public boolean allowFlying;
    public boolean isCreativeMode;
    public boolean allowEdit = true;
-   private float flySpeed = 0.05F;
-   private float walkSpeed = 0.1F;
+   public float flySpeed = 0.05F;
+   public float walkSpeed = 0.1F;
 
    public void writeCapabilitiesToNBT(NBTTagCompound var1) {
       NBTTagCompound var2 = new NBTTagCompound();
@@ -48,17 +46,7 @@ public class PlayerCapabilities {
       return this.flySpeed;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setFlySpeed(float var1) {
-      this.flySpeed = var1;
-   }
-
    public float getWalkSpeed() {
       return this.walkSpeed;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setPlayerWalkSpeed(float var1) {
-      this.walkSpeed = var1;
    }
 }

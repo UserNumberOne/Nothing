@@ -1,15 +1,13 @@
 package net.minecraft.world;
 
 import javax.annotation.Nullable;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ChunkCache implements IBlockAccess {
    protected int chunkX;
@@ -44,11 +42,6 @@ public class ChunkCache implements IBlockAccess {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean extendedLevelsInChunkCache() {
-      return this.hasExtendedLevels;
-   }
-
    @Nullable
    public TileEntity getTileEntity(BlockPos var1) {
       return this.getTileEntity(var1, Chunk.EnumCreateEntityType.IMMEDIATE);
@@ -58,22 +51,7 @@ public class ChunkCache implements IBlockAccess {
    public TileEntity getTileEntity(BlockPos var1, Chunk.EnumCreateEntityType var2) {
       int var3 = (var1.getX() >> 4) - this.chunkX;
       int var4 = (var1.getZ() >> 4) - this.chunkZ;
-      if (var3 >= 0 && var3 < this.chunkArray.length && var4 >= 0 && var4 < this.chunkArray[var3].length) {
-         return this.chunkArray[var3][var4] == null ? null : this.chunkArray[var3][var4].getTileEntity(var1, var2);
-      } else {
-         return null;
-      }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getCombinedLight(BlockPos var1, int var2) {
-      int var3 = this.getLightForExt(EnumSkyBlock.SKY, var1);
-      int var4 = this.getLightForExt(EnumSkyBlock.BLOCK, var1);
-      if (var4 < var2) {
-         var4 = var2;
-      }
-
-      return var3 << 20 | var4 << 4;
+      return this.chunkArray[var3][var4].getTileEntity(var1, var2);
    }
 
    public IBlockState getBlockState(BlockPos var1) {
@@ -91,88 +69,11 @@ public class ChunkCache implements IBlockAccess {
       return Blocks.AIR.getDefaultState();
    }
 
-   @SideOnly(Side.CLIENT)
-   public Biome getBiome(BlockPos var1) {
-      int var2 = (var1.getX() >> 4) - this.chunkX;
-      int var3 = (var1.getZ() >> 4) - this.chunkZ;
-      return this.chunkArray[var2][var3].getBiome(var1, this.world.getBiomeProvider());
-   }
-
-   @SideOnly(Side.CLIENT)
-   private int getLightForExt(EnumSkyBlock var1, BlockPos var2) {
-      if (var1 == EnumSkyBlock.SKY && this.world.provider.hasNoSky()) {
-         return 0;
-      } else if (var2.getY() >= 0 && var2.getY() < 256) {
-         if (this.getBlockState(var2).useNeighborBrightness()) {
-            int var9 = 0;
-
-            for(EnumFacing var7 : EnumFacing.values()) {
-               int var8 = this.getLightFor(var1, var2.offset(var7));
-               if (var8 > var9) {
-                  var9 = var8;
-               }
-
-               if (var9 >= 15) {
-                  return var9;
-               }
-            }
-
-            return var9;
-         } else {
-            int var3 = (var2.getX() >> 4) - this.chunkX;
-            int var4 = (var2.getZ() >> 4) - this.chunkZ;
-            if (var3 >= 0 && var3 < this.chunkArray.length && var4 >= 0 && var4 < this.chunkArray[var3].length) {
-               return this.chunkArray[var3][var4] == null ? var1.defaultLightValue : this.chunkArray[var3][var4].getLightFor(var1, var2);
-            } else {
-               return var1.defaultLightValue;
-            }
-         }
-      } else {
-         return var1.defaultLightValue;
-      }
-   }
-
    public boolean isAirBlock(BlockPos var1) {
-      IBlockState var2 = this.getBlockState(var1);
-      return var2.getBlock().isAir(var2, this, var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getLightFor(EnumSkyBlock var1, BlockPos var2) {
-      if (var2.getY() >= 0 && var2.getY() < 256) {
-         int var3 = (var2.getX() >> 4) - this.chunkX;
-         int var4 = (var2.getZ() >> 4) - this.chunkZ;
-         return var3 >= 0 && var3 < this.chunkArray.length && var4 >= 0 && var4 < this.chunkArray[var3].length ? this.chunkArray[var3][var4].getLightFor(var1, var2) : var1.defaultLightValue;
-      } else {
-         return var1.defaultLightValue;
-      }
+      return this.getBlockState(var1).getMaterial() == Material.AIR;
    }
 
    public int getStrongPower(BlockPos var1, EnumFacing var2) {
       return this.getBlockState(var1).getStrongPower(this, var1, var2);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public WorldType getWorldType() {
-      return this.world.getWorldType();
-   }
-
-   public boolean isSideSolid(BlockPos var1, EnumFacing var2, boolean var3) {
-      int var4 = (var1.getX() >> 4) - this.chunkX;
-      int var5 = (var1.getZ() >> 4) - this.chunkZ;
-      if (var1.getY() >= 0 && var1.getY() < 256) {
-         if (var4 >= 0 && var4 < this.chunkArray.length && var5 >= 0 && var5 < this.chunkArray[var4].length) {
-            if (this.chunkArray[var4][var5] == null) {
-               return var3;
-            } else {
-               IBlockState var6 = this.getBlockState(var1);
-               return var6.getBlock().isSideSolid(var6, this, var1, var2);
-            }
-         } else {
-            return var3;
-         }
-      } else {
-         return var3;
-      }
    }
 }

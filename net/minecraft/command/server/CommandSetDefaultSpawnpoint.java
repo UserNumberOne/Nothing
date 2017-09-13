@@ -8,7 +8,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandSetDefaultSpawnpoint extends CommandBase {
@@ -41,7 +41,7 @@ public class CommandSetDefaultSpawnpoint extends CommandBase {
       notifyCommandListener(var2, this, "commands.setworldspawn.success", new Object[]{var4.getX(), var4.getY(), var4.getZ()});
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       return var3.length > 0 && var3.length <= 3 ? getTabCompletionCoordinate(var3, 0, var4) : Collections.emptyList();
    }
 }

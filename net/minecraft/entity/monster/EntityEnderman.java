@@ -25,6 +25,7 @@ import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.monster.EntityEnderman.AIFindPlayer.1;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
@@ -47,8 +48,8 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.EnderTeleportEvent;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityEnderman extends EntityMob {
    private static final UUID ATTACKING_SPEED_BOOST_ID = UUID.fromString("020E0DFB-87AE-4653-9556-831010E291A0");
@@ -58,6 +59,24 @@ public class EntityEnderman extends EntityMob {
    private static final DataParameter SCREAMING = EntityDataManager.createKey(EntityEnderman.class, DataSerializers.BOOLEAN);
    private int lastCreepySound;
    private int targetChangeTime;
+
+   static {
+      CARRIABLE_BLOCKS.add(Blocks.GRASS);
+      CARRIABLE_BLOCKS.add(Blocks.DIRT);
+      CARRIABLE_BLOCKS.add(Blocks.SAND);
+      CARRIABLE_BLOCKS.add(Blocks.GRAVEL);
+      CARRIABLE_BLOCKS.add(Blocks.YELLOW_FLOWER);
+      CARRIABLE_BLOCKS.add(Blocks.RED_FLOWER);
+      CARRIABLE_BLOCKS.add(Blocks.BROWN_MUSHROOM);
+      CARRIABLE_BLOCKS.add(Blocks.RED_MUSHROOM);
+      CARRIABLE_BLOCKS.add(Blocks.TNT);
+      CARRIABLE_BLOCKS.add(Blocks.CACTUS);
+      CARRIABLE_BLOCKS.add(Blocks.CLAY);
+      CARRIABLE_BLOCKS.add(Blocks.PUMPKIN);
+      CARRIABLE_BLOCKS.add(Blocks.MELON_BLOCK);
+      CARRIABLE_BLOCKS.add(Blocks.MYCELIUM);
+      CARRIABLE_BLOCKS.add(Blocks.NETHERRACK);
+   }
 
    public EntityEnderman(World var1) {
       super(var1);
@@ -80,6 +99,10 @@ public class EntityEnderman extends EntityMob {
          public boolean apply(@Nullable EntityEndermite var1) {
             return var1.isSpawnedByPlayer();
          }
+
+         public boolean apply(Object var1) {
+            return this.apply((EntityEndermite)var1);
+         }
       }));
    }
 
@@ -92,20 +115,29 @@ public class EntityEnderman extends EntityMob {
    }
 
    public void setAttackTarget(@Nullable EntityLivingBase var1) {
-      super.setAttackTarget(var1);
-      IAttributeInstance var2 = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-      if (var1 == null) {
-         this.targetChangeTime = 0;
-         this.dataManager.set(SCREAMING, Boolean.valueOf(false));
-         var2.removeModifier(ATTACKING_SPEED_BOOST);
-      } else {
-         this.targetChangeTime = this.ticksExisted;
-         this.dataManager.set(SCREAMING, Boolean.valueOf(true));
-         if (!var2.hasModifier(ATTACKING_SPEED_BOOST)) {
-            var2.applyModifier(ATTACKING_SPEED_BOOST);
-         }
-      }
+      this.setGoalTarget(var1, TargetReason.UNKNOWN, true);
+   }
 
+   public boolean setGoalTarget(EntityLivingBase var1, TargetReason var2, boolean var3) {
+      if (!super.setGoalTarget(var1, var2, var3)) {
+         return false;
+      } else {
+         var1 = this.getAttackTarget();
+         IAttributeInstance var4 = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+         if (var1 == null) {
+            this.targetChangeTime = 0;
+            this.dataManager.set(SCREAMING, Boolean.valueOf(false));
+            var4.removeModifier(ATTACKING_SPEED_BOOST);
+         } else {
+            this.targetChangeTime = this.ticksExisted;
+            this.dataManager.set(SCREAMING, Boolean.valueOf(true));
+            if (!var4.hasModifier(ATTACKING_SPEED_BOOST)) {
+               var4.applyModifier(ATTACKING_SPEED_BOOST);
+            }
+         }
+
+         return true;
+      }
    }
 
    protected void entityInit() {
@@ -217,26 +249,20 @@ public class EntityEnderman extends EntityMob {
    protected boolean teleportToEntity(Entity var1) {
       Vec3d var2 = new Vec3d(this.posX - var1.posX, this.getEntityBoundingBox().minY + (double)(this.height / 2.0F) - var1.posY + (double)var1.getEyeHeight(), this.posZ - var1.posZ);
       var2 = var2.normalize();
-      double var3 = 16.0D;
-      double var5 = this.posX + (this.rand.nextDouble() - 0.5D) * 8.0D - var2.xCoord * 16.0D;
-      double var7 = this.posY + (double)(this.rand.nextInt(16) - 8) - var2.yCoord * 16.0D;
-      double var9 = this.posZ + (this.rand.nextDouble() - 0.5D) * 8.0D - var2.zCoord * 16.0D;
-      return this.teleportTo(var5, var7, var9);
+      double var3 = this.posX + (this.rand.nextDouble() - 0.5D) * 8.0D - var2.xCoord * 16.0D;
+      double var5 = this.posY + (double)(this.rand.nextInt(16) - 8) - var2.yCoord * 16.0D;
+      double var7 = this.posZ + (this.rand.nextDouble() - 0.5D) * 8.0D - var2.zCoord * 16.0D;
+      return this.teleportTo(var3, var5, var7);
    }
 
    private boolean teleportTo(double var1, double var3, double var5) {
-      EnderTeleportEvent var7 = new EnderTeleportEvent(this, var1, var3, var5, 0.0F);
-      if (MinecraftForge.EVENT_BUS.post(var7)) {
-         return false;
-      } else {
-         boolean var8 = this.attemptTeleport(var7.getTargetX(), var7.getTargetY(), var7.getTargetZ());
-         if (var8) {
-            this.world.playSound((EntityPlayer)null, this.prevPosX, this.prevPosY, this.prevPosZ, SoundEvents.ENTITY_ENDERMEN_TELEPORT, this.getSoundCategory(), 1.0F, 1.0F);
-            this.playSound(SoundEvents.ENTITY_ENDERMEN_TELEPORT, 1.0F, 1.0F);
-         }
-
-         return var8;
+      boolean var7 = this.attemptTeleport(var1, var3, var5);
+      if (var7) {
+         this.world.playSound((EntityPlayer)null, this.prevPosX, this.prevPosY, this.prevPosZ, SoundEvents.ENTITY_ENDERMEN_TELEPORT, this.getSoundCategory(), 1.0F, 1.0F);
+         this.playSound(SoundEvents.ENTITY_ENDERMEN_TELEPORT, 1.0F, 1.0F);
       }
+
+      return var7;
    }
 
    protected SoundEvent getAmbientSound() {
@@ -281,57 +307,26 @@ public class EntityEnderman extends EntityMob {
    public boolean attackEntityFrom(DamageSource var1, float var2) {
       if (this.isEntityInvulnerable(var1)) {
          return false;
-      } else if (var1 instanceof EntityDamageSourceIndirect) {
-         for(int var4 = 0; var4 < 64; ++var4) {
+      } else if (!(var1 instanceof EntityDamageSourceIndirect)) {
+         boolean var4 = super.attackEntityFrom(var1, var2);
+         if (var1.isUnblockable() && this.rand.nextInt(10) != 0) {
+            this.teleportRandomly();
+         }
+
+         return var4;
+      } else {
+         for(int var3 = 0; var3 < 64; ++var3) {
             if (this.teleportRandomly()) {
                return true;
             }
          }
 
          return false;
-      } else {
-         boolean var3 = super.attackEntityFrom(var1, var2);
-         if (var1.isUnblockable() && this.rand.nextInt(10) != 0) {
-            this.teleportRandomly();
-         }
-
-         return var3;
       }
-   }
-
-   public static void setCarriable(Block var0, boolean var1) {
-      if (var1) {
-         CARRIABLE_BLOCKS.add(var0);
-      } else {
-         CARRIABLE_BLOCKS.remove(var0);
-      }
-
-   }
-
-   public static boolean getCarriable(Block var0) {
-      return CARRIABLE_BLOCKS.contains(var0);
    }
 
    public boolean isScreaming() {
       return ((Boolean)this.dataManager.get(SCREAMING)).booleanValue();
-   }
-
-   static {
-      CARRIABLE_BLOCKS.add(Blocks.GRASS);
-      CARRIABLE_BLOCKS.add(Blocks.DIRT);
-      CARRIABLE_BLOCKS.add(Blocks.SAND);
-      CARRIABLE_BLOCKS.add(Blocks.GRAVEL);
-      CARRIABLE_BLOCKS.add(Blocks.YELLOW_FLOWER);
-      CARRIABLE_BLOCKS.add(Blocks.RED_FLOWER);
-      CARRIABLE_BLOCKS.add(Blocks.BROWN_MUSHROOM);
-      CARRIABLE_BLOCKS.add(Blocks.RED_MUSHROOM);
-      CARRIABLE_BLOCKS.add(Blocks.TNT);
-      CARRIABLE_BLOCKS.add(Blocks.CACTUS);
-      CARRIABLE_BLOCKS.add(Blocks.CLAY);
-      CARRIABLE_BLOCKS.add(Blocks.PUMPKIN);
-      CARRIABLE_BLOCKS.add(Blocks.MELON_BLOCK);
-      CARRIABLE_BLOCKS.add(Blocks.MYCELIUM);
-      CARRIABLE_BLOCKS.add(Blocks.NETHERRACK);
    }
 
    static class AIFindPlayer extends EntityAINearestAttackableTarget {
@@ -347,11 +342,7 @@ public class EntityEnderman extends EntityMob {
 
       public boolean shouldExecute() {
          double var1 = this.getTargetDistance();
-         this.player = this.enderman.world.getNearestAttackablePlayer(this.enderman.posX, this.enderman.posY, this.enderman.posZ, var1, var1, (Function)null, new Predicate() {
-            public boolean apply(@Nullable EntityPlayer var1) {
-               return var1 != null && AIFindPlayer.this.enderman.shouldAttackPlayer(var1);
-            }
-         });
+         this.player = this.enderman.world.getNearestAttackablePlayer(this.enderman.posX, this.enderman.posY, this.enderman.posZ, var1, var1, (Function)null, new 1(this));
          return this.player != null;
       }
 
@@ -402,6 +393,11 @@ public class EntityEnderman extends EntityMob {
          }
 
       }
+
+      // $FF: synthetic method
+      static EntityEnderman access$0(EntityEnderman.AIFindPlayer var0) {
+         return var0.enderman;
+      }
    }
 
    static class AIPlaceBlock extends EntityAIBase {
@@ -425,7 +421,7 @@ public class EntityEnderman extends EntityMob {
          IBlockState var7 = var2.getBlockState(var6);
          IBlockState var8 = var2.getBlockState(var6.down());
          IBlockState var9 = this.enderman.getHeldBlockState();
-         if (var9 != null && this.canPlaceBlock(var2, var6, var9.getBlock(), var7, var8)) {
+         if (var9 != null && this.canPlaceBlock(var2, var6, var9.getBlock(), var7, var8) && !CraftEventFactory.callEntityChangeBlockEvent(this.enderman, var6, this.enderman.getHeldBlockState().getBlock(), this.enderman.getHeldBlockState().getBlock().getMetaFromState(this.enderman.getHeldBlockState())).isCancelled()) {
             var2.setBlockState(var6, var9, 3);
             this.enderman.setHeldBlockState((IBlockState)null);
          }
@@ -459,7 +455,7 @@ public class EntityEnderman extends EntityMob {
          Block var8 = var7.getBlock();
          RayTraceResult var9 = var2.rayTraceBlocks(new Vec3d((double)((float)MathHelper.floor(this.enderman.posX) + 0.5F), (double)((float)var4 + 0.5F), (double)((float)MathHelper.floor(this.enderman.posZ) + 0.5F)), new Vec3d((double)((float)var3 + 0.5F), (double)((float)var4 + 0.5F), (double)((float)var5 + 0.5F)), false, true, false);
          boolean var10 = var9 != null && var9.getBlockPos().equals(var6);
-         if (EntityEnderman.CARRIABLE_BLOCKS.contains(var8) && var10) {
+         if (EntityEnderman.CARRIABLE_BLOCKS.contains(var8) && var10 && !CraftEventFactory.callEntityChangeBlockEvent(this.enderman, this.enderman.world.getWorld().getBlockAt(var6.getX(), var6.getY(), var6.getZ()), org.bukkit.Material.AIR).isCancelled()) {
             this.enderman.setHeldBlockState(var7);
             var2.setBlockToAir(var6);
          }

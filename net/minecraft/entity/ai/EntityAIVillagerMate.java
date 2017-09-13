@@ -1,13 +1,14 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntityAIVillagerMate extends EntityAIBase {
    private final EntityVillager villagerObj;
@@ -86,17 +87,15 @@ public class EntityAIVillagerMate extends EntityAIBase {
 
    private void giveBirth() {
       EntityVillager var1 = this.villagerObj.createChild(this.mate);
-      this.mate.setGrowingAge(6000);
-      this.villagerObj.setGrowingAge(6000);
-      this.mate.setIsWillingToMate(false);
-      this.villagerObj.setIsWillingToMate(false);
-      BabyEntitySpawnEvent var2 = new BabyEntitySpawnEvent(this.villagerObj, this.mate, var1);
-      if (!MinecraftForge.EVENT_BUS.post(var2) && var2.getChild() != null) {
-         EntityAgeable var3 = var2.getChild();
-         var3.setGrowingAge(-24000);
-         var3.setLocationAndAngles(this.villagerObj.posX, this.villagerObj.posY, this.villagerObj.posZ, 0.0F, 0.0F);
-         this.world.spawnEntity(var3);
-         this.world.setEntityState(var3, (byte)12);
+      if (!CraftEventFactory.callEntityBreedEvent(var1, this.villagerObj, this.mate, (EntityLivingBase)null, (ItemStack)null, 0).isCancelled()) {
+         this.mate.setGrowingAge(6000);
+         this.villagerObj.setGrowingAge(6000);
+         this.mate.setIsWillingToMate(false);
+         this.villagerObj.setIsWillingToMate(false);
+         var1.setGrowingAge(-24000);
+         var1.setLocationAndAngles(this.villagerObj.posX, this.villagerObj.posY, this.villagerObj.posZ, 0.0F, 0.0F);
+         this.world.addEntity(var1, SpawnReason.BREEDING);
+         this.world.setEntityState(var1, (byte)12);
       }
    }
 }

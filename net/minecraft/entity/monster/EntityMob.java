@@ -20,6 +20,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import org.bukkit.Bukkit;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
 
 public abstract class EntityMob extends EntityCreature implements IMob {
    public EntityMob(World var1) {
@@ -95,18 +97,22 @@ public abstract class EntityMob extends EntityCreature implements IMob {
 
          int var5 = EnchantmentHelper.getFireAspectModifier(this);
          if (var5 > 0) {
-            var1.setFire(var5 * 4);
+            EntityCombustByEntityEvent var6 = new EntityCombustByEntityEvent(this.getBukkitEntity(), var1.getBukkitEntity(), var5 * 4);
+            Bukkit.getPluginManager().callEvent(var6);
+            if (!var6.isCancelled()) {
+               var1.setFire(var6.getDuration());
+            }
          }
 
          if (var1 instanceof EntityPlayer) {
-            EntityPlayer var6 = (EntityPlayer)var1;
+            EntityPlayer var10 = (EntityPlayer)var1;
             ItemStack var7 = this.getHeldItemMainhand();
-            ItemStack var8 = var6.isHandActive() ? var6.getActiveItemStack() : null;
+            ItemStack var8 = var10.isHandActive() ? var10.getActiveItemStack() : null;
             if (var7 != null && var8 != null && var7.getItem() instanceof ItemAxe && var8.getItem() == Items.SHIELD) {
                float var9 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier(this) * 0.05F;
                if (this.rand.nextFloat() < var9) {
-                  var6.getCooldownTracker().setCooldown(Items.SHIELD, 100);
-                  this.world.setEntityState(var6, (byte)30);
+                  var10.getCooldownTracker().setCooldown(Items.SHIELD, 100);
+                  this.world.setEntityState(var10, (byte)30);
                }
             }
          }

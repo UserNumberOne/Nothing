@@ -37,6 +37,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntityPig extends EntityAnimal {
    private static final DataParameter SADDLED = EntityDataManager.createKey(EntityPig.class, DataSerializers.BOOLEAN);
@@ -166,6 +168,10 @@ public class EntityPig extends EntityAnimal {
    public void onStruckByLightning(EntityLightningBolt var1) {
       if (!this.world.isRemote && !this.isDead) {
          EntityPigZombie var2 = new EntityPigZombie(this.world);
+         if (CraftEventFactory.callPigZapEvent(this, var1, var2).isCancelled()) {
+            return;
+         }
+
          var2.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
          var2.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
          var2.setNoAI(this.isAIDisabled());
@@ -174,7 +180,7 @@ public class EntityPig extends EntityAnimal {
             var2.setAlwaysRenderNameTag(this.getAlwaysRenderNameTag());
          }
 
-         this.world.spawnEntity(var2);
+         this.world.addEntity(var2, SpawnReason.LIGHTNING);
          this.setDead();
       }
 
@@ -220,14 +226,14 @@ public class EntityPig extends EntityAnimal {
          }
 
          this.prevLimbSwingAmount = this.limbSwingAmount;
-         double var9 = this.posX - this.prevPosX;
-         double var6 = this.posZ - this.prevPosZ;
-         float var8 = MathHelper.sqrt(var9 * var9 + var6 * var6) * 4.0F;
-         if (var8 > 1.0F) {
-            var8 = 1.0F;
+         double var5 = this.posX - this.prevPosX;
+         double var7 = this.posZ - this.prevPosZ;
+         float var9 = MathHelper.sqrt(var5 * var5 + var7 * var7) * 4.0F;
+         if (var9 > 1.0F) {
+            var9 = 1.0F;
          }
 
-         this.limbSwingAmount += (var8 - this.limbSwingAmount) * 0.4F;
+         this.limbSwingAmount += (var9 - this.limbSwingAmount) * 0.4F;
          this.limbSwing += this.limbSwingAmount;
       } else {
          this.stepHeight = 0.5F;
@@ -254,5 +260,9 @@ public class EntityPig extends EntityAnimal {
 
    public boolean isBreedingItem(@Nullable ItemStack var1) {
       return var1 != null && TEMPTATION_ITEMS.contains(var1.getItem());
+   }
+
+   public EntityAgeable createChild(EntityAgeable var1) {
+      return this.createChild(var1);
    }
 }

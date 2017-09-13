@@ -11,15 +11,17 @@ import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.ChunkProviderServer;
 
 public class CommandSpreadPlayers extends CommandBase {
    public String getName() {
@@ -38,40 +40,42 @@ public class CommandSpreadPlayers extends CommandBase {
       if (var3.length < 6) {
          throw new WrongUsageException("commands.spreadplayers.usage", new Object[0]);
       } else {
-         int var4 = 0;
+         byte var4 = 0;
          BlockPos var5 = var2.getPosition();
-         double var6 = parseDouble((double)var5.getX(), var3[var4++], true);
-         double var8 = parseDouble((double)var5.getZ(), var3[var4++], true);
-         double var10 = parseDouble(var3[var4++], 0.0D);
-         double var12 = parseDouble(var3[var4++], var10 + 1.0D);
-         boolean var14 = parseBoolean(var3[var4++]);
-         ArrayList var15 = Lists.newArrayList();
+         double var6 = (double)var5.getX();
+         int var8 = var4 + 1;
+         double var9 = parseDouble(var6, var3[var4], true);
+         double var11 = parseDouble((double)var5.getZ(), var3[var8++], true);
+         double var13 = parseDouble(var3[var8++], 0.0D);
+         double var15 = parseDouble(var3[var8++], var13 + 1.0D);
+         boolean var17 = parseBoolean(var3[var8++]);
+         ArrayList var18 = Lists.newArrayList();
 
-         while(var4 < var3.length) {
-            String var16 = var3[var4++];
-            if (EntitySelector.hasArguments(var16)) {
-               List var17 = EntitySelector.matchEntities(var2, var16, Entity.class);
-               if (var17.isEmpty()) {
+         while(var8 < var3.length) {
+            String var19 = var3[var8++];
+            if (EntitySelector.hasArguments(var19)) {
+               List var20 = EntitySelector.matchEntities(var2, var19, Entity.class);
+               if (var20.isEmpty()) {
                   throw new EntityNotFoundException();
                }
 
-               var15.addAll(var17);
+               var18.addAll(var20);
             } else {
-               EntityPlayerMP var23 = var1.getPlayerList().getPlayerByUsername(var16);
-               if (var23 == null) {
+               EntityPlayerMP var25 = var1.getPlayerList().getPlayerByUsername(var19);
+               if (var25 == null) {
                   throw new PlayerNotFoundException();
                }
 
-               var15.add(var23);
+               var18.add(var25);
             }
          }
 
-         var2.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, var15.size());
-         if (var15.isEmpty()) {
+         var2.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, var18.size());
+         if (var18.isEmpty()) {
             throw new EntityNotFoundException();
          } else {
-            var2.sendMessage(new TextComponentTranslation("commands.spreadplayers.spreading." + (var14 ? "teams" : "players"), new Object[]{var15.size(), var12, var6, var8, var10}));
-            this.spread(var2, var15, new CommandSpreadPlayers.Position(var6, var8), var10, var12, ((Entity)var15.get(0)).world, var14);
+            var2.sendMessage(new TextComponentTranslation("commands.spreadplayers.spreading." + (var17 ? "teams" : "players"), new Object[]{var18.size(), var15, var9, var11, var13}));
+            this.spread(var2, var18, new CommandSpreadPlayers.Position(var9, var11), var13, var15, ((Entity)var18.get(0)).world, var17);
          }
       }
    }
@@ -99,7 +103,7 @@ public class CommandSpreadPlayers extends CommandBase {
          if (var4 instanceof EntityPlayer) {
             var2.add(((EntityPlayer)var4).getTeam());
          } else {
-            var2.add((Team)null);
+            var2.add((Object)null);
          }
       }
 
@@ -136,8 +140,8 @@ public class CommandSpreadPlayers extends CommandBase {
             if (var22 > 0) {
                var23.x /= (double)var22;
                var23.z /= (double)var22;
-               double var32 = (double)var23.getLength();
-               if (var32 > 0.0D) {
+               double var28 = (double)var23.getLength();
+               if (var28 > 0.0D) {
                   var23.normalize();
                   var21.moveAway(var23);
                } else {
@@ -153,9 +157,9 @@ public class CommandSpreadPlayers extends CommandBase {
          }
 
          if (!var16) {
-            for(CommandSpreadPlayers.Position var31 : var14) {
-               if (!var31.isSafe(var4)) {
-                  var31.randomize(var5, var6, var8, var10, var12);
+            for(CommandSpreadPlayers.Position var33 : var14) {
+               if (!var33.isSafe(var4)) {
+                  var33.randomize(var5, var6, var8, var10, var12);
                   var16 = true;
                }
             }
@@ -176,29 +180,29 @@ public class CommandSpreadPlayers extends CommandBase {
 
       for(int var9 = 0; var9 < var1.size(); ++var9) {
          Entity var10 = (Entity)var1.get(var9);
-         CommandSpreadPlayers.Position var11;
+         CommandSpreadPlayers.Position var12;
          if (var4) {
-            Team var12 = var10 instanceof EntityPlayer ? ((EntityPlayer)var10).getTeam() : null;
-            if (!var8.containsKey(var12)) {
-               var8.put(var12, var3[var7++]);
+            Team var11 = var10 instanceof EntityPlayer ? ((EntityPlayer)var10).getTeam() : null;
+            if (!var8.containsKey(var11)) {
+               var8.put(var11, var3[var7++]);
             }
 
-            var11 = (CommandSpreadPlayers.Position)var8.get(var12);
+            var12 = (CommandSpreadPlayers.Position)var8.get(var11);
          } else {
-            var11 = var3[var7++];
+            var12 = var3[var7++];
          }
 
-         var10.setPositionAndUpdate((double)((float)MathHelper.floor(var11.x) + 0.5F), (double)var11.getSpawnY(var2), (double)MathHelper.floor(var11.z) + 0.5D);
-         double var21 = Double.MAX_VALUE;
+         var10.setPositionAndUpdate((double)((float)MathHelper.floor(var12.x) + 0.5F), (double)var12.getSpawnY(var2), (double)MathHelper.floor(var12.z) + 0.5D);
+         double var13 = Double.MAX_VALUE;
 
-         for(CommandSpreadPlayers.Position var17 : var3) {
-            if (var11 != var17) {
-               double var18 = var11.dist(var17);
-               var21 = Math.min(var18, var21);
+         for(CommandSpreadPlayers.Position var18 : var3) {
+            if (var12 != var18) {
+               double var19 = var12.dist(var18);
+               var13 = Math.min(var19, var13);
             }
          }
 
-         var5 += var21;
+         var5 += var13;
       }
 
       var5 = var5 / (double)var1.size();
@@ -217,8 +221,12 @@ public class CommandSpreadPlayers extends CommandBase {
       return var11;
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       return var3.length >= 1 && var3.length <= 2 ? getTabCompletionCoordinateXZ(var3, 0, var4) : Collections.emptyList();
+   }
+
+   public int compareTo(ICommand var1) {
+      return this.compareTo(var1);
    }
 
    static class Position {
@@ -280,7 +288,7 @@ public class CommandSpreadPlayers extends CommandBase {
 
          while(var2.getY() > 0) {
             var2 = var2.down();
-            if (var1.getBlockState(var2).getMaterial() != Material.AIR) {
+            if (getType(var1, var2).getMaterial() != Material.AIR) {
                return var2.getY() + 1;
             }
          }
@@ -293,9 +301,13 @@ public class CommandSpreadPlayers extends CommandBase {
 
          while(var2.getY() > 0) {
             var2 = var2.down();
-            Material var3 = var1.getBlockState(var2).getMaterial();
+            Material var3 = getType(var1, var2).getMaterial();
             if (var3 != Material.AIR) {
-               return !var3.isLiquid() && var3 != Material.FIRE;
+               if (!var3.isLiquid() && var3 != Material.FIRE) {
+                  return true;
+               }
+
+               return false;
             }
          }
 
@@ -305,6 +317,11 @@ public class CommandSpreadPlayers extends CommandBase {
       public void randomize(Random var1, double var2, double var4, double var6, double var8) {
          this.x = MathHelper.nextDouble(var1, var2, var6);
          this.z = MathHelper.nextDouble(var1, var4, var8);
+      }
+
+      private static IBlockState getType(World var0, BlockPos var1) {
+         ((ChunkProviderServer)var0.chunkProvider).provideChunk(var1.getX() >> 4, var1.getZ() >> 4);
+         return var0.getBlockState(var1);
       }
    }
 }

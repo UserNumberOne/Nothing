@@ -8,13 +8,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockMobSpawner extends BlockContainer {
    protected BlockMobSpawner() {
@@ -38,8 +34,9 @@ public class BlockMobSpawner extends BlockContainer {
       super.dropBlockAsItemWithChance(var1, var2, var3, var4, var5);
    }
 
-   public int getExpDrop(IBlockState var1, IBlockAccess var2, BlockPos var3, int var4) {
-      return 15 + RANDOM.nextInt(15) + RANDOM.nextInt(15);
+   public int getExpDrop(World var1, IBlockState var2, int var3) {
+      int var4 = 15 + var1.rand.nextInt(15) + var1.rand.nextInt(15);
+      return var4;
    }
 
    public boolean isOpaqueCube(IBlockState var1) {
@@ -53,10 +50,5 @@ public class BlockMobSpawner extends BlockContainer {
    @Nullable
    public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
       return null;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 }

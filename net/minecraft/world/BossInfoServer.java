@@ -1,6 +1,5 @@
 package net.minecraft.world;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +12,7 @@ import net.minecraft.util.text.ITextComponent;
 public class BossInfoServer extends BossInfo {
    private final Set players = Sets.newHashSet();
    private final Set readOnlyPlayers;
-   private boolean visible;
+   public boolean visible;
 
    public BossInfoServer(ITextComponent var1, BossInfo.Color var2, BossInfo.Overlay var3) {
       super(MathHelper.getRandomUUID(), var1, var2, var3);
@@ -25,22 +24,6 @@ public class BossInfoServer extends BossInfo {
       if (var1 != this.percent) {
          super.setPercent(var1);
          this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_PCT);
-      }
-
-   }
-
-   public void setColor(BossInfo.Color var1) {
-      if (var1 != this.color) {
-         super.setColor(var1);
-         this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
-      }
-
-   }
-
-   public void setOverlay(BossInfo.Overlay var1) {
-      if (var1 != this.overlay) {
-         super.setOverlay(var1);
-         this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
       }
 
    }
@@ -72,15 +55,7 @@ public class BossInfoServer extends BossInfo {
       return this;
    }
 
-   public void setName(ITextComponent var1) {
-      if (!Objects.equal(var1, this.name)) {
-         super.setName(var1);
-         this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_NAME);
-      }
-
-   }
-
-   private void sendUpdate(SPacketUpdateBossInfo.Operation var1) {
+   public void sendUpdate(SPacketUpdateBossInfo.Operation var1) {
       if (this.visible) {
          SPacketUpdateBossInfo var2 = new SPacketUpdateBossInfo(var1, this);
 

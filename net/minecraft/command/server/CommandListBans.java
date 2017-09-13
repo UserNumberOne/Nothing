@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -20,8 +20,8 @@ public class CommandListBans extends CommandBase {
       return 3;
    }
 
-   public boolean checkPermission(MinecraftServer var1, ICommandSender var2) {
-      return (var1.getPlayerList().getBannedIPs().isLanServer() || var1.getPlayerList().getBannedPlayers().isLanServer()) && super.checkPermission(var1, var2);
+   public boolean canUse(MinecraftServer var1, ICommandSender var2) {
+      return (var1.getPlayerList().getBannedIPs().isLanServer() || var1.getPlayerList().getBannedPlayers().isLanServer()) && super.canUse(var1, var2);
    }
 
    public String getUsage(ICommandSender var1) {
@@ -39,7 +39,7 @@ public class CommandListBans extends CommandBase {
 
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, new String[]{"players", "ips"}) : Collections.emptyList();
    }
 }

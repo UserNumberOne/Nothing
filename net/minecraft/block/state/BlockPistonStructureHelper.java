@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.material.EnumPushReaction;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -60,7 +61,7 @@ public class BlockPistonStructureHelper {
    private boolean addBlockLine(BlockPos var1) {
       IBlockState var2 = this.world.getBlockState(var1);
       Block var3 = var2.getBlock();
-      if (var2.getBlock().isAir(var2, this.world, var1)) {
+      if (var2.getMaterial() == Material.AIR) {
          return true;
       } else if (!BlockPistonBase.canPush(var2, this.world, var1, this.moveDirection, false)) {
          return true;
@@ -77,7 +78,7 @@ public class BlockPistonStructureHelper {
                BlockPos var5 = var1.offset(this.moveDirection.getOpposite(), var4);
                var2 = this.world.getBlockState(var5);
                var3 = var2.getBlock();
-               if (var2.getBlock().isAir(var2, this.world, var5) || !BlockPistonBase.canPush(var2, this.world, var5, this.moveDirection, false) || var5.equals(this.pistonPos)) {
+               if (var2.getMaterial() == Material.AIR || !BlockPistonBase.canPush(var2, this.world, var5, this.moveDirection, false) || var5.equals(this.pistonPos)) {
                   break;
                }
 
@@ -113,7 +114,7 @@ public class BlockPistonStructureHelper {
                }
 
                var2 = this.world.getBlockState(var7);
-               if (var2.getBlock().isAir(var2, this.world, var7)) {
+               if (var2.getMaterial() == Material.AIR) {
                   return true;
                }
 

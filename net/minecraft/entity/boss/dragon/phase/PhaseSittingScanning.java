@@ -22,11 +22,11 @@ public class PhaseSittingScanning extends PhaseSittingBase {
             Vec3d var2 = (new Vec3d(var1.posX - this.dragon.posX, 0.0D, var1.posZ - this.dragon.posZ)).normalize();
             Vec3d var3 = (new Vec3d((double)MathHelper.sin(this.dragon.rotationYaw * 0.017453292F), 0.0D, (double)(-MathHelper.cos(this.dragon.rotationYaw * 0.017453292F)))).normalize();
             float var4 = (float)var3.dotProduct(var2);
-            float var5 = (float)(Math.acos((double)var4) * 57.29577951308232D) + 0.5F;
+            float var5 = (float)(Math.acos((double)var4) * 57.2957763671875D) + 0.5F;
             if (var5 < 0.0F || var5 > 10.0F) {
                double var6 = var1.posX - this.dragon.dragonPartHead.posX;
                double var8 = var1.posZ - this.dragon.dragonPartHead.posZ;
-               double var10 = MathHelper.clamp(MathHelper.wrapDegrees(180.0D - MathHelper.atan2(var6, var8) * 57.29577951308232D - (double)this.dragon.rotationYaw), -100.0D, 100.0D);
+               double var10 = MathHelper.clamp(MathHelper.wrapDegrees(180.0D - MathHelper.atan2(var6, var8) * 57.2957763671875D - (double)this.dragon.rotationYaw), -100.0D, 100.0D);
                this.dragon.randomYawVelocity *= 0.8F;
                float var12 = MathHelper.sqrt(var6 * var6 + var8 * var8) + 1.0F;
                float var13 = var12;

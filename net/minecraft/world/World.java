@@ -3,14 +3,14 @@ package net.minecraft.world;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -23,19 +23,25 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.monster.EntityGolem;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.pathfinding.PathWorldListener;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
@@ -47,41 +53,38 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.VillageCollection;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.world.storage.loot.LootTableManager;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.ForgeModContainer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityDispatcher;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.common.util.WorldCapabilityData;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
-import net.minecraftforge.event.world.GetCollisionBoxesEvent;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Bukkit;
+import org.bukkit.World.Environment;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.block.CraftBlockState;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.entity.Projectile;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.block.BlockCanBuildEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.generator.ChunkGenerator;
 
-public abstract class World implements IBlockAccess, ICapabilityProvider {
-   public static double MAX_ENTITY_RADIUS = 2.0D;
+public abstract class World implements IBlockAccess {
    private int seaLevel = 63;
    protected boolean scheduledUpdatesAreImmediate;
    public final List loadedEntityList = Lists.newArrayList();
@@ -97,39 +100,71 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    private int skylightSubtracted;
    protected int updateLCG = (new Random()).nextInt();
    protected final int DIST_HASH_MAGIC = 1013904223;
-   public float prevRainingStrength;
-   public float rainingStrength;
-   public float prevThunderingStrength;
-   public float thunderingStrength;
+   protected float prevRainingStrength;
+   protected float rainingStrength;
+   protected float prevThunderingStrength;
+   protected float thunderingStrength;
    private int lastLightningBolt;
    public final Random rand = new Random();
-   public final WorldProvider provider;
+   public WorldProvider provider;
    protected PathWorldListener pathListener = new PathWorldListener();
    protected List eventListeners;
    protected IChunkProvider chunkProvider;
    protected final ISaveHandler saveHandler;
-   protected WorldInfo worldInfo;
+   public WorldInfo worldInfo;
    protected boolean findingSpawnPoint;
-   protected MapStorage mapStorage;
-   public VillageCollection villageCollectionObj;
+   public MapStorage mapStorage;
+   protected VillageCollection villageCollectionObj;
    protected LootTableManager lootTable;
    public final Profiler theProfiler;
    private final Calendar theCalendar;
-   protected Scoreboard worldScoreboard;
+   public Scoreboard worldScoreboard;
    public final boolean isRemote;
-   protected boolean spawnHostileMobs;
-   protected boolean spawnPeacefulMobs;
+   public boolean spawnHostileMobs;
+   public boolean spawnPeacefulMobs;
    private boolean processingLoadedTiles;
    private final WorldBorder worldBorder;
    int[] lightUpdateBlockList;
-   public boolean restoringBlockSnapshots = false;
-   public boolean captureBlockSnapshots = false;
-   public ArrayList capturedBlockSnapshots = new ArrayList();
-   private CapabilityDispatcher capabilities;
-   private WorldCapabilityData capabilityData;
-   protected MapStorage perWorldStorage;
+   private final CraftWorld world;
+   public boolean pvpMode;
+   public boolean keepSpawnInMemory = true;
+   public ChunkGenerator generator;
+   public boolean captureBlockStates = false;
+   public boolean captureTreeGeneration = false;
+   public ArrayList capturedBlockStates = new ArrayList() {
+      public boolean add(BlockState var1) {
+         for(BlockState var3 : this) {
+            if (var3.getLocation().equals(var1.getLocation())) {
+               return false;
+            }
+         }
 
-   protected World(ISaveHandler var1, WorldInfo var2, WorldProvider var3, Profiler var4, boolean var5) {
+         return super.add(var1);
+      }
+   };
+   public long ticksPerAnimalSpawns;
+   public long ticksPerMonsterSpawns;
+   public boolean populating;
+   private int tickPosition;
+   public Map capturedTileEntities = Maps.newHashMap();
+
+   public CraftWorld getWorld() {
+      return this.world;
+   }
+
+   public CraftServer getServer() {
+      return (CraftServer)Bukkit.getServer();
+   }
+
+   public Chunk getChunkIfLoaded(int var1, int var2) {
+      return ((ChunkProviderServer)this.chunkProvider).getChunkIfLoaded(var1, var2);
+   }
+
+   protected World(ISaveHandler var1, WorldInfo var2, WorldProvider var3, Profiler var4, boolean var5, ChunkGenerator var6, Environment var7) {
+      this.generator = var6;
+      this.world = new CraftWorld((WorldServer)this, var6, var7);
+      this.ticksPerAnimalSpawns = (long)this.getServer().getTicksPerAnimalSpawns();
+      this.ticksPerMonsterSpawns = (long)this.getServer().getTicksPerMonsterSpawns();
       this.eventListeners = Lists.newArrayList(new IWorldEventListener[]{this.pathListener});
       this.theCalendar = Calendar.getInstance();
       this.worldScoreboard = new Scoreboard();
@@ -142,18 +177,42 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       this.provider = var3;
       this.isRemote = var5;
       this.worldBorder = var3.createWorldBorder();
-      this.perWorldStorage = new MapStorage((ISaveHandler)null);
+      this.getWorldBorder().world = (WorldServer)this;
+      this.getWorldBorder().addListener(new IBorderListener() {
+         public void onSizeChanged(WorldBorder var1, double var2) {
+            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(var1, SPacketWorldBorder.Action.SET_SIZE), var1.world);
+         }
+
+         public void onTransitionStarted(WorldBorder var1, double var2, double var4, long var6) {
+            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(var1, SPacketWorldBorder.Action.LERP_SIZE), var1.world);
+         }
+
+         public void onCenterChanged(WorldBorder var1, double var2, double var4) {
+            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(var1, SPacketWorldBorder.Action.SET_CENTER), var1.world);
+         }
+
+         public void onWarningTimeChanged(WorldBorder var1, int var2) {
+            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(var1, SPacketWorldBorder.Action.SET_WARNING_TIME), var1.world);
+         }
+
+         public void onWarningDistanceChanged(WorldBorder var1, int var2) {
+            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(var1, SPacketWorldBorder.Action.SET_WARNING_BLOCKS), var1.world);
+         }
+
+         public void onDamageAmountChanged(WorldBorder var1, double var2) {
+         }
+
+         public void onDamageBufferChanged(WorldBorder var1, double var2) {
+         }
+      });
+      this.getServer().addWorld(this.world);
    }
 
    public World init() {
       return this;
    }
 
-   public Biome getBiome(BlockPos var1) {
-      return this.provider.getBiomeForCoords(var1);
-   }
-
-   public Biome getBiomeForCoordsBody(final BlockPos var1) {
+   public Biome getBiome(final BlockPos var1) {
       if (this.isBlockLoaded(var1)) {
          Chunk var2 = this.getChunkFromBlockCoords(var1);
 
@@ -165,6 +224,10 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
             var5.setDetail("Location", new ICrashReportDetail() {
                public String call() throws Exception {
                   return CrashReportCategory.getCoordinateInfo(var1);
+               }
+
+               public Object call() throws Exception {
+                  return this.call();
                }
             });
             throw new ReportedException(var4);
@@ -189,11 +252,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       return null;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setInitialSpawnLocation() {
-      this.setSpawnPoint(new BlockPos(8, 64, 8));
-   }
-
    public IBlockState getGroundAboveSeaLevel(BlockPos var1) {
       BlockPos var2;
       for(var2 = new BlockPos(var1.getX(), this.getSeaLevel(), var1.getZ()); !this.isAirBlock(var2.up()); var2 = var2.up()) {
@@ -212,7 +270,7 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public boolean isAirBlock(BlockPos var1) {
-      return this.getBlockState(var1).getBlock().isAir(this.getBlockState(var1), this, var1);
+      return this.getBlockState(var1).getMaterial() == Material.AIR;
    }
 
    public boolean isBlockLoaded(BlockPos var1) {
@@ -279,38 +337,56 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public boolean setBlockState(BlockPos var1, IBlockState var2, int var3) {
-      if (this.isOutsideBuildHeight(var1)) {
+      if (this.captureTreeGeneration) {
+         Object var7 = null;
+         Iterator var8 = this.capturedBlockStates.iterator();
+
+         while(var8.hasNext()) {
+            BlockState var9 = (BlockState)var8.next();
+            if (var9.getX() == var1.getX() && var9.getY() == var1.getY() && var9.getZ() == var1.getZ()) {
+               var7 = var9;
+               var8.remove();
+               break;
+            }
+         }
+
+         if (var7 == null) {
+            var7 = CraftBlockState.getBlockState(this, var1.getX(), var1.getY(), var1.getZ(), var3);
+         }
+
+         ((BlockState)var7).setTypeId(CraftMagicNumbers.getId(var2.getBlock()));
+         ((BlockState)var7).setRawData((byte)var2.getBlock().getMetaFromState(var2));
+         this.capturedBlockStates.add(var7);
+         return true;
+      } else if (this.isOutsideBuildHeight(var1)) {
          return false;
       } else if (!this.isRemote && this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) {
          return false;
       } else {
          Chunk var4 = this.getChunkFromBlockCoords(var1);
-         Block var5 = var2.getBlock();
-         BlockSnapshot var6 = null;
-         if (this.captureBlockSnapshots && !this.isRemote) {
-            var6 = BlockSnapshot.getBlockSnapshot(this, var1, var3);
-            this.capturedBlockSnapshots.add(var6);
+         var2.getBlock();
+         CraftBlockState var5 = null;
+         if (this.captureBlockStates) {
+            var5 = CraftBlockState.getBlockState(this, var1.getX(), var1.getY(), var1.getZ(), var3);
+            this.capturedBlockStates.add(var5);
          }
 
-         IBlockState var7 = this.getBlockState(var1);
-         int var8 = var7.getLightValue(this, var1);
-         int var9 = var7.getLightOpacity(this, var1);
-         IBlockState var10 = var4.setBlockState(var1, var2);
-         if (var10 == null) {
-            if (var6 != null) {
-               this.capturedBlockSnapshots.remove(var6);
+         IBlockState var6 = var4.setBlockState(var1, var2);
+         if (var6 == null) {
+            if (this.captureBlockStates) {
+               this.capturedBlockStates.remove(var5);
             }
 
             return false;
          } else {
-            if (var2.getLightOpacity(this, var1) != var9 || var2.getLightValue(this, var1) != var8) {
+            if (var2.getLightOpacity() != var6.getLightOpacity() || var2.getLightValue() != var6.getLightValue()) {
                this.theProfiler.startSection("checkLight");
                this.checkLight(var1);
                this.theProfiler.endSection();
             }
 
-            if (var6 == null) {
-               this.markAndNotifyBlock(var1, var4, var10, var2, var3);
+            if (!this.captureBlockStates) {
+               this.notifyAndUpdatePhysics(var1, var4, var6, var2, var3);
             }
 
             return true;
@@ -318,8 +394,8 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       }
    }
 
-   public void markAndNotifyBlock(BlockPos var1, Chunk var2, IBlockState var3, IBlockState var4, int var5) {
-      if ((var5 & 2) != 0 && (!this.isRemote || (var5 & 4) == 0) && (var2 == null || var2.isPopulated())) {
+   public void notifyAndUpdatePhysics(BlockPos var1, Chunk var2, IBlockState var3, IBlockState var4, int var5) {
+      if ((var5 & 2) != 0 && (var2 == null || var2.isPopulated())) {
          this.notifyBlockUpdate(var1, var3, var4, var5);
       }
 
@@ -339,7 +415,7 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    public boolean destroyBlock(BlockPos var1, boolean var2) {
       IBlockState var3 = this.getBlockState(var1);
       Block var4 = var3.getBlock();
-      if (var4.isAir(var3, this, var1)) {
+      if (var3.getMaterial() == Material.AIR) {
          return false;
       } else {
          this.playEvent(2001, var1, Block.getStateId(var3));
@@ -364,6 +440,10 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
    public void notifyNeighborsRespectDebug(BlockPos var1, Block var2) {
       if (this.worldInfo.getTerrainType() != WorldType.DEBUG_WORLD) {
+         if (this.populating) {
+            return;
+         }
+
          this.notifyNeighborsOfStateChange(var1, var2);
       }
 
@@ -397,45 +477,39 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public void notifyNeighborsOfStateChange(BlockPos var1, Block var2) {
-      if (!ForgeEventFactory.onNeighborNotify(this, var1, this.getBlockState(var1), EnumSet.allOf(EnumFacing.class)).isCanceled()) {
-         this.notifyBlockOfStateChange(var1.west(), var2);
-         this.notifyBlockOfStateChange(var1.east(), var2);
-         this.notifyBlockOfStateChange(var1.down(), var2);
-         this.notifyBlockOfStateChange(var1.up(), var2);
-         this.notifyBlockOfStateChange(var1.north(), var2);
-         this.notifyBlockOfStateChange(var1.south(), var2);
-      }
+      this.notifyBlockOfStateChange(var1.west(), var2);
+      this.notifyBlockOfStateChange(var1.east(), var2);
+      this.notifyBlockOfStateChange(var1.down(), var2);
+      this.notifyBlockOfStateChange(var1.up(), var2);
+      this.notifyBlockOfStateChange(var1.north(), var2);
+      this.notifyBlockOfStateChange(var1.south(), var2);
    }
 
    public void notifyNeighborsOfStateExcept(BlockPos var1, Block var2, EnumFacing var3) {
-      EnumSet var4 = EnumSet.allOf(EnumFacing.class);
-      var4.remove(var3);
-      if (!ForgeEventFactory.onNeighborNotify(this, var1, this.getBlockState(var1), var4).isCanceled()) {
-         if (var3 != EnumFacing.WEST) {
-            this.notifyBlockOfStateChange(var1.west(), var2);
-         }
-
-         if (var3 != EnumFacing.EAST) {
-            this.notifyBlockOfStateChange(var1.east(), var2);
-         }
-
-         if (var3 != EnumFacing.DOWN) {
-            this.notifyBlockOfStateChange(var1.down(), var2);
-         }
-
-         if (var3 != EnumFacing.UP) {
-            this.notifyBlockOfStateChange(var1.up(), var2);
-         }
-
-         if (var3 != EnumFacing.NORTH) {
-            this.notifyBlockOfStateChange(var1.north(), var2);
-         }
-
-         if (var3 != EnumFacing.SOUTH) {
-            this.notifyBlockOfStateChange(var1.south(), var2);
-         }
-
+      if (var3 != EnumFacing.WEST) {
+         this.notifyBlockOfStateChange(var1.west(), var2);
       }
+
+      if (var3 != EnumFacing.EAST) {
+         this.notifyBlockOfStateChange(var1.east(), var2);
+      }
+
+      if (var3 != EnumFacing.DOWN) {
+         this.notifyBlockOfStateChange(var1.down(), var2);
+      }
+
+      if (var3 != EnumFacing.UP) {
+         this.notifyBlockOfStateChange(var1.up(), var2);
+      }
+
+      if (var3 != EnumFacing.NORTH) {
+         this.notifyBlockOfStateChange(var1.north(), var2);
+      }
+
+      if (var3 != EnumFacing.SOUTH) {
+         this.notifyBlockOfStateChange(var1.south(), var2);
+      }
+
    }
 
    public void notifyBlockOfStateChange(BlockPos var1, final Block var2) {
@@ -443,6 +517,15 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          IBlockState var3 = this.getBlockState(var1);
 
          try {
+            CraftWorld var4 = ((WorldServer)this).getWorld();
+            if (var4 != null) {
+               BlockPhysicsEvent var8 = new BlockPhysicsEvent(var4.getBlockAt(var1.getX(), var1.getY(), var1.getZ()), CraftMagicNumbers.getId(var2));
+               this.getServer().getPluginManager().callEvent(var8);
+               if (var8.isCancelled()) {
+                  return;
+               }
+            }
+
             var3.neighborChanged(this, var1, var2);
          } catch (Throwable var7) {
             CrashReport var5 = CrashReport.makeCrashReport(var7, "Exception while updating neighbours");
@@ -451,9 +534,13 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
                public String call() throws Exception {
                   try {
                      return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(var2), var2.getUnlocalizedName(), var2.getClass().getCanonicalName());
-                  } catch (Throwable var2x) {
+                  } catch (Throwable var1) {
                      return "ID #" + Block.getIdFromBlock(var2);
                   }
+               }
+
+               public Object call() throws Exception {
+                  return this.call();
                }
             });
             CrashReportCategory.addBlockInfo(var6, var1, var3);
@@ -481,7 +568,7 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          } else {
             for(BlockPos var4 = var2.down(); var4.getY() > var1.getY(); var4 = var4.down()) {
                IBlockState var3 = this.getBlockState(var4);
-               if (var3.getBlock().getLightOpacity(var3, this, var4) > 0 && !var3.getMaterial().isLiquid()) {
+               if (var3.getLightOpacity() > 0 && !var3.getMaterial().isLiquid()) {
                   return false;
                }
             }
@@ -581,49 +668,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getLightFromNeighborsFor(EnumSkyBlock var1, BlockPos var2) {
-      if (this.provider.hasNoSky() && var1 == EnumSkyBlock.SKY) {
-         return 0;
-      } else {
-         if (var2.getY() < 0) {
-            var2 = new BlockPos(var2.getX(), 0, var2.getZ());
-         }
-
-         if (!this.isValid(var2)) {
-            return var1.defaultLightValue;
-         } else if (!this.isBlockLoaded(var2)) {
-            return var1.defaultLightValue;
-         } else if (this.getBlockState(var2).useNeighborBrightness()) {
-            int var8 = this.getLightFor(var1, var2.up());
-            int var4 = this.getLightFor(var1, var2.east());
-            int var5 = this.getLightFor(var1, var2.west());
-            int var6 = this.getLightFor(var1, var2.south());
-            int var7 = this.getLightFor(var1, var2.north());
-            if (var4 > var8) {
-               var8 = var4;
-            }
-
-            if (var5 > var8) {
-               var8 = var5;
-            }
-
-            if (var6 > var8) {
-               var8 = var6;
-            }
-
-            if (var7 > var8) {
-               var8 = var7;
-            }
-
-            return var8;
-         } else {
-            Chunk var3 = this.getChunkFromBlockCoords(var2);
-            return var3.getLightFor(var1, var2);
-         }
-      }
-   }
-
    public int getLightFor(EnumSkyBlock var1, BlockPos var2) {
       if (var2.getY() < 0) {
          var2 = new BlockPos(var2.getX(), 0, var2.getZ());
@@ -655,32 +699,29 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getCombinedLight(BlockPos var1, int var2) {
-      int var3 = this.getLightFromNeighborsFor(EnumSkyBlock.SKY, var1);
-      int var4 = this.getLightFromNeighborsFor(EnumSkyBlock.BLOCK, var1);
-      if (var4 < var2) {
-         var4 = var2;
-      }
-
-      return var3 << 20 | var4 << 4;
-   }
-
    public float getLightBrightness(BlockPos var1) {
       return this.provider.getLightBrightnessTable()[this.getLightFromNeighbors(var1)];
    }
 
    public IBlockState getBlockState(BlockPos var1) {
+      if (this.captureTreeGeneration) {
+         for(BlockState var3 : this.capturedBlockStates) {
+            if (var3.getX() == var1.getX() && var3.getY() == var1.getY() && var3.getZ() == var1.getZ()) {
+               return CraftMagicNumbers.getBlock(var3.getTypeId()).getStateFromMeta(var3.getRawData());
+            }
+         }
+      }
+
       if (this.isOutsideBuildHeight(var1)) {
          return Blocks.AIR.getDefaultState();
       } else {
-         Chunk var2 = this.getChunkFromBlockCoords(var1);
-         return var2.getBlockState(var1);
+         Chunk var4 = this.getChunkFromBlockCoords(var1);
+         return var4.getBlockState(var1);
       }
    }
 
    public boolean isDaytime() {
-      return this.provider.isDaytime();
+      return this.skylightSubtracted < 4;
    }
 
    @Nullable
@@ -829,18 +870,10 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public void playSound(@Nullable EntityPlayer var1, double var2, double var4, double var6, SoundEvent var8, SoundCategory var9, float var10, float var11) {
-      PlaySoundAtEntityEvent var12 = ForgeEventFactory.onPlaySoundAtEntity(var1, var8, var9, var10, var11);
-      if (!var12.isCanceled() && var12.getSound() != null) {
-         var8 = var12.getSound();
-         var9 = var12.getCategory();
-         var10 = var12.getVolume();
-         var11 = var12.getPitch();
-
-         for(int var13 = 0; var13 < this.eventListeners.size(); ++var13) {
-            ((IWorldEventListener)this.eventListeners.get(var13)).playSoundToAllNearExcept(var1, var8, var9, var2, var4, var6, var10, var11);
-         }
-
+      for(int var12 = 0; var12 < this.eventListeners.size(); ++var12) {
+         ((IWorldEventListener)this.eventListeners.get(var12)).playSoundToAllNearExcept(var1, var8, var9, var2, var4, var6, var10, var11);
       }
+
    }
 
    public void playSound(double var1, double var3, double var5, SoundEvent var7, SoundCategory var8, float var9, float var10, boolean var11) {
@@ -857,11 +890,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       this.spawnParticle(var1.getParticleID(), var1.getShouldIgnoreRange(), var2, var4, var6, var8, var10, var12, var14);
    }
 
-   @SideOnly(Side.CLIENT)
-   public void spawnParticle(EnumParticleTypes var1, boolean var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
-      this.spawnParticle(var1.getParticleID(), var1.getShouldIgnoreRange() | var2, var3, var5, var7, var9, var11, var13, var15);
-   }
-
    private void spawnParticle(int var1, boolean var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
       for(int var16 = 0; var16 < this.eventListeners.size(); ++var16) {
          ((IWorldEventListener)this.eventListeners.get(var16)).spawnParticle(var1, var2, var3, var5, var7, var9, var11, var13, var15);
@@ -875,49 +903,72 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public boolean spawnEntity(Entity var1) {
-      if (this.isRemote || var1 != null && (!(var1 instanceof EntityItem) || !this.restoringBlockSnapshots)) {
-         int var2 = MathHelper.floor(var1.posX / 16.0D);
-         int var3 = MathHelper.floor(var1.posZ / 16.0D);
-         boolean var4 = var1.forceSpawn;
+      return this.addEntity(var1, SpawnReason.DEFAULT);
+   }
+
+   public boolean addEntity(Entity var1, SpawnReason var2) {
+      if (var1 == null) {
+         return false;
+      } else {
+         int var3 = MathHelper.floor(var1.posX / 16.0D);
+         int var4 = MathHelper.floor(var1.posZ / 16.0D);
+         boolean var5 = var1.forceSpawn;
          if (var1 instanceof EntityPlayer) {
-            var4 = true;
+            var5 = true;
          }
 
-         if (!var4 && !this.isChunkLoaded(var2, var3, false)) {
-            return false;
-         } else {
-            if (var1 instanceof EntityPlayer) {
-               EntityPlayer var5 = (EntityPlayer)var1;
-               this.playerEntities.add(var5);
-               this.updateAllPlayersSleepingFlag();
+         Object var6 = null;
+         if (var1 instanceof EntityLivingBase && !(var1 instanceof EntityPlayerMP)) {
+            boolean var7 = var1 instanceof EntityAnimal || var1 instanceof EntityWaterMob || var1 instanceof EntityGolem;
+            boolean var8 = var1 instanceof EntityMob || var1 instanceof EntityGhast || var1 instanceof EntitySlime;
+            if (var2 != SpawnReason.CUSTOM && (var7 && !this.spawnPeacefulMobs || var8 && !this.spawnHostileMobs)) {
+               var1.isDead = true;
+               return false;
             }
 
-            if (MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(var1, this)) && !var4) {
+            var6 = CraftEventFactory.callCreatureSpawnEvent((EntityLivingBase)var1, var2);
+         } else if (var1 instanceof EntityItem) {
+            var6 = CraftEventFactory.callItemSpawnEvent((EntityItem)var1);
+         } else if (var1.getBukkitEntity() instanceof Projectile) {
+            var6 = CraftEventFactory.callProjectileLaunchEvent(var1);
+         }
+
+         if (var6 == null || !((Cancellable)var6).isCancelled() && !var1.isDead) {
+            if (!var5 && !this.isChunkLoaded(var3, var4, false)) {
                return false;
             } else {
-               this.getChunkFromChunkCoords(var2, var3).addEntity(var1);
+               if (var1 instanceof EntityPlayer) {
+                  EntityPlayer var9 = (EntityPlayer)var1;
+                  this.playerEntities.add(var9);
+                  this.updateAllPlayersSleepingFlag();
+               }
+
+               this.getChunkFromChunkCoords(var3, var4).addEntity(var1);
                this.loadedEntityList.add(var1);
                this.onEntityAdded(var1);
                return true;
             }
+         } else {
+            var1.isDead = true;
+            return false;
          }
-      } else {
-         return false;
       }
    }
 
-   public void onEntityAdded(Entity var1) {
+   protected void onEntityAdded(Entity var1) {
       for(int var2 = 0; var2 < this.eventListeners.size(); ++var2) {
          ((IWorldEventListener)this.eventListeners.get(var2)).onEntityAdded(var1);
       }
 
+      var1.valid = true;
    }
 
-   public void onEntityRemoved(Entity var1) {
+   protected void onEntityRemoved(Entity var1) {
       for(int var2 = 0; var2 < this.eventListeners.size(); ++var2) {
          ((IWorldEventListener)this.eventListeners.get(var2)).onEntityRemoved(var1);
       }
 
+      var1.valid = false;
    }
 
    public void removeEntity(Entity var1) {
@@ -952,7 +1003,15 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          this.getChunkFromChunkCoords(var2, var3).removeEntity(var1);
       }
 
-      this.loadedEntityList.remove(var1);
+      int var4 = this.loadedEntityList.indexOf(var1);
+      if (var4 != -1) {
+         if (var4 <= this.tickPosition) {
+            --this.tickPosition;
+         }
+
+         this.loadedEntityList.remove(var4);
+      }
+
       this.onEntityRemoved(var1);
    }
 
@@ -1021,7 +1080,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          }
       }
 
-      MinecraftForge.EVENT_BUS.post(new GetCollisionBoxesEvent(this, var1, var2, var3));
       return var3;
    }
 
@@ -1080,10 +1138,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       return var2;
    }
 
-   public void removeEventListener(IWorldEventListener var1) {
-      this.eventListeners.remove(var1);
-   }
-
    public boolean collidesWithAnyBlock(AxisAlignedBB var1) {
       ArrayList var2 = Lists.newArrayList();
       int var3 = MathHelper.floor(var1.minX) - 1;
@@ -1103,17 +1157,17 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
                      if (var12 <= 0 || var13 != var5 && var13 != var6 - 1) {
                         var9.setPos(var10, var13, var11);
                         if (var10 < -30000000 || var10 >= 30000000 || var11 < -30000000 || var11 >= 30000000) {
-                           boolean var21 = true;
-                           boolean var22 = var21;
-                           return var22;
+                           boolean var20 = true;
+                           boolean var21 = var20;
+                           return var21;
                         }
 
                         IBlockState var14 = this.getBlockState(var9);
                         var14.addCollisionBoxToList(this, var9, var1, var2, (Entity)null);
                         if (!var2.isEmpty()) {
-                           boolean var15 = true;
-                           boolean var16 = var15;
-                           return var16;
+                           boolean var16 = true;
+                           boolean var15 = var16;
+                           return var15;
                         }
                      }
                   }
@@ -1121,162 +1175,34 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
             }
          }
 
-         boolean var20 = false;
-         return var20;
+         return false;
       } finally {
          var9.release();
       }
    }
 
    public int calculateSkylightSubtracted(float var1) {
-      float var2 = this.provider.getSunBrightnessFactor(var1);
-      var2 = 1.0F - var2;
-      return (int)(var2 * 11.0F);
-   }
-
-   public float getSunBrightnessFactor(float var1) {
       float var2 = this.getCelestialAngle(var1);
       float var3 = 1.0F - (MathHelper.cos(var2 * 6.2831855F) * 2.0F + 0.5F);
       var3 = MathHelper.clamp(var3, 0.0F, 1.0F);
       var3 = 1.0F - var3;
       var3 = (float)((double)var3 * (1.0D - (double)(this.getRainStrength(var1) * 5.0F) / 16.0D));
       var3 = (float)((double)var3 * (1.0D - (double)(this.getThunderStrength(var1) * 5.0F) / 16.0D));
-      return var3;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getSunBrightness(float var1) {
-      return this.provider.getSunBrightness(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getSunBrightnessBody(float var1) {
-      float var2 = this.getCelestialAngle(var1);
-      float var3 = 1.0F - (MathHelper.cos(var2 * 6.2831855F) * 2.0F + 0.2F);
-      var3 = MathHelper.clamp(var3, 0.0F, 1.0F);
       var3 = 1.0F - var3;
-      var3 = (float)((double)var3 * (1.0D - (double)(this.getRainStrength(var1) * 5.0F) / 16.0D));
-      var3 = (float)((double)var3 * (1.0D - (double)(this.getThunderStrength(var1) * 5.0F) / 16.0D));
-      return var3 * 0.8F + 0.2F;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Vec3d getSkyColor(Entity var1, float var2) {
-      return this.provider.getSkyColor(var1, var2);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Vec3d getSkyColorBody(Entity var1, float var2) {
-      float var3 = this.getCelestialAngle(var2);
-      float var4 = MathHelper.cos(var3 * 6.2831855F) * 2.0F + 0.5F;
-      var4 = MathHelper.clamp(var4, 0.0F, 1.0F);
-      int var5 = MathHelper.floor(var1.posX);
-      int var6 = MathHelper.floor(var1.posY);
-      int var7 = MathHelper.floor(var1.posZ);
-      BlockPos var8 = new BlockPos(var5, var6, var7);
-      int var9 = ForgeHooksClient.getSkyBlendColour(this, var8);
-      float var10 = (float)(var9 >> 16 & 255) / 255.0F;
-      float var11 = (float)(var9 >> 8 & 255) / 255.0F;
-      float var12 = (float)(var9 & 255) / 255.0F;
-      var10 = var10 * var4;
-      var11 = var11 * var4;
-      var12 = var12 * var4;
-      float var13 = this.getRainStrength(var2);
-      if (var13 > 0.0F) {
-         float var14 = (var10 * 0.3F + var11 * 0.59F + var12 * 0.11F) * 0.6F;
-         float var15 = 1.0F - var13 * 0.75F;
-         var10 = var10 * var15 + var14 * (1.0F - var15);
-         var11 = var11 * var15 + var14 * (1.0F - var15);
-         var12 = var12 * var15 + var14 * (1.0F - var15);
-      }
-
-      float var21 = this.getThunderStrength(var2);
-      if (var21 > 0.0F) {
-         float var22 = (var10 * 0.3F + var11 * 0.59F + var12 * 0.11F) * 0.2F;
-         float var16 = 1.0F - var21 * 0.75F;
-         var10 = var10 * var16 + var22 * (1.0F - var16);
-         var11 = var11 * var16 + var22 * (1.0F - var16);
-         var12 = var12 * var16 + var22 * (1.0F - var16);
-      }
-
-      if (this.lastLightningBolt > 0) {
-         float var23 = (float)this.lastLightningBolt - var2;
-         if (var23 > 1.0F) {
-            var23 = 1.0F;
-         }
-
-         var23 = var23 * 0.45F;
-         var10 = var10 * (1.0F - var23) + 0.8F * var23;
-         var11 = var11 * (1.0F - var23) + 0.8F * var23;
-         var12 = var12 * (1.0F - var23) + 1.0F * var23;
-      }
-
-      return new Vec3d((double)var10, (double)var11, (double)var12);
+      return (int)(var3 * 11.0F);
    }
 
    public float getCelestialAngle(float var1) {
       return this.provider.calculateCelestialAngle(this.worldInfo.getWorldTime(), var1);
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getMoonPhase() {
-      return this.provider.getMoonPhase(this.worldInfo.getWorldTime());
-   }
-
    public float getCurrentMoonPhaseFactor() {
-      return this.provider.getCurrentMoonPhaseFactor();
-   }
-
-   public float getCurrentMoonPhaseFactorBody() {
       return WorldProvider.MOON_PHASE_FACTORS[this.provider.getMoonPhase(this.worldInfo.getWorldTime())];
    }
 
    public float getCelestialAngleRadians(float var1) {
       float var2 = this.getCelestialAngle(var1);
       return var2 * 6.2831855F;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Vec3d getCloudColour(float var1) {
-      return this.provider.getCloudColor(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Vec3d getCloudColorBody(float var1) {
-      float var2 = this.getCelestialAngle(var1);
-      float var3 = MathHelper.cos(var2 * 6.2831855F) * 2.0F + 0.5F;
-      var3 = MathHelper.clamp(var3, 0.0F, 1.0F);
-      float var4 = 1.0F;
-      float var5 = 1.0F;
-      float var6 = 1.0F;
-      float var7 = this.getRainStrength(var1);
-      if (var7 > 0.0F) {
-         float var8 = (var4 * 0.3F + var5 * 0.59F + var6 * 0.11F) * 0.6F;
-         float var9 = 1.0F - var7 * 0.95F;
-         var4 = var4 * var9 + var8 * (1.0F - var9);
-         var5 = var5 * var9 + var8 * (1.0F - var9);
-         var6 = var6 * var9 + var8 * (1.0F - var9);
-      }
-
-      var4 = var4 * (var3 * 0.9F + 0.1F);
-      var5 = var5 * (var3 * 0.9F + 0.1F);
-      var6 = var6 * (var3 * 0.85F + 0.15F);
-      float var15 = this.getThunderStrength(var1);
-      if (var15 > 0.0F) {
-         float var16 = (var4 * 0.3F + var5 * 0.59F + var6 * 0.11F) * 0.2F;
-         float var10 = 1.0F - var15 * 0.95F;
-         var4 = var4 * var10 + var16 * (1.0F - var10);
-         var5 = var5 * var10 + var16 * (1.0F - var10);
-         var6 = var6 * var10 + var16 * (1.0F - var10);
-      }
-
-      return new Vec3d((double)var4, (double)var5, (double)var6);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Vec3d getFogColor(float var1) {
-      float var2 = this.getCelestialAngle(var1);
-      return this.provider.getFogColor(var2, var1);
    }
 
    public BlockPos getPrecipitationHeight(BlockPos var1) {
@@ -1290,26 +1216,13 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       BlockPos var4;
       for(var3 = new BlockPos(var1.getX(), var2.getTopFilledSegment() + 16, var1.getZ()); var3.getY() >= 0; var3 = var4) {
          var4 = var3.down();
-         IBlockState var5 = var2.getBlockState(var4);
-         if (var5.getMaterial().blocksMovement() && !var5.getBlock().isLeaves(var5, this, var4) && !var5.getBlock().isFoliage(this, var4)) {
+         Material var5 = var2.getBlockState(var4).getMaterial();
+         if (var5.blocksMovement() && var5 != Material.LEAVES) {
             break;
          }
       }
 
       return var3;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getStarBrightness(float var1) {
-      return this.provider.getStarBrightness(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getStarBrightnessBody(float var1) {
-      float var2 = this.getCelestialAngle(var1);
-      float var3 = 1.0F - (MathHelper.cos(var2 * 6.2831855F) * 2.0F + 0.25F);
-      var3 = MathHelper.clamp(var3, 0.0F, 1.0F);
-      return var3 * var3 * 0.5F;
    }
 
    public boolean isUpdateScheduled(BlockPos var1, Block var2) {
@@ -1331,91 +1244,82 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
       for(int var1 = 0; var1 < this.weatherEffects.size(); ++var1) {
          Entity var2 = (Entity)this.weatherEffects.get(var1);
+         if (var2 != null) {
+            try {
+               ++var2.ticksExisted;
+               var2.onUpdate();
+            } catch (Throwable var13) {
+               CrashReport var4 = CrashReport.makeCrashReport(var13, "Ticking entity");
+               CrashReportCategory var5 = var4.makeCategory("Entity being ticked");
+               if (var2 == null) {
+                  var5.addCrashSection("Entity", "~~NULL~~");
+               } else {
+                  var2.addEntityCrashInfo(var5);
+               }
 
-         try {
-            ++var2.ticksExisted;
-            var2.onUpdate();
-         } catch (Throwable var9) {
-            CrashReport var4 = CrashReport.makeCrashReport(var9, "Ticking entity");
-            CrashReportCategory var5 = var4.makeCategory("Entity being ticked");
-            if (var2 == null) {
-               var5.addCrashSection("Entity", "~~NULL~~");
-            } else {
-               var2.addEntityCrashInfo(var5);
-            }
-
-            if (!ForgeModContainer.removeErroringEntities) {
                throw new ReportedException(var4);
             }
 
-            FMLLog.severe(var4.getCompleteReport(), new Object[0]);
-            this.removeEntity(var2);
-         }
-
-         if (var2.isDead) {
-            this.weatherEffects.remove(var1--);
+            if (var2.isDead) {
+               this.weatherEffects.remove(var1--);
+            }
          }
       }
 
       this.theProfiler.endStartSection("remove");
       this.loadedEntityList.removeAll(this.unloadedEntityList);
 
-      for(int var10 = 0; var10 < this.unloadedEntityList.size(); ++var10) {
-         Entity var14 = (Entity)this.unloadedEntityList.get(var10);
-         int var3 = var14.chunkCoordX;
-         int var24 = var14.chunkCoordZ;
-         if (var14.addedToChunk && this.isChunkLoaded(var3, var24, true)) {
-            this.getChunkFromChunkCoords(var3, var24).removeEntity(var14);
+      for(int var14 = 0; var14 < this.unloadedEntityList.size(); ++var14) {
+         Entity var16 = (Entity)this.unloadedEntityList.get(var14);
+         int var19 = var16.chunkCoordX;
+         int var3 = var16.chunkCoordZ;
+         if (var16.addedToChunk && this.isChunkLoaded(var19, var3, true)) {
+            this.getChunkFromChunkCoords(var19, var3).removeEntity(var16);
          }
       }
 
-      for(int var11 = 0; var11 < this.unloadedEntityList.size(); ++var11) {
-         this.onEntityRemoved((Entity)this.unloadedEntityList.get(var11));
+      for(int var15 = 0; var15 < this.unloadedEntityList.size(); ++var15) {
+         this.onEntityRemoved((Entity)this.unloadedEntityList.get(var15));
       }
 
       this.unloadedEntityList.clear();
       this.tickPlayers();
       this.theProfiler.endStartSection("regular");
 
-      for(int var12 = 0; var12 < this.loadedEntityList.size(); ++var12) {
-         Entity var15 = (Entity)this.loadedEntityList.get(var12);
-         Entity var19 = var15.getRidingEntity();
-         if (var19 != null) {
-            if (!var19.isDead && var19.isPassenger(var15)) {
+      for(this.tickPosition = 0; this.tickPosition < this.loadedEntityList.size(); ++this.tickPosition) {
+         Entity var17 = (Entity)this.loadedEntityList.get(this.tickPosition);
+         Entity var6 = var17.getRidingEntity();
+         if (var6 != null) {
+            if (!var6.isDead && var6.isPassenger(var17)) {
                continue;
             }
 
-            var15.dismountRidingEntity();
+            var17.dismountRidingEntity();
          }
 
          this.theProfiler.startSection("tick");
-         if (!var15.isDead && !(var15 instanceof EntityPlayerMP)) {
+         if (!var17.isDead && !(var17 instanceof EntityPlayerMP)) {
             try {
-               this.updateEntity(var15);
-            } catch (Throwable var8) {
-               CrashReport var27 = CrashReport.makeCrashReport(var8, "Ticking entity");
-               CrashReportCategory var6 = var27.makeCategory("Entity being ticked");
-               var15.addEntityCrashInfo(var6);
-               if (!ForgeModContainer.removeErroringEntities) {
-                  throw new ReportedException(var27);
-               }
-
-               FMLLog.severe(var27.getCompleteReport(), new Object[0]);
-               this.removeEntity(var15);
+               this.updateEntity(var17);
+            } catch (Throwable var12) {
+               CrashReport var22 = CrashReport.makeCrashReport(var12, "Ticking entity");
+               CrashReportCategory var20 = var22.makeCategory("Entity being ticked");
+               var17.addEntityCrashInfo(var20);
+               throw new ReportedException(var22);
             }
          }
 
          this.theProfiler.endSection();
          this.theProfiler.startSection("remove");
-         if (var15.isDead) {
-            int var25 = var15.chunkCoordX;
-            int var28 = var15.chunkCoordZ;
-            if (var15.addedToChunk && this.isChunkLoaded(var25, var28, true)) {
-               this.getChunkFromChunkCoords(var25, var28).removeEntity(var15);
+         if (var17.isDead) {
+            int var18 = var17.chunkCoordX;
+            int var7 = var17.chunkCoordZ;
+            if (var17.addedToChunk && this.isChunkLoaded(var18, var7, true)) {
+               this.getChunkFromChunkCoords(var18, var7).removeEntity(var17);
             }
 
-            this.loadedEntityList.remove(var12--);
-            this.onEntityRemoved(var15);
+            this.loadedEntityList.remove(this.tickPosition--);
+            this.onEntityRemoved(var17);
          }
 
          this.theProfiler.endSection();
@@ -1423,69 +1327,53 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
       this.theProfiler.endStartSection("blockEntities");
       this.processingLoadedTiles = true;
-      Iterator var13 = this.tickableTileEntities.iterator();
-
-      while(var13.hasNext()) {
-         TileEntity var16 = (TileEntity)var13.next();
-         if (!var16.isInvalid() && var16.hasWorld()) {
-            BlockPos var20 = var16.getPos();
-            if (this.isBlockLoaded(var20, false) && this.worldBorder.contains(var20)) {
-               try {
-                  this.theProfiler.startSection(var16.getClass().getSimpleName());
-                  ((ITickable)var16).update();
-                  this.theProfiler.endSection();
-               } catch (Throwable var7) {
-                  CrashReport var29 = CrashReport.makeCrashReport(var7, "Ticking block entity");
-                  CrashReportCategory var31 = var29.makeCategory("Block entity being ticked");
-                  var16.addInfoToCrashReport(var31);
-                  if (!ForgeModContainer.removeErroringTileEntities) {
-                     throw new ReportedException(var29);
-                  }
-
-                  FMLLog.severe(var29.getCompleteReport(), new Object[0]);
-                  var16.invalidate();
-                  this.removeTileEntity(var16.getPos());
-               }
-            }
-         }
-
-         if (var16.isInvalid()) {
-            var13.remove();
-            this.loadedTileEntityList.remove(var16);
-            if (this.isBlockLoaded(var16.getPos())) {
-               Chunk var21 = this.getChunkFromBlockCoords(var16.getPos());
-               if (var21.getTileEntity(var16.getPos(), Chunk.EnumCreateEntityType.CHECK) == var16) {
-                  var21.removeTileEntity(var16.getPos());
-               }
-            }
-         }
-      }
-
       if (!this.tileEntitiesToBeRemoved.isEmpty()) {
-         for(Object var22 : this.tileEntitiesToBeRemoved) {
-            ((TileEntity)var22).onChunkUnload();
-         }
-
          this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
          this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
          this.tileEntitiesToBeRemoved.clear();
       }
 
+      Iterator var24 = this.tickableTileEntities.iterator();
+
+      while(var24.hasNext()) {
+         TileEntity var25 = (TileEntity)var24.next();
+         if (!var25.isInvalid() && var25.hasWorld()) {
+            BlockPos var8 = var25.getPos();
+            if (this.isBlockLoaded(var8) && this.worldBorder.contains(var8)) {
+               try {
+                  this.theProfiler.startSection("");
+                  ((ITickable)var25).update();
+                  this.theProfiler.endSection();
+               } catch (Throwable var11) {
+                  CrashReport var23 = CrashReport.makeCrashReport(var11, "Ticking block entity");
+                  CrashReportCategory var21 = var23.makeCategory("Block entity being ticked");
+                  var25.addInfoToCrashReport(var21);
+                  throw new ReportedException(var23);
+               }
+            }
+         }
+
+         if (var25.isInvalid()) {
+            var24.remove();
+            this.loadedTileEntityList.remove(var25);
+            if (this.isBlockLoaded(var25.getPos())) {
+               this.getChunkFromBlockCoords(var25.getPos()).removeTileEntity(var25.getPos());
+            }
+         }
+      }
+
       this.processingLoadedTiles = false;
       this.theProfiler.endStartSection("pendingBlockEntities");
       if (!this.addedTileEntityList.isEmpty()) {
-         for(int var18 = 0; var18 < this.addedTileEntityList.size(); ++var18) {
-            TileEntity var23 = (TileEntity)this.addedTileEntityList.get(var18);
-            if (!var23.isInvalid()) {
-               if (!this.loadedTileEntityList.contains(var23)) {
-                  this.addTileEntity(var23);
-               }
-
-               if (this.isBlockLoaded(var23.getPos())) {
-                  Chunk var26 = this.getChunkFromBlockCoords(var23.getPos());
-                  IBlockState var30 = var26.getBlockState(var23.getPos());
-                  var26.addTileEntity(var23.getPos(), var23);
-                  this.notifyBlockUpdate(var23.getPos(), var30, var30, 3);
+         for(int var26 = 0; var26 < this.addedTileEntityList.size(); ++var26) {
+            TileEntity var27 = (TileEntity)this.addedTileEntityList.get(var26);
+            if (!var27.isInvalid() && this.isBlockLoaded(var27.getPos())) {
+               Chunk var9 = this.getChunkFromBlockCoords(var27.getPos());
+               IBlockState var10 = var9.getBlockState(var27.getPos());
+               var9.addTileEntity(var27.getPos(), var27);
+               this.notifyBlockUpdate(var27.getPos(), var10, var10, 3);
+               if (!this.loadedTileEntityList.contains(var27)) {
+                  this.addTileEntity(var27);
                }
             }
          }
@@ -1501,37 +1389,26 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public boolean addTileEntity(TileEntity var1) {
-      if (var1.getWorld() != null) {
-         var1.setWorld(this);
-      }
-
-      List var2 = this.processingLoadedTiles ? this.addedTileEntityList : this.loadedTileEntityList;
-      boolean var3 = var2.add(var1);
-      if (var3 && var1 instanceof ITickable) {
+      boolean var2 = this.loadedTileEntityList.add(var1);
+      if (var2 && var1 instanceof ITickable) {
          this.tickableTileEntities.add(var1);
       }
 
       if (this.isRemote) {
-         BlockPos var4 = var1.getPos();
-         IBlockState var5 = this.getBlockState(var4);
-         this.notifyBlockUpdate(var4, var5, var5, 2);
+         BlockPos var3 = var1.getPos();
+         IBlockState var4 = this.getBlockState(var3);
+         this.notifyBlockUpdate(var3, var4, var4, 2);
       }
 
-      return var3;
+      return var2;
    }
 
    public void addTileEntities(Collection var1) {
       if (this.processingLoadedTiles) {
-         for(TileEntity var3 : var1) {
-            if (var3.getWorld() != this) {
-               var3.setWorld(this);
-            }
-         }
-
          this.addedTileEntityList.addAll(var1);
       } else {
-         for(TileEntity var5 : var1) {
-            this.addTileEntity(var5);
+         for(TileEntity var3 : var1) {
+            this.addTileEntity(var3);
          }
       }
 
@@ -1544,14 +1421,8 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    public void updateEntityWithOptionalForce(Entity var1, boolean var2) {
       int var3 = MathHelper.floor(var1.posX);
       int var4 = MathHelper.floor(var1.posZ);
-      boolean var5 = this.getPersistentChunks().containsKey(new ChunkPos(var3 >> 4, var4 >> 4));
-      int var6 = var5 ? 0 : 32;
-      boolean var7 = !var2 || this.isAreaLoaded(var3 - var6, 0, var4 - var6, var3 + var6, 0, var4 + var6, true);
-      if (!var7) {
-         var7 = ForgeEventFactory.canEntityUpdate(var1);
-      }
-
-      if (var7) {
+      Chunk var5 = this.getChunkIfLoaded(var3 >> 4, var4 >> 4);
+      if (!var2 || var5 != null && var5.areNeighborsLoaded(2)) {
          var1.lastTickPosX = var1.posX;
          var1.lastTickPosY = var1.posY;
          var1.lastTickPosZ = var1.posZ;
@@ -1587,28 +1458,28 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
             var1.rotationYaw = var1.prevRotationYaw;
          }
 
-         int var8 = MathHelper.floor(var1.posX / 16.0D);
-         int var9 = MathHelper.floor(var1.posY / 16.0D);
-         int var10 = MathHelper.floor(var1.posZ / 16.0D);
-         if (!var1.addedToChunk || var1.chunkCoordX != var8 || var1.chunkCoordY != var9 || var1.chunkCoordZ != var10) {
+         int var6 = MathHelper.floor(var1.posX / 16.0D);
+         int var7 = MathHelper.floor(var1.posY / 16.0D);
+         int var8 = MathHelper.floor(var1.posZ / 16.0D);
+         if (!var1.addedToChunk || var1.chunkCoordX != var6 || var1.chunkCoordY != var7 || var1.chunkCoordZ != var8) {
             if (var1.addedToChunk && this.isChunkLoaded(var1.chunkCoordX, var1.chunkCoordZ, true)) {
                this.getChunkFromChunkCoords(var1.chunkCoordX, var1.chunkCoordZ).removeEntityAtIndex(var1, var1.chunkCoordY);
             }
 
-            if (!var1.setPositionNonDirty() && !this.isChunkLoaded(var8, var10, true)) {
+            if (!var1.setPositionNonDirty() && !this.isChunkLoaded(var6, var8, true)) {
                var1.addedToChunk = false;
             } else {
-               this.getChunkFromChunkCoords(var8, var10).addEntity(var1);
+               this.getChunkFromChunkCoords(var6, var8).addEntity(var1);
             }
          }
 
          this.theProfiler.endSection();
          if (var2 && var1.addedToChunk) {
-            for(Entity var12 : var1.getPassengers()) {
-               if (!var12.isDead && var12.getRidingEntity() == var1) {
-                  this.updateEntity(var12);
+            for(Entity var10 : var1.getPassengers()) {
+               if (!var10.isDead && var10.getRidingEntity() == var1) {
+                  this.updateEntity(var10);
                } else {
-                  var12.dismountRidingEntity();
+                  var10.dismountRidingEntity();
                }
             }
          }
@@ -1701,10 +1572,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
                      var8.release();
                      return true;
                   }
-
-                  if (var12.isBurning(this, new BlockPos(var9, var10, var11))) {
-                     return true;
-                  }
                }
             }
          }
@@ -1735,13 +1602,9 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
                   var12.setPos(var13, var14, var15);
                   IBlockState var16 = this.getBlockState(var12);
                   Block var17 = var16.getBlock();
-                  Boolean var18 = var17.isEntityInsideMaterial(this, var12, var16, var3, (double)var7, var2, false);
-                  if (var18 != null && var18.booleanValue()) {
-                     var10 = true;
-                     var11 = var17.modifyAcceleration(this, var12, var3, var11);
-                  } else if ((var18 == null || var18.booleanValue()) && var16.getMaterial() == var2) {
-                     double var19 = (double)((float)(var14 + 1) - BlockLiquid.getLiquidHeightPercent(((Integer)var16.getValue(BlockLiquid.LEVEL)).intValue()));
-                     if ((double)var7 >= var19) {
+                  if (var16.getMaterial() == var2) {
+                     double var18 = (double)((float)(var14 + 1) - BlockLiquid.getLiquidHeightPercent(((Integer)var16.getValue(BlockLiquid.LEVEL)).intValue()));
+                     if ((double)var7 >= var18) {
                         var10 = true;
                         var11 = var17.modifyAcceleration(this, var12, var3, var11);
                      }
@@ -1753,7 +1616,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          var12.release();
          if (var11.lengthVector() > 0.0D && var3.isPushedByWater()) {
             var11 = var11.normalize();
-            double var22 = 0.014D;
             var3.motionX += var11.xCoord * 0.014D;
             var3.motionY += var11.yCoord * 0.014D;
             var3.motionZ += var11.zCoord * 0.014D;
@@ -1800,19 +1662,14 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          for(int var11 = var5; var11 < var6; ++var11) {
             for(int var12 = var7; var12 < var8; ++var12) {
                IBlockState var13 = this.getBlockState(var9.setPos(var10, var11, var12));
-               Boolean var14 = var13.getBlock().isAABBInsideMaterial(this, var9, var1, var2);
-               if (var14 != null) {
-                  return var14.booleanValue();
-               }
-
                if (var13.getMaterial() == var2) {
-                  int var15 = ((Integer)var13.getValue(BlockLiquid.LEVEL)).intValue();
-                  double var16 = (double)(var11 + 1);
-                  if (var15 < 8) {
-                     var16 = (double)(var11 + 1) - (double)var15 / 8.0D;
+                  int var14 = ((Integer)var13.getValue(BlockLiquid.LEVEL)).intValue();
+                  double var15 = (double)(var11 + 1);
+                  if (var14 < 8) {
+                     var15 = (double)(var11 + 1) - (double)var14 / 8.0D;
                   }
 
-                  if (var16 >= var1.minY) {
+                  if (var15 >= var1.minY) {
                      var9.release();
                      return true;
                   }
@@ -1831,13 +1688,9 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
    public Explosion newExplosion(@Nullable Entity var1, double var2, double var4, double var6, float var8, boolean var9, boolean var10) {
       Explosion var11 = new Explosion(this, var1, var2, var4, var6, var8, var9, var10);
-      if (ForgeEventFactory.onExplosionStart(this, var11)) {
-         return var11;
-      } else {
-         var11.doExplosionA();
-         var11.doExplosionB(true);
-         return var11;
-      }
+      var11.doExplosionA();
+      var11.doExplosionB(true);
+      return var11;
    }
 
    public float getBlockDensity(Vec3d var1, AxisAlignedBB var2) {
@@ -1882,20 +1735,12 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public String getDebugLoadedEntities() {
-      return "All: " + this.loadedEntityList.size();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getProviderName() {
-      return this.chunkProvider.makeString();
-   }
-
    @Nullable
    public TileEntity getTileEntity(BlockPos var1) {
       if (this.isOutsideBuildHeight(var1)) {
          return null;
+      } else if (this.capturedTileEntities.containsKey(var1)) {
+         return (TileEntity)this.capturedTileEntities.get(var1);
       } else {
          TileEntity var2 = null;
          if (this.processingLoadedTiles) {
@@ -1927,20 +1772,16 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public void setTileEntity(BlockPos var1, @Nullable TileEntity var2) {
-      var1 = var1.toImmutable();
       if (!this.isOutsideBuildHeight(var1) && var2 != null && !var2.isInvalid()) {
-         if (!this.processingLoadedTiles) {
-            this.addTileEntity(var2);
-            Chunk var6 = this.getChunkFromBlockCoords(var1);
-            if (var6 != null) {
-               var6.addTileEntity(var1, var2);
-            }
-         } else {
+         if (this.captureBlockStates) {
+            var2.setWorld(this);
             var2.setPos(var1);
-            if (var2.getWorld() != this) {
-               var2.setWorld(this);
-            }
+            this.capturedTileEntities.put(var1, var2);
+            return;
+         }
 
+         if (this.processingLoadedTiles) {
+            var2.setPos(var1);
             Iterator var3 = this.addedTileEntityList.iterator();
 
             while(var3.hasNext()) {
@@ -1952,9 +1793,10 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
             }
 
             this.addedTileEntityList.add(var2);
+         } else {
+            this.addTileEntity(var2);
+            this.getChunkFromBlockCoords(var1).addTileEntity(var1, var2);
          }
-
-         this.updateComparatorOutputLevel(var1, this.getBlockState(var1).getBlock());
       }
 
    }
@@ -1964,9 +1806,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       if (var2 != null && this.processingLoadedTiles) {
          var2.invalidate();
          this.addedTileEntityList.remove(var2);
-         if (!(var2 instanceof ITickable)) {
-            this.loadedTileEntityList.remove(var2);
-         }
       } else {
          if (var2 != null) {
             this.addedTileEntityList.remove(var2);
@@ -1977,7 +1816,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          this.getChunkFromBlockCoords(var1).removeTileEntity(var1);
       }
 
-      this.updateComparatorOutputLevel(var1, this.getBlockState(var1).getBlock());
    }
 
    public void markTileEntityForRemoval(TileEntity var1) {
@@ -1996,7 +1834,7 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          Chunk var3 = this.chunkProvider.getLoadedChunk(var1.getX() >> 4, var1.getZ() >> 4);
          if (var3 != null && !var3.isEmpty()) {
             IBlockState var4 = this.getBlockState(var1);
-            return var4.getBlock().isNormalCube(var4, this, var1);
+            return var4.getMaterial().isOpaque() && var4.isFullCube();
          } else {
             return var2;
          }
@@ -2014,7 +1852,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    public void setAllowedSpawnTypes(boolean var1, boolean var2) {
       this.spawnHostileMobs = var1;
       this.spawnPeacefulMobs = var2;
-      this.provider.setAllowedSpawnTypes(var1, var2);
    }
 
    public void tick() {
@@ -2022,10 +1859,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    protected void calculateInitialWeather() {
-      this.provider.calculateInitialWeather();
-   }
-
-   public void calculateInitialWeatherBody() {
       if (this.worldInfo.isRaining()) {
          this.rainingStrength = 1.0F;
          if (this.worldInfo.isThundering()) {
@@ -2036,10 +1869,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    protected void updateWeather() {
-      this.provider.updateWeather();
-   }
-
-   public void updateWeatherBody() {
       if (!this.provider.hasNoSky() && !this.isRemote) {
          int var1 = this.worldInfo.getCleanWeatherTime();
          if (var1 > 0) {
@@ -2095,13 +1924,14 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          }
 
          this.rainingStrength = MathHelper.clamp(this.rainingStrength, 0.0F, 1.0F);
+
+         for(int var4 = 0; var4 < this.playerEntities.size(); ++var4) {
+            if (((EntityPlayerMP)this.playerEntities.get(var4)).world == this) {
+               ((EntityPlayerMP)this.playerEntities.get(var4)).tickWeather();
+            }
+         }
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   protected void playMoodSoundAndCheckLight(int var1, int var2, Chunk var3) {
-      var3.enqueueRelightChecks();
    }
 
    protected void updateBlocks() {
@@ -2122,10 +1952,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public boolean canBlockFreeze(BlockPos var1, boolean var2) {
-      return this.provider.canBlockFreeze(var1, var2);
-   }
-
-   public boolean canBlockFreezeBody(BlockPos var1, boolean var2) {
       Biome var3 = this.getBiome(var1);
       float var4 = var3.getFloatTemperature(var1);
       if (var4 > 0.15F) {
@@ -2155,10 +1981,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public boolean canSnowAt(BlockPos var1, boolean var2) {
-      return this.provider.canSnowAt(var1, var2);
-   }
-
-   public boolean canSnowAtBody(BlockPos var1, boolean var2) {
       Biome var3 = this.getBiome(var1);
       float var4 = var3.getFloatTemperature(var1);
       if (var4 > 0.15F) {
@@ -2168,7 +1990,7 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       } else {
          if (var1.getY() >= 0 && var1.getY() < 256 && this.getLightFor(EnumSkyBlock.BLOCK, var1) < 10) {
             IBlockState var5 = this.getBlockState(var1);
-            if (var5.getBlock().isAir(var5, this, var1) && Blocks.SNOW_LAYER.canPlaceBlockAt(this, var1)) {
+            if (var5.getMaterial() == Material.AIR && Blocks.SNOW_LAYER.canPlaceBlockAt(this, var1)) {
                return true;
             }
          }
@@ -2192,138 +2014,136 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
          return 15;
       } else {
          IBlockState var3 = this.getBlockState(var1);
-         int var4 = var3.getBlock().getLightValue(var3, this, var1);
-         int var5 = var2 == EnumSkyBlock.SKY ? 0 : var4;
-         int var6 = var3.getBlock().getLightOpacity(var3, this, var1);
-         if (var6 >= 15 && var4 > 0) {
-            var6 = 1;
+         int var4 = var2 == EnumSkyBlock.SKY ? 0 : var3.getLightValue();
+         int var5 = var3.getLightOpacity();
+         if (var5 >= 15 && var3.getLightValue() > 0) {
+            var5 = 1;
          }
 
-         if (var6 < 1) {
-            var6 = 1;
+         if (var5 < 1) {
+            var5 = 1;
          }
 
-         if (var6 >= 15) {
+         if (var5 >= 15) {
             return 0;
-         } else if (var5 >= 14) {
-            return var5;
+         } else if (var4 >= 14) {
+            return var4;
          } else {
-            BlockPos.PooledMutableBlockPos var7 = BlockPos.PooledMutableBlockPos.retain();
+            BlockPos.PooledMutableBlockPos var6 = BlockPos.PooledMutableBlockPos.retain();
 
-            for(EnumFacing var11 : EnumFacing.values()) {
-               var7.setPos(var1).move(var11);
-               int var12 = this.getLightFor(var2, var7) - var6;
-               if (var12 > var5) {
-                  var5 = var12;
+            for(EnumFacing var10 : EnumFacing.values()) {
+               var6.setPos(var1).move(var10);
+               int var11 = this.getLightFor(var2, var6) - var5;
+               if (var11 > var4) {
+                  var4 = var11;
                }
 
-               if (var5 >= 14) {
-                  return var5;
+               if (var4 >= 14) {
+                  return var4;
                }
             }
 
-            var7.release();
-            return var5;
+            var6.release();
+            return var4;
          }
       }
    }
 
    public boolean checkLightFor(EnumSkyBlock var1, BlockPos var2) {
-      if (!this.isAreaLoaded(var2, 17, false)) {
-         return false;
-      } else {
-         int var3 = 0;
+      Chunk var3 = this.getChunkIfLoaded(var2.getX() >> 4, var2.getZ() >> 4);
+      if (var3 != null && var3.areNeighborsLoaded(1)) {
          int var4 = 0;
+         int var5 = 0;
          this.theProfiler.startSection("getBrightness");
-         int var5 = this.getLightFor(var1, var2);
-         int var6 = this.getRawLight(var2, var1);
-         int var7 = var2.getX();
-         int var8 = var2.getY();
-         int var9 = var2.getZ();
-         if (var6 > var5) {
-            this.lightUpdateBlockList[var4++] = 133152;
-         } else if (var6 < var5) {
-            this.lightUpdateBlockList[var4++] = 133152 | var5 << 18;
+         int var6 = this.getLightFor(var1, var2);
+         int var7 = this.getRawLight(var2, var1);
+         int var8 = var2.getX();
+         int var9 = var2.getY();
+         int var10 = var2.getZ();
+         if (var7 > var6) {
+            this.lightUpdateBlockList[var5++] = 133152;
+         } else if (var7 < var6) {
+            this.lightUpdateBlockList[var5++] = 133152 | var6 << 18;
 
-            while(var3 < var4) {
-               int var10 = this.lightUpdateBlockList[var3++];
-               int var11 = (var10 & 63) - 32 + var7;
-               int var12 = (var10 >> 6 & 63) - 32 + var8;
-               int var13 = (var10 >> 12 & 63) - 32 + var9;
-               int var14 = var10 >> 18 & 15;
-               BlockPos var15 = new BlockPos(var11, var12, var13);
-               int var16 = this.getLightFor(var1, var15);
-               if (var16 == var14) {
-                  this.setLightFor(var1, var15, 0);
-                  if (var14 > 0) {
-                     int var17 = MathHelper.abs(var11 - var7);
+            while(var4 < var5) {
+               int var11 = this.lightUpdateBlockList[var4++];
+               int var12 = (var11 & 63) - 32 + var8;
+               int var13 = (var11 >> 6 & 63) - 32 + var9;
+               int var14 = (var11 >> 12 & 63) - 32 + var10;
+               int var15 = var11 >> 18 & 15;
+               BlockPos var16 = new BlockPos(var12, var13, var14);
+               int var17 = this.getLightFor(var1, var16);
+               if (var17 == var15) {
+                  this.setLightFor(var1, var16, 0);
+                  if (var15 > 0) {
                      int var18 = MathHelper.abs(var12 - var8);
                      int var19 = MathHelper.abs(var13 - var9);
-                     if (var17 + var18 + var19 < 17) {
-                        BlockPos.PooledMutableBlockPos var20 = BlockPos.PooledMutableBlockPos.retain();
+                     int var20 = MathHelper.abs(var14 - var10);
+                     if (var18 + var19 + var20 < 17) {
+                        BlockPos.PooledMutableBlockPos var21 = BlockPos.PooledMutableBlockPos.retain();
 
-                        for(EnumFacing var24 : EnumFacing.values()) {
-                           int var25 = var11 + var24.getFrontOffsetX();
-                           int var26 = var12 + var24.getFrontOffsetY();
-                           int var27 = var13 + var24.getFrontOffsetZ();
-                           var20.setPos(var25, var26, var27);
-                           int var28 = Math.max(1, this.getBlockState(var20).getBlock().getLightOpacity(this.getBlockState(var20), this, var20));
-                           var16 = this.getLightFor(var1, var20);
-                           if (var16 == var14 - var28 && var4 < this.lightUpdateBlockList.length) {
-                              this.lightUpdateBlockList[var4++] = var25 - var7 + 32 | var26 - var8 + 32 << 6 | var27 - var9 + 32 << 12 | var14 - var28 << 18;
+                        for(EnumFacing var25 : EnumFacing.values()) {
+                           int var26 = var12 + var25.getFrontOffsetX();
+                           int var27 = var13 + var25.getFrontOffsetY();
+                           int var28 = var14 + var25.getFrontOffsetZ();
+                           var21.setPos(var26, var27, var28);
+                           int var29 = Math.max(1, this.getBlockState(var21).getLightOpacity());
+                           var17 = this.getLightFor(var1, var21);
+                           if (var17 == var15 - var29 && var5 < this.lightUpdateBlockList.length) {
+                              this.lightUpdateBlockList[var5++] = var26 - var8 + 32 | var27 - var9 + 32 << 6 | var28 - var10 + 32 << 12 | var15 - var29 << 18;
                            }
                         }
 
-                        var20.release();
+                        var21.release();
                      }
                   }
                }
             }
 
-            var3 = 0;
+            var4 = 0;
          }
 
          this.theProfiler.endSection();
          this.theProfiler.startSection("checkedPosition < toCheckCount");
 
-         while(var3 < var4) {
-            int var29 = this.lightUpdateBlockList[var3++];
-            int var30 = (var29 & 63) - 32 + var7;
-            int var31 = (var29 >> 6 & 63) - 32 + var8;
-            int var32 = (var29 >> 12 & 63) - 32 + var9;
-            BlockPos var33 = new BlockPos(var30, var31, var32);
-            int var34 = this.getLightFor(var1, var33);
-            int var36 = this.getRawLight(var33, var1);
-            if (var36 != var34) {
-               this.setLightFor(var1, var33, var36);
-               if (var36 > var34) {
-                  int var37 = Math.abs(var30 - var7);
+         while(var4 < var5) {
+            int var30 = this.lightUpdateBlockList[var4++];
+            int var31 = (var30 & 63) - 32 + var8;
+            int var32 = (var30 >> 6 & 63) - 32 + var9;
+            int var33 = (var30 >> 12 & 63) - 32 + var10;
+            BlockPos var34 = new BlockPos(var31, var32, var33);
+            int var35 = this.getLightFor(var1, var34);
+            int var37 = this.getRawLight(var34, var1);
+            if (var37 != var35) {
+               this.setLightFor(var1, var34, var37);
+               if (var37 > var35) {
                   int var38 = Math.abs(var31 - var8);
                   int var39 = Math.abs(var32 - var9);
-                  boolean var40 = var4 < this.lightUpdateBlockList.length - 6;
-                  if (var37 + var38 + var39 < 17 && var40) {
-                     if (this.getLightFor(var1, var33.west()) < var36) {
-                        this.lightUpdateBlockList[var4++] = var30 - 1 - var7 + 32 + (var31 - var8 + 32 << 6) + (var32 - var9 + 32 << 12);
+                  int var40 = Math.abs(var33 - var10);
+                  boolean var41 = var5 < this.lightUpdateBlockList.length - 6;
+                  if (var38 + var39 + var40 < 17 && var41) {
+                     if (this.getLightFor(var1, var34.west()) < var37) {
+                        this.lightUpdateBlockList[var5++] = var31 - 1 - var8 + 32 + (var32 - var9 + 32 << 6) + (var33 - var10 + 32 << 12);
                      }
 
-                     if (this.getLightFor(var1, var33.east()) < var36) {
-                        this.lightUpdateBlockList[var4++] = var30 + 1 - var7 + 32 + (var31 - var8 + 32 << 6) + (var32 - var9 + 32 << 12);
+                     if (this.getLightFor(var1, var34.east()) < var37) {
+                        this.lightUpdateBlockList[var5++] = var31 + 1 - var8 + 32 + (var32 - var9 + 32 << 6) + (var33 - var10 + 32 << 12);
                      }
 
-                     if (this.getLightFor(var1, var33.down()) < var36) {
-                        this.lightUpdateBlockList[var4++] = var30 - var7 + 32 + (var31 - 1 - var8 + 32 << 6) + (var32 - var9 + 32 << 12);
+                     if (this.getLightFor(var1, var34.down()) < var37) {
+                        this.lightUpdateBlockList[var5++] = var31 - var8 + 32 + (var32 - 1 - var9 + 32 << 6) + (var33 - var10 + 32 << 12);
                      }
 
-                     if (this.getLightFor(var1, var33.up()) < var36) {
-                        this.lightUpdateBlockList[var4++] = var30 - var7 + 32 + (var31 + 1 - var8 + 32 << 6) + (var32 - var9 + 32 << 12);
+                     if (this.getLightFor(var1, var34.up()) < var37) {
+                        this.lightUpdateBlockList[var5++] = var31 - var8 + 32 + (var32 + 1 - var9 + 32 << 6) + (var33 - var10 + 32 << 12);
                      }
 
-                     if (this.getLightFor(var1, var33.north()) < var36) {
-                        this.lightUpdateBlockList[var4++] = var30 - var7 + 32 + (var31 - var8 + 32 << 6) + (var32 - 1 - var9 + 32 << 12);
+                     if (this.getLightFor(var1, var34.north()) < var37) {
+                        this.lightUpdateBlockList[var5++] = var31 - var8 + 32 + (var32 - var9 + 32 << 6) + (var33 - 1 - var10 + 32 << 12);
                      }
 
-                     if (this.getLightFor(var1, var33.south()) < var36) {
-                        this.lightUpdateBlockList[var4++] = var30 - var7 + 32 + (var31 - var8 + 32 << 6) + (var32 + 1 - var9 + 32 << 12);
+                     if (this.getLightFor(var1, var34.south()) < var37) {
+                        this.lightUpdateBlockList[var5++] = var31 - var8 + 32 + (var32 - var9 + 32 << 6) + (var33 + 1 - var10 + 32 << 12);
                      }
                   }
                }
@@ -2332,6 +2152,8 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
          this.theProfiler.endSection();
          return true;
+      } else {
+         return false;
       }
    }
 
@@ -2355,10 +2177,10 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
    public List getEntitiesInAABBexcluding(@Nullable Entity var1, AxisAlignedBB var2, @Nullable Predicate var3) {
       ArrayList var4 = Lists.newArrayList();
-      int var5 = MathHelper.floor((var2.minX - MAX_ENTITY_RADIUS) / 16.0D);
-      int var6 = MathHelper.floor((var2.maxX + MAX_ENTITY_RADIUS) / 16.0D);
-      int var7 = MathHelper.floor((var2.minZ - MAX_ENTITY_RADIUS) / 16.0D);
-      int var8 = MathHelper.floor((var2.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
+      int var5 = MathHelper.floor((var2.minX - 2.0D) / 16.0D);
+      int var6 = MathHelper.floor((var2.maxX + 2.0D) / 16.0D);
+      int var7 = MathHelper.floor((var2.minZ - 2.0D) / 16.0D);
+      int var8 = MathHelper.floor((var2.maxZ + 2.0D) / 16.0D);
 
       for(int var9 = var5; var9 <= var6; ++var9) {
          for(int var10 = var7; var10 <= var8; ++var10) {
@@ -2400,10 +2222,10 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public List getEntitiesWithinAABB(Class var1, AxisAlignedBB var2, @Nullable Predicate var3) {
-      int var4 = MathHelper.floor((var2.minX - MAX_ENTITY_RADIUS) / 16.0D);
-      int var5 = MathHelper.ceil((var2.maxX + MAX_ENTITY_RADIUS) / 16.0D);
-      int var6 = MathHelper.floor((var2.minZ - MAX_ENTITY_RADIUS) / 16.0D);
-      int var7 = MathHelper.ceil((var2.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
+      int var4 = MathHelper.floor((var2.minX - 2.0D) / 16.0D);
+      int var5 = MathHelper.ceil((var2.maxX + 2.0D) / 16.0D);
+      int var6 = MathHelper.floor((var2.minZ - 2.0D) / 16.0D);
+      int var7 = MathHelper.ceil((var2.maxZ + 2.0D) / 16.0D);
       ArrayList var8 = Lists.newArrayList();
 
       for(int var9 = var4; var9 < var5; ++var9) {
@@ -2442,11 +2264,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       return (Entity)this.entitiesById.lookup(var1);
    }
 
-   @SideOnly(Side.CLIENT)
-   public List getLoadedEntityList() {
-      return this.loadedEntityList;
-   }
-
    public void markChunkDirty(BlockPos var1, TileEntity var2) {
       if (this.isBlockLoaded(var1)) {
          this.getChunkFromBlockCoords(var1).setChunkModified();
@@ -2456,19 +2273,35 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
    public int countEntities(Class var1) {
       int var2 = 0;
+      Iterator var3 = this.loadedEntityList.iterator();
 
-      for(Entity var4 : this.loadedEntityList) {
-         if ((!(var4 instanceof EntityLiving) || !((EntityLiving)var4).isNoDespawnRequired()) && var1.isAssignableFrom(var4.getClass())) {
+      while(true) {
+         Entity var4;
+         while(true) {
+            if (!var3.hasNext()) {
+               return var2;
+            }
+
+            var4 = (Entity)var3.next();
+            if (!(var4 instanceof EntityLiving)) {
+               break;
+            }
+
+            EntityLiving var5 = (EntityLiving)var4;
+            if (!var5.canDespawn() || !var5.isNoDespawnRequired()) {
+               break;
+            }
+         }
+
+         if (var1.isAssignableFrom(var4.getClass())) {
             ++var2;
          }
       }
-
-      return var2;
    }
 
    public void loadEntities(Collection var1) {
       for(Entity var3 : var1) {
-         if (!MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(var3, this))) {
+         if (var3 != null) {
             this.loadedEntityList.add(var3);
             this.onEntityAdded(var3);
          }
@@ -2483,7 +2316,10 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    public boolean canBlockBePlaced(Block var1, BlockPos var2, boolean var3, EnumFacing var4, @Nullable Entity var5, @Nullable ItemStack var6) {
       IBlockState var7 = this.getBlockState(var2);
       AxisAlignedBB var8 = var3 ? null : var1.getDefaultState().getCollisionBoundingBox(this, var2);
-      return var8 != Block.NULL_AABB && !this.checkNoEntityCollision(var8.offset(var2), var5) ? false : (var7.getMaterial() == Material.CIRCUITS && var1 == Blocks.ANVIL ? true : var7.getBlock().isReplaceable(this, var2) && var1.canReplace(this, var2, var4, var6));
+      boolean var9 = var8 != Block.NULL_AABB && !this.checkNoEntityCollision(var8.offset(var2), var5) ? false : (var7.getMaterial() == Material.CIRCUITS && var1 == Blocks.ANVIL ? true : var7.getMaterial().isReplaceable() && var1.canReplace(this, var2, var4, var6));
+      BlockCanBuildEvent var10 = new BlockCanBuildEvent(this.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ()), CraftMagicNumbers.getId(var1), var9);
+      this.getServer().getPluginManager().callEvent(var10);
+      return var10.isBuildable();
    }
 
    public int getSeaLevel() {
@@ -2503,29 +2339,29 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public int getStrongPower(BlockPos var1) {
-      int var2 = 0;
-      var2 = Math.max(var2, this.getStrongPower(var1.down(), EnumFacing.DOWN));
-      if (var2 >= 15) {
-         return var2;
+      byte var2 = 0;
+      int var3 = Math.max(var2, this.getStrongPower(var1.down(), EnumFacing.DOWN));
+      if (var3 >= 15) {
+         return var3;
       } else {
-         var2 = Math.max(var2, this.getStrongPower(var1.up(), EnumFacing.UP));
-         if (var2 >= 15) {
-            return var2;
+         var3 = Math.max(var3, this.getStrongPower(var1.up(), EnumFacing.UP));
+         if (var3 >= 15) {
+            return var3;
          } else {
-            var2 = Math.max(var2, this.getStrongPower(var1.north(), EnumFacing.NORTH));
-            if (var2 >= 15) {
-               return var2;
+            var3 = Math.max(var3, this.getStrongPower(var1.north(), EnumFacing.NORTH));
+            if (var3 >= 15) {
+               return var3;
             } else {
-               var2 = Math.max(var2, this.getStrongPower(var1.south(), EnumFacing.SOUTH));
-               if (var2 >= 15) {
-                  return var2;
+               var3 = Math.max(var3, this.getStrongPower(var1.south(), EnumFacing.SOUTH));
+               if (var3 >= 15) {
+                  return var3;
                } else {
-                  var2 = Math.max(var2, this.getStrongPower(var1.west(), EnumFacing.WEST));
-                  if (var2 >= 15) {
-                     return var2;
+                  var3 = Math.max(var3, this.getStrongPower(var1.west(), EnumFacing.WEST));
+                  if (var3 >= 15) {
+                     return var3;
                   } else {
-                     var2 = Math.max(var2, this.getStrongPower(var1.east(), EnumFacing.EAST));
-                     return var2 >= 15 ? var2 : var2;
+                     var3 = Math.max(var3, this.getStrongPower(var1.east(), EnumFacing.EAST));
+                     return var3 >= 15 ? var3 : var3;
                   }
                }
             }
@@ -2539,7 +2375,7 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
    public int getRedstonePower(BlockPos var1, EnumFacing var2) {
       IBlockState var3 = this.getBlockState(var1);
-      return var3.getBlock().shouldCheckWeakPower(var3, this, var1, var2) ? this.getStrongPower(var1) : var3.getWeakPower(this, var1, var2);
+      return var3.isNormalCube() ? this.getStrongPower(var1) : var3.getWeakPower(this, var1, var2);
    }
 
    public boolean isBlockPowered(BlockPos var1) {
@@ -2580,7 +2416,7 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
       for(int var13 = 0; var13 < this.playerEntities.size(); ++var13) {
          EntityPlayer var14 = (EntityPlayer)this.playerEntities.get(var13);
-         if ((EntitySelectors.CAN_AI_TARGET.apply(var14) || !var9) && (EntitySelectors.NOT_SPECTATING.apply(var14) || var9)) {
+         if (var14 != null && !var14.isDead && (EntitySelectors.CAN_AI_TARGET.apply(var14) || !var9) && (EntitySelectors.NOT_SPECTATING.apply(var14) || var9)) {
             double var15 = var14.getDistanceSq(var1, var3, var5);
             if ((var7 < 0.0D || var15 < var7 * var7) && (var10 == -1.0D || var15 < var10)) {
                var10 = var15;
@@ -2640,10 +2476,9 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
             }
 
             if (var11 != null) {
-               var20 *= ((Double)Objects.firstNonNull(var11.apply(var17), Double.valueOf(1.0D))).doubleValue();
+               var20 *= ((Double)Objects.firstNonNull((Double)var11.apply(var17), Double.valueOf(1.0D))).doubleValue();
             }
 
-            var20 = ForgeHooks.getPlayerVisibilityDistance(var17, var20, var7);
             if ((var9 < 0.0D || Math.abs(var17.posY - var3) < var9 * var9) && (var7 < 0.0D || var18 < var20 * var20) && (var13 == -1.0D || var18 < var13)) {
                var13 = var18;
                var15 = var17;
@@ -2678,21 +2513,12 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       return null;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void sendQuittingDisconnectingPacket() {
-   }
-
    public void checkSessionLock() throws MinecraftException {
       this.saveHandler.checkSessionLock();
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setTotalWorldTime(long var1) {
-      this.worldInfo.setWorldTotalTime(var1);
-   }
-
    public long getSeed() {
-      return this.provider.getSeed();
+      return this.worldInfo.getSeed();
    }
 
    public long getTotalWorldTime() {
@@ -2700,15 +2526,15 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public long getWorldTime() {
-      return this.provider.getWorldTime();
+      return this.worldInfo.getWorldTime();
    }
 
    public void setWorldTime(long var1) {
-      this.provider.setWorldTime(var1);
+      this.worldInfo.setWorldTime(var1);
    }
 
    public BlockPos getSpawnPoint() {
-      BlockPos var1 = this.provider.getSpawnPoint();
+      BlockPos var1 = new BlockPos(this.worldInfo.getSpawnX(), this.worldInfo.getSpawnY(), this.worldInfo.getSpawnZ());
       if (!this.getWorldBorder().contains(var1)) {
          var1 = this.getHeight(new BlockPos(this.getWorldBorder().getCenterX(), 0.0D, this.getWorldBorder().getCenterZ()));
       }
@@ -2717,32 +2543,10 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public void setSpawnPoint(BlockPos var1) {
-      this.provider.setSpawnPoint(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void joinEntityInSurroundings(Entity var1) {
-      int var2 = MathHelper.floor(var1.posX / 16.0D);
-      int var3 = MathHelper.floor(var1.posZ / 16.0D);
-      boolean var4 = true;
-
-      for(int var5 = -2; var5 <= 2; ++var5) {
-         for(int var6 = -2; var6 <= 2; ++var6) {
-            this.getChunkFromChunkCoords(var2 + var5, var3 + var6);
-         }
-      }
-
-      if (!this.loadedEntityList.contains(var1) && !MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(var1, this))) {
-         this.loadedEntityList.add(var1);
-      }
-
+      this.worldInfo.setSpawn(var1);
    }
 
    public boolean isBlockModifiable(EntityPlayer var1, BlockPos var2) {
-      return this.provider.canMineBlock(var1, var2);
-   }
-
-   public boolean canMineBlockBody(EntityPlayer var1, BlockPos var2) {
       return true;
    }
 
@@ -2772,24 +2576,19 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    public void updateAllPlayersSleepingFlag() {
    }
 
+   public void checkSleepStatus() {
+      if (!this.isRemote) {
+         this.updateAllPlayersSleepingFlag();
+      }
+
+   }
+
    public float getThunderStrength(float var1) {
       return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * var1) * this.getRainStrength(var1);
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setThunderStrength(float var1) {
-      this.prevThunderingStrength = var1;
-      this.thunderingStrength = var1;
-   }
-
    public float getRainStrength(float var1) {
       return this.prevRainingStrength + (this.rainingStrength - this.prevRainingStrength) * var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setRainStrength(float var1) {
-      this.prevRainingStrength = var1;
-      this.rainingStrength = var1;
    }
 
    public boolean isThundering() {
@@ -2814,7 +2613,8 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public boolean isBlockinHighHumidity(BlockPos var1) {
-      return this.provider.isBlockHighHumidity(var1);
+      Biome var2 = this.getBiome(var1);
+      return var2.isHighHumidity();
    }
 
    @Nullable
@@ -2864,11 +2664,11 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public int getHeight() {
-      return this.provider.getHeight();
+      return 256;
    }
 
    public int getActualHeight() {
-      return this.provider.getActualHeight();
+      return this.provider.hasNoSky() ? 128 : 256;
    }
 
    public Random setRandomSeed(int var1, int var2, int var3) {
@@ -2881,13 +2681,21 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       CrashReportCategory var2 = var1.makeCategoryDepth("Affected level", 1);
       var2.addCrashSection("Level name", this.worldInfo == null ? "????" : this.worldInfo.getWorldName());
       var2.setDetail("All players", new ICrashReportDetail() {
-         public String call() {
+         public String a() {
             return World.this.playerEntities.size() + " total; " + World.this.playerEntities;
+         }
+
+         public Object call() throws Exception {
+            return this.a();
          }
       });
       var2.setDetail("Chunk stats", new ICrashReportDetail() {
-         public String call() {
+         public String a() {
             return World.this.chunkProvider.makeString();
+         }
+
+         public Object call() throws Exception {
+            return this.a();
          }
       });
 
@@ -2900,11 +2708,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       return var2;
    }
 
-   @SideOnly(Side.CLIENT)
-   public double getHorizon() {
-      return this.provider.getHorizon();
-   }
-
    public void sendBlockBreakProgress(int var1, BlockPos var2, int var3) {
       for(int var4 = 0; var4 < this.eventListeners.size(); ++var4) {
          IWorldEventListener var5 = (IWorldEventListener)this.eventListeners.get(var4);
@@ -2915,14 +2718,10 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
 
    public Calendar getCurrentDate() {
       if (this.getTotalWorldTime() % 600L == 0L) {
-         this.theCalendar.setTimeInMillis(MinecraftServer.getCurrentTimeMillis());
+         this.theCalendar.setTimeInMillis(MinecraftServer.av());
       }
 
       return this.theCalendar;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void makeFireworks(double var1, double var3, double var5, double var7, double var9, double var11, @Nullable NBTTagCompound var13) {
    }
 
    public Scoreboard getScoreboard() {
@@ -2930,16 +2729,17 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
    }
 
    public void updateComparatorOutputLevel(BlockPos var1, Block var2) {
-      for(EnumFacing var6 : EnumFacing.VALUES) {
-         BlockPos var7 = var1.offset(var6);
-         if (this.isBlockLoaded(var7)) {
-            IBlockState var8 = this.getBlockState(var7);
-            var8.getBlock().onNeighborChange(this, var7, var1);
-            if (var8.getBlock().isNormalCube(var8, this, var7)) {
-               var7 = var7.offset(var6);
-               var8 = this.getBlockState(var7);
-               if (var8.getBlock().getWeakChanges(this, var7)) {
-                  var8.getBlock().onNeighborChange(this, var7, var1);
+      for(EnumFacing var4 : EnumFacing.Plane.HORIZONTAL) {
+         BlockPos var5 = var1.offset(var4);
+         if (this.isBlockLoaded(var5)) {
+            IBlockState var6 = this.getBlockState(var5);
+            if (Blocks.UNPOWERED_COMPARATOR.isSameDiode(var6)) {
+               var6.neighborChanged(this, var5, var2);
+            } else if (var6.isNormalCube()) {
+               var5 = var5.offset(var4);
+               var6 = this.getBlockState(var5);
+               if (Blocks.UNPOWERED_COMPARATOR.isSameDiode(var6)) {
+                  var6.neighborChanged(this, var5, var2);
                }
             }
          }
@@ -2970,11 +2770,6 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       this.skylightSubtracted = var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getLastLightningBolt() {
-      return this.lastLightningBolt;
-   }
-
    public void setLastLightningBolt(int var1) {
       this.lastLightningBolt = var1;
    }
@@ -2991,71 +2786,7 @@ public abstract class World implements IBlockAccess, ICapabilityProvider {
       BlockPos var3 = this.getSpawnPoint();
       int var4 = var1 * 16 + 8 - var3.getX();
       int var5 = var2 * 16 + 8 - var3.getZ();
-      boolean var6 = true;
-      return var4 >= -128 && var4 <= 128 && var5 >= -128 && var5 <= 128;
-   }
-
-   public boolean isSideSolid(BlockPos var1, EnumFacing var2) {
-      return this.isSideSolid(var1, var2, false);
-   }
-
-   public boolean isSideSolid(BlockPos var1, EnumFacing var2, boolean var3) {
-      if (!this.isValid(var1)) {
-         return var3;
-      } else {
-         Chunk var4 = this.getChunkFromBlockCoords(var1);
-         return var4 != null && !var4.isEmpty() ? this.getBlockState(var1).isSideSolid(this, var1, var2) : var3;
-      }
-   }
-
-   public ImmutableSetMultimap getPersistentChunks() {
-      return ForgeChunkManager.getPersistentChunksFor(this);
-   }
-
-   public Iterator getPersistentChunkIterable(Iterator var1) {
-      return ForgeChunkManager.getPersistentChunksIterableFor(this, var1);
-   }
-
-   public int getBlockLightOpacity(BlockPos var1) {
-      return !this.isValid(var1) ? 0 : this.getChunkFromBlockCoords(var1).getBlockLightOpacity(var1);
-   }
-
-   public int countEntities(EnumCreatureType var1, boolean var2) {
-      int var3 = 0;
-
-      for(int var4 = 0; var4 < this.loadedEntityList.size(); ++var4) {
-         if (((Entity)this.loadedEntityList.get(var4)).isCreatureType(var1, var2)) {
-            ++var3;
-         }
-      }
-
-      return var3;
-   }
-
-   protected void initCapabilities() {
-      ICapabilityProvider var1 = this.provider.initCapabilities();
-      this.capabilities = ForgeEventFactory.gatherCapabilities(this, var1);
-      WorldCapabilityData var2 = (WorldCapabilityData)this.perWorldStorage.getOrLoadData(WorldCapabilityData.class, "capabilities");
-      if (var2 == null) {
-         this.capabilityData = new WorldCapabilityData(this.capabilities);
-         this.perWorldStorage.setData(this.capabilityData.mapName, this.capabilityData);
-      } else {
-         this.capabilityData = var2;
-         this.capabilityData.setCapabilities(this.provider, this.capabilities);
-      }
-
-   }
-
-   public boolean hasCapability(Capability var1, EnumFacing var2) {
-      return this.capabilities == null ? false : this.capabilities.hasCapability(var1, var2);
-   }
-
-   public Object getCapability(Capability var1, EnumFacing var2) {
-      return this.capabilities == null ? null : this.capabilities.getCapability(var1, var2);
-   }
-
-   public MapStorage getPerWorldStorage() {
-      return this.perWorldStorage;
+      return var4 >= -128 && var4 <= 128 && var5 >= -128 && var5 <= 128 && this.keepSpawnInMemory;
    }
 
    public void sendPacketToServer(Packet var1) {

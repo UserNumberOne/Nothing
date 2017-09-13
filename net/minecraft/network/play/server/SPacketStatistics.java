@@ -9,8 +9,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketStatistics implements Packet {
    private Map statisticMap;
@@ -48,10 +46,5 @@ public class SPacketStatistics implements Packet {
          var1.writeVarInt(((Integer)var3.getValue()).intValue());
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Map getStatisticMap() {
-      return this.statisticMap;
    }
 }

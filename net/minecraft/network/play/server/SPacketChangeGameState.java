@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketChangeGameState implements Packet {
    public static final String[] MESSAGE_NAMES = new String[]{"tile.bed.notValid"};
@@ -32,15 +30,5 @@ public class SPacketChangeGameState implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleChangeGameState(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getGameState() {
-      return this.state;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getValue() {
-      return this.value;
    }
 }

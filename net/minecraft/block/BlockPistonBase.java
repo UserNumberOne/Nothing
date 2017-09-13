@@ -1,6 +1,8 @@
 package net.minecraft.block;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -29,6 +31,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.block.CraftBlock;
+import org.bukkit.event.Event;
+import org.bukkit.event.block.BlockPistonEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 
 public class BlockPistonBase extends BlockDirectional {
    public static final PropertyBool EXTENDED = PropertyBool.create("extended");
@@ -51,19 +58,19 @@ public class BlockPistonBase extends BlockDirectional {
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
       if (((Boolean)var1.getValue(EXTENDED)).booleanValue()) {
-         switch((EnumFacing)var1.getValue(FACING)) {
-         case DOWN:
+         switch(BlockPistonBase.SyntheticClass_1.a[((EnumFacing)var1.getValue(FACING)).ordinal()]) {
+         case 1:
             return PISTON_BASE_DOWN_AABB;
-         case UP:
+         case 2:
          default:
             return PISTON_BASE_UP_AABB;
-         case NORTH:
+         case 3:
             return PISTON_BASE_NORTH_AABB;
-         case SOUTH:
+         case 4:
             return PISTON_BASE_SOUTH_AABB;
-         case WEST:
+         case 5:
             return PISTON_BASE_WEST_AABB;
-         case EAST:
+         case 6:
             return PISTON_BASE_EAST_AABB;
          }
       } else {
@@ -117,6 +124,15 @@ public class BlockPistonBase extends BlockDirectional {
             var1.addBlockEvent(var2, this, 0, var4.getIndex());
          }
       } else if (!var5 && ((Boolean)var3.getValue(EXTENDED)).booleanValue()) {
+         if (!this.isSticky) {
+            org.bukkit.block.Block var6 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+            BlockPistonRetractEvent var7 = new BlockPistonRetractEvent(var6, ImmutableList.of(), CraftBlock.notchToBlockFace(var4));
+            var1.getServer().getPluginManager().callEvent(var7);
+            if (var7.isCancelled()) {
+               return;
+            }
+         }
+
          var1.addBlockEvent(var2, this, 1, var4.getIndex());
       }
 
@@ -132,10 +148,10 @@ public class BlockPistonBase extends BlockDirectional {
       if (var1.isSidePowered(var2, EnumFacing.DOWN)) {
          return true;
       } else {
-         BlockPos var9 = var2.up();
+         BlockPos var12 = var2.up();
 
-         for(EnumFacing var8 : EnumFacing.values()) {
-            if (var8 != EnumFacing.DOWN && var1.isSidePowered(var9.offset(var8), var8)) {
+         for(EnumFacing var10 : EnumFacing.values()) {
+            if (var10 != EnumFacing.DOWN && var1.isSidePowered(var12.offset(var10), var10)) {
                return true;
             }
          }
@@ -189,7 +205,7 @@ public class BlockPistonBase extends BlockDirectional {
                }
             }
 
-            if (!var11 && !var9.getBlock().isAir(var9, var2, var3) && canPush(var9, var2, var8, var6.getOpposite(), false) && (var9.getMobilityFlag() == EnumPushReaction.NORMAL || var10 == Blocks.PISTON || var10 == Blocks.STICKY_PISTON)) {
+            if (!var11 && canPush(var9, var2, var8, var6.getOpposite(), false) && (var9.getMobilityFlag() == EnumPushReaction.NORMAL || var10 == Blocks.PISTON || var10 == Blocks.STICKY_PISTON)) {
                this.doMove(var2, var3, var6, false);
             }
          } else {
@@ -251,7 +267,7 @@ public class BlockPistonBase extends BlockDirectional {
                return false;
             }
 
-            return !var5.hasTileEntity(var0);
+            return !var5.hasTileEntity();
          } else {
             return false;
          }
@@ -277,55 +293,92 @@ public class BlockPistonBase extends BlockDirectional {
             var7.add(var1.getBlockState(var9).getActualState(var1, var9));
          }
 
-         List var16 = var5.getBlocksToDestroy();
-         int var17 = var6.size() + var16.size();
-         IBlockState[] var10 = new IBlockState[var17];
+         List var23 = var5.getBlocksToDestroy();
+         int var24 = var6.size() + var23.size();
+         IBlockState[] var10 = new IBlockState[var24];
          EnumFacing var11 = var4 ? var3 : var3.getOpposite();
+         final org.bukkit.block.Block var12 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+         final List var13 = var5.getBlocksToMove();
+         final List var14 = var5.getBlocksToDestroy();
+         AbstractList var15 = new AbstractList() {
+            public int size() {
+               return var13.size() + var14.size();
+            }
 
-         for(int var12 = var16.size() - 1; var12 >= 0; --var12) {
-            BlockPos var13 = (BlockPos)var16.get(var12);
-            IBlockState var14 = var1.getBlockState(var13);
-            float var15 = var14.getBlock() instanceof BlockSnow ? -1.0F : 1.0F;
-            var14.getBlock().dropBlockAsItemWithChance(var1, var13, var14, var15, 0);
-            var1.setBlockToAir(var13);
-            --var17;
-            var10[var17] = var14;
-         }
-
-         for(int var18 = var6.size() - 1; var18 >= 0; --var18) {
-            BlockPos var20 = (BlockPos)var6.get(var18);
-            IBlockState var25 = var1.getBlockState(var20);
-            var1.setBlockState(var20, Blocks.AIR.getDefaultState(), 2);
-            var20 = var20.offset(var11);
-            var1.setBlockState(var20, Blocks.PISTON_EXTENSION.getDefaultState().withProperty(FACING, var3), 4);
-            var1.setTileEntity(var20, BlockPistonMoving.createTilePiston((IBlockState)var7.get(var18), var3, var4, false));
-            --var17;
-            var10[var17] = var25;
-         }
-
-         BlockPos var19 = var2.offset(var3);
+            public org.bukkit.block.Block get(int var1) {
+               if (var1 < this.size() && var1 >= 0) {
+                  BlockPos var2 = var1 < var13.size() ? (BlockPos)var13.get(var1) : (BlockPos)var14.get(var1 - var13.size());
+                  return var12.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+               } else {
+                  throw new ArrayIndexOutOfBoundsException(var1);
+               }
+            }
+         };
+         Object var16;
          if (var4) {
-            BlockPistonExtension.EnumPistonType var22 = this.isSticky ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT;
-            IBlockState var26 = Blocks.PISTON_HEAD.getDefaultState().withProperty(BlockPistonExtension.FACING, var3).withProperty(BlockPistonExtension.TYPE, var22);
-            IBlockState var27 = Blocks.PISTON_EXTENSION.getDefaultState().withProperty(BlockPistonMoving.FACING, var3).withProperty(BlockPistonMoving.TYPE, this.isSticky ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT);
-            var1.setBlockState(var19, var27, 4);
-            var1.setTileEntity(var19, BlockPistonMoving.createTilePiston(var26, var3, true, false));
+            var16 = new BlockPistonExtendEvent(var12, var15, CraftBlock.notchToBlockFace(var11));
+         } else {
+            var16 = new BlockPistonRetractEvent(var12, var15, CraftBlock.notchToBlockFace(var11));
          }
 
-         for(int var23 = var16.size() - 1; var23 >= 0; --var23) {
-            var1.notifyNeighborsOfStateChange((BlockPos)var16.get(var23), var10[var17++].getBlock());
-         }
+         var1.getServer().getPluginManager().callEvent((Event)var16);
+         if (((BlockPistonEvent)var16).isCancelled()) {
+            for(BlockPos var30 : var14) {
+               var1.notifyBlockUpdate(var30, Blocks.AIR.getDefaultState(), var1.getBlockState(var30), 3);
+            }
 
-         for(int var24 = var6.size() - 1; var24 >= 0; --var24) {
-            var1.notifyNeighborsOfStateChange((BlockPos)var6.get(var24), var10[var17++].getBlock());
-         }
+            for(BlockPos var31 : var13) {
+               var1.notifyBlockUpdate(var31, Blocks.AIR.getDefaultState(), var1.getBlockState(var31), 3);
+               var31 = var31.offset(var11);
+               var1.notifyBlockUpdate(var31, Blocks.AIR.getDefaultState(), var1.getBlockState(var31), 3);
+            }
 
-         if (var4) {
-            var1.notifyNeighborsOfStateChange(var19, Blocks.PISTON_HEAD);
-            var1.notifyNeighborsOfStateChange(var2, this);
-         }
+            return false;
+         } else {
+            for(int var18 = var23.size() - 1; var18 >= 0; --var18) {
+               BlockPos var17 = (BlockPos)var23.get(var18);
+               IBlockState var19 = var1.getBlockState(var17);
+               var19.getBlock().dropBlockAsItem(var1, var17, var19, 0);
+               var1.setBlockToAir(var17);
+               --var24;
+               var10[var24] = var19;
+            }
 
-         return true;
+            for(int var29 = var6.size() - 1; var29 >= 0; --var29) {
+               BlockPos var25 = (BlockPos)var6.get(var29);
+               IBlockState var33 = var1.getBlockState(var25);
+               var1.setBlockState(var25, Blocks.AIR.getDefaultState(), 2);
+               var25 = var25.offset(var11);
+               var1.setBlockState(var25, Blocks.PISTON_EXTENSION.getDefaultState().withProperty(FACING, var3), 4);
+               var1.setTileEntity(var25, BlockPistonMoving.createTilePiston((IBlockState)var7.get(var29), var3, var4, false));
+               --var24;
+               var10[var24] = var33;
+            }
+
+            BlockPos var20 = var2.offset(var3);
+            if (var4) {
+               BlockPistonExtension.EnumPistonType var21 = this.isSticky ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT;
+               IBlockState var34 = Blocks.PISTON_HEAD.getDefaultState().withProperty(BlockPistonExtension.FACING, var3).withProperty(BlockPistonExtension.TYPE, var21);
+               IBlockState var22 = Blocks.PISTON_EXTENSION.getDefaultState().withProperty(BlockPistonMoving.FACING, var3).withProperty(BlockPistonMoving.TYPE, this.isSticky ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT);
+               var1.setBlockState(var20, var22, 4);
+               var1.setTileEntity(var20, BlockPistonMoving.createTilePiston(var34, var3, true, false));
+            }
+
+            for(int var35 = var23.size() - 1; var35 >= 0; --var35) {
+               var1.notifyNeighborsOfStateChange((BlockPos)var23.get(var35), var10[var24++].getBlock());
+            }
+
+            for(int var36 = var6.size() - 1; var36 >= 0; --var36) {
+               var1.notifyNeighborsOfStateChange((BlockPos)var6.get(var36), var10[var24++].getBlock());
+            }
+
+            if (var4) {
+               var1.notifyNeighborsOfStateChange(var20, Blocks.PISTON_HEAD);
+               var1.notifyNeighborsOfStateChange(var2, this);
+            }
+
+            return true;
+         }
       }
    }
 
@@ -334,13 +387,13 @@ public class BlockPistonBase extends BlockDirectional {
    }
 
    public int getMetaFromState(IBlockState var1) {
-      int var2 = 0;
-      var2 = var2 | ((EnumFacing)var1.getValue(FACING)).getIndex();
+      byte var2 = 0;
+      int var3 = var2 | ((EnumFacing)var1.getValue(FACING)).getIndex();
       if (((Boolean)var1.getValue(EXTENDED)).booleanValue()) {
-         var2 |= 8;
+         var3 |= 8;
       }
 
-      return var2;
+      return var3;
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
@@ -353,5 +406,48 @@ public class BlockPistonBase extends BlockDirectional {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, EXTENDED});
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.DOWN.ordinal()] = 1;
+         } catch (NoSuchFieldError var5) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.UP.ordinal()] = 2;
+         } catch (NoSuchFieldError var4) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 3;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 4;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 5;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.EAST.ordinal()] = 6;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

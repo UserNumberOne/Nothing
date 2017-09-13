@@ -1,6 +1,5 @@
 package net.minecraft.tileentity;
 
-import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.EnumPushReaction;
@@ -14,9 +13,6 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityPiston extends TileEntity implements ITickable {
    private IBlockState pistonState;
@@ -52,35 +48,6 @@ public class TileEntityPiston extends TileEntity implements ITickable {
       return this.pistonFacing;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean shouldPistonHeadBeRendered() {
-      return this.shouldHeadBeRendered;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getProgress(float var1) {
-      if (var1 > 1.0F) {
-         var1 = 1.0F;
-      }
-
-      return this.lastProgress + (this.progress - this.lastProgress) * var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getOffsetX(float var1) {
-      return (float)this.pistonFacing.getFrontOffsetX() * this.getExtendedProgress(this.getProgress(var1));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getOffsetY(float var1) {
-      return (float)this.pistonFacing.getFrontOffsetY() * this.getExtendedProgress(this.getProgress(var1));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getOffsetZ(float var1) {
-      return (float)this.pistonFacing.getFrontOffsetZ() * this.getExtendedProgress(this.getProgress(var1));
-   }
-
    private float getExtendedProgress(float var1) {
       return this.extending ? var1 - 1.0F : 1.0F - var1;
    }
@@ -104,14 +71,14 @@ public class TileEntityPiston extends TileEntity implements ITickable {
             Entity var5 = (Entity)var2.get(var4);
             if (var5.getPushReaction() != EnumPushReaction.IGNORE) {
                if (this.pistonState.getBlock() == Blocks.SLIME_BLOCK) {
-                  switch(var3.getAxis()) {
-                  case X:
+                  switch(TileEntityPiston.SyntheticClass_1.a[var3.getAxis().ordinal()]) {
+                  case 1:
                      var5.motionX = (double)var3.getFrontOffsetX();
                      break;
-                  case Y:
+                  case 2:
                      var5.motionY = (double)var3.getFrontOffsetY();
                      break;
-                  case Z:
+                  case 3:
                      var5.motionZ = (double)var3.getFrontOffsetZ();
                   }
                }
@@ -120,8 +87,8 @@ public class TileEntityPiston extends TileEntity implements ITickable {
                double var8 = 0.0D;
                double var10 = 0.0D;
                AxisAlignedBB var12 = var5.getEntityBoundingBox();
-               switch(var3.getAxis()) {
-               case X:
+               switch(TileEntityPiston.SyntheticClass_1.a[var3.getAxis().ordinal()]) {
+               case 1:
                   if (var3.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) {
                      var6 = var1.maxX - var12.minX;
                   } else {
@@ -130,7 +97,7 @@ public class TileEntityPiston extends TileEntity implements ITickable {
 
                   var6 = var6 + 0.01D;
                   break;
-               case Y:
+               case 2:
                   if (var3.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) {
                      var8 = var1.maxY - var12.minY;
                   } else {
@@ -139,7 +106,7 @@ public class TileEntityPiston extends TileEntity implements ITickable {
 
                   var8 = var8 + 0.01D;
                   break;
-               case Z:
+               case 3:
                   if (var3.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) {
                      var10 = var1.maxZ - var12.minZ;
                   } else {
@@ -164,35 +131,33 @@ public class TileEntityPiston extends TileEntity implements ITickable {
          this.invalidate();
          if (this.world.getBlockState(this.pos).getBlock() == Blocks.PISTON_EXTENSION) {
             this.world.setBlockState(this.pos, this.pistonState, 3);
-            if (!ForgeEventFactory.onNeighborNotify(this.world, this.pos, this.world.getBlockState(this.pos), EnumSet.of(this.pistonFacing.getOpposite())).isCanceled()) {
-               this.world.notifyBlockOfStateChange(this.pos, this.pistonState.getBlock());
-            }
+            this.world.notifyBlockOfStateChange(this.pos, this.pistonState.getBlock());
          }
       }
 
    }
 
    public void update() {
-      this.lastProgress = this.progress;
-      if (this.lastProgress >= 1.0F) {
-         this.moveCollidedEntities();
-         this.world.removeTileEntity(this.pos);
-         this.invalidate();
-         if (this.world.getBlockState(this.pos).getBlock() == Blocks.PISTON_EXTENSION) {
-            this.world.setBlockState(this.pos, this.pistonState, 3);
-            if (!ForgeEventFactory.onNeighborNotify(this.world, this.pos, this.world.getBlockState(this.pos), EnumSet.of(this.pistonFacing.getOpposite())).isCanceled()) {
+      if (this.world != null) {
+         this.lastProgress = this.progress;
+         if (this.lastProgress >= 1.0F) {
+            this.moveCollidedEntities();
+            this.world.removeTileEntity(this.pos);
+            this.invalidate();
+            if (this.world.getBlockState(this.pos).getBlock() == Blocks.PISTON_EXTENSION) {
+               this.world.setBlockState(this.pos, this.pistonState, 3);
                this.world.notifyBlockOfStateChange(this.pos, this.pistonState.getBlock());
             }
-         }
-      } else {
-         this.progress += 0.5F;
-         if (this.progress >= 1.0F) {
-            this.progress = 1.0F;
+         } else {
+            this.progress += 0.5F;
+            if (this.progress >= 1.0F) {
+               this.progress = 1.0F;
+            }
+
+            this.moveCollidedEntities();
          }
 
-         this.moveCollidedEntities();
       }
-
    }
 
    public static void registerFixesPiston(DataFixer var0) {
@@ -215,5 +180,30 @@ public class TileEntityPiston extends TileEntity implements ITickable {
       var1.setFloat("progress", this.lastProgress);
       var1.setBoolean("extending", this.extending);
       return var1;
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.Axis.values().length];
+
+      static {
+         try {
+            a[EnumFacing.Axis.X.ordinal()] = 1;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.Axis.Y.ordinal()] = 2;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.Axis.Z.ordinal()] = 3;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

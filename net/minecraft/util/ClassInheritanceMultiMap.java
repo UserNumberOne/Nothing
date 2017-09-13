@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class ClassInheritanceMultiMap extends AbstractSet {
-   private static final Set ALL_KNOWN = Sets.newHashSet();
+   private static final Set ALL_KNOWN = Sets.newConcurrentHashSet();
    private final Map map = Maps.newHashMap();
    private final Set knownKeys = Sets.newIdentityHashSet();
    private final Class baseClass;

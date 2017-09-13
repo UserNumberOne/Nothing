@@ -1,25 +1,20 @@
 package net.minecraft.entity.projectile;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.entity.Explosive;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 public class EntityLargeFireball extends EntityFireball {
    public int explosionPower = 1;
 
    public EntityLargeFireball(World var1) {
       super(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EntityLargeFireball(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
-      super(var1, var2, var4, var6, var8, var10, var12);
    }
 
    public EntityLargeFireball(World var1, EntityLivingBase var2, double var3, double var5, double var7) {
@@ -34,7 +29,12 @@ public class EntityLargeFireball extends EntityFireball {
          }
 
          boolean var2 = this.world.getGameRules().getBoolean("mobGriefing");
-         this.world.newExplosion((Entity)null, this.posX, this.posY, this.posZ, (float)this.explosionPower, var2, var2);
+         ExplosionPrimeEvent var3 = new ExplosionPrimeEvent((Explosive)CraftEntity.getEntity(this.world.getServer(), this));
+         this.world.getServer().getPluginManager().callEvent(var3);
+         if (!var3.isCancelled()) {
+            this.world.newExplosion(this, this.posX, this.posY, this.posZ, var3.getRadius(), var3.getFire(), var2);
+         }
+
          this.setDead();
       }
 
@@ -52,7 +52,7 @@ public class EntityLargeFireball extends EntityFireball {
    public void readEntityFromNBT(NBTTagCompound var1) {
       super.readEntityFromNBT(var1);
       if (var1.hasKey("ExplosionPower", 99)) {
-         this.explosionPower = var1.getInteger("ExplosionPower");
+         this.bukkitYield = (float)(this.explosionPower = var1.getInteger("ExplosionPower"));
       }
 
    }

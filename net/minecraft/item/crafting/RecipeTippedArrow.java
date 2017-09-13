@@ -8,8 +8,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.world.World;
 
-public class RecipeTippedArrow implements IRecipe {
+class RecipeTippedArrow extends ShapedRecipes implements IRecipe {
    private static final ItemStack[] EMPTY_ITEMS = new ItemStack[9];
+
+   RecipeTippedArrow() {
+      super(3, 3, new ItemStack[]{new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.LINGERING_POTION, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0)}, new ItemStack(Items.TIPPED_ARROW, 8));
+   }
 
    public boolean matches(InventoryCrafting var1, World var2) {
       if (var1.getWidth() == 3 && var1.getHeight() == 3) {

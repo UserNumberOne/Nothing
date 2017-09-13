@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockDoor;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.EnumDifficulty;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityAIBreakDoor extends EntityAIDoorInteract {
    private int breakingTime;
@@ -19,7 +20,6 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract {
       } else if (!this.theEntity.world.getGameRules().getBoolean("mobGriefing")) {
          return false;
       } else {
-         BlockDoor var1 = this.doorBlock;
          return !BlockDoor.isOpen(this.theEntity.world, this.doorPosition);
       }
    }
@@ -31,16 +31,13 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract {
 
    public boolean continueExecuting() {
       double var1 = this.theEntity.getDistanceSq(this.doorPosition);
-      if (this.breakingTime <= 240) {
-         BlockDoor var4 = this.doorBlock;
-         if (!BlockDoor.isOpen(this.theEntity.world, this.doorPosition) && var1 < 4.0D) {
-            boolean var5 = true;
-            return var5;
-         }
+      if (this.breakingTime <= 240 && !BlockDoor.isOpen(this.theEntity.world, this.doorPosition) && var1 < 4.0D) {
+         boolean var4 = true;
+         return var4;
+      } else {
+         boolean var3 = false;
+         return var3;
       }
-
-      boolean var3 = false;
-      return var3;
    }
 
    public void resetTask() {
@@ -62,6 +59,11 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract {
       }
 
       if (this.breakingTime == 240 && this.theEntity.world.getDifficulty() == EnumDifficulty.HARD) {
+         if (CraftEventFactory.callEntityBreakDoorEvent(this.theEntity, this.doorPosition.getX(), this.doorPosition.getY(), this.doorPosition.getZ()).isCancelled()) {
+            this.startExecuting();
+            return;
+         }
+
          this.theEntity.world.setBlockToAir(this.doorPosition);
          this.theEntity.world.playEvent(1021, this.doorPosition, 0);
          this.theEntity.world.playEvent(2001, this.doorPosition, Block.getIdFromBlock(this.doorBlock));

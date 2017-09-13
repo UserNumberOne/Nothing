@@ -35,32 +35,32 @@ public class EnchantRandomly extends LootFunction {
    }
 
    public ItemStack apply(ItemStack var1, Random var2, LootContext var3) {
-      Enchantment var4;
+      Enchantment var7;
       if (this.enchantments != null && !this.enchantments.isEmpty()) {
-         var4 = (Enchantment)this.enchantments.get(var2.nextInt(this.enchantments.size()));
+         var7 = (Enchantment)this.enchantments.get(var2.nextInt(this.enchantments.size()));
       } else {
-         ArrayList var5 = Lists.newArrayList();
+         ArrayList var4 = Lists.newArrayList();
 
-         for(Enchantment var7 : Enchantment.REGISTRY) {
-            if (var1.getItem() == Items.BOOK || var7.canApply(var1)) {
-               var5.add(var7);
+         for(Enchantment var6 : Enchantment.REGISTRY) {
+            if (var1.getItem() == Items.BOOK || var6.canApply(var1)) {
+               var4.add(var6);
             }
          }
 
-         if (var5.isEmpty()) {
+         if (var4.isEmpty()) {
             LOGGER.warn("Couldn't find a compatible enchantment for {}", new Object[]{var1});
             return var1;
          }
 
-         var4 = (Enchantment)var5.get(var2.nextInt(var5.size()));
+         var7 = (Enchantment)var4.get(var2.nextInt(var4.size()));
       }
 
-      int var8 = MathHelper.getInt(var2, var4.getMinLevel(), var4.getMaxLevel());
+      int var8 = MathHelper.getInt(var2, var7.getMinLevel(), var7.getMaxLevel());
       if (var1.getItem() == Items.BOOK) {
          var1.setItem(Items.ENCHANTED_BOOK);
-         Items.ENCHANTED_BOOK.addEnchantment(var1, new EnchantmentData(var4, var8));
+         Items.ENCHANTED_BOOK.addEnchantment(var1, new EnchantmentData(var7, var8));
       } else {
-         var1.addEnchantment(var4, var8);
+         var1.addEnchantment(var7, var8);
       }
 
       return var1;
@@ -94,18 +94,23 @@ public class EnchantRandomly extends LootFunction {
          if (var1.has("enchantments")) {
             var4 = Lists.newArrayList();
 
-            for(JsonElement var6 : JsonUtils.getJsonArray(var1, "enchantments")) {
-               String var7 = JsonUtils.getString(var6, "enchantment");
-               Enchantment var8 = (Enchantment)Enchantment.REGISTRY.getObject(new ResourceLocation(var7));
-               if (var8 == null) {
-                  throw new JsonSyntaxException("Unknown enchantment '" + var7 + "'");
+            for(JsonElement var7 : JsonUtils.getJsonArray(var1, "enchantments")) {
+               String var8 = JsonUtils.getString(var7, "enchantment");
+               Enchantment var9 = (Enchantment)Enchantment.REGISTRY.getObject(new ResourceLocation(var8));
+               if (var9 == null) {
+                  throw new JsonSyntaxException("Unknown enchantment '" + var8 + "'");
                }
 
-               var4.add(var8);
+               var4.add(var9);
             }
          }
 
          return new EnchantRandomly(var3, var4);
+      }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

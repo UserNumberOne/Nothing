@@ -6,8 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSetPassengers implements Packet {
    private int entityId;
@@ -39,15 +37,5 @@ public class SPacketSetPassengers implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleSetPassengers(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int[] getPassengerIds() {
-      return this.passengerIds;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
    }
 }

@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.List;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 
 public class BiomeCache {
    private final BiomeProvider chunkManager;
@@ -27,7 +27,7 @@ public class BiomeCache {
          this.cache.add(var5);
       }
 
-      var5.lastAccessTime = MinecraftServer.getCurrentTimeMillis();
+      var5.lastAccessTime = MinecraftServer.av();
       return var5;
    }
 
@@ -37,7 +37,7 @@ public class BiomeCache {
    }
 
    public void cleanupCache() {
-      long var1 = MinecraftServer.getCurrentTimeMillis();
+      long var1 = MinecraftServer.av();
       long var3 = var1 - this.lastCleanupTime;
       if (var3 > 7500L || var3 < 0L) {
          this.lastCleanupTime = var1;

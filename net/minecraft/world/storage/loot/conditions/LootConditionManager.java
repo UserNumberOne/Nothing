@@ -34,20 +34,6 @@ public class LootConditionManager {
       }
    }
 
-   public static boolean testAllConditions(Iterable var0, Random var1, LootContext var2) {
-      if (var0 == null) {
-         return true;
-      } else {
-         for(LootCondition var4 : var0) {
-            if (!var4.testCondition(var1, var2)) {
-               return false;
-            }
-         }
-
-         return true;
-      }
-   }
-
    public static boolean testAllConditions(@Nullable LootCondition[] var0, Random var1, LootContext var2) {
       if (var0 == null) {
          return true;
@@ -109,6 +95,16 @@ public class LootConditionManager {
          var4.serialize(var5, var1, var3);
          var5.addProperty("condition", var4.getLootTableLocation().toString());
          return var5;
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((LootCondition)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

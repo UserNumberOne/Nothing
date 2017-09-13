@@ -4,16 +4,25 @@ import javax.annotation.Nullable;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftMerchantRecipe;
 
 public class MerchantRecipe {
-   private ItemStack itemToBuy;
-   private ItemStack secondItemToBuy;
-   private ItemStack itemToSell;
-   private int toolUses;
-   private int maxTradeUses;
-   private boolean rewardsExp;
+   public ItemStack itemToBuy;
+   public ItemStack secondItemToBuy;
+   public ItemStack itemToSell;
+   public int toolUses;
+   public int maxTradeUses;
+   public boolean rewardsExp;
+   private CraftMerchantRecipe bukkitHandle;
+
+   public CraftMerchantRecipe asBukkit() {
+      return this.bukkitHandle == null ? (this.bukkitHandle = new CraftMerchantRecipe(this)) : this.bukkitHandle;
+   }
+
+   public MerchantRecipe(ItemStack var1, ItemStack var2, ItemStack var3, int var4, int var5, CraftMerchantRecipe var6) {
+      this(var1, var2, var3, var4, var5);
+      this.bukkitHandle = var6;
+   }
 
    public MerchantRecipe(NBTTagCompound var1) {
       this.readFromTags(var1);
@@ -74,11 +83,6 @@ public class MerchantRecipe {
 
    public boolean isRecipeDisabled() {
       return this.toolUses >= this.maxTradeUses;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void compensateToolUses() {
-      this.toolUses = this.maxTradeUses;
    }
 
    public boolean getRewardsExp() {

@@ -6,8 +6,6 @@ import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSpawnGlobalEntity implements Packet {
    private int entityId;
@@ -48,30 +46,5 @@ public class SPacketSpawnGlobalEntity implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleSpawnGlobalEntity(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityId() {
-      return this.entityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.x;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.y;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.z;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getType() {
-      return this.type;
    }
 }

@@ -7,8 +7,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityEquipment implements Packet {
    private int entityID;
@@ -38,20 +36,5 @@ public class SPacketEntityEquipment implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleEntityEquipment(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ItemStack getItemStack() {
-      return this.itemStack;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityID() {
-      return this.entityID;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public EntityEquipmentSlot getEquipmentSlot() {
-      return this.equipmentSlot;
    }
 }

@@ -1,19 +1,71 @@
 package net.minecraft.inventory;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.InventoryHolder;
 
 public class InventoryCrafting implements IInventory {
    private final ItemStack[] stackList;
    private final int inventoryWidth;
    private final int inventoryHeight;
    private final Container eventHandler;
+   public List transaction;
+   public IRecipe currentRecipe;
+   public IInventory resultInventory;
+   private EntityPlayer owner;
+   private int maxStack;
+
+   public ItemStack[] getContents() {
+      return this.stackList;
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public InventoryType getInvType() {
+      return this.stackList.length == 4 ? InventoryType.CRAFTING : InventoryType.WORKBENCH;
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public InventoryHolder getOwner() {
+      return this.owner == null ? null : this.owner.getBukkitEntity();
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
+      this.resultInventory.setMaxStackSize(var1);
+   }
+
+   public Location getLocation() {
+      return this.owner.getBukkitEntity().getLocation();
+   }
+
+   public InventoryCrafting(Container var1, int var2, int var3, EntityPlayer var4) {
+      this(var1, var2, var3);
+      this.owner = var4;
+   }
 
    public InventoryCrafting(Container var1, int var2, int var3) {
+      this.transaction = new ArrayList();
+      this.maxStack = 64;
       int var4 = var2 * var3;
       this.stackList = new ItemStack[var4];
       this.eventHandler = var1;

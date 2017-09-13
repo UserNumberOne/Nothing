@@ -5,9 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityHeadLook implements Packet {
    private int entityId;
@@ -33,15 +30,5 @@ public class SPacketEntityHeadLook implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleEntityHeadLook(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Entity getEntity(World var1) {
-      return var1.getEntityByID(this.entityId);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getYaw() {
-      return this.yaw;
    }
 }

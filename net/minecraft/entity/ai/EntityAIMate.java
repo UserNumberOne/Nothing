@@ -6,13 +6,15 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityCow;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntityAIMate extends EntityAIBase {
    private final EntityAnimal theAnimal;
@@ -73,52 +75,52 @@ public class EntityAIMate extends EntityAIBase {
 
    private void spawnBaby() {
       EntityAgeable var1 = this.theAnimal.createChild(this.targetMate);
-      BabyEntitySpawnEvent var2 = new BabyEntitySpawnEvent(this.theAnimal, this.targetMate, var1);
-      boolean var3 = MinecraftForge.EVENT_BUS.post(var2);
-      var1 = var2.getChild();
-      if (var3) {
+      if (var1 != null) {
+         if (var1 instanceof EntityTameable && ((EntityTameable)var1).isTamed()) {
+            var1.persistenceRequired = true;
+         }
+
+         EntityPlayer var2 = this.theAnimal.getPlayerInLove();
+         if (var2 == null && this.targetMate.getPlayerInLove() != null) {
+            var2 = this.targetMate.getPlayerInLove();
+         }
+
+         int var3 = this.theAnimal.getRNG().nextInt(7) + 1;
+         EntityBreedEvent var4 = CraftEventFactory.callEntityBreedEvent(var1, this.theAnimal, this.targetMate, var2, this.theAnimal.breedItem, var3);
+         if (var4.isCancelled()) {
+            return;
+         }
+
+         if (var2 != null) {
+            var2.addStat(StatList.ANIMALS_BRED);
+            if (this.theAnimal instanceof EntityCow) {
+               var2.addStat(AchievementList.BREED_COW);
+            }
+         }
+
          this.theAnimal.setGrowingAge(6000);
          this.targetMate.setGrowingAge(6000);
          this.theAnimal.resetInLove();
          this.targetMate.resetInLove();
-      } else {
-         if (var1 != null) {
-            EntityPlayer var4 = this.theAnimal.getPlayerInLove();
-            if (var4 == null && this.targetMate.getPlayerInLove() != null) {
-               var4 = this.targetMate.getPlayerInLove();
-            }
+         var1.setGrowingAge(-24000);
+         var1.setLocationAndAngles(this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, 0.0F, 0.0F);
+         this.world.addEntity(var1, SpawnReason.BREEDING);
+         Random var5 = this.theAnimal.getRNG();
 
-            if (var4 != null) {
-               var4.addStat(StatList.ANIMALS_BRED);
-               if (this.theAnimal instanceof EntityCow) {
-                  var4.addStat(AchievementList.BREED_COW);
-               }
-            }
-
-            this.theAnimal.setGrowingAge(6000);
-            this.targetMate.setGrowingAge(6000);
-            this.theAnimal.resetInLove();
-            this.targetMate.resetInLove();
-            var1.setGrowingAge(-24000);
-            var1.setLocationAndAngles(this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, 0.0F, 0.0F);
-            this.world.spawnEntity(var1);
-            Random var5 = this.theAnimal.getRNG();
-
-            for(int var6 = 0; var6 < 7; ++var6) {
-               double var7 = var5.nextGaussian() * 0.02D;
-               double var9 = var5.nextGaussian() * 0.02D;
-               double var11 = var5.nextGaussian() * 0.02D;
-               double var13 = var5.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
-               double var15 = 0.5D + var5.nextDouble() * (double)this.theAnimal.height;
-               double var17 = var5.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
-               this.world.spawnParticle(EnumParticleTypes.HEART, this.theAnimal.posX + var13, this.theAnimal.posY + var15, this.theAnimal.posZ + var17, var7, var9, var11);
-            }
-
-            if (this.world.getGameRules().getBoolean("doMobLoot")) {
-               this.world.spawnEntity(new EntityXPOrb(this.world, this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, var5.nextInt(7) + 1));
-            }
+         for(int var6 = 0; var6 < 7; ++var6) {
+            double var7 = var5.nextGaussian() * 0.02D;
+            double var9 = var5.nextGaussian() * 0.02D;
+            double var11 = var5.nextGaussian() * 0.02D;
+            double var13 = var5.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
+            double var15 = 0.5D + var5.nextDouble() * (double)this.theAnimal.height;
+            double var17 = var5.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
+            this.world.spawnParticle(EnumParticleTypes.HEART, this.theAnimal.posX + var13, this.theAnimal.posY + var15, this.theAnimal.posZ + var17, var7, var9, var11);
          }
 
+         if (this.world.getGameRules().getBoolean("doMobLoot")) {
+            this.world.spawnEntity(new EntityXPOrb(this.world, this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, var4.getExperience()));
+         }
       }
+
    }
 }

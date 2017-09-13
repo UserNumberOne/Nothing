@@ -42,5 +42,10 @@ public class EnchantWithLevels extends LootFunction {
          boolean var5 = JsonUtils.getBoolean(var1, "treasure", false);
          return new EnchantWithLevels(var3, var4, var5);
       }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
+      }
    }
 }

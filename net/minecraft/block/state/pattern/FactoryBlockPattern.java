@@ -25,7 +25,7 @@ public class FactoryBlockPattern {
    }
 
    public FactoryBlockPattern aisle(String... var1) {
-      if (!ArrayUtils.isEmpty((Object[])var1) && !StringUtils.isEmpty(var1[0])) {
+      if (!ArrayUtils.isEmpty(var1) && !StringUtils.isEmpty(var1[0])) {
          if (this.depth.isEmpty()) {
             this.aisleHeight = var1.length;
             this.rowWidth = var1[0].length();
@@ -41,7 +41,7 @@ public class FactoryBlockPattern {
 
                for(char var9 : var5.toCharArray()) {
                   if (!this.symbolMap.containsKey(Character.valueOf(var9))) {
-                     this.symbolMap.put(Character.valueOf(var9), (Predicate)null);
+                     this.symbolMap.put(Character.valueOf(var9), (Object)null);
                   }
                }
             }
@@ -74,7 +74,7 @@ public class FactoryBlockPattern {
       for(int var2 = 0; var2 < this.depth.size(); ++var2) {
          for(int var3 = 0; var3 < this.aisleHeight; ++var3) {
             for(int var4 = 0; var4 < this.rowWidth; ++var4) {
-               var1[var2][var3][var4] = (Predicate)this.symbolMap.get(Character.valueOf(((String[])((String[])this.depth.get(var2)))[var3].charAt(var4)));
+               var1[var2][var3][var4] = (Predicate)this.symbolMap.get(Character.valueOf(((String[])this.depth.get(var2))[var3].charAt(var4)));
             }
          }
       }

@@ -1,5 +1,7 @@
 package net.minecraft.entity.item;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
@@ -11,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
@@ -24,19 +25,47 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.ILootContainer;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.inventory.InventoryHolder;
 
 public abstract class EntityMinecartContainer extends EntityMinecart implements ILockableContainer, ILootContainer {
-   private ItemStack[] minecartContainerItems = new ItemStack[36];
-   public boolean dropContentsWhenDead = true;
+   private ItemStack[] minecartContainerItems = new ItemStack[27];
+   private boolean dropContentsWhenDead = true;
    private ResourceLocation lootTable;
    private long lootTableSeed;
-   public IItemHandler itemHandler = new InvWrapper(this);
+   public List transaction = new ArrayList();
+   private int maxStack = 64;
+
+   public ItemStack[] getContents() {
+      return this.minecartContainerItems;
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public InventoryHolder getOwner() {
+      CraftEntity var1 = this.getBukkitEntity();
+      return var1 instanceof InventoryHolder ? (InventoryHolder)var1 : null;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
+   }
+
+   public Location getLocation() {
+      return this.getBukkitEntity().getLocation();
+   }
 
    public EntityMinecartContainer(World var1) {
       super(var1);
@@ -105,7 +134,7 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
    }
 
    public int getInventoryStackLimit() {
-      return 64;
+      return this.maxStack;
    }
 
    @Nullable
@@ -176,15 +205,11 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
    }
 
    public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
-      if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, var1, var2, var3))) {
-         return true;
-      } else {
-         if (!this.world.isRemote) {
-            var1.displayGUIChest(this);
-         }
-
-         return true;
+      if (!this.world.isRemote) {
+         var1.displayGUIChest(this);
       }
+
+      return true;
    }
 
    protected void applyDrag() {
@@ -240,14 +265,6 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
          var2.fillInventory(this, var3, var4.build());
       }
 
-   }
-
-   public Object getCapability(Capability var1, EnumFacing var2) {
-      return var1 == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? this.itemHandler : super.getCapability(var1, var2);
-   }
-
-   public boolean hasCapability(Capability var1, EnumFacing var2) {
-      return var1 == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(var1, var2);
    }
 
    public void clear() {

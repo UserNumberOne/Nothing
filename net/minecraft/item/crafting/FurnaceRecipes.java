@@ -1,6 +1,7 @@
 package net.minecraft.item.crafting;
 
 import com.google.common.collect.Maps;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
@@ -12,18 +13,19 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFishFood;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.FMLLog;
 
 public class FurnaceRecipes {
    private static final FurnaceRecipes SMELTING_BASE = new FurnaceRecipes();
-   private final Map smeltingList = Maps.newHashMap();
+   public Map smeltingList = Maps.newHashMap();
    private final Map experienceList = Maps.newHashMap();
+   public Map customRecipes = Maps.newHashMap();
+   public Map customExperience = Maps.newHashMap();
 
    public static FurnaceRecipes instance() {
       return SMELTING_BASE;
    }
 
-   private FurnaceRecipes() {
+   public FurnaceRecipes() {
       this.addSmeltingRecipeForBlock(Blocks.IRON_ORE, new ItemStack(Items.IRON_INGOT), 0.7F);
       this.addSmeltingRecipeForBlock(Blocks.GOLD_ORE, new ItemStack(Items.GOLD_INGOT), 1.0F);
       this.addSmeltingRecipeForBlock(Blocks.DIAMOND_ORE, new ItemStack(Items.DIAMOND), 1.0F);
@@ -58,6 +60,10 @@ public class FurnaceRecipes {
       this.addSmeltingRecipeForBlock(Blocks.QUARTZ_ORE, new ItemStack(Items.QUARTZ), 0.2F);
    }
 
+   public void registerRecipe(ItemStack var1, ItemStack var2, float var3) {
+      this.customRecipes.put(var1, var2);
+   }
+
    public void addSmeltingRecipeForBlock(Block var1, ItemStack var2, float var3) {
       this.addSmelting(Item.getItemFromBlock(var1), var2, var3);
    }
@@ -67,23 +73,33 @@ public class FurnaceRecipes {
    }
 
    public void addSmeltingRecipe(ItemStack var1, ItemStack var2, float var3) {
-      if (this.getSmeltingResult(var1) != null) {
-         FMLLog.info("Ignored smelting recipe with conflicting input: " + var1 + " = " + var2, new Object[0]);
-      } else {
-         this.smeltingList.put(var1, var2);
-         this.experienceList.put(var2, Float.valueOf(var3));
-      }
+      this.smeltingList.put(var1, var2);
+      this.experienceList.put(var2, Float.valueOf(var3));
    }
 
    @Nullable
    public ItemStack getSmeltingResult(ItemStack var1) {
-      for(Entry var3 : this.smeltingList.entrySet()) {
-         if (this.compareItemStacks(var1, (ItemStack)var3.getKey())) {
-            return (ItemStack)var3.getValue();
+      boolean var2 = false;
+      Iterator var3 = this.customRecipes.entrySet().iterator();
+
+      Entry var4;
+      while(true) {
+         if (!var3.hasNext()) {
+            if (var2 || this.smeltingList.isEmpty()) {
+               return null;
+            }
+
+            var3 = this.smeltingList.entrySet().iterator();
+            var2 = true;
+         }
+
+         var4 = (Entry)var3.next();
+         if (this.compareItemStacks(var1, (ItemStack)var4.getKey())) {
+            break;
          }
       }
 
-      return null;
+      return (ItemStack)var4.getValue();
    }
 
    private boolean compareItemStacks(ItemStack var1, ItemStack var2) {
@@ -95,17 +111,26 @@ public class FurnaceRecipes {
    }
 
    public float getSmeltingExperience(ItemStack var1) {
-      float var2 = var1.getItem().getSmeltingExperience(var1);
-      if (var2 != -1.0F) {
-         return var2;
-      } else {
-         for(Entry var4 : this.experienceList.entrySet()) {
-            if (this.compareItemStacks(var1, (ItemStack)var4.getKey())) {
-               return ((Float)var4.getValue()).floatValue();
+      boolean var2 = false;
+      Iterator var3 = this.customExperience.entrySet().iterator();
+
+      Entry var4;
+      while(true) {
+         if (!var3.hasNext()) {
+            if (var2 || this.experienceList.isEmpty()) {
+               return 0.0F;
             }
+
+            var3 = this.experienceList.entrySet().iterator();
+            var2 = true;
          }
 
-         return 0.0F;
+         var4 = (Entry)var3.next();
+         if (this.compareItemStacks(var1, (ItemStack)var4.getKey())) {
+            break;
+         }
       }
+
+      return ((Float)var4.getValue()).floatValue();
    }
 }

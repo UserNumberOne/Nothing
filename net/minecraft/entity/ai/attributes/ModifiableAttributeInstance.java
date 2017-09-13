@@ -1,6 +1,5 @@
 package net.minecraft.entity.ai.attributes;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.Collection;
@@ -9,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ModifiableAttributeInstance implements IAttributeInstance {
    private final AbstractAttributeMap attributeMap;
@@ -46,7 +43,6 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
          this.baseValue = var1;
          this.flagForUpdate();
       }
-
    }
 
    public Collection getModifiersByOperation(int var1) {
@@ -120,17 +116,6 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public void removeAllModifiers() {
-      Collection var1 = this.getModifiers();
-      if (var1 != null) {
-         for(AttributeModifier var3 : Lists.newArrayList(var1)) {
-            this.removeModifier(var3);
-         }
-      }
-
-   }
-
    public double getAttributeValue() {
       if (this.needsUpdate) {
          this.cachedValue = this.computeValue();
@@ -147,17 +132,17 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
          var1 += var4.getAmount();
       }
 
-      double var7 = var1;
+      double var5 = var1;
 
-      for(AttributeModifier var6 : this.getAppliedModifiers(1)) {
-         var7 += var1 * var6.getAmount();
+      for(AttributeModifier var8 : this.getAppliedModifiers(1)) {
+         var5 += var1 * var8.getAmount();
       }
 
-      for(AttributeModifier var9 : this.getAppliedModifiers(2)) {
-         var7 *= 1.0D + var9.getAmount();
+      for(AttributeModifier var10 : this.getAppliedModifiers(2)) {
+         var5 *= 1.0D + var10.getAmount();
       }
 
-      return this.genericAttribute.clampValue(var7);
+      return this.genericAttribute.clampValue(var5);
    }
 
    private Collection getAppliedModifiers(int var1) {

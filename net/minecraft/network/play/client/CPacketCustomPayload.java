@@ -5,24 +5,10 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketCustomPayload implements Packet {
    private String channel;
    private PacketBuffer data;
-
-   public CPacketCustomPayload() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketCustomPayload(String var1, PacketBuffer var2) {
-      this.channel = var1;
-      this.data = var2;
-      if (var2.writerIndex() > 32767) {
-         throw new IllegalArgumentException("Payload may not be larger than 32767 bytes");
-      }
-   }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
       this.channel = var1.readString(20);
@@ -36,11 +22,7 @@ public class CPacketCustomPayload implements Packet {
 
    public void writePacketData(PacketBuffer var1) throws IOException {
       var1.writeString(this.channel);
-      synchronized(this.data) {
-         this.data.markReaderIndex();
-         var1.writeBytes((ByteBuf)this.data);
-         this.data.resetReaderIndex();
-      }
+      var1.writeBytes((ByteBuf)this.data);
    }
 
    public void processPacket(INetHandlerPlayServer var1) {

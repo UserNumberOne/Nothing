@@ -14,8 +14,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.projectiles.ProjectileSource;
 
 public abstract class EntityFireball extends Entity {
    private int xTile = -1;
@@ -29,6 +30,8 @@ public abstract class EntityFireball extends Entity {
    public double accelerationX;
    public double accelerationY;
    public double accelerationZ;
+   public float bukkitYield = 1.0F;
+   public boolean isIncendiary = true;
 
    public EntityFireball(World var1) {
       super(var1);
@@ -36,17 +39,6 @@ public abstract class EntityFireball extends Entity {
    }
 
    protected void entityInit() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      double var3 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
-      if (Double.isNaN(var3)) {
-         var3 = 4.0D;
-      }
-
-      var3 = var3 * 64.0D;
-      return var1 < var3 * var3;
    }
 
    public EntityFireball(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
@@ -63,19 +55,24 @@ public abstract class EntityFireball extends Entity {
    public EntityFireball(World var1, EntityLivingBase var2, double var3, double var5, double var7) {
       super(var1);
       this.shootingEntity = var2;
+      this.projectileSource = (LivingEntity)var2.getBukkitEntity();
       this.setSize(1.0F, 1.0F);
       this.setLocationAndAngles(var2.posX, var2.posY, var2.posZ, var2.rotationYaw, var2.rotationPitch);
       this.setPosition(this.posX, this.posY, this.posZ);
       this.motionX = 0.0D;
       this.motionY = 0.0D;
       this.motionZ = 0.0D;
+      this.setDirection(var3, var5, var7);
+   }
+
+   public void setDirection(double var1, double var3, double var5) {
+      var1 = var1 + this.rand.nextGaussian() * 0.4D;
       var3 = var3 + this.rand.nextGaussian() * 0.4D;
       var5 = var5 + this.rand.nextGaussian() * 0.4D;
-      var7 = var7 + this.rand.nextGaussian() * 0.4D;
-      double var9 = (double)MathHelper.sqrt(var3 * var3 + var5 * var5 + var7 * var7);
-      this.accelerationX = var3 / var9 * 0.1D;
-      this.accelerationY = var5 / var9 * 0.1D;
-      this.accelerationZ = var7 / var9 * 0.1D;
+      double var7 = (double)MathHelper.sqrt(var1 * var1 + var3 * var3 + var5 * var5);
+      this.accelerationX = var1 / var7 * 0.1D;
+      this.accelerationY = var3 / var7 * 0.1D;
+      this.accelerationZ = var5 / var7 * 0.1D;
    }
 
    public void onUpdate() {
@@ -108,6 +105,9 @@ public abstract class EntityFireball extends Entity {
          RayTraceResult var1 = ProjectileHelper.forwardsRaycast(this, true, this.ticksInAir >= 25, this.shootingEntity);
          if (var1 != null) {
             this.onImpact(var1);
+            if (this.isDead) {
+               CraftEventFactory.callProjectileHitEvent(this);
+            }
          }
 
          this.posX += this.motionX;
@@ -117,7 +117,6 @@ public abstract class EntityFireball extends Entity {
          float var2 = this.getMotionFactor();
          if (this.isInWater()) {
             for(int var3 = 0; var3 < 4; ++var3) {
-               float var4 = 0.25F;
                this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
             }
 
@@ -213,21 +212,26 @@ public abstract class EntityFireball extends Entity {
       } else {
          this.setBeenAttacked();
          if (var1.getEntity() != null) {
-            Vec3d var3 = var1.getEntity().getLookVec();
-            if (var3 != null) {
-               this.motionX = var3.xCoord;
-               this.motionY = var3.yCoord;
-               this.motionZ = var3.zCoord;
-               this.accelerationX = this.motionX * 0.1D;
-               this.accelerationY = this.motionY * 0.1D;
-               this.accelerationZ = this.motionZ * 0.1D;
-            }
+            if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, var1, (double)var2)) {
+               return false;
+            } else {
+               Vec3d var3 = var1.getEntity().getLookVec();
+               if (var3 != null) {
+                  this.motionX = var3.xCoord;
+                  this.motionY = var3.yCoord;
+                  this.motionZ = var3.zCoord;
+                  this.accelerationX = this.motionX * 0.1D;
+                  this.accelerationY = this.motionY * 0.1D;
+                  this.accelerationZ = this.motionZ * 0.1D;
+               }
 
-            if (var1.getEntity() instanceof EntityLivingBase) {
-               this.shootingEntity = (EntityLivingBase)var1.getEntity();
-            }
+               if (var1.getEntity() instanceof EntityLivingBase) {
+                  this.shootingEntity = (EntityLivingBase)var1.getEntity();
+                  this.projectileSource = (ProjectileSource)this.shootingEntity.getBukkitEntity();
+               }
 
-            return true;
+               return true;
+            }
          } else {
             return false;
          }
@@ -236,10 +240,5 @@ public abstract class EntityFireball extends Entity {
 
    public float getBrightness(float var1) {
       return 1.0F;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return 15728880;
    }
 }

@@ -11,8 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.stats.AchievementList;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class SlotCrafting extends Slot {
    private final InventoryCrafting craftMatrix;
@@ -91,11 +89,8 @@ public class SlotCrafting extends Slot {
    }
 
    public void onPickupFromSlot(EntityPlayer var1, ItemStack var2) {
-      FMLCommonHandler.instance().firePlayerCraftingEvent(var1, var2, this.craftMatrix);
       this.onCrafting(var2);
-      ForgeHooks.setCraftingPlayer(var1);
       ItemStack[] var3 = CraftingManager.getInstance().getRemainingItems(this.craftMatrix, var1.world);
-      ForgeHooks.setCraftingPlayer((EntityPlayer)null);
 
       for(int var4 = 0; var4 < var3.length; ++var4) {
          ItemStack var5 = this.craftMatrix.getStackInSlot(var4);

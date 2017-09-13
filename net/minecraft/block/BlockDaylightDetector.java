@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
@@ -24,8 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockDaylightDetector extends BlockContainer {
    public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
@@ -67,6 +65,7 @@ public class BlockDaylightDetector extends BlockContainer {
 
          var4 = MathHelper.clamp(var4, 0, 15);
          if (((Integer)var3.getValue(POWER)).intValue() != var4) {
+            var4 = CraftEventFactory.callRedstoneChange(var1, var2.getX(), var2.getY(), var2.getZ(), ((Integer)var3.getValue(POWER)).intValue(), var4).getNewCurrent();
             var1.setBlockState(var2, var3.withProperty(POWER, Integer.valueOf(var4)), 3);
          }
       }
@@ -79,10 +78,10 @@ public class BlockDaylightDetector extends BlockContainer {
             return true;
          } else {
             if (this.inverted) {
-               var1.setBlockState(var2, Blocks.DAYLIGHT_DETECTOR.getDefaultState().withProperty(POWER, var3.getValue(POWER)), 4);
+               var1.setBlockState(var2, Blocks.DAYLIGHT_DETECTOR.getDefaultState().withProperty(POWER, (Integer)var3.getValue(POWER)), 4);
                Blocks.DAYLIGHT_DETECTOR.updatePower(var1, var2);
             } else {
-               var1.setBlockState(var2, Blocks.DAYLIGHT_DETECTOR_INVERTED.getDefaultState().withProperty(POWER, var3.getValue(POWER)), 4);
+               var1.setBlockState(var2, Blocks.DAYLIGHT_DETECTOR_INVERTED.getDefaultState().withProperty(POWER, (Integer)var3.getValue(POWER)), 4);
                Blocks.DAYLIGHT_DETECTOR_INVERTED.updatePower(var1, var2);
             }
 
@@ -132,13 +131,5 @@ public class BlockDaylightDetector extends BlockContainer {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{POWER});
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
-      if (!this.inverted) {
-         super.getSubBlocks(var1, var2, var3);
-      }
-
    }
 }

@@ -1,5 +1,6 @@
 package net.minecraft.tileentity;
 
+import com.google.gson.JsonParseException;
 import javax.annotation.Nullable;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandResultStats;
@@ -8,7 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
@@ -17,13 +18,14 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentUtils;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.command.CraftBlockCommandSender;
+import org.bukkit.craftbukkit.v1_10_R1.command.ProxiedNativeCommandSender;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftChatMessage;
 
 public class TileEntitySign extends TileEntity {
    public final ITextComponent[] signText = new ITextComponent[]{new TextComponentString(""), new TextComponentString(""), new TextComponentString(""), new TextComponentString("")};
    public int lineBeingEdited = -1;
-   private boolean isEditable = true;
+   public boolean isEditable = true;
    private EntityPlayer player;
    private final CommandResultStats stats = new CommandResultStats();
 
@@ -33,6 +35,10 @@ public class TileEntitySign extends TileEntity {
       for(int var2 = 0; var2 < 4; ++var2) {
          String var3 = ITextComponent.Serializer.componentToJson(this.signText[var2]);
          var1.setString("Text" + (var2 + 1), var3);
+      }
+
+      if (Boolean.getBoolean("convertLegacySigns")) {
+         var1.setBoolean("Bukkit.isConverted", true);
       }
 
       this.stats.writeStatsToNBT(var1);
@@ -59,7 +65,7 @@ public class TileEntitySign extends TileEntity {
          }
 
          public boolean canUseCommand(int var1, String var2) {
-            return var1 <= 2;
+            return true;
          }
 
          public BlockPos getPosition() {
@@ -85,19 +91,31 @@ public class TileEntitySign extends TileEntity {
          public void setCommandStat(CommandResultStats.Type var1, int var2) {
          }
 
-         public MinecraftServer getServer() {
+         public MinecraftServer h() {
             return TileEntitySign.this.world.getMinecraftServer();
          }
       };
+      boolean var3 = Boolean.getBoolean("convertLegacySigns") && !var1.getBoolean("Bukkit.isConverted");
 
-      for(int var3 = 0; var3 < 4; ++var3) {
-         String var4 = var1.getString("Text" + (var3 + 1));
-         ITextComponent var5 = ITextComponent.Serializer.jsonToComponent(var4);
+      for(int var4 = 0; var4 < 4; ++var4) {
+         String var5 = var1.getString("Text" + (var4 + 1));
+         if (var5 != null && var5.length() > 2048) {
+            var5 = "\"\"";
+         }
 
          try {
-            this.signText[var3] = TextComponentUtils.processComponent(var2, var5, (Entity)null);
-         } catch (CommandException var7) {
-            this.signText[var3] = var5;
+            ITextComponent var6 = ITextComponent.Serializer.jsonToComponent(var5);
+            if (var3) {
+               this.signText[var4] = CraftChatMessage.fromString(var5)[0];
+            } else {
+               try {
+                  this.signText[var4] = TextComponentUtils.processComponent(var2, var6, (Entity)null);
+               } catch (CommandException var7) {
+                  this.signText[var4] = var6;
+               }
+            }
+         } catch (JsonParseException var8) {
+            this.signText[var4] = new TextComponentString(var5);
          }
       }
 
@@ -119,15 +137,6 @@ public class TileEntitySign extends TileEntity {
 
    public boolean getIsEditable() {
       return this.isEditable;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setEditable(boolean var1) {
-      this.isEditable = var1;
-      if (!var1) {
-         this.player = null;
-      }
-
    }
 
    public void setPlayer(EntityPlayer var1) {
@@ -177,13 +186,13 @@ public class TileEntitySign extends TileEntity {
 
          public void setCommandStat(CommandResultStats.Type var1x, int var2) {
             if (TileEntitySign.this.world != null && !TileEntitySign.this.world.isRemote) {
-               TileEntitySign.this.stats.setCommandStatForSender(TileEntitySign.this.world.getMinecraftServer(), this, var1x, var2);
+               TileEntitySign.this.stats.a(TileEntitySign.this.world.getMinecraftServer(), this, var1x, var2);
             }
 
          }
 
-         public MinecraftServer getServer() {
-            return var1.getServer();
+         public MinecraftServer h() {
+            return var1.h();
          }
       };
 
@@ -192,7 +201,7 @@ public class TileEntitySign extends TileEntity {
          if (var7 != null && var7.getClickEvent() != null) {
             ClickEvent var8 = var7.getClickEvent();
             if (var8.getAction() == ClickEvent.Action.RUN_COMMAND) {
-               var1.getServer().getCommandManager().executeCommand(var2, var8.getValue());
+               CommandBlockBaseLogic.executeCommand(var2, new ProxiedNativeCommandSender(var2, new CraftBlockCommandSender(var2), var1.getBukkitEntity()), var8.getValue());
             }
          }
       }

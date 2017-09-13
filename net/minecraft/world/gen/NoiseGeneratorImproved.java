@@ -53,117 +53,118 @@ public class NoiseGeneratorImproved extends NoiseGenerator {
 
    public void populateNoiseArray(double[] var1, double var2, double var4, double var6, int var8, int var9, int var10, double var11, double var13, double var15, double var17) {
       if (var9 == 1) {
-         int var19 = 0;
+         int var77 = 0;
          int var20 = 0;
          int var21 = 0;
-         int var22 = 0;
+         int var81 = 0;
          double var23 = 0.0D;
          double var25 = 0.0D;
-         int var27 = 0;
+         int var86 = 0;
          double var28 = 1.0D / var17;
 
          for(int var30 = 0; var30 < var8; ++var30) {
-            double var31 = var2 + (double)var30 * var11 + this.xCoord;
-            int var33 = (int)var31;
-            if (var31 < (double)var33) {
+            double var87 = var2 + (double)var30 * var11 + this.xCoord;
+            int var33 = (int)var87;
+            if (var87 < (double)var33) {
                --var33;
             }
 
             int var34 = var33 & 255;
-            var31 = var31 - (double)var33;
-            double var35 = var31 * var31 * var31 * (var31 * (var31 * 6.0D - 15.0D) + 10.0D);
+            var87 = var87 - (double)var33;
+            double var89 = var87 * var87 * var87 * (var87 * (var87 * 6.0D - 15.0D) + 10.0D);
 
-            for(int var37 = 0; var37 < var10; ++var37) {
-               double var38 = var6 + (double)var37 * var15 + this.zCoord;
-               int var40 = (int)var38;
-               if (var38 < (double)var40) {
-                  --var40;
+            for(int var90 = 0; var90 < var10; ++var90) {
+               double var92 = var6 + (double)var90 * var15 + this.zCoord;
+               int var94 = (int)var92;
+               if (var92 < (double)var94) {
+                  --var94;
                }
 
-               int var41 = var40 & 255;
-               var38 = var38 - (double)var40;
-               double var42 = var38 * var38 * var38 * (var38 * (var38 * 6.0D - 15.0D) + 10.0D);
-               var19 = this.permutations[var34] + 0;
-               var20 = this.permutations[var19] + var41;
+               int var95 = var94 & 255;
+               var92 = var92 - (double)var94;
+               double var96 = var92 * var92 * var92 * (var92 * (var92 * 6.0D - 15.0D) + 10.0D);
+               var77 = this.permutations[var34] + 0;
+               var20 = this.permutations[var77] + var95;
                var21 = this.permutations[var34 + 1] + 0;
-               var22 = this.permutations[var21] + var41;
-               var23 = this.lerp(var35, this.grad2(this.permutations[var20], var31, var38), this.grad(this.permutations[var22], var31 - 1.0D, 0.0D, var38));
-               var25 = this.lerp(var35, this.grad(this.permutations[var20 + 1], var31, 0.0D, var38 - 1.0D), this.grad(this.permutations[var22 + 1], var31 - 1.0D, 0.0D, var38 - 1.0D));
-               double var44 = this.lerp(var42, var23, var25);
-               int var46 = var27++;
-               var1[var46] += var44 * var28;
+               var81 = this.permutations[var21] + var95;
+               var23 = this.lerp(var89, this.grad2(this.permutations[var20], var87, var92), this.grad(this.permutations[var81], var87 - 1.0D, 0.0D, var92));
+               var25 = this.lerp(var89, this.grad(this.permutations[var20 + 1], var87, 0.0D, var92 - 1.0D), this.grad(this.permutations[var81 + 1], var87 - 1.0D, 0.0D, var92 - 1.0D));
+               double var44 = this.lerp(var96, var23, var25);
+               int var104 = var86++;
+               var1[var104] += var44 * var28;
             }
          }
+
       } else {
-         int var66 = 0;
-         double var68 = 1.0D / var17;
-         int var71 = -1;
-         int var73 = 0;
-         int var24 = 0;
-         int var77 = 0;
-         int var26 = 0;
-         int var80 = 0;
-         int var82 = 0;
-         double var29 = 0.0D;
-         double var85 = 0.0D;
-         double var86 = 0.0D;
-         double var87 = 0.0D;
+         int var19 = 0;
+         double var46 = 1.0D / var17;
+         int var22 = -1;
+         int var48 = 0;
+         int var49 = 0;
+         int var50 = 0;
+         int var51 = 0;
+         int var27 = 0;
+         int var52 = 0;
+         double var53 = 0.0D;
+         double var31 = 0.0D;
+         double var55 = 0.0D;
+         double var35 = 0.0D;
 
-         for(int var88 = 0; var88 < var8; ++var88) {
-            double var90 = var2 + (double)var88 * var11 + this.xCoord;
-            int var92 = (int)var90;
-            if (var90 < (double)var92) {
-               --var92;
+         for(int var37 = 0; var37 < var8; ++var37) {
+            double var38 = var2 + (double)var37 * var11 + this.xCoord;
+            int var40 = (int)var38;
+            if (var38 < (double)var40) {
+               --var40;
             }
 
-            int var93 = var92 & 255;
-            var90 = var90 - (double)var92;
-            double var94 = var90 * var90 * var90 * (var90 * (var90 * 6.0D - 15.0D) + 10.0D);
+            int var41 = var40 & 255;
+            var38 = var38 - (double)var40;
+            double var42 = var38 * var38 * var38 * (var38 * (var38 * 6.0D - 15.0D) + 10.0D);
 
-            for(int var95 = 0; var95 < var10; ++var95) {
-               double var45 = var6 + (double)var95 * var15 + this.zCoord;
-               int var47 = (int)var45;
-               if (var45 < (double)var47) {
-                  --var47;
+            for(int var57 = 0; var57 < var10; ++var57) {
+               double var58 = var6 + (double)var57 * var15 + this.zCoord;
+               int var60 = (int)var58;
+               if (var58 < (double)var60) {
+                  --var60;
                }
 
-               int var48 = var47 & 255;
-               var45 = var45 - (double)var47;
-               double var49 = var45 * var45 * var45 * (var45 * (var45 * 6.0D - 15.0D) + 10.0D);
+               int var61 = var60 & 255;
+               var58 = var58 - (double)var60;
+               double var62 = var58 * var58 * var58 * (var58 * (var58 * 6.0D - 15.0D) + 10.0D);
 
-               for(int var51 = 0; var51 < var9; ++var51) {
-                  double var52 = var4 + (double)var51 * var13 + this.yCoord;
-                  int var54 = (int)var52;
-                  if (var52 < (double)var54) {
-                     --var54;
+               for(int var64 = 0; var64 < var9; ++var64) {
+                  double var65 = var4 + (double)var64 * var13 + this.yCoord;
+                  int var67 = (int)var65;
+                  if (var65 < (double)var67) {
+                     --var67;
                   }
 
-                  int var55 = var54 & 255;
-                  var52 = var52 - (double)var54;
-                  double var56 = var52 * var52 * var52 * (var52 * (var52 * 6.0D - 15.0D) + 10.0D);
-                  if (var51 == 0 || var55 != var71) {
-                     var71 = var55;
-                     var73 = this.permutations[var93] + var55;
-                     var24 = this.permutations[var73] + var48;
-                     var77 = this.permutations[var73 + 1] + var48;
-                     var26 = this.permutations[var93 + 1] + var55;
-                     var80 = this.permutations[var26] + var48;
-                     var82 = this.permutations[var26 + 1] + var48;
-                     var29 = this.lerp(var94, this.grad(this.permutations[var24], var90, var52, var45), this.grad(this.permutations[var80], var90 - 1.0D, var52, var45));
-                     var85 = this.lerp(var94, this.grad(this.permutations[var77], var90, var52 - 1.0D, var45), this.grad(this.permutations[var82], var90 - 1.0D, var52 - 1.0D, var45));
-                     var86 = this.lerp(var94, this.grad(this.permutations[var24 + 1], var90, var52, var45 - 1.0D), this.grad(this.permutations[var80 + 1], var90 - 1.0D, var52, var45 - 1.0D));
-                     var87 = this.lerp(var94, this.grad(this.permutations[var77 + 1], var90, var52 - 1.0D, var45 - 1.0D), this.grad(this.permutations[var82 + 1], var90 - 1.0D, var52 - 1.0D, var45 - 1.0D));
+                  int var68 = var67 & 255;
+                  var65 = var65 - (double)var67;
+                  double var69 = var65 * var65 * var65 * (var65 * (var65 * 6.0D - 15.0D) + 10.0D);
+                  if (var64 == 0 || var68 != var22) {
+                     var22 = var68;
+                     var48 = this.permutations[var41] + var68;
+                     var49 = this.permutations[var48] + var61;
+                     var50 = this.permutations[var48 + 1] + var61;
+                     var51 = this.permutations[var41 + 1] + var68;
+                     var27 = this.permutations[var51] + var61;
+                     var52 = this.permutations[var51 + 1] + var61;
+                     var53 = this.lerp(var42, this.grad(this.permutations[var49], var38, var65, var58), this.grad(this.permutations[var27], var38 - 1.0D, var65, var58));
+                     var31 = this.lerp(var42, this.grad(this.permutations[var50], var38, var65 - 1.0D, var58), this.grad(this.permutations[var52], var38 - 1.0D, var65 - 1.0D, var58));
+                     var55 = this.lerp(var42, this.grad(this.permutations[var49 + 1], var38, var65, var58 - 1.0D), this.grad(this.permutations[var27 + 1], var38 - 1.0D, var65, var58 - 1.0D));
+                     var35 = this.lerp(var42, this.grad(this.permutations[var50 + 1], var38, var65 - 1.0D, var58 - 1.0D), this.grad(this.permutations[var52 + 1], var38 - 1.0D, var65 - 1.0D, var58 - 1.0D));
                   }
 
-                  double var58 = this.lerp(var56, var29, var85);
-                  double var60 = this.lerp(var56, var86, var87);
-                  double var62 = this.lerp(var49, var58, var60);
-                  int var64 = var66++;
-                  var1[var64] += var62 * var68;
+                  double var71 = this.lerp(var69, var53, var31);
+                  double var73 = this.lerp(var69, var55, var35);
+                  double var75 = this.lerp(var62, var71, var73);
+                  int var10001 = var19++;
+                  var1[var10001] += var75 * var46;
                }
             }
          }
-      }
 
+      }
    }
 }

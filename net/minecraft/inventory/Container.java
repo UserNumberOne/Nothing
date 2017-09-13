@@ -3,34 +3,55 @@ package net.minecraft.inventory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.event.Event.Result;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.InventoryView;
 
 public abstract class Container {
    public List inventoryItemStacks = Lists.newArrayList();
    public List inventorySlots = Lists.newArrayList();
    public int windowId;
-   @SideOnly(Side.CLIENT)
-   private short transactionID;
    private int dragMode = -1;
    private int dragEvent;
    private final Set dragSlots = Sets.newHashSet();
    protected List listeners = Lists.newArrayList();
    private final Set playerList = Sets.newHashSet();
+   public boolean checkReachable = true;
+
+   public abstract InventoryView getBukkitView();
+
+   public void transferTo(Container var1, CraftHumanEntity var2) {
+      InventoryView var3 = this.getBukkitView();
+      InventoryView var4 = var1.getBukkitView();
+      ((CraftInventory)var3.getTopInventory()).getInventory().onClose(var2);
+      ((CraftInventory)var3.getBottomInventory()).getInventory().onClose(var2);
+      ((CraftInventory)var4.getTopInventory()).getInventory().onOpen(var2);
+      ((CraftInventory)var4.getBottomInventory()).getInventory().onOpen(var2);
+   }
 
    protected Slot addSlotToContainer(Slot var1) {
       var1.slotNumber = this.inventorySlots.size();
       this.inventorySlots.add(var1);
-      this.inventoryItemStacks.add((ItemStack)null);
+      this.inventoryItemStacks.add((Object)null);
       return var1;
    }
 
@@ -52,11 +73,6 @@ public abstract class Container {
       }
 
       return var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void removeListener(IContainerListener var1) {
-      this.listeners.remove(var1);
    }
 
    public void detectAndSendChanges() {
@@ -127,33 +143,60 @@ public abstract class Container {
             }
          } else if (this.dragEvent == 2) {
             if (!this.dragSlots.isEmpty()) {
-               ItemStack var22 = var6.getItemStack().copy();
-               int var9 = var6.getItemStack().stackSize;
+               ItemStack var9 = var6.getItemStack().copy();
+               int var10 = var6.getItemStack().stackSize;
+               Iterator var26 = this.dragSlots.iterator();
+               HashMap var11 = new HashMap();
 
-               for(Slot var11 : this.dragSlots) {
-                  if (var11 != null && canAddItemToSlot(var11, var6.getItemStack(), true) && var11.isItemValid(var6.getItemStack()) && var6.getItemStack().stackSize >= this.dragSlots.size() && this.canDragIntoSlot(var11)) {
-                     ItemStack var12 = var22.copy();
-                     int var13 = var11.getHasStack() ? var11.getStack().stackSize : 0;
-                     computeStackSize(this.dragSlots, this.dragMode, var12, var13);
-                     if (var12.stackSize > var12.getMaxStackSize()) {
-                        var12.stackSize = var12.getMaxStackSize();
+               while(var26.hasNext()) {
+                  Slot var12 = (Slot)var26.next();
+                  if (var12 != null && canAddItemToSlot(var12, var6.getItemStack(), true) && var12.isItemValid(var6.getItemStack()) && var6.getItemStack().stackSize >= this.dragSlots.size() && this.canDragIntoSlot(var12)) {
+                     ItemStack var13 = var9.copy();
+                     int var14 = var12.getHasStack() ? var12.getStack().stackSize : 0;
+                     computeStackSize(this.dragSlots, this.dragMode, var13, var14);
+                     if (var13.stackSize > var13.getMaxStackSize()) {
+                        var13.stackSize = var13.getMaxStackSize();
                      }
 
-                     if (var12.stackSize > var11.getItemStackLimit(var12)) {
-                        var12.stackSize = var11.getItemStackLimit(var12);
+                     if (var13.stackSize > var12.getItemStackLimit(var13)) {
+                        var13.stackSize = var12.getItemStackLimit(var13);
                      }
 
-                     var9 -= var12.stackSize - var13;
-                     var11.putStack(var12);
+                     var10 -= var13.stackSize - var14;
+                     var11.put(Integer.valueOf(var12.slotNumber), var13);
                   }
                }
 
-               var22.stackSize = var9;
-               if (var22.stackSize <= 0) {
-                  var22 = null;
+               InventoryView var45 = this.getBukkitView();
+               CraftItemStack var50 = CraftItemStack.asCraftMirror(var9);
+               var50.setAmount(var10);
+               HashMap var52 = new HashMap();
+
+               for(Entry var16 : var11.entrySet()) {
+                  var52.put((Integer)var16.getKey(), CraftItemStack.asBukkitCopy((ItemStack)var16.getValue()));
                }
 
-               var6.setItemStack(var22);
+               ItemStack var56 = var6.getItemStack();
+               var6.setItemStack(CraftItemStack.asNMSCopy(var50));
+               InventoryDragEvent var54 = new InventoryDragEvent(var45, var50.getType() != Material.AIR ? var50 : null, CraftItemStack.asBukkitCopy(var56), this.dragMode == 1, var52);
+               var4.world.getServer().getPluginManager().callEvent(var54);
+               boolean var17 = var54.getResult() != Result.DEFAULT;
+               if (var54.getResult() != Result.DENY) {
+                  for(Entry var19 : var11.entrySet()) {
+                     var45.setItem(((Integer)var19.getKey()).intValue(), CraftItemStack.asBukkitCopy((ItemStack)var19.getValue()));
+                  }
+
+                  if (var6.getItemStack() != null) {
+                     var6.setItemStack(CraftItemStack.asNMSCopy(var54.getCursor()));
+                     var17 = true;
+                  }
+               } else {
+                  var6.setItemStack(var56);
+               }
+
+               if (var17 && var4 instanceof EntityPlayerMP) {
+                  ((EntityPlayerMP)var4).sendContainerToPlayer(this);
+               }
             }
 
             this.resetDrag();
@@ -171,8 +214,12 @@ public abstract class Container {
                }
 
                if (var2 == 1) {
-                  var4.dropItem(var6.getItemStack().splitStack(1), true);
-                  if (var6.getItemStack().stackSize == 0) {
+                  ItemStack var47 = var6.getItemStack();
+                  if (var47.stackSize > 0) {
+                     var4.dropItem(var47.splitStack(1), true);
+                  }
+
+                  if (var47.stackSize == 0) {
                      var6.setItemStack((ItemStack)null);
                   }
                }
@@ -182,19 +229,19 @@ public abstract class Container {
                return null;
             }
 
-            Slot var20 = (Slot)this.inventorySlots.get(var1);
-            if (var20 != null && var20.canTakeStack(var4)) {
-               ItemStack var27 = var20.getStack();
-               if (var27 != null && var27.stackSize <= 0) {
-                  var5 = var27.copy();
-                  var20.putStack((ItemStack)null);
+            Slot var24 = (Slot)this.inventorySlots.get(var1);
+            if (var24 != null && var24.canTakeStack(var4)) {
+               ItemStack var34 = var24.getStack();
+               if (var34 != null && var34.stackSize <= 0) {
+                  var5 = var34.copy();
+                  var24.putStack((ItemStack)null);
                }
 
-               ItemStack var32 = this.transferStackInSlot(var4, var1);
-               if (var32 != null) {
-                  Item var37 = var32.getItem();
-                  var5 = var32.copy();
-                  if (var20.getStack() != null && var20.getStack().getItem() == var37) {
+               ItemStack var28 = this.transferStackInSlot(var4, var1);
+               if (var28 != null) {
+                  Item var48 = var28.getItem();
+                  var5 = var28.copy();
+                  if (var24.getStack() != null && var24.getStack().getItem() == var48) {
                      this.retrySlotClick(var1, var2, true, var4);
                   }
                }
@@ -204,156 +251,169 @@ public abstract class Container {
                return null;
             }
 
-            Slot var21 = (Slot)this.inventorySlots.get(var1);
-            if (var21 != null) {
-               ItemStack var28 = var21.getStack();
-               ItemStack var33 = var6.getItemStack();
-               if (var28 != null) {
-                  var5 = var28.copy();
+            Slot var25 = (Slot)this.inventorySlots.get(var1);
+            if (var25 != null) {
+               ItemStack var35 = var25.getStack();
+               ItemStack var29 = var6.getItemStack();
+               if (var35 != null) {
+                  var5 = var35.copy();
                }
 
-               if (var28 == null) {
-                  if (var33 != null && var21.isItemValid(var33)) {
-                     int var41 = var2 == 0 ? var33.stackSize : 1;
-                     if (var41 > var21.getItemStackLimit(var33)) {
-                        var41 = var21.getItemStackLimit(var33);
+               if (var35 == null) {
+                  if (var29 != null && var25.isItemValid(var29)) {
+                     int var44 = var2 == 0 ? var29.stackSize : 1;
+                     if (var44 > var25.getItemStackLimit(var29)) {
+                        var44 = var25.getItemStackLimit(var29);
                      }
 
-                     var21.putStack(var33.splitStack(var41));
-                     if (var33.stackSize == 0) {
+                     var25.putStack(var29.splitStack(var44));
+                     if (var29.stackSize == 0) {
                         var6.setItemStack((ItemStack)null);
+                     } else if (var4 instanceof EntityPlayerMP) {
+                        ((EntityPlayerMP)var4).connection.sendPacket(new SPacketSetSlot(-1, -1, var4.inventory.getItemStack()));
                      }
                   }
-               } else if (var21.canTakeStack(var4)) {
-                  if (var33 == null) {
-                     if (var28.stackSize > 0) {
-                        int var40 = var2 == 0 ? var28.stackSize : (var28.stackSize + 1) / 2;
-                        var6.setItemStack(var21.decrStackSize(var40));
-                        if (var28.stackSize <= 0) {
-                           var21.putStack((ItemStack)null);
+               } else if (var25.canTakeStack(var4)) {
+                  if (var29 == null) {
+                     if (var35.stackSize > 0) {
+                        int var43 = var2 == 0 ? var35.stackSize : (var35.stackSize + 1) / 2;
+                        var6.setItemStack(var25.decrStackSize(var43));
+                        if (var35.stackSize <= 0) {
+                           var25.putStack((ItemStack)null);
                         }
 
-                        var21.onPickupFromSlot(var4, var6.getItemStack());
+                        var25.onPickupFromSlot(var4, var6.getItemStack());
                      } else {
-                        var21.putStack((ItemStack)null);
+                        var25.putStack((ItemStack)null);
                         var6.setItemStack((ItemStack)null);
                      }
-                  } else if (var21.isItemValid(var33)) {
-                     if (var28.getItem() == var33.getItem() && var28.getMetadata() == var33.getMetadata() && ItemStack.areItemStackTagsEqual(var28, var33)) {
-                        int var39 = var2 == 0 ? var33.stackSize : 1;
-                        if (var39 > var21.getItemStackLimit(var33) - var28.stackSize) {
-                           var39 = var21.getItemStackLimit(var33) - var28.stackSize;
+                  } else if (var25.isItemValid(var29)) {
+                     if (var35.getItem() == var29.getItem() && var35.getMetadata() == var29.getMetadata() && ItemStack.areItemStackTagsEqual(var35, var29)) {
+                        int var42 = var2 == 0 ? var29.stackSize : 1;
+                        if (var42 > var25.getItemStackLimit(var29) - var35.stackSize) {
+                           var42 = var25.getItemStackLimit(var29) - var35.stackSize;
                         }
 
-                        if (var39 > var33.getMaxStackSize() - var28.stackSize) {
-                           var39 = var33.getMaxStackSize() - var28.stackSize;
+                        if (var42 > var29.getMaxStackSize() - var35.stackSize) {
+                           var42 = var29.getMaxStackSize() - var35.stackSize;
                         }
 
-                        var33.splitStack(var39);
-                        if (var33.stackSize == 0) {
+                        var29.splitStack(var42);
+                        if (var29.stackSize == 0) {
                            var6.setItemStack((ItemStack)null);
+                        } else if (var4 instanceof EntityPlayerMP) {
+                           ((EntityPlayerMP)var4).connection.sendPacket(new SPacketSetSlot(-1, -1, var4.inventory.getItemStack()));
                         }
 
-                        var28.stackSize += var39;
-                     } else if (var33.stackSize <= var21.getItemStackLimit(var33)) {
-                        var21.putStack(var33);
-                        var6.setItemStack(var28);
+                        var35.stackSize += var42;
+                     } else if (var29.stackSize <= var25.getItemStackLimit(var29)) {
+                        var25.putStack(var29);
+                        var6.setItemStack(var35);
                      }
-                  } else if (var28.getItem() == var33.getItem() && var33.getMaxStackSize() > 1 && (!var28.getHasSubtypes() || var28.getMetadata() == var33.getMetadata()) && ItemStack.areItemStackTagsEqual(var28, var33)) {
-                     int var38 = var28.stackSize;
-                     if (var38 > 0 && var38 + var33.stackSize <= var33.getMaxStackSize()) {
-                        var33.stackSize += var38;
-                        var28 = var21.decrStackSize(var38);
-                        if (var28.stackSize == 0) {
-                           var21.putStack((ItemStack)null);
+                  } else if (var35.getItem() == var29.getItem() && var29.getMaxStackSize() > 1 && (!var35.getHasSubtypes() || var35.getMetadata() == var29.getMetadata()) && ItemStack.areItemStackTagsEqual(var35, var29)) {
+                     int var41 = var35.stackSize;
+                     int var49 = Math.min(var29.getMaxStackSize(), var25.getSlotStackLimit());
+                     if (var41 > 0 && var41 + var29.stackSize <= var49) {
+                        var29.stackSize += var41;
+                        var35 = var25.decrStackSize(var41);
+                        if (var35.stackSize == 0) {
+                           var25.putStack((ItemStack)null);
                         }
 
-                        var21.onPickupFromSlot(var4, var6.getItemStack());
+                        var25.onPickupFromSlot(var4, var6.getItemStack());
+                     } else if (var4 instanceof EntityPlayerMP) {
+                        ((EntityPlayerMP)var4).connection.sendPacket(new SPacketSetSlot(-1, -1, var4.inventory.getItemStack()));
                      }
                   }
                }
 
-               var21.onSlotChanged();
+               var25.onSlotChanged();
+               if (var4 instanceof EntityPlayerMP && var25.getSlotStackLimit() != 64) {
+                  ((EntityPlayerMP)var4).connection.sendPacket(new SPacketSetSlot(this.windowId, var25.slotNumber, var25.getStack()));
+                  if (this.getBukkitView().getType() == InventoryType.WORKBENCH || this.getBukkitView().getType() == InventoryType.CRAFTING) {
+                     ((EntityPlayerMP)var4).connection.sendPacket(new SPacketSetSlot(this.windowId, 0, this.getSlot(0).getStack()));
+                  }
+               }
             }
          }
       } else if (var3 == ClickType.SWAP && var2 >= 0 && var2 < 9) {
-         Slot var19 = (Slot)this.inventorySlots.get(var1);
-         ItemStack var26 = var6.getStackInSlot(var2);
-         if (var26 != null && var26.stackSize <= 0) {
-            var26 = null;
+         Slot var23 = (Slot)this.inventorySlots.get(var1);
+         ItemStack var33 = var6.getStackInSlot(var2);
+         if (var33 != null && var33.stackSize <= 0) {
+            var33 = null;
             var6.setInventorySlotContents(var2, (ItemStack)null);
          }
 
-         ItemStack var31 = var19.getStack();
-         if (var26 != null || var31 != null) {
-            if (var26 == null) {
-               if (var19.canTakeStack(var4)) {
-                  var6.setInventorySlotContents(var2, var31);
-                  var19.putStack((ItemStack)null);
-                  var19.onPickupFromSlot(var4, var31);
+         ItemStack var27 = var23.getStack();
+         if (var33 != null || var27 != null) {
+            if (var33 == null) {
+               if (var23.canTakeStack(var4)) {
+                  var6.setInventorySlotContents(var2, var27);
+                  var23.putStack((ItemStack)null);
+                  var23.onPickupFromSlot(var4, var27);
                }
-            } else if (var31 == null) {
-               if (var19.isItemValid(var26)) {
-                  int var35 = var19.getItemStackLimit(var26);
-                  if (var26.stackSize > var35) {
-                     var19.putStack(var26.splitStack(var35));
+            } else if (var27 == null) {
+               if (var23.isItemValid(var33)) {
+                  int var39 = var23.getItemStackLimit(var33);
+                  if (var33.stackSize > var39) {
+                     var23.putStack(var33.splitStack(var39));
                   } else {
-                     var19.putStack(var26);
+                     var23.putStack(var33);
                      var6.setInventorySlotContents(var2, (ItemStack)null);
                   }
                }
-            } else if (var19.canTakeStack(var4) && var19.isItemValid(var26)) {
-               int var36 = var19.getItemStackLimit(var26);
-               if (var26.stackSize > var36) {
-                  var19.putStack(var26.splitStack(var36));
-                  var19.onPickupFromSlot(var4, var31);
-                  if (!var6.addItemStackToInventory(var31)) {
-                     var4.dropItem(var31, true);
+            } else if (var23.canTakeStack(var4) && var23.isItemValid(var33)) {
+               int var40 = var23.getItemStackLimit(var33);
+               if (var33.stackSize > var40) {
+                  var23.putStack(var33.splitStack(var40));
+                  var23.onPickupFromSlot(var4, var27);
+                  if (!var6.addItemStackToInventory(var27)) {
+                     var4.dropItem(var27, true);
                   }
                } else {
-                  var19.putStack(var26);
-                  var6.setInventorySlotContents(var2, var31);
-                  var19.onPickupFromSlot(var4, var31);
+                  var23.putStack(var33);
+                  var6.setInventorySlotContents(var2, var27);
+                  var23.onPickupFromSlot(var4, var27);
                }
             }
          }
       } else if (var3 == ClickType.CLONE && var4.capabilities.isCreativeMode && var6.getItemStack() == null && var1 >= 0) {
-         Slot var18 = (Slot)this.inventorySlots.get(var1);
-         if (var18 != null && var18.getHasStack()) {
-            if (var18.getStack().stackSize > 0) {
-               ItemStack var25 = var18.getStack().copy();
-               var25.stackSize = var25.getMaxStackSize();
-               var6.setItemStack(var25);
+         Slot var22 = (Slot)this.inventorySlots.get(var1);
+         if (var22 != null && var22.getHasStack()) {
+            if (var22.getStack().stackSize > 0) {
+               ItemStack var32 = var22.getStack().copy();
+               var32.stackSize = var32.getMaxStackSize();
+               var6.setItemStack(var32);
             } else {
-               var18.putStack((ItemStack)null);
+               var22.putStack((ItemStack)null);
             }
          }
       } else if (var3 == ClickType.THROW && var6.getItemStack() == null && var1 >= 0) {
-         Slot var17 = (Slot)this.inventorySlots.get(var1);
-         if (var17 != null && var17.getHasStack() && var17.canTakeStack(var4)) {
-            ItemStack var24 = var17.decrStackSize(var2 == 0 ? 1 : var17.getStack().stackSize);
-            var17.onPickupFromSlot(var4, var24);
-            var4.dropItem(var24, true);
+         Slot var21 = (Slot)this.inventorySlots.get(var1);
+         if (var21 != null && var21.getHasStack() && var21.canTakeStack(var4)) {
+            ItemStack var31 = var21.decrStackSize(var2 == 0 ? 1 : var21.getStack().stackSize);
+            var21.onPickupFromSlot(var4, var31);
+            var4.dropItem(var31, true);
          }
       } else if (var3 == ClickType.PICKUP_ALL && var1 >= 0) {
-         Slot var16 = (Slot)this.inventorySlots.get(var1);
-         ItemStack var23 = var6.getItemStack();
-         if (var23 != null && (var16 == null || !var16.getHasStack() || !var16.canTakeStack(var4))) {
-            int var30 = var2 == 0 ? 0 : this.inventorySlots.size() - 1;
-            int var34 = var2 == 0 ? 1 : -1;
+         Slot var20 = (Slot)this.inventorySlots.get(var1);
+         ItemStack var30 = var6.getItemStack();
+         if (var30 != null && (var20 == null || !var20.getHasStack() || !var20.canTakeStack(var4))) {
+            int var37 = var2 == 0 ? 0 : this.inventorySlots.size() - 1;
+            int var38 = var2 == 0 ? 1 : -1;
 
-            for(int var42 = 0; var42 < 2; ++var42) {
-               for(int var43 = var30; var43 >= 0 && var43 < this.inventorySlots.size() && var23.stackSize < var23.getMaxStackSize(); var43 += var34) {
-                  Slot var44 = (Slot)this.inventorySlots.get(var43);
-                  if (var44.getHasStack() && canAddItemToSlot(var44, var23, true) && var44.canTakeStack(var4) && this.canMergeSlot(var23, var44) && (var42 != 0 || var44.getStack().stackSize != var44.getStack().getMaxStackSize())) {
-                     int var14 = Math.min(var23.getMaxStackSize() - var23.stackSize, var44.getStack().stackSize);
-                     ItemStack var15 = var44.decrStackSize(var14);
-                     var23.stackSize += var14;
-                     if (var15.stackSize <= 0) {
-                        var44.putStack((ItemStack)null);
+            for(int var46 = 0; var46 < 2; ++var46) {
+               for(int var51 = var37; var51 >= 0 && var51 < this.inventorySlots.size() && var30.stackSize < var30.getMaxStackSize(); var51 += var38) {
+                  Slot var53 = (Slot)this.inventorySlots.get(var51);
+                  if (var53.getHasStack() && canAddItemToSlot(var53, var30, true) && var53.canTakeStack(var4) && this.canMergeSlot(var30, var53) && (var46 != 0 || var53.getStack().stackSize != var53.getStack().getMaxStackSize())) {
+                     int var57 = Math.min(var30.getMaxStackSize() - var30.stackSize, var53.getStack().stackSize);
+                     ItemStack var55 = var53.decrStackSize(var57);
+                     var30.stackSize += var57;
+                     if (var55.stackSize <= 0) {
+                        var53.putStack((ItemStack)null);
                      }
 
-                     var44.onPickupFromSlot(var4, var15);
+                     var53.onPickupFromSlot(var4, var55);
                   }
                }
             }
@@ -390,24 +450,6 @@ public abstract class Container {
       this.getSlot(var1).putStack(var2);
    }
 
-   @SideOnly(Side.CLIENT)
-   public void putStacksInSlots(ItemStack[] var1) {
-      for(int var2 = 0; var2 < var1.length; ++var2) {
-         this.getSlot(var2).putStack(var1[var2]);
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void updateProgressBar(int var1, int var2) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public short getNextTransactionID(InventoryPlayer var1) {
-      ++this.transactionID;
-      return this.transactionID;
-   }
-
    public boolean getCanCraft(EntityPlayer var1) {
       return !this.playerList.contains(var1);
    }
@@ -436,7 +478,7 @@ public abstract class Container {
             ItemStack var8 = var7.getStack();
             if (var8 != null && areItemStacksEqual(var1, var8)) {
                int var9 = var8.stackSize + var1.stackSize;
-               int var10 = Math.min(var7.getSlotStackLimit(), var1.getMaxStackSize());
+               int var10 = Math.min(var1.getMaxStackSize(), var7.getSlotStackLimit());
                if (var9 <= var10) {
                   var1.stackSize = 0;
                   var8.stackSize = var9;
@@ -468,7 +510,7 @@ public abstract class Container {
          while(!var4 && var6 < var3 || var4 && var6 >= var2) {
             Slot var12 = (Slot)this.inventorySlots.get(var6);
             ItemStack var13 = var12.getStack();
-            if (var13 == null && var12.isItemValid(var1)) {
+            if (var13 == null) {
                var12.putStack(var1.copy());
                var12.onSlotChanged();
                var1.stackSize = 0;
@@ -499,11 +541,6 @@ public abstract class Container {
       return var0 & 3;
    }
 
-   @SideOnly(Side.CLIENT)
-   public static int getQuickcraftMask(int var0, int var1) {
-      return var0 & 3 | (var1 & 3) << 2;
-   }
-
    public static boolean isValidDragMode(int var0, EntityPlayer var1) {
       return var0 == 0 ? true : (var0 == 1 ? true : var0 == 2 && var1.capabilities.isCreativeMode);
    }
@@ -531,7 +568,7 @@ public abstract class Container {
          var2.stackSize = 1;
          break;
       case 2:
-         var2.stackSize = var2.getMaxStackSize();
+         var2.stackSize = var2.getItem().getItemStackLimit();
       }
 
       var2.stackSize += var3;

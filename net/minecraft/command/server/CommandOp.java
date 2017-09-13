@@ -10,7 +10,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandOp extends CommandBase {
@@ -28,7 +28,7 @@ public class CommandOp extends CommandBase {
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
       if (var3.length == 1 && var3[0].length() > 0) {
-         GameProfile var4 = var1.getPlayerProfileCache().getGameProfileForUsername(var3[0]);
+         GameProfile var4 = var1.getUserCache().getGameProfileForUsername(var3[0]);
          if (var4 == null) {
             throw new CommandException("commands.op.failed", new Object[]{var3[0]});
          } else {
@@ -40,12 +40,12 @@ public class CommandOp extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       if (var3.length == 1) {
          String var5 = var3[var3.length - 1];
          ArrayList var6 = Lists.newArrayList();
 
-         for(GameProfile var10 : var1.getOnlinePlayerProfiles()) {
+         for(GameProfile var10 : var1.K()) {
             if (!var1.getPlayerList().canSendCommands(var10) && doesStringStartWith(var5, var10.getName())) {
                var6.add(var10.getName());
             }

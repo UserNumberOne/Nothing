@@ -2,6 +2,7 @@ package net.minecraft.item.crafting;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.init.Items;
@@ -10,9 +11,12 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 
-public class RecipesArmorDyes implements IRecipe {
+public class RecipesArmorDyes extends ShapelessRecipes implements IRecipe {
+   public RecipesArmorDyes() {
+      super(new ItemStack(Items.LEATHER_HELMET, 0, 0), Arrays.asList(new ItemStack(Items.DYE, 0, 5)));
+   }
+
    public boolean matches(InventoryCrafting var1, World var2) {
       ItemStack var3 = null;
       ArrayList var4 = Lists.newArrayList();
@@ -37,7 +41,11 @@ public class RecipesArmorDyes implements IRecipe {
          }
       }
 
-      return var3 != null && !var4.isEmpty();
+      if (var3 != null && !var4.isEmpty()) {
+         return true;
+      } else {
+         return false;
+      }
    }
 
    @Nullable
@@ -75,14 +83,14 @@ public class RecipesArmorDyes implements IRecipe {
                   return null;
                }
 
-               float[] var17 = EntitySheep.getDyeRgb(EnumDyeColor.byDyeDamage(var8.getMetadata()));
-               int var20 = (int)(var17[0] * 255.0F);
-               int var22 = (int)(var17[1] * 255.0F);
-               int var24 = (int)(var17[2] * 255.0F);
-               var4 += Math.max(var20, Math.max(var22, var24));
-               var3[0] += var20;
-               var3[1] += var22;
-               var3[2] += var24;
+               float[] var24 = EntitySheep.getDyeRgb(EnumDyeColor.byDyeDamage(var8.getMetadata()));
+               int var13 = (int)(var24[0] * 255.0F);
+               int var14 = (int)(var24[1] * 255.0F);
+               int var15 = (int)(var24[2] * 255.0F);
+               var4 += Math.max(var13, Math.max(var14, var15));
+               var3[0] += var13;
+               var3[1] += var14;
+               var3[2] += var15;
                ++var5;
             }
          }
@@ -91,16 +99,16 @@ public class RecipesArmorDyes implements IRecipe {
       if (var6 == null) {
          return null;
       } else {
-         int var13 = var3[0] / var5;
-         int var15 = var3[1] / var5;
-         int var18 = var3[2] / var5;
-         float var21 = (float)var4 / (float)var5;
-         float var23 = (float)Math.max(var13, Math.max(var15, var18));
-         var13 = (int)((float)var13 * var21 / var23);
-         var15 = (int)((float)var15 * var21 / var23);
-         var18 = (int)((float)var18 * var21 / var23);
-         int var25 = (var13 << 8) + var15;
-         var25 = (var25 << 8) + var18;
+         int var16 = var3[0] / var5;
+         int var18 = var3[1] / var5;
+         int var20 = var3[2] / var5;
+         float var22 = (float)var4 / (float)var5;
+         float var23 = (float)Math.max(var16, Math.max(var18, var20));
+         var16 = (int)((float)var16 * var22 / var23);
+         var18 = (int)((float)var18 * var22 / var23);
+         var20 = (int)((float)var20 * var22 / var23);
+         int var25 = (var16 << 8) + var18;
+         var25 = (var25 << 8) + var20;
          var6.setColor(var2, var25);
          return var2;
       }
@@ -120,7 +128,9 @@ public class RecipesArmorDyes implements IRecipe {
 
       for(int var3 = 0; var3 < var2.length; ++var3) {
          ItemStack var4 = var1.getStackInSlot(var3);
-         var2[var3] = ForgeHooks.getContainerItem(var4);
+         if (var4 != null && var4.getItem().hasContainerItem()) {
+            var2[var3] = new ItemStack(var4.getItem().getContainerItem());
+         }
       }
 
       return var2;

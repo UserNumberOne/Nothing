@@ -6,6 +6,8 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class RegionFileCache {
    private static final Map REGIONS_BY_FILE = Maps.newHashMap();
@@ -45,13 +47,16 @@ public class RegionFileCache {
       REGIONS_BY_FILE.clear();
    }
 
-   public static DataInputStream getChunkInputStream(File var0, int var1, int var2) {
+   public static synchronized NBTTagCompound c(File var0, int var1, int var2) throws IOException {
       RegionFile var3 = createOrLoadRegionFile(var0, var1, var2);
-      return var3.getChunkDataInputStream(var1 & 31, var2 & 31);
+      DataInputStream var4 = var3.getChunkDataInputStream(var1 & 31, var2 & 31);
+      return var4 == null ? null : CompressedStreamTools.read(var4);
    }
 
-   public static DataOutputStream getChunkOutputStream(File var0, int var1, int var2) {
-      RegionFile var3 = createOrLoadRegionFile(var0, var1, var2);
-      return var3.getChunkDataOutputStream(var1 & 31, var2 & 31);
+   public static synchronized void d(File var0, int var1, int var2, NBTTagCompound var3) throws IOException {
+      RegionFile var4 = createOrLoadRegionFile(var0, var1, var2);
+      DataOutputStream var5 = var4.getChunkDataOutputStream(var1 & 31, var2 & 31);
+      CompressedStreamTools.write(var3, var5);
+      var5.close();
    }
 }

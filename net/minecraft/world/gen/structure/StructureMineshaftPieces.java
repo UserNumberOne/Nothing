@@ -318,8 +318,8 @@ public class StructureMineshaftPieces {
                this.randomlyPlaceBlock(var1, var2, var8, 0.05F, var3 + 1, var6, var5 - 1, Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.NORTH));
                this.randomlyPlaceBlock(var1, var2, var8, 0.05F, var3 + 1, var6, var5 + 1, Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.SOUTH));
             }
-         }
 
+         }
       }
 
       private void func_189922_a(World var1, StructureBoundingBox var2, Random var3, float var4, int var5, int var6, int var7) {
@@ -543,53 +543,53 @@ public class StructureMineshaftPieces {
             var5 = 1;
          }
 
-         int var6;
-         for(int var7 = 0; var7 < this.boundingBox.getXSize(); var7 = var6 + 4) {
-            var6 = var7 + var3.nextInt(this.boundingBox.getXSize());
-            if (var6 + 3 > this.boundingBox.getXSize()) {
+         int var9;
+         for(var9 = 0; var9 < this.boundingBox.getXSize(); var9 = var9 + 4) {
+            var9 = var9 + var3.nextInt(this.boundingBox.getXSize());
+            if (var9 + 3 > this.boundingBox.getXSize()) {
                break;
             }
 
-            StructureMineshaftPieces.Peice var8 = StructureMineshaftPieces.func_189938_b(var1, var2, var3, this.boundingBox.minX + var6, this.boundingBox.minY + var3.nextInt(var5) + 1, this.boundingBox.minZ - 1, EnumFacing.NORTH, var4);
-            if (var8 != null) {
-               StructureBoundingBox var9 = var8.getBoundingBox();
-               this.roomsLinkedToTheRoom.add(new StructureBoundingBox(var9.minX, var9.minY, this.boundingBox.minZ, var9.maxX, var9.maxY, this.boundingBox.minZ + 1));
+            StructureMineshaftPieces.Peice var7 = StructureMineshaftPieces.func_189938_b(var1, var2, var3, this.boundingBox.minX + var9, this.boundingBox.minY + var3.nextInt(var5) + 1, this.boundingBox.minZ - 1, EnumFacing.NORTH, var4);
+            if (var7 != null) {
+               StructureBoundingBox var8 = var7.getBoundingBox();
+               this.roomsLinkedToTheRoom.add(new StructureBoundingBox(var8.minX, var8.minY, this.boundingBox.minZ, var8.maxX, var8.maxY, this.boundingBox.minZ + 1));
             }
          }
 
-         for(int var13 = 0; var13 < this.boundingBox.getXSize(); var13 = var6 + 4) {
-            var6 = var13 + var3.nextInt(this.boundingBox.getXSize());
-            if (var6 + 3 > this.boundingBox.getXSize()) {
+         for(var9 = 0; var9 < this.boundingBox.getXSize(); var9 = var9 + 4) {
+            var9 = var9 + var3.nextInt(this.boundingBox.getXSize());
+            if (var9 + 3 > this.boundingBox.getXSize()) {
                break;
             }
 
-            StructureMineshaftPieces.Peice var16 = StructureMineshaftPieces.func_189938_b(var1, var2, var3, this.boundingBox.minX + var6, this.boundingBox.minY + var3.nextInt(var5) + 1, this.boundingBox.maxZ + 1, EnumFacing.SOUTH, var4);
+            StructureMineshaftPieces.Peice var16 = StructureMineshaftPieces.func_189938_b(var1, var2, var3, this.boundingBox.minX + var9, this.boundingBox.minY + var3.nextInt(var5) + 1, this.boundingBox.maxZ + 1, EnumFacing.SOUTH, var4);
             if (var16 != null) {
                StructureBoundingBox var19 = var16.getBoundingBox();
                this.roomsLinkedToTheRoom.add(new StructureBoundingBox(var19.minX, var19.minY, this.boundingBox.maxZ - 1, var19.maxX, var19.maxY, this.boundingBox.maxZ));
             }
          }
 
-         for(int var14 = 0; var14 < this.boundingBox.getZSize(); var14 = var6 + 4) {
-            var6 = var14 + var3.nextInt(this.boundingBox.getZSize());
-            if (var6 + 3 > this.boundingBox.getZSize()) {
+         for(var9 = 0; var9 < this.boundingBox.getZSize(); var9 = var9 + 4) {
+            var9 = var9 + var3.nextInt(this.boundingBox.getZSize());
+            if (var9 + 3 > this.boundingBox.getZSize()) {
                break;
             }
 
-            StructureMineshaftPieces.Peice var17 = StructureMineshaftPieces.func_189938_b(var1, var2, var3, this.boundingBox.minX - 1, this.boundingBox.minY + var3.nextInt(var5) + 1, this.boundingBox.minZ + var6, EnumFacing.WEST, var4);
+            StructureMineshaftPieces.Peice var17 = StructureMineshaftPieces.func_189938_b(var1, var2, var3, this.boundingBox.minX - 1, this.boundingBox.minY + var3.nextInt(var5) + 1, this.boundingBox.minZ + var9, EnumFacing.WEST, var4);
             if (var17 != null) {
                StructureBoundingBox var20 = var17.getBoundingBox();
                this.roomsLinkedToTheRoom.add(new StructureBoundingBox(this.boundingBox.minX, var20.minY, var20.minZ, this.boundingBox.minX + 1, var20.maxY, var20.maxZ));
             }
          }
 
-         for(int var15 = 0; var15 < this.boundingBox.getZSize(); var15 = var6 + 4) {
-            var6 = var15 + var3.nextInt(this.boundingBox.getZSize());
-            if (var6 + 3 > this.boundingBox.getZSize()) {
+         for(var9 = 0; var9 < this.boundingBox.getZSize(); var9 = var9 + 4) {
+            var9 = var9 + var3.nextInt(this.boundingBox.getZSize());
+            if (var9 + 3 > this.boundingBox.getZSize()) {
                break;
             }
 
-            StructureMineshaftPieces.Peice var18 = StructureMineshaftPieces.func_189938_b(var1, var2, var3, this.boundingBox.maxX + 1, this.boundingBox.minY + var3.nextInt(var5) + 1, this.boundingBox.minZ + var6, EnumFacing.EAST, var4);
+            StructureMineshaftPieces.Peice var18 = StructureMineshaftPieces.func_189938_b(var1, var2, var3, this.boundingBox.maxX + 1, this.boundingBox.minY + var3.nextInt(var5) + 1, this.boundingBox.minZ + var9, EnumFacing.EAST, var4);
             if (var18 != null) {
                StructureBoundingBox var21 = var18.getBoundingBox();
                this.roomsLinkedToTheRoom.add(new StructureBoundingBox(this.boundingBox.maxX - 1, var21.minY, var21.minZ, this.boundingBox.maxX, var21.maxY, var21.maxZ));

@@ -9,17 +9,11 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.EntityCreeper;
-import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.monster.SkeletonType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAINearestAttackableTarget extends EntityAITarget {
    protected final Class targetClass;
@@ -46,6 +40,10 @@ public class EntityAINearestAttackableTarget extends EntityAITarget {
          public boolean apply(@Nullable EntityLivingBase var1) {
             return var1 == null ? false : (var6 != null && !var6.apply(var1) ? false : (!EntitySelectors.NOT_SPECTATING.apply(var1) ? false : EntityAINearestAttackableTarget.this.isSuitableTarget(var1, false)));
          }
+
+         public boolean apply(Object var1) {
+            return this.apply((EntityLivingBase)var1);
+         }
       };
    }
 
@@ -64,19 +62,12 @@ public class EntityAINearestAttackableTarget extends EntityAITarget {
       } else {
          this.targetEntity = this.taskOwner.world.getNearestAttackablePlayer(this.taskOwner.posX, this.taskOwner.posY + (double)this.taskOwner.getEyeHeight(), this.taskOwner.posZ, this.getTargetDistance(), this.getTargetDistance(), new Function() {
             @Nullable
-            public Double apply(@Nullable EntityPlayer var1) {
-               ItemStack var2 = var1.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
-               if (var2 != null && var2.getItem() == Items.SKULL) {
-                  int var3 = var2.getItemDamage();
-                  boolean var4 = EntityAINearestAttackableTarget.this.taskOwner instanceof EntitySkeleton && ((EntitySkeleton)EntityAINearestAttackableTarget.this.taskOwner).getSkeletonType() == SkeletonType.NORMAL && var3 == 0;
-                  boolean var5 = EntityAINearestAttackableTarget.this.taskOwner instanceof EntityZombie && var3 == 2;
-                  boolean var6 = EntityAINearestAttackableTarget.this.taskOwner instanceof EntityCreeper && var3 == 4;
-                  if (var4 || var5 || var6) {
-                     return 0.5D;
-                  }
-               }
+            public Double apply(@Nullable EntityPlayer param1) {
+               // $FF: Couldn't be decompiled
+            }
 
-               return 1.0D;
+            public Double apply(EntityPlayer param1) {
+               // $FF: Couldn't be decompiled
             }
          }, this.targetEntitySelector);
          return this.targetEntity != null;
@@ -88,7 +79,7 @@ public class EntityAINearestAttackableTarget extends EntityAITarget {
    }
 
    public void startExecuting() {
-      this.taskOwner.setAttackTarget(this.targetEntity);
+      this.taskOwner.setGoalTarget(this.targetEntity, this.targetEntity instanceof EntityPlayerMP ? TargetReason.CLOSEST_PLAYER : TargetReason.CLOSEST_ENTITY, true);
       super.startExecuting();
    }
 
@@ -99,10 +90,12 @@ public class EntityAINearestAttackableTarget extends EntityAITarget {
          this.theEntity = var1;
       }
 
-      public int compare(Entity var1, Entity var2) {
-         double var3 = this.theEntity.getDistanceSqToEntity(var1);
-         double var5 = this.theEntity.getDistanceSqToEntity(var2);
-         return var3 < var5 ? -1 : (var3 > var5 ? 1 : 0);
+      public int compare(Entity param1, Entity param2) {
+         // $FF: Couldn't be decompiled
+      }
+
+      public int compare(Entity param1, Entity param2) {
+         // $FF: Couldn't be decompiled
       }
    }
 }

@@ -12,9 +12,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.oredict.OreDictionary;
 
 public class ItemSword extends Item {
    private final float attackDamage;
@@ -59,11 +56,6 @@ public class ItemSword extends Item {
       return var1.getBlock() == Blocks.WEB;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isFull3D() {
-      return true;
-   }
-
    public int getItemEnchantability() {
       return this.material.getEnchantability();
    }
@@ -73,8 +65,7 @@ public class ItemSword extends Item {
    }
 
    public boolean getIsRepairable(ItemStack var1, ItemStack var2) {
-      ItemStack var3 = this.material.getRepairItemStack();
-      return var3 != null && OreDictionary.itemMatches(var3, var2, false) ? true : super.getIsRepairable(var1, var2);
+      return this.material.getRepairItem() == var2.getItem() ? true : super.getIsRepairable(var1, var2);
    }
 
    public Multimap getItemAttributeModifiers(EntityEquipmentSlot var1) {

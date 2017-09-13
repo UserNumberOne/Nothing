@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 
 public class RegionFile {
    private static final byte[] EMPTY_SECTOR = new byte[4096];
@@ -217,7 +217,7 @@ public class RegionFile {
             }
          }
 
-         this.setChunkTimestamp(var1, var2, (int)(MinecraftServer.getCurrentTimeMillis() / 1000L));
+         this.setChunkTimestamp(var1, var2, (int)(MinecraftServer.av() / 1000L));
       } catch (IOException var12) {
          var12.printStackTrace();
       }
@@ -272,7 +272,7 @@ public class RegionFile {
          this.chunkZ = var3;
       }
 
-      public void close() throws IOException {
+      public void close() {
          RegionFile.this.write(this.chunkX, this.chunkZ, this.buf, this.count);
       }
    }

@@ -18,12 +18,6 @@ public class ItemAxe extends ItemTool {
       this.attackSpeed = ATTACK_SPEEDS[var1.ordinal()];
    }
 
-   protected ItemAxe(Item.ToolMaterial var1, float var2, float var3) {
-      super(var1, EFFECTIVE_ON);
-      this.damageVsEntity = var2;
-      this.attackSpeed = var3;
-   }
-
    public float getStrVsBlock(ItemStack var1, IBlockState var2) {
       Material var3 = var2.getMaterial();
       return var3 != Material.WOOD && var3 != Material.PLANTS && var3 != Material.VINE ? super.getStrVsBlock(var1, var2) : this.efficiencyOnProperMaterial;

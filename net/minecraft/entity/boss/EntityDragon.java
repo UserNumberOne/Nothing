@@ -1,5 +1,6 @@
 package net.minecraft.entity.boss;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
@@ -37,14 +38,19 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.end.DragonFightManager;
 import net.minecraft.world.gen.feature.WorldGenEndPodium;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
 public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -72,6 +78,7 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
    private final PathPoint[] pathPoints = new PathPoint[24];
    private final int[] neighbors = new int[24];
    private final PathHeap pathFindQueue = new PathHeap();
+   private Explosion explosionSource = new Explosion((World)null, this, Double.NaN, Double.NaN, Double.NaN, Float.NaN, true, true);
 
    public EntityDragon(World var1) {
       super(var1);
@@ -139,20 +146,20 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
 
       this.prevAnimTime = this.animTime;
       if (this.getHealth() <= 0.0F) {
-         float var22 = (this.rand.nextFloat() - 0.5F) * 8.0F;
-         float var25 = (this.rand.nextFloat() - 0.5F) * 4.0F;
+         float var32 = (this.rand.nextFloat() - 0.5F) * 8.0F;
+         float var35 = (this.rand.nextFloat() - 0.5F) * 4.0F;
          float var3 = (this.rand.nextFloat() - 0.5F) * 8.0F;
-         this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.posX + (double)var22, this.posY + 2.0D + (double)var25, this.posZ + (double)var3, 0.0D, 0.0D, 0.0D);
+         this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.posX + (double)var32, this.posY + 2.0D + (double)var35, this.posZ + (double)var3, 0.0D, 0.0D, 0.0D);
       } else {
          this.updateDragonEnderCrystal();
-         float var23 = 0.2F / (MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ) * 10.0F + 1.0F);
-         var23 = var23 * (float)Math.pow(2.0D, this.motionY);
+         float var33 = 0.2F / (MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ) * 10.0F + 1.0F);
+         var33 = var33 * (float)Math.pow(2.0D, this.motionY);
          if (this.phaseManager.getCurrentPhase().getIsStationary()) {
             this.animTime += 0.1F;
          } else if (this.slowed) {
-            this.animTime += var23 * 0.5F;
+            this.animTime += var33 * 0.5F;
          } else {
-            this.animTime += var23;
+            this.animTime += var33;
          }
 
          this.rotationYaw = MathHelper.wrapDegrees(this.rotationYaw);
@@ -160,9 +167,9 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
             this.animTime = 0.5F;
          } else {
             if (this.ringBufferIndex < 0) {
-               for(int var26 = 0; var26 < this.ringBuffer.length; ++var26) {
-                  this.ringBuffer[var26][0] = (double)this.rotationYaw;
-                  this.ringBuffer[var26][1] = this.posY;
+               for(int var4 = 0; var4 < this.ringBuffer.length; ++var4) {
+                  this.ringBuffer[var4][0] = (double)this.rotationYaw;
+                  this.ringBuffer[var4][1] = this.posY;
                }
             }
 
@@ -174,57 +181,56 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
             this.ringBuffer[this.ringBufferIndex][1] = this.posY;
             if (this.world.isRemote) {
                if (this.newPosRotationIncrements > 0) {
-                  double var27 = this.posX + (this.interpTargetX - this.posX) / (double)this.newPosRotationIncrements;
-                  double var4 = this.posY + (this.interpTargetY - this.posY) / (double)this.newPosRotationIncrements;
-                  double var6 = this.posZ + (this.interpTargetZ - this.posZ) / (double)this.newPosRotationIncrements;
-                  double var8 = MathHelper.wrapDegrees(this.interpTargetYaw - (double)this.rotationYaw);
-                  this.rotationYaw = (float)((double)this.rotationYaw + var8 / (double)this.newPosRotationIncrements);
+                  double var5 = this.posX + (this.interpTargetX - this.posX) / (double)this.newPosRotationIncrements;
+                  double var7 = this.posY + (this.interpTargetY - this.posY) / (double)this.newPosRotationIncrements;
+                  double var9 = this.posZ + (this.interpTargetZ - this.posZ) / (double)this.newPosRotationIncrements;
+                  double var11 = MathHelper.wrapDegrees(this.interpTargetYaw - (double)this.rotationYaw);
+                  this.rotationYaw = (float)((double)this.rotationYaw + var11 / (double)this.newPosRotationIncrements);
                   this.rotationPitch = (float)((double)this.rotationPitch + (this.interpTargetPitch - (double)this.rotationPitch) / (double)this.newPosRotationIncrements);
                   --this.newPosRotationIncrements;
-                  this.setPosition(var27, var4, var6);
+                  this.setPosition(var5, var7, var9);
                   this.setRotation(this.rotationYaw, this.rotationPitch);
                }
 
                this.phaseManager.getCurrentPhase().doClientRenderEffects();
             } else {
-               IPhase var28 = this.phaseManager.getCurrentPhase();
-               var28.doLocalUpdate();
-               if (this.phaseManager.getCurrentPhase() != var28) {
-                  var28 = this.phaseManager.getCurrentPhase();
-                  var28.doLocalUpdate();
+               IPhase var13 = this.phaseManager.getCurrentPhase();
+               var13.doLocalUpdate();
+               if (this.phaseManager.getCurrentPhase() != var13) {
+                  var13 = this.phaseManager.getCurrentPhase();
+                  var13.doLocalUpdate();
                }
 
-               Vec3d var30 = var28.getTargetLocation();
-               if (var30 != null) {
-                  double var32 = var30.xCoord - this.posX;
-                  double var34 = var30.yCoord - this.posY;
-                  double var37 = var30.zCoord - this.posZ;
-                  double var10 = var32 * var32 + var34 * var34 + var37 * var37;
-                  float var12 = var28.getMaxRiseOrFall();
-                  var34 = MathHelper.clamp(var34 / (double)MathHelper.sqrt(var32 * var32 + var37 * var37), (double)(-var12), (double)var12);
-                  this.motionY += var34 * 0.10000000149011612D;
+               Vec3d var14 = var13.getTargetLocation();
+               if (var14 != null && var13.getPhaseList() != PhaseList.HOVER) {
+                  double var38 = var14.xCoord - this.posX;
+                  double var39 = var14.yCoord - this.posY;
+                  double var41 = var14.zCoord - this.posZ;
+                  double var15 = var38 * var38 + var39 * var39 + var41 * var41;
+                  float var17 = var13.getMaxRiseOrFall();
+                  var39 = MathHelper.clamp(var39 / (double)MathHelper.sqrt(var38 * var38 + var41 * var41), (double)(-var17), (double)var17);
+                  this.motionY += var39 * 0.10000000149011612D;
                   this.rotationYaw = MathHelper.wrapDegrees(this.rotationYaw);
-                  double var13 = MathHelper.clamp(MathHelper.wrapDegrees(180.0D - MathHelper.atan2(var32, var37) * 57.29577951308232D - (double)this.rotationYaw), -50.0D, 50.0D);
-                  Vec3d var15 = (new Vec3d(var30.xCoord - this.posX, var30.yCoord - this.posY, var30.zCoord - this.posZ)).normalize();
-                  Vec3d var16 = (new Vec3d((double)MathHelper.sin(this.rotationYaw * 0.017453292F), this.motionY, (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)))).normalize();
-                  float var17 = Math.max(((float)var16.dotProduct(var15) + 0.5F) / 1.5F, 0.0F);
+                  double var18 = MathHelper.clamp(MathHelper.wrapDegrees(180.0D - MathHelper.atan2(var38, var41) * 57.2957763671875D - (double)this.rotationYaw), -50.0D, 50.0D);
+                  Vec3d var20 = (new Vec3d(var14.xCoord - this.posX, var14.yCoord - this.posY, var14.zCoord - this.posZ)).normalize();
+                  Vec3d var21 = (new Vec3d((double)MathHelper.sin(this.rotationYaw * 0.017453292F), this.motionY, (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)))).normalize();
+                  float var22 = Math.max(((float)var21.dotProduct(var20) + 0.5F) / 1.5F, 0.0F);
                   this.randomYawVelocity *= 0.8F;
-                  this.randomYawVelocity = (float)((double)this.randomYawVelocity + var13 * (double)var28.getYawFactor());
+                  this.randomYawVelocity = (float)((double)this.randomYawVelocity + var18 * (double)var13.getYawFactor());
                   this.rotationYaw += this.randomYawVelocity * 0.1F;
-                  float var18 = (float)(2.0D / (var10 + 1.0D));
-                  float var19 = 0.06F;
-                  this.moveRelative(0.0F, -1.0F, 0.06F * (var17 * var18 + (1.0F - var18)));
+                  float var23 = (float)(2.0D / (var15 + 1.0D));
+                  this.moveRelative(0.0F, -1.0F, 0.06F * (var22 * var23 + (1.0F - var23)));
                   if (this.slowed) {
                      this.move(this.motionX * 0.800000011920929D, this.motionY * 0.800000011920929D, this.motionZ * 0.800000011920929D);
                   } else {
                      this.move(this.motionX, this.motionY, this.motionZ);
                   }
 
-                  Vec3d var20 = (new Vec3d(this.motionX, this.motionY, this.motionZ)).normalize();
-                  float var21 = ((float)var20.dotProduct(var16) + 1.0F) / 2.0F;
-                  var21 = 0.8F + 0.15F * var21;
-                  this.motionX *= (double)var21;
-                  this.motionZ *= (double)var21;
+                  Vec3d var24 = (new Vec3d(this.motionX, this.motionY, this.motionZ)).normalize();
+                  float var25 = ((float)var24.dotProduct(var21) + 1.0F) / 2.0F;
+                  var25 = 0.8F + 0.15F * var25;
+                  this.motionX *= (double)var25;
+                  this.motionZ *= (double)var25;
                   this.motionY *= 0.9100000262260437D;
                }
             }
@@ -246,18 +252,18 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
             this.dragonPartWing1.width = 4.0F;
             this.dragonPartWing2.height = 3.0F;
             this.dragonPartWing2.width = 4.0F;
-            float var29 = (float)(this.getMovementOffsets(5, 1.0F)[1] - this.getMovementOffsets(10, 1.0F)[1]) * 10.0F * 0.017453292F;
-            float var31 = MathHelper.cos(var29);
-            float var33 = MathHelper.sin(var29);
-            float var5 = this.rotationYaw * 0.017453292F;
-            float var36 = MathHelper.sin(var5);
-            float var7 = MathHelper.cos(var5);
+            float var36 = (float)(this.getMovementOffsets(5, 1.0F)[1] - this.getMovementOffsets(10, 1.0F)[1]) * 10.0F * 0.017453292F;
+            float var37 = MathHelper.cos(var36);
+            float var42 = MathHelper.sin(var36);
+            float var43 = this.rotationYaw * 0.017453292F;
+            float var26 = MathHelper.sin(var43);
+            float var27 = MathHelper.cos(var43);
             this.dragonPartBody.onUpdate();
-            this.dragonPartBody.setLocationAndAngles(this.posX + (double)(var36 * 0.5F), this.posY, this.posZ - (double)(var7 * 0.5F), 0.0F, 0.0F);
+            this.dragonPartBody.setLocationAndAngles(this.posX + (double)(var26 * 0.5F), this.posY, this.posZ - (double)(var27 * 0.5F), 0.0F, 0.0F);
             this.dragonPartWing1.onUpdate();
-            this.dragonPartWing1.setLocationAndAngles(this.posX + (double)(var7 * 4.5F), this.posY + 2.0D, this.posZ + (double)(var36 * 4.5F), 0.0F, 0.0F);
+            this.dragonPartWing1.setLocationAndAngles(this.posX + (double)(var27 * 4.5F), this.posY + 2.0D, this.posZ + (double)(var26 * 4.5F), 0.0F, 0.0F);
             this.dragonPartWing2.onUpdate();
-            this.dragonPartWing2.setLocationAndAngles(this.posX - (double)(var7 * 4.5F), this.posY + 2.0D, this.posZ - (double)(var36 * 4.5F), 0.0F, 0.0F);
+            this.dragonPartWing2.setLocationAndAngles(this.posX - (double)(var27 * 4.5F), this.posY + 2.0D, this.posZ - (double)(var26 * 4.5F), 0.0F, 0.0F);
             if (!this.world.isRemote && this.hurtTime == 0) {
                this.collideWithEntities(this.world.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartWing1.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D).offset(0.0D, -2.0D, 0.0D)));
                this.collideWithEntities(this.world.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartWing2.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D).offset(0.0D, -2.0D, 0.0D)));
@@ -265,37 +271,36 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
                this.attackEntitiesInList(this.world.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartNeck.getEntityBoundingBox().expandXyz(1.0D)));
             }
 
-            double[] var38 = this.getMovementOffsets(5, 1.0F);
-            float var9 = MathHelper.sin(this.rotationYaw * 0.017453292F - this.randomYawVelocity * 0.01F);
-            float var39 = MathHelper.cos(this.rotationYaw * 0.017453292F - this.randomYawVelocity * 0.01F);
+            double[] var28 = this.getMovementOffsets(5, 1.0F);
+            float var29 = MathHelper.sin(this.rotationYaw * 0.017453292F - this.randomYawVelocity * 0.01F);
+            float var45 = MathHelper.cos(this.rotationYaw * 0.017453292F - this.randomYawVelocity * 0.01F);
             this.dragonPartHead.onUpdate();
             this.dragonPartNeck.onUpdate();
-            float var11 = this.getHeadYOffset(1.0F);
-            this.dragonPartHead.setLocationAndAngles(this.posX + (double)(var9 * 6.5F * var31), this.posY + (double)var11 + (double)(var33 * 6.5F), this.posZ - (double)(var39 * 6.5F * var31), 0.0F, 0.0F);
-            this.dragonPartNeck.setLocationAndAngles(this.posX + (double)(var9 * 5.5F * var31), this.posY + (double)var11 + (double)(var33 * 5.5F), this.posZ - (double)(var39 * 5.5F * var31), 0.0F, 0.0F);
+            float var46 = this.getHeadYOffset(1.0F);
+            this.dragonPartHead.setLocationAndAngles(this.posX + (double)(var29 * 6.5F * var37), this.posY + (double)var46 + (double)(var42 * 6.5F), this.posZ - (double)(var45 * 6.5F * var37), 0.0F, 0.0F);
+            this.dragonPartNeck.setLocationAndAngles(this.posX + (double)(var29 * 5.5F * var37), this.posY + (double)var46 + (double)(var42 * 5.5F), this.posZ - (double)(var45 * 5.5F * var37), 0.0F, 0.0F);
 
-            for(int var40 = 0; var40 < 3; ++var40) {
-               EntityDragonPart var41 = null;
-               if (var40 == 0) {
-                  var41 = this.dragonPartTail1;
+            for(int var47 = 0; var47 < 3; ++var47) {
+               EntityDragonPart var48 = null;
+               if (var47 == 0) {
+                  var48 = this.dragonPartTail1;
                }
 
-               if (var40 == 1) {
-                  var41 = this.dragonPartTail2;
+               if (var47 == 1) {
+                  var48 = this.dragonPartTail2;
                }
 
-               if (var40 == 2) {
-                  var41 = this.dragonPartTail3;
+               if (var47 == 2) {
+                  var48 = this.dragonPartTail3;
                }
 
-               double[] var14 = this.getMovementOffsets(12 + var40 * 2, 1.0F);
-               float var42 = this.rotationYaw * 0.017453292F + this.simplifyAngle(var14[0] - var38[0]) * 0.017453292F;
-               float var43 = MathHelper.sin(var42);
-               float var44 = MathHelper.cos(var42);
-               float var45 = 1.5F;
-               float var46 = (float)(var40 + 1) * 2.0F;
-               var41.onUpdate();
-               var41.setLocationAndAngles(this.posX - (double)((var36 * 1.5F + var43 * var46) * var31), this.posY + (var14[1] - var38[1]) - (double)((var46 + 1.5F) * var33) + 1.5D, this.posZ + (double)((var7 * 1.5F + var44 * var46) * var31), 0.0F, 0.0F);
+               double[] var49 = this.getMovementOffsets(12 + var47 * 2, 1.0F);
+               float var44 = this.rotationYaw * 0.017453292F + this.simplifyAngle(var49[0] - var28[0]) * 0.017453292F;
+               float var51 = MathHelper.sin(var44);
+               float var30 = MathHelper.cos(var44);
+               float var31 = (float)(var47 + 1) * 2.0F;
+               var48.onUpdate();
+               var48.setLocationAndAngles(this.posX - (double)((var26 * 1.5F + var51 * var31) * var37), this.posY + (var49[1] - var28[1]) - (double)((var31 + 1.5F) * var42) + 1.5D, this.posZ + (double)((var27 * 1.5F + var30 * var31) * var37), 0.0F, 0.0F);
             }
 
             if (!this.world.isRemote) {
@@ -327,16 +332,20 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
          if (this.healingEnderCrystal.isDead) {
             this.healingEnderCrystal = null;
          } else if (this.ticksExisted % 10 == 0 && this.getHealth() < this.getMaxHealth()) {
-            this.setHealth(this.getHealth() + 1.0F);
+            EntityRegainHealthEvent var1 = new EntityRegainHealthEvent(this.getBukkitEntity(), 1.0D, RegainReason.ENDER_CRYSTAL);
+            this.world.getServer().getPluginManager().callEvent(var1);
+            if (!var1.isCancelled()) {
+               this.setHealth((float)((double)this.getHealth() + var1.getAmount()));
+            }
          }
       }
 
       if (this.rand.nextInt(10) == 0) {
-         List var1 = this.world.getEntitiesWithinAABB(EntityEnderCrystal.class, this.getEntityBoundingBox().expandXyz(32.0D));
+         List var9 = this.world.getEntitiesWithinAABB(EntityEnderCrystal.class, this.getEntityBoundingBox().expandXyz(32.0D));
          EntityEnderCrystal var2 = null;
          double var3 = Double.MAX_VALUE;
 
-         for(EntityEnderCrystal var6 : var1) {
+         for(EntityEnderCrystal var6 : var9) {
             double var7 = var6.getDistanceSqToEntity(this);
             if (var7 < var3) {
                var3 = var7;
@@ -392,20 +401,25 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
       int var7 = MathHelper.floor(var1.maxZ);
       boolean var8 = false;
       boolean var9 = false;
+      ArrayList var10 = new ArrayList();
+      CraftWorld var11 = this.world.getWorld();
 
-      for(int var10 = var2; var10 <= var5; ++var10) {
-         for(int var11 = var3; var11 <= var6; ++var11) {
-            for(int var12 = var4; var12 <= var7; ++var12) {
-               BlockPos var13 = new BlockPos(var10, var11, var12);
-               IBlockState var14 = this.world.getBlockState(var13);
-               Block var15 = var14.getBlock();
-               if (!var15.isAir(var14, this.world, var13) && var14.getMaterial() != Material.FIRE) {
+      for(int var12 = var2; var12 <= var5; ++var12) {
+         for(int var13 = var3; var13 <= var6; ++var13) {
+            for(int var14 = var4; var14 <= var7; ++var14) {
+               BlockPos var15 = new BlockPos(var12, var13, var14);
+               IBlockState var16 = this.world.getBlockState(var15);
+               Block var17 = var16.getBlock();
+               if (var16.getMaterial() != Material.AIR && var16.getMaterial() != Material.FIRE) {
                   if (!this.world.getGameRules().getBoolean("mobGriefing")) {
                      var8 = true;
-                  } else if (!var15.canEntityDestroy(var14, this.world, var13, this)) {
-                     var8 = true;
-                  } else if (var15 != Blocks.COMMAND_BLOCK && var15 != Blocks.REPEATING_COMMAND_BLOCK && var15 != Blocks.CHAIN_COMMAND_BLOCK && var15 != Blocks.IRON_BARS && var15 != Blocks.END_GATEWAY) {
-                     var9 = this.world.setBlockToAir(var13) || var9;
+                  } else if (var17 != Blocks.BARRIER && var17 != Blocks.OBSIDIAN && var17 != Blocks.END_STONE && var17 != Blocks.BEDROCK && var17 != Blocks.END_PORTAL && var17 != Blocks.END_PORTAL_FRAME) {
+                     if (var17 != Blocks.COMMAND_BLOCK && var17 != Blocks.REPEATING_COMMAND_BLOCK && var17 != Blocks.CHAIN_COMMAND_BLOCK && var17 != Blocks.IRON_BARS && var17 != Blocks.END_GATEWAY) {
+                        var9 = true;
+                        var10.add(var11.getBlockAt(var12, var13, var14));
+                     } else {
+                        var8 = true;
+                     }
                   } else {
                      var8 = true;
                   }
@@ -414,14 +428,43 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
          }
       }
 
-      if (var9) {
-         double var16 = var1.minX + (var1.maxX - var1.minX) * (double)this.rand.nextFloat();
-         double var17 = var1.minY + (var1.maxY - var1.minY) * (double)this.rand.nextFloat();
-         double var18 = var1.minZ + (var1.maxZ - var1.minZ) * (double)this.rand.nextFloat();
-         this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, var16, var17, var18, 0.0D, 0.0D, 0.0D);
-      }
+      CraftEntity var27 = this.getBukkitEntity();
+      EntityExplodeEvent var28 = new EntityExplodeEvent(var27, var27.getLocation(), var10, 0.0F);
+      var27.getServer().getPluginManager().callEvent(var28);
+      if (var28.isCancelled()) {
+         return var8;
+      } else {
+         if (var28.getYield() == 0.0F) {
+            for(org.bukkit.block.Block var29 : var28.blockList()) {
+               this.world.setBlockToAir(new BlockPos(var29.getX(), var29.getY(), var29.getZ()));
+            }
+         } else {
+            for(org.bukkit.block.Block var30 : var28.blockList()) {
+               org.bukkit.Material var33 = var30.getType();
+               if (var33 != org.bukkit.Material.AIR) {
+                  int var34 = var30.getX();
+                  int var18 = var30.getY();
+                  int var19 = var30.getZ();
+                  Block var20 = CraftMagicNumbers.getBlock(var33);
+                  if (var20.canDropFromExplosion(this.explosionSource)) {
+                     var20.dropBlockAsItemWithChance(this.world, new BlockPos(var34, var18, var19), var20.getStateFromMeta(var30.getData()), var28.getYield(), 0);
+                  }
 
-      return var8;
+                  var20.onBlockDestroyedByExplosion(this.world, new BlockPos(var34, var18, var19), this.explosionSource);
+                  this.world.setBlockToAir(new BlockPos(var34, var18, var19));
+               }
+            }
+         }
+
+         if (var9) {
+            double var21 = var1.minX + (var1.maxX - var1.minX) * (double)this.rand.nextFloat();
+            double var23 = var1.minY + (var1.maxY - var1.minY) * (double)this.rand.nextFloat();
+            double var25 = var1.minZ + (var1.maxZ - var1.minZ) * (double)this.rand.nextFloat();
+            this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, var21, var23, var25, 0.0D, 0.0D, 0.0D);
+         }
+
+         return var8;
+      }
    }
 
    public boolean attackEntityFromPart(EntityDragonPart var1, DamageSource var2, float var3) {
@@ -696,16 +739,16 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
          ++var3;
       }
 
-      PathPoint[] var7 = new PathPoint[var3];
-      PathPoint var5 = var2;
+      PathPoint[] var5 = new PathPoint[var3];
+      PathPoint var7 = var2;
       --var3;
 
-      for(var7[var3] = var2; var5.previous != null; var7[var3] = var5) {
-         var5 = var5.previous;
+      for(var5[var3] = var2; var7.previous != null; var5[var3] = var7) {
+         var7 = var7.previous;
          --var3;
       }
 
-      return new Path(var7);
+      return new Path(var5);
    }
 
    public static void registerFixesDragon(DataFixer var0) {
@@ -756,54 +799,31 @@ public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
       return 5.0F;
    }
 
-   @SideOnly(Side.CLIENT)
-   public float getHeadPartYOffset(int var1, double[] var2, double[] var3) {
-      IPhase var4 = this.phaseManager.getCurrentPhase();
-      PhaseList var5 = var4.getPhaseList();
-      double var6;
-      if (var5 != PhaseList.LANDING && var5 != PhaseList.TAKEOFF) {
-         if (var4.getIsStationary()) {
-            var6 = (double)var1;
-         } else if (var1 == 6) {
-            var6 = 0.0D;
-         } else {
-            var6 = var3[1] - var2[1];
-         }
-      } else {
-         BlockPos var8 = this.world.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
-         float var9 = Math.max(MathHelper.sqrt(this.getDistanceSqToCenter(var8)) / 4.0F, 1.0F);
-         var6 = (double)((float)var1 / var9);
-      }
-
-      return (float)var6;
-   }
-
    public Vec3d getHeadLookVec(float var1) {
       IPhase var2 = this.phaseManager.getCurrentPhase();
       PhaseList var3 = var2.getPhaseList();
-      Vec3d var4;
+      Vec3d var6;
       if (var3 != PhaseList.LANDING && var3 != PhaseList.TAKEOFF) {
          if (var2.getIsStationary()) {
-            float var10 = this.rotationPitch;
-            float var11 = 1.5F;
+            float var9 = this.rotationPitch;
+            float var10 = 1.5F;
             this.rotationPitch = -45.0F;
-            var4 = this.getLook(var1);
-            this.rotationPitch = var10;
+            var6 = this.getLook(var1);
+            this.rotationPitch = var9;
          } else {
-            var4 = this.getLook(var1);
+            var6 = this.getLook(var1);
          }
       } else {
-         BlockPos var5 = this.world.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
-         float var6 = Math.max(MathHelper.sqrt(this.getDistanceSqToCenter(var5)) / 4.0F, 1.0F);
-         float var7 = 6.0F / var6;
+         BlockPos var4 = this.world.getTopSolidOrLiquidBlock(WorldGenEndPodium.END_PODIUM_LOCATION);
+         float var5 = Math.max(MathHelper.sqrt(this.getDistanceSqToCenter(var4)) / 4.0F, 1.0F);
+         float var7 = 6.0F / var5;
          float var8 = this.rotationPitch;
-         float var9 = 1.5F;
          this.rotationPitch = -var7 * 1.5F * 5.0F;
-         var4 = this.getLook(var1);
+         var6 = this.getLook(var1);
          this.rotationPitch = var8;
       }
 
-      return var4;
+      return var6;
    }
 
    public void onCrystalDestroyed(EntityEnderCrystal var1, BlockPos var2, DamageSource var3) {

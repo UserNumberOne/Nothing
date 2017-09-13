@@ -4,21 +4,33 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.HorseArmorType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryHorse;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
+import org.bukkit.inventory.InventoryView;
 
 public class ContainerHorseInventory extends Container {
    private final IInventory horseInventory;
    private final EntityHorse theHorse;
+   CraftInventoryView bukkitEntity;
+   InventoryPlayer player;
+
+   public InventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventoryHorse var1 = new CraftInventoryHorse(this.horseInventory);
+         return this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), var1, this);
+      }
+   }
 
    public ContainerHorseInventory(IInventory var1, IInventory var2, final EntityHorse var3, EntityPlayer var4) {
+      this.player = (InventoryPlayer)var1;
       this.horseInventory = var2;
       this.theHorse = var3;
-      boolean var5 = true;
       var2.openInventory(var4);
-      boolean var6 = true;
       this.addSlotToContainer(new Slot(var2, 0, 8, 18) {
          public boolean isItemValid(@Nullable ItemStack var1) {
             return super.isItemValid(var1) && var1.getItem() == Items.SADDLE && !this.getHasStack();
@@ -28,28 +40,23 @@ public class ContainerHorseInventory extends Container {
          public boolean isItemValid(@Nullable ItemStack var1) {
             return super.isItemValid(var1) && var3.getType().isHorse() && HorseArmorType.isHorseArmor(var1.getItem());
          }
-
-         @SideOnly(Side.CLIENT)
-         public boolean canBeHovered() {
-            return var3.getType().isHorse();
-         }
       });
       if (var3.isChested()) {
-         for(int var7 = 0; var7 < 3; ++var7) {
-            for(int var8 = 0; var8 < 5; ++var8) {
-               this.addSlotToContainer(new Slot(var2, 2 + var8 + var7 * 5, 80 + var8 * 18, 18 + var7 * 18));
+         for(int var5 = 0; var5 < 3; ++var5) {
+            for(int var6 = 0; var6 < 5; ++var6) {
+               this.addSlotToContainer(new Slot(var2, 2 + var6 + var5 * 5, 80 + var6 * 18, 18 + var5 * 18));
             }
          }
       }
 
-      for(int var9 = 0; var9 < 3; ++var9) {
-         for(int var11 = 0; var11 < 9; ++var11) {
-            this.addSlotToContainer(new Slot(var1, var11 + var9 * 9 + 9, 8 + var11 * 18, 102 + var9 * 18 + -18));
+      for(int var7 = 0; var7 < 3; ++var7) {
+         for(int var9 = 0; var9 < 9; ++var9) {
+            this.addSlotToContainer(new Slot(var1, var9 + var7 * 9 + 9, 8 + var9 * 18, 102 + var7 * 18 + -18));
          }
       }
 
-      for(int var10 = 0; var10 < 9; ++var10) {
-         this.addSlotToContainer(new Slot(var1, var10, 8 + var10 * 18, 142));
+      for(int var8 = 0; var8 < 9; ++var8) {
+         this.addSlotToContainer(new Slot(var1, var8, 8 + var8 * 18, 142));
       }
 
    }

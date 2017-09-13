@@ -1,13 +1,11 @@
 package net.minecraft.item;
 
-import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
@@ -15,8 +13,6 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemPotion extends Item {
    public ItemPotion() {
@@ -32,8 +28,8 @@ public class ItemPotion extends Item {
       }
 
       if (!var2.isRemote) {
-         for(PotionEffect var6 : PotionUtils.getEffectsFromStack(var1)) {
-            var3.addPotionEffect(new PotionEffect(var6));
+         for(PotionEffect var7 : PotionUtils.getEffectsFromStack(var1)) {
+            var3.addPotionEffect(new PotionEffect(var7));
          }
       }
 
@@ -69,23 +65,5 @@ public class ItemPotion extends Item {
 
    public String getItemStackDisplayName(ItemStack var1) {
       return I18n.translateToLocal(PotionUtils.getPotionFromItem(var1).getNamePrefixed("potion.effect."));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void addInformation(ItemStack var1, EntityPlayer var2, List var3, boolean var4) {
-      PotionUtils.addPotionTooltip(var1, var3, 1.0F);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasEffect(ItemStack var1) {
-      return !PotionUtils.getEffectsFromStack(var1).isEmpty();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubItems(Item var1, CreativeTabs var2, List var3) {
-      for(PotionType var5 : PotionType.REGISTRY) {
-         var3.add(PotionUtils.addPotionToItemStack(new ItemStack(var1), var5));
-      }
-
    }
 }

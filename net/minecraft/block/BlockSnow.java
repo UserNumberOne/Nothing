@@ -13,15 +13,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockSnow extends Block {
    public static final PropertyInteger LAYERS = PropertyInteger.create("layers", 1, 8);
@@ -49,9 +48,8 @@ public class BlockSnow extends Block {
    @Nullable
    public AxisAlignedBB getCollisionBoundingBox(IBlockState var1, World var2, BlockPos var3) {
       int var4 = ((Integer)var1.getValue(LAYERS)).intValue() - 1;
-      float var5 = 0.125F;
-      AxisAlignedBB var6 = var1.getBoundingBox(var2, var3);
-      return new AxisAlignedBB(var6.minX, var6.minY, var6.minZ, var6.maxX, (double)((float)var4 * 0.125F), var6.maxZ);
+      AxisAlignedBB var5 = var1.getBoundingBox(var2, var3);
+      return new AxisAlignedBB(var5.minX, var5.minY, var5.minZ, var5.maxX, (double)((float)var4 * 0.125F), var5.maxZ);
    }
 
    public boolean isOpaqueCube(IBlockState var1) {
@@ -65,7 +63,7 @@ public class BlockSnow extends Block {
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
       IBlockState var3 = var1.getBlockState(var2.down());
       Block var4 = var3.getBlock();
-      return var4 != Blocks.ICE && var4 != Blocks.PACKED_ICE ? (var3.getBlock().isLeaves(var3, var1, var2.down()) ? true : (var4 == this && ((Integer)var3.getValue(LAYERS)).intValue() >= 7 ? true : var3.isOpaqueCube() && var3.getMaterial().blocksMovement())) : false;
+      return var4 != Blocks.ICE && var4 != Blocks.PACKED_ICE ? (var3.getMaterial() == Material.LEAVES ? true : (var4 == this && ((Integer)var3.getValue(LAYERS)).intValue() >= 7 ? true : var3.isOpaqueCube() && var3.getMaterial().blocksMovement())) : false;
    }
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
@@ -74,6 +72,7 @@ public class BlockSnow extends Block {
 
    private boolean checkAndDropBlock(World var1, BlockPos var2, IBlockState var3) {
       if (!this.canPlaceBlockAt(var1, var2)) {
+         this.dropBlockAsItem(var1, var2, var3, 0);
          var1.setBlockToAir(var2);
          return false;
       } else {
@@ -82,8 +81,9 @@ public class BlockSnow extends Block {
    }
 
    public void harvestBlock(World var1, EntityPlayer var2, BlockPos var3, IBlockState var4, @Nullable TileEntity var5, @Nullable ItemStack var6) {
-      super.harvestBlock(var1, var2, var3, var4, var5, var6);
+      spawnAsEntity(var1, var3, new ItemStack(Items.SNOWBALL, ((Integer)var4.getValue(LAYERS)).intValue() + 1, 0));
       var1.setBlockToAir(var3);
+      var2.addStat(StatList.getBlockStats(this));
    }
 
    @Nullable
@@ -92,24 +92,19 @@ public class BlockSnow extends Block {
    }
 
    public int quantityDropped(Random var1) {
-      return 1;
+      return 0;
    }
 
    public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
       if (var1.getLightFor(EnumSkyBlock.BLOCK, var2) > 11) {
+         if (CraftEventFactory.callBlockFadeEvent(var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ()), Blocks.AIR).isCancelled()) {
+            return;
+         }
+
+         this.dropBlockAsItem(var1, var2, var1.getBlockState(var2), 0);
          var1.setBlockToAir(var2);
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      if (var4 == EnumFacing.UP) {
-         return true;
-      } else {
-         IBlockState var5 = var2.getBlockState(var3.offset(var4));
-         return var5.getBlock() == this && ((Integer)var5.getValue(LAYERS)).intValue() >= ((Integer)var1.getValue(LAYERS)).intValue() ? true : super.shouldSideBeRendered(var1, var2, var3, var4);
-      }
    }
 
    public IBlockState getStateFromMeta(int var1) {
@@ -122,10 +117,6 @@ public class BlockSnow extends Block {
 
    public int getMetaFromState(IBlockState var1) {
       return ((Integer)var1.getValue(LAYERS)).intValue() - 1;
-   }
-
-   public int quantityDropped(IBlockState var1, int var2, Random var3) {
-      return ((Integer)var1.getValue(LAYERS)).intValue() + 1;
    }
 
    protected BlockStateContainer createBlockState() {

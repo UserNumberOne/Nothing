@@ -3,14 +3,11 @@ package net.minecraft.network.play.server;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSpawnPlayer implements Packet {
    private int entityId;
@@ -61,50 +58,5 @@ public class SPacketSpawnPlayer implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleSpawnPlayer(this);
-   }
-
-   @Nullable
-   @SideOnly(Side.CLIENT)
-   public List getDataManagerEntries() {
-      if (this.dataManagerEntries == null) {
-         this.dataManagerEntries = this.watcher.getAll();
-      }
-
-      return this.dataManagerEntries;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityID() {
-      return this.entityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public UUID getUniqueId() {
-      return this.uniqueId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.x;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.y;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.z;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getYaw() {
-      return this.yaw;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getPitch() {
-      return this.pitch;
    }
 }

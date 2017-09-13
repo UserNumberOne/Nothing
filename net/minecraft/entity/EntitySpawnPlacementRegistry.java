@@ -42,13 +42,6 @@ public class EntitySpawnPlacementRegistry {
       return (EntityLiving.SpawnPlacementType)ENTITY_PLACEMENTS.get(var0);
    }
 
-   public static void setPlacementType(Class var0, EntityLiving.SpawnPlacementType var1) {
-      if (!ENTITY_PLACEMENTS.containsKey(var0)) {
-         ENTITY_PLACEMENTS.put(var0, var1);
-      }
-
-   }
-
    static {
       ENTITY_PLACEMENTS.put(EntityBat.class, EntityLiving.SpawnPlacementType.ON_GROUND);
       ENTITY_PLACEMENTS.put(EntityChicken.class, EntityLiving.SpawnPlacementType.ON_GROUND);

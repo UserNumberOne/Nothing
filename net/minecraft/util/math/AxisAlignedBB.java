@@ -3,8 +3,6 @@ package net.minecraft.util.math;
 import com.google.common.annotations.VisibleForTesting;
 import javax.annotation.Nullable;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class AxisAlignedBB {
    public final double minX;
@@ -31,11 +29,6 @@ public class AxisAlignedBB {
       this((double)var1.getX(), (double)var1.getY(), (double)var1.getZ(), (double)var2.getX(), (double)var2.getY(), (double)var2.getZ());
    }
 
-   @SideOnly(Side.CLIENT)
-   public AxisAlignedBB(Vec3d var1, Vec3d var2) {
-      this(var1.xCoord, var1.yCoord, var1.zCoord, var2.xCoord, var2.yCoord, var2.zCoord);
-   }
-
    public AxisAlignedBB setMaxY(double var1) {
       return new AxisAlignedBB(this.minX, this.minY, this.minZ, this.maxX, var1, this.maxZ);
    }
@@ -47,7 +40,19 @@ public class AxisAlignedBB {
          return false;
       } else {
          AxisAlignedBB var2 = (AxisAlignedBB)var1;
-         return Double.compare(var2.minX, this.minX) != 0 ? false : (Double.compare(var2.minY, this.minY) != 0 ? false : (Double.compare(var2.minZ, this.minZ) != 0 ? false : (Double.compare(var2.maxX, this.maxX) != 0 ? false : (Double.compare(var2.maxY, this.maxY) != 0 ? false : Double.compare(var2.maxZ, this.maxZ) == 0))));
+         if (Double.compare(var2.minX, this.minX) != 0) {
+            return false;
+         } else if (Double.compare(var2.minY, this.minY) != 0) {
+            return false;
+         } else if (Double.compare(var2.minZ, this.minZ) != 0) {
+            return false;
+         } else if (Double.compare(var2.maxX, this.maxX) != 0) {
+            return false;
+         } else if (Double.compare(var2.maxY, this.maxY) != 0) {
+            return false;
+         } else {
+            return Double.compare(var2.maxZ, this.maxZ) == 0;
+         }
       }
    }
 
@@ -195,13 +200,16 @@ public class AxisAlignedBB {
       return this.minX < var7 && this.maxX > var1 && this.minY < var9 && this.maxY > var3 && this.minZ < var11 && this.maxZ > var5;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean intersects(Vec3d var1, Vec3d var2) {
-      return this.intersects(Math.min(var1.xCoord, var2.xCoord), Math.min(var1.yCoord, var2.yCoord), Math.min(var1.zCoord, var2.zCoord), Math.max(var1.xCoord, var2.xCoord), Math.max(var1.yCoord, var2.yCoord), Math.max(var1.zCoord, var2.zCoord));
-   }
-
    public boolean isVecInside(Vec3d var1) {
-      return var1.xCoord > this.minX && var1.xCoord < this.maxX ? (var1.yCoord > this.minY && var1.yCoord < this.maxY ? var1.zCoord > this.minZ && var1.zCoord < this.maxZ : false) : false;
+      if (var1.xCoord > this.minX && var1.xCoord < this.maxX) {
+         if (var1.yCoord > this.minY && var1.yCoord < this.maxY) {
+            return var1.zCoord > this.minZ && var1.zCoord < this.maxZ;
+         } else {
+            return false;
+         }
+      } else {
+         return false;
+      }
    }
 
    public double getAverageEdgeLength() {
@@ -295,15 +303,5 @@ public class AxisAlignedBB {
 
    public String toString() {
       return "box[" + this.minX + ", " + this.minY + ", " + this.minZ + " -> " + this.maxX + ", " + this.maxY + ", " + this.maxZ + "]";
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean hasNaN() {
-      return Double.isNaN(this.minX) || Double.isNaN(this.minY) || Double.isNaN(this.minZ) || Double.isNaN(this.maxX) || Double.isNaN(this.maxY) || Double.isNaN(this.maxZ);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Vec3d getCenter() {
-      return new Vec3d(this.minX + (this.maxX - this.minX) * 0.5D, this.minY + (this.maxY - this.minY) * 0.5D, this.minZ + (this.maxZ - this.minZ) * 0.5D);
    }
 }

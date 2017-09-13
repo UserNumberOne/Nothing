@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -14,25 +13,26 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
+import net.minecraft.network.play.server.SPacketUpdateHealth;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StringUtils;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.RegistryNamespaced;
-import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry.Impl;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_10_R1.potion.CraftPotionEffectType;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.potion.PotionEffectType;
 
-public class Potion extends Impl {
-   public static final RegistryNamespaced REGISTRY = GameData.getPotionRegistry();
+public class Potion {
+   public static final RegistryNamespaced REGISTRY = new RegistryNamespaced();
    private final Map attributeModifierMap = Maps.newHashMap();
    private final boolean isBadEffect;
    private final int liquidColor;
    private String name = "";
    private int statusIconIndex = -1;
-   private double effectiveness;
+   public double effectiveness;
    private boolean beneficial;
 
    @Nullable
@@ -68,11 +68,11 @@ public class Potion extends Impl {
    public void performEffect(EntityLivingBase var1, int var2) {
       if (this == MobEffects.REGENERATION) {
          if (var1.getHealth() < var1.getMaxHealth()) {
-            var1.heal(1.0F);
+            var1.heal(1.0F, RegainReason.MAGIC_REGEN);
          }
       } else if (this == MobEffects.POISON) {
          if (var1.getHealth() > 1.0F) {
-            var1.attackEntityFrom(DamageSource.magic, 1.0F);
+            var1.attackEntityFrom(CraftEventFactory.POISON, 1.0F);
          }
       } else if (this == MobEffects.WITHER) {
          var1.attackEntityFrom(DamageSource.wither, 1.0F);
@@ -80,14 +80,21 @@ public class Potion extends Impl {
          ((EntityPlayer)var1).addExhaustion(0.025F * (float)(var2 + 1));
       } else if (this == MobEffects.SATURATION && var1 instanceof EntityPlayer) {
          if (!var1.world.isRemote) {
-            ((EntityPlayer)var1).getFoodStats().addStats(var2 + 1, 1.0F);
+            EntityPlayer var3 = (EntityPlayer)var1;
+            int var4 = var3.getFoodStats().foodLevel;
+            FoodLevelChangeEvent var5 = CraftEventFactory.callFoodLevelChangeEvent(var3, var2 + 1 + var4);
+            if (!var5.isCancelled()) {
+               var3.getFoodStats().addStats(var5.getFoodLevel() - var4, 1.0F);
+            }
+
+            ((EntityPlayerMP)var3).connection.sendPacket(new SPacketUpdateHealth(((EntityPlayerMP)var3).getBukkitEntity().getScaledHealth(), var3.getFoodStats().foodLevel, var3.getFoodStats().foodSaturationLevel));
          }
       } else if ((this != MobEffects.INSTANT_HEALTH || var1.isEntityUndead()) && (this != MobEffects.INSTANT_DAMAGE || !var1.isEntityUndead())) {
          if (this == MobEffects.INSTANT_DAMAGE && !var1.isEntityUndead() || this == MobEffects.INSTANT_HEALTH && var1.isEntityUndead()) {
             var1.attackEntityFrom(DamageSource.magic, (float)(6 << var2));
          }
       } else {
-         var1.heal((float)Math.max(4 << var2, 0));
+         var1.heal((float)Math.max(4 << var2, 0), RegainReason.MAGIC);
       }
 
    }
@@ -104,7 +111,7 @@ public class Potion extends Impl {
          }
       } else {
          int var7 = (int)(var5 * (double)(4 << var4) + 0.5D);
-         var3.heal((float)var7);
+         var3.heal((float)var7, RegainReason.MAGIC);
       }
 
    }
@@ -142,30 +149,6 @@ public class Potion extends Impl {
       return this;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean hasStatusIcon() {
-      return this.statusIconIndex >= 0;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getStatusIconIndex() {
-      return this.statusIconIndex;
-   }
-
-   public boolean isBadEffect() {
-      return this.isBadEffect;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static String getPotionDurationString(PotionEffect var0, float var1) {
-      if (var0.getIsPotionDurationMax()) {
-         return "**:**";
-      } else {
-         int var2 = MathHelper.floor((float)var0.getDuration() * var1);
-         return StringUtils.ticksToElapsedTime(var2);
-      }
-   }
-
    public int getLiquidColor() {
       return this.liquidColor;
    }
@@ -186,11 +169,6 @@ public class Potion extends Impl {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public Map getAttributeModifierMap() {
-      return this.attributeModifierMap;
-   }
-
    public void applyAttributesModifiersToEntity(EntityLivingBase var1, AbstractAttributeMap var2, int var3) {
       for(Entry var5 : this.attributeModifierMap.entrySet()) {
          IAttributeInstance var6 = var2.getAttributeInstance((IAttribute)var5.getKey());
@@ -205,31 +183,6 @@ public class Potion extends Impl {
 
    public double getAttributeModifierAmount(int var1, AttributeModifier var2) {
       return var2.getAmount() * (double)(var1 + 1);
-   }
-
-   public boolean shouldRender(PotionEffect var1) {
-      return true;
-   }
-
-   public boolean shouldRenderInvText(PotionEffect var1) {
-      return true;
-   }
-
-   public boolean shouldRenderHUD(PotionEffect var1) {
-      return true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void renderInventoryEffect(int var1, int var2, PotionEffect var3, Minecraft var4) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void renderHUDEffect(int var1, int var2, PotionEffect var3, Minecraft var4, float var5) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isBeneficial() {
-      return this.beneficial;
    }
 
    public Potion setBeneficial() {
@@ -265,5 +218,10 @@ public class Potion extends Impl {
       REGISTRY.register(25, new ResourceLocation("levitation"), (new Potion(true, 13565951)).setPotionName("effect.levitation").setIconIndex(3, 2));
       REGISTRY.register(26, new ResourceLocation("luck"), (new Potion(false, 3381504)).setPotionName("effect.luck").setIconIndex(5, 2).setBeneficial().registerPotionAttributeModifier(SharedMonsterAttributes.LUCK, "03C3C89D-7037-4B42-869F-B146BCB64D2E", 1.0D, 0));
       REGISTRY.register(27, new ResourceLocation("unluck"), (new Potion(true, 12624973)).setPotionName("effect.unluck").setIconIndex(6, 2).registerPotionAttributeModifier(SharedMonsterAttributes.LUCK, "CC5AF142-2BD2-4215-B636-2605AED11727", -1.0D, 0));
+
+      for(Object var1 : REGISTRY) {
+         PotionEffectType.registerPotionEffectType(new CraftPotionEffectType((Potion)var1));
+      }
+
    }
 }

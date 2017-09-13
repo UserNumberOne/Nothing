@@ -7,15 +7,31 @@ import javax.annotation.Nullable;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftShapelessRecipe;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.inventory.ShapelessRecipe;
 
 public class ShapelessRecipes implements IRecipe {
    private final ItemStack recipeOutput;
-   public final List recipeItems;
+   private final List recipeItems;
 
    public ShapelessRecipes(ItemStack var1, List var2) {
       this.recipeOutput = var1;
       this.recipeItems = var2;
+   }
+
+   public ShapelessRecipe toBukkitRecipe() {
+      CraftItemStack var1 = CraftItemStack.asCraftMirror(this.recipeOutput);
+      CraftShapelessRecipe var2 = new CraftShapelessRecipe(var1, this);
+
+      for(ItemStack var4 : this.recipeItems) {
+         if (var4 != null) {
+            var2.addIngredient(CraftMagicNumbers.getMaterial(var4.getItem()), var4.getMetadata());
+         }
+      }
+
+      return var2;
    }
 
    @Nullable
@@ -28,7 +44,9 @@ public class ShapelessRecipes implements IRecipe {
 
       for(int var3 = 0; var3 < var2.length; ++var3) {
          ItemStack var4 = var1.getStackInSlot(var3);
-         var2[var3] = ForgeHooks.getContainerItem(var4);
+         if (var4 != null && var4.getItem().hasContainerItem()) {
+            var2[var3] = new ItemStack(var4.getItem().getContainerItem());
+         }
       }
 
       return var2;

@@ -44,7 +44,6 @@ public class BlockStructure extends BlockContainer {
             var7.createdBy(var4);
          }
       }
-
    }
 
    @Nullable
@@ -89,9 +88,9 @@ public class BlockStructure extends BlockContainer {
             } else if (!var7 && var8) {
                var6.setPowered(false);
             }
+
          }
       }
-
    }
 
    private void trigger(TileEntityStructure var1) {

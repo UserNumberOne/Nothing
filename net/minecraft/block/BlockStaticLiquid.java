@@ -7,6 +7,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockStaticLiquid extends BlockLiquid {
    protected BlockStaticLiquid(Material var1) {
@@ -27,7 +28,7 @@ public class BlockStaticLiquid extends BlockLiquid {
 
    private void updateLiquid(World var1, BlockPos var2, IBlockState var3) {
       BlockDynamicLiquid var4 = getFlowingBlock(this.blockMaterial);
-      var1.setBlockState(var2, var4.getDefaultState().withProperty(LEVEL, var3.getValue(LEVEL)), 2);
+      var1.setBlockState(var2, var4.getDefaultState().withProperty(LEVEL, (Integer)var3.getValue(LEVEL)), 2);
       var1.scheduleUpdate(var2, var4, this.tickRate(var1));
    }
 
@@ -35,33 +36,36 @@ public class BlockStaticLiquid extends BlockLiquid {
       if (this.blockMaterial == Material.LAVA && var1.getGameRules().getBoolean("doFireTick")) {
          int var5 = var4.nextInt(3);
          if (var5 > 0) {
-            BlockPos var6 = var2;
+            BlockPos var9 = var2;
 
-            for(int var7 = 0; var7 < var5; ++var7) {
-               var6 = var6.add(var4.nextInt(3) - 1, 1, var4.nextInt(3) - 1);
-               if (var6.getY() >= 0 && var6.getY() < var1.getHeight() && !var1.isBlockLoaded(var6)) {
+            for(int var10 = 0; var10 < var5; ++var10) {
+               var9 = var9.add(var4.nextInt(3) - 1, 1, var4.nextInt(3) - 1);
+               if (var9.getY() >= 0 && var9.getY() < 256 && !var1.isBlockLoaded(var9)) {
                   return;
                }
 
-               Block var8 = var1.getBlockState(var6).getBlock();
-               if (var8.blockMaterial == Material.AIR) {
-                  if (this.isSurroundingBlockFlammable(var1, var6)) {
-                     var1.setBlockState(var6, Blocks.FIRE.getDefaultState());
+               Block var11 = var1.getBlockState(var9).getBlock();
+               if (var11.blockMaterial == Material.AIR) {
+                  if (this.isSurroundingBlockFlammable(var1, var9) && (var1.getBlockState(var9) == Blocks.FIRE || !CraftEventFactory.callBlockIgniteEvent(var1, var9.getX(), var9.getY(), var9.getZ(), var2.getX(), var2.getY(), var2.getZ()).isCancelled())) {
+                     var1.setBlockState(var9, Blocks.FIRE.getDefaultState());
                      return;
                   }
-               } else if (var8.blockMaterial.blocksMovement()) {
+               } else if (var11.blockMaterial.blocksMovement()) {
                   return;
                }
             }
          } else {
-            for(int var9 = 0; var9 < 3; ++var9) {
-               BlockPos var10 = var2.add(var4.nextInt(3) - 1, 0, var4.nextInt(3) - 1);
-               if (var10.getY() >= 0 && var10.getY() < 256 && !var1.isBlockLoaded(var10)) {
+            for(int var6 = 0; var6 < 3; ++var6) {
+               BlockPos var7 = var2.add(var4.nextInt(3) - 1, 0, var4.nextInt(3) - 1);
+               if (var7.getY() >= 0 && var7.getY() < 256 && !var1.isBlockLoaded(var7)) {
                   return;
                }
 
-               if (var1.isAirBlock(var10.up()) && this.getCanBlockBurn(var1, var10)) {
-                  var1.setBlockState(var10.up(), Blocks.FIRE.getDefaultState());
+               if (var1.isAirBlock(var7.up()) && this.getCanBlockBurn(var1, var7)) {
+                  BlockPos var8 = var7.up();
+                  if (var1.getBlockState(var8) == Blocks.FIRE || !CraftEventFactory.callBlockIgniteEvent(var1, var8.getX(), var8.getY(), var8.getZ(), var2.getX(), var2.getY(), var2.getZ()).isCancelled()) {
+                     var1.setBlockState(var7.up(), Blocks.FIRE.getDefaultState());
+                  }
                }
             }
          }

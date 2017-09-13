@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.border.WorldBorder;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketWorldBorder implements Packet {
    private SPacketWorldBorder.Action action;
@@ -104,39 +102,6 @@ public class SPacketWorldBorder implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleWorldBorder(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void apply(WorldBorder var1) {
-      switch(this.action) {
-      case SET_SIZE:
-         var1.setTransition(this.targetSize);
-         break;
-      case LERP_SIZE:
-         var1.setTransition(this.diameter, this.targetSize, this.timeUntilTarget);
-         break;
-      case SET_CENTER:
-         var1.setCenter(this.centerX, this.centerZ);
-         break;
-      case SET_WARNING_BLOCKS:
-         var1.setWarningDistance(this.warningDistance);
-         break;
-      case SET_WARNING_TIME:
-         var1.setWarningTime(this.warningTime);
-         break;
-      case INITIALIZE:
-         var1.setCenter(this.centerX, this.centerZ);
-         if (this.timeUntilTarget > 0L) {
-            var1.setTransition(this.diameter, this.targetSize, this.timeUntilTarget);
-         } else {
-            var1.setTransition(this.targetSize);
-         }
-
-         var1.setSize(this.size);
-         var1.setWarningDistance(this.warningDistance);
-         var1.setWarningTime(this.warningTime);
-      }
-
    }
 
    public static enum Action {

@@ -179,14 +179,14 @@ public class WalkNodeProcessor extends NodeProcessor {
             }
 
             if (var13 == PathNodeType.OPEN) {
-               AxisAlignedBB var26 = new AxisAlignedBB((double)var1 - var15 + 0.5D, (double)var2 + 0.001D, (double)var3 - var15 + 0.5D, (double)var1 + var15 + 0.5D, (double)((float)var2 + this.entity.height), (double)var3 + var15 + 0.5D);
-               if (this.entity.world.collidesWithAnyBlock(var26)) {
+               AxisAlignedBB var24 = new AxisAlignedBB((double)var1 - var15 + 0.5D, (double)var2 + 0.001D, (double)var3 - var15 + 0.5D, (double)var1 + var15 + 0.5D, (double)((float)var2 + this.entity.height), (double)var3 + var15 + 0.5D);
+               if (this.entity.world.collidesWithAnyBlock(var24)) {
                   return null;
                }
 
                if (this.entity.width >= 1.0F) {
-                  PathNodeType var18 = this.getPathNodeType(this.entity, var1, var2 - 1, var3);
-                  if (var18 == PathNodeType.BLOCKED) {
+                  PathNodeType var25 = this.getPathNodeType(this.entity, var1, var2 - 1, var3);
+                  if (var25 == PathNodeType.BLOCKED) {
                      var8 = this.openPoint(var1, var2, var3);
                      var8.nodeType = PathNodeType.WALKABLE;
                      var8.costMalus = Math.max(var8.costMalus, var14);
@@ -194,11 +194,11 @@ public class WalkNodeProcessor extends NodeProcessor {
                   }
                }
 
-               int var27 = 0;
+               int var28 = 0;
 
                while(var2 > 0 && var13 == PathNodeType.OPEN) {
                   --var2;
-                  if (var27++ >= this.entity.getMaxFallHeight()) {
+                  if (var28++ >= this.entity.getMaxFallHeight()) {
                      return null;
                   }
 
@@ -327,6 +327,34 @@ public class WalkNodeProcessor extends NodeProcessor {
       IBlockState var6 = var1.getBlockState(var5);
       Block var7 = var6.getBlock();
       Material var8 = var6.getMaterial();
-      return var8 == Material.AIR ? PathNodeType.OPEN : (var7 != Blocks.TRAPDOOR && var7 != Blocks.IRON_TRAPDOOR && var7 != Blocks.WATERLILY ? (var7 == Blocks.FIRE ? PathNodeType.DAMAGE_FIRE : (var7 == Blocks.CACTUS ? PathNodeType.DAMAGE_CACTUS : (var7 instanceof BlockDoor && var8 == Material.WOOD && !((Boolean)var6.getValue(BlockDoor.OPEN)).booleanValue() ? PathNodeType.DOOR_WOOD_CLOSED : (var7 instanceof BlockDoor && var8 == Material.IRON && !((Boolean)var6.getValue(BlockDoor.OPEN)).booleanValue() ? PathNodeType.DOOR_IRON_CLOSED : (var7 instanceof BlockDoor && ((Boolean)var6.getValue(BlockDoor.OPEN)).booleanValue() ? PathNodeType.DOOR_OPEN : (var7 instanceof BlockRailBase ? PathNodeType.RAIL : (!(var7 instanceof BlockFence) && !(var7 instanceof BlockWall) && (!(var7 instanceof BlockFenceGate) || ((Boolean)var6.getValue(BlockFenceGate.OPEN)).booleanValue()) ? (var8 == Material.WATER ? PathNodeType.WATER : (var8 == Material.LAVA ? PathNodeType.LAVA : (var7.isPassable(var1, var5) ? PathNodeType.OPEN : PathNodeType.BLOCKED))) : PathNodeType.FENCE))))))) : PathNodeType.TRAPDOOR);
+      if (var8 == Material.AIR) {
+         return PathNodeType.OPEN;
+      } else if (var7 != Blocks.TRAPDOOR && var7 != Blocks.IRON_TRAPDOOR && var7 != Blocks.WATERLILY) {
+         if (var7 == Blocks.FIRE) {
+            return PathNodeType.DAMAGE_FIRE;
+         } else if (var7 == Blocks.CACTUS) {
+            return PathNodeType.DAMAGE_CACTUS;
+         } else if (var7 instanceof BlockDoor && var8 == Material.WOOD && !((Boolean)var6.getValue(BlockDoor.OPEN)).booleanValue()) {
+            return PathNodeType.DOOR_WOOD_CLOSED;
+         } else if (var7 instanceof BlockDoor && var8 == Material.IRON && !((Boolean)var6.getValue(BlockDoor.OPEN)).booleanValue()) {
+            return PathNodeType.DOOR_IRON_CLOSED;
+         } else if (var7 instanceof BlockDoor && ((Boolean)var6.getValue(BlockDoor.OPEN)).booleanValue()) {
+            return PathNodeType.DOOR_OPEN;
+         } else if (var7 instanceof BlockRailBase) {
+            return PathNodeType.RAIL;
+         } else if (!(var7 instanceof BlockFence) && !(var7 instanceof BlockWall) && (!(var7 instanceof BlockFenceGate) || ((Boolean)var6.getValue(BlockFenceGate.OPEN)).booleanValue())) {
+            if (var8 == Material.WATER) {
+               return PathNodeType.WATER;
+            } else if (var8 == Material.LAVA) {
+               return PathNodeType.LAVA;
+            } else {
+               return var7.isPassable(var1, var5) ? PathNodeType.OPEN : PathNodeType.BLOCKED;
+            }
+         } else {
+            return PathNodeType.FENCE;
+         }
+      } else {
+         return PathNodeType.TRAPDOOR;
+      }
    }
 }

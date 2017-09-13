@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketUpdateHealth implements Packet {
    private float health;
@@ -35,20 +33,5 @@ public class SPacketUpdateHealth implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleUpdateHealth(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getHealth() {
-      return this.health;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getFoodLevel() {
-      return this.foodLevel;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getSaturationLevel() {
-      return this.saturationLevel;
    }
 }

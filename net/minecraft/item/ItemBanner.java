@@ -1,6 +1,5 @@
 package net.minecraft.item;
 
-import java.util.List;
 import net.minecraft.block.BlockStandingSign;
 import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.state.IBlockState;
@@ -8,7 +7,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.util.EnumActionResult;
@@ -18,8 +16,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemBanner extends ItemBlock {
    public ItemBanner() {
@@ -68,48 +64,6 @@ public class ItemBanner extends ItemBlock {
       EnumDyeColor var3 = getBaseColor(var1);
       var2 = var2 + var3.getUnlocalizedName() + ".name";
       return I18n.translateToLocal(var2);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static void appendHoverTextFromTileEntityTag(ItemStack var0, List var1) {
-      NBTTagCompound var2 = var0.getSubCompound("BlockEntityTag", false);
-      if (var2 != null && var2.hasKey("Patterns")) {
-         NBTTagList var3 = var2.getTagList("Patterns", 10);
-
-         for(int var4 = 0; var4 < var3.tagCount() && var4 < 6; ++var4) {
-            NBTTagCompound var5 = var3.getCompoundTagAt(var4);
-            EnumDyeColor var6 = EnumDyeColor.byDyeDamage(var5.getInteger("Color"));
-            TileEntityBanner.EnumBannerPattern var7 = TileEntityBanner.EnumBannerPattern.getPatternByID(var5.getString("Pattern"));
-            if (var7 != null) {
-               var1.add(I18n.translateToLocal("item.banner." + var7.getPatternName() + "." + var6.getUnlocalizedName()));
-            }
-         }
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void addInformation(ItemStack var1, EntityPlayer var2, List var3, boolean var4) {
-      appendHoverTextFromTileEntityTag(var1, var3);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubItems(Item var1, CreativeTabs var2, List var3) {
-      for(EnumDyeColor var7 : EnumDyeColor.values()) {
-         NBTTagCompound var8 = new NBTTagCompound();
-         TileEntityBanner.setBaseColorAndPatterns(var8, var7.getDyeDamage(), (NBTTagList)null);
-         NBTTagCompound var9 = new NBTTagCompound();
-         var9.setTag("BlockEntityTag", var8);
-         ItemStack var10 = new ItemStack(var1, 1, var7.getDyeDamage());
-         var10.setTagCompound(var9);
-         var3.add(var10);
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CreativeTabs getCreativeTab() {
-      return CreativeTabs.DECORATIONS;
    }
 
    public static EnumDyeColor getBaseColor(ItemStack var0) {

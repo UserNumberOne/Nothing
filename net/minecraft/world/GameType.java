@@ -1,8 +1,6 @@
 package net.minecraft.world;
 
 import net.minecraft.entity.player.PlayerCapabilities;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public enum GameType {
    NOT_SET(-1, "", ""),
@@ -73,11 +71,6 @@ public enum GameType {
       }
 
       return var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static GameType getByName(String var0) {
-      return parseGameTypeWithDefault(var0, SURVIVAL);
    }
 
    public static GameType parseGameTypeWithDefault(String var0, GameType var1) {

@@ -5,8 +5,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public enum HorseType {
    HORSE("EntityHorse", "horse_white", SoundEvents.ENTITY_HORSE_AMBIENT, SoundEvents.ENTITY_HORSE_HURT, SoundEvents.ENTITY_HORSE_DEATH, LootTableList.ENTITIES_HORSE),
@@ -45,11 +43,6 @@ public enum HorseType {
 
    public TextComponentTranslation getDefaultName() {
       return this.name;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ResourceLocation getTexture() {
-      return this.texture;
    }
 
    public boolean canBeChested() {

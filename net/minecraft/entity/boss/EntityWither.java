@@ -5,6 +5,7 @@ import com.google.common.base.Predicates;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -33,8 +34,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
@@ -47,8 +50,10 @@ import net.minecraft.world.BossInfo;
 import net.minecraft.world.BossInfoServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.WorldServer;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
 public class EntityWither extends EntityMob implements IRangedAttackMob {
    private static final DataParameter FIRST_HEAD_TARGET = EntityDataManager.createKey(EntityWither.class, DataSerializers.VARINT);
@@ -67,6 +72,10 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
    private static final Predicate NOT_UNDEAD = new Predicate() {
       public boolean apply(@Nullable Entity var1) {
          return var1 instanceof EntityLivingBase && ((EntityLivingBase)var1).getCreatureAttribute() != EnumCreatureAttribute.UNDEAD;
+      }
+
+      public boolean apply(Object var1) {
+         return this.apply((Entity)var1);
       }
    };
 
@@ -154,49 +163,49 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
 
       super.onLivingUpdate();
 
-      for(int var20 = 0; var20 < 2; ++var20) {
-         this.yRotOHeads[var20] = this.yRotationHeads[var20];
-         this.xRotOHeads[var20] = this.xRotationHeads[var20];
+      for(int var22 = 0; var22 < 2; ++var22) {
+         this.yRotOHeads[var22] = this.yRotationHeads[var22];
+         this.xRotOHeads[var22] = this.xRotationHeads[var22];
       }
 
-      for(int var21 = 0; var21 < 2; ++var21) {
-         int var23 = this.getWatchedTargetId(var21 + 1);
-         Entity var3 = null;
-         if (var23 > 0) {
-            var3 = this.world.getEntityByID(var23);
+      for(int var23 = 0; var23 < 2; ++var23) {
+         int var10 = this.getWatchedTargetId(var23 + 1);
+         Entity var11 = null;
+         if (var10 > 0) {
+            var11 = this.world.getEntityByID(var10);
          }
 
-         if (var3 != null) {
-            double var27 = this.getHeadX(var21 + 1);
-            double var28 = this.getHeadY(var21 + 1);
-            double var29 = this.getHeadZ(var21 + 1);
-            double var10 = var3.posX - var27;
-            double var12 = var3.posY + (double)var3.getEyeHeight() - var28;
-            double var14 = var3.posZ - var29;
-            double var16 = (double)MathHelper.sqrt(var10 * var10 + var14 * var14);
-            float var18 = (float)(MathHelper.atan2(var14, var10) * 57.29577951308232D) - 90.0F;
-            float var19 = (float)(-(MathHelper.atan2(var12, var16) * 57.29577951308232D));
-            this.xRotationHeads[var21] = this.rotlerp(this.xRotationHeads[var21], var19, 40.0F);
-            this.yRotationHeads[var21] = this.rotlerp(this.yRotationHeads[var21], var18, 10.0F);
+         if (var11 != null) {
+            double var24 = this.getHeadX(var23 + 1);
+            double var25 = this.getHeadY(var23 + 1);
+            double var26 = this.getHeadZ(var23 + 1);
+            double var12 = var11.posX - var24;
+            double var14 = var11.posY + (double)var11.getEyeHeight() - var25;
+            double var16 = var11.posZ - var26;
+            double var18 = (double)MathHelper.sqrt(var12 * var12 + var16 * var16);
+            float var20 = (float)(MathHelper.atan2(var16, var12) * 57.2957763671875D) - 90.0F;
+            float var21 = (float)(-(MathHelper.atan2(var14, var18) * 57.2957763671875D));
+            this.xRotationHeads[var23] = this.rotlerp(this.xRotationHeads[var23], var21, 40.0F);
+            this.yRotationHeads[var23] = this.rotlerp(this.yRotationHeads[var23], var20, 10.0F);
          } else {
-            this.yRotationHeads[var21] = this.rotlerp(this.yRotationHeads[var21], this.renderYawOffset, 10.0F);
+            this.yRotationHeads[var23] = this.rotlerp(this.yRotationHeads[var23], this.renderYawOffset, 10.0F);
          }
       }
 
-      boolean var22 = this.isArmored();
+      boolean var29 = this.isArmored();
 
-      for(int var24 = 0; var24 < 3; ++var24) {
-         double var26 = this.getHeadX(var24);
-         double var5 = this.getHeadY(var24);
-         double var7 = this.getHeadZ(var24);
-         this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var26 + this.rand.nextGaussian() * 0.30000001192092896D, var5 + this.rand.nextGaussian() * 0.30000001192092896D, var7 + this.rand.nextGaussian() * 0.30000001192092896D, 0.0D, 0.0D, 0.0D);
-         if (var22 && this.world.rand.nextInt(4) == 0) {
-            this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, var26 + this.rand.nextGaussian() * 0.30000001192092896D, var5 + this.rand.nextGaussian() * 0.30000001192092896D, var7 + this.rand.nextGaussian() * 0.30000001192092896D, 0.699999988079071D, 0.699999988079071D, 0.5D);
+      for(int var27 = 0; var27 < 3; ++var27) {
+         double var30 = this.getHeadX(var27);
+         double var31 = this.getHeadY(var27);
+         double var32 = this.getHeadZ(var27);
+         this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var30 + this.rand.nextGaussian() * 0.30000001192092896D, var31 + this.rand.nextGaussian() * 0.30000001192092896D, var32 + this.rand.nextGaussian() * 0.30000001192092896D, 0.0D, 0.0D, 0.0D);
+         if (var29 && this.world.rand.nextInt(4) == 0) {
+            this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, var30 + this.rand.nextGaussian() * 0.30000001192092896D, var31 + this.rand.nextGaussian() * 0.30000001192092896D, var32 + this.rand.nextGaussian() * 0.30000001192092896D, 0.699999988079071D, 0.699999988079071D, 0.5D);
          }
       }
 
       if (this.getInvulTime() > 0) {
-         for(int var25 = 0; var25 < 3; ++var25) {
+         for(int var28 = 0; var28 < 3; ++var28) {
             this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + this.rand.nextGaussian(), this.posY + (double)(this.rand.nextFloat() * 3.3F), this.posZ + this.rand.nextGaussian(), 0.699999988079071D, 0.699999988079071D, 0.8999999761581421D);
          }
       }
@@ -207,66 +216,83 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       if (this.getInvulTime() > 0) {
          int var1 = this.getInvulTime() - 1;
          if (var1 <= 0) {
-            this.world.newExplosion(this, this.posX, this.posY + (double)this.getEyeHeight(), this.posZ, 7.0F, false, this.world.getGameRules().getBoolean("mobGriefing"));
-            this.world.playBroadcastSound(1023, new BlockPos(this), 0);
+            ExplosionPrimeEvent var2 = new ExplosionPrimeEvent(this.getBukkitEntity(), 7.0F, false);
+            this.world.getServer().getPluginManager().callEvent(var2);
+            if (!var2.isCancelled()) {
+               this.world.newExplosion(this, this.posX, this.posY + (double)this.getEyeHeight(), this.posZ, var2.getRadius(), var2.getFire(), this.world.getGameRules().getBoolean("mobGriefing"));
+            }
+
+            int var3 = ((WorldServer)this.world).getServer().getViewDistance() * 16;
+
+            for(EntityPlayerMP var5 : MinecraftServer.getServer().getPlayerList().playerEntityList) {
+               double var6 = this.posX - var5.posX;
+               double var8 = this.posZ - var5.posZ;
+               double var10 = var6 * var6 + var8 * var8;
+               if (var10 > (double)(var3 * var3)) {
+                  double var12 = Math.sqrt(var10);
+                  double var14 = var5.posX + var6 / var12 * (double)var3;
+                  double var16 = var5.posZ + var8 / var12 * (double)var3;
+                  var5.connection.sendPacket(new SPacketEffect(1013, new BlockPos((int)var14, (int)this.posY, (int)var16), 0, true));
+               } else {
+                  var5.connection.sendPacket(new SPacketEffect(1013, new BlockPos((int)this.posX, (int)this.posY, (int)this.posZ), 0, true));
+               }
+            }
          }
 
          this.setInvulTime(var1);
          if (this.ticksExisted % 10 == 0) {
-            this.heal(10.0F);
+            this.heal(10.0F, RegainReason.WITHER_SPAWN);
          }
       } else {
          super.updateAITasks();
 
-         for(int var14 = 1; var14 < 3; ++var14) {
-            if (this.ticksExisted >= this.nextHeadUpdate[var14 - 1]) {
-               this.nextHeadUpdate[var14 - 1] = this.ticksExisted + 10 + this.rand.nextInt(10);
+         for(int var32 = 1; var32 < 3; ++var32) {
+            if (this.ticksExisted >= this.nextHeadUpdate[var32 - 1]) {
+               this.nextHeadUpdate[var32 - 1] = this.ticksExisted + 10 + this.rand.nextInt(10);
                if (this.world.getDifficulty() == EnumDifficulty.NORMAL || this.world.getDifficulty() == EnumDifficulty.HARD) {
-                  int var2 = var14 - 1;
-                  int var3 = this.idleHeadUpdates[var14 - 1];
-                  this.idleHeadUpdates[var2] = this.idleHeadUpdates[var14 - 1] + 1;
-                  if (var3 > 15) {
-                     float var4 = 10.0F;
-                     float var5 = 5.0F;
-                     double var6 = MathHelper.nextDouble(this.rand, this.posX - 10.0D, this.posX + 10.0D);
-                     double var8 = MathHelper.nextDouble(this.rand, this.posY - 5.0D, this.posY + 5.0D);
-                     double var10 = MathHelper.nextDouble(this.rand, this.posZ - 10.0D, this.posZ + 10.0D);
-                     this.launchWitherSkullToCoords(var14 + 1, var6, var8, var10, true);
-                     this.idleHeadUpdates[var14 - 1] = 0;
+                  int var36 = var32 - 1;
+                  int var42 = this.idleHeadUpdates[var32 - 1];
+                  this.idleHeadUpdates[var36] = this.idleHeadUpdates[var32 - 1] + 1;
+                  if (var42 > 15) {
+                     double var18 = MathHelper.nextDouble(this.rand, this.posX - 10.0D, this.posX + 10.0D);
+                     double var20 = MathHelper.nextDouble(this.rand, this.posY - 5.0D, this.posY + 5.0D);
+                     double var22 = MathHelper.nextDouble(this.rand, this.posZ - 10.0D, this.posZ + 10.0D);
+                     this.launchWitherSkullToCoords(var32 + 1, var18, var20, var22, true);
+                     this.idleHeadUpdates[var32 - 1] = 0;
                   }
                }
 
-               int var16 = this.getWatchedTargetId(var14);
-               if (var16 > 0) {
-                  Entity var19 = this.world.getEntityByID(var16);
-                  if (var19 != null && var19.isEntityAlive() && this.getDistanceSqToEntity(var19) <= 900.0D && this.canEntityBeSeen(var19)) {
-                     if (var19 instanceof EntityPlayer && ((EntityPlayer)var19).capabilities.disableDamage) {
-                        this.updateWatchedTargetId(var14, 0);
+               int var34 = this.getWatchedTargetId(var32);
+               if (var34 > 0) {
+                  Entity var38 = this.world.getEntityByID(var34);
+                  if (var38 != null && var38.isEntityAlive() && this.getDistanceSqToEntity(var38) <= 900.0D && this.canEntityBeSeen(var38)) {
+                     if (var38 instanceof EntityPlayer && ((EntityPlayer)var38).capabilities.disableDamage) {
+                        this.updateWatchedTargetId(var32, 0);
                      } else {
-                        this.launchWitherSkullToEntity(var14 + 1, (EntityLivingBase)var19);
-                        this.nextHeadUpdate[var14 - 1] = this.ticksExisted + 40 + this.rand.nextInt(20);
-                        this.idleHeadUpdates[var14 - 1] = 0;
+                        this.launchWitherSkullToEntity(var32 + 1, (EntityLivingBase)var38);
+                        this.nextHeadUpdate[var32 - 1] = this.ticksExisted + 40 + this.rand.nextInt(20);
+                        this.idleHeadUpdates[var32 - 1] = 0;
                      }
                   } else {
-                     this.updateWatchedTargetId(var14, 0);
+                     this.updateWatchedTargetId(var32, 0);
                   }
                } else {
-                  List var18 = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(20.0D, 8.0D, 20.0D), Predicates.and(NOT_UNDEAD, EntitySelectors.NOT_SPECTATING));
+                  List var37 = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(20.0D, 8.0D, 20.0D), Predicates.and(NOT_UNDEAD, EntitySelectors.NOT_SPECTATING));
 
-                  for(int var21 = 0; var21 < 10 && !var18.isEmpty(); ++var21) {
-                     EntityLivingBase var23 = (EntityLivingBase)var18.get(this.rand.nextInt(var18.size()));
-                     if (var23 != this && var23.isEntityAlive() && this.canEntityBeSeen(var23)) {
-                        if (var23 instanceof EntityPlayer) {
-                           if (!((EntityPlayer)var23).capabilities.disableDamage) {
-                              this.updateWatchedTargetId(var14, var23.getEntityId());
+                  for(int var43 = 0; var43 < 10 && !var37.isEmpty(); ++var43) {
+                     EntityLivingBase var40 = (EntityLivingBase)var37.get(this.rand.nextInt(var37.size()));
+                     if (var40 != this && var40.isEntityAlive() && this.canEntityBeSeen(var40)) {
+                        if (var40 instanceof EntityPlayer) {
+                           if (!((EntityPlayer)var40).capabilities.disableDamage) {
+                              this.updateWatchedTargetId(var32, var40.getEntityId());
                            }
                         } else {
-                           this.updateWatchedTargetId(var14, var23.getEntityId());
+                           this.updateWatchedTargetId(var32, var40.getEntityId());
                         }
                         break;
                      }
 
-                     var18.remove(var23);
+                     var37.remove(var40);
                   }
                }
             }
@@ -281,35 +307,35 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
          if (this.blockBreakCounter > 0) {
             --this.blockBreakCounter;
             if (this.blockBreakCounter == 0 && this.world.getGameRules().getBoolean("mobGriefing")) {
-               int var15 = MathHelper.floor(this.posY);
-               int var17 = MathHelper.floor(this.posX);
-               int var20 = MathHelper.floor(this.posZ);
-               boolean var22 = false;
+               int var33 = MathHelper.floor(this.posY);
+               int var35 = MathHelper.floor(this.posX);
+               int var39 = MathHelper.floor(this.posZ);
+               boolean var44 = false;
 
-               for(int var24 = -1; var24 <= 1; ++var24) {
-                  for(int var25 = -1; var25 <= 1; ++var25) {
-                     for(int var7 = 0; var7 <= 3; ++var7) {
-                        int var26 = var17 + var24;
-                        int var9 = var15 + var7;
-                        int var27 = var20 + var25;
-                        BlockPos var11 = new BlockPos(var26, var9, var27);
-                        IBlockState var12 = this.world.getBlockState(var11);
-                        Block var13 = var12.getBlock();
-                        if (!var13.isAir(var12, this.world, var11) && var13.canEntityDestroy(var12, this.world, var11, this)) {
-                           var22 = this.world.destroyBlock(var11, true) || var22;
+               for(int var41 = -1; var41 <= 1; ++var41) {
+                  for(int var24 = -1; var24 <= 1; ++var24) {
+                     for(int var25 = 0; var25 <= 3; ++var25) {
+                        int var26 = var35 + var41;
+                        int var27 = var33 + var25;
+                        int var28 = var39 + var24;
+                        BlockPos var29 = new BlockPos(var26, var27, var28);
+                        IBlockState var30 = this.world.getBlockState(var29);
+                        Block var31 = var30.getBlock();
+                        if (var30.getMaterial() != Material.AIR && canDestroyBlock(var31) && !CraftEventFactory.callEntityChangeBlockEvent(this, var29, Blocks.AIR, 0).isCancelled()) {
+                           var44 = this.world.destroyBlock(var29, true) || var44;
                         }
                      }
                   }
                }
 
-               if (var22) {
+               if (var44) {
                   this.world.playEvent((EntityPlayer)null, 1022, new BlockPos(this), 0);
                }
             }
          }
 
          if (this.ticksExisted % 20 == 0) {
-            this.heal(1.0F);
+            this.heal(1.0F, RegainReason.REGEN);
          }
 
          this.bossInfo.setPercent(this.getHealth() / this.getMaxHealth());
@@ -455,11 +481,6 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       this.entityAge = 0;
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return 15728880;
-   }
-
    public void fall(float var1, float var2) {
    }
 
@@ -472,16 +493,6 @@ public class EntityWither extends EntityMob implements IRangedAttackMob {
       this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.6000000238418579D);
       this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(40.0D);
       this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(4.0D);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getHeadYRotation(int var1) {
-      return this.yRotationHeads[var1];
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getHeadXRotation(int var1) {
-      return this.xRotationHeads[var1];
    }
 
    public int getInvulTime() {

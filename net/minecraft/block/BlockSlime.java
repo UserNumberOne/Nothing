@@ -5,22 +5,14 @@ import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockSlime extends BlockBreakable {
    public BlockSlime() {
       super(Material.CLAY, false, MapColor.GRASS);
       this.setCreativeTab(CreativeTabs.DECORATIONS);
       this.slipperiness = 0.8F;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.TRANSLUCENT;
    }
 
    public void onFallenUpon(World var1, BlockPos var2, Entity var3, float var4) {

@@ -2,13 +2,19 @@ package net.minecraft.inventory;
 
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerDispenser extends Container {
-   private final IInventory dispenserInventory;
+   public final IInventory dispenserInventory;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
 
    public ContainerDispenser(IInventory var1, IInventory var2) {
       this.dispenserInventory = var2;
+      this.player = (InventoryPlayer)var1;
 
       for(int var3 = 0; var3 < 3; ++var3) {
          for(int var4 = 0; var4 < 3; ++var4) {
@@ -29,7 +35,7 @@ public class ContainerDispenser extends Container {
    }
 
    public boolean canInteractWith(EntityPlayer var1) {
-      return this.dispenserInventory.isUsableByPlayer(var1);
+      return !this.checkReachable ? true : this.dispenserInventory.isUsableByPlayer(var1);
    }
 
    @Nullable
@@ -61,5 +67,15 @@ public class ContainerDispenser extends Container {
       }
 
       return var3;
+   }
+
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventory var1 = new CraftInventory(this.dispenserInventory);
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), var1, this);
+         return this.bukkitEntity;
+      }
    }
 }

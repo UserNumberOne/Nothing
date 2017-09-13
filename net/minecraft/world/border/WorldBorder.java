@@ -6,8 +6,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.WorldServer;
+import org.bukkit.craftbukkit.v1_10_R1.util.LongHash;
 
 public class WorldBorder {
    private final List listeners = Lists.newArrayList();
@@ -22,6 +22,7 @@ public class WorldBorder {
    private double damageBuffer;
    private int warningTime;
    private int warningDistance;
+   public WorldServer world;
 
    public WorldBorder() {
       this.endDiameter = this.startDiameter;
@@ -37,7 +38,15 @@ public class WorldBorder {
    }
 
    public boolean contains(ChunkPos var1) {
-      return (double)var1.getXEnd() > this.minX() && (double)var1.getXStart() < this.maxX() && (double)var1.getZEnd() > this.minZ() && (double)var1.getZStart() < this.maxZ();
+      return this.isInBounds(var1.chunkXPos, var1.chunkZPos);
+   }
+
+   public boolean isInBounds(long var1) {
+      return this.isInBounds(LongHash.msw(var1), LongHash.lsw(var1));
+   }
+
+   public boolean isInBounds(int var1, int var2) {
+      return (double)((var1 << 4) + 15) > this.minX() && (double)(var1 << 4) < this.maxX() && (double)((var2 << 4) + 15) > this.minZ() && (double)(var1 << 4) < this.maxZ();
    }
 
    public boolean contains(AxisAlignedBB var1) {
@@ -166,7 +175,9 @@ public class WorldBorder {
    }
 
    public void addListener(IBorderListener var1) {
-      this.listeners.add(var1);
+      if (!this.listeners.contains(var1)) {
+         this.listeners.add(var1);
+      }
    }
 
    public void setSize(int var1) {
@@ -203,11 +214,6 @@ public class WorldBorder {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public double getResizeSpeed() {
-      return this.endTime == this.startTime ? 0.0D : Math.abs(this.startDiameter - this.endDiameter) / (double)(this.endTime - this.startTime);
-   }
-
    public int getWarningTime() {
       return this.warningTime;
    }
@@ -232,9 +238,5 @@ public class WorldBorder {
          var3.onWarningDistanceChanged(this, var1);
       }
 
-   }
-
-   public void removeListener(IBorderListener var1) {
-      this.listeners.remove(var1);
    }
 }

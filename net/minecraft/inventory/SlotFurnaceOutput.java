@@ -7,8 +7,12 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.stats.AchievementList;
+import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.FurnaceExtractEvent;
 
 public class SlotFurnaceOutput extends Slot {
    private final EntityPlayer player;
@@ -57,15 +61,23 @@ public class SlotFurnaceOutput extends Slot {
             var2 = var4;
          }
 
+         Player var5 = (Player)this.player.getBukkitEntity();
+         TileEntityFurnace var6 = (TileEntityFurnace)this.inventory;
+         Block var7 = this.player.world.getWorld().getBlockAt(var6.pos.getX(), var6.pos.getY(), var6.pos.getZ());
+         if (this.removeCount != 0) {
+            FurnaceExtractEvent var8 = new FurnaceExtractEvent(var5, var7, CraftMagicNumbers.getMaterial(var1.getItem()), this.removeCount, var2);
+            this.player.world.getServer().getPluginManager().callEvent(var8);
+            var2 = var8.getExpToDrop();
+         }
+
          while(var2 > 0) {
-            int var5 = EntityXPOrb.getXPSplit(var2);
-            var2 -= var5;
-            this.player.world.spawnEntity(new EntityXPOrb(this.player.world, this.player.posX, this.player.posY + 0.5D, this.player.posZ + 0.5D, var5));
+            int var9 = EntityXPOrb.getXPSplit(var2);
+            var2 -= var9;
+            this.player.world.spawnEntity(new EntityXPOrb(this.player.world, this.player.posX, this.player.posY + 0.5D, this.player.posZ + 0.5D, var9));
          }
       }
 
       this.removeCount = 0;
-      FMLCommonHandler.instance().firePlayerSmeltedEvent(this.player, var1);
       if (var1.getItem() == Items.IRON_INGOT) {
          this.player.addStat(AchievementList.ACQUIRE_IRON);
       }

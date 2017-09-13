@@ -98,12 +98,16 @@ public class GenLayerShore extends GenLayer {
          } else {
             var2[var3 + var4 * var5] = var7;
          }
-      }
 
+      }
    }
 
    private boolean isJungleCompatible(int var1) {
-      return Biome.getBiome(var1) != null && Biome.getBiome(var1).getBiomeClass() == BiomeJungle.class ? true : var1 == Biome.getIdForBiome(Biomes.JUNGLE_EDGE) || var1 == Biome.getIdForBiome(Biomes.JUNGLE) || var1 == Biome.getIdForBiome(Biomes.JUNGLE_HILLS) || var1 == Biome.getIdForBiome(Biomes.FOREST) || var1 == Biome.getIdForBiome(Biomes.TAIGA) || isBiomeOceanic(var1);
+      if (Biome.getBiome(var1) != null && Biome.getBiome(var1).getBiomeClass() == BiomeJungle.class) {
+         return true;
+      } else {
+         return var1 == Biome.getIdForBiome(Biomes.JUNGLE_EDGE) || var1 == Biome.getIdForBiome(Biomes.JUNGLE) || var1 == Biome.getIdForBiome(Biomes.JUNGLE_HILLS) || var1 == Biome.getIdForBiome(Biomes.FOREST) || var1 == Biome.getIdForBiome(Biomes.TAIGA) || isBiomeOceanic(var1);
+      }
    }
 
    private boolean isMesa(int var1) {

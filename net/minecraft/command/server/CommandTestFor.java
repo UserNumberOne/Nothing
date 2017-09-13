@@ -12,7 +12,7 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandTestFor extends CommandBase {
@@ -32,7 +32,7 @@ public class CommandTestFor extends CommandBase {
       if (var3.length < 1) {
          throw new WrongUsageException("commands.testfor.usage", new Object[0]);
       } else {
-         Entity var4 = getEntity(var1, var2, var3[0]);
+         Entity var4 = b(var1, var2, var3[0]);
          NBTTagCompound var5 = null;
          if (var3.length >= 2) {
             try {
@@ -57,7 +57,7 @@ public class CommandTestFor extends CommandBase {
       return var2 == 0;
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : Collections.emptyList();
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getPlayers()) : Collections.emptyList();
    }
 }

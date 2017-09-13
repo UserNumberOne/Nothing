@@ -28,6 +28,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.event.block.CauldronLevelChangeEvent;
+import org.bukkit.event.block.CauldronLevelChangeEvent.ChangeReason;
 
 public class BlockCauldron extends Block {
    public static final PropertyInteger LEVEL = PropertyInteger.create("level", 0, 3);
@@ -66,8 +68,11 @@ public class BlockCauldron extends Block {
       int var5 = ((Integer)var3.getValue(LEVEL)).intValue();
       float var6 = (float)var2.getY() + (6.0F + (float)(3 * var5)) / 16.0F;
       if (!var1.isRemote && var4.isBurning() && var5 > 0 && var4.getEntityBoundingBox().minY <= (double)var6) {
+         if (!this.changeLevel(var1, var2, var3, var5 - 1, var4, ChangeReason.EXTINGUISH)) {
+            return;
+         }
+
          var4.extinguish();
-         this.setWaterLevel(var1, var2, var3, var5 - 1);
       }
 
    }
@@ -80,17 +85,24 @@ public class BlockCauldron extends Block {
          Item var12 = var6.getItem();
          if (var12 == Items.WATER_BUCKET) {
             if (var11 < 3 && !var1.isRemote) {
+               if (!this.changeLevel(var1, var2, var3, 3, var4, ChangeReason.BUCKET_EMPTY)) {
+                  return true;
+               }
+
                if (!var4.capabilities.isCreativeMode) {
                   var4.setHeldItem(var5, new ItemStack(Items.BUCKET));
                }
 
                var4.addStat(StatList.CAULDRON_FILLED);
-               this.setWaterLevel(var1, var2, var3, 3);
             }
 
             return true;
          } else if (var12 == Items.BUCKET) {
             if (var11 == 3 && !var1.isRemote) {
+               if (!this.changeLevel(var1, var2, var3, 0, var4, ChangeReason.BUCKET_FILL)) {
+                  return true;
+               }
+
                if (!var4.capabilities.isCreativeMode) {
                   --var6.stackSize;
                   if (var6.stackSize == 0) {
@@ -101,12 +113,15 @@ public class BlockCauldron extends Block {
                }
 
                var4.addStat(StatList.CAULDRON_USED);
-               this.setWaterLevel(var1, var2, var3, 0);
             }
 
             return true;
          } else if (var12 == Items.GLASS_BOTTLE) {
             if (var11 > 0 && !var1.isRemote) {
+               if (!this.changeLevel(var1, var2, var3, var11 - 1, var4, ChangeReason.BOTTLE_FILL)) {
+                  return true;
+               }
+
                if (!var4.capabilities.isCreativeMode) {
                   ItemStack var15 = PotionUtils.addPotionToItemStack(new ItemStack(Items.POTIONITEM), PotionTypes.WATER);
                   var4.addStat(StatList.CAULDRON_USED);
@@ -118,17 +133,18 @@ public class BlockCauldron extends Block {
                      ((EntityPlayerMP)var4).sendContainerToPlayer(var4.inventoryContainer);
                   }
                }
-
-               this.setWaterLevel(var1, var2, var3, var11 - 1);
             }
 
             return true;
          } else {
             if (var11 > 0 && var12 instanceof ItemArmor) {
-               ItemArmor var13 = (ItemArmor)var12;
-               if (var13.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER && var13.hasColor(var6) && !var1.isRemote) {
-                  var13.removeColor(var6);
-                  this.setWaterLevel(var1, var2, var3, var11 - 1);
+               ItemArmor var14 = (ItemArmor)var12;
+               if (var14.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER && var14.hasColor(var6) && !var1.isRemote) {
+                  if (!this.changeLevel(var1, var2, var3, var11 - 1, var4, ChangeReason.ARMOR_WASH)) {
+                     return true;
+                  }
+
+                  var14.removeColor(var6);
                   var4.addStat(StatList.ARMOR_CLEANED);
                   return true;
                }
@@ -136,24 +152,24 @@ public class BlockCauldron extends Block {
 
             if (var11 > 0 && var12 instanceof ItemBanner) {
                if (TileEntityBanner.getPatterns(var6) > 0 && !var1.isRemote) {
-                  ItemStack var14 = var6.copy();
-                  var14.stackSize = 1;
-                  TileEntityBanner.removeBannerData(var14);
+                  ItemStack var13 = var6.copy();
+                  var13.stackSize = 1;
+                  TileEntityBanner.removeBannerData(var13);
                   var4.addStat(StatList.BANNER_CLEANED);
                   if (!var4.capabilities.isCreativeMode) {
                      --var6.stackSize;
                   }
 
                   if (var6.stackSize == 0) {
-                     var4.setHeldItem(var5, var14);
-                  } else if (!var4.inventory.addItemStackToInventory(var14)) {
-                     var4.dropItem(var14, false);
+                     var4.setHeldItem(var5, var13);
+                  } else if (!var4.inventory.addItemStackToInventory(var13)) {
+                     var4.dropItem(var13, false);
                   } else if (var4 instanceof EntityPlayerMP) {
                      ((EntityPlayerMP)var4).sendContainerToPlayer(var4.inventoryContainer);
                   }
 
                   if (!var4.capabilities.isCreativeMode) {
-                     this.setWaterLevel(var1, var2, var3, var11 - 1);
+                     this.changeLevel(var1, var2, var3, var11 - 1, var4, ChangeReason.BANNER_WASH);
                   }
                }
 
@@ -166,8 +182,20 @@ public class BlockCauldron extends Block {
    }
 
    public void setWaterLevel(World var1, BlockPos var2, IBlockState var3, int var4) {
-      var1.setBlockState(var2, var3.withProperty(LEVEL, Integer.valueOf(MathHelper.clamp(var4, 0, 3))), 2);
-      var1.updateComparatorOutputLevel(var2, this);
+      this.changeLevel(var1, var2, var3, var4, (Entity)null, ChangeReason.UNKNOWN);
+   }
+
+   private boolean changeLevel(World var1, BlockPos var2, IBlockState var3, int var4, Entity var5, ChangeReason var6) {
+      int var7 = MathHelper.clamp(var4, 0, 3).intValue();
+      CauldronLevelChangeEvent var8 = new CauldronLevelChangeEvent(var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ()), var5 == null ? null : var5.getBukkitEntity(), var6, ((Integer)var3.getValue(LEVEL)).intValue(), var7);
+      var1.getServer().getPluginManager().callEvent(var8);
+      if (var8.isCancelled()) {
+         return false;
+      } else {
+         var1.setBlockState(var2, var3.withProperty(LEVEL, Integer.valueOf(var7)), 2);
+         var1.updateComparatorOutputLevel(var2, this);
+         return true;
+      }
    }
 
    public void fillWithRain(World var1, BlockPos var2) {
@@ -176,7 +204,7 @@ public class BlockCauldron extends Block {
          if (var1.getBiomeProvider().getTemperatureAtHeight(var3, var2.getY()) >= 0.15F) {
             IBlockState var4 = var1.getBlockState(var2);
             if (((Integer)var4.getValue(LEVEL)).intValue() < 3) {
-               var1.setBlockState(var2, var4.cycleProperty(LEVEL), 2);
+               this.setWaterLevel(var1, var2, var4.cycleProperty(LEVEL), 2);
             }
          }
       }

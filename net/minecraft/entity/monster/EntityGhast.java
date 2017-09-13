@@ -29,8 +29,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityGhast extends EntityFlying implements IMob {
    private static final DataParameter ATTACKING = EntityDataManager.createKey(EntityGhast.class, DataSerializers.BOOLEAN);
@@ -49,11 +47,6 @@ public class EntityGhast extends EntityFlying implements IMob {
       this.tasks.addTask(7, new EntityGhast.AILookAround(this));
       this.tasks.addTask(7, new EntityGhast.AIFireballAttack(this));
       this.targetTasks.addTask(1, new EntityAIFindEntityNearestPlayer(this));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isAttacking() {
-      return ((Boolean)this.dataManager.get(ATTACKING)).booleanValue();
    }
 
    public void setAttacking(boolean var1) {
@@ -171,27 +164,25 @@ public class EntityGhast extends EntityFlying implements IMob {
 
       public void updateTask() {
          EntityLivingBase var1 = this.parentEntity.getAttackTarget();
-         double var2 = 64.0D;
          if (var1.getDistanceSqToEntity(this.parentEntity) < 4096.0D && this.parentEntity.canEntityBeSeen(var1)) {
-            World var4 = this.parentEntity.world;
+            World var2 = this.parentEntity.world;
             ++this.attackTimer;
             if (this.attackTimer == 10) {
-               var4.playEvent((EntityPlayer)null, 1015, new BlockPos(this.parentEntity), 0);
+               var2.playEvent((EntityPlayer)null, 1015, new BlockPos(this.parentEntity), 0);
             }
 
             if (this.attackTimer == 20) {
-               double var5 = 4.0D;
-               Vec3d var7 = this.parentEntity.getLook(1.0F);
-               double var8 = var1.posX - (this.parentEntity.posX + var7.xCoord * 4.0D);
-               double var10 = var1.getEntityBoundingBox().minY + (double)(var1.height / 2.0F) - (0.5D + this.parentEntity.posY + (double)(this.parentEntity.height / 2.0F));
-               double var12 = var1.posZ - (this.parentEntity.posZ + var7.zCoord * 4.0D);
-               var4.playEvent((EntityPlayer)null, 1016, new BlockPos(this.parentEntity), 0);
-               EntityLargeFireball var14 = new EntityLargeFireball(var4, this.parentEntity, var8, var10, var12);
-               var14.explosionPower = this.parentEntity.getFireballStrength();
-               var14.posX = this.parentEntity.posX + var7.xCoord * 4.0D;
-               var14.posY = this.parentEntity.posY + (double)(this.parentEntity.height / 2.0F) + 0.5D;
-               var14.posZ = this.parentEntity.posZ + var7.zCoord * 4.0D;
-               var4.spawnEntity(var14);
+               Vec3d var3 = this.parentEntity.getLook(1.0F);
+               double var4 = var1.posX - (this.parentEntity.posX + var3.xCoord * 4.0D);
+               double var6 = var1.getEntityBoundingBox().minY + (double)(var1.height / 2.0F) - (0.5D + this.parentEntity.posY + (double)(this.parentEntity.height / 2.0F));
+               double var8 = var1.posZ - (this.parentEntity.posZ + var3.zCoord * 4.0D);
+               var2.playEvent((EntityPlayer)null, 1016, new BlockPos(this.parentEntity), 0);
+               EntityLargeFireball var10 = new EntityLargeFireball(var2, this.parentEntity, var4, var6, var8);
+               var10.bukkitYield = (float)(var10.explosionPower = this.parentEntity.getFireballStrength());
+               var10.posX = this.parentEntity.posX + var3.xCoord * 4.0D;
+               var10.posY = this.parentEntity.posY + (double)(this.parentEntity.height / 2.0F) + 0.5D;
+               var10.posZ = this.parentEntity.posZ + var3.zCoord * 4.0D;
+               var2.spawnEntity(var10);
                this.attackTimer = -40;
             }
          } else if (this.attackTimer > 0) {
@@ -220,11 +211,10 @@ public class EntityGhast extends EntityFlying implements IMob {
             this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw;
          } else {
             EntityLivingBase var1 = this.parentEntity.getAttackTarget();
-            double var2 = 64.0D;
             if (var1.getDistanceSqToEntity(this.parentEntity) < 4096.0D) {
-               double var4 = var1.posX - this.parentEntity.posX;
-               double var6 = var1.posZ - this.parentEntity.posZ;
-               this.parentEntity.rotationYaw = -((float)MathHelper.atan2(var4, var6)) * 57.295776F;
+               double var2 = var1.posX - this.parentEntity.posX;
+               double var4 = var1.posZ - this.parentEntity.posZ;
+               this.parentEntity.rotationYaw = -((float)MathHelper.atan2(var2, var4)) * 57.295776F;
                this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw;
             }
          }

@@ -10,18 +10,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.src.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@SideOnly(Side.SERVER)
 public class ServerHangWatchdog implements Runnable {
    private static final Logger LOGGER = LogManager.getLogger();
    private final DedicatedServer server;
    private final long maxTickTime;
-   private boolean firstRun = true;
 
    public ServerHangWatchdog(DedicatedServer var1) {
       this.server = var1;
@@ -29,11 +25,11 @@ public class ServerHangWatchdog implements Runnable {
    }
 
    public void run() {
-      while(this.server.isServerRunning()) {
-         long var1 = this.server.getCurrentTime();
-         long var3 = MinecraftServer.getCurrentTimeMillis();
+      while(this.server.isRunning()) {
+         long var1 = this.server.aG();
+         long var3 = MinecraftServer.av();
          long var5 = var3 - var1;
-         if (var5 > this.maxTickTime && !this.firstRun) {
+         if (var5 > this.maxTickTime) {
             LOGGER.fatal("A single server tick took {} seconds (should be max {})", new Object[]{String.format("%.2f", (float)var5 / 1000.0F), String.format("%.2f", 0.05F)});
             LOGGER.fatal("Considering it to be crashed, server will forcibly shutdown.");
             ThreadMXBean var7 = ManagementFactory.getThreadMXBean();
@@ -42,7 +38,7 @@ public class ServerHangWatchdog implements Runnable {
             Error var10 = new Error();
 
             for(ThreadInfo var14 : var8) {
-               if (var14.getThreadId() == this.server.getServerThread().getId()) {
+               if (var14.getThreadId() == this.server.aH().getId()) {
                   var10.setStackTrace(var14.getStackTrace());
                }
 
@@ -54,7 +50,7 @@ public class ServerHangWatchdog implements Runnable {
             this.server.addServerInfoToCrashReport(var16);
             CrashReportCategory var17 = var16.makeCategory("Thread Dump");
             var17.addCrashSection("Threads", var9);
-            File var18 = new File(new File(this.server.getDataDirectory(), "crash-reports"), "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-server.txt");
+            File var18 = new File(new File(this.server.A(), "crash-reports"), "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-server.txt");
             if (var16.saveToFile(var18)) {
                LOGGER.error("This crash report has been saved to: {}", new Object[]{var18.getAbsolutePath()});
             } else {
@@ -63,8 +59,6 @@ public class ServerHangWatchdog implements Runnable {
 
             this.scheduleHalt();
          }
-
-         this.firstRun = false;
 
          try {
             Thread.sleep(var1 + this.maxTickTime - var3);

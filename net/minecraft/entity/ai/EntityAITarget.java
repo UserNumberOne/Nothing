@@ -12,6 +12,7 @@ import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public abstract class EntityAITarget extends EntityAIBase {
    protected final EntityCreature taskOwner;
@@ -65,7 +66,7 @@ public abstract class EntityAITarget extends EntityAIBase {
                if (var1 instanceof EntityPlayer && ((EntityPlayer)var1).capabilities.disableDamage) {
                   return false;
                } else {
-                  this.taskOwner.setAttackTarget(var1);
+                  this.taskOwner.setGoalTarget(var1, TargetReason.CLOSEST_ENTITY, true);
                   return true;
                }
             }
@@ -85,7 +86,7 @@ public abstract class EntityAITarget extends EntityAIBase {
    }
 
    public void resetTask() {
-      this.taskOwner.setAttackTarget((EntityLivingBase)null);
+      this.taskOwner.setGoalTarget((EntityLivingBase)null, TargetReason.FORGOT_TARGET, true);
       this.target = null;
    }
 

@@ -364,7 +364,163 @@ public class ChunkProviderSettings {
             return true;
          } else if (var1 != null && this.getClass() == var1.getClass()) {
             ChunkProviderSettings.Factory var2 = (ChunkProviderSettings.Factory)var1;
-            return this.andesiteCount != var2.andesiteCount ? false : (this.andesiteMaxHeight != var2.andesiteMaxHeight ? false : (this.andesiteMinHeight != var2.andesiteMinHeight ? false : (this.andesiteSize != var2.andesiteSize ? false : (Float.compare(var2.baseSize, this.baseSize) != 0 ? false : (Float.compare(var2.biomeDepthOffset, this.biomeDepthOffset) != 0 ? false : (Float.compare(var2.biomeDepthWeight, this.biomeDepthWeight) != 0 ? false : (Float.compare(var2.biomeScaleOffset, this.biomeScaleOffset) != 0 ? false : (Float.compare(var2.biomeScaleWeight, this.biomeScaleWeight) != 0 ? false : (this.biomeSize != var2.biomeSize ? false : (this.coalCount != var2.coalCount ? false : (this.coalMaxHeight != var2.coalMaxHeight ? false : (this.coalMinHeight != var2.coalMinHeight ? false : (this.coalSize != var2.coalSize ? false : (Float.compare(var2.coordinateScale, this.coordinateScale) != 0 ? false : (Float.compare(var2.depthNoiseScaleExponent, this.depthNoiseScaleExponent) != 0 ? false : (Float.compare(var2.depthNoiseScaleX, this.depthNoiseScaleX) != 0 ? false : (Float.compare(var2.depthNoiseScaleZ, this.depthNoiseScaleZ) != 0 ? false : (this.diamondCount != var2.diamondCount ? false : (this.diamondMaxHeight != var2.diamondMaxHeight ? false : (this.diamondMinHeight != var2.diamondMinHeight ? false : (this.diamondSize != var2.diamondSize ? false : (this.dioriteCount != var2.dioriteCount ? false : (this.dioriteMaxHeight != var2.dioriteMaxHeight ? false : (this.dioriteMinHeight != var2.dioriteMinHeight ? false : (this.dioriteSize != var2.dioriteSize ? false : (this.dirtCount != var2.dirtCount ? false : (this.dirtMaxHeight != var2.dirtMaxHeight ? false : (this.dirtMinHeight != var2.dirtMinHeight ? false : (this.dirtSize != var2.dirtSize ? false : (this.dungeonChance != var2.dungeonChance ? false : (this.fixedBiome != var2.fixedBiome ? false : (this.goldCount != var2.goldCount ? false : (this.goldMaxHeight != var2.goldMaxHeight ? false : (this.goldMinHeight != var2.goldMinHeight ? false : (this.goldSize != var2.goldSize ? false : (this.graniteCount != var2.graniteCount ? false : (this.graniteMaxHeight != var2.graniteMaxHeight ? false : (this.graniteMinHeight != var2.graniteMinHeight ? false : (this.graniteSize != var2.graniteSize ? false : (this.gravelCount != var2.gravelCount ? false : (this.gravelMaxHeight != var2.gravelMaxHeight ? false : (this.gravelMinHeight != var2.gravelMinHeight ? false : (this.gravelSize != var2.gravelSize ? false : (Float.compare(var2.heightScale, this.heightScale) != 0 ? false : (this.ironCount != var2.ironCount ? false : (this.ironMaxHeight != var2.ironMaxHeight ? false : (this.ironMinHeight != var2.ironMinHeight ? false : (this.ironSize != var2.ironSize ? false : (this.lapisCenterHeight != var2.lapisCenterHeight ? false : (this.lapisCount != var2.lapisCount ? false : (this.lapisSize != var2.lapisSize ? false : (this.lapisSpread != var2.lapisSpread ? false : (this.lavaLakeChance != var2.lavaLakeChance ? false : (Float.compare(var2.lowerLimitScale, this.lowerLimitScale) != 0 ? false : (Float.compare(var2.mainNoiseScaleX, this.mainNoiseScaleX) != 0 ? false : (Float.compare(var2.mainNoiseScaleY, this.mainNoiseScaleY) != 0 ? false : (Float.compare(var2.mainNoiseScaleZ, this.mainNoiseScaleZ) != 0 ? false : (this.redstoneCount != var2.redstoneCount ? false : (this.redstoneMaxHeight != var2.redstoneMaxHeight ? false : (this.redstoneMinHeight != var2.redstoneMinHeight ? false : (this.redstoneSize != var2.redstoneSize ? false : (this.riverSize != var2.riverSize ? false : (this.seaLevel != var2.seaLevel ? false : (Float.compare(var2.stretchY, this.stretchY) != 0 ? false : (Float.compare(var2.upperLimitScale, this.upperLimitScale) != 0 ? false : (this.useCaves != var2.useCaves ? false : (this.useDungeons != var2.useDungeons ? false : (this.useLavaLakes != var2.useLavaLakes ? false : (this.useLavaOceans != var2.useLavaOceans ? false : (this.useMineShafts != var2.useMineShafts ? false : (this.useRavines != var2.useRavines ? false : (this.useStrongholds != var2.useStrongholds ? false : (this.useTemples != var2.useTemples ? false : (this.useMonuments != var2.useMonuments ? false : (this.useVillages != var2.useVillages ? false : (this.useWaterLakes != var2.useWaterLakes ? false : this.waterLakeChance == var2.waterLakeChance))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
+            if (this.andesiteCount != var2.andesiteCount) {
+               return false;
+            } else if (this.andesiteMaxHeight != var2.andesiteMaxHeight) {
+               return false;
+            } else if (this.andesiteMinHeight != var2.andesiteMinHeight) {
+               return false;
+            } else if (this.andesiteSize != var2.andesiteSize) {
+               return false;
+            } else if (Float.compare(var2.baseSize, this.baseSize) != 0) {
+               return false;
+            } else if (Float.compare(var2.biomeDepthOffset, this.biomeDepthOffset) != 0) {
+               return false;
+            } else if (Float.compare(var2.biomeDepthWeight, this.biomeDepthWeight) != 0) {
+               return false;
+            } else if (Float.compare(var2.biomeScaleOffset, this.biomeScaleOffset) != 0) {
+               return false;
+            } else if (Float.compare(var2.biomeScaleWeight, this.biomeScaleWeight) != 0) {
+               return false;
+            } else if (this.biomeSize != var2.biomeSize) {
+               return false;
+            } else if (this.coalCount != var2.coalCount) {
+               return false;
+            } else if (this.coalMaxHeight != var2.coalMaxHeight) {
+               return false;
+            } else if (this.coalMinHeight != var2.coalMinHeight) {
+               return false;
+            } else if (this.coalSize != var2.coalSize) {
+               return false;
+            } else if (Float.compare(var2.coordinateScale, this.coordinateScale) != 0) {
+               return false;
+            } else if (Float.compare(var2.depthNoiseScaleExponent, this.depthNoiseScaleExponent) != 0) {
+               return false;
+            } else if (Float.compare(var2.depthNoiseScaleX, this.depthNoiseScaleX) != 0) {
+               return false;
+            } else if (Float.compare(var2.depthNoiseScaleZ, this.depthNoiseScaleZ) != 0) {
+               return false;
+            } else if (this.diamondCount != var2.diamondCount) {
+               return false;
+            } else if (this.diamondMaxHeight != var2.diamondMaxHeight) {
+               return false;
+            } else if (this.diamondMinHeight != var2.diamondMinHeight) {
+               return false;
+            } else if (this.diamondSize != var2.diamondSize) {
+               return false;
+            } else if (this.dioriteCount != var2.dioriteCount) {
+               return false;
+            } else if (this.dioriteMaxHeight != var2.dioriteMaxHeight) {
+               return false;
+            } else if (this.dioriteMinHeight != var2.dioriteMinHeight) {
+               return false;
+            } else if (this.dioriteSize != var2.dioriteSize) {
+               return false;
+            } else if (this.dirtCount != var2.dirtCount) {
+               return false;
+            } else if (this.dirtMaxHeight != var2.dirtMaxHeight) {
+               return false;
+            } else if (this.dirtMinHeight != var2.dirtMinHeight) {
+               return false;
+            } else if (this.dirtSize != var2.dirtSize) {
+               return false;
+            } else if (this.dungeonChance != var2.dungeonChance) {
+               return false;
+            } else if (this.fixedBiome != var2.fixedBiome) {
+               return false;
+            } else if (this.goldCount != var2.goldCount) {
+               return false;
+            } else if (this.goldMaxHeight != var2.goldMaxHeight) {
+               return false;
+            } else if (this.goldMinHeight != var2.goldMinHeight) {
+               return false;
+            } else if (this.goldSize != var2.goldSize) {
+               return false;
+            } else if (this.graniteCount != var2.graniteCount) {
+               return false;
+            } else if (this.graniteMaxHeight != var2.graniteMaxHeight) {
+               return false;
+            } else if (this.graniteMinHeight != var2.graniteMinHeight) {
+               return false;
+            } else if (this.graniteSize != var2.graniteSize) {
+               return false;
+            } else if (this.gravelCount != var2.gravelCount) {
+               return false;
+            } else if (this.gravelMaxHeight != var2.gravelMaxHeight) {
+               return false;
+            } else if (this.gravelMinHeight != var2.gravelMinHeight) {
+               return false;
+            } else if (this.gravelSize != var2.gravelSize) {
+               return false;
+            } else if (Float.compare(var2.heightScale, this.heightScale) != 0) {
+               return false;
+            } else if (this.ironCount != var2.ironCount) {
+               return false;
+            } else if (this.ironMaxHeight != var2.ironMaxHeight) {
+               return false;
+            } else if (this.ironMinHeight != var2.ironMinHeight) {
+               return false;
+            } else if (this.ironSize != var2.ironSize) {
+               return false;
+            } else if (this.lapisCenterHeight != var2.lapisCenterHeight) {
+               return false;
+            } else if (this.lapisCount != var2.lapisCount) {
+               return false;
+            } else if (this.lapisSize != var2.lapisSize) {
+               return false;
+            } else if (this.lapisSpread != var2.lapisSpread) {
+               return false;
+            } else if (this.lavaLakeChance != var2.lavaLakeChance) {
+               return false;
+            } else if (Float.compare(var2.lowerLimitScale, this.lowerLimitScale) != 0) {
+               return false;
+            } else if (Float.compare(var2.mainNoiseScaleX, this.mainNoiseScaleX) != 0) {
+               return false;
+            } else if (Float.compare(var2.mainNoiseScaleY, this.mainNoiseScaleY) != 0) {
+               return false;
+            } else if (Float.compare(var2.mainNoiseScaleZ, this.mainNoiseScaleZ) != 0) {
+               return false;
+            } else if (this.redstoneCount != var2.redstoneCount) {
+               return false;
+            } else if (this.redstoneMaxHeight != var2.redstoneMaxHeight) {
+               return false;
+            } else if (this.redstoneMinHeight != var2.redstoneMinHeight) {
+               return false;
+            } else if (this.redstoneSize != var2.redstoneSize) {
+               return false;
+            } else if (this.riverSize != var2.riverSize) {
+               return false;
+            } else if (this.seaLevel != var2.seaLevel) {
+               return false;
+            } else if (Float.compare(var2.stretchY, this.stretchY) != 0) {
+               return false;
+            } else if (Float.compare(var2.upperLimitScale, this.upperLimitScale) != 0) {
+               return false;
+            } else if (this.useCaves != var2.useCaves) {
+               return false;
+            } else if (this.useDungeons != var2.useDungeons) {
+               return false;
+            } else if (this.useLavaLakes != var2.useLavaLakes) {
+               return false;
+            } else if (this.useLavaOceans != var2.useLavaOceans) {
+               return false;
+            } else if (this.useMineShafts != var2.useMineShafts) {
+               return false;
+            } else if (this.useRavines != var2.useRavines) {
+               return false;
+            } else if (this.useStrongholds != var2.useStrongholds) {
+               return false;
+            } else if (this.useTemples != var2.useTemples) {
+               return false;
+            } else if (this.useMonuments != var2.useMonuments) {
+               return false;
+            } else if (this.useVillages != var2.useVillages) {
+               return false;
+            } else if (this.useWaterLakes != var2.useWaterLakes) {
+               return false;
+            } else {
+               return this.waterLakeChance == var2.waterLakeChance;
+            }
          } else {
             return false;
          }
@@ -637,6 +793,16 @@ public class ChunkProviderSettings {
          var4.addProperty("lapisCenterHeight", Integer.valueOf(var1.lapisCenterHeight));
          var4.addProperty("lapisSpread", Integer.valueOf(var1.lapisSpread));
          return var4;
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((ChunkProviderSettings.Factory)var1, var2, var3);
       }
    }
 }

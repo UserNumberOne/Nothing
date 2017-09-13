@@ -12,15 +12,11 @@ import java.util.Date;
 import java.util.List;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.gen.layer.IntCache;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.asm.transformers.BlamingTransformer;
-import net.minecraftforge.fml.relauncher.CoreModManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.craftbukkit.v1_10_R1.CraftCrashReport;
 
 public class CrashReport {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -43,20 +39,36 @@ public class CrashReport {
          public String call() {
             return "1.10.2";
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       this.theReportCategory.setDetail("Operating System", new ICrashReportDetail() {
          public String call() {
             return System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ") version " + System.getProperty("os.version");
+         }
+
+         public Object call() throws Exception {
+            return this.call();
          }
       });
       this.theReportCategory.setDetail("Java Version", new ICrashReportDetail() {
          public String call() {
             return System.getProperty("java.version") + ", " + System.getProperty("java.vendor");
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       this.theReportCategory.setDetail("Java VM Version", new ICrashReportDetail() {
          public String call() {
             return System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.info") + "), " + System.getProperty("java.vm.vendor");
+         }
+
+         public Object call() throws Exception {
+            return this.call();
          }
       });
       this.theReportCategory.setDetail("Memory", new ICrashReportDetail() {
@@ -69,6 +81,10 @@ public class CrashReport {
             long var10 = var4 / 1024L / 1024L;
             long var12 = var6 / 1024L / 1024L;
             return var6 + " bytes (" + var12 + " MB) / " + var4 + " bytes (" + var10 + " MB) up to " + var2 + " bytes (" + var8 + " MB)";
+         }
+
+         public Object call() throws Exception {
+            return this.call();
          }
       });
       this.theReportCategory.setDetail("JVM Flags", new ICrashReportDetail() {
@@ -90,13 +106,21 @@ public class CrashReport {
 
             return String.format("%d total; %s", var3, var4.toString());
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       this.theReportCategory.setDetail("IntCache", new ICrashReportDetail() {
          public String call() throws Exception {
             return IntCache.getCacheSizes();
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
-      FMLCommonHandler.instance().enhanceCrashReport(this, this.theReportCategory);
+      this.theReportCategory.setDetail("CraftBukkit Information", new CraftCrashReport());
    }
 
    public String getDescription() {
@@ -167,8 +191,6 @@ public class CrashReport {
    public String getCompleteReport() {
       StringBuilder var1 = new StringBuilder();
       var1.append("---- Minecraft Crash Report ----\n");
-      BlamingTransformer.onCrash(var1);
-      CoreModManager.onCrash(var1);
       var1.append("// ");
       var1.append(getWittyComment());
       var1.append("\n\n");
@@ -190,11 +212,6 @@ public class CrashReport {
       return var1.toString();
    }
 
-   @SideOnly(Side.CLIENT)
-   public File getFile() {
-      return this.crashReportFile;
-   }
-
    public boolean saveToFile(File var1) {
       if (this.crashReportFile != null) {
          return false;
@@ -205,22 +222,22 @@ public class CrashReport {
 
          FileWriter var2 = null;
 
-         boolean var3;
+         boolean var5;
          try {
             var2 = new FileWriter(var1);
             var2.write(this.getCompleteReport());
             this.crashReportFile = var1;
-            boolean var4 = true;
-            boolean var5 = var4;
-            return var5;
+            boolean var3 = true;
+            boolean var4 = var3;
+            return var4;
          } catch (Throwable var9) {
             LOGGER.error("Could not save crash report to {}", new Object[]{var1, var9});
-            var3 = false;
+            var5 = false;
          } finally {
             IOUtils.closeQuietly(var2);
          }
 
-         return var3;
+         return var5;
       }
    }
 
@@ -244,7 +261,7 @@ public class CrashReport {
             System.out.println("Negative index in crash report handler (" + var5.length + "/" + var4 + ")");
          }
 
-         if (var5 != null && 0 <= var8 && var8 < var5.length) {
+         if (var5 != null && var8 >= 0 && var8 < var5.length) {
             var6 = var5[var8];
             if (var5.length + 1 - var4 < var5.length) {
                var7 = var5[var5.length + 1 - var4];
@@ -255,7 +272,7 @@ public class CrashReport {
          if (var4 > 0 && !this.crashReportSections.isEmpty()) {
             CrashReportCategory var9 = (CrashReportCategory)this.crashReportSections.get(this.crashReportSections.size() - 1);
             var9.trimStackTraceEntriesFromBottom(var4);
-         } else if (var5 != null && var5.length >= var4 && 0 <= var8 && var8 < var5.length) {
+         } else if (var5 != null && var5.length >= var4 && var8 >= 0 && var8 < var5.length) {
             this.stacktrace = new StackTraceElement[var8];
             System.arraycopy(var5, 0, this.stacktrace, 0, this.stacktrace.length);
          } else {
@@ -272,7 +289,7 @@ public class CrashReport {
 
       try {
          return var0[(int)(System.nanoTime() % (long)var0.length)];
-      } catch (Throwable var2) {
+      } catch (Throwable var1) {
          return "Witty comment unavailable :(";
       }
    }

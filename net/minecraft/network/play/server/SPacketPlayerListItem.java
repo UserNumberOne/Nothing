@@ -13,8 +13,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketPlayerListItem implements Packet {
    private SPacketPlayerListItem.Action action;
@@ -152,16 +150,6 @@ public class SPacketPlayerListItem implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handlePlayerListItem(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getEntries() {
-      return this.players;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public SPacketPlayerListItem.Action getAction() {
-      return this.action;
    }
 
    public String toString() {

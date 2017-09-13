@@ -25,6 +25,7 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.event.block.BlockRedstoneEvent;
 
 public class BlockCommandBlock extends BlockContainer {
    public static final PropertyDirection FACING = BlockDirectional.FACING;
@@ -49,17 +50,22 @@ public class BlockCommandBlock extends BlockContainer {
             boolean var7 = var2.isBlockPowered(var3);
             boolean var8 = var6.isPowered();
             boolean var9 = var6.isAuto();
-            if (var7 && !var8) {
+            org.bukkit.block.Block var10 = var2.getWorld().getBlockAt(var3.getX(), var3.getY(), var3.getZ());
+            int var11 = var8 ? 15 : 0;
+            int var12 = var7 ? 15 : 0;
+            BlockRedstoneEvent var13 = new BlockRedstoneEvent(var10, var11, var12);
+            var2.getServer().getPluginManager().callEvent(var13);
+            if (var13.getNewCurrent() > 0 && var13.getOldCurrent() <= 0) {
                var6.setPowered(true);
                if (var6.getMode() != TileEntityCommandBlock.Mode.SEQUENCE && !var9) {
-                  boolean var10 = !var6.isConditional() || this.isNextToSuccessfulCommandBlock(var2, var3, var1);
-                  var6.setConditionMet(var10);
+                  boolean var14 = !var6.isConditional() || this.isNextToSuccessfulCommandBlock(var2, var3, var1);
+                  var6.setConditionMet(var14);
                   var2.scheduleUpdate(var3, this, this.tickRate(var2));
-                  if (var10) {
+                  if (var14) {
                      this.propagateUpdate(var2, var3);
                   }
                }
-            } else if (!var7 && var8) {
+            } else if (var13.getNewCurrent() <= 0 && var13.getOldCurrent() > 0) {
                var6.setPowered(false);
             }
          }

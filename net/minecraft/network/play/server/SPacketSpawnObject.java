@@ -8,8 +8,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSpawnObject implements Packet {
    private int entityId;
@@ -89,80 +87,15 @@ public class SPacketSpawnObject implements Packet {
       var1.handleSpawnObject(this);
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getEntityID() {
-      return this.entityId;
-   }
-
    public void setSpeedX(int var1) {
       this.speedX = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public UUID getUniqueId() {
-      return this.uniqueId;
    }
 
    public void setSpeedY(int var1) {
       this.speedY = var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.x;
-   }
-
    public void setSpeedZ(int var1) {
       this.speedZ = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.y;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.z;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSpeedX() {
-      return this.speedX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSpeedY() {
-      return this.speedY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSpeedZ() {
-      return this.speedZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getPitch() {
-      return this.pitch;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getYaw() {
-      return this.yaw;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getType() {
-      return this.type;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getData() {
-      return this.data;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setData(int var1) {
-      this.data = var1;
    }
 }

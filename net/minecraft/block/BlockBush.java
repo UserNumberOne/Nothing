@@ -7,18 +7,13 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.EnumPlantType;
-import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.block.BlockPhysicsEvent;
 
-public class BlockBush extends Block implements IPlantable {
+public class BlockBush extends Block {
    protected static final AxisAlignedBB BUSH_AABB = new AxisAlignedBB(0.30000001192092896D, 0.0D, 0.30000001192092896D, 0.699999988079071D, 0.6000000238418579D, 0.699999988079071D);
 
    protected BlockBush() {
@@ -36,8 +31,7 @@ public class BlockBush extends Block implements IPlantable {
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      IBlockState var3 = var1.getBlockState(var2.down());
-      return super.canPlaceBlockAt(var1, var2) && var3.getBlock().canSustainPlant(var3, var1, var2.down(), EnumFacing.UP, this);
+      return super.canPlaceBlockAt(var1, var2) && this.canSustainBush(var1.getBlockState(var2.down()));
    }
 
    protected boolean canSustainBush(IBlockState var1) {
@@ -55,6 +49,13 @@ public class BlockBush extends Block implements IPlantable {
 
    protected void checkAndDropBlock(World var1, BlockPos var2, IBlockState var3) {
       if (!this.canBlockStay(var1, var2, var3)) {
+         org.bukkit.block.Block var4 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+         BlockPhysicsEvent var5 = new BlockPhysicsEvent(var4, var4.getTypeId());
+         var1.getServer().getPluginManager().callEvent(var5);
+         if (var5.isCancelled()) {
+            return;
+         }
+
          this.dropBlockAsItem(var1, var2, var3, 0);
          var1.setBlockState(var2, Blocks.AIR.getDefaultState(), 3);
       }
@@ -62,12 +63,7 @@ public class BlockBush extends Block implements IPlantable {
    }
 
    public boolean canBlockStay(World var1, BlockPos var2, IBlockState var3) {
-      if (var3.getBlock() == this) {
-         IBlockState var4 = var1.getBlockState(var2.down());
-         return var4.getBlock().canSustainPlant(var4, var1, var2.down(), EnumFacing.UP, this);
-      } else {
-         return this.canSustainBush(var1.getBlockState(var2.down()));
-      }
+      return this.canSustainBush(var1.getBlockState(var2.down()));
    }
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
@@ -85,49 +81,5 @@ public class BlockBush extends Block implements IPlantable {
 
    public boolean isFullCube(IBlockState var1) {
       return false;
-   }
-
-   public EnumPlantType getPlantType(IBlockAccess var1, BlockPos var2) {
-      if (this == Blocks.WHEAT) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.CARROTS) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.POTATOES) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.MELON_STEM) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.PUMPKIN_STEM) {
-         return EnumPlantType.Crop;
-      } else if (this == Blocks.DEADBUSH) {
-         return EnumPlantType.Desert;
-      } else if (this == Blocks.WATERLILY) {
-         return EnumPlantType.Water;
-      } else if (this == Blocks.RED_MUSHROOM) {
-         return EnumPlantType.Cave;
-      } else if (this == Blocks.BROWN_MUSHROOM) {
-         return EnumPlantType.Cave;
-      } else if (this == Blocks.NETHER_WART) {
-         return EnumPlantType.Nether;
-      } else if (this == Blocks.SAPLING) {
-         return EnumPlantType.Plains;
-      } else if (this == Blocks.TALLGRASS) {
-         return EnumPlantType.Plains;
-      } else if (this == Blocks.DOUBLE_PLANT) {
-         return EnumPlantType.Plains;
-      } else if (this == Blocks.RED_FLOWER) {
-         return EnumPlantType.Plains;
-      } else {
-         return this == Blocks.YELLOW_FLOWER ? EnumPlantType.Plains : EnumPlantType.Plains;
-      }
-   }
-
-   public IBlockState getPlant(IBlockAccess var1, BlockPos var2) {
-      IBlockState var3 = var1.getBlockState(var2);
-      return var3.getBlock() != this ? this.getDefaultState() : var3;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 }

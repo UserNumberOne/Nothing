@@ -6,7 +6,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
 public class CPacketResourcePackStatus implements Packet {
-   private CPacketResourcePackStatus.Action action;
+   public CPacketResourcePackStatus.Action action;
 
    public CPacketResourcePackStatus() {
    }

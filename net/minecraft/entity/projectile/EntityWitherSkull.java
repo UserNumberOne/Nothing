@@ -3,6 +3,7 @@ package net.minecraft.entity.projectile;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.init.MobEffects;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -15,8 +16,8 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
 public class EntityWitherSkull extends EntityFireball {
    private static final DataParameter INVULNERABLE = EntityDataManager.createKey(EntityWitherSkull.class, DataSerializers.BOOLEAN);
@@ -39,12 +40,6 @@ public class EntityWitherSkull extends EntityFireball {
       return this.isInvulnerable() ? 0.73F : super.getMotionFactor();
    }
 
-   @SideOnly(Side.CLIENT)
-   public EntityWitherSkull(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
-      super(var1, var2, var4, var6, var8, var10, var12);
-      this.setSize(0.3125F, 0.3125F);
-   }
-
    public boolean isBurning() {
       return false;
    }
@@ -52,7 +47,7 @@ public class EntityWitherSkull extends EntityFireball {
    public float getExplosionResistance(Explosion var1, World var2, BlockPos var3, IBlockState var4) {
       float var5 = super.getExplosionResistance(var1, var2, var3, var4);
       Block var6 = var4.getBlock();
-      if (this.isInvulnerable() && var6.canEntityDestroy(var4, var2, var3, this)) {
+      if (this.isInvulnerable() && EntityWither.canDestroyBlock(var6)) {
          var5 = Math.min(0.8F, var5);
       }
 
@@ -63,11 +58,11 @@ public class EntityWitherSkull extends EntityFireball {
       if (!this.world.isRemote) {
          if (var1.entityHit != null) {
             if (this.shootingEntity != null) {
-               if (var1.entityHit.attackEntityFrom(DamageSource.causeMobDamage(this.shootingEntity), 8.0F)) {
+               if (var1.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.shootingEntity), 8.0F)) {
                   if (var1.entityHit.isEntityAlive()) {
                      this.applyEnchantments(this.shootingEntity, var1.entityHit);
                   } else {
-                     this.shootingEntity.heal(5.0F);
+                     this.shootingEntity.heal(5.0F, RegainReason.WITHER);
                   }
                }
             } else {
@@ -88,7 +83,12 @@ public class EntityWitherSkull extends EntityFireball {
             }
          }
 
-         this.world.newExplosion(this, this.posX, this.posY, this.posZ, 1.0F, false, this.world.getGameRules().getBoolean("mobGriefing"));
+         ExplosionPrimeEvent var3 = new ExplosionPrimeEvent(this.getBukkitEntity(), 1.0F, false);
+         this.world.getServer().getPluginManager().callEvent(var3);
+         if (!var3.isCancelled()) {
+            this.world.newExplosion(this, this.posX, this.posY, this.posZ, var3.getRadius(), var3.getFire(), this.world.getGameRules().getBoolean("mobGriefing"));
+         }
+
          this.setDead();
       }
 

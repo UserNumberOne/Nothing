@@ -12,11 +12,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry.Impl;
+import org.bukkit.craftbukkit.v1_10_R1.enchantments.CraftEnchantment;
 
-public abstract class Enchantment extends Impl {
-   public static final RegistryNamespaced REGISTRY = GameData.getEnchantmentRegistry();
+public abstract class Enchantment {
+   public static final RegistryNamespaced REGISTRY = new RegistryNamespaced();
    private final EntityEquipmentSlot[] applicableEquipmentTypes;
    private final Enchantment.Rarity rarity;
    public EnumEnchantmentType type;
@@ -103,7 +102,7 @@ public abstract class Enchantment extends Impl {
    }
 
    public boolean canApply(ItemStack var1) {
-      return this.canApplyAtEnchantingTable(var1);
+      return this.type.canEnchantItem(var1.getItem());
    }
 
    public void onEntityDamaged(EntityLivingBase var1, Entity var2, int var3) {
@@ -114,14 +113,6 @@ public abstract class Enchantment extends Impl {
 
    public boolean isTreasureEnchantment() {
       return false;
-   }
-
-   public boolean canApplyAtEnchantingTable(ItemStack var1) {
-      return this.type.canEnchantItem(var1.getItem());
-   }
-
-   public boolean isAllowedOnBooks() {
-      return true;
    }
 
    public static void registerEnchantments() {
@@ -153,6 +144,11 @@ public abstract class Enchantment extends Impl {
       REGISTRY.register(61, new ResourceLocation("luck_of_the_sea"), new EnchantmentLootBonus(Enchantment.Rarity.RARE, EnumEnchantmentType.FISHING_ROD, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
       REGISTRY.register(62, new ResourceLocation("lure"), new EnchantmentFishingSpeed(Enchantment.Rarity.RARE, EnumEnchantmentType.FISHING_ROD, new EntityEquipmentSlot[]{EntityEquipmentSlot.MAINHAND}));
       REGISTRY.register(70, new ResourceLocation("mending"), new EnchantmentMending(Enchantment.Rarity.RARE, EntityEquipmentSlot.values()));
+
+      for(Object var2 : REGISTRY) {
+         org.bukkit.enchantments.Enchantment.registerEnchantment(new CraftEnchantment((Enchantment)var2));
+      }
+
    }
 
    public static enum Rarity {

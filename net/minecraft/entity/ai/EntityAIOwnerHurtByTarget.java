@@ -2,6 +2,7 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIOwnerHurtByTarget extends EntityAITarget {
    EntityTameable theDefendingTameable;
@@ -30,7 +31,7 @@ public class EntityAIOwnerHurtByTarget extends EntityAITarget {
    }
 
    public void startExecuting() {
-      this.taskOwner.setAttackTarget(this.theOwnerAttacker);
+      this.taskOwner.setGoalTarget(this.theOwnerAttacker, TargetReason.TARGET_ATTACKED_OWNER, true);
       EntityLivingBase var1 = this.theDefendingTameable.getOwner();
       if (var1 != null) {
          this.timestamp = var1.getRevengeTimer();

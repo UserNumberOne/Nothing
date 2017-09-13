@@ -90,14 +90,19 @@ public class Template {
          } else {
             this.entities.clear();
          }
-      }
 
+      }
    }
 
    private void takeEntitiesFromWorld(World var1, BlockPos var2, BlockPos var3) {
       List var4 = var1.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(var2, var3), new Predicate() {
          public boolean apply(@Nullable Entity var1) {
             return !(var1 instanceof EntityPlayer);
+         }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1) {
+            return this.apply((Entity)var1);
          }
       });
       this.entities.clear();
@@ -218,8 +223,8 @@ public class Template {
          if (!var4.getIgnoreEntities()) {
             this.addEntitiesToWorld(var1, var2, var4.getMirror(), var4.getRotation(), var7);
          }
-      }
 
+      }
    }
 
    private void addEntitiesToWorld(World var1, BlockPos var2, Mirror var3, Rotation var4, @Nullable StructureBoundingBox var5) {

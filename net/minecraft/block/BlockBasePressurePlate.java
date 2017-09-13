@@ -13,6 +13,9 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.plugin.PluginManager;
 
 public abstract class BlockBasePressurePlate extends Block {
    protected static final AxisAlignedBB PRESSED_AABB = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 0.03125D, 0.9375D);
@@ -102,6 +105,15 @@ public abstract class BlockBasePressurePlate extends Block {
       int var5 = this.computeRedstoneStrength(var1, var2);
       boolean var6 = var4 > 0;
       boolean var7 = var5 > 0;
+      CraftWorld var8 = var1.getWorld();
+      PluginManager var9 = var1.getServer().getPluginManager();
+      if (var6 != var7) {
+         BlockRedstoneEvent var10 = new BlockRedstoneEvent(var8.getBlockAt(var2.getX(), var2.getY(), var2.getZ()), var4, var5);
+         var9.callEvent(var10);
+         var7 = var10.getNewCurrent() > 0;
+         var5 = var10.getNewCurrent();
+      }
+
       if (var4 != var5) {
          var3 = this.setRedstoneStrength(var3, var5);
          var1.setBlockState(var2, var3, 2);

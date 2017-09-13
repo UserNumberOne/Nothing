@@ -1,5 +1,6 @@
 package net.minecraft.item;
 
+import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -10,6 +11,8 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 
 public class ItemFlintAndSteel extends Item {
    public ItemFlintAndSteel() {
@@ -23,7 +26,12 @@ public class ItemFlintAndSteel extends Item {
       if (!var2.canPlayerEdit(var4, var6, var1)) {
          return EnumActionResult.FAIL;
       } else {
-         if (var3.isAirBlock(var4)) {
+         if (var3.getBlockState(var4).getMaterial() == Material.AIR) {
+            if (CraftEventFactory.callBlockIgniteEvent(var3, var4.getX(), var4.getY(), var4.getZ(), IgniteCause.FLINT_AND_STEEL, var2).isCancelled()) {
+               var1.damageItem(1, var2);
+               return EnumActionResult.PASS;
+            }
+
             var3.playSound(var2, var4, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, itemRand.nextFloat() * 0.4F + 0.8F);
             var3.setBlockState(var4, Blocks.FIRE.getDefaultState(), 11);
          }

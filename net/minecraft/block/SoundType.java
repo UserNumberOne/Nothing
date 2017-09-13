@@ -42,20 +42,12 @@ public class SoundType {
       return this.pitch;
    }
 
-   public SoundEvent getBreakSound() {
-      return this.breakSound;
-   }
-
    public SoundEvent getStepSound() {
       return this.stepSound;
    }
 
    public SoundEvent getPlaceSound() {
       return this.placeSound;
-   }
-
-   public SoundEvent getHitSound() {
-      return this.hitSound;
    }
 
    public SoundEvent getFallSound() {

@@ -15,12 +15,12 @@ public class MapGenStructureIO {
    private static final Map componentNameToClassMap = Maps.newHashMap();
    private static final Map componentClassToNameMap = Maps.newHashMap();
 
-   public static void registerStructure(Class var0, String var1) {
+   private static void registerStructure(Class var0, String var1) {
       startNameToClassMap.put(var1, var0);
       startClassToNameMap.put(var0, var1);
    }
 
-   public static void registerStructureComponent(Class var0, String var1) {
+   static void registerStructureComponent(Class var0, String var1) {
       componentNameToClassMap.put(var1, var0);
       componentClassToNameMap.put(var0, var1);
    }

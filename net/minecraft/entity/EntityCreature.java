@@ -9,6 +9,8 @@ import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.event.entity.EntityUnleashEvent;
+import org.bukkit.event.entity.EntityUnleashEvent.UnleashReason;
 
 public abstract class EntityCreature extends EntityLiving {
    public static final UUID FLEEING_SPEED_MODIFIER_UUID = UUID.fromString("E199AD21-BA8A-4C53-8D13-6182D5C69D3A");
@@ -72,6 +74,7 @@ public abstract class EntityCreature extends EntityLiving {
          float var2 = this.getDistanceToEntity(var1);
          if (this instanceof EntityTameable && ((EntityTameable)this).isSitting()) {
             if (var2 > 10.0F) {
+               this.world.getServer().getPluginManager().callEvent(new EntityUnleashEvent(this.getBukkitEntity(), UnleashReason.DISTANCE));
                this.clearLeashed(true, true);
             }
 
@@ -103,6 +106,7 @@ public abstract class EntityCreature extends EntityLiving {
          }
 
          if (var2 > 10.0F) {
+            this.world.getServer().getPluginManager().callEvent(new EntityUnleashEvent(this.getBukkitEntity(), UnleashReason.DISTANCE));
             this.clearLeashed(true, true);
          }
       } else if (!this.getLeashed() && this.isMovementAITaskSet) {

@@ -60,7 +60,7 @@ public class BlockJukebox extends BlockContainer {
 
    }
 
-   private void dropRecord(World var1, BlockPos var2, IBlockState var3) {
+   public void dropRecord(World var1, BlockPos var2, IBlockState var3) {
       if (!var1.isRemote) {
          TileEntity var4 = var1.getTileEntity(var2);
          if (var4 instanceof BlockJukebox.TileEntityJukebox) {
@@ -70,14 +70,13 @@ public class BlockJukebox extends BlockContainer {
                var1.playEvent(1010, var2, 0);
                var1.playRecord(var2, (SoundEvent)null);
                var5.setRecord((ItemStack)null);
-               float var7 = 0.7F;
-               double var8 = (double)(var1.rand.nextFloat() * 0.7F) + 0.15000000596046448D;
-               double var10 = (double)(var1.rand.nextFloat() * 0.7F) + 0.06000000238418579D + 0.6D;
-               double var12 = (double)(var1.rand.nextFloat() * 0.7F) + 0.15000000596046448D;
-               ItemStack var14 = var6.copy();
-               EntityItem var15 = new EntityItem(var1, (double)var2.getX() + var8, (double)var2.getY() + var10, (double)var2.getZ() + var12, var14);
-               var15.setDefaultPickupDelay();
-               var1.spawnEntity(var15);
+               double var7 = (double)(var1.rand.nextFloat() * 0.7F) + 0.15000000596046448D;
+               double var9 = (double)(var1.rand.nextFloat() * 0.7F) + 0.06000000238418579D + 0.6D;
+               double var11 = (double)(var1.rand.nextFloat() * 0.7F) + 0.15000000596046448D;
+               ItemStack var13 = var6.copy();
+               EntityItem var14 = new EntityItem(var1, (double)var2.getX() + var7, (double)var2.getY() + var9, (double)var2.getZ() + var11, var13);
+               var14.setDefaultPickupDelay();
+               var1.spawnEntity(var14);
             }
          }
       }
@@ -160,6 +159,10 @@ public class BlockJukebox extends BlockContainer {
       }
 
       public void setRecord(@Nullable ItemStack var1) {
+         if (var1 != null) {
+            var1.stackSize = 1;
+         }
+
          this.record = var1;
          this.markDirty();
       }

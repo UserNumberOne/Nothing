@@ -11,12 +11,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 
 public class BlockMycelium extends Block {
    public static final PropertyBool SNOWY = PropertyBool.create("snowy");
@@ -35,27 +37,32 @@ public class BlockMycelium extends Block {
 
    public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
       if (!var1.isRemote) {
-         if (var1.getLightFromNeighbors(var2.up()) < 4 && var1.getBlockState(var2.up()).getLightOpacity(var1, var2.up()) > 2) {
-            var1.setBlockState(var2, Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT));
+         if (var1.getLightFromNeighbors(var2.up()) < 4 && var1.getBlockState(var2.up()).getLightOpacity() > 2) {
+            CraftWorld var12 = var1.getWorld();
+            BlockState var13 = var12.getBlockAt(var2.getX(), var2.getY(), var2.getZ()).getState();
+            var13.setType(CraftMagicNumbers.getMaterial(Blocks.DIRT));
+            BlockFadeEvent var14 = new BlockFadeEvent(var13.getBlock(), var13);
+            var1.getServer().getPluginManager().callEvent(var14);
+            if (!var14.isCancelled()) {
+               var13.update(true);
+            }
          } else if (var1.getLightFromNeighbors(var2.up()) >= 9) {
             for(int var5 = 0; var5 < 4; ++var5) {
                BlockPos var6 = var2.add(var4.nextInt(3) - 1, var4.nextInt(5) - 3, var4.nextInt(3) - 1);
                IBlockState var7 = var1.getBlockState(var6);
                IBlockState var8 = var1.getBlockState(var6.up());
-               if (var7.getBlock() == Blocks.DIRT && var7.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT && var1.getLightFromNeighbors(var6.up()) >= 4 && var8.getLightOpacity(var1, var6.up()) <= 2) {
-                  var1.setBlockState(var6, this.getDefaultState());
+               if (var7.getBlock() == Blocks.DIRT && var7.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT && var1.getLightFromNeighbors(var6.up()) >= 4 && var8.getLightOpacity() <= 2) {
+                  CraftWorld var9 = var1.getWorld();
+                  BlockState var10 = var9.getBlockAt(var6.getX(), var6.getY(), var6.getZ()).getState();
+                  var10.setType(CraftMagicNumbers.getMaterial(this));
+                  BlockSpreadEvent var11 = new BlockSpreadEvent(var10.getBlock(), var9.getBlockAt(var2.getX(), var2.getY(), var2.getZ()), var10);
+                  var1.getServer().getPluginManager().callEvent(var11);
+                  if (!var11.isCancelled()) {
+                     var10.update(true);
+                  }
                }
             }
          }
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      super.randomDisplayTick(var1, var2, var3, var4);
-      if (var4.nextInt(10) == 0) {
-         var2.spawnParticle(EnumParticleTypes.TOWN_AURA, (double)((float)var3.getX() + var4.nextFloat()), (double)((float)var3.getY() + 1.1F), (double)((float)var3.getZ() + var4.nextFloat()), 0.0D, 0.0D, 0.0D);
       }
 
    }

@@ -33,4 +33,8 @@ public class EntityDamageSourceIndirect extends EntityDamageSource {
       String var5 = var4 + ".item";
       return var3 != null && var3.hasDisplayName() && I18n.canTranslate(var5) ? new TextComponentTranslation(var5, new Object[]{var1.getDisplayName(), var2, var3.getTextComponent()}) : new TextComponentTranslation(var4, new Object[]{var1.getDisplayName(), var2});
    }
+
+   public Entity getProximateDamageSource() {
+      return super.getEntity();
+   }
 }

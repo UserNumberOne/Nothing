@@ -40,4 +40,9 @@ public class TextComponentSelector extends TextComponentBase {
    public String toString() {
       return "SelectorComponent{pattern='" + this.selector + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
    }
+
+   // $FF: synthetic method
+   public ITextComponent createCopy() {
+      return this.createCopy();
+   }
 }

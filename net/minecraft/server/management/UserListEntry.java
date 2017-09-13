@@ -13,7 +13,7 @@ public class UserListEntry {
       this.value = var1;
    }
 
-   Object getValue() {
+   public Object getValue() {
       return this.value;
    }
 

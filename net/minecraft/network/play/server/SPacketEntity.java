@@ -1,13 +1,9 @@
 package net.minecraft.network.play.server;
 
 import java.io.IOException;
-import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntity implements Packet {
    protected int entityId;
@@ -40,46 +36,6 @@ public class SPacketEntity implements Packet {
 
    public String toString() {
       return "Entity_" + super.toString();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Entity getEntity(World var1) {
-      return var1.getEntityByID(this.entityId);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getX() {
-      return this.posX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getY() {
-      return this.posY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getZ() {
-      return this.posZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getYaw() {
-      return this.yaw;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getPitch() {
-      return this.pitch;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isRotating() {
-      return this.rotating;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean getOnGround() {
-      return this.onGround;
    }
 
    public static class S15PacketEntityRelMove extends SPacketEntity {

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Biomes;
@@ -25,7 +24,6 @@ import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
-import net.minecraftforge.event.ForgeEventFactory;
 
 public class ChunkProviderFlat implements IChunkGenerator {
    private final World world;
@@ -135,7 +133,6 @@ public class ChunkProviderFlat implements IChunkGenerator {
    }
 
    public void populate(int var1, int var2) {
-      BlockFalling.fallInstantly = true;
       int var3 = var1 * 16;
       int var4 = var2 * 16;
       BlockPos var5 = new BlockPos(var3, 0, var4);
@@ -146,7 +143,6 @@ public class ChunkProviderFlat implements IChunkGenerator {
       long var10 = this.random.nextLong() / 2L * 2L + 1L;
       this.random.setSeed((long)var1 * var8 + (long)var2 * var10 ^ this.world.getSeed());
       ChunkPos var12 = new ChunkPos(var1, var2);
-      ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, var1, var2, var7);
 
       for(MapGenStructure var14 : this.structureGenerators) {
          boolean var15 = var14.generateStructure(this.world, this.random, var12);
@@ -176,8 +172,6 @@ public class ChunkProviderFlat implements IChunkGenerator {
          var6.decorate(this.world, this.random, var5);
       }
 
-      ForgeEventFactory.onChunkPopulate(false, this, this.world, this.random, var1, var2, var7);
-      BlockFalling.fallInstantly = false;
    }
 
    public boolean generateStructures(Chunk var1, int var2, int var3) {

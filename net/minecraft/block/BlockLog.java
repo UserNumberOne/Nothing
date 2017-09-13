@@ -9,7 +9,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public abstract class BlockLog extends BlockRotatedPillar {
@@ -28,12 +27,12 @@ public abstract class BlockLog extends BlockRotatedPillar {
       if (var1.isAreaLoaded(var2.add(-5, -5, -5), var2.add(5, 5, 5))) {
          for(BlockPos var7 : BlockPos.getAllInBox(var2.add(-4, -4, -4), var2.add(4, 4, 4))) {
             IBlockState var8 = var1.getBlockState(var7);
-            if (var8.getBlock().isLeaves(var8, var1, var7)) {
-               var8.getBlock().beginLeavesDecay(var8, var1, var7);
+            if (var8.getMaterial() == Material.LEAVES && !((Boolean)var8.getValue(BlockLeaves.CHECK_DECAY)).booleanValue()) {
+               var1.setBlockState(var7, var8.withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(true)), 4);
             }
          }
-      }
 
+      }
    }
 
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
@@ -55,14 +54,6 @@ public abstract class BlockLog extends BlockRotatedPillar {
       default:
          return var1;
       }
-   }
-
-   public boolean canSustainLeaves(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return true;
-   }
-
-   public boolean isWood(IBlockAccess var1, BlockPos var2) {
-      return true;
    }
 
    public static enum EnumAxis implements IStringSerializable {

@@ -1,5 +1,6 @@
 package net.minecraft.item.crafting;
 
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
@@ -7,7 +8,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemWrittenBook;
 import net.minecraft.world.World;
 
-public class RecipeBookCloning implements IRecipe {
+public class RecipeBookCloning extends ShapelessRecipes implements IRecipe {
+   public RecipeBookCloning() {
+      super(new ItemStack(Items.WRITTEN_BOOK, 0, -1), Arrays.asList(new ItemStack(Items.WRITABLE_BOOK, 0, 0)));
+   }
+
    public boolean matches(InventoryCrafting var1, World var2) {
       int var3 = 0;
       ItemStack var4 = null;
@@ -31,7 +36,11 @@ public class RecipeBookCloning implements IRecipe {
          }
       }
 
-      return var4 != null && var3 > 0;
+      if (var4 != null && var3 > 0) {
+         return true;
+      } else {
+         return false;
+      }
    }
 
    @Nullable

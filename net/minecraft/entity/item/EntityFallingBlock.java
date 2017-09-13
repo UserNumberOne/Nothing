@@ -26,15 +26,14 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityFallingBlock extends Entity {
    private IBlockState fallTile;
    public int fallTime;
    public boolean shouldDropItem = true;
    private boolean canSetAsBlock;
-   private boolean hurtEntities;
+   public boolean hurtEntities;
    private int fallHurtMax = 40;
    private float fallHurtAmount = 2.0F;
    public NBTTagCompound tileEntityData;
@@ -63,11 +62,6 @@ public class EntityFallingBlock extends Entity {
       this.dataManager.set(ORIGIN, var1);
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockPos getOrigin() {
-      return (BlockPos)this.dataManager.get(ORIGIN);
-   }
-
    protected boolean canTriggerWalking() {
       return false;
    }
@@ -90,7 +84,7 @@ public class EntityFallingBlock extends Entity {
          this.prevPosZ = this.posZ;
          if (this.fallTime++ == 0) {
             BlockPos var2 = new BlockPos(this);
-            if (this.world.getBlockState(var2).getBlock() == var1) {
+            if (this.world.getBlockState(var2).getBlock() == var1 && !CraftEventFactory.callEntityChangeBlockEvent(this, var2, Blocks.AIR, 0).isCancelled()) {
                this.world.setBlockToAir(var2);
             } else if (!this.world.isRemote) {
                this.setDead();
@@ -110,9 +104,8 @@ public class EntityFallingBlock extends Entity {
             BlockPos var9 = new BlockPos(this);
             if (this.onGround) {
                IBlockState var3 = this.world.getBlockState(var9);
-               if (this.world.isAirBlock(new BlockPos(this.posX, this.posY - 0.009999999776482582D, this.posZ)) && BlockFalling.canFallThrough(this.world.getBlockState(new BlockPos(this.posX, this.posY - 0.009999999776482582D, this.posZ)))) {
+               if (BlockFalling.canFallThrough(this.world.getBlockState(new BlockPos(this.posX, this.posY - 0.009999999776482582D, this.posZ)))) {
                   this.onGround = false;
-                  return;
                }
 
                this.motionX *= 0.699999988079071D;
@@ -121,7 +114,12 @@ public class EntityFallingBlock extends Entity {
                if (var3.getBlock() != Blocks.PISTON_EXTENSION) {
                   this.setDead();
                   if (!this.canSetAsBlock) {
-                     if (this.world.canBlockBePlaced(var1, var9, true, EnumFacing.UP, (Entity)null, (ItemStack)null) && !BlockFalling.canFallThrough(this.world.getBlockState(var9.down())) && this.world.setBlockState(var9, this.fallTile, 3)) {
+                     if (this.world.canBlockBePlaced(var1, var9, true, EnumFacing.UP, (Entity)null, (ItemStack)null) && !BlockFalling.canFallThrough(this.world.getBlockState(var9.down()))) {
+                        if (CraftEventFactory.callEntityChangeBlockEvent(this, var9, this.fallTile.getBlock(), this.fallTile.getBlock().getMetaFromState(this.fallTile)).isCancelled()) {
+                           return;
+                        }
+
+                        this.world.setBlockState(var9, this.fallTile, 3);
                         if (var1 instanceof BlockFalling) {
                            ((BlockFalling)var1).onEndFalling(this.world, var9);
                         }
@@ -169,7 +167,9 @@ public class EntityFallingBlock extends Entity {
             DamageSource var7 = var6 ? DamageSource.anvil : DamageSource.fallingBlock;
 
             for(Entity var9 : var5) {
+               CraftEventFactory.entityDamage = this;
                var9.attackEntityFrom(var7, (float)Math.min(MathHelper.floor((float)var4 * this.fallHurtAmount), this.fallHurtMax));
+               CraftEventFactory.entityDamage = null;
             }
 
             if (var6 && (double)this.rand.nextFloat() < 0.05000000074505806D + (double)var4 * 0.05D) {
@@ -251,16 +251,6 @@ public class EntityFallingBlock extends Entity {
          var1.addCrashSection("Immitating block data", Integer.valueOf(var2.getMetaFromState(this.fallTile)));
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public World getWorldObj() {
-      return this.world;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean canRenderOnFire() {
-      return false;
    }
 
    @Nullable

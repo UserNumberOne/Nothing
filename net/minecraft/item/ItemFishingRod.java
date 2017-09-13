@@ -1,8 +1,6 @@
 package net.minecraft.item;
 
-import javax.annotation.Nullable;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.SoundEvents;
@@ -13,8 +11,11 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Fish;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerFishEvent.State;
 
 public class ItemFishingRod extends Item {
    public ItemFishingRod() {
@@ -22,21 +23,7 @@ public class ItemFishingRod extends Item {
       this.setMaxStackSize(1);
       this.setCreativeTab(CreativeTabs.TOOLS);
       this.addPropertyOverride(new ResourceLocation("cast"), new IItemPropertyGetter() {
-         @SideOnly(Side.CLIENT)
-         public float apply(ItemStack var1, @Nullable World var2, @Nullable EntityLivingBase var3) {
-            return var3 == null ? 0.0F : (var3.getHeldItemMainhand() == var1 && var3 instanceof EntityPlayer && ((EntityPlayer)var3).fishEntity != null ? 1.0F : 0.0F);
-         }
       });
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isFull3D() {
-      return true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldRotateAroundWhenRendering() {
-      return true;
    }
 
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
@@ -45,9 +32,16 @@ public class ItemFishingRod extends Item {
          var1.damageItem(var5, var3);
          var3.swingArm(var4);
       } else {
+         EntityFishHook var7 = new EntityFishHook(var2, var3);
+         PlayerFishEvent var6 = new PlayerFishEvent((Player)var3.getBukkitEntity(), (Entity)null, (Fish)var7.getBukkitEntity(), State.FISHING);
+         var2.getServer().getPluginManager().callEvent(var6);
+         if (var6.isCancelled()) {
+            return new ActionResult(EnumActionResult.PASS, var1);
+         }
+
          var2.playSound((EntityPlayer)null, var3.posX, var3.posY, var3.posZ, SoundEvents.ENTITY_BOBBER_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
          if (!var2.isRemote) {
-            var2.spawnEntity(new EntityFishHook(var2, var3));
+            var2.spawnEntity(var7);
          }
 
          var3.swingArm(var4);

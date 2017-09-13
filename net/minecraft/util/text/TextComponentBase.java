@@ -61,22 +61,14 @@ public abstract class TextComponentBase implements ITextComponent {
       return var1.toString();
    }
 
-   public final String getFormattedText() {
-      StringBuilder var1 = new StringBuilder();
-
-      for(ITextComponent var3 : this) {
-         var1.append(var3.getStyle().getFormattingCode());
-         var1.append(var3.getUnformattedComponentText());
-         var1.append(TextFormatting.RESET);
-      }
-
-      return var1.toString();
-   }
-
    public static Iterator createDeepCopyIterator(Iterable var0) {
       Iterator var1 = Iterators.concat(Iterators.transform(var0.iterator(), new Function() {
          public Iterator apply(@Nullable ITextComponent var1) {
             return var1.iterator();
+         }
+
+         public Object apply(Object var1) {
+            return this.apply((ITextComponent)var1);
          }
       }));
       var1 = Iterators.transform(var1, new Function() {
@@ -84,6 +76,10 @@ public abstract class TextComponentBase implements ITextComponent {
             ITextComponent var2 = var1.createCopy();
             var2.setStyle(var2.getStyle().createDeepCopy());
             return var2;
+         }
+
+         public Object apply(Object var1) {
+            return this.apply((ITextComponent)var1);
          }
       });
       return var1;
@@ -101,7 +97,7 @@ public abstract class TextComponentBase implements ITextComponent {
    }
 
    public int hashCode() {
-      return 31 * this.style.hashCode() + this.siblings.hashCode();
+      return 31 * this.getStyle().hashCode() + this.siblings.hashCode();
    }
 
    public String toString() {

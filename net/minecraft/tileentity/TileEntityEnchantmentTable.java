@@ -97,10 +97,10 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
       this.bookSpread = MathHelper.clamp(this.bookSpread, 0.0F, 1.0F);
       ++this.tickCount;
       this.pageFlipPrev = this.pageFlip;
-      float var3 = (this.flipT - this.pageFlip) * 0.4F;
+      float var8 = (this.flipT - this.pageFlip) * 0.4F;
       float var9 = 0.2F;
-      var3 = MathHelper.clamp(var3, -0.2F, 0.2F);
-      this.flipA += (var3 - this.flipA) * 0.9F;
+      var8 = MathHelper.clamp(var8, -0.2F, 0.2F);
+      this.flipA += (var8 - this.flipA) * 0.9F;
       this.pageFlip += this.flipA;
    }
 

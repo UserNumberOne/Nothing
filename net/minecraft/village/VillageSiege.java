@@ -13,6 +13,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEntitySpawner;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class VillageSiege {
    private final World world;
@@ -140,7 +141,7 @@ public class VillageSiege {
          }
 
          var2.setLocationAndAngles(var1.xCoord, var1.yCoord, var1.zCoord, this.world.rand.nextFloat() * 360.0F, 0.0F);
-         this.world.spawnEntity(var2);
+         this.world.addEntity(var2, SpawnReason.VILLAGE_INVASION);
          BlockPos var3 = this.theVillage.getCenter();
          var2.setHomePosAndDistance(var3, this.theVillage.getVillageRadius());
          return true;

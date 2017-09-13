@@ -19,4 +19,9 @@ public class BlockMatcher implements Predicate {
    public boolean apply(@Nullable IBlockState var1) {
       return var1 != null && var1.getBlock() == this.block;
    }
+
+   // $FF: synthetic method
+   public boolean apply(Object var1) {
+      return this.apply((IBlockState)var1);
+   }
 }

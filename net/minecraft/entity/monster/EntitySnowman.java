@@ -29,6 +29,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.event.block.EntityBlockFormEvent;
 
 public class EntitySnowman extends EntityGolem implements IRangedAttackMob {
    private static final DataParameter PUMPKIN_EQUIPPED = EntityDataManager.createKey(EntitySnowman.class, DataSerializers.BYTE);
@@ -72,7 +76,7 @@ public class EntitySnowman extends EntityGolem implements IRangedAttackMob {
          }
 
          if (this.world.getBiome(new BlockPos(var1, 0, var3)).getFloatTemperature(new BlockPos(var1, var2, var3)) > 1.0F) {
-            this.attackEntityFrom(DamageSource.onFire, 1.0F);
+            this.attackEntityFrom(CraftEventFactory.MELTING, 1.0F);
          }
 
          if (!this.world.getGameRules().getBoolean("mobGriefing")) {
@@ -85,7 +89,13 @@ public class EntitySnowman extends EntityGolem implements IRangedAttackMob {
             var3 = MathHelper.floor(this.posZ + (double)((float)(var4 / 2 % 2 * 2 - 1) * 0.25F));
             BlockPos var5 = new BlockPos(var1, var2, var3);
             if (this.world.getBlockState(var5).getMaterial() == Material.AIR && this.world.getBiome(new BlockPos(var1, 0, var3)).getFloatTemperature(var5) < 0.8F && Blocks.SNOW_LAYER.canPlaceBlockAt(this.world, var5)) {
-               this.world.setBlockState(var5, Blocks.SNOW_LAYER.getDefaultState());
+               BlockState var6 = this.world.getWorld().getBlockAt(var1, var2, var3).getState();
+               var6.setType(CraftMagicNumbers.getMaterial(Blocks.SNOW_LAYER));
+               EntityBlockFormEvent var7 = new EntityBlockFormEvent(this.getBukkitEntity(), var6.getBlock(), var6);
+               this.world.getServer().getPluginManager().callEvent(var7);
+               if (!var7.isCancelled()) {
+                  var6.update(true);
+               }
             }
          }
       }

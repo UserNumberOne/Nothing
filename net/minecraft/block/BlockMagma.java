@@ -15,11 +15,9 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockMagma extends Block {
    public BlockMagma() {
@@ -35,15 +33,12 @@ public class BlockMagma extends Block {
 
    public void onEntityWalk(World var1, BlockPos var2, Entity var3) {
       if (!var3.isImmuneToFire() && var3 instanceof EntityLivingBase && !EnchantmentHelper.hasFrostWalkerEnchantment((EntityLivingBase)var3)) {
+         CraftEventFactory.blockDamage = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
          var3.attackEntityFrom(DamageSource.hotFloor, 1.0F);
+         CraftEventFactory.blockDamage = null;
       }
 
       super.onEntityWalk(var1, var2, var3);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getPackedLightmapCoords(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return 15728880;
    }
 
    public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {

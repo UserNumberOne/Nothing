@@ -14,27 +14,20 @@ import java.util.Random;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
-import net.minecraftforge.common.ForgeHooks;
 
 public abstract class LootEntry {
-   protected final String entryName;
    protected final int weight;
    protected final int quality;
    protected final LootCondition[] conditions;
 
-   protected LootEntry(int var1, int var2, LootCondition[] var3, String var4) {
+   protected LootEntry(int var1, int var2, LootCondition[] var3) {
       this.weight = var1;
       this.quality = var2;
       this.conditions = var3;
-      this.entryName = var4;
    }
 
    public int getEffectiveWeight(float var1) {
       return Math.max(MathHelper.floor((float)this.weight + (float)this.quality * var1), 0);
-   }
-
-   public String getEntryName() {
-      return this.entryName;
    }
 
    public abstract void addLoot(Collection var1, Random var2, LootContext var3);
@@ -54,10 +47,7 @@ public abstract class LootEntry {
             var8 = new LootCondition[0];
          }
 
-         LootEntry var9 = ForgeHooks.deserializeJsonLootEntry(var5, var4, var6, var7, var8);
-         if (var9 != null) {
-            return var9;
-         } else if ("item".equals(var5)) {
+         if ("item".equals(var5)) {
             return LootEntryItem.deserialize(var4, var3, var6, var7, var8);
          } else if ("loot_table".equals(var5)) {
             return LootEntryTable.deserialize(var4, var3, var6, var7, var8);
@@ -70,20 +60,13 @@ public abstract class LootEntry {
 
       public JsonElement serialize(LootEntry var1, Type var2, JsonSerializationContext var3) {
          JsonObject var4 = new JsonObject();
-         if (var1.entryName != null && !var1.entryName.startsWith("custom#")) {
-            var4.addProperty("entryName", var1.entryName);
-         }
-
          var4.addProperty("weight", Integer.valueOf(var1.weight));
          var4.addProperty("quality", Integer.valueOf(var1.quality));
          if (var1.conditions.length > 0) {
             var4.add("conditions", var3.serialize(var1.conditions));
          }
 
-         String var5 = ForgeHooks.getLootEntryType(var1);
-         if (var5 != null) {
-            var4.addProperty("type", var5);
-         } else if (var1 instanceof LootEntryItem) {
+         if (var1 instanceof LootEntryItem) {
             var4.addProperty("type", "item");
          } else if (var1 instanceof LootEntryTable) {
             var4.addProperty("type", "item");
@@ -97,6 +80,16 @@ public abstract class LootEntry {
 
          var1.serialize(var4, var3);
          return var4;
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((LootEntry)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
    }
 }

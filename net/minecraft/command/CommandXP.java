@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandXP extends CommandBase {
@@ -36,7 +36,7 @@ public class CommandXP extends CommandBase {
             var6 *= -1;
          }
 
-         EntityPlayerMP var8 = var3.length > 1 ? getPlayer(var1, var2, var3[1]) : getCommandSenderAsPlayer(var2);
+         EntityPlayerMP var8 = var3.length > 1 ? a(var1, var2, var3[1]) : getCommandSenderAsPlayer(var2);
          if (var5) {
             var2.setCommandStat(CommandResultStats.Type.QUERY_RESULT, var8.experienceLevel);
             if (var7) {
@@ -59,8 +59,8 @@ public class CommandXP extends CommandBase {
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 2 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : Collections.emptyList();
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return var3.length == 2 ? getListOfStringsMatchingLastWord(var3, var1.getPlayers()) : Collections.emptyList();
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

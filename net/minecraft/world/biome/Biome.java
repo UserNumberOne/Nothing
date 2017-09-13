@@ -2,13 +2,11 @@ package net.minecraft.world.biome;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockBush;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockSand;
 import net.minecraft.block.BlockTallGrass;
@@ -34,10 +32,7 @@ import net.minecraft.util.ObjectIntIdentityMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.RegistryNamespaced;
-import net.minecraft.world.ColorizerFoliage;
-import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
@@ -48,19 +43,10 @@ import net.minecraft.world.gen.feature.WorldGenSwamp;
 import net.minecraft.world.gen.feature.WorldGenTallGrass;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 import net.minecraft.world.gen.feature.WorldGenerator;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.terraingen.DeferredBiomeDecorator;
-import net.minecraftforge.event.terraingen.BiomeEvent.GetFoliageColor;
-import net.minecraftforge.event.terraingen.BiomeEvent.GetGrassColor;
-import net.minecraftforge.event.terraingen.BiomeEvent.GetWaterColor;
-import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry.Impl;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class Biome extends Impl {
+public abstract class Biome {
    private static final Logger LOGGER = LogManager.getLogger();
    protected static final IBlockState STONE = Blocks.STONE.getDefaultState();
    protected static final IBlockState AIR = Blocks.AIR.getDefaultState();
@@ -78,7 +64,7 @@ public abstract class Biome extends Impl {
    protected static final WorldGenTrees TREE_FEATURE = new WorldGenTrees(false);
    protected static final WorldGenBigTree BIG_TREE_FEATURE = new WorldGenBigTree(false);
    protected static final WorldGenSwamp SWAMP_FEATURE = new WorldGenSwamp();
-   public static final RegistryNamespaced REGISTRY = GameData.getBiomeRegistry();
+   public static final RegistryNamespaced REGISTRY = new RegistryNamespaced();
    private final String biomeName;
    private final float baseHeight;
    private final float heightVariation;
@@ -96,7 +82,6 @@ public abstract class Biome extends Impl {
    protected List spawnableCreatureList = Lists.newArrayList();
    protected List spawnableWaterCreatureList = Lists.newArrayList();
    protected List spawnableCaveCreatureList = Lists.newArrayList();
-   protected List flowers = new ArrayList();
 
    public static int getIdForBiome(Biome var0) {
       return REGISTRY.getIDForObject(var0);
@@ -112,7 +97,7 @@ public abstract class Biome extends Impl {
       return (Biome)MUTATION_TO_BASE_ID_MAP.getByValue(getIdForBiome(var0));
    }
 
-   public Biome(Biome.BiomeProperties var1) {
+   protected Biome(Biome.BiomeProperties var1) {
       this.biomeName = var1.biomeName;
       this.baseHeight = var1.baseHeight;
       this.heightVariation = var1.heightVariation;
@@ -136,11 +121,10 @@ public abstract class Biome extends Impl {
       this.spawnableMonsterList.add(new Biome.SpawnListEntry(EntityWitch.class, 5, 1, 1));
       this.spawnableWaterCreatureList.add(new Biome.SpawnListEntry(EntitySquid.class, 10, 4, 4));
       this.spawnableCaveCreatureList.add(new Biome.SpawnListEntry(EntityBat.class, 10, 8, 8));
-      this.addDefaultFlowers();
    }
 
-   public BiomeDecorator createBiomeDecorator() {
-      return this.getModdedBiomeDecorator(new BiomeDecorator());
+   protected BiomeDecorator createBiomeDecorator() {
+      return new BiomeDecorator();
    }
 
    public boolean isMutation() {
@@ -157,13 +141,6 @@ public abstract class Biome extends Impl {
 
    public BlockFlower.EnumFlowerType pickRandomFlower(Random var1, BlockPos var2) {
       return var1.nextInt(3) > 0 ? BlockFlower.EnumFlowerType.DANDELION : BlockFlower.EnumFlowerType.POPPY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSkyColorByTemp(float var1) {
-      var1 = var1 / 3.0F;
-      var1 = MathHelper.clamp(var1, -1.0F, 1.0F);
-      return MathHelper.hsvToRGB(0.62222224F - var1 * 0.05F, 0.5F + var1 * 0.1F, 1.0F);
    }
 
    public List getSpawnableList(EnumCreatureType var1) {
@@ -212,13 +189,6 @@ public abstract class Biome extends Impl {
 
    public void genTerrainBlocks(World var1, Random var2, ChunkPrimer var3, int var4, int var5, double var6) {
       this.generateBiomeTerrain(var1, var2, var3, var4, var5, var6);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getGrassColorAtPos(BlockPos var1) {
-      double var2 = (double)MathHelper.clamp(this.getFloatTemperature(var1), 0.0F, 1.0F);
-      double var4 = (double)MathHelper.clamp(this.getRainfall(), 0.0F, 1.0F);
-      return this.getModdedBiomeGrassColor(ColorizerGrass.getGrassColor(var2, var4));
    }
 
    public final void generateBiomeTerrain(World var1, Random var2, ChunkPrimer var3, int var4, int var5, double var6) {
@@ -280,19 +250,16 @@ public abstract class Biome extends Impl {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getFoliageColorAtPos(BlockPos var1) {
-      double var2 = (double)MathHelper.clamp(this.getFloatTemperature(var1), 0.0F, 1.0F);
-      double var4 = (double)MathHelper.clamp(this.getRainfall(), 0.0F, 1.0F);
-      return this.getModdedBiomeFoliageColor(ColorizerFoliage.getFoliageColor(var2, var4));
-   }
-
    public Class getBiomeClass() {
       return this.getClass();
    }
 
    public Biome.TempCategory getTempCategory() {
-      return (double)this.getTemperature() < 0.2D ? Biome.TempCategory.COLD : ((double)this.getTemperature() < 1.0D ? Biome.TempCategory.MEDIUM : Biome.TempCategory.WARM);
+      if ((double)this.getTemperature() < 0.2D) {
+         return Biome.TempCategory.COLD;
+      } else {
+         return (double)this.getTemperature() < 1.0D ? Biome.TempCategory.MEDIUM : Biome.TempCategory.WARM;
+      }
    }
 
    @Nullable
@@ -329,51 +296,8 @@ public abstract class Biome extends Impl {
       return this.temperature;
    }
 
-   @SideOnly(Side.CLIENT)
-   public final int getWaterColor() {
-      return this.waterColor;
-   }
-
    public final boolean isSnowyBiome() {
       return this.enableSnow;
-   }
-
-   public BiomeDecorator getModdedBiomeDecorator(BiomeDecorator var1) {
-      return new DeferredBiomeDecorator(var1);
-   }
-
-   public int getWaterColorMultiplier() {
-      GetWaterColor var1 = new GetWaterColor(this, this.waterColor);
-      MinecraftForge.EVENT_BUS.post(var1);
-      return var1.getNewColor();
-   }
-
-   public int getModdedBiomeGrassColor(int var1) {
-      GetGrassColor var2 = new GetGrassColor(this, var1);
-      MinecraftForge.EVENT_BUS.post(var2);
-      return var2.getNewColor();
-   }
-
-   public int getModdedBiomeFoliageColor(int var1) {
-      GetFoliageColor var2 = new GetFoliageColor(this, var1);
-      MinecraftForge.EVENT_BUS.post(var2);
-      return var2.getNewColor();
-   }
-
-   public void addDefaultFlowers() {
-      this.addFlower(Blocks.YELLOW_FLOWER.getDefaultState().withProperty(Blocks.YELLOW_FLOWER.getTypeProperty(), BlockFlower.EnumFlowerType.DANDELION), 20);
-      this.addFlower(Blocks.RED_FLOWER.getDefaultState().withProperty(Blocks.RED_FLOWER.getTypeProperty(), BlockFlower.EnumFlowerType.POPPY), 20);
-   }
-
-   public void addFlower(IBlockState var1, int var2) {
-      this.flowers.add(new Biome.FlowerEntry(var1, var2));
-   }
-
-   public void plantFlower(World var1, Random var2, BlockPos var3) {
-      Biome.FlowerEntry var4 = (Biome.FlowerEntry)WeightedRandom.getRandomItem(var2, this.flowers);
-      if (var4 != null && var4.state != null && (!(var4.state.getBlock() instanceof BlockBush) || ((BlockBush)var4.state.getBlock()).canBlockStay(var1, var3, var4.state))) {
-         var1.setBlockState(var3, var4.state, 3);
-      }
    }
 
    public static void registerBiomes() {
@@ -442,7 +366,7 @@ public abstract class Biome extends Impl {
       Collections.addAll(EXPLORATION_BIOMES_LIST, new Biome[]{Biomes.OCEAN, Biomes.PLAINS, Biomes.DESERT, Biomes.EXTREME_HILLS, Biomes.FOREST, Biomes.TAIGA, Biomes.SWAMPLAND, Biomes.RIVER, Biomes.FROZEN_RIVER, Biomes.ICE_PLAINS, Biomes.ICE_MOUNTAINS, Biomes.MUSHROOM_ISLAND, Biomes.MUSHROOM_ISLAND_SHORE, Biomes.BEACH, Biomes.DESERT_HILLS, Biomes.FOREST_HILLS, Biomes.TAIGA_HILLS, Biomes.JUNGLE, Biomes.JUNGLE_HILLS, Biomes.JUNGLE_EDGE, Biomes.DEEP_OCEAN, Biomes.STONE_BEACH, Biomes.COLD_BEACH, Biomes.BIRCH_FOREST, Biomes.BIRCH_FOREST_HILLS, Biomes.ROOFED_FOREST, Biomes.COLD_TAIGA, Biomes.COLD_TAIGA_HILLS, Biomes.REDWOOD_TAIGA, Biomes.REDWOOD_TAIGA_HILLS, Biomes.EXTREME_HILLS_WITH_TREES, Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU, Biomes.MESA, Biomes.MESA_ROCK, Biomes.MESA_CLEAR_ROCK});
    }
 
-   public static void registerBiome(int var0, String var1, Biome var2) {
+   private static void registerBiome(int var0, String var1, Biome var2) {
       REGISTRY.register(var0, new ResourceLocation(var1), var2);
       if (var2.isMutation()) {
          MUTATION_TO_BASE_ID_MAP.put(var2, getIdForBiome((Biome)REGISTRY.getObject(new ResourceLocation(var2.baseBiomeRegName))));
@@ -466,7 +390,7 @@ public abstract class Biome extends Impl {
          this.biomeName = var1;
       }
 
-      public Biome.BiomeProperties setTemperature(float var1) {
+      protected Biome.BiomeProperties setTemperature(float var1) {
          if (var1 > 0.1F && var1 < 0.2F) {
             throw new IllegalArgumentException("Please avoid temperatures in the range 0.1 - 0.2 because of snow");
          } else {
@@ -475,48 +399,39 @@ public abstract class Biome extends Impl {
          }
       }
 
-      public Biome.BiomeProperties setRainfall(float var1) {
+      protected Biome.BiomeProperties setRainfall(float var1) {
          this.rainfall = var1;
          return this;
       }
 
-      public Biome.BiomeProperties setBaseHeight(float var1) {
+      protected Biome.BiomeProperties setBaseHeight(float var1) {
          this.baseHeight = var1;
          return this;
       }
 
-      public Biome.BiomeProperties setHeightVariation(float var1) {
+      protected Biome.BiomeProperties setHeightVariation(float var1) {
          this.heightVariation = var1;
          return this;
       }
 
-      public Biome.BiomeProperties setRainDisabled() {
+      protected Biome.BiomeProperties setRainDisabled() {
          this.enableRain = false;
          return this;
       }
 
-      public Biome.BiomeProperties setSnowEnabled() {
+      protected Biome.BiomeProperties setSnowEnabled() {
          this.enableSnow = true;
          return this;
       }
 
-      public Biome.BiomeProperties setWaterColor(int var1) {
+      protected Biome.BiomeProperties setWaterColor(int var1) {
          this.waterColor = var1;
          return this;
       }
 
-      public Biome.BiomeProperties setBaseBiome(String var1) {
+      protected Biome.BiomeProperties setBaseBiome(String var1) {
          this.baseBiomeRegName = var1;
          return this;
-      }
-   }
-
-   public static class FlowerEntry extends WeightedRandom.Item {
-      public final IBlockState state;
-
-      public FlowerEntry(IBlockState var1, int var2) {
-         super(var2);
-         this.state = var1;
       }
    }
 

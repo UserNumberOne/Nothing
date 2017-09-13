@@ -19,8 +19,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockFenceGate extends BlockHorizontal {
    public static final PropertyBool OPEN = PropertyBool.create("open");
@@ -41,7 +39,11 @@ public class BlockFenceGate extends BlockHorizontal {
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
       var1 = this.getActualState(var1, var2, var3);
-      return ((Boolean)var1.getValue(IN_WALL)).booleanValue() ? (((EnumFacing)var1.getValue(FACING)).getAxis() == EnumFacing.Axis.X ? AABB_COLLIDE_XAXIS_INWALL : AABB_COLLIDE_ZAXIS_INWALL) : (((EnumFacing)var1.getValue(FACING)).getAxis() == EnumFacing.Axis.X ? AABB_COLLIDE_XAXIS : AABB_COLLIDE_ZAXIS);
+      if (((Boolean)var1.getValue(IN_WALL)).booleanValue()) {
+         return ((EnumFacing)var1.getValue(FACING)).getAxis() == EnumFacing.Axis.X ? AABB_COLLIDE_XAXIS_INWALL : AABB_COLLIDE_ZAXIS_INWALL;
+      } else {
+         return ((EnumFacing)var1.getValue(FACING)).getAxis() == EnumFacing.Axis.X ? AABB_COLLIDE_XAXIS : AABB_COLLIDE_ZAXIS;
+      }
    }
 
    public IBlockState getActualState(IBlockState var1, IBlockAccess var2, BlockPos var3) {
@@ -67,7 +69,11 @@ public class BlockFenceGate extends BlockHorizontal {
 
    @Nullable
    public AxisAlignedBB getCollisionBoundingBox(IBlockState var1, World var2, BlockPos var3) {
-      return ((Boolean)var1.getValue(OPEN)).booleanValue() ? NULL_AABB : (((EnumFacing)var1.getValue(FACING)).getAxis() == EnumFacing.Axis.Z ? AABB_CLOSED_SELECTED_ZAXIS : AABB_CLOSED_SELECTED_XAXIS);
+      if (((Boolean)var1.getValue(OPEN)).booleanValue()) {
+         return NULL_AABB;
+      } else {
+         return ((EnumFacing)var1.getValue(FACING)).getAxis() == EnumFacing.Axis.Z ? AABB_CLOSED_SELECTED_ZAXIS : AABB_CLOSED_SELECTED_XAXIS;
+      }
    }
 
    public boolean isOpaqueCube(IBlockState var1) {
@@ -118,13 +124,8 @@ public class BlockFenceGate extends BlockHorizontal {
                var2.setBlockState(var3, var1.withProperty(POWERED, Boolean.valueOf(var5)), 2);
             }
          }
+
       }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return true;
    }
 
    public IBlockState getStateFromMeta(int var1) {

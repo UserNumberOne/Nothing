@@ -1,6 +1,6 @@
 package net.minecraft.item.crafting;
 
-import java.util.List;
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -11,8 +11,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.oredict.OreDictionary;
 
 public class RecipesBanners {
    void addRecipes(CraftingManager var1) {
@@ -20,17 +18,13 @@ public class RecipesBanners {
          var1.addRecipe(new ItemStack(Items.BANNER, 1, var5.getDyeDamage()), "###", "###", " | ", '#', new ItemStack(Blocks.WOOL, 1, var5.getMetadata()), '|', Items.STICK);
       }
 
-      var1.addRecipe(new RecipesBanners.RecipeDuplicatePattern());
-      var1.addRecipe(new RecipesBanners.RecipeAddPattern());
+      var1.addRecipe(new RecipesBanners.RecipeDuplicatePattern((RecipesBanners.SyntheticClass_1)null));
+      var1.addRecipe(new RecipesBanners.RecipeAddPattern((RecipesBanners.SyntheticClass_1)null));
    }
 
-   public static class RecipeAddPattern implements IRecipe {
-      private static String[] colors = new String[]{"Black", "Red", "Green", "Brown", "Blue", "Purple", "Cyan", "LightGray", "Gray", "Pink", "Lime", "Yellow", "LightBlue", "Magenta", "Orange", "White"};
-      private static List[] colored = new List[colors.length];
-      private static List dyes;
-      private static boolean hasInit = false;
-
+   static class RecipeAddPattern extends ShapelessRecipes implements IRecipe {
       private RecipeAddPattern() {
+         super(new ItemStack(Items.BANNER, 0, 0), Arrays.asList(new ItemStack(Items.BANNER)));
       }
 
       public boolean matches(InventoryCrafting var1, World var2) {
@@ -53,8 +47,10 @@ public class RecipesBanners {
 
          if (!var3) {
             return false;
+         } else if (this.matchPatterns(var1) != null) {
+            return true;
          } else {
-            return this.matchPatterns(var1) != null;
+            return false;
          }
       }
 
@@ -77,9 +73,8 @@ public class RecipesBanners {
 
             for(int var5 = 0; var5 < var1.getSizeInventory(); ++var5) {
                ItemStack var6 = var1.getStackInSlot(var5);
-               int var7 = this.getColor(var6);
-               if (var7 != -1) {
-                  var9 = var7;
+               if (var6 != null && var6.getItem() == Items.DYE) {
+                  var9 = var6.getMetadata();
                   break;
                }
             }
@@ -93,10 +88,10 @@ public class RecipesBanners {
                var10.setTag("Patterns", var11);
             }
 
-            NBTTagCompound var12 = new NBTTagCompound();
-            var12.setString("Pattern", var8.getPatternID());
-            var12.setInteger("Color", var9);
-            var11.appendTag(var12);
+            NBTTagCompound var7 = new NBTTagCompound();
+            var7.setString("Pattern", var8.getPatternID());
+            var7.setInteger("Color", var9);
+            var11.appendTag(var7);
          }
 
          return var2;
@@ -116,7 +111,9 @@ public class RecipesBanners {
 
          for(int var3 = 0; var3 < var2.length; ++var3) {
             ItemStack var4 = var1.getStackInSlot(var3);
-            var2[var3] = ForgeHooks.getContainerItem(var4);
+            if (var4 != null && var4.getItem().hasContainerItem()) {
+               var2[var3] = new ItemStack(var4.getItem().getContainerItem());
+            }
          }
 
          return var2;
@@ -134,7 +131,7 @@ public class RecipesBanners {
                   for(int var9 = 0; var9 < var1.getSizeInventory() && var6; ++var9) {
                      ItemStack var10 = var1.getStackInSlot(var9);
                      if (var10 != null && var10.getItem() != Items.BANNER) {
-                        if (this.isDye(var10)) {
+                        if (var10.getItem() == Items.DYE) {
                            if (var8) {
                               var6 = false;
                               break;
@@ -155,7 +152,9 @@ public class RecipesBanners {
                   if (!var7) {
                      var6 = false;
                   }
-               } else if (var1.getSizeInventory() == var5.getCraftingLayers().length * var5.getCraftingLayers()[0].length()) {
+               } else if (var1.getSizeInventory() != var5.getCraftingLayers().length * var5.getCraftingLayers()[0].length()) {
+                  var6 = false;
+               } else {
                   int var12 = -1;
 
                   for(int var13 = 0; var13 < var1.getSizeInventory() && var6; ++var13) {
@@ -163,7 +162,7 @@ public class RecipesBanners {
                      int var15 = var13 % 3;
                      ItemStack var11 = var1.getStackInSlot(var13);
                      if (var11 != null && var11.getItem() != Items.BANNER) {
-                        if (!this.isDye(var11)) {
+                        if (var11.getItem() != Items.DYE) {
                            var6 = false;
                            break;
                         }
@@ -184,8 +183,6 @@ public class RecipesBanners {
                         break;
                      }
                   }
-               } else {
-                  var6 = false;
                }
 
                if (var6) {
@@ -197,49 +194,14 @@ public class RecipesBanners {
          return null;
       }
 
-      private static void init() {
-         if (!hasInit) {
-            for(int var0 = 0; var0 < colors.length; ++var0) {
-               colored[var0] = OreDictionary.getOres("dye" + colors[var0]);
-            }
-
-            dyes = OreDictionary.getOres("dye");
-            hasInit = true;
-         }
-      }
-
-      private boolean isDye(ItemStack var1) {
-         init();
-
-         for(ItemStack var3 : dyes) {
-            if (OreDictionary.itemMatches(var3, var1, false)) {
-               return true;
-            }
-         }
-
-         return false;
-      }
-
-      private int getColor(ItemStack var1) {
-         init();
-         if (var1 == null) {
-            return -1;
-         } else {
-            for(int var2 = 0; var2 < colored.length; ++var2) {
-               for(ItemStack var4 : colored[var2]) {
-                  if (OreDictionary.itemMatches(var4, var1, true)) {
-                     return var2;
-                  }
-               }
-            }
-
-            return -1;
-         }
+      RecipeAddPattern(RecipesBanners.SyntheticClass_1 var1) {
+         this();
       }
    }
 
-   public static class RecipeDuplicatePattern implements IRecipe {
+   static class RecipeDuplicatePattern extends ShapelessRecipes implements IRecipe {
       private RecipeDuplicatePattern() {
+         super(new ItemStack(Items.BANNER, 0, 0), Arrays.asList(new ItemStack(Items.DYE, 0, 5)));
       }
 
       public boolean matches(InventoryCrafting var1, World var2) {
@@ -287,7 +249,11 @@ public class RecipesBanners {
             }
          }
 
-         return var3 != null && var4 != null;
+         if (var3 != null && var4 != null) {
+            return true;
+         } else {
+            return false;
+         }
       }
 
       @Nullable
@@ -319,8 +285,8 @@ public class RecipesBanners {
          for(int var3 = 0; var3 < var2.length; ++var3) {
             ItemStack var4 = var1.getStackInSlot(var3);
             if (var4 != null) {
-               if (var4.getItem().hasContainerItem(var4)) {
-                  var2[var3] = ForgeHooks.getContainerItem(var4);
+               if (var4.getItem().hasContainerItem()) {
+                  var2[var3] = new ItemStack(var4.getItem().getContainerItem());
                } else if (var4.hasTagCompound() && TileEntityBanner.getPatterns(var4) > 0) {
                   var2[var3] = var4.copy();
                   var2[var3].stackSize = 1;
@@ -330,5 +296,12 @@ public class RecipesBanners {
 
          return var2;
       }
+
+      RecipeDuplicatePattern(RecipesBanners.SyntheticClass_1 var1) {
+         this();
+      }
+   }
+
+   static class SyntheticClass_1 {
    }
 }

@@ -8,8 +8,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketBlockChange implements Packet {
    private BlockPos blockPosition;
@@ -35,15 +33,5 @@ public class SPacketBlockChange implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleBlockChange(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public IBlockState getBlockState() {
-      return this.blockState;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockPos getBlockPosition() {
-      return this.blockPosition;
    }
 }

@@ -34,8 +34,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityPolarBear extends EntityAnimal {
    private static final DataParameter IS_STANDING = EntityDataManager.createKey(EntityPolarBear.class, DataSerializers.BOOLEAN);
@@ -154,11 +152,6 @@ public class EntityPolarBear extends EntityAnimal {
       this.dataManager.set(IS_STANDING, Boolean.valueOf(var1));
    }
 
-   @SideOnly(Side.CLIENT)
-   public float getStandingAnimationScale(float var1) {
-      return (this.clientSideStandAnimation0 + (this.clientSideStandAnimation - this.clientSideStandAnimation0) * var1) / 6.0F;
-   }
-
    protected float getWaterSlowDown() {
       return 0.98F;
    }
@@ -187,8 +180,8 @@ public class EntityPolarBear extends EntityAnimal {
             return false;
          } else {
             if (super.shouldExecute()) {
-               for(EntityPolarBear var2 : EntityPolarBear.this.world.getEntitiesWithinAABB(EntityPolarBear.class, EntityPolarBear.this.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D))) {
-                  if (var2.isChild()) {
+               for(EntityPolarBear var3 : EntityPolarBear.this.world.getEntitiesWithinAABB(EntityPolarBear.class, EntityPolarBear.this.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D))) {
+                  if (var3.isChild()) {
                      return true;
                   }
                }

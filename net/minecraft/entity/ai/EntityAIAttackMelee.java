@@ -4,7 +4,6 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.Path;
-import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -21,8 +20,6 @@ public class EntityAIAttackMelee extends EntityAIBase {
    private double targetY;
    private double targetZ;
    protected final int attackInterval = 20;
-   private int failedPathFindingPenalty = 0;
-   private boolean canPenalize = false;
 
    public EntityAIAttackMelee(EntityCreature var1, double var2, boolean var4) {
       this.attacker = var1;
@@ -38,14 +35,6 @@ public class EntityAIAttackMelee extends EntityAIBase {
          return false;
       } else if (!var1.isEntityAlive()) {
          return false;
-      } else if (this.canPenalize) {
-         if (--this.delayCounter <= 0) {
-            this.entityPathEntity = this.attacker.getNavigator().getPathToEntityLiving(var1);
-            this.delayCounter = 4 + this.attacker.getRNG().nextInt(7);
-            return this.entityPathEntity != null;
-         } else {
-            return true;
-         }
       } else {
          this.entityPathEntity = this.attacker.getNavigator().getPathToEntityLiving(var1);
          return this.entityPathEntity != null;
@@ -54,7 +43,17 @@ public class EntityAIAttackMelee extends EntityAIBase {
 
    public boolean continueExecuting() {
       EntityLivingBase var1 = this.attacker.getAttackTarget();
-      return var1 == null ? false : (!var1.isEntityAlive() ? false : (!this.longMemory ? !this.attacker.getNavigator().noPath() : (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(var1)) ? false : !(var1 instanceof EntityPlayer) || !((EntityPlayer)var1).isSpectator() && !((EntityPlayer)var1).isCreative())));
+      if (var1 == null) {
+         return false;
+      } else if (!var1.isEntityAlive()) {
+         return false;
+      } else if (!this.longMemory) {
+         return !this.attacker.getNavigator().noPath();
+      } else if (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(var1))) {
+         return false;
+      } else {
+         return !(var1 instanceof EntityPlayer) || !((EntityPlayer)var1).isSpectator() && !((EntityPlayer)var1).isCreative();
+      }
    }
 
    public void startExecuting() {
@@ -81,20 +80,6 @@ public class EntityAIAttackMelee extends EntityAIBase {
          this.targetY = var1.getEntityBoundingBox().minY;
          this.targetZ = var1.posZ;
          this.delayCounter = 4 + this.attacker.getRNG().nextInt(7);
-         if (this.canPenalize) {
-            this.delayCounter += this.failedPathFindingPenalty;
-            if (this.attacker.getNavigator().getPath() != null) {
-               PathPoint var4 = this.attacker.getNavigator().getPath().getFinalPathPoint();
-               if (var4 != null && var1.getDistanceSq((double)var4.xCoord, (double)var4.yCoord, (double)var4.zCoord) < 1.0D) {
-                  this.failedPathFindingPenalty = 0;
-               } else {
-                  this.failedPathFindingPenalty += 10;
-               }
-            } else {
-               this.failedPathFindingPenalty += 10;
-            }
-         }
-
          if (var2 > 1024.0D) {
             this.delayCounter += 10;
          } else if (var2 > 256.0D) {

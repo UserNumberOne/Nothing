@@ -29,7 +29,7 @@ public class TileEntityEnderChest extends TileEntity implements ITickable {
       }
 
       if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F) {
-         float var11 = this.lidAngle;
+         float var9 = this.lidAngle;
          if (this.numPlayersUsing > 0) {
             this.lidAngle += 0.1F;
          } else {
@@ -40,11 +40,11 @@ public class TileEntityEnderChest extends TileEntity implements ITickable {
             this.lidAngle = 1.0F;
          }
 
-         float var6 = 0.5F;
-         if (this.lidAngle < 0.5F && var11 >= 0.5F) {
-            double var12 = (double)var1 + 0.5D;
-            double var9 = (double)var3 + 0.5D;
-            this.world.playSound((EntityPlayer)null, var12, (double)var2 + 0.5D, var9, SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+         float var10 = 0.5F;
+         if (this.lidAngle < 0.5F && var9 >= 0.5F) {
+            double var13 = (double)var1 + 0.5D;
+            double var11 = (double)var3 + 0.5D;
+            this.world.playSound((EntityPlayer)null, var13, (double)var2 + 0.5D, var11, SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
          }
 
          if (this.lidAngle < 0.0F) {
@@ -79,6 +79,10 @@ public class TileEntityEnderChest extends TileEntity implements ITickable {
    }
 
    public boolean canBeUsed(EntityPlayer var1) {
-      return this.world.getTileEntity(this.pos) != this ? false : var1.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+      if (this.world.getTileEntity(this.pos) != this) {
+         return false;
+      } else {
+         return var1.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+      }
    }
 }

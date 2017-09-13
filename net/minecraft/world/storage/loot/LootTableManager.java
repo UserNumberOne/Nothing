@@ -18,7 +18,6 @@ import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.conditions.LootConditionManager;
 import net.minecraft.world.storage.loot.functions.LootFunction;
 import net.minecraft.world.storage.loot.functions.LootFunctionManager;
-import net.minecraftforge.common.ForgeHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -83,7 +82,7 @@ public class LootTableManager {
                }
 
                try {
-                  return ForgeHooks.loadLootTable(LootTableManager.GSON_INSTANCE, var1, var3, true);
+                  return (LootTable)LootTableManager.GSON_INSTANCE.fromJson(var3, LootTable.class);
                } catch (JsonParseException var5) {
                   LootTableManager.LOGGER.error("Couldn't load loot table {} from {}", new Object[]{var1, var2, var5});
                   return LootTable.EMPTY_LOOT_TABLE;
@@ -110,7 +109,7 @@ public class LootTableManager {
             }
 
             try {
-               return ForgeHooks.loadLootTable(LootTableManager.GSON_INSTANCE, var1, var3, false);
+               return (LootTable)LootTableManager.GSON_INSTANCE.fromJson(var3, LootTable.class);
             } catch (JsonParseException var5) {
                LootTableManager.LOGGER.error("Couldn't load loot table {} from {}", new Object[]{var1, var2, var5});
                return LootTable.EMPTY_LOOT_TABLE;
@@ -118,6 +117,11 @@ public class LootTableManager {
          } else {
             return null;
          }
+      }
+
+      // $FF: synthetic method
+      public Object load(Object var1) throws Exception {
+         return this.load((ResourceLocation)var1);
       }
    }
 }

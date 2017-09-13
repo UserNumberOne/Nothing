@@ -26,6 +26,7 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntitySilverfish extends EntityMob {
    private EntitySilverfish.AISummonSilverfish summonSilverfish;
@@ -174,6 +175,10 @@ public class EntitySilverfish extends EntityMob {
             BlockPos var2 = (new BlockPos(this.silverfish.posX, this.silverfish.posY + 0.5D, this.silverfish.posZ)).offset(this.facing);
             IBlockState var3 = var1.getBlockState(var2);
             if (BlockSilverfish.canContainSilverfish(var3)) {
+               if (CraftEventFactory.callEntityChangeBlockEvent(this.silverfish, var2, Blocks.MONSTER_EGG, Block.getIdFromBlock(BlockSilverfish.getBlockById(var3.getBlock().getMetaFromState(var3)))).isCancelled()) {
+                  return;
+               }
+
                var1.setBlockState(var2, Blocks.MONSTER_EGG.getDefaultState().withProperty(BlockSilverfish.VARIANT, BlockSilverfish.EnumType.forModelBlock(var3)), 3);
                this.silverfish.spawnExplosionParticle();
                this.silverfish.setDead();
@@ -214,7 +219,7 @@ public class EntitySilverfish extends EntityMob {
                   for(int var6 = 0; var6 <= 10 && var6 >= -10; var6 = var6 <= 0 ? 1 - var6 : 0 - var6) {
                      BlockPos var7 = var3.add(var5, var4, var6);
                      IBlockState var8 = var1.getBlockState(var7);
-                     if (var8.getBlock() == Blocks.MONSTER_EGG) {
+                     if (var8.getBlock() == Blocks.MONSTER_EGG && !CraftEventFactory.callEntityChangeBlockEvent(this.silverfish, var7, Blocks.AIR, 0).isCancelled()) {
                         if (var1.getGameRules().getBoolean("mobGriefing")) {
                            var1.destroyBlock(var7, true);
                         } else {

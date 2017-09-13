@@ -42,8 +42,8 @@ public class ScoreboardSaveData extends WorldSavedData {
          if (var1.hasKey("Teams", 9)) {
             this.readTeams(var1.getTagList("Teams", 10));
          }
-      }
 
+      }
    }
 
    protected void readTeams(NBTTagList var1) {
@@ -171,29 +171,29 @@ public class ScoreboardSaveData extends WorldSavedData {
    protected NBTTagList teamsToNbt() {
       NBTTagList var1 = new NBTTagList();
 
-      for(ScorePlayerTeam var3 : this.theScoreboard.getTeams()) {
-         NBTTagCompound var4 = new NBTTagCompound();
-         var4.setString("Name", var3.getRegisteredName());
-         var4.setString("DisplayName", var3.getTeamName());
-         if (var3.getChatFormat().getColorIndex() >= 0) {
-            var4.setString("TeamColor", var3.getChatFormat().getFriendlyName());
+      for(ScorePlayerTeam var4 : this.theScoreboard.getTeams()) {
+         NBTTagCompound var5 = new NBTTagCompound();
+         var5.setString("Name", var4.getRegisteredName());
+         var5.setString("DisplayName", var4.getTeamName());
+         if (var4.getChatFormat().getColorIndex() >= 0) {
+            var5.setString("TeamColor", var4.getChatFormat().getFriendlyName());
          }
 
-         var4.setString("Prefix", var3.getColorPrefix());
-         var4.setString("Suffix", var3.getColorSuffix());
-         var4.setBoolean("AllowFriendlyFire", var3.getAllowFriendlyFire());
-         var4.setBoolean("SeeFriendlyInvisibles", var3.getSeeFriendlyInvisiblesEnabled());
-         var4.setString("NameTagVisibility", var3.getNameTagVisibility().internalName);
-         var4.setString("DeathMessageVisibility", var3.getDeathMessageVisibility().internalName);
-         var4.setString("CollisionRule", var3.getCollisionRule().name);
-         NBTTagList var5 = new NBTTagList();
+         var5.setString("Prefix", var4.getColorPrefix());
+         var5.setString("Suffix", var4.getColorSuffix());
+         var5.setBoolean("AllowFriendlyFire", var4.getAllowFriendlyFire());
+         var5.setBoolean("SeeFriendlyInvisibles", var4.getSeeFriendlyInvisiblesEnabled());
+         var5.setString("NameTagVisibility", var4.getNameTagVisibility().internalName);
+         var5.setString("DeathMessageVisibility", var4.getDeathMessageVisibility().internalName);
+         var5.setString("CollisionRule", var4.getCollisionRule().name);
+         NBTTagList var6 = new NBTTagList();
 
-         for(String var7 : var3.getMembershipCollection()) {
-            var5.appendTag(new NBTTagString(var7));
+         for(String var8 : var4.getMembershipCollection()) {
+            var6.appendTag(new NBTTagString(var8));
          }
 
-         var4.setTag("Players", var5);
-         var1.appendTag(var4);
+         var5.setTag("Players", var6);
+         var1.appendTag(var5);
       }
 
       return var1;
@@ -220,14 +220,14 @@ public class ScoreboardSaveData extends WorldSavedData {
    protected NBTTagList objectivesToNbt() {
       NBTTagList var1 = new NBTTagList();
 
-      for(ScoreObjective var3 : this.theScoreboard.getScoreObjectives()) {
-         if (var3.getCriteria() != null) {
-            NBTTagCompound var4 = new NBTTagCompound();
-            var4.setString("Name", var3.getName());
-            var4.setString("CriteriaName", var3.getCriteria().getName());
-            var4.setString("DisplayName", var3.getDisplayName());
-            var4.setString("RenderType", var3.getRenderType().getRenderType());
-            var1.appendTag(var4);
+      for(ScoreObjective var4 : this.theScoreboard.getScoreObjectives()) {
+         if (var4.getCriteria() != null) {
+            NBTTagCompound var5 = new NBTTagCompound();
+            var5.setString("Name", var4.getName());
+            var5.setString("CriteriaName", var4.getCriteria().getName());
+            var5.setString("DisplayName", var4.getDisplayName());
+            var5.setString("RenderType", var4.getRenderType().getRenderType());
+            var1.appendTag(var5);
          }
       }
 
@@ -237,14 +237,14 @@ public class ScoreboardSaveData extends WorldSavedData {
    protected NBTTagList scoresToNbt() {
       NBTTagList var1 = new NBTTagList();
 
-      for(Score var3 : this.theScoreboard.getScores()) {
-         if (var3.getObjective() != null) {
-            NBTTagCompound var4 = new NBTTagCompound();
-            var4.setString("Name", var3.getPlayerName());
-            var4.setString("Objective", var3.getObjective().getName());
-            var4.setInteger("Score", var3.getScorePoints());
-            var4.setBoolean("Locked", var3.isLocked());
-            var1.appendTag(var4);
+      for(Score var4 : this.theScoreboard.getScores()) {
+         if (var4.getObjective() != null) {
+            NBTTagCompound var5 = new NBTTagCompound();
+            var5.setString("Name", var4.getPlayerName());
+            var5.setString("Objective", var4.getObjective().getName());
+            var5.setInteger("Score", var4.getScorePoints());
+            var5.setBoolean("Locked", var4.isLocked());
+            var1.appendTag(var5);
          }
       }
 

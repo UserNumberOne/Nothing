@@ -1,7 +1,6 @@
 package net.minecraft.nbt;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.UnmodifiableIterator;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.util.UUID;
@@ -200,10 +199,8 @@ public final class NBTUtil {
       var0.setString("Name", ((ResourceLocation)Block.REGISTRY.getNameForObject(var1.getBlock())).toString());
       if (!var1.getProperties().isEmpty()) {
          NBTTagCompound var2 = new NBTTagCompound();
-         UnmodifiableIterator var3 = var1.getProperties().entrySet().iterator();
 
-         while(var3.hasNext()) {
-            Entry var4 = (Entry)var3.next();
+         for(Entry var4 : var1.getProperties().entrySet()) {
             IProperty var5 = (IProperty)var4.getKey();
             var2.setString(var5.getName(), getName(var5, (Comparable)var4.getValue()));
          }

@@ -23,8 +23,7 @@ import net.minecraft.util.datafix.walkers.ItemStackData;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityItemFrame extends EntityHanging {
    private static final DataParameter ITEM = EntityDataManager.createKey(EntityItemFrame.class, DataSerializers.OPTIONAL_ITEM_STACK);
@@ -54,6 +53,10 @@ public class EntityItemFrame extends EntityHanging {
          return false;
       } else if (!var1.isExplosion() && this.getDisplayedItem() != null) {
          if (!this.world.isRemote) {
+            if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, var1, (double)var2, false) || this.isDead) {
+               return true;
+            }
+
             this.dropItemOrSelf(var1.getEntity(), false);
             this.playSound(SoundEvents.ENTITY_ITEMFRAME_REMOVE_ITEM, 1.0F, 1.0F);
             this.setDisplayedItem((ItemStack)null);
@@ -71,13 +74,6 @@ public class EntityItemFrame extends EntityHanging {
 
    public int getHeightPixels() {
       return 12;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      double var3 = 16.0D;
-      var3 = var3 * 64.0D * getRenderDistanceWeight();
-      return var1 < var3 * var3;
    }
 
    public void onBroken(@Nullable Entity var1) {
@@ -115,7 +111,7 @@ public class EntityItemFrame extends EntityHanging {
 
    private void removeFrameFromMap(ItemStack var1) {
       if (var1 != null) {
-         if (var1.getItem() instanceof ItemMap) {
+         if (var1.getItem() == Items.FILLED_MAP) {
             MapData var2 = ((ItemMap)var1.getItem()).getMapData(var1, this.world);
             var2.mapDecorations.remove("frame-" + this.getEntityId());
          }

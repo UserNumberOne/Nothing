@@ -11,20 +11,14 @@ import com.google.gson.JsonSerializer;
 import com.mojang.authlib.GameProfile;
 import java.lang.reflect.Type;
 import java.util.UUID;
-import java.util.concurrent.Semaphore;
-import net.minecraft.network.status.server.SPacketServerInfo;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 
 public class ServerStatusResponse {
    private ITextComponent description;
    private ServerStatusResponse.Players players;
    private ServerStatusResponse.Version version;
    private String favicon;
-   private Semaphore mutex = new Semaphore(1);
-   private String json = null;
 
    public ITextComponent getServerDescription() {
       return this.description;
@@ -32,7 +26,6 @@ public class ServerStatusResponse {
 
    public void setServerDescription(ITextComponent var1) {
       this.description = var1;
-      this.invalidateJson();
    }
 
    public ServerStatusResponse.Players getPlayers() {
@@ -41,7 +34,6 @@ public class ServerStatusResponse {
 
    public void setPlayers(ServerStatusResponse.Players var1) {
       this.players = var1;
-      this.invalidateJson();
    }
 
    public ServerStatusResponse.Version getVersion() {
@@ -50,36 +42,14 @@ public class ServerStatusResponse {
 
    public void setVersion(ServerStatusResponse.Version var1) {
       this.version = var1;
-      this.invalidateJson();
    }
 
    public void setFavicon(String var1) {
       this.favicon = var1;
-      this.invalidateJson();
    }
 
    public String getFavicon() {
       return this.favicon;
-   }
-
-   public String getJson() {
-      String var1 = this.json;
-      if (var1 == null) {
-         this.mutex.acquireUninterruptibly();
-         var1 = this.json;
-         if (var1 == null) {
-            var1 = SPacketServerInfo.GSON.toJson(this);
-            this.json = var1;
-         }
-
-         this.mutex.release();
-      }
-
-      return var1;
-   }
-
-   public void invalidateJson() {
-      this.json = null;
    }
 
    public static class Players {
@@ -150,6 +120,16 @@ public class ServerStatusResponse {
 
             return var4;
          }
+
+         // $FF: synthetic method
+         public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+            return this.serialize((ServerStatusResponse.Players)var1, var2, var3);
+         }
+
+         // $FF: synthetic method
+         public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+            return this.deserialize(var1, var2, var3);
+         }
       }
    }
 
@@ -173,7 +153,6 @@ public class ServerStatusResponse {
             var5.setFavicon(JsonUtils.getString(var4, "favicon"));
          }
 
-         FMLClientHandler.instance().captureAdditionalData(var5, var4);
          return var5;
       }
 
@@ -195,8 +174,17 @@ public class ServerStatusResponse {
             var4.addProperty("favicon", var1.getFavicon());
          }
 
-         FMLNetworkHandler.enhanceStatusQuery(var4);
          return var4;
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((ServerStatusResponse)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
    }
 
@@ -228,6 +216,16 @@ public class ServerStatusResponse {
             var4.addProperty("name", var1.getName());
             var4.addProperty("protocol", Integer.valueOf(var1.getProtocol()));
             return var4;
+         }
+
+         // $FF: synthetic method
+         public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+            return this.serialize((ServerStatusResponse.Version)var1, var2, var3);
+         }
+
+         // $FF: synthetic method
+         public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+            return this.deserialize(var1, var2, var3);
          }
       }
    }

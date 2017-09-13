@@ -1,49 +1,22 @@
 package net.minecraft.world.gen.layer;
 
-import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.init.Biomes;
-import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.ChunkProviderSettings;
-import net.minecraftforge.common.BiomeManager;
-import net.minecraftforge.common.BiomeManager.BiomeEntry;
-import net.minecraftforge.common.BiomeManager.BiomeType;
 
 public class GenLayerBiome extends GenLayer {
-   private List[] biomes = new ArrayList[BiomeType.values().length];
+   private Biome[] warmBiomes = new Biome[]{Biomes.DESERT, Biomes.DESERT, Biomes.DESERT, Biomes.SAVANNA, Biomes.SAVANNA, Biomes.PLAINS};
+   private final Biome[] mediumBiomes = new Biome[]{Biomes.FOREST, Biomes.ROOFED_FOREST, Biomes.EXTREME_HILLS, Biomes.PLAINS, Biomes.BIRCH_FOREST, Biomes.SWAMPLAND};
+   private final Biome[] coldBiomes = new Biome[]{Biomes.FOREST, Biomes.EXTREME_HILLS, Biomes.TAIGA, Biomes.PLAINS};
+   private final Biome[] iceBiomes = new Biome[]{Biomes.ICE_PLAINS, Biomes.ICE_PLAINS, Biomes.ICE_PLAINS, Biomes.COLD_TAIGA};
    private final ChunkProviderSettings settings;
 
    public GenLayerBiome(long var1, GenLayer var3, WorldType var4, String var5) {
       super(var1);
       this.parent = var3;
-
-      for(BiomeType var9 : BiomeType.values()) {
-         ImmutableList var10 = BiomeManager.getBiomes(var9);
-         int var11 = var9.ordinal();
-         if (this.biomes[var11] == null) {
-            this.biomes[var11] = new ArrayList();
-         }
-
-         if (var10 != null) {
-            this.biomes[var11].addAll(var10);
-         }
-      }
-
-      int var12 = BiomeType.DESERT.ordinal();
-      this.biomes[var12].add(new BiomeEntry(Biomes.DESERT, 30));
-      this.biomes[var12].add(new BiomeEntry(Biomes.SAVANNA, 20));
-      this.biomes[var12].add(new BiomeEntry(Biomes.PLAINS, 10));
       if (var4 == WorldType.DEFAULT_1_1) {
-         this.biomes[var12].clear();
-         this.biomes[var12].add(new BiomeEntry(Biomes.DESERT, 10));
-         this.biomes[var12].add(new BiomeEntry(Biomes.FOREST, 10));
-         this.biomes[var12].add(new BiomeEntry(Biomes.EXTREME_HILLS, 10));
-         this.biomes[var12].add(new BiomeEntry(Biomes.SWAMPLAND, 10));
-         this.biomes[var12].add(new BiomeEntry(Biomes.PLAINS, 10));
-         this.biomes[var12].add(new BiomeEntry(Biomes.TAIGA, 10));
+         this.warmBiomes = new Biome[]{Biomes.DESERT, Biomes.FOREST, Biomes.EXTREME_HILLS, Biomes.SWAMPLAND, Biomes.PLAINS, Biomes.TAIGA};
          this.settings = null;
       } else if (var4 == WorldType.CUSTOMIZED) {
          this.settings = ChunkProviderSettings.Factory.jsonToFactory(var5).build();
@@ -77,22 +50,22 @@ public class GenLayerBiome extends GenLayer {
                      var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.MESA_ROCK);
                   }
                } else {
-                  var6[var8 + var7 * var3] = Biome.getIdForBiome(this.getWeightedBiomeEntry(BiomeType.DESERT).biome);
+                  var6[var8 + var7 * var3] = Biome.getIdForBiome(this.warmBiomes[this.nextInt(this.warmBiomes.length)]);
                }
             } else if (var9 == 2) {
                if (var10 > 0) {
                   var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.JUNGLE);
                } else {
-                  var6[var8 + var7 * var3] = Biome.getIdForBiome(this.getWeightedBiomeEntry(BiomeType.WARM).biome);
+                  var6[var8 + var7 * var3] = Biome.getIdForBiome(this.mediumBiomes[this.nextInt(this.mediumBiomes.length)]);
                }
             } else if (var9 == 3) {
                if (var10 > 0) {
                   var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.REDWOOD_TAIGA);
                } else {
-                  var6[var8 + var7 * var3] = Biome.getIdForBiome(this.getWeightedBiomeEntry(BiomeType.COOL).biome);
+                  var6[var8 + var7 * var3] = Biome.getIdForBiome(this.coldBiomes[this.nextInt(this.coldBiomes.length)]);
                }
             } else if (var9 == 4) {
-               var6[var8 + var7 * var3] = Biome.getIdForBiome(this.getWeightedBiomeEntry(BiomeType.ICY).biome);
+               var6[var8 + var7 * var3] = Biome.getIdForBiome(this.iceBiomes[this.nextInt(this.iceBiomes.length)]);
             } else {
                var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND);
             }
@@ -100,12 +73,5 @@ public class GenLayerBiome extends GenLayer {
       }
 
       return var6;
-   }
-
-   protected BiomeEntry getWeightedBiomeEntry(BiomeType var1) {
-      List var2 = this.biomes[var1.ordinal()];
-      int var3 = WeightedRandom.getTotalWeight(var2);
-      int var4 = BiomeManager.isTypeListModded(var1) ? this.nextInt(var3) : this.nextInt(var3 / 10) * 10;
-      return (BiomeEntry)WeightedRandom.getRandomItem(var2, var4);
    }
 }

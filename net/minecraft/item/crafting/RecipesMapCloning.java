@@ -1,13 +1,17 @@
 package net.minecraft.item.crafting;
 
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 
-public class RecipesMapCloning implements IRecipe {
+public class RecipesMapCloning extends ShapelessRecipes implements IRecipe {
+   public RecipesMapCloning() {
+      super(new ItemStack(Items.MAP, 0, -1), Arrays.asList(new ItemStack(Items.MAP, 0, 0)));
+   }
+
    public boolean matches(InventoryCrafting var1, World var2) {
       int var3 = 0;
       ItemStack var4 = null;
@@ -31,7 +35,11 @@ public class RecipesMapCloning implements IRecipe {
          }
       }
 
-      return var4 != null && var3 > 0;
+      if (var4 != null && var3 > 0) {
+         return true;
+      } else {
+         return false;
+      }
    }
 
    @Nullable
@@ -84,7 +92,9 @@ public class RecipesMapCloning implements IRecipe {
 
       for(int var3 = 0; var3 < var2.length; ++var3) {
          ItemStack var4 = var1.getStackInSlot(var3);
-         var2[var3] = ForgeHooks.getContainerItem(var4);
+         if (var4 != null && var4.getItem().hasContainerItem()) {
+            var2[var3] = new ItemStack(var4.getItem().getContainerItem());
+         }
       }
 
       return var2;

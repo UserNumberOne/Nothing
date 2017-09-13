@@ -59,5 +59,10 @@ public class BiomeEndDecorator extends BiomeDecorator {
 
          return var3;
       }
+
+      // $FF: synthetic method
+      public Object load(Object var1) throws Exception {
+         return this.load((Long)var1);
+      }
    }
 }

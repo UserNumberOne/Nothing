@@ -7,8 +7,6 @@ import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketPlayerTryUseItemOnBlock implements Packet {
    private BlockPos position;
@@ -17,19 +15,6 @@ public class CPacketPlayerTryUseItemOnBlock implements Packet {
    private float facingX;
    private float facingY;
    private float facingZ;
-
-   public CPacketPlayerTryUseItemOnBlock() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketPlayerTryUseItemOnBlock(BlockPos var1, EnumFacing var2, EnumHand var3, float var4, float var5, float var6) {
-      this.position = var1;
-      this.placedBlockDirection = var2;
-      this.hand = var3;
-      this.facingX = var4;
-      this.facingY = var5;
-      this.facingZ = var6;
-   }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
       this.position = var1.readBlockPos();

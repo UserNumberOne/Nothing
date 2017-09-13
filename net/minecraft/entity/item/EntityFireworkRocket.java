@@ -17,13 +17,12 @@ import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.walkers.ItemStackData;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityFireworkRocket extends Entity {
-   private static final DataParameter FIREWORK_ITEM = EntityDataManager.createKey(EntityFireworkRocket.class, DataSerializers.OPTIONAL_ITEM_STACK);
+   public static final DataParameter FIREWORK_ITEM = EntityDataManager.createKey(EntityFireworkRocket.class, DataSerializers.OPTIONAL_ITEM_STACK);
    private int fireworkAge;
-   private int lifetime;
+   public int lifetime;
 
    public EntityFireworkRocket(World var1) {
       super(var1);
@@ -32,11 +31,6 @@ public class EntityFireworkRocket extends Entity {
 
    protected void entityInit() {
       this.dataManager.register(FIREWORK_ITEM, Optional.absent());
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      return var1 < 4096.0D;
    }
 
    public EntityFireworkRocket(World var1, double var2, double var4, double var6, @Nullable ItemStack var8) {
@@ -58,21 +52,6 @@ public class EntityFireworkRocket extends Entity {
       this.lifetime = 10 * var9 + this.rand.nextInt(6) + this.rand.nextInt(7);
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setVelocity(double var1, double var3, double var5) {
-      this.motionX = var1;
-      this.motionY = var3;
-      this.motionZ = var5;
-      if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F) {
-         float var7 = MathHelper.sqrt(var1 * var1 + var5 * var5);
-         this.rotationYaw = (float)(MathHelper.atan2(var1, var5) * 57.29577951308232D);
-         this.rotationPitch = (float)(MathHelper.atan2(var3, (double)var7) * 57.29577951308232D);
-         this.prevRotationYaw = this.rotationYaw;
-         this.prevRotationPitch = this.rotationPitch;
-      }
-
-   }
-
    public void onUpdate() {
       this.lastTickPosX = this.posX;
       this.lastTickPosY = this.posY;
@@ -83,9 +62,9 @@ public class EntityFireworkRocket extends Entity {
       this.motionY += 0.04D;
       this.move(this.motionX, this.motionY, this.motionZ);
       float var1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-      this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.29577951308232D);
+      this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.2957763671875D);
 
-      for(this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)var1) * 57.29577951308232D); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
+      for(this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)var1) * 57.2957763671875D); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
          ;
       }
 
@@ -113,25 +92,13 @@ public class EntityFireworkRocket extends Entity {
       }
 
       if (!this.world.isRemote && this.fireworkAge > this.lifetime) {
-         this.world.setEntityState(this, (byte)17);
+         if (!CraftEventFactory.callFireworkExplodeEvent(this).isCancelled()) {
+            this.world.setEntityState(this, (byte)17);
+         }
+
          this.setDead();
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 17 && this.world.isRemote) {
-         ItemStack var2 = (ItemStack)((Optional)this.dataManager.get(FIREWORK_ITEM)).orNull();
-         NBTTagCompound var3 = null;
-         if (var2 != null && var2.hasTagCompound()) {
-            var3 = var2.getTagCompound().getCompoundTag("Fireworks");
-         }
-
-         this.world.makeFireworks(this.posX, this.posY, this.posZ, this.motionX, this.motionY, this.motionZ, var3);
-      }
-
-      super.handleStatusUpdate(var1);
    }
 
    public static void registerFixesFireworkRocket(DataFixer var0) {
@@ -163,11 +130,6 @@ public class EntityFireworkRocket extends Entity {
 
    public float getBrightness(float var1) {
       return super.getBrightness(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return super.getBrightnessForRender(var1);
    }
 
    public boolean canBeAttackedWithItem() {

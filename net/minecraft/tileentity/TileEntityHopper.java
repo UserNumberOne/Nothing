@@ -1,5 +1,6 @@
 package net.minecraft.tileentity;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
@@ -7,12 +8,14 @@ import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockHopper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityMinecartHopper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerHopper;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,14 +30,40 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.VanillaHopperItemHandler;
-import net.minecraftforge.items.VanillaInventoryCodeHooks;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryDoubleChest;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Item;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.inventory.Inventory;
 
 public class TileEntityHopper extends TileEntityLockableLoot implements IHopper, ITickable {
    private ItemStack[] inventory = new ItemStack[5];
    private String customName;
    private int transferCooldown = -1;
+   public List transaction = new ArrayList();
+   private int maxStack = 64;
+
+   public ItemStack[] getContents() {
+      return this.inventory;
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
+   }
 
    public static void registerFixesHopper(DataFixer var0) {
       var0.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists("Hopper", new String[]{"Items"}));
@@ -131,7 +160,7 @@ public class TileEntityHopper extends TileEntityLockableLoot implements IHopper,
    }
 
    public int getInventoryStackLimit() {
-      return 64;
+      return this.maxStack;
    }
 
    public boolean isUsableByPlayer(EntityPlayer var1) {
@@ -205,32 +234,49 @@ public class TileEntityHopper extends TileEntityLockableLoot implements IHopper,
    }
 
    private boolean transferItemsOut() {
-      if (VanillaInventoryCodeHooks.insertHook(this)) {
-         return true;
+      IInventory var1 = this.getInventoryForHopperTransfer();
+      if (var1 == null) {
+         return false;
       } else {
-         IInventory var1 = this.getInventoryForHopperTransfer();
-         if (var1 == null) {
+         EnumFacing var2 = BlockHopper.getFacing(this.getBlockMetadata()).getOpposite();
+         if (this.isInventoryFull(var1, var2)) {
             return false;
          } else {
-            EnumFacing var2 = BlockHopper.getFacing(this.getBlockMetadata()).getOpposite();
-            if (this.isInventoryFull(var1, var2)) {
-               return false;
-            } else {
-               for(int var3 = 0; var3 < this.getSizeInventory(); ++var3) {
-                  if (this.getStackInSlot(var3) != null) {
-                     ItemStack var4 = this.getStackInSlot(var3).copy();
-                     ItemStack var5 = putStackInInventoryAllSlots(var1, this.decrStackSize(var3, 1), var2);
-                     if (var5 == null || var5.stackSize == 0) {
+            for(int var3 = 0; var3 < this.getSizeInventory(); ++var3) {
+               if (this.getStackInSlot(var3) != null) {
+                  ItemStack var4 = this.getStackInSlot(var3).copy();
+                  CraftItemStack var5 = CraftItemStack.asCraftMirror(this.decrStackSize(var3, 1));
+                  Object var6;
+                  if (var1 instanceof InventoryLargeChest) {
+                     var6 = new CraftInventoryDoubleChest((InventoryLargeChest)var1);
+                  } else {
+                     var6 = var1.getOwner().getInventory();
+                  }
+
+                  InventoryMoveItemEvent var7 = new InventoryMoveItemEvent(this.getOwner().getInventory(), var5.clone(), (Inventory)var6, true);
+                  this.getWorld().getServer().getPluginManager().callEvent(var7);
+                  if (var7.isCancelled()) {
+                     this.setInventorySlotContents(var3, var4);
+                     this.setTransferCooldown(8);
+                     return false;
+                  }
+
+                  ItemStack var8 = putStackInInventoryAllSlots(var1, CraftItemStack.asNMSCopy(var7.getItem()), var2);
+                  if (var8 == null || var8.stackSize == 0) {
+                     if (var7.getItem().equals(var5)) {
                         var1.markDirty();
-                        return true;
+                     } else {
+                        this.setInventorySlotContents(var3, var4);
                      }
 
-                     this.setInventorySlotContents(var3, var4);
+                     return true;
                   }
-               }
 
-               return false;
+                  this.setInventorySlotContents(var3, var4);
+               }
             }
+
+            return false;
          }
       }
    }
@@ -284,54 +330,75 @@ public class TileEntityHopper extends TileEntityLockableLoot implements IHopper,
    }
 
    public static boolean captureDroppedItems(IHopper var0) {
-      Boolean var1 = VanillaInventoryCodeHooks.extractHook(var0);
+      IInventory var1 = getHopperInventory(var0);
       if (var1 != null) {
-         return var1.booleanValue();
-      } else {
-         IInventory var2 = getHopperInventory(var0);
-         if (var2 != null) {
-            EnumFacing var3 = EnumFacing.DOWN;
-            if (isInventoryEmpty(var2, var3)) {
-               return false;
-            }
+         EnumFacing var2 = EnumFacing.DOWN;
+         if (isInventoryEmpty(var1, var2)) {
+            return false;
+         }
 
-            if (var2 instanceof ISidedInventory) {
-               ISidedInventory var4 = (ISidedInventory)var2;
-               int[] var5 = var4.getSlotsForFace(var3);
+         if (var1 instanceof ISidedInventory) {
+            ISidedInventory var3 = (ISidedInventory)var1;
+            int[] var4 = var3.getSlotsForFace(var2);
 
-               for(int var9 : var5) {
-                  if (pullItemFromSlot(var0, var2, var9, var3)) {
-                     return true;
-                  }
-               }
-            } else {
-               int var11 = var2.getSizeInventory();
-
-               for(int var13 = 0; var13 < var11; ++var13) {
-                  if (pullItemFromSlot(var0, var2, var13, var3)) {
-                     return true;
-                  }
+            for(int var8 : var4) {
+               if (pullItemFromSlot(var0, var1, var8, var2)) {
+                  return true;
                }
             }
          } else {
-            for(EntityItem var12 : getCaptureItems(var0.getWorld(), var0.getXPos(), var0.getYPos(), var0.getZPos())) {
-               if (putDropInInventoryAllSlots(var0, var12)) {
+            int var10 = var1.getSizeInventory();
+
+            for(int var12 = 0; var12 < var10; ++var12) {
+               if (pullItemFromSlot(var0, var1, var12, var2)) {
                   return true;
                }
             }
          }
-
-         return false;
+      } else {
+         for(EntityItem var11 : getCaptureItems(var0.getWorld(), var0.getXPos(), var0.getYPos(), var0.getZPos())) {
+            if (putDropInInventoryAllSlots(var0, var11)) {
+               return true;
+            }
+         }
       }
+
+      return false;
    }
 
    private static boolean pullItemFromSlot(IHopper var0, IInventory var1, int var2, EnumFacing var3) {
       ItemStack var4 = var1.getStackInSlot(var2);
       if (var4 != null && canExtractItemFromSlot(var1, var4, var2, var3)) {
          ItemStack var5 = var4.copy();
-         ItemStack var6 = putStackInInventoryAllSlots(var0, var1.decrStackSize(var2, 1), (EnumFacing)null);
-         if (var6 == null || var6.stackSize == 0) {
-            var1.markDirty();
+         CraftItemStack var6 = CraftItemStack.asCraftMirror(var1.decrStackSize(var2, 1));
+         Object var7;
+         if (var1 instanceof InventoryLargeChest) {
+            var7 = new CraftInventoryDoubleChest((InventoryLargeChest)var1);
+         } else {
+            var7 = var1.getOwner().getInventory();
+         }
+
+         InventoryMoveItemEvent var8 = new InventoryMoveItemEvent((Inventory)var7, var6.clone(), var0.getOwner().getInventory(), false);
+         var0.getWorld().getServer().getPluginManager().callEvent(var8);
+         if (var8.isCancelled()) {
+            var1.setInventorySlotContents(var2, var5);
+            if (var0 instanceof TileEntityHopper) {
+               ((TileEntityHopper)var0).setTransferCooldown(8);
+            } else if (var0 instanceof EntityMinecartHopper) {
+               ((EntityMinecartHopper)var0).setTransferTicker(4);
+            }
+
+            return false;
+         }
+
+         ItemStack var9 = putStackInInventoryAllSlots(var0, CraftItemStack.asNMSCopy(var8.getItem()), (EnumFacing)null);
+         if (var9 == null || var9.stackSize == 0) {
+            if (var8.getItem().equals(var6)) {
+               var1.markDirty();
+            } else {
+               var1.setInventorySlotContents(var2, var5);
+            }
+
             return true;
          }
 
@@ -346,16 +413,22 @@ public class TileEntityHopper extends TileEntityLockableLoot implements IHopper,
       if (var1 == null) {
          return false;
       } else {
-         ItemStack var3 = var1.getEntityItem().copy();
-         ItemStack var4 = putStackInInventoryAllSlots(var0, var3, (EnumFacing)null);
-         if (var4 != null && var4.stackSize != 0) {
-            var1.setEntityItemStack(var4);
+         InventoryPickupItemEvent var3 = new InventoryPickupItemEvent(var0.getOwner().getInventory(), (Item)var1.getBukkitEntity());
+         var1.world.getServer().getPluginManager().callEvent(var3);
+         if (var3.isCancelled()) {
+            return false;
          } else {
-            var2 = true;
-            var1.setDead();
-         }
+            ItemStack var4 = var1.getEntityItem().copy();
+            ItemStack var5 = putStackInInventoryAllSlots(var0, var4, (EnumFacing)null);
+            if (var5 != null && var5.stackSize != 0) {
+               var1.setEntityItemStack(var5);
+            } else {
+               var2 = true;
+               var1.setDead();
+            }
 
-         return var2;
+            return var2;
+         }
       }
    }
 
@@ -395,31 +468,22 @@ public class TileEntityHopper extends TileEntityLockableLoot implements IHopper,
       if (canInsertItemInSlot(var0, var1, var2, var3)) {
          boolean var5 = false;
          if (var4 == null) {
-            int var6 = Math.min(var1.getMaxStackSize(), var0.getInventoryStackLimit());
-            if (var6 >= var1.stackSize) {
-               var0.setInventorySlotContents(var2, var1);
-               var1 = null;
-            } else {
-               var0.setInventorySlotContents(var2, var1.splitStack(var6));
-            }
-
+            var0.setInventorySlotContents(var2, var1);
+            var1 = null;
             var5 = true;
          } else if (canCombine(var4, var1)) {
-            int var9 = Math.min(var1.getMaxStackSize(), var0.getInventoryStackLimit());
-            if (var9 > var4.stackSize) {
-               int var7 = var9 - var4.stackSize;
-               int var8 = Math.min(var1.stackSize, var7);
-               var1.stackSize -= var8;
-               var4.stackSize += var8;
-               var5 = var8 > 0;
-            }
+            int var6 = var1.getMaxStackSize() - var4.stackSize;
+            int var7 = Math.min(var1.stackSize, var6);
+            var1.stackSize -= var7;
+            var4.stackSize += var7;
+            var5 = var7 > 0;
          }
 
          if (var5) {
             if (var0 instanceof TileEntityHopper) {
-               TileEntityHopper var10 = (TileEntityHopper)var0;
-               if (var10.mayTransfer()) {
-                  var10.setTransferCooldown(8);
+               TileEntityHopper var8 = (TileEntityHopper)var0;
+               if (var8.mayTransfer()) {
+                  var8.setTransferCooldown(8);
                }
 
                var0.markDirty();
@@ -527,9 +591,5 @@ public class TileEntityHopper extends TileEntityLockableLoot implements IHopper,
          this.inventory[var1] = null;
       }
 
-   }
-
-   protected IItemHandler createUnSidedHandler() {
-      return new VanillaHopperItemHandler(this);
    }
 }

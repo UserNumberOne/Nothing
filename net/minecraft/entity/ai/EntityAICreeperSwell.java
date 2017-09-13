@@ -36,6 +36,5 @@ public class EntityAICreeperSwell extends EntityAIBase {
       } else {
          this.swellingCreeper.setCreeperState(1);
       }
-
    }
 }

@@ -1,6 +1,5 @@
 package net.minecraft.item;
 
-import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockFence;
@@ -15,7 +14,7 @@ import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntity;
@@ -29,8 +28,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class ItemMonsterPlacer extends Item {
    public ItemMonsterPlacer() {
@@ -38,7 +36,7 @@ public class ItemMonsterPlacer extends Item {
    }
 
    public String getItemStackDisplayName(ItemStack var1) {
-      String var2 = ("" + I18n.translateToLocal(this.getUnlocalizedName() + ".name")).trim();
+      String var2 = I18n.translateToLocal(this.getUnlocalizedName() + ".name").trim();
       String var3 = getEntityIdFromItem(var1);
       if (var3 != null) {
          var2 = var2 + " " + I18n.translateToLocal("entity." + var3 + ".name");
@@ -70,18 +68,18 @@ public class ItemMonsterPlacer extends Item {
          }
 
          var4 = var4.offset(var6);
-         double var15 = 0.0D;
-         if (var6 == EnumFacing.UP && var10.getBlock() instanceof BlockFence) {
-            var15 = 0.5D;
+         double var13 = 0.0D;
+         if (var6 == EnumFacing.UP && var10 instanceof BlockFence) {
+            var13 = 0.5D;
          }
 
-         Entity var13 = spawnCreature(var3, getEntityIdFromItem(var1), (double)var4.getX() + 0.5D, (double)var4.getY() + var15, (double)var4.getZ() + 0.5D);
-         if (var13 != null) {
-            if (var13 instanceof EntityLivingBase && var1.hasDisplayName()) {
-               var13.setCustomNameTag(var1.getDisplayName());
+         Entity var15 = spawnCreature(var3, getEntityIdFromItem(var1), (double)var4.getX() + 0.5D, (double)var4.getY() + var13, (double)var4.getZ() + 0.5D);
+         if (var15 != null) {
+            if (var15 instanceof EntityLivingBase && var1.hasDisplayName()) {
+               var15.setCustomNameTag(var1.getDisplayName());
             }
 
-            applyItemEntityDataToEntity(var3, var2, var1, var13);
+            applyItemEntityDataToEntity(var3, var2, var1, var15);
             if (!var2.capabilities.isCreativeMode) {
                --var1.stackSize;
             }
@@ -147,45 +145,33 @@ public class ItemMonsterPlacer extends Item {
 
    @Nullable
    public static Entity spawnCreature(World var0, @Nullable String var1, double var2, double var4, double var6) {
-      if (var1 != null && EntityList.ENTITY_EGGS.containsKey(var1)) {
-         Entity var8 = null;
+      return spawnCreature(var0, var1, var2, var4, var6, SpawnReason.SPAWNER_EGG);
+   }
 
-         for(int var9 = 0; var9 < 1; ++var9) {
-            var8 = EntityList.createEntityByIDFromName(var1, var0);
-            if (var8 instanceof EntityLivingBase) {
-               EntityLiving var10 = (EntityLiving)var8;
-               var8.setLocationAndAngles(var2, var4, var6, MathHelper.wrapDegrees(var0.rand.nextFloat() * 360.0F), 0.0F);
-               var10.rotationYawHead = var10.rotationYaw;
-               var10.renderYawOffset = var10.rotationYaw;
-               var10.onInitialSpawn(var0.getDifficultyForLocation(new BlockPos(var10)), (IEntityLivingData)null);
-               var0.spawnEntity(var8);
-               var10.playLivingSound();
+   public static Entity spawnCreature(World var0, String var1, double var2, double var4, double var6, SpawnReason var8) {
+      if (var1 != null && EntityList.ENTITY_EGGS.containsKey(var1)) {
+         Entity var9 = null;
+
+         for(int var10 = 0; var10 < 1; ++var10) {
+            var9 = EntityList.createEntityByIDFromName(var1, var0);
+            if (var9 instanceof EntityLivingBase) {
+               EntityLiving var11 = (EntityLiving)var9;
+               var9.setLocationAndAngles(var2, var4, var6, MathHelper.wrapDegrees(var0.rand.nextFloat() * 360.0F), 0.0F);
+               var11.rotationYawHead = var11.rotationYaw;
+               var11.renderYawOffset = var11.rotationYaw;
+               var11.onInitialSpawn(var0.getDifficultyForLocation(new BlockPos(var11)), (IEntityLivingData)null);
+               if (!var0.addEntity(var9, var8)) {
+                  var9 = null;
+               } else {
+                  var11.playLivingSound();
+               }
             }
          }
 
-         return var8;
+         return var9;
       } else {
          return null;
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubItems(Item var1, CreativeTabs var2, List var3) {
-      for(EntityList.EntityEggInfo var5 : EntityList.ENTITY_EGGS.values()) {
-         ItemStack var6 = new ItemStack(var1, 1);
-         applyEntityIdToItemStack(var6, var5.spawnedID);
-         var3.add(var6);
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static void applyEntityIdToItemStack(ItemStack var0, String var1) {
-      NBTTagCompound var2 = var0.hasTagCompound() ? var0.getTagCompound() : new NBTTagCompound();
-      NBTTagCompound var3 = new NBTTagCompound();
-      var3.setString("id", var1);
-      var2.setTag("EntityTag", var3);
-      var0.setTagCompound(var2);
    }
 
    @Nullable

@@ -7,8 +7,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BitArray;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockStateContainer implements IBlockStatePaletteResizer {
    private static final IBlockStatePalette REGISTRY_BASED_PALETTE = new BlockStatePaletteRegistry();
@@ -26,10 +24,6 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
    }
 
    private void setBits(int var1) {
-      this.setBits(var1, false);
-   }
-
-   private void setBits(int var1, boolean var2) {
       if (var1 != this.bits) {
          this.bits = var1;
          if (this.bits <= 4) {
@@ -40,9 +34,6 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
          } else {
             this.palette = REGISTRY_BASED_PALETTE;
             this.bits = MathHelper.log2DeBruijn(Block.BLOCK_STATE_IDS.size());
-            if (var2) {
-               this.bits = var1;
-            }
          }
 
          this.palette.idFor(AIR_BLOCK_STATE);
@@ -84,22 +75,6 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
       return var2 == null ? AIR_BLOCK_STATE : var2;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void read(PacketBuffer var1) {
-      byte var2 = var1.readByte();
-      if (this.bits != var2) {
-         this.setBits(var2, true);
-      }
-
-      this.palette.read(var1);
-      var1.readLongArray(this.storage.getBackingLongArray());
-      int var3 = MathHelper.log2DeBruijn(Block.BLOCK_STATE_IDS.size());
-      if (this.palette == REGISTRY_BASED_PALETTE && this.bits != var3) {
-         this.onResize(var3, AIR_BLOCK_STATE);
-      }
-
-   }
-
    public void write(PacketBuffer var1) {
       var1.writeByte(this.bits);
       this.palette.write(var1);
@@ -137,7 +112,19 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
          int var7 = var4 >> 4 & 15;
          int var8 = var3 == null ? 0 : var3.get(var5, var6, var7);
          int var9 = var8 << 12 | (var1[var4] & 255) << 4 | var2.get(var5, var6, var7);
-         this.set(var4, (IBlockState)Block.BLOCK_STATE_IDS.getByValue(var9));
+         IBlockState var10 = (IBlockState)Block.BLOCK_STATE_IDS.getByValue(var9);
+         if (var10 == null) {
+            Block var11 = Block.getBlockById(var9 >> 4);
+            if (var11 != null) {
+               try {
+                  var10 = var11.getStateFromMeta(var9 & 15);
+               } catch (Exception var12) {
+                  var10 = var11.getDefaultState();
+               }
+            }
+         }
+
+         this.set(var4, var10);
       }
 
    }

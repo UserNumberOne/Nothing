@@ -3,6 +3,7 @@ package net.minecraft.world.gen.feature;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHugeMushroom;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -45,8 +46,8 @@ public class WorldGenBigMushroom extends WorldGenerator {
             for(int var10 = var3.getX() - var8; var10 <= var3.getX() + var8 && var6; ++var10) {
                for(int var11 = var3.getZ() - var8; var11 <= var3.getZ() + var8 && var6; ++var11) {
                   if (var7 >= 0 && var7 < 256) {
-                     IBlockState var12 = var1.getBlockState(var9.setPos(var10, var7, var11));
-                     if (!var12.getBlock().isAir(var12, var1, var9) && !var12.getBlock().isLeaves(var12, var1, var9)) {
+                     Material var12 = var1.getBlockState(var9.setPos(var10, var7, var11)).getMaterial();
+                     if (var12 != Material.AIR && var12 != Material.LEAVES) {
                         var6 = false;
                      }
                   } else {
@@ -59,36 +60,36 @@ public class WorldGenBigMushroom extends WorldGenerator {
          if (!var6) {
             return false;
          } else {
-            Block var21 = var1.getBlockState(var3.down()).getBlock();
-            if (var21 != Blocks.DIRT && var21 != Blocks.GRASS && var21 != Blocks.MYCELIUM) {
+            Block var20 = var1.getBlockState(var3.down()).getBlock();
+            if (var20 != Blocks.DIRT && var20 != Blocks.GRASS && var20 != Blocks.MYCELIUM) {
                return false;
             } else {
-               int var22 = var3.getY() + var5;
+               int var21 = var3.getY() + var5;
                if (var4 == Blocks.RED_MUSHROOM_BLOCK) {
-                  var22 = var3.getY() + var5 - 3;
+                  var21 = var3.getY() + var5 - 3;
                }
 
-               for(int var23 = var22; var23 <= var3.getY() + var5; ++var23) {
-                  int var25 = 1;
-                  if (var23 < var3.getY() + var5) {
-                     ++var25;
+               for(int var22 = var21; var22 <= var3.getY() + var5; ++var22) {
+                  int var24 = 1;
+                  if (var22 < var3.getY() + var5) {
+                     ++var24;
                   }
 
                   if (var4 == Blocks.BROWN_MUSHROOM_BLOCK) {
-                     var25 = 3;
+                     var24 = 3;
                   }
 
-                  int var27 = var3.getX() - var25;
-                  int var28 = var3.getX() + var25;
-                  int var13 = var3.getZ() - var25;
-                  int var14 = var3.getZ() + var25;
+                  int var26 = var3.getX() - var24;
+                  int var27 = var3.getX() + var24;
+                  int var13 = var3.getZ() - var24;
+                  int var14 = var3.getZ() + var24;
 
-                  for(int var15 = var27; var15 <= var28; ++var15) {
+                  for(int var15 = var26; var15 <= var27; ++var15) {
                      for(int var16 = var13; var16 <= var14; ++var16) {
                         int var17 = 5;
-                        if (var15 == var27) {
+                        if (var15 == var26) {
                            --var17;
-                        } else if (var15 == var28) {
+                        } else if (var15 == var27) {
                            ++var17;
                         }
 
@@ -99,52 +100,51 @@ public class WorldGenBigMushroom extends WorldGenerator {
                         }
 
                         BlockHugeMushroom.EnumType var18 = BlockHugeMushroom.EnumType.byMetadata(var17);
-                        if (var4 == Blocks.BROWN_MUSHROOM_BLOCK || var23 < var3.getY() + var5) {
-                           if ((var15 == var27 || var15 == var28) && (var16 == var13 || var16 == var14)) {
+                        if (var4 == Blocks.BROWN_MUSHROOM_BLOCK || var22 < var3.getY() + var5) {
+                           if ((var15 == var26 || var15 == var27) && (var16 == var13 || var16 == var14)) {
                               continue;
                            }
 
-                           if (var15 == var3.getX() - (var25 - 1) && var16 == var13) {
+                           if (var15 == var3.getX() - (var24 - 1) && var16 == var13) {
                               var18 = BlockHugeMushroom.EnumType.NORTH_WEST;
                            }
 
-                           if (var15 == var27 && var16 == var3.getZ() - (var25 - 1)) {
+                           if (var15 == var26 && var16 == var3.getZ() - (var24 - 1)) {
                               var18 = BlockHugeMushroom.EnumType.NORTH_WEST;
                            }
 
-                           if (var15 == var3.getX() + (var25 - 1) && var16 == var13) {
+                           if (var15 == var3.getX() + (var24 - 1) && var16 == var13) {
                               var18 = BlockHugeMushroom.EnumType.NORTH_EAST;
                            }
 
-                           if (var15 == var28 && var16 == var3.getZ() - (var25 - 1)) {
+                           if (var15 == var27 && var16 == var3.getZ() - (var24 - 1)) {
                               var18 = BlockHugeMushroom.EnumType.NORTH_EAST;
                            }
 
-                           if (var15 == var3.getX() - (var25 - 1) && var16 == var14) {
+                           if (var15 == var3.getX() - (var24 - 1) && var16 == var14) {
                               var18 = BlockHugeMushroom.EnumType.SOUTH_WEST;
                            }
 
-                           if (var15 == var27 && var16 == var3.getZ() + (var25 - 1)) {
+                           if (var15 == var26 && var16 == var3.getZ() + (var24 - 1)) {
                               var18 = BlockHugeMushroom.EnumType.SOUTH_WEST;
                            }
 
-                           if (var15 == var3.getX() + (var25 - 1) && var16 == var14) {
+                           if (var15 == var3.getX() + (var24 - 1) && var16 == var14) {
                               var18 = BlockHugeMushroom.EnumType.SOUTH_EAST;
                            }
 
-                           if (var15 == var28 && var16 == var3.getZ() + (var25 - 1)) {
+                           if (var15 == var27 && var16 == var3.getZ() + (var24 - 1)) {
                               var18 = BlockHugeMushroom.EnumType.SOUTH_EAST;
                            }
                         }
 
-                        if (var18 == BlockHugeMushroom.EnumType.CENTER && var23 < var3.getY() + var5) {
+                        if (var18 == BlockHugeMushroom.EnumType.CENTER && var22 < var3.getY() + var5) {
                            var18 = BlockHugeMushroom.EnumType.ALL_INSIDE;
                         }
 
                         if (var3.getY() >= var3.getY() + var5 - 1 || var18 != BlockHugeMushroom.EnumType.ALL_INSIDE) {
-                           BlockPos var19 = new BlockPos(var15, var23, var16);
-                           IBlockState var20 = var1.getBlockState(var19);
-                           if (var20.getBlock().canBeReplacedByLeaves(var20, var1, var19)) {
+                           BlockPos var19 = new BlockPos(var15, var22, var16);
+                           if (!var1.getBlockState(var19).isFullBlock()) {
                               this.setBlockAndNotifyAdequately(var1, var19, var4.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, var18));
                            }
                         }
@@ -152,10 +152,10 @@ public class WorldGenBigMushroom extends WorldGenerator {
                   }
                }
 
-               for(int var24 = 0; var24 < var5; ++var24) {
-                  IBlockState var26 = var1.getBlockState(var3.up(var24));
-                  if (var26.getBlock().canBeReplacedByLeaves(var26, var1, var3.up(var24))) {
-                     this.setBlockAndNotifyAdequately(var1, var3.up(var24), var4.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, BlockHugeMushroom.EnumType.STEM));
+               for(int var23 = 0; var23 < var5; ++var23) {
+                  IBlockState var25 = var1.getBlockState(var3.up(var23));
+                  if (!var25.isFullBlock()) {
+                     this.setBlockAndNotifyAdequately(var1, var3.up(var23), var4.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, BlockHugeMushroom.EnumType.STEM));
                   }
                }
 

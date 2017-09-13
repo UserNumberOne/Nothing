@@ -12,6 +12,7 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIFindEntityNearest extends EntityAIBase {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -36,6 +37,10 @@ public class EntityAIFindEntityNearest extends EntityAIBase {
             }
 
             return var1.isInvisible() ? false : ((double)var1.getDistanceToEntity(EntityAIFindEntityNearest.this.mob) > var2 ? false : EntityAITarget.isSuitableTarget(EntityAIFindEntityNearest.this.mob, var1, false, true));
+         }
+
+         public boolean apply(Object var1) {
+            return this.apply((EntityLivingBase)var1);
          }
       };
       this.sorter = new EntityAINearestAttackableTarget.Sorter(var1);
@@ -66,7 +71,7 @@ public class EntityAIFindEntityNearest extends EntityAIBase {
    }
 
    public void startExecuting() {
-      this.mob.setAttackTarget(this.target);
+      this.mob.setGoalTarget(this.target, TargetReason.CLOSEST_ENTITY, true);
       super.startExecuting();
    }
 

@@ -11,6 +11,7 @@ import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityAIHarvestFarmland extends EntityAIMoveToBlock {
    private final EntityVillager theVillager;
@@ -58,7 +59,9 @@ public class EntityAIHarvestFarmland extends EntityAIMoveToBlock {
          IBlockState var3 = var1.getBlockState(var2);
          Block var4 = var3.getBlock();
          if (this.currentTask == 0 && var4 instanceof BlockCrops && ((BlockCrops)var4).isMaxAge(var3)) {
-            var1.destroyBlock(var2, true);
+            if (!CraftEventFactory.callEntityChangeBlockEvent(this.theVillager, var2, Blocks.AIR, 0).isCancelled()) {
+               var1.destroyBlock(var2, true);
+            }
          } else if (this.currentTask == 1 && var3.getMaterial() == Material.AIR) {
             InventoryBasic var5 = this.theVillager.getVillagerInventory();
 
@@ -66,18 +69,25 @@ public class EntityAIHarvestFarmland extends EntityAIMoveToBlock {
                ItemStack var7 = var5.getStackInSlot(var6);
                boolean var8 = false;
                if (var7 != null) {
+                  Block var9 = null;
                   if (var7.getItem() == Items.WHEAT_SEEDS) {
-                     var1.setBlockState(var2, Blocks.WHEAT.getDefaultState(), 3);
+                     var9 = Blocks.WHEAT;
                      var8 = true;
                   } else if (var7.getItem() == Items.POTATO) {
-                     var1.setBlockState(var2, Blocks.POTATOES.getDefaultState(), 3);
+                     var9 = Blocks.POTATOES;
                      var8 = true;
                   } else if (var7.getItem() == Items.CARROT) {
-                     var1.setBlockState(var2, Blocks.CARROTS.getDefaultState(), 3);
+                     var9 = Blocks.CARROTS;
                      var8 = true;
                   } else if (var7.getItem() == Items.BEETROOT_SEEDS) {
-                     var1.setBlockState(var2, Blocks.BEETROOTS.getDefaultState(), 3);
+                     var9 = Blocks.BEETROOTS;
                      var8 = true;
+                  }
+
+                  if (var9 != null && !CraftEventFactory.callEntityChangeBlockEvent(this.theVillager, var2, var9, 0).isCancelled()) {
+                     var1.setBlockState(var2, var9.getDefaultState(), 3);
+                  } else {
+                     var8 = false;
                   }
                }
 

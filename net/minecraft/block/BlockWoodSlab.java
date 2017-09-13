@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.MapColor;
@@ -15,8 +14,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BlockWoodSlab extends BlockSlab {
    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockPlanks.EnumType.class);
@@ -55,16 +52,6 @@ public abstract class BlockWoodSlab extends BlockSlab {
 
    public Comparable getTypeForItem(ItemStack var1) {
       return BlockPlanks.EnumType.byMetadata(var1.getMetadata() & 7);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
-      if (var1 != Item.getItemFromBlock(Blocks.DOUBLE_WOODEN_SLAB)) {
-         for(BlockPlanks.EnumType var7 : BlockPlanks.EnumType.values()) {
-            var3.add(new ItemStack(var1, 1, var7.getMetadata()));
-         }
-      }
-
    }
 
    public IBlockState getStateFromMeta(int var1) {

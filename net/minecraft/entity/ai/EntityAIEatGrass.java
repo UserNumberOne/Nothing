@@ -9,6 +9,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityAIEatGrass extends EntityAIBase {
    private static final Predicate IS_TALL_GRASS = BlockStateMatcher.forBlock(Blocks.TALLGRASS).where(BlockTallGrass.TYPE, Predicates.equalTo(BlockTallGrass.EnumType.GRASS));
@@ -54,7 +56,7 @@ public class EntityAIEatGrass extends EntityAIBase {
       if (this.eatingGrassTimer == 4) {
          BlockPos var1 = new BlockPos(this.grassEaterEntity.posX, this.grassEaterEntity.posY, this.grassEaterEntity.posZ);
          if (IS_TALL_GRASS.apply(this.entityWorld.getBlockState(var1))) {
-            if (this.entityWorld.getGameRules().getBoolean("mobGriefing")) {
+            if (!CraftEventFactory.callEntityChangeBlockEvent(this.grassEaterEntity, this.grassEaterEntity.world.getWorld().getBlockAt(var1.getX(), var1.getY(), var1.getZ()), Material.AIR, !this.entityWorld.getGameRules().getBoolean("mobGriefing")).isCancelled()) {
                this.entityWorld.destroyBlock(var1, false);
             }
 
@@ -62,7 +64,7 @@ public class EntityAIEatGrass extends EntityAIBase {
          } else {
             BlockPos var2 = var1.down();
             if (this.entityWorld.getBlockState(var2).getBlock() == Blocks.GRASS) {
-               if (this.entityWorld.getGameRules().getBoolean("mobGriefing")) {
+               if (!CraftEventFactory.callEntityChangeBlockEvent(this.grassEaterEntity, this.grassEaterEntity.world.getWorld().getBlockAt(var1.getX(), var1.getY(), var1.getZ()), Material.AIR, !this.entityWorld.getGameRules().getBoolean("mobGriefing")).isCancelled()) {
                   this.entityWorld.playEvent(2001, var2, Block.getIdFromBlock(Blocks.GRASS));
                   this.entityWorld.setBlockState(var2, Blocks.DIRT.getDefaultState(), 2);
                }

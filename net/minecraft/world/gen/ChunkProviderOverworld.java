@@ -25,18 +25,14 @@ import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.event.terraingen.InitMapGenEvent.EventType;
-import net.minecraftforge.event.terraingen.InitNoiseGensEvent.ContextOverworld;
 
 public class ChunkProviderOverworld implements IChunkGenerator {
    protected static final IBlockState STONE = Blocks.STONE.getDefaultState();
    private final Random rand;
-   private NoiseGeneratorOctaves minLimitPerlinNoise;
-   private NoiseGeneratorOctaves maxLimitPerlinNoise;
-   private NoiseGeneratorOctaves mainPerlinNoise;
-   private NoiseGeneratorPerlin surfaceNoise;
+   private final NoiseGeneratorOctaves minLimitPerlinNoise;
+   private final NoiseGeneratorOctaves maxLimitPerlinNoise;
+   private final NoiseGeneratorOctaves mainPerlinNoise;
+   private final NoiseGeneratorPerlin surfaceNoise;
    public NoiseGeneratorOctaves scaleNoise;
    public NoiseGeneratorOctaves depthNoise;
    public NoiseGeneratorOctaves forestNoise;
@@ -48,13 +44,13 @@ public class ChunkProviderOverworld implements IChunkGenerator {
    private ChunkProviderSettings settings;
    private IBlockState oceanBlock = Blocks.WATER.getDefaultState();
    private double[] depthBuffer = new double[256];
-   private MapGenBase caveGenerator = new MapGenCaves();
-   private MapGenStronghold strongholdGenerator = new MapGenStronghold();
-   private MapGenVillage villageGenerator = new MapGenVillage();
-   private MapGenMineshaft mineshaftGenerator = new MapGenMineshaft();
-   private MapGenScatteredFeature scatteredFeatureGenerator = new MapGenScatteredFeature();
-   private MapGenBase ravineGenerator = new MapGenRavine();
-   private StructureOceanMonument oceanMonumentGenerator = new StructureOceanMonument();
+   private final MapGenBase caveGenerator = new MapGenCaves();
+   private final MapGenStronghold strongholdGenerator = new MapGenStronghold();
+   private final MapGenVillage villageGenerator = new MapGenVillage();
+   private final MapGenMineshaft mineshaftGenerator = new MapGenMineshaft();
+   private final MapGenScatteredFeature scatteredFeatureGenerator = new MapGenScatteredFeature();
+   private final MapGenBase ravineGenerator = new MapGenRavine();
+   private final StructureOceanMonument oceanMonumentGenerator = new StructureOceanMonument();
    private Biome[] biomesForGeneration;
    double[] mainNoiseRegion;
    double[] minLimitRegion;
@@ -62,13 +58,6 @@ public class ChunkProviderOverworld implements IChunkGenerator {
    double[] depthRegion;
 
    public ChunkProviderOverworld(World var1, long var2, boolean var4, String var5) {
-      this.caveGenerator = TerrainGen.getModdedMapGen(this.caveGenerator, EventType.CAVE);
-      this.strongholdGenerator = (MapGenStronghold)TerrainGen.getModdedMapGen(this.strongholdGenerator, EventType.STRONGHOLD);
-      this.villageGenerator = (MapGenVillage)TerrainGen.getModdedMapGen(this.villageGenerator, EventType.VILLAGE);
-      this.mineshaftGenerator = (MapGenMineshaft)TerrainGen.getModdedMapGen(this.mineshaftGenerator, EventType.MINESHAFT);
-      this.scatteredFeatureGenerator = (MapGenScatteredFeature)TerrainGen.getModdedMapGen(this.scatteredFeatureGenerator, EventType.SCATTERED_FEATURE);
-      this.ravineGenerator = TerrainGen.getModdedMapGen(this.ravineGenerator, EventType.RAVINE);
-      this.oceanMonumentGenerator = (StructureOceanMonument)TerrainGen.getModdedMapGen(this.oceanMonumentGenerator, EventType.OCEAN_MONUMENT);
       this.world = var1;
       this.mapFeaturesEnabled = var4;
       this.terrainType = var1.getWorldInfo().getTerrainType();
@@ -96,15 +85,6 @@ public class ChunkProviderOverworld implements IChunkGenerator {
          var1.setSeaLevel(this.settings.seaLevel);
       }
 
-      ContextOverworld var9 = new ContextOverworld(this.minLimitPerlinNoise, this.maxLimitPerlinNoise, this.mainPerlinNoise, this.surfaceNoise, this.scaleNoise, this.depthNoise, this.forestNoise);
-      var9 = (ContextOverworld)TerrainGen.getModdedNoiseGenerators(var1, this.rand, var9);
-      this.minLimitPerlinNoise = var9.getLPerlin1();
-      this.maxLimitPerlinNoise = var9.getLPerlin2();
-      this.mainPerlinNoise = var9.getPerlin();
-      this.surfaceNoise = var9.getHeight();
-      this.scaleNoise = var9.getScale();
-      this.depthNoise = var9.getDepth();
-      this.forestNoise = var9.getForest();
    }
 
    public void setBlocksInChunk(int var1, int var2, ChunkPrimer var3) {
@@ -122,44 +102,41 @@ public class ChunkProviderOverworld implements IChunkGenerator {
             int var11 = (var6 + var7 + 1) * 33;
 
             for(int var12 = 0; var12 < 32; ++var12) {
-               double var13 = 0.125D;
-               double var15 = this.heightMap[var8 + var12];
-               double var17 = this.heightMap[var9 + var12];
-               double var19 = this.heightMap[var10 + var12];
-               double var21 = this.heightMap[var11 + var12];
-               double var23 = (this.heightMap[var8 + var12 + 1] - var15) * 0.125D;
-               double var25 = (this.heightMap[var9 + var12 + 1] - var17) * 0.125D;
-               double var27 = (this.heightMap[var10 + var12 + 1] - var19) * 0.125D;
-               double var29 = (this.heightMap[var11 + var12 + 1] - var21) * 0.125D;
+               double var13 = this.heightMap[var8 + var12];
+               double var15 = this.heightMap[var9 + var12];
+               double var17 = this.heightMap[var10 + var12];
+               double var19 = this.heightMap[var11 + var12];
+               double var21 = (this.heightMap[var8 + var12 + 1] - var13) * 0.125D;
+               double var23 = (this.heightMap[var9 + var12 + 1] - var15) * 0.125D;
+               double var25 = (this.heightMap[var10 + var12 + 1] - var17) * 0.125D;
+               double var27 = (this.heightMap[var11 + var12 + 1] - var19) * 0.125D;
 
-               for(int var31 = 0; var31 < 8; ++var31) {
-                  double var32 = 0.25D;
-                  double var34 = var15;
-                  double var36 = var17;
-                  double var38 = (var19 - var15) * 0.25D;
-                  double var40 = (var21 - var17) * 0.25D;
+               for(int var29 = 0; var29 < 8; ++var29) {
+                  double var30 = var13;
+                  double var32 = var15;
+                  double var34 = (var17 - var13) * 0.25D;
+                  double var36 = (var19 - var15) * 0.25D;
 
-                  for(int var42 = 0; var42 < 4; ++var42) {
-                     double var43 = 0.25D;
-                     double var45 = (var36 - var34) * 0.25D;
-                     double var47 = var34 - var45;
+                  for(int var38 = 0; var38 < 4; ++var38) {
+                     double var39 = (var32 - var30) * 0.25D;
+                     double var41 = var30 - var39;
 
-                     for(int var49 = 0; var49 < 4; ++var49) {
-                        if ((var47 += var45) > 0.0D) {
-                           var3.setBlockState(var4 * 4 + var42, var12 * 8 + var31, var7 * 4 + var49, STONE);
-                        } else if (var12 * 8 + var31 < this.settings.seaLevel) {
-                           var3.setBlockState(var4 * 4 + var42, var12 * 8 + var31, var7 * 4 + var49, this.oceanBlock);
+                     for(int var43 = 0; var43 < 4; ++var43) {
+                        if ((var41 += var39) > 0.0D) {
+                           var3.setBlockState(var4 * 4 + var38, var12 * 8 + var29, var7 * 4 + var43, STONE);
+                        } else if (var12 * 8 + var29 < this.settings.seaLevel) {
+                           var3.setBlockState(var4 * 4 + var38, var12 * 8 + var29, var7 * 4 + var43, this.oceanBlock);
                         }
                      }
 
-                     var34 += var38;
-                     var36 += var40;
+                     var30 += var34;
+                     var32 += var36;
                   }
 
+                  var13 += var21;
                   var15 += var23;
                   var17 += var25;
                   var19 += var27;
-                  var21 += var29;
                }
             }
          }
@@ -168,18 +145,15 @@ public class ChunkProviderOverworld implements IChunkGenerator {
    }
 
    public void replaceBiomeBlocks(int var1, int var2, ChunkPrimer var3, Biome[] var4) {
-      if (ForgeEventFactory.onReplaceBiomeBlocks(this, var1, var2, var3, this.world)) {
-         double var5 = 0.03125D;
-         this.depthBuffer = this.surfaceNoise.getRegion(this.depthBuffer, (double)(var1 * 16), (double)(var2 * 16), 16, 16, 0.0625D, 0.0625D, 1.0D);
+      this.depthBuffer = this.surfaceNoise.getRegion(this.depthBuffer, (double)(var1 * 16), (double)(var2 * 16), 16, 16, 0.0625D, 0.0625D, 1.0D);
 
-         for(int var7 = 0; var7 < 16; ++var7) {
-            for(int var8 = 0; var8 < 16; ++var8) {
-               Biome var9 = var4[var8 + var7 * 16];
-               var9.genTerrainBlocks(this.world, this.rand, var3, var1 * 16 + var7, var2 * 16 + var8, this.depthBuffer[var8 + var7 * 16]);
-            }
+      for(int var5 = 0; var5 < 16; ++var5) {
+         for(int var6 = 0; var6 < 16; ++var6) {
+            Biome var7 = var4[var6 + var5 * 16];
+            var7.genTerrainBlocks(this.world, this.rand, var3, var1 * 16 + var5, var2 * 16 + var6, this.depthBuffer[var6 + var5 * 16]);
          }
-
       }
+
    }
 
    public Chunk provideChunk(int var1, int var2) {
@@ -244,27 +218,30 @@ public class ChunkProviderOverworld implements IChunkGenerator {
             float var10 = 0.0F;
             float var11 = 0.0F;
             float var12 = 0.0F;
-            boolean var13 = true;
-            Biome var14 = this.biomesForGeneration[var8 + 2 + (var9 + 2) * 10];
+            Biome var13 = this.biomesForGeneration[var8 + 2 + (var9 + 2) * 10];
 
-            for(int var15 = -2; var15 <= 2; ++var15) {
-               for(int var16 = -2; var16 <= 2; ++var16) {
-                  Biome var17 = this.biomesForGeneration[var8 + var15 + 2 + (var9 + var16 + 2) * 10];
-                  float var18 = this.settings.biomeDepthOffSet + var17.getBaseHeight() * this.settings.biomeDepthWeight;
-                  float var19 = this.settings.biomeScaleOffset + var17.getHeightVariation() * this.settings.biomeScaleWeight;
-                  if (this.terrainType == WorldType.AMPLIFIED && var18 > 0.0F) {
-                     var18 = 1.0F + var18 * 2.0F;
-                     var19 = 1.0F + var19 * 4.0F;
+            for(int var14 = -2; var14 <= 2; ++var14) {
+               for(int var15 = -2; var15 <= 2; ++var15) {
+                  Biome var16 = this.biomesForGeneration[var8 + var14 + 2 + (var9 + var15 + 2) * 10];
+                  float var17 = this.settings.biomeDepthOffSet + var16.getBaseHeight() * this.settings.biomeDepthWeight;
+                  float var18 = this.settings.biomeScaleOffset + var16.getHeightVariation() * this.settings.biomeScaleWeight;
+                  if (this.terrainType == WorldType.AMPLIFIED && var17 > 0.0F) {
+                     var17 = 1.0F + var17 * 2.0F;
+                     var18 = 1.0F + var18 * 4.0F;
                   }
 
-                  float var20 = this.biomeWeights[var15 + 2 + (var16 + 2) * 5] / (var18 + 2.0F);
-                  if (var17.getBaseHeight() > var14.getBaseHeight()) {
-                     var20 /= 2.0F;
+                  if (var17 < -1.8F) {
+                     var17 = -1.8F;
                   }
 
-                  var10 += var19 * var20;
-                  var11 += var18 * var20;
-                  var12 += var20;
+                  float var19 = this.biomeWeights[var14 + 2 + (var15 + 2) * 5] / (var17 + 2.0F);
+                  if (var16.getBaseHeight() > var13.getBaseHeight()) {
+                     var19 /= 2.0F;
+                  }
+
+                  var10 += var18 * var19;
+                  var11 += var17 * var19;
+                  var12 += var19;
                }
             }
 
@@ -272,51 +249,51 @@ public class ChunkProviderOverworld implements IChunkGenerator {
             var11 = var11 / var12;
             var10 = var10 * 0.9F + 0.1F;
             var11 = (var11 * 4.0F - 1.0F) / 8.0F;
-            double var40 = this.depthRegion[var7] / 8000.0D;
-            if (var40 < 0.0D) {
-               var40 = -var40 * 0.3D;
+            double var20 = this.depthRegion[var7] / 8000.0D;
+            if (var20 < 0.0D) {
+               var20 = -var20 * 0.3D;
             }
 
-            var40 = var40 * 3.0D - 2.0D;
-            if (var40 < 0.0D) {
-               var40 = var40 / 2.0D;
-               if (var40 < -1.0D) {
-                  var40 = -1.0D;
+            var20 = var20 * 3.0D - 2.0D;
+            if (var20 < 0.0D) {
+               var20 = var20 / 2.0D;
+               if (var20 < -1.0D) {
+                  var20 = -1.0D;
                }
 
-               var40 = var40 / 1.4D;
-               var40 = var40 / 2.0D;
+               var20 = var20 / 1.4D;
+               var20 = var20 / 2.0D;
             } else {
-               if (var40 > 1.0D) {
-                  var40 = 1.0D;
+               if (var20 > 1.0D) {
+                  var20 = 1.0D;
                }
 
-               var40 = var40 / 8.0D;
+               var20 = var20 / 8.0D;
             }
 
             ++var7;
-            double var45 = (double)var11;
-            double var48 = (double)var10;
-            var45 = var45 + var40 * 0.2D;
-            var45 = var45 * (double)this.settings.baseSize / 8.0D;
-            double var21 = (double)this.settings.baseSize + var45 * 4.0D;
+            double var22 = (double)var11;
+            double var24 = (double)var10;
+            var22 = var22 + var20 * 0.2D;
+            var22 = var22 * (double)this.settings.baseSize / 8.0D;
+            double var26 = (double)this.settings.baseSize + var22 * 4.0D;
 
-            for(int var23 = 0; var23 < 33; ++var23) {
-               double var24 = ((double)var23 - var21) * (double)this.settings.stretchY * 128.0D / 256.0D / var48;
-               if (var24 < 0.0D) {
-                  var24 *= 4.0D;
+            for(int var28 = 0; var28 < 33; ++var28) {
+               double var29 = ((double)var28 - var26) * (double)this.settings.stretchY * 128.0D / 256.0D / var24;
+               if (var29 < 0.0D) {
+                  var29 *= 4.0D;
                }
 
-               double var26 = this.minLimitRegion[var6] / (double)this.settings.lowerLimitScale;
-               double var28 = this.maxLimitRegion[var6] / (double)this.settings.upperLimitScale;
-               double var30 = (this.mainNoiseRegion[var6] / 10.0D + 1.0D) / 2.0D;
-               double var32 = MathHelper.clampedLerp(var26, var28, var30) - var24;
-               if (var23 > 29) {
-                  double var34 = (double)((float)(var23 - 29) / 3.0F);
-                  var32 = var32 * (1.0D - var34) + -10.0D * var34;
+               double var31 = this.minLimitRegion[var6] / (double)this.settings.lowerLimitScale;
+               double var33 = this.maxLimitRegion[var6] / (double)this.settings.upperLimitScale;
+               double var35 = (this.mainNoiseRegion[var6] / 10.0D + 1.0D) / 2.0D;
+               double var37 = MathHelper.clampedLerp(var31, var33, var35) - var29;
+               if (var28 > 29) {
+                  double var39 = (double)((float)(var28 - 29) / 3.0F);
+                  var37 = var37 * (1.0D - var39) + -10.0D * var39;
                }
 
-               this.heightMap[var6] = var32;
+               this.heightMap[var6] = var37;
                ++var6;
             }
          }
@@ -336,7 +313,6 @@ public class ChunkProviderOverworld implements IChunkGenerator {
       this.rand.setSeed((long)var1 * var7 + (long)var2 * var9 ^ this.world.getSeed());
       boolean var11 = false;
       ChunkPos var12 = new ChunkPos(var1, var2);
-      ForgeEventFactory.onChunkPopulate(true, this, this.world, this.rand, var1, var2, var11);
       if (this.mapFeaturesEnabled) {
          if (this.settings.useMineShafts) {
             this.mineshaftGenerator.generateStructure(this.world, this.rand, var12);
@@ -359,54 +335,49 @@ public class ChunkProviderOverworld implements IChunkGenerator {
          }
       }
 
-      if (var6 != Biomes.DESERT && var6 != Biomes.DESERT_HILLS && this.settings.useWaterLakes && !var11 && this.rand.nextInt(this.settings.waterLakeChance) == 0 && TerrainGen.populate(this, this.world, this.rand, var1, var2, var11, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.LAKE)) {
+      if (var6 != Biomes.DESERT && var6 != Biomes.DESERT_HILLS && this.settings.useWaterLakes && !var11 && this.rand.nextInt(this.settings.waterLakeChance) == 0) {
          int var13 = this.rand.nextInt(16) + 8;
          int var14 = this.rand.nextInt(256);
          int var15 = this.rand.nextInt(16) + 8;
          (new WorldGenLakes(Blocks.WATER)).generate(this.world, this.rand, var5.add(var13, var14, var15));
       }
 
-      if (!var11 && this.rand.nextInt(this.settings.lavaLakeChance / 10) == 0 && this.settings.useLavaLakes && TerrainGen.populate(this, this.world, this.rand, var1, var2, var11, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.LAVA)) {
-         int var18 = this.rand.nextInt(16) + 8;
-         int var21 = this.rand.nextInt(this.rand.nextInt(248) + 8);
-         int var24 = this.rand.nextInt(16) + 8;
-         if (var21 < this.world.getSeaLevel() || this.rand.nextInt(this.settings.lavaLakeChance / 8) == 0) {
-            (new WorldGenLakes(Blocks.LAVA)).generate(this.world, this.rand, var5.add(var18, var21, var24));
+      if (!var11 && this.rand.nextInt(this.settings.lavaLakeChance / 10) == 0 && this.settings.useLavaLakes) {
+         int var19 = this.rand.nextInt(16) + 8;
+         int var22 = this.rand.nextInt(this.rand.nextInt(248) + 8);
+         int var25 = this.rand.nextInt(16) + 8;
+         if (var22 < this.world.getSeaLevel() || this.rand.nextInt(this.settings.lavaLakeChance / 8) == 0) {
+            (new WorldGenLakes(Blocks.LAVA)).generate(this.world, this.rand, var5.add(var19, var22, var25));
          }
       }
 
-      if (this.settings.useDungeons && TerrainGen.populate(this, this.world, this.rand, var1, var2, var11, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.DUNGEON)) {
-         for(int var19 = 0; var19 < this.settings.dungeonChance; ++var19) {
-            int var22 = this.rand.nextInt(16) + 8;
-            int var25 = this.rand.nextInt(256);
+      if (this.settings.useDungeons) {
+         for(int var20 = 0; var20 < this.settings.dungeonChance; ++var20) {
+            int var23 = this.rand.nextInt(16) + 8;
+            int var26 = this.rand.nextInt(256);
             int var16 = this.rand.nextInt(16) + 8;
-            (new WorldGenDungeons()).generate(this.world, this.rand, var5.add(var22, var25, var16));
+            (new WorldGenDungeons()).generate(this.world, this.rand, var5.add(var23, var26, var16));
          }
       }
 
       var6.decorate(this.world, this.rand, new BlockPos(var3, 0, var4));
-      if (TerrainGen.populate(this, this.world, this.rand, var1, var2, var11, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.ANIMALS)) {
-         WorldEntitySpawner.performWorldGenSpawning(this.world, var6, var3 + 8, var4 + 8, 16, 16, this.rand);
-      }
-
+      WorldEntitySpawner.performWorldGenSpawning(this.world, var6, var3 + 8, var4 + 8, 16, 16, this.rand);
       var5 = var5.add(8, 0, 8);
-      if (TerrainGen.populate(this, this.world, this.rand, var1, var2, var11, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.ICE)) {
-         for(int var20 = 0; var20 < 16; ++var20) {
-            for(int var23 = 0; var23 < 16; ++var23) {
-               BlockPos var26 = this.world.getPrecipitationHeight(var5.add(var20, 0, var23));
-               BlockPos var27 = var26.down();
-               if (this.world.canBlockFreezeWater(var27)) {
-                  this.world.setBlockState(var27, Blocks.ICE.getDefaultState(), 2);
-               }
 
-               if (this.world.canSnowAt(var26, true)) {
-                  this.world.setBlockState(var26, Blocks.SNOW_LAYER.getDefaultState(), 2);
-               }
+      for(int var21 = 0; var21 < 16; ++var21) {
+         for(int var24 = 0; var24 < 16; ++var24) {
+            BlockPos var27 = this.world.getPrecipitationHeight(var5.add(var21, 0, var24));
+            BlockPos var17 = var27.down();
+            if (this.world.canBlockFreezeWater(var17)) {
+               this.world.setBlockState(var17, Blocks.ICE.getDefaultState(), 2);
+            }
+
+            if (this.world.canSnowAt(var27, true)) {
+               this.world.setBlockState(var27, Blocks.SNOW_LAYER.getDefaultState(), 2);
             }
          }
       }
 
-      ForgeEventFactory.onChunkPopulate(false, this, this.world, this.rand, var1, var2, var11);
       BlockFalling.fallInstantly = false;
    }
 

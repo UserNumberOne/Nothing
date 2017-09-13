@@ -9,10 +9,17 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityInteractEvent;
 
 public class BlockPressurePlateWeighted extends BlockBasePressurePlate {
    public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
@@ -29,10 +36,26 @@ public class BlockPressurePlateWeighted extends BlockBasePressurePlate {
    }
 
    protected int computeRedstoneStrength(World var1, BlockPos var2) {
-      int var3 = Math.min(var1.getEntitiesWithinAABB(Entity.class, PRESSURE_AABB.offset(var2)).size(), this.maxWeight);
+      int var3 = 0;
+
+      for(Entity var5 : var1.getEntitiesWithinAABB(Entity.class, PRESSURE_AABB.offset(var2))) {
+         Object var6;
+         if (var5 instanceof EntityPlayer) {
+            var6 = CraftEventFactory.callPlayerInteractEvent((EntityPlayer)var5, Action.PHYSICAL, var2, (EnumFacing)null, (ItemStack)null, (EnumHand)null);
+         } else {
+            var6 = new EntityInteractEvent(var5.getBukkitEntity(), var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ()));
+            var1.getServer().getPluginManager().callEvent((EntityInteractEvent)var6);
+         }
+
+         if (!((Cancellable)var6).isCancelled()) {
+            ++var3;
+         }
+      }
+
+      var3 = Math.min(var3, this.maxWeight);
       if (var3 > 0) {
-         float var4 = (float)Math.min(this.maxWeight, var3) / (float)this.maxWeight;
-         return MathHelper.ceil(var4 * 15.0F);
+         float var8 = (float)Math.min(this.maxWeight, var3) / (float)this.maxWeight;
+         return MathHelper.ceil(var8 * 15.0F);
       } else {
          return 0;
       }

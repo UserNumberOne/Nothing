@@ -17,7 +17,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.IStringSerializable;
@@ -30,9 +29,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeModContainer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockStairs extends Block {
    public static final PropertyDirection FACING = BlockHorizontal.FACING;
@@ -151,22 +147,12 @@ public class BlockStairs extends Block {
       return false;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      this.modelBlock.randomDisplayTick(var1, var2, var3, var4);
-   }
-
    public void onBlockClicked(World var1, BlockPos var2, EntityPlayer var3) {
       this.modelBlock.onBlockClicked(var1, var2, var3);
    }
 
    public void onBlockDestroyedByPlayer(World var1, BlockPos var2, IBlockState var3) {
       this.modelBlock.onBlockDestroyedByPlayer(var1, var2, var3);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getPackedLightmapCoords(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      return this.modelState.getPackedLightmapCoords(var2, var3);
    }
 
    public float getExplosionResistance(Entity var1) {
@@ -179,16 +165,6 @@ public class BlockStairs extends Block {
 
    public Vec3d modifyAcceleration(World var1, BlockPos var2, Entity var3, Vec3d var4) {
       return this.modelBlock.modifyAcceleration(var1, var2, var3, var4);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return this.modelBlock.getBlockLayer();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public AxisAlignedBB getSelectedBoundingBox(IBlockState var1, World var2, BlockPos var3) {
-      return this.modelState.getSelectedBoundingBox(var2, var3);
    }
 
    public boolean isCollidable() {
@@ -239,7 +215,7 @@ public class BlockStairs extends Block {
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
       IBlockState var9 = super.getStateForPlacement(var1, var2, var3, var4, var5, var6, var7, var8);
       var9 = var9.withProperty(FACING, var8.getHorizontalFacing()).withProperty(SHAPE, BlockStairs.EnumShape.STRAIGHT);
-      return var3 == EnumFacing.DOWN || var3 != EnumFacing.UP && (double)var5 > 0.5D ? var9.withProperty(HALF, BlockStairs.EnumHalf.TOP) : var9.withProperty(HALF, BlockStairs.EnumHalf.BOTTOM);
+      return var3 != EnumFacing.DOWN && (var3 == EnumFacing.UP || (double)var5 <= 0.5D) ? var9.withProperty(HALF, BlockStairs.EnumHalf.BOTTOM) : var9.withProperty(HALF, BlockStairs.EnumHalf.TOP);
    }
 
    @Nullable
@@ -250,20 +226,20 @@ public class BlockStairs extends Block {
          var6.add(this.rayTrace(var3, var4, var5, var8));
       }
 
-      RayTraceResult var14 = null;
-      double var15 = 0.0D;
+      RayTraceResult var15 = null;
+      double var9 = 0.0D;
 
-      for(RayTraceResult var11 : var6) {
-         if (var11 != null) {
-            double var12 = var11.hitVec.squareDistanceTo(var5);
-            if (var12 > var15) {
-               var14 = var11;
+      for(RayTraceResult var12 : var6) {
+         if (var12 != null) {
+            double var13 = var12.hitVec.squareDistanceTo(var5);
+            if (var13 > var9) {
                var15 = var12;
+               var9 = var13;
             }
          }
       }
 
-      return var14;
+      return var15;
    }
 
    public IBlockState getStateFromMeta(int var1) {
@@ -370,34 +346,6 @@ public class BlockStairs extends Block {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, HALF, SHAPE});
-   }
-
-   public boolean doesSideBlockRendering(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      if (ForgeModContainer.disableStairSlabCulling) {
-         return super.doesSideBlockRendering(var1, var2, var3, var4);
-      } else if (var1.isOpaqueCube()) {
-         return true;
-      } else {
-         var1 = this.getActualState(var1, var2, var3);
-         BlockStairs.EnumHalf var5 = (BlockStairs.EnumHalf)var1.getValue(HALF);
-         EnumFacing var6 = (EnumFacing)var1.getValue(FACING);
-         BlockStairs.EnumShape var7 = (BlockStairs.EnumShape)var1.getValue(SHAPE);
-         if (var4 == EnumFacing.UP) {
-            return var5 == BlockStairs.EnumHalf.TOP;
-         } else if (var4 == EnumFacing.DOWN) {
-            return var5 == BlockStairs.EnumHalf.BOTTOM;
-         } else if (var7 != BlockStairs.EnumShape.OUTER_LEFT && var7 != BlockStairs.EnumShape.OUTER_RIGHT) {
-            if (var4 == var6) {
-               return true;
-            } else if (var7 == BlockStairs.EnumShape.INNER_LEFT && var4.rotateY() == var6) {
-               return true;
-            } else {
-               return var7 == BlockStairs.EnumShape.INNER_RIGHT && var4.rotateYCCW() == var6;
-            }
-         } else {
-            return false;
-         }
-      }
    }
 
    public static enum EnumHalf implements IStringSerializable {

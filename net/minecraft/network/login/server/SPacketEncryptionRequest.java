@@ -6,8 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginClient;
 import net.minecraft.util.CryptManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEncryptionRequest implements Packet {
    private String hashedServerId;
@@ -37,20 +35,5 @@ public class SPacketEncryptionRequest implements Packet {
 
    public void processPacket(INetHandlerLoginClient var1) {
       var1.handleEncryptionRequest(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getServerId() {
-      return this.hashedServerId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public PublicKey getPublicKey() {
-      return this.publicKey;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte[] getVerifyToken() {
-      return this.verifyToken;
    }
 }

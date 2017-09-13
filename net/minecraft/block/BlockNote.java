@@ -20,8 +20,6 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.NoteBlockEvent.Play;
 
 public class BlockNote extends BlockContainer {
    private static final List INSTRUMENTS = Lists.newArrayList(new SoundEvent[]{SoundEvents.BLOCK_NOTE_HARP, SoundEvents.BLOCK_NOTE_BASEDRUM, SoundEvents.BLOCK_NOTE_SNARE, SoundEvents.BLOCK_NOTE_HAT, SoundEvents.BLOCK_NOTE_BASS});
@@ -54,12 +52,7 @@ public class BlockNote extends BlockContainer {
          TileEntity var11 = var1.getTileEntity(var2);
          if (var11 instanceof TileEntityNote) {
             TileEntityNote var12 = (TileEntityNote)var11;
-            byte var13 = var12.note;
             var12.changePitch();
-            if (var13 == var12.note) {
-               return false;
-            }
-
             var12.triggerNote(var1, var2);
             var4.addStat(StatList.NOTEBLOCK_TUNED);
          }
@@ -75,8 +68,8 @@ public class BlockNote extends BlockContainer {
             ((TileEntityNote)var4).triggerNote(var1, var2);
             var3.addStat(StatList.NOTEBLOCK_PLAYED);
          }
-      }
 
+      }
    }
 
    public TileEntity createNewTileEntity(World var1, int var2) {
@@ -92,17 +85,10 @@ public class BlockNote extends BlockContainer {
    }
 
    public boolean eventReceived(IBlockState var1, World var2, BlockPos var3, int var4, int var5) {
-      Play var6 = new Play(var2, var3, var1, var5, var4);
-      if (MinecraftForge.EVENT_BUS.post(var6)) {
-         return false;
-      } else {
-         var4 = var6.getInstrument().ordinal();
-         var5 = var6.getVanillaNoteId();
-         float var7 = (float)Math.pow(2.0D, (double)(var5 - 12) / 12.0D);
-         var2.playSound((EntityPlayer)null, var3, this.getInstrument(var4), SoundCategory.RECORDS, 3.0F, var7);
-         var2.spawnParticle(EnumParticleTypes.NOTE, (double)var3.getX() + 0.5D, (double)var3.getY() + 1.2D, (double)var3.getZ() + 0.5D, (double)var5 / 24.0D, 0.0D, 0.0D);
-         return true;
-      }
+      float var6 = (float)Math.pow(2.0D, (double)(var5 - 12) / 12.0D);
+      var2.playSound((EntityPlayer)null, var3, this.getInstrument(var4), SoundCategory.RECORDS, 3.0F, var6);
+      var2.spawnParticle(EnumParticleTypes.NOTE, (double)var3.getX() + 0.5D, (double)var3.getY() + 1.2D, (double)var3.getZ() + 0.5D, (double)var5 / 24.0D, 0.0D, 0.0D);
+      return true;
    }
 
    public EnumBlockRenderType getRenderType(IBlockState var1) {

@@ -85,7 +85,6 @@ public class MapGenEndCity extends MapGenStructure {
             this.updateBoundingBox();
             this.isSizeable = true;
          }
-
       }
 
       public boolean isSizeableStructure() {

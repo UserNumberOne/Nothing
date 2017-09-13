@@ -3,6 +3,7 @@ package net.minecraft.entity.passive;
 import com.google.common.base.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
@@ -40,6 +41,8 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntityOcelot extends EntityTameable {
    private static final DataParameter OCELOT_VARIANT = EntityDataManager.createKey(EntityOcelot.class, DataSerializers.VARINT);
@@ -93,7 +96,7 @@ public class EntityOcelot extends EntityTameable {
    }
 
    protected boolean canDespawn() {
-      return !this.isTamed() && this.ticksExisted > 2400;
+      return !this.isTamed();
    }
 
    protected void applyEntityAttributes() {
@@ -140,18 +143,6 @@ public class EntityOcelot extends EntityTameable {
       return var1.attackEntityFrom(DamageSource.causeMobDamage(this), 3.0F);
    }
 
-   public boolean attackEntityFrom(DamageSource var1, float var2) {
-      if (this.isEntityInvulnerable(var1)) {
-         return false;
-      } else {
-         if (this.aiSit != null) {
-            this.aiSit.setSitting(false);
-         }
-
-         return super.attackEntityFrom(var1, var2);
-      }
-   }
-
    @Nullable
    protected ResourceLocation getLootTable() {
       return LootTableList.ENTITIES_OCELOT;
@@ -168,7 +159,7 @@ public class EntityOcelot extends EntityTameable {
          }
 
          if (!this.world.isRemote) {
-            if (this.rand.nextInt(3) == 0) {
+            if (this.rand.nextInt(3) == 0 && !CraftEventFactory.callEntityTameEvent(this, var1).isCancelled()) {
                this.setTamed(true);
                this.setTameSkin(1 + this.world.rand.nextInt(3));
                this.setOwnerId(var1.getUniqueID());
@@ -236,7 +227,7 @@ public class EntityOcelot extends EntityTameable {
 
          IBlockState var2 = this.world.getBlockState(var1.down());
          Block var3 = var2.getBlock();
-         if (var3 == Blocks.GRASS || var3.isLeaves(var2, this.world, var1.down())) {
+         if (var3 == Blocks.GRASS || var2.getMaterial() == Material.LEAVES) {
             return true;
          }
       }
@@ -272,10 +263,14 @@ public class EntityOcelot extends EntityTameable {
             EntityOcelot var4 = new EntityOcelot(this.world);
             var4.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
             var4.setGrowingAge(-24000);
-            this.world.spawnEntity(var4);
+            this.world.addEntity(var4, SpawnReason.OCELOT_BABY);
          }
       }
 
       return var2;
+   }
+
+   public EntityAgeable createChild(EntityAgeable var1) {
+      return this.createChild(var1);
    }
 }

@@ -22,6 +22,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.event.block.BlockRedstoneEvent;
 
 public class BlockLever extends Block {
    public static final PropertyEnum FACING = PropertyEnum.create("facing", BlockLever.EnumOrientation.class);
@@ -108,21 +109,21 @@ public class BlockLever extends Block {
    }
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      switch((BlockLever.EnumOrientation)var1.getValue(FACING)) {
-      case EAST:
+      switch(BlockLever.SyntheticClass_1.b[((BlockLever.EnumOrientation)var1.getValue(FACING)).ordinal()]) {
+      case 1:
       default:
          return LEVER_EAST_AABB;
-      case WEST:
+      case 2:
          return LEVER_WEST_AABB;
-      case SOUTH:
+      case 3:
          return LEVER_SOUTH_AABB;
-      case NORTH:
+      case 4:
          return LEVER_NORTH_AABB;
-      case UP_Z:
-      case UP_X:
+      case 5:
+      case 6:
          return LEVER_UP_AABB;
-      case DOWN_X:
-      case DOWN_Z:
+      case 7:
+      case 8:
          return LEVER_DOWN_AABB;
       }
    }
@@ -131,14 +132,24 @@ public class BlockLever extends Block {
       if (var1.isRemote) {
          return true;
       } else {
-         var3 = var3.cycleProperty(POWERED);
-         var1.setBlockState(var2, var3, 3);
-         float var11 = ((Boolean)var3.getValue(POWERED)).booleanValue() ? 0.6F : 0.5F;
-         var1.playSound((EntityPlayer)null, var2, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, var11);
-         var1.notifyNeighborsOfStateChange(var2, this);
-         EnumFacing var12 = ((BlockLever.EnumOrientation)var3.getValue(FACING)).getFacing();
-         var1.notifyNeighborsOfStateChange(var2.offset(var12.getOpposite()), this);
-         return true;
+         boolean var11 = ((Boolean)var3.getValue(POWERED)).booleanValue();
+         org.bukkit.block.Block var12 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+         int var13 = var11 ? 15 : 0;
+         int var14 = !var11 ? 15 : 0;
+         BlockRedstoneEvent var15 = new BlockRedstoneEvent(var12, var13, var14);
+         var1.getServer().getPluginManager().callEvent(var15);
+         if (var15.getNewCurrent() > 0 != !var11) {
+            return true;
+         } else {
+            var3 = var3.cycleProperty(POWERED);
+            var1.setBlockState(var2, var3, 3);
+            float var16 = ((Boolean)var3.getValue(POWERED)).booleanValue() ? 0.6F : 0.5F;
+            var1.playSound((EntityPlayer)null, var2, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, var16);
+            var1.notifyNeighborsOfStateChange(var2, this);
+            EnumFacing var17 = ((BlockLever.EnumOrientation)var3.getValue(FACING)).getFacing();
+            var1.notifyNeighborsOfStateChange(var2.offset(var17.getOpposite()), this);
+            return true;
+         }
       }
    }
 
@@ -169,66 +180,66 @@ public class BlockLever extends Block {
    }
 
    public int getMetaFromState(IBlockState var1) {
-      int var2 = 0;
-      var2 = var2 | ((BlockLever.EnumOrientation)var1.getValue(FACING)).getMetadata();
+      byte var2 = 0;
+      int var3 = var2 | ((BlockLever.EnumOrientation)var1.getValue(FACING)).getMetadata();
       if (((Boolean)var1.getValue(POWERED)).booleanValue()) {
-         var2 |= 8;
+         var3 |= 8;
       }
 
-      return var2;
+      return var3;
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      switch(var2) {
-      case CLOCKWISE_180:
-         switch((BlockLever.EnumOrientation)var1.getValue(FACING)) {
-         case EAST:
+      switch(BlockLever.SyntheticClass_1.c[var2.ordinal()]) {
+      case 1:
+         switch(BlockLever.SyntheticClass_1.b[((BlockLever.EnumOrientation)var1.getValue(FACING)).ordinal()]) {
+         case 1:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.WEST);
-         case WEST:
+         case 2:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.EAST);
-         case SOUTH:
+         case 3:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.NORTH);
-         case NORTH:
+         case 4:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.SOUTH);
          default:
             return var1;
          }
-      case COUNTERCLOCKWISE_90:
-         switch((BlockLever.EnumOrientation)var1.getValue(FACING)) {
-         case EAST:
+      case 2:
+         switch(BlockLever.SyntheticClass_1.b[((BlockLever.EnumOrientation)var1.getValue(FACING)).ordinal()]) {
+         case 1:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.NORTH);
-         case WEST:
+         case 2:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.SOUTH);
-         case SOUTH:
+         case 3:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.EAST);
-         case NORTH:
+         case 4:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.WEST);
-         case UP_Z:
+         case 5:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.UP_X);
-         case UP_X:
+         case 6:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.UP_Z);
-         case DOWN_X:
+         case 7:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.DOWN_Z);
-         case DOWN_Z:
+         case 8:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.DOWN_X);
          }
-      case CLOCKWISE_90:
-         switch((BlockLever.EnumOrientation)var1.getValue(FACING)) {
-         case EAST:
+      case 3:
+         switch(BlockLever.SyntheticClass_1.b[((BlockLever.EnumOrientation)var1.getValue(FACING)).ordinal()]) {
+         case 1:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.SOUTH);
-         case WEST:
+         case 2:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.NORTH);
-         case SOUTH:
+         case 3:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.WEST);
-         case NORTH:
+         case 4:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.EAST);
-         case UP_Z:
+         case 5:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.UP_X);
-         case UP_X:
+         case 6:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.UP_Z);
-         case DOWN_X:
+         case 7:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.DOWN_Z);
-         case DOWN_Z:
+         case 8:
             return var1.withProperty(FACING, BlockLever.EnumOrientation.DOWN_X);
          }
       default:
@@ -242,10 +253,6 @@ public class BlockLever extends Block {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, POWERED});
-   }
-
-   private boolean canAttach(World var1, BlockPos var2, EnumFacing var3) {
-      return var1.isSideSolid(var2, var3);
    }
 
    public static enum EnumOrientation implements IStringSerializable {
@@ -262,6 +269,13 @@ public class BlockLever extends Block {
       private final int meta;
       private final String name;
       private final EnumFacing facing;
+
+      static {
+         for(BlockLever.EnumOrientation var3 : values()) {
+            META_LOOKUP[var3.getMetadata()] = var3;
+         }
+
+      }
 
       private EnumOrientation(int var3, String var4, EnumFacing var5) {
          this.meta = var3;
@@ -290,32 +304,32 @@ public class BlockLever extends Block {
       }
 
       public static BlockLever.EnumOrientation forFacings(EnumFacing var0, EnumFacing var1) {
-         switch(var0) {
-         case DOWN:
-            switch(var1.getAxis()) {
-            case X:
+         switch(BlockLever.SyntheticClass_1.a[var0.ordinal()]) {
+         case 1:
+            switch(BlockLever.SyntheticClass_1.d[var1.getAxis().ordinal()]) {
+            case 1:
                return DOWN_X;
-            case Z:
+            case 2:
                return DOWN_Z;
             default:
                throw new IllegalArgumentException("Invalid entityFacing " + var1 + " for facing " + var0);
             }
-         case UP:
-            switch(var1.getAxis()) {
-            case X:
+         case 2:
+            switch(BlockLever.SyntheticClass_1.d[var1.getAxis().ordinal()]) {
+            case 1:
                return UP_X;
-            case Z:
+            case 2:
                return UP_Z;
             default:
                throw new IllegalArgumentException("Invalid entityFacing " + var1 + " for facing " + var0);
             }
-         case NORTH:
+         case 3:
             return NORTH;
-         case SOUTH:
+         case 4:
             return SOUTH;
-         case WEST:
+         case 5:
             return WEST;
-         case EAST:
+         case 6:
             return EAST;
          default:
             throw new IllegalArgumentException("Invalid facing: " + var0);
@@ -325,10 +339,133 @@ public class BlockLever extends Block {
       public String getName() {
          return this.name;
       }
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a;
+      static final int[] b;
+      static final int[] c;
+      static final int[] d = new int[EnumFacing.Axis.values().length];
 
       static {
-         for(BlockLever.EnumOrientation var3 : values()) {
-            META_LOOKUP[var3.getMetadata()] = var3;
+         try {
+            d[EnumFacing.Axis.X.ordinal()] = 1;
+         } catch (NoSuchFieldError var18) {
+            ;
+         }
+
+         try {
+            d[EnumFacing.Axis.Z.ordinal()] = 2;
+         } catch (NoSuchFieldError var17) {
+            ;
+         }
+
+         c = new int[Rotation.values().length];
+
+         try {
+            c[Rotation.CLOCKWISE_180.ordinal()] = 1;
+         } catch (NoSuchFieldError var16) {
+            ;
+         }
+
+         try {
+            c[Rotation.COUNTERCLOCKWISE_90.ordinal()] = 2;
+         } catch (NoSuchFieldError var15) {
+            ;
+         }
+
+         try {
+            c[Rotation.CLOCKWISE_90.ordinal()] = 3;
+         } catch (NoSuchFieldError var14) {
+            ;
+         }
+
+         b = new int[BlockLever.EnumOrientation.values().length];
+
+         try {
+            b[BlockLever.EnumOrientation.EAST.ordinal()] = 1;
+         } catch (NoSuchFieldError var13) {
+            ;
+         }
+
+         try {
+            b[BlockLever.EnumOrientation.WEST.ordinal()] = 2;
+         } catch (NoSuchFieldError var12) {
+            ;
+         }
+
+         try {
+            b[BlockLever.EnumOrientation.SOUTH.ordinal()] = 3;
+         } catch (NoSuchFieldError var11) {
+            ;
+         }
+
+         try {
+            b[BlockLever.EnumOrientation.NORTH.ordinal()] = 4;
+         } catch (NoSuchFieldError var10) {
+            ;
+         }
+
+         try {
+            b[BlockLever.EnumOrientation.UP_Z.ordinal()] = 5;
+         } catch (NoSuchFieldError var9) {
+            ;
+         }
+
+         try {
+            b[BlockLever.EnumOrientation.UP_X.ordinal()] = 6;
+         } catch (NoSuchFieldError var8) {
+            ;
+         }
+
+         try {
+            b[BlockLever.EnumOrientation.DOWN_X.ordinal()] = 7;
+         } catch (NoSuchFieldError var7) {
+            ;
+         }
+
+         try {
+            b[BlockLever.EnumOrientation.DOWN_Z.ordinal()] = 8;
+         } catch (NoSuchFieldError var6) {
+            ;
+         }
+
+         a = new int[EnumFacing.values().length];
+
+         try {
+            a[EnumFacing.DOWN.ordinal()] = 1;
+         } catch (NoSuchFieldError var5) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.UP.ordinal()] = 2;
+         } catch (NoSuchFieldError var4) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 3;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 4;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 5;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.EAST.ordinal()] = 6;
+         } catch (NoSuchFieldError var0) {
+            ;
          }
 
       }

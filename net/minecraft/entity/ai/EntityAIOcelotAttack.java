@@ -27,7 +27,13 @@ public class EntityAIOcelotAttack extends EntityAIBase {
    }
 
    public boolean continueExecuting() {
-      return !this.theVictim.isEntityAlive() ? false : (this.theEntity.getDistanceSqToEntity(this.theVictim) > 225.0D ? false : !this.theEntity.getNavigator().noPath() || this.shouldExecute());
+      if (!this.theVictim.isEntityAlive()) {
+         return false;
+      } else if (this.theEntity.getDistanceSqToEntity(this.theVictim) > 225.0D) {
+         return false;
+      } else {
+         return !this.theEntity.getNavigator().noPath() || this.shouldExecute();
+      }
    }
 
    public void resetTask() {
@@ -48,10 +54,11 @@ public class EntityAIOcelotAttack extends EntityAIBase {
 
       this.theEntity.getNavigator().tryMoveToEntityLiving(this.theVictim, var5);
       this.attackCountdown = Math.max(this.attackCountdown - 1, 0);
-      if (var3 <= var1 && this.attackCountdown <= 0) {
-         this.attackCountdown = 20;
-         this.theEntity.attackEntityAsMob(this.theVictim);
+      if (var3 <= var1) {
+         if (this.attackCountdown <= 0) {
+            this.attackCountdown = 20;
+            this.theEntity.attackEntityAsMob(this.theVictim);
+         }
       }
-
    }
 }

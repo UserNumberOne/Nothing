@@ -9,24 +9,12 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemCarrotOnAStick extends Item {
    public ItemCarrotOnAStick() {
       this.setCreativeTab(CreativeTabs.TRANSPORTATION);
       this.setMaxStackSize(1);
       this.setMaxDamage(25);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isFull3D() {
-      return true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldRotateAroundWhenRendering() {
-      return true;
    }
 
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {

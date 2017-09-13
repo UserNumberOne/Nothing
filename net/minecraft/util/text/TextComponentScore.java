@@ -4,7 +4,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.StringUtils;
 
 public class TextComponentScore extends TextComponentBase {
@@ -34,9 +34,9 @@ public class TextComponentScore extends TextComponentBase {
    }
 
    public void resolve(ICommandSender var1) {
-      MinecraftServer var2 = var1.getServer();
-      if (var2 != null && var2.isAnvilFileSet() && StringUtils.isNullOrEmpty(this.value)) {
-         Scoreboard var3 = var2.worldServerForDimension(0).getScoreboard();
+      MinecraftServer var2 = var1.h();
+      if (var2 != null && var2.M() && StringUtils.isNullOrEmpty(this.value)) {
+         Scoreboard var3 = var2.getWorldServer(0).getScoreboard();
          ScoreObjective var4 = var3.getObjective(this.objective);
          if (var3.entityHasObjective(this.name, var4)) {
             Score var5 = var3.getOrCreateScore(this.name, var4);
@@ -73,5 +73,10 @@ public class TextComponentScore extends TextComponentBase {
 
    public String toString() {
       return "ScoreComponent{name='" + this.name + '\'' + "objective='" + this.objective + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+   }
+
+   // $FF: synthetic method
+   public ITextComponent createCopy() {
+      return this.createCopy();
    }
 }

@@ -72,4 +72,9 @@ public class NBTTagFloat extends NBTPrimitive {
    public float getFloat() {
       return this.data;
    }
+
+   // $FF: synthetic method
+   public NBTBase copy() {
+      return this.copy();
+   }
 }

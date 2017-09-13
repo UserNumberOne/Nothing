@@ -71,6 +71,10 @@ public class EntityChicken extends EntityAnimal {
    }
 
    public void onLivingUpdate() {
+      if (this.isChickenJockey()) {
+         this.spawnableBlock = !this.canDespawn();
+      }
+
       super.onLivingUpdate();
       this.oFlap = this.wingRotation;
       this.oFlapSpeed = this.destPos;
@@ -88,7 +92,9 @@ public class EntityChicken extends EntityAnimal {
       this.wingRotation += this.wingRotDelta * 2.0F;
       if (!this.world.isRemote && !this.isChild() && !this.isChickenJockey() && --this.timeUntilNextEgg <= 0) {
          this.playSound(SoundEvents.ENTITY_CHICKEN_EGG, 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+         this.forceDrops = true;
          this.dropItem(Items.EGG, 1);
+         this.forceDrops = false;
          this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;
       }
 
@@ -157,8 +163,6 @@ public class EntityChicken extends EntityAnimal {
       super.updatePassenger(var1);
       float var2 = MathHelper.sin(this.renderYawOffset * 0.017453292F);
       float var3 = MathHelper.cos(this.renderYawOffset * 0.017453292F);
-      float var4 = 0.1F;
-      float var5 = 0.0F;
       var1.setPosition(this.posX + (double)(0.1F * var2), this.posY + (double)(this.height * 0.5F) + var1.getYOffset() + 0.0D, this.posZ - (double)(0.1F * var3));
       if (var1 instanceof EntityLivingBase) {
          ((EntityLivingBase)var1).renderYawOffset = this.renderYawOffset;
@@ -172,5 +176,9 @@ public class EntityChicken extends EntityAnimal {
 
    public void setChickenJockey(boolean var1) {
       this.chickenJockey = var1;
+   }
+
+   public EntityAgeable createChild(EntityAgeable var1) {
+      return this.createChild(var1);
    }
 }

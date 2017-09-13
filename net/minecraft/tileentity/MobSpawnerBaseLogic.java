@@ -15,12 +15,10 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public abstract class MobSpawnerBaseLogic {
-   private int spawnDelay = 20;
+   public int spawnDelay = 20;
    private final List potentialSpawns = Lists.newArrayList();
    private WeightedSpawnerEntity randomEntity = new WeightedSpawnerEntity();
    private double mobRotation;
@@ -33,7 +31,7 @@ public abstract class MobSpawnerBaseLogic {
    private int activatingRangeFromPlayer = 16;
    private int spawnRange = 4;
 
-   private String getEntityNameToSpawn() {
+   public String getEntityNameToSpawn() {
       return this.randomEntity.getNbt().getString("id");
    }
 
@@ -52,11 +50,11 @@ public abstract class MobSpawnerBaseLogic {
       } else {
          BlockPos var1 = this.getSpawnerPosition();
          if (this.getSpawnerWorld().isRemote) {
-            double var17 = (double)((float)var1.getX() + this.getSpawnerWorld().rand.nextFloat());
-            double var18 = (double)((float)var1.getY() + this.getSpawnerWorld().rand.nextFloat());
-            double var19 = (double)((float)var1.getZ() + this.getSpawnerWorld().rand.nextFloat());
-            this.getSpawnerWorld().spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var17, var18, var19, 0.0D, 0.0D, 0.0D);
-            this.getSpawnerWorld().spawnParticle(EnumParticleTypes.FLAME, var17, var18, var19, 0.0D, 0.0D, 0.0D);
+            double var2 = (double)((float)var1.getX() + this.getSpawnerWorld().rand.nextFloat());
+            double var4 = (double)((float)var1.getY() + this.getSpawnerWorld().rand.nextFloat());
+            double var6 = (double)((float)var1.getZ() + this.getSpawnerWorld().rand.nextFloat());
+            this.getSpawnerWorld().spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var2, var4, var6, 0.0D, 0.0D, 0.0D);
+            this.getSpawnerWorld().spawnParticle(EnumParticleTypes.FLAME, var2, var4, var6, 0.0D, 0.0D, 0.0D);
             if (this.spawnDelay > 0) {
                --this.spawnDelay;
             }
@@ -73,45 +71,45 @@ public abstract class MobSpawnerBaseLogic {
                return;
             }
 
-            boolean var2 = false;
+            boolean var8 = false;
 
-            for(int var3 = 0; var3 < this.spawnCount; ++var3) {
-               NBTTagCompound var4 = this.randomEntity.getNbt();
-               NBTTagList var5 = var4.getTagList("Pos", 6);
-               World var6 = this.getSpawnerWorld();
-               int var7 = var5.tagCount();
-               double var8 = var7 >= 1 ? var5.getDoubleAt(0) : (double)var1.getX() + (var6.rand.nextDouble() - var6.rand.nextDouble()) * (double)this.spawnRange + 0.5D;
-               double var10 = var7 >= 2 ? var5.getDoubleAt(1) : (double)(var1.getY() + var6.rand.nextInt(3) - 1);
-               double var12 = var7 >= 3 ? var5.getDoubleAt(2) : (double)var1.getZ() + (var6.rand.nextDouble() - var6.rand.nextDouble()) * (double)this.spawnRange + 0.5D;
-               Entity var14 = AnvilChunkLoader.readWorldEntityPos(var4, var6, var8, var10, var12, false);
-               if (var14 == null) {
+            for(int var9 = 0; var9 < this.spawnCount; ++var9) {
+               NBTTagCompound var10 = this.randomEntity.getNbt();
+               NBTTagList var11 = var10.getTagList("Pos", 6);
+               World var12 = this.getSpawnerWorld();
+               int var13 = var11.tagCount();
+               double var14 = var13 >= 1 ? var11.getDoubleAt(0) : (double)var1.getX() + (var12.rand.nextDouble() - var12.rand.nextDouble()) * (double)this.spawnRange + 0.5D;
+               double var16 = var13 >= 2 ? var11.getDoubleAt(1) : (double)(var1.getY() + var12.rand.nextInt(3) - 1);
+               double var18 = var13 >= 3 ? var11.getDoubleAt(2) : (double)var1.getZ() + (var12.rand.nextDouble() - var12.rand.nextDouble()) * (double)this.spawnRange + 0.5D;
+               Entity var20 = AnvilChunkLoader.readWorldEntityPos(var10, var12, var14, var16, var18, false);
+               if (var20 == null) {
                   return;
                }
 
-               int var15 = var6.getEntitiesWithinAABB(var14.getClass(), (new AxisAlignedBB((double)var1.getX(), (double)var1.getY(), (double)var1.getZ(), (double)(var1.getX() + 1), (double)(var1.getY() + 1), (double)(var1.getZ() + 1))).expandXyz((double)this.spawnRange)).size();
-               if (var15 >= this.maxNearbyEntities) {
+               int var21 = var12.getEntitiesWithinAABB(var20.getClass(), (new AxisAlignedBB((double)var1.getX(), (double)var1.getY(), (double)var1.getZ(), (double)(var1.getX() + 1), (double)(var1.getY() + 1), (double)(var1.getZ() + 1))).expandXyz((double)this.spawnRange)).size();
+               if (var21 >= this.maxNearbyEntities) {
                   this.resetTimer();
                   return;
                }
 
-               EntityLiving var16 = var14 instanceof EntityLiving ? (EntityLiving)var14 : null;
-               var14.setLocationAndAngles(var14.posX, var14.posY, var14.posZ, var6.rand.nextFloat() * 360.0F, 0.0F);
-               if (var16 == null || ForgeEventFactory.canEntitySpawnSpawner(var16, this.getSpawnerWorld(), (float)var14.posX, (float)var14.posY, (float)var14.posZ)) {
-                  if (this.randomEntity.getNbt().getSize() == 1 && this.randomEntity.getNbt().hasKey("id", 8) && var14 instanceof EntityLiving && !ForgeEventFactory.doSpecialSpawn(var16, this.getSpawnerWorld(), (float)var14.posX, (float)var14.posY, (float)var14.posZ)) {
-                     ((EntityLiving)var14).onInitialSpawn(var6.getDifficultyForLocation(new BlockPos(var14)), (IEntityLivingData)null);
+               EntityLiving var22 = var20 instanceof EntityLiving ? (EntityLiving)var20 : null;
+               var20.setLocationAndAngles(var20.posX, var20.posY, var20.posZ, var12.rand.nextFloat() * 360.0F, 0.0F);
+               if (var22 == null || var22.getCanSpawnHere() && var22.isNotColliding()) {
+                  if (this.randomEntity.getNbt().getSize() == 1 && this.randomEntity.getNbt().hasKey("id", 8) && var20 instanceof EntityLiving) {
+                     ((EntityLiving)var20).onInitialSpawn(var12.getDifficultyForLocation(new BlockPos(var20)), (IEntityLivingData)null);
                   }
 
-                  AnvilChunkLoader.spawnEntity(var14, var6);
-                  var6.playEvent(2004, var1, 0);
-                  if (var16 != null) {
-                     var16.spawnExplosionParticle();
+                  AnvilChunkLoader.a(var20, var12, SpawnReason.SPAWNER);
+                  var12.playEvent(2004, var1, 0);
+                  if (var22 != null) {
+                     var22.spawnExplosionParticle();
                   }
 
-                  var2 = true;
+                  var8 = true;
                }
             }
 
-            if (var2) {
+            if (var8) {
                this.resetTimer();
             }
          }
@@ -208,18 +206,6 @@ public abstract class MobSpawnerBaseLogic {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public Entity getCachedEntity() {
-      if (this.cachedEntity == null) {
-         this.cachedEntity = AnvilChunkLoader.readWorldEntity(this.randomEntity.getNbt(), this.getSpawnerWorld(), false);
-         if (this.randomEntity.getNbt().getSize() == 1 && this.randomEntity.getNbt().hasKey("id", 8) && this.cachedEntity instanceof EntityLiving) {
-            ((EntityLiving)this.cachedEntity).onInitialSpawn(this.getSpawnerWorld().getDifficultyForLocation(new BlockPos(this.cachedEntity)), (IEntityLivingData)null);
-         }
-      }
-
-      return this.cachedEntity;
-   }
-
    public void setNextSpawnData(WeightedSpawnerEntity var1) {
       this.randomEntity = var1;
    }
@@ -229,14 +215,4 @@ public abstract class MobSpawnerBaseLogic {
    public abstract World getSpawnerWorld();
 
    public abstract BlockPos getSpawnerPosition();
-
-   @SideOnly(Side.CLIENT)
-   public double getMobRotation() {
-      return this.mobRotation;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getPrevMobRotation() {
-      return this.prevMobRotation;
-   }
 }

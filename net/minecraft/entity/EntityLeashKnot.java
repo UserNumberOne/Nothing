@@ -3,18 +3,19 @@ package net.minecraft.entity;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockFence;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketEntityAttach;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityLeashKnot extends EntityHanging {
    public EntityLeashKnot(World var1) {
@@ -24,9 +25,6 @@ public class EntityLeashKnot extends EntityHanging {
    public EntityLeashKnot(World var1, BlockPos var2) {
       super(var1, var2);
       this.setPosition((double)var2.getX() + 0.5D, (double)var2.getY() + 0.5D, (double)var2.getZ() + 0.5D);
-      float var3 = 0.125F;
-      float var4 = 0.1875F;
-      float var5 = 0.25F;
       this.setEntityBoundingBox(new AxisAlignedBB(this.posX - 0.1875D, this.posY - 0.25D + 0.125D, this.posZ - 0.1875D, this.posX + 0.1875D, this.posY + 0.25D + 0.125D, this.posZ + 0.1875D));
    }
 
@@ -55,11 +53,6 @@ public class EntityLeashKnot extends EntityHanging {
       return -0.0625F;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      return var1 < 1024.0D;
-   }
-
    public void onBroken(@Nullable Entity var1) {
       this.playSound(SoundEvents.ENTITY_LEASHKNOT_BREAK, 1.0F, 1.0F);
    }
@@ -80,26 +73,33 @@ public class EntityLeashKnot extends EntityHanging {
       } else {
          boolean var4 = false;
          if (var2 != null && var2.getItem() == Items.LEAD) {
-            double var5 = 7.0D;
-
-            for(EntityLiving var8 : this.world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(this.posX - 7.0D, this.posY - 7.0D, this.posZ - 7.0D, this.posX + 7.0D, this.posY + 7.0D, this.posZ + 7.0D))) {
-               if (var8.getLeashed() && var8.getLeashedToEntity() == var1) {
-                  var8.setLeashedToEntity(this, true);
-                  var4 = true;
+            for(EntityLiving var7 : this.world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(this.posX - 7.0D, this.posY - 7.0D, this.posZ - 7.0D, this.posX + 7.0D, this.posY + 7.0D, this.posZ + 7.0D))) {
+               if (var7.getLeashed() && var7.getLeashedToEntity() == var1) {
+                  if (CraftEventFactory.callPlayerLeashEntityEvent(var7, this, var1).isCancelled()) {
+                     ((EntityPlayerMP)var1).connection.sendPacket(new SPacketEntityAttach(var7, var7.getLeashedToEntity()));
+                  } else {
+                     var7.setLeashedToEntity(this, true);
+                     var4 = true;
+                  }
                }
             }
          }
 
          if (!var4) {
-            this.setDead();
-            if (var1.capabilities.isCreativeMode) {
-               double var9 = 7.0D;
+            boolean var8 = true;
 
-               for(EntityLiving var11 : this.world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(this.posX - 7.0D, this.posY - 7.0D, this.posZ - 7.0D, this.posX + 7.0D, this.posY + 7.0D, this.posZ + 7.0D))) {
-                  if (var11.getLeashed() && var11.getLeashedToEntity() == this) {
-                     var11.clearLeashed(true, false);
+            for(EntityLiving var11 : this.world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(this.posX - 7.0D, this.posY - 7.0D, this.posZ - 7.0D, this.posX + 7.0D, this.posY + 7.0D, this.posZ + 7.0D))) {
+               if (var11.getLeashed() && var11.getLeashedToEntity() == this) {
+                  if (CraftEventFactory.callPlayerUnleashEntityEvent(var11, var1).isCancelled()) {
+                     var8 = false;
+                  } else {
+                     var11.clearLeashed(true, !var1.capabilities.isCreativeMode);
                   }
                }
+            }
+
+            if (var8) {
+               this.setDead();
             }
          }
 
@@ -124,9 +124,9 @@ public class EntityLeashKnot extends EntityHanging {
       int var3 = var1.getY();
       int var4 = var1.getZ();
 
-      for(EntityLeashKnot var6 : var0.getEntitiesWithinAABB(EntityLeashKnot.class, new AxisAlignedBB((double)var2 - 1.0D, (double)var3 - 1.0D, (double)var4 - 1.0D, (double)var2 + 1.0D, (double)var3 + 1.0D, (double)var4 + 1.0D))) {
-         if (var6.getHangingPosition().equals(var1)) {
-            return var6;
+      for(EntityLeashKnot var7 : var0.getEntitiesWithinAABB(EntityLeashKnot.class, new AxisAlignedBB((double)var2 - 1.0D, (double)var3 - 1.0D, (double)var4 - 1.0D, (double)var2 + 1.0D, (double)var3 + 1.0D, (double)var4 + 1.0D))) {
+         if (var7.getHangingPosition().equals(var1)) {
+            return var7;
          }
       }
 

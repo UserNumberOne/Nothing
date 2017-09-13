@@ -19,4 +19,9 @@ public class NettyVarint21FrameEncoder extends MessageToByteEncoder {
          var6.writeBytes(var2, var2.readerIndex(), var4);
       }
    }
+
+   // $FF: synthetic method
+   protected void encode(ChannelHandlerContext var1, Object var2, ByteBuf var3) throws Exception {
+      this.encode(var1, (ByteBuf)var2, var3);
+   }
 }

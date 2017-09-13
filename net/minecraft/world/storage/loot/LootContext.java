@@ -11,7 +11,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.ForgeHooks;
 
 public class LootContext {
    private final float luck;
@@ -79,14 +78,6 @@ public class LootContext {
       }
    }
 
-   public WorldServer getWorld() {
-      return this.world;
-   }
-
-   public int getLootingModifier() {
-      return ForgeHooks.getLootingLevel(this.getLootedEntity(), this.getKiller(), this.damageSource);
-   }
-
    public static class Builder {
       private final WorldServer world;
       private float luck;
@@ -151,6 +142,16 @@ public class LootContext {
 
          public LootContext.EntityTarget read(JsonReader var1) throws IOException {
             return LootContext.EntityTarget.fromString(var1.nextString());
+         }
+
+         // $FF: synthetic method
+         public Object read(JsonReader var1) throws IOException {
+            return this.read(var1);
+         }
+
+         // $FF: synthetic method
+         public void write(JsonWriter var1, Object var2) throws IOException {
+            this.write(var1, (LootContext.EntityTarget)var2);
          }
       }
    }

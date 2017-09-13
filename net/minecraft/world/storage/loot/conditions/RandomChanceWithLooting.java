@@ -4,6 +4,8 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Random;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootContext;
@@ -18,7 +20,11 @@ public class RandomChanceWithLooting implements LootCondition {
    }
 
    public boolean testCondition(Random var1, LootContext var2) {
-      int var3 = var2.getLootingModifier();
+      int var3 = 0;
+      if (var2.getKiller() instanceof EntityLivingBase) {
+         var3 = EnchantmentHelper.getLootingModifier((EntityLivingBase)var2.getKiller());
+      }
+
       return var1.nextFloat() < this.chance + (float)var3 * this.lootingMultiplier;
    }
 
@@ -34,6 +40,11 @@ public class RandomChanceWithLooting implements LootCondition {
 
       public RandomChanceWithLooting deserialize(JsonObject var1, JsonDeserializationContext var2) {
          return new RandomChanceWithLooting(JsonUtils.getFloat(var1, "chance"), JsonUtils.getFloat(var1, "looting_multiplier"));
+      }
+
+      // $FF: synthetic method
+      public LootCondition deserialize(JsonObject var1, JsonDeserializationContext var2) {
+         return this.deserialize(var1, var2);
       }
    }
 }

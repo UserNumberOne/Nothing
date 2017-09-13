@@ -35,8 +35,8 @@ public class PathWorldListener implements IWorldEventListener {
                }
             }
          }
-      }
 
+      }
    }
 
    protected boolean didBlockChange(World var1, BlockPos var2, IBlockState var3, IBlockState var4) {

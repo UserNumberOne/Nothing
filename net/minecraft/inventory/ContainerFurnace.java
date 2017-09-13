@@ -6,8 +6,8 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryFurnace;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerFurnace extends Container {
    private final IInventory tileFurnace;
@@ -15,12 +15,25 @@ public class ContainerFurnace extends Container {
    private int totalCookTime;
    private int furnaceBurnTime;
    private int currentItemBurnTime;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
+
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventoryFurnace var1 = new CraftInventoryFurnace((TileEntityFurnace)this.tileFurnace);
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), var1, this);
+         return this.bukkitEntity;
+      }
+   }
 
    public ContainerFurnace(InventoryPlayer var1, IInventory var2) {
       this.tileFurnace = var2;
       this.addSlotToContainer(new Slot(var2, 0, 56, 17));
       this.addSlotToContainer(new SlotFurnaceFuel(var2, 1, 56, 53));
       this.addSlotToContainer(new SlotFurnaceOutput(var1.player, var2, 2, 116, 35));
+      this.player = var1;
 
       for(int var3 = 0; var3 < 3; ++var3) {
          for(int var4 = 0; var4 < 9; ++var4) {
@@ -67,13 +80,8 @@ public class ContainerFurnace extends Container {
       this.totalCookTime = this.tileFurnace.getField(3);
    }
 
-   @SideOnly(Side.CLIENT)
-   public void updateProgressBar(int var1, int var2) {
-      this.tileFurnace.setField(var1, var2);
-   }
-
    public boolean canInteractWith(EntityPlayer var1) {
-      return this.tileFurnace.isUsableByPlayer(var1);
+      return !this.checkReachable ? true : this.tileFurnace.isUsableByPlayer(var1);
    }
 
    @Nullable

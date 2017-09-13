@@ -18,8 +18,6 @@ import net.minecraft.server.management.PreYggdrasilConverter;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityTameable extends EntityAnimal implements IEntityOwnable {
    protected static final DataParameter TAMED = EntityDataManager.createKey(EntityTameable.class, DataSerializers.BYTE);
@@ -55,7 +53,7 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
          var2 = var1.getString("OwnerUUID");
       } else {
          String var3 = var1.getString("Owner");
-         var2 = PreYggdrasilConverter.convertMobOwnerIfNeeded(this.getServer(), var3);
+         var2 = PreYggdrasilConverter.a(this.h(), var3);
       }
 
       if (!var2.isEmpty()) {
@@ -89,18 +87,6 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
          double var6 = this.rand.nextGaussian() * 0.02D;
          double var8 = this.rand.nextGaussian() * 0.02D;
          this.world.spawnParticle(var2, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, var4, var6, var8);
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 7) {
-         this.playTameEffect(true);
-      } else if (var1 == 6) {
-         this.playTameEffect(false);
-      } else {
-         super.handleStatusUpdate(var1);
       }
 
    }
@@ -200,5 +186,10 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
       }
 
       super.onDeath(var1);
+   }
+
+   // $FF: synthetic method
+   public Entity getOwner() {
+      return this.getOwner();
    }
 }

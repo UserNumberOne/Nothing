@@ -15,6 +15,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.util.Vector;
 
 public class ItemMinecart extends Item {
    private static final IBehaviorDispenseItem MINECART_DISPENSER_BEHAVIOR = new BehaviorDefaultDispenseItem() {
@@ -50,14 +54,37 @@ public class ItemMinecart extends Item {
             }
          }
 
-         EntityMinecart var18 = EntityMinecart.create(var4, var5, var7 + var14, var9, ((ItemMinecart)var2.getItem()).minecartType);
-         if (var2.hasDisplayName()) {
-            var18.setCustomNameTag(var2.getDisplayName());
+         ItemStack var22 = var2.splitStack(1);
+         Block var24 = var4.getWorld().getBlockAt(var1.getBlockPos().getX(), var1.getBlockPos().getY(), var1.getBlockPos().getZ());
+         CraftItemStack var18 = CraftItemStack.asCraftMirror(var22);
+         BlockDispenseEvent var19 = new BlockDispenseEvent(var24, var18.clone(), new Vector(var5, var7 + var14, var9));
+         if (!BlockDispenser.eventFired) {
+            var4.getServer().getPluginManager().callEvent(var19);
          }
 
-         var4.spawnEntity(var18);
-         var2.splitStack(1);
-         return var2;
+         if (var19.isCancelled()) {
+            ++var2.stackSize;
+            return var2;
+         } else {
+            if (!var19.getItem().equals(var18)) {
+               ++var2.stackSize;
+               ItemStack var20 = CraftItemStack.asNMSCopy(var19.getItem());
+               IBehaviorDispenseItem var21 = (IBehaviorDispenseItem)BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(var20.getItem());
+               if (var21 != IBehaviorDispenseItem.DEFAULT_BEHAVIOR && var21 != this) {
+                  var21.dispense(var1, var20);
+                  return var2;
+               }
+            }
+
+            var22 = CraftItemStack.asNMSCopy(var19.getItem());
+            EntityMinecart var25 = EntityMinecart.create(var4, var19.getVelocity().getX(), var19.getVelocity().getY(), var19.getVelocity().getZ(), ((ItemMinecart)var22.getItem()).minecartType);
+            if (var2.hasDisplayName()) {
+               var25.setCustomNameTag(var2.getDisplayName());
+            }
+
+            var4.spawnEntity(var25);
+            return var2;
+         }
       }
 
       protected void playDispenseSound(IBlockSource var1) {

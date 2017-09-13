@@ -332,7 +332,6 @@ public class DragonFightManager {
          int var3 = (int)(96.0D * Math.sin(2.0D * (-3.141592653589793D + 0.15707963267948966D * (double)var1)));
          this.generateGateway(new BlockPos(var2, 75, var3));
       }
-
    }
 
    private void generateGateway(BlockPos var1) {
@@ -452,9 +451,9 @@ public class DragonFightManager {
 
    public void resetSpikeCrystals() {
       for(WorldGenSpikes.EndSpike var4 : BiomeEndDecorator.getSpikesForWorld(this.world)) {
-         for(EntityEnderCrystal var6 : this.world.getEntitiesWithinAABB(EntityEnderCrystal.class, var4.getTopBoundingBox())) {
-            var6.setEntityInvulnerable(false);
-            var6.setBeamTarget((BlockPos)null);
+         for(EntityEnderCrystal var7 : this.world.getEntitiesWithinAABB(EntityEnderCrystal.class, var4.getTopBoundingBox())) {
+            var7.setEntityInvulnerable(false);
+            var7.setBeamTarget((BlockPos)null);
          }
       }
 

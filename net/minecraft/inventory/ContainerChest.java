@@ -2,17 +2,44 @@ package net.minecraft.inventory;
 
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryDoubleChest;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryPlayer;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
+import org.bukkit.inventory.Inventory;
 
 public class ContainerChest extends Container {
    private final IInventory lowerChestInventory;
    private final int numRows;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
+
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         Object var1;
+         if (this.lowerChestInventory instanceof InventoryPlayer) {
+            var1 = new CraftInventoryPlayer((InventoryPlayer)this.lowerChestInventory);
+         } else if (this.lowerChestInventory instanceof InventoryLargeChest) {
+            var1 = new CraftInventoryDoubleChest((InventoryLargeChest)this.lowerChestInventory);
+         } else {
+            var1 = new CraftInventory(this.lowerChestInventory);
+         }
+
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), (Inventory)var1, this);
+         return this.bukkitEntity;
+      }
+   }
 
    public ContainerChest(IInventory var1, IInventory var2, EntityPlayer var3) {
       this.lowerChestInventory = var2;
       this.numRows = var2.getSizeInventory() / 9;
       var2.openInventory(var3);
       int var4 = (this.numRows - 4) * 18;
+      this.player = (InventoryPlayer)var1;
 
       for(int var5 = 0; var5 < this.numRows; ++var5) {
          for(int var6 = 0; var6 < 9; ++var6) {
@@ -33,7 +60,7 @@ public class ContainerChest extends Container {
    }
 
    public boolean canInteractWith(EntityPlayer var1) {
-      return this.lowerChestInventory.isUsableByPlayer(var1);
+      return !this.checkReachable ? true : this.lowerChestInventory.isUsableByPlayer(var1);
    }
 
    @Nullable

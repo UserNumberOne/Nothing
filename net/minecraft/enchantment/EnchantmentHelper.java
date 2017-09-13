@@ -105,9 +105,9 @@ public class EnchantmentHelper {
                   var0.calculateModifier(Enchantment.getEnchantmentByID(var4), var5);
                }
             }
+
          }
       }
-
    }
 
    private static void applyEnchantmentModifierArray(EnchantmentHelper.IModifier var0, Iterable var1) {
@@ -235,7 +235,7 @@ public class EnchantmentHelper {
 
    public static int calcItemStackEnchantability(Random var0, int var1, int var2, ItemStack var3) {
       Item var4 = var3.getItem();
-      int var5 = var4.getItemEnchantability(var3);
+      int var5 = var4.getItemEnchantability();
       if (var5 <= 0) {
          return 0;
       } else {
@@ -244,7 +244,11 @@ public class EnchantmentHelper {
          }
 
          int var6 = var0.nextInt(8) + 1 + (var2 >> 1) + var0.nextInt(var2 + 1);
-         return var1 == 0 ? Math.max(var6 / 3, 1) : (var1 == 1 ? var6 * 2 / 3 + 1 : Math.max(var6, var2 * 2));
+         if (var1 == 0) {
+            return Math.max(var6 / 3, 1);
+         } else {
+            return var1 == 1 ? var6 * 2 / 3 + 1 : Math.max(var6, var2 * 2);
+         }
       }
    }
 
@@ -269,7 +273,7 @@ public class EnchantmentHelper {
    public static List buildEnchantmentList(Random var0, ItemStack var1, int var2, boolean var3) {
       ArrayList var4 = Lists.newArrayList();
       Item var5 = var1.getItem();
-      int var6 = var5.getItemEnchantability(var1);
+      int var6 = var5.getItemEnchantability();
       if (var6 <= 0) {
          return var4;
       } else {
@@ -299,8 +303,7 @@ public class EnchantmentHelper {
       Iterator var2 = var0.iterator();
 
       while(var2.hasNext()) {
-         Enchantment var3 = ((EnchantmentData)var2.next()).enchantmentobj;
-         if (!var1.enchantmentobj.canApplyTogether(var3) || !var3.canApplyTogether(var1.enchantmentobj)) {
+         if (!var1.enchantmentobj.canApplyTogether(((EnchantmentData)var2.next()).enchantmentobj)) {
             var2.remove();
          }
       }
@@ -313,7 +316,7 @@ public class EnchantmentHelper {
       boolean var5 = var1.getItem() == Items.BOOK;
 
       for(Enchantment var7 : Enchantment.REGISTRY) {
-         if ((!var7.isTreasureEnchantment() || var2) && (var7.canApplyAtEnchantingTable(var1) || var5 && var7.isAllowedOnBooks())) {
+         if ((!var7.isTreasureEnchantment() || var2) && (var7.type.canEnchantItem(var4) || var5)) {
             for(int var8 = var7.getMaxLevel(); var8 > var7.getMinLevel() - 1; --var8) {
                if (var0 >= var7.getMinEnchantability(var8) && var0 <= var7.getMaxEnchantability(var8)) {
                   var3.add(new EnchantmentData(var7, var8));

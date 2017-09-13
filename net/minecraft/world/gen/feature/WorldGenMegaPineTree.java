@@ -7,11 +7,9 @@ import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockSapling;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -35,20 +33,24 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
          this.createCrown(var1, var3.getX(), var3.getZ(), var3.getY() + var4, 0, var2);
 
          for(int var5 = 0; var5 < var4; ++var5) {
-            if (this.isAirLeaves(var1, var3.up(var5))) {
+            IBlockState var6 = var1.getBlockState(var3.up(var5));
+            if (var6.getMaterial() == Material.AIR || var6.getMaterial() == Material.LEAVES) {
                this.setBlockAndNotifyAdequately(var1, var3.up(var5), this.woodMetadata);
             }
 
             if (var5 < var4 - 1) {
-               if (this.isAirLeaves(var1, var3.add(1, var5, 0))) {
+               var6 = var1.getBlockState(var3.add(1, var5, 0));
+               if (var6.getMaterial() == Material.AIR || var6.getMaterial() == Material.LEAVES) {
                   this.setBlockAndNotifyAdequately(var1, var3.add(1, var5, 0), this.woodMetadata);
                }
 
-               if (this.isAirLeaves(var1, var3.add(1, var5, 1))) {
+               var6 = var1.getBlockState(var3.add(1, var5, 1));
+               if (var6.getMaterial() == Material.AIR || var6.getMaterial() == Material.LEAVES) {
                   this.setBlockAndNotifyAdequately(var1, var3.add(1, var5, 1), this.woodMetadata);
                }
 
-               if (this.isAirLeaves(var1, var3.add(0, var5, 1))) {
+               var6 = var1.getBlockState(var3.add(0, var5, 1));
+               if (var6.getMaterial() == Material.AIR || var6.getMaterial() == Material.LEAVES) {
                   this.setBlockAndNotifyAdequately(var1, var3.add(0, var5, 1), this.woodMetadata);
                }
             }
@@ -104,7 +106,7 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
          BlockPos var4 = var2.up(var3);
          IBlockState var5 = var1.getBlockState(var4);
          Block var6 = var5.getBlock();
-         if (var6.canSustainPlant(var5, var1, var4, EnumFacing.UP, (BlockSapling)Blocks.SAPLING)) {
+         if (var6 == Blocks.GRASS || var6 == Blocks.DIRT) {
             this.setBlockAndNotifyAdequately(var1, var4, PODZOL);
             break;
          }
@@ -114,10 +116,5 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
          }
       }
 
-   }
-
-   private boolean isAirLeaves(World var1, BlockPos var2) {
-      IBlockState var3 = var1.getBlockState(var2);
-      return var3.getBlock().isAir(var3, var1, var2) || var3.getBlock().isLeaves(var3, var1, var2);
    }
 }

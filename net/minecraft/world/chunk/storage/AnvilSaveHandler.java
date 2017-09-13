@@ -5,6 +5,8 @@ import javax.annotation.Nullable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.ThreadedFileIOBase;
 import net.minecraft.world.storage.WorldInfo;
@@ -16,8 +18,12 @@ public class AnvilSaveHandler extends SaveHandler {
 
    public IChunkLoader getChunkLoader(WorldProvider var1) {
       File var2 = this.getWorldDirectory();
-      if (var1.getSaveFolder() != null) {
-         File var3 = new File(var2, var1.getSaveFolder());
+      if (var1 instanceof WorldProviderHell) {
+         File var4 = new File(var2, "DIM-1");
+         var4.mkdirs();
+         return new AnvilChunkLoader(var4, this.dataFixer);
+      } else if (var1 instanceof WorldProviderEnd) {
+         File var3 = new File(var2, "DIM1");
          var3.mkdirs();
          return new AnvilChunkLoader(var3, this.dataFixer);
       } else {

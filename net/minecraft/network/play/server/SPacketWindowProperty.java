@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketWindowProperty implements Packet {
    private int windowId;
@@ -35,20 +33,5 @@ public class SPacketWindowProperty implements Packet {
       var1.writeByte(this.windowId);
       var1.writeShort(this.property);
       var1.writeShort(this.value);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getWindowId() {
-      return this.windowId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getProperty() {
-      return this.property;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getValue() {
-      return this.value;
    }
 }

@@ -12,6 +12,11 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.entity.Hanging;
+import org.bukkit.entity.Player;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 
 public class ItemLead extends Item {
    public ItemLead() {
@@ -34,19 +39,26 @@ public class ItemLead extends Item {
    public static boolean attachToFence(EntityPlayer var0, World var1, BlockPos var2) {
       EntityLeashKnot var3 = EntityLeashKnot.getKnotForPosition(var1, var2);
       boolean var4 = false;
-      double var5 = 7.0D;
-      int var7 = var2.getX();
-      int var8 = var2.getY();
-      int var9 = var2.getZ();
+      int var5 = var2.getX();
+      int var6 = var2.getY();
+      int var7 = var2.getZ();
 
-      for(EntityLiving var11 : var1.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double)var7 - 7.0D, (double)var8 - 7.0D, (double)var9 - 7.0D, (double)var7 + 7.0D, (double)var8 + 7.0D, (double)var9 + 7.0D))) {
-         if (var11.getLeashed() && var11.getLeashedToEntity() == var0) {
+      for(EntityLiving var10 : var1.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double)var5 - 7.0D, (double)var6 - 7.0D, (double)var7 - 7.0D, (double)var5 + 7.0D, (double)var6 + 7.0D, (double)var7 + 7.0D))) {
+         if (var10.getLeashed() && var10.getLeashedToEntity() == var0) {
             if (var3 == null) {
                var3 = EntityLeashKnot.createKnot(var1, var2);
+               HangingPlaceEvent var11 = new HangingPlaceEvent((Hanging)var3.getBukkitEntity(), var0 != null ? (Player)var0.getBukkitEntity() : null, var1.getWorld().getBlockAt(var5, var6, var7), BlockFace.SELF);
+               var1.getServer().getPluginManager().callEvent(var11);
+               if (var11.isCancelled()) {
+                  var3.setDead();
+                  return false;
+               }
             }
 
-            var11.setLeashedToEntity(var3, true);
-            var4 = true;
+            if (!CraftEventFactory.callPlayerLeashEntityEvent(var10, var3, var0).isCancelled()) {
+               var10.setLeashedToEntity(var3, true);
+               var4 = true;
+            }
          }
       }
 

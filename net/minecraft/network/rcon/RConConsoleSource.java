@@ -3,14 +3,12 @@ package net.minecraft.network.rcon;
 import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class RConConsoleSource implements ICommandSender {
    private final StringBuffer buffer = new StringBuffer();
@@ -20,12 +18,24 @@ public class RConConsoleSource implements ICommandSender {
       this.server = var1;
    }
 
+   public void resetLog() {
+      this.buffer.setLength(0);
+   }
+
+   public String getLogContents() {
+      return this.buffer.toString();
+   }
+
    public String getName() {
       return "Rcon";
    }
 
    public ITextComponent getDisplayName() {
       return new TextComponentString(this.getName());
+   }
+
+   public void sendMessage(String var1) {
+      this.buffer.append(var1);
    }
 
    public void sendMessage(ITextComponent var1) {
@@ -59,17 +69,7 @@ public class RConConsoleSource implements ICommandSender {
    public void setCommandStat(CommandResultStats.Type var1, int var2) {
    }
 
-   public MinecraftServer getServer() {
+   public MinecraftServer h() {
       return this.server;
-   }
-
-   @SideOnly(Side.SERVER)
-   public void resetLog() {
-      this.buffer.setLength(0);
-   }
-
-   @SideOnly(Side.SERVER)
-   public String getLogContents() {
-      return this.buffer.toString();
    }
 }

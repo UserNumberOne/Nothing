@@ -6,8 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSetSlot implements Packet {
    private int windowId;
@@ -37,21 +35,5 @@ public class SPacketSetSlot implements Packet {
       var1.writeByte(this.windowId);
       var1.writeShort(this.slot);
       var1.writeItemStack(this.item);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getWindowId() {
-      return this.windowId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSlot() {
-      return this.slot;
-   }
-
-   @Nullable
-   @SideOnly(Side.CLIENT)
-   public ItemStack getStack() {
-      return this.item;
    }
 }

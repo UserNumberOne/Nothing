@@ -6,9 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.Vec4b;
-import net.minecraft.world.storage.MapData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketMaps implements Packet {
    private int mapId;
@@ -88,29 +85,5 @@ public class SPacketMaps implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleMaps(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getMapId() {
-      return this.mapId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setMapdataTo(MapData var1) {
-      var1.scale = this.mapScale;
-      var1.trackingPosition = this.trackingPosition;
-      var1.mapDecorations.clear();
-
-      for(int var2 = 0; var2 < this.icons.length; ++var2) {
-         Vec4b var3 = this.icons[var2];
-         var1.mapDecorations.put("icon-" + var2, var3);
-      }
-
-      for(int var4 = 0; var4 < this.columns; ++var4) {
-         for(int var5 = 0; var5 < this.rows; ++var5) {
-            var1.colors[this.minX + var4 + (this.minZ + var5) * 128] = this.mapDataBytes[var4 + var5 * this.columns];
-         }
-      }
-
    }
 }

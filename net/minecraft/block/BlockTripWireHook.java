@@ -15,7 +15,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -24,8 +23,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.block.BlockRedstoneEvent;
 
 public class BlockTripWireHook extends Block {
    public static final PropertyDirection FACING = BlockHorizontal.FACING;
@@ -44,15 +42,15 @@ public class BlockTripWireHook extends Block {
    }
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
-      switch((EnumFacing)var1.getValue(FACING)) {
-      case EAST:
+      switch(BlockTripWireHook.SyntheticClass_1.a[((EnumFacing)var1.getValue(FACING)).ordinal()]) {
+      case 1:
       default:
          return HOOK_EAST_AABB;
-      case WEST:
+      case 2:
          return HOOK_WEST_AABB;
-      case SOUTH:
+      case 3:
          return HOOK_SOUTH_AABB;
-      case NORTH:
+      case 4:
          return HOOK_NORTH_AABB;
       }
    }
@@ -71,12 +69,12 @@ public class BlockTripWireHook extends Block {
    }
 
    public boolean canPlaceBlockOnSide(World var1, BlockPos var2, EnumFacing var3) {
-      return var3.getAxis().isHorizontal() && var1.getBlockState(var2.offset(var3.getOpposite())).isSideSolid(var1, var2.offset(var3.getOpposite()), var3);
+      return var3.getAxis().isHorizontal() && var1.getBlockState(var2.offset(var3.getOpposite())).isNormalCube();
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
       for(EnumFacing var4 : EnumFacing.Plane.HORIZONTAL) {
-         if (var1.getBlockState(var2.offset(var4)).isSideSolid(var1, var2.offset(var4), var4.getOpposite())) {
+         if (var1.getBlockState(var2.offset(var4)).isNormalCube()) {
             return true;
          }
       }
@@ -100,7 +98,7 @@ public class BlockTripWireHook extends Block {
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
       if (var4 != this && this.checkForDrop(var2, var3, var1)) {
          EnumFacing var5 = (EnumFacing)var1.getValue(FACING);
-         if (!var2.getBlockState(var3.offset(var5.getOpposite())).isSideSolid(var2, var3.offset(var5.getOpposite()), var5)) {
+         if (!var2.getBlockState(var3.offset(var5.getOpposite())).isNormalCube()) {
             this.dropBlockAsItem(var2, var3, var1, 0);
             var2.setBlockToAir(var3);
          }
@@ -148,33 +146,38 @@ public class BlockTripWireHook extends Block {
 
       var11 = var11 & var13 > 1;
       var12 = var12 & var11;
-      IBlockState var22 = this.getDefaultState().withProperty(ATTACHED, Boolean.valueOf(var11)).withProperty(POWERED, Boolean.valueOf(var12));
+      IBlockState var24 = this.getDefaultState().withProperty(ATTACHED, Boolean.valueOf(var11)).withProperty(POWERED, Boolean.valueOf(var12));
       if (var13 > 0) {
-         BlockPos var23 = var2.offset(var8, var13);
-         EnumFacing var25 = var8.getOpposite();
-         var1.setBlockState(var23, var22.withProperty(FACING, var25), 3);
-         this.notifyNeighbors(var1, var23, var25);
-         this.playSound(var1, var23, var11, var12, var9, var10);
+         BlockPos var25 = var2.offset(var8, var13);
+         EnumFacing var26 = var8.getOpposite();
+         var1.setBlockState(var25, var24.withProperty(FACING, var26), 3);
+         this.notifyNeighbors(var1, var25, var26);
+         this.playSound(var1, var25, var11, var12, var9, var10);
       }
 
-      this.playSound(var1, var2, var11, var12, var9, var10);
-      if (!var4) {
-         var1.setBlockState(var2, var22.withProperty(FACING, var8), 3);
-         if (var5) {
-            this.notifyNeighbors(var1, var2, var8);
-         }
-      }
-
-      if (var9 != var11) {
-         for(int var24 = 1; var24 < var13; ++var24) {
-            BlockPos var26 = var2.offset(var8, var24);
-            IBlockState var27 = var14[var24];
-            if (var27 != null && var1.getBlockState(var26).getMaterial() != Material.AIR) {
-               var1.setBlockState(var26, var27.withProperty(ATTACHED, Boolean.valueOf(var11)), 3);
+      org.bukkit.block.Block var27 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+      BlockRedstoneEvent var28 = new BlockRedstoneEvent(var27, 15, 0);
+      var1.getServer().getPluginManager().callEvent(var28);
+      if (var28.getNewCurrent() <= 0) {
+         this.playSound(var1, var2, var11, var12, var9, var10);
+         if (!var4) {
+            var1.setBlockState(var2, var24.withProperty(FACING, var8), 3);
+            if (var5) {
+               this.notifyNeighbors(var1, var2, var8);
             }
          }
-      }
 
+         if (var9 != var11) {
+            for(int var29 = 1; var29 < var13; ++var29) {
+               BlockPos var20 = var2.offset(var8, var29);
+               IBlockState var21 = var14[var29];
+               if (var21 != null && var1.getBlockState(var20).getMaterial() != Material.AIR) {
+                  var1.setBlockState(var20, var21.withProperty(ATTACHED, Boolean.valueOf(var11)), 3);
+               }
+            }
+         }
+
+      }
    }
 
    public void randomTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
@@ -239,27 +242,22 @@ public class BlockTripWireHook extends Block {
       return true;
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT_MIPPED;
-   }
-
    public IBlockState getStateFromMeta(int var1) {
       return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(var1 & 3)).withProperty(POWERED, Boolean.valueOf((var1 & 8) > 0)).withProperty(ATTACHED, Boolean.valueOf((var1 & 4) > 0));
    }
 
    public int getMetaFromState(IBlockState var1) {
-      int var2 = 0;
-      var2 = var2 | ((EnumFacing)var1.getValue(FACING)).getHorizontalIndex();
+      byte var2 = 0;
+      int var3 = var2 | ((EnumFacing)var1.getValue(FACING)).getHorizontalIndex();
       if (((Boolean)var1.getValue(POWERED)).booleanValue()) {
-         var2 |= 8;
+         var3 |= 8;
       }
 
       if (((Boolean)var1.getValue(ATTACHED)).booleanValue()) {
-         var2 |= 4;
+         var3 |= 4;
       }
 
-      return var2;
+      return var3;
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
@@ -272,5 +270,36 @@ public class BlockTripWireHook extends Block {
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, POWERED, ATTACHED});
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.EAST.ordinal()] = 1;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 2;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 3;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 4;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

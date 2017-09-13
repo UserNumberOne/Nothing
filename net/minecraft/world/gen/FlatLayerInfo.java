@@ -51,25 +51,25 @@ public class FlatLayerInfo {
    }
 
    public String toString() {
-      String var1;
+      String var2;
       if (this.version >= 3) {
-         ResourceLocation var2 = (ResourceLocation)Block.REGISTRY.getNameForObject(this.getLayerMaterialBlock());
-         var1 = var2 == null ? "null" : var2.toString();
+         ResourceLocation var1 = (ResourceLocation)Block.REGISTRY.getNameForObject(this.getLayerMaterialBlock());
+         var2 = var1 == null ? "null" : var1.toString();
          if (this.layerCount > 1) {
-            var1 = this.layerCount + "*" + var1;
+            var2 = this.layerCount + "*" + var2;
          }
       } else {
-         var1 = Integer.toString(Block.getIdFromBlock(this.getLayerMaterialBlock()));
+         var2 = Integer.toString(Block.getIdFromBlock(this.getLayerMaterialBlock()));
          if (this.layerCount > 1) {
-            var1 = this.layerCount + "x" + var1;
+            var2 = this.layerCount + "x" + var2;
          }
       }
 
       int var3 = this.getFillBlockMeta();
       if (var3 > 0) {
-         var1 = var1 + ":" + var3;
+         var2 = var2 + ":" + var3;
       }
 
-      return var1;
+      return var2;
    }
 }

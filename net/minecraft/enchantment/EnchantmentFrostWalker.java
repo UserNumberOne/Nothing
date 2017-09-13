@@ -13,6 +13,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.event.block.EntityBlockFormEvent;
 
 public class EnchantmentFrostWalker extends Enchantment {
    public EnchantmentFrostWalker(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
@@ -48,8 +51,14 @@ public class EnchantmentFrostWalker extends Enchantment {
                if (var8.getMaterial() == Material.AIR) {
                   IBlockState var9 = var1.getBlockState(var7);
                   if (var9.getMaterial() == Material.WATER && ((Integer)var9.getValue(BlockLiquid.LEVEL)).intValue() == 0 && var1.canBlockBePlaced(Blocks.FROSTED_ICE, var7, false, EnumFacing.DOWN, (Entity)null, (ItemStack)null)) {
-                     var1.setBlockState(var7, Blocks.FROSTED_ICE.getDefaultState());
-                     var1.scheduleUpdate(var7.toImmutable(), Blocks.FROSTED_ICE, MathHelper.getInt(var0.getRNG(), 60, 120));
+                     BlockState var10 = var1.getWorld().getBlockAt(var7.getX(), var7.getY(), var7.getZ()).getState();
+                     var10.setType(CraftMagicNumbers.getMaterial(Blocks.FROSTED_ICE));
+                     EntityBlockFormEvent var11 = new EntityBlockFormEvent(var0.bukkitEntity, var10.getBlock(), var10);
+                     var1.getServer().getPluginManager().callEvent(var11);
+                     if (!var11.isCancelled()) {
+                        var10.update(true);
+                        var1.scheduleUpdate(var7.toImmutable(), Blocks.FROSTED_ICE, MathHelper.getInt(var0.getRNG(), 60, 120));
+                     }
                   }
                }
             }

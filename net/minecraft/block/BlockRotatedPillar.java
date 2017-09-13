@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import com.google.common.collect.UnmodifiableIterator;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -24,21 +23,6 @@ public class BlockRotatedPillar extends Block {
 
    protected BlockRotatedPillar(Material var1, MapColor var2) {
       super(var1, var2);
-   }
-
-   public boolean rotateBlock(World var1, BlockPos var2, EnumFacing var3) {
-      IBlockState var4 = var1.getBlockState(var2);
-      UnmodifiableIterator var5 = var4.getProperties().keySet().iterator();
-
-      while(var5.hasNext()) {
-         IProperty var6 = (IProperty)var5.next();
-         if (var6.getName().equals("axis")) {
-            var1.setBlockState(var2, var4.cycleProperty(var6));
-            return true;
-         }
-      }
-
-      return false;
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {

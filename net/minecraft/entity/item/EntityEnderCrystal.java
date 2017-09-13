@@ -15,8 +15,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.end.DragonFightManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 public class EntityEnderCrystal extends Entity {
    private static final DataParameter BEAM_TARGET = EntityDataManager.createKey(EntityEnderCrystal.class, DataSerializers.OPTIONAL_BLOCK_POS);
@@ -51,7 +51,7 @@ public class EntityEnderCrystal extends Entity {
       ++this.innerRotation;
       if (!this.world.isRemote) {
          BlockPos var1 = new BlockPos(this);
-         if (this.world.provider instanceof WorldProviderEnd && this.world.getBlockState(var1).getBlock() != Blocks.FIRE) {
+         if (this.world.provider instanceof WorldProviderEnd && this.world.getBlockState(var1).getBlock() != Blocks.FIRE && !CraftEventFactory.callBlockIgniteEvent(this.world, var1.getX(), var1.getY(), var1.getZ(), this).isCancelled()) {
             this.world.setBlockState(var1, Blocks.FIRE.getDefaultState());
          }
       }
@@ -88,9 +88,20 @@ public class EntityEnderCrystal extends Entity {
          return false;
       } else {
          if (!this.isDead && !this.world.isRemote) {
+            if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, var1, (double)var2)) {
+               return false;
+            }
+
             this.setDead();
             if (!this.world.isRemote) {
-               this.world.createExplosion((Entity)null, this.posX, this.posY, this.posZ, 6.0F, true);
+               ExplosionPrimeEvent var3 = new ExplosionPrimeEvent(this.getBukkitEntity(), 6.0F, true);
+               this.world.getServer().getPluginManager().callEvent(var3);
+               if (var3.isCancelled()) {
+                  this.isDead = false;
+                  return false;
+               }
+
+               this.world.createExplosion(this, this.posX, this.posY, this.posZ, var3.getRadius(), var3.getFire());
                this.onCrystalDestroyed(var1);
             }
          }
@@ -130,10 +141,5 @@ public class EntityEnderCrystal extends Entity {
 
    public boolean shouldShowBottom() {
       return ((Boolean)this.getDataManager().get(SHOW_BOTTOM)).booleanValue();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      return super.isInRangeToRenderDist(var1) || this.getBeamTarget() != null;
    }
 }

@@ -10,7 +10,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.common.DungeonHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -115,6 +114,6 @@ public class WorldGenDungeons extends WorldGenerator {
    }
 
    private String pickMobSpawner(Random var1) {
-      return DungeonHooks.getRandomDungeonMob(var1);
+      return SPAWNERTYPES[var1.nextInt(SPAWNERTYPES.length)];
    }
 }

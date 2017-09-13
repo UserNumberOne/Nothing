@@ -3,7 +3,6 @@ package net.minecraft.item;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multisets;
-import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockStone;
@@ -18,47 +17,39 @@ import net.minecraft.network.Packet;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Bukkit;
+import org.bukkit.event.server.MapInitializeEvent;
 
 public class ItemMap extends ItemMapBase {
    protected ItemMap() {
       this.setHasSubtypes(true);
    }
 
-   @SideOnly(Side.CLIENT)
-   public static MapData loadMapData(int var0, World var1) {
-      String var2 = "map_" + var0;
-      MapData var3 = (MapData)var1.loadData(MapData.class, var2);
-      if (var3 == null) {
-         var3 = new MapData(var2);
-         var1.setData(var2, var3);
-      }
-
-      return var3;
-   }
-
    public MapData getMapData(ItemStack var1, World var2) {
-      String var3 = "map_" + var1.getMetadata();
-      MapData var4 = (MapData)var2.loadData(MapData.class, var3);
-      if (var4 == null && !var2.isRemote) {
-         var1.setItemDamage(var2.getUniqueDataId("map"));
-         var3 = "map_" + var1.getMetadata();
-         var4 = new MapData(var3);
-         var4.scale = 3;
-         var4.calculateMapCenter((double)var2.getWorldInfo().getSpawnX(), (double)var2.getWorldInfo().getSpawnZ(), var4.scale);
-         var4.dimension = var2.provider.getDimension();
-         var4.markDirty();
-         var2.setData(var3, var4);
+      World var3 = (World)var2.getServer().getServer().worlds.get(0);
+      String var4 = "map_" + var1.getMetadata();
+      MapData var5 = (MapData)var3.loadData(MapData.class, var4);
+      if (var5 == null && !var2.isRemote) {
+         var1.setItemDamage(var3.getUniqueDataId("map"));
+         var4 = "map_" + var1.getMetadata();
+         var5 = new MapData(var4);
+         var5.scale = 3;
+         var5.calculateMapCenter((double)var2.getWorldInfo().getSpawnX(), (double)var2.getWorldInfo().getSpawnZ(), var5.scale);
+         var5.dimension = (byte)((WorldServer)var2).dimension;
+         var5.markDirty();
+         var3.setData(var4, var5);
+         MapInitializeEvent var6 = new MapInitializeEvent(var5.mapView);
+         Bukkit.getServer().getPluginManager().callEvent(var6);
       }
 
-      return var4;
+      return var5;
    }
 
    public void updateMapData(World var1, Entity var2, MapData var3) {
-      if (var1.provider.getDimension() == var3.dimension && var2 instanceof EntityPlayer) {
+      if (((WorldServer)var1).dimension == var3.dimension && var2 instanceof EntityPlayer) {
          int var4 = 1 << var3.scale;
          int var5 = var3.xCenter;
          int var6 = var3.zCenter;
@@ -103,17 +94,17 @@ public class ItemMap extends ItemMapBase {
 
                            var26 = 100.0D;
                         } else {
-                           BlockPos.MutableBlockPos var37 = new BlockPos.MutableBlockPos();
+                           BlockPos.MutableBlockPos var39 = new BlockPos.MutableBlockPos();
 
                            for(int var29 = 0; var29 < var4; ++var29) {
                               for(int var30 = 0; var30 < var4; ++var30) {
                                  int var31 = var22.getHeightValue(var29 + var23, var30 + var24) + 1;
                                  IBlockState var32 = Blocks.AIR.getDefaultState();
                                  if (var31 > 1) {
-                                    label168: {
+                                    label165: {
                                        while(true) {
                                           --var31;
-                                          var32 = var22.getBlockState(var37.setPos(var29 + var23, var31, var30 + var24));
+                                          var32 = var22.getBlockState(var39.setPos(var29 + var23, var31, var30 + var24));
                                           if (var32.getMapColor() != MapColor.AIR || var31 <= 0) {
                                              break;
                                           }
@@ -126,7 +117,7 @@ public class ItemMap extends ItemMapBase {
                                              IBlockState var34 = var22.getBlockState(var29 + var23, var33--, var30 + var24);
                                              ++var25;
                                              if (var33 <= 0 || !var34.getMaterial().isLiquid()) {
-                                                break label168;
+                                                break label165;
                                              }
                                           }
                                        }
@@ -140,25 +131,25 @@ public class ItemMap extends ItemMapBase {
                         }
 
                         var25 = var25 / (var4 * var4);
-                        double var38 = (var26 - var13) * 4.0D / (double)(var4 + 4) + ((double)(var12 + var15 & 1) - 0.5D) * 0.4D;
+                        double var35 = (var26 - var13) * 4.0D / (double)(var4 + 4) + ((double)(var12 + var15 & 1) - 0.5D) * 0.4D;
                         byte var40 = 1;
-                        if (var38 > 0.6D) {
+                        if (var35 > 0.6D) {
                            var40 = 2;
                         }
 
-                        if (var38 < -0.6D) {
+                        if (var35 < -0.6D) {
                            var40 = 0;
                         }
 
                         MapColor var41 = (MapColor)Iterables.getFirst(Multisets.copyHighestCountFirst(var21), MapColor.AIR);
                         if (var41 == MapColor.WATER) {
-                           var38 = (double)var25 * 0.1D + (double)(var12 + var15 & 1) * 0.2D;
+                           var35 = (double)var25 * 0.1D + (double)(var12 + var15 & 1) * 0.2D;
                            var40 = 1;
-                           if (var38 < 0.5D) {
+                           if (var35 < 0.5D) {
                               var40 = 2;
                            }
 
-                           if (var38 > 0.9D) {
+                           if (var35 > 0.9D) {
                               var40 = 0;
                            }
                         }
@@ -218,6 +209,7 @@ public class ItemMap extends ItemMapBase {
 
    protected static void scaleMap(ItemStack var0, World var1, int var2) {
       MapData var3 = Items.FILLED_MAP.getMapData(var0, var1);
+      var1 = (World)var1.getServer().getServer().worlds.get(0);
       var0.setItemDamage(var1.getUniqueDataId("map"));
       MapData var4 = new MapData("map_" + var0.getMetadata());
       var4.scale = (byte)MathHelper.clamp(var3.scale + var2, 0, 4);
@@ -226,10 +218,13 @@ public class ItemMap extends ItemMapBase {
       var4.dimension = var3.dimension;
       var4.markDirty();
       var1.setData("map_" + var0.getMetadata(), var4);
+      MapInitializeEvent var5 = new MapInitializeEvent(var4.mapView);
+      Bukkit.getServer().getPluginManager().callEvent(var5);
    }
 
    protected static void enableMapTracking(ItemStack var0, World var1) {
       MapData var2 = Items.FILLED_MAP.getMapData(var0, var1);
+      var1 = (World)var1.getServer().getServer().worlds.get(0);
       var0.setItemDamage(var1.getUniqueDataId("map"));
       MapData var3 = new MapData("map_" + var0.getMetadata());
       var3.trackingPosition = true;
@@ -239,19 +234,7 @@ public class ItemMap extends ItemMapBase {
       var3.dimension = var2.dimension;
       var3.markDirty();
       var1.setData("map_" + var0.getMetadata(), var3);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void addInformation(ItemStack var1, EntityPlayer var2, List var3, boolean var4) {
-      MapData var5 = this.getMapData(var1, var2.world);
-      if (var4) {
-         if (var5 == null) {
-            var3.add("Unknown map");
-         } else {
-            var3.add("Scaling at 1:" + (1 << var5.scale));
-            var3.add("(Level " + var5.scale + "/" + 4 + ")");
-         }
-      }
-
+      MapInitializeEvent var4 = new MapInitializeEvent(var3.mapView);
+      Bukkit.getServer().getPluginManager().callEvent(var4);
    }
 }

@@ -8,7 +8,6 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
-import net.minecraftforge.common.ISpecialArmor;
 
 public class EnchantmentThorns extends Enchantment {
    public EnchantmentThorns(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
@@ -35,16 +34,16 @@ public class EnchantmentThorns extends Enchantment {
    public void onUserHurt(EntityLivingBase var1, Entity var2, int var3) {
       Random var4 = var1.getRNG();
       ItemStack var5 = EnchantmentHelper.getEnchantedItem(Enchantments.THORNS, var1);
-      if (shouldHit(var3, var4)) {
+      if (var2 != null && shouldHit(var3, var4)) {
          if (var2 != null) {
             var2.attackEntityFrom(DamageSource.causeThornsDamage(var1), (float)getDamage(var3, var4));
          }
 
          if (var5 != null) {
-            this.damageArmor(var5, 3, var1);
+            var5.damageItem(3, var1);
          }
       } else if (var5 != null) {
-         this.damageArmor(var5, 1, var1);
+         var5.damageItem(1, var1);
       }
 
    }
@@ -55,26 +54,5 @@ public class EnchantmentThorns extends Enchantment {
 
    public static int getDamage(int var0, Random var1) {
       return var0 > 10 ? var0 - 10 : 1 + var1.nextInt(4);
-   }
-
-   private void damageArmor(ItemStack var1, int var2, EntityLivingBase var3) {
-      int var4 = -1;
-      int var5 = 0;
-
-      for(ItemStack var7 : var3.getArmorInventoryList()) {
-         if (var7 == var1) {
-            var4 = var5;
-            break;
-         }
-
-         ++var5;
-      }
-
-      if (var4 != -1 && var1.getItem() instanceof ISpecialArmor) {
-         ISpecialArmor var8 = (ISpecialArmor)var1.getItem();
-         var8.damageArmor(var3, var1, DamageSource.causeThornsDamage(var3), var2, var4);
-      } else {
-         var1.damageItem(1, var3);
-      }
    }
 }

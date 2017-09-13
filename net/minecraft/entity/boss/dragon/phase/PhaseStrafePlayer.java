@@ -40,35 +40,35 @@ public class PhaseStrafePlayer extends PhaseBase {
             this.targetLocation = new Vec3d(var1, this.attackTarget.posY + var11, var3);
          }
 
-         double var25 = this.targetLocation == null ? 0.0D : this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
-         if (var25 < 100.0D || var25 > 22500.0D) {
+         double var31 = this.targetLocation == null ? 0.0D : this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
+         if (var31 < 100.0D || var31 > 22500.0D) {
             this.findNewTarget();
          }
 
-         double var26 = 64.0D;
+         double var32 = 64.0D;
          if (this.attackTarget.getDistanceSqToEntity(this.dragon) < 4096.0D) {
             if (this.dragon.canEntityBeSeen(this.attackTarget)) {
                ++this.fireballCharge;
-               Vec3d var27 = (new Vec3d(this.attackTarget.posX - this.dragon.posX, 0.0D, this.attackTarget.posZ - this.dragon.posZ)).normalize();
-               Vec3d var6 = (new Vec3d((double)MathHelper.sin(this.dragon.rotationYaw * 0.017453292F), 0.0D, (double)(-MathHelper.cos(this.dragon.rotationYaw * 0.017453292F)))).normalize();
-               float var28 = (float)var6.dotProduct(var27);
-               float var8 = (float)(Math.acos((double)var28) * 57.29577951308232D);
-               var8 = var8 + 0.5F;
-               if (this.fireballCharge >= 5 && var8 >= 0.0F && var8 < 10.0F) {
-                  double var30 = 1.0D;
-                  Vec3d var31 = this.dragon.getLook(1.0F);
-                  double var12 = this.dragon.dragonPartHead.posX - var31.xCoord * 1.0D;
-                  double var14 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F) + 0.5D;
-                  double var16 = this.dragon.dragonPartHead.posZ - var31.zCoord * 1.0D;
-                  double var18 = this.attackTarget.posX - var12;
-                  double var20 = this.attackTarget.posY + (double)(this.attackTarget.height / 2.0F) - (var14 + (double)(this.dragon.dragonPartHead.height / 2.0F));
-                  double var22 = this.attackTarget.posZ - var16;
+               Vec3d var13 = (new Vec3d(this.attackTarget.posX - this.dragon.posX, 0.0D, this.attackTarget.posZ - this.dragon.posZ)).normalize();
+               Vec3d var14 = (new Vec3d((double)MathHelper.sin(this.dragon.rotationYaw * 0.017453292F), 0.0D, (double)(-MathHelper.cos(this.dragon.rotationYaw * 0.017453292F)))).normalize();
+               float var15 = (float)var14.dotProduct(var13);
+               float var16 = (float)(Math.acos((double)var15) * 57.2957763671875D);
+               var16 = var16 + 0.5F;
+               if (this.fireballCharge >= 5 && var16 >= 0.0F && var16 < 10.0F) {
+                  double var33 = 1.0D;
+                  Vec3d var17 = this.dragon.getLook(1.0F);
+                  double var18 = this.dragon.dragonPartHead.posX - var17.xCoord * 1.0D;
+                  double var20 = this.dragon.dragonPartHead.posY + (double)(this.dragon.dragonPartHead.height / 2.0F) + 0.5D;
+                  double var22 = this.dragon.dragonPartHead.posZ - var17.zCoord * 1.0D;
+                  double var24 = this.attackTarget.posX - var18;
+                  double var26 = this.attackTarget.posY + (double)(this.attackTarget.height / 2.0F) - (var20 + (double)(this.dragon.dragonPartHead.height / 2.0F));
+                  double var28 = this.attackTarget.posZ - var22;
                   this.dragon.world.playEvent((EntityPlayer)null, 1017, new BlockPos(this.dragon), 0);
-                  EntityDragonFireball var24 = new EntityDragonFireball(this.dragon.world, this.dragon, var18, var20, var22);
-                  var24.posX = var12;
-                  var24.posY = var14;
-                  var24.posZ = var16;
-                  this.dragon.world.spawnEntity(var24);
+                  EntityDragonFireball var30 = new EntityDragonFireball(this.dragon.world, this.dragon, var24, var26, var28);
+                  var30.posX = var18;
+                  var30.posY = var20;
+                  var30.posZ = var22;
+                  this.dragon.world.spawnEntity(var30);
                   this.fireballCharge = 0;
                   if (this.currentPath != null) {
                      while(!this.currentPath.isFinished()) {
@@ -84,8 +84,8 @@ public class PhaseStrafePlayer extends PhaseBase {
          } else if (this.fireballCharge > 0) {
             --this.fireballCharge;
          }
-      }
 
+      }
    }
 
    private void findNewTarget() {

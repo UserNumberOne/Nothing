@@ -3,10 +3,7 @@ package net.minecraft.network.rcon;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.SERVER)
 public class RConOutputStream {
    private final ByteArrayOutputStream byteArrayOutput;
    private final DataOutputStream output;

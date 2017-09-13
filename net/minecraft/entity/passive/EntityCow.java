@@ -17,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -24,6 +25,10 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 
 public class EntityCow extends EntityAnimal {
    public EntityCow(World var1) {
@@ -79,14 +84,21 @@ public class EntityCow extends EntityAnimal {
 
    public boolean processInteract(EntityPlayer var1, EnumHand var2, @Nullable ItemStack var3) {
       if (var3 != null && var3.getItem() == Items.BUCKET && !var1.capabilities.isCreativeMode && !this.isChild()) {
-         var1.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
-         if (--var3.stackSize == 0) {
-            var1.setHeldItem(var2, new ItemStack(Items.MILK_BUCKET));
-         } else if (!var1.inventory.addItemStackToInventory(new ItemStack(Items.MILK_BUCKET))) {
-            var1.dropItem(new ItemStack(Items.MILK_BUCKET), false);
-         }
+         Location var4 = this.getBukkitEntity().getLocation();
+         PlayerBucketFillEvent var5 = CraftEventFactory.callPlayerBucketFillEvent(var1, var4.getBlockX(), var4.getBlockY(), var4.getBlockZ(), (EnumFacing)null, var3, Items.MILK_BUCKET);
+         if (var5.isCancelled()) {
+            return false;
+         } else {
+            ItemStack var6 = CraftItemStack.asNMSCopy(var5.getItemStack());
+            var1.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
+            if (--var3.stackSize <= 0) {
+               var1.setHeldItem(var2, var6);
+            } else if (!var1.inventory.addItemStackToInventory(var6)) {
+               var1.dropItem(var6, false);
+            }
 
-         return true;
+            return true;
+         }
       } else {
          return super.processInteract(var1, var2, var3);
       }
@@ -98,5 +110,9 @@ public class EntityCow extends EntityAnimal {
 
    public float getEyeHeight() {
       return this.isChild() ? this.height : 1.3F;
+   }
+
+   public EntityAgeable createChild(EntityAgeable var1) {
+      return this.createChild(var1);
    }
 }

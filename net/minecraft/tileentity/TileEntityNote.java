@@ -6,7 +6,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.block.NotePlayEvent;
 
 public class TileEntityNote extends TileEntity {
    public byte note;
@@ -27,11 +28,8 @@ public class TileEntityNote extends TileEntity {
    }
 
    public void changePitch() {
-      byte var1 = this.note;
       this.note = (byte)((this.note + 1) % 25);
-      if (ForgeHooks.onNoteChange(this, var1)) {
-         this.markDirty();
-      }
+      this.markDirty();
    }
 
    public void triggerNote(World var1, BlockPos var2) {
@@ -54,7 +52,10 @@ public class TileEntityNote extends TileEntity {
             var4 = 4;
          }
 
-         var1.addBlockEvent(var2, Blocks.NOTEBLOCK, var4, this.note);
+         NotePlayEvent var5 = CraftEventFactory.callNotePlayEvent(this.world, var2.getX(), var2.getY(), var2.getZ(), var4, this.note);
+         if (!var5.isCancelled()) {
+            var1.addBlockEvent(var2, Blocks.NOTEBLOCK, var5.getInstrument().getType(), var5.getNote().getId());
+         }
       }
 
    }

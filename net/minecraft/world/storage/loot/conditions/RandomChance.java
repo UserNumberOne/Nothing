@@ -31,5 +31,10 @@ public class RandomChance implements LootCondition {
       public RandomChance deserialize(JsonObject var1, JsonDeserializationContext var2) {
          return new RandomChance(JsonUtils.getFloat(var1, "chance"));
       }
+
+      // $FF: synthetic method
+      public LootCondition deserialize(JsonObject var1, JsonDeserializationContext var2) {
+         return this.deserialize(var1, var2);
+      }
    }
 }

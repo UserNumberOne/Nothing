@@ -27,7 +27,7 @@ public class BiomeVoidDecorator extends BiomeDecorator {
                }
             }
          }
-      }
 
+      }
    }
 }

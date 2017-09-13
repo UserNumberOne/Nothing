@@ -1,24 +1,15 @@
 package net.minecraft.inventory;
 
 import javax.annotation.Nullable;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class Slot {
-   private final int slotIndex;
+   public final int slotIndex;
    public final IInventory inventory;
    public int slotNumber;
    public int xPos;
    public int yPos;
-   protected String backgroundName = null;
-   protected ResourceLocation backgroundLocation = null;
-   protected Object backgroundMap;
 
    public Slot(IInventory var1, int var2, int var3, int var4) {
       this.inventory = var1;
@@ -57,6 +48,10 @@ public class Slot {
    }
 
    public boolean getHasStack() {
+      if (this.getStack() != null && this.getStack().stackSize == 0) {
+         this.putStack((ItemStack)null);
+      }
+
       return this.getStack() != null;
    }
 
@@ -77,12 +72,6 @@ public class Slot {
       return this.getSlotStackLimit();
    }
 
-   @Nullable
-   @SideOnly(Side.CLIENT)
-   public String getSlotTexture() {
-      return this.backgroundName;
-   }
-
    public ItemStack decrStackSize(int var1) {
       return this.inventory.decrStackSize(this.slotIndex, var1);
    }
@@ -93,47 +82,5 @@ public class Slot {
 
    public boolean canTakeStack(EntityPlayer var1) {
       return true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean canBeHovered() {
-      return true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ResourceLocation getBackgroundLocation() {
-      return this.backgroundLocation == null ? TextureMap.LOCATION_BLOCKS_TEXTURE : this.backgroundLocation;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setBackgroundLocation(ResourceLocation var1) {
-      this.backgroundLocation = var1;
-   }
-
-   public void setBackgroundName(String var1) {
-      this.backgroundName = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public TextureAtlasSprite getBackgroundSprite() {
-      String var1 = this.getSlotTexture();
-      return var1 == null ? null : this.getBackgroundMap().getAtlasSprite(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   protected TextureMap getBackgroundMap() {
-      if (this.backgroundMap == null) {
-         this.backgroundMap = Minecraft.getMinecraft().getTextureMapBlocks();
-      }
-
-      return (TextureMap)this.backgroundMap;
-   }
-
-   public int getSlotIndex() {
-      return this.slotIndex;
-   }
-
-   public boolean isSameInventory(Slot var1) {
-      return this.inventory == var1.inventory;
    }
 }

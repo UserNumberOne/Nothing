@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.ArrayList;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.EnumPushReaction;
@@ -14,13 +13,10 @@ import net.minecraft.init.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockIce extends BlockBreakable {
    public BlockIce() {
@@ -30,25 +26,13 @@ public class BlockIce extends BlockBreakable {
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.TRANSLUCENT;
-   }
-
    public void harvestBlock(World var1, EntityPlayer var2, BlockPos var3, IBlockState var4, @Nullable TileEntity var5, @Nullable ItemStack var6) {
       var2.addStat(StatList.getBlockStats(this));
       var2.addExhaustion(0.025F);
-      if (this.canSilkHarvest(var1, var3, var4, var2) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, var6) > 0) {
-         ArrayList var11 = new ArrayList();
-         ItemStack var12 = this.getSilkTouchDrop(var4);
-         if (var12 != null) {
-            var11.add(var12);
-         }
-
-         ForgeEventFactory.fireBlockHarvesting(var11, var1, var3, var4, 0, 1.0F, true, var2);
-
-         for(ItemStack var10 : var11) {
-            spawnAsEntity(var1, var3, var10);
+      if (this.canSilkHarvest() && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, var6) > 0) {
+         ItemStack var9 = this.getSilkTouchDrop(var4);
+         if (var9 != null) {
+            spawnAsEntity(var1, var3, var9);
          }
       } else {
          if (var1.provider.doesWaterVaporize()) {
@@ -57,9 +41,7 @@ public class BlockIce extends BlockBreakable {
          }
 
          int var7 = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, var6);
-         this.harvesters.set(var2);
          this.dropBlockAsItem(var1, var3, var4, var7);
-         this.harvesters.set((Object)null);
          Material var8 = var1.getBlockState(var3.down()).getMaterial();
          if (var8.blocksMovement() || var8.isLiquid()) {
             var1.setBlockState(var3, Blocks.FLOWING_WATER.getDefaultState());
@@ -80,14 +62,16 @@ public class BlockIce extends BlockBreakable {
    }
 
    protected void turnIntoWater(World var1, BlockPos var2) {
-      if (var1.provider.doesWaterVaporize()) {
-         var1.setBlockToAir(var2);
-      } else {
-         this.dropBlockAsItem(var1, var2, var1.getBlockState(var2), 0);
-         var1.setBlockState(var2, Blocks.WATER.getDefaultState());
-         var1.notifyBlockOfStateChange(var2, Blocks.WATER);
-      }
+      if (!CraftEventFactory.callBlockFadeEvent(var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ()), (Block)(var1.provider.doesWaterVaporize() ? Blocks.AIR : Blocks.WATER)).isCancelled()) {
+         if (var1.provider.doesWaterVaporize()) {
+            var1.setBlockToAir(var2);
+         } else {
+            this.dropBlockAsItem(var1, var2, var1.getBlockState(var2), 0);
+            var1.setBlockState(var2, Blocks.WATER.getDefaultState());
+            var1.notifyBlockOfStateChange(var2, Blocks.WATER);
+         }
 
+      }
    }
 
    public EnumPushReaction getMobilityFlag(IBlockState var1) {

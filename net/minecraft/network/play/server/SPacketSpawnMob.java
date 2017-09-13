@@ -3,15 +3,12 @@ package net.minecraft.network.play.server;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSpawnMob implements Packet {
    private int entityId;
@@ -110,75 +107,5 @@ public class SPacketSpawnMob implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleSpawnMob(this);
-   }
-
-   @Nullable
-   @SideOnly(Side.CLIENT)
-   public List getDataManagerEntries() {
-      if (this.dataManagerEntries == null) {
-         this.dataManagerEntries = this.dataManager.getAll();
-      }
-
-      return this.dataManagerEntries;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityID() {
-      return this.entityId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public UUID getUniqueId() {
-      return this.uniqueId;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityType() {
-      return this.type;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.x;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.y;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.z;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getVelocityX() {
-      return this.velocityX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getVelocityY() {
-      return this.velocityY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getVelocityZ() {
-      return this.velocityZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getYaw() {
-      return this.yaw;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getPitch() {
-      return this.pitch;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public byte getHeadPitch() {
-      return this.headPitch;
    }
 }

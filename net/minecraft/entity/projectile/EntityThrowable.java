@@ -20,9 +20,8 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.entity.LivingEntity;
 
 public abstract class EntityThrowable extends Entity implements IProjectile {
    private int xTile;
@@ -31,8 +30,8 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
    private Block inTile;
    protected boolean inGround;
    public int throwableShake;
-   private EntityLivingBase thrower;
-   private String throwerName;
+   public EntityLivingBase thrower;
+   public String throwerName;
    private int ticksInGround;
    private int ticksInAir;
    public Entity ignoreEntity;
@@ -54,20 +53,10 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
    public EntityThrowable(World var1, EntityLivingBase var2) {
       this(var1, var2.posX, var2.posY + (double)var2.getEyeHeight() - 0.10000000149011612D, var2.posZ);
       this.thrower = var2;
+      this.projectileSource = (LivingEntity)var2.getBukkitEntity();
    }
 
    protected void entityInit() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      double var3 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
-      if (Double.isNaN(var3)) {
-         var3 = 4.0D;
-      }
-
-      var3 = var3 * 64.0D;
-      return var1 < var3 * var3;
    }
 
    public void setHeadingFromThrower(Entity var1, float var2, float var3, float var4, float var5, float var6) {
@@ -98,26 +87,11 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
       this.motionY = var3;
       this.motionZ = var5;
       float var10 = MathHelper.sqrt(var1 * var1 + var5 * var5);
-      this.rotationYaw = (float)(MathHelper.atan2(var1, var5) * 57.29577951308232D);
-      this.rotationPitch = (float)(MathHelper.atan2(var3, (double)var10) * 57.29577951308232D);
+      this.rotationYaw = (float)(MathHelper.atan2(var1, var5) * 57.2957763671875D);
+      this.rotationPitch = (float)(MathHelper.atan2(var3, (double)var10) * 57.2957763671875D);
       this.prevRotationYaw = this.rotationYaw;
       this.prevRotationPitch = this.rotationPitch;
       this.ticksInGround = 0;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setVelocity(double var1, double var3, double var5) {
-      this.motionX = var1;
-      this.motionY = var3;
-      this.motionZ = var5;
-      if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F) {
-         float var7 = MathHelper.sqrt(var1 * var1 + var5 * var5);
-         this.rotationYaw = (float)(MathHelper.atan2(var1, var5) * 57.29577951308232D);
-         this.rotationPitch = (float)(MathHelper.atan2(var3, (double)var7) * 57.29577951308232D);
-         this.prevRotationYaw = this.rotationYaw;
-         this.prevRotationPitch = this.rotationPitch;
-      }
-
    }
 
    public void onUpdate() {
@@ -201,8 +175,11 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
       if (var3 != null) {
          if (var3.typeOfHit == RayTraceResult.Type.BLOCK && this.world.getBlockState(var3.getBlockPos()).getBlock() == Blocks.PORTAL) {
             this.setPortal(var3.getBlockPos());
-         } else if (!ForgeHooks.onThrowableImpact(this, var3)) {
+         } else {
             this.onImpact(var3);
+            if (this.isDead) {
+               CraftEventFactory.callProjectileHitEvent(this);
+            }
          }
       }
 
@@ -210,9 +187,9 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
       this.posY += this.motionY;
       this.posZ += this.motionZ;
       float var17 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-      this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.29577951308232D);
+      this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 57.2957763671875D);
 
-      for(this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)var17) * 57.29577951308232D); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
+      for(this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)var17) * 57.2957763671875D); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F) {
          ;
       }
 
@@ -234,7 +211,6 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
       float var19 = this.getGravityVelocity();
       if (this.isInWater()) {
          for(int var20 = 0; var20 < 4; ++var20) {
-            float var21 = 0.25F;
             this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
          }
 

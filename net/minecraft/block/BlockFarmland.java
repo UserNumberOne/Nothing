@@ -14,13 +14,15 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityInteractEvent;
 
 public class BlockFarmland extends Block {
    public static final PropertyInteger MOISTURE = PropertyInteger.create("moisture", 0, 7);
@@ -51,6 +53,11 @@ public class BlockFarmland extends Block {
          if (var5 > 0) {
             var1.setBlockState(var2, var3.withProperty(MOISTURE, Integer.valueOf(var5 - 1)), 2);
          } else if (!this.hasCrops(var1, var2)) {
+            org.bukkit.block.Block var6 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+            if (CraftEventFactory.callBlockFadeEvent(var6, Blocks.DIRT).isCancelled()) {
+               return;
+            }
+
             var1.setBlockState(var2, Blocks.DIRT.getDefaultState());
          }
       } else if (var5 < 7) {
@@ -60,16 +67,32 @@ public class BlockFarmland extends Block {
    }
 
    public void onFallenUpon(World var1, BlockPos var2, Entity var3, float var4) {
+      super.onFallenUpon(var1, var2, var3, var4);
       if (!var1.isRemote && var1.rand.nextFloat() < var4 - 0.5F && var3 instanceof EntityLivingBase && (var3 instanceof EntityPlayer || var1.getGameRules().getBoolean("mobGriefing")) && var3.width * var3.width * var3.height > 0.512F) {
+         Object var5;
+         if (var3 instanceof EntityPlayer) {
+            var5 = CraftEventFactory.callPlayerInteractEvent((EntityPlayer)var3, Action.PHYSICAL, var2, (EnumFacing)null, (ItemStack)null, (EnumHand)null);
+         } else {
+            var5 = new EntityInteractEvent(var3.getBukkitEntity(), var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ()));
+            var1.getServer().getPluginManager().callEvent((EntityInteractEvent)var5);
+         }
+
+         if (((Cancellable)var5).isCancelled()) {
+            return;
+         }
+
+         if (CraftEventFactory.callEntityChangeBlockEvent(var3, var2, Blocks.DIRT, 0).isCancelled()) {
+            return;
+         }
+
          var1.setBlockState(var2, Blocks.DIRT.getDefaultState());
       }
 
-      super.onFallenUpon(var1, var2, var3, var4);
    }
 
    private boolean hasCrops(World var1, BlockPos var2) {
       Block var3 = var1.getBlockState(var2.up()).getBlock();
-      return var3 instanceof IPlantable && this.canSustainPlant(var1.getBlockState(var2), var1, var2, EnumFacing.UP, (IPlantable)var3);
+      return var3 instanceof BlockCrops || var3 instanceof BlockStem;
    }
 
    private boolean hasWater(World var1, BlockPos var2) {
@@ -88,23 +111,6 @@ public class BlockFarmland extends Block {
          var2.setBlockState(var3, Blocks.DIRT.getDefaultState());
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      switch(var4) {
-      case UP:
-         return true;
-      case NORTH:
-      case SOUTH:
-      case WEST:
-      case EAST:
-         IBlockState var5 = var2.getBlockState(var3.offset(var4));
-         Block var6 = var5.getBlock();
-         return !var5.isOpaqueCube() && var6 != Blocks.FARMLAND && var6 != Blocks.GRASS_PATH;
-      default:
-         return super.shouldSideBeRendered(var1, var2, var3, var4);
-      }
    }
 
    @Nullable

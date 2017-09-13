@@ -1,6 +1,7 @@
 package net.minecraft.inventory;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,26 +9,60 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.inventory.InventoryHolder;
 
 public class InventoryBasic implements IInventory {
    private String inventoryTitle;
    private final int slotsCount;
-   private final ItemStack[] inventoryContents;
+   public final ItemStack[] inventoryContents;
    private List changeListeners;
    private boolean hasCustomName;
+   public List transaction;
+   private int maxStack;
+   protected InventoryHolder bukkitOwner;
+
+   public ItemStack[] getContents() {
+      return this.inventoryContents;
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
+   }
+
+   public InventoryHolder getOwner() {
+      return this.bukkitOwner;
+   }
+
+   public Location getLocation() {
+      return null;
+   }
 
    public InventoryBasic(String var1, boolean var2, int var3) {
+      this(var1, var2, var3, (InventoryHolder)null);
+   }
+
+   public InventoryBasic(String var1, boolean var2, int var3, InventoryHolder var4) {
+      this.transaction = new ArrayList();
+      this.maxStack = 64;
+      this.bukkitOwner = var4;
       this.inventoryTitle = var1;
       this.hasCustomName = var2;
       this.slotsCount = var3;
       this.inventoryContents = new ItemStack[var3];
-   }
-
-   @SideOnly(Side.CLIENT)
-   public InventoryBasic(ITextComponent var1, int var2) {
-      this(var1.getUnformattedText(), true, var2);
    }
 
    public void addInventoryChangeListener(IInventoryChangedListener var1) {

@@ -1,6 +1,8 @@
 package net.minecraft.tileentity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockBrewingStand;
 import net.minecraft.block.state.IBlockState;
@@ -16,18 +18,18 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.potion.PotionHelper;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.event.inventory.BrewEvent;
+import org.bukkit.inventory.BrewerInventory;
 
 public class TileEntityBrewingStand extends TileEntityLockable implements ITickable, ISidedInventory {
    private static final int[] SLOTS_FOR_UP = new int[]{3};
@@ -39,9 +41,29 @@ public class TileEntityBrewingStand extends TileEntityLockable implements ITicka
    private Item ingredientID;
    private String customName;
    private int fuel;
-   IItemHandler handlerInput = new SidedInvWrapper(this, EnumFacing.UP);
-   IItemHandler handlerOutput = new SidedInvWrapper(this, EnumFacing.DOWN);
-   IItemHandler handlerSides = new SidedInvWrapper(this, EnumFacing.NORTH);
+   private int lastTick = MinecraftServer.currentTick;
+   public List transaction = new ArrayList();
+   private int maxStack = 64;
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public ItemStack[] getContents() {
+      return this.brewingItemStacks;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
+   }
 
    public String getName() {
       return this.hasCustomName() ? this.customName : "container.brewing";
@@ -72,10 +94,12 @@ public class TileEntityBrewingStand extends TileEntityLockable implements ITicka
 
       boolean var1 = this.canBrew();
       boolean var2 = this.brewTime > 0;
+      int var3 = MinecraftServer.currentTick - this.lastTick;
+      this.lastTick = MinecraftServer.currentTick;
       if (var2) {
-         --this.brewTime;
-         boolean var3 = this.brewTime == 0;
-         if (var3 && var1) {
+         this.brewTime -= var3;
+         boolean var4 = this.brewTime <= 0;
+         if (var4 && var1) {
             this.brewPotions();
             this.markDirty();
          } else if (!var1) {
@@ -93,19 +117,19 @@ public class TileEntityBrewingStand extends TileEntityLockable implements ITicka
       }
 
       if (!this.world.isRemote) {
-         boolean[] var6 = this.createFilledSlotsArray();
-         if (!Arrays.equals(var6, this.filledSlots)) {
-            this.filledSlots = var6;
-            IBlockState var4 = this.world.getBlockState(this.getPos());
-            if (!(var4.getBlock() instanceof BlockBrewingStand)) {
+         boolean[] var7 = this.createFilledSlotsArray();
+         if (!Arrays.equals(var7, this.filledSlots)) {
+            this.filledSlots = var7;
+            IBlockState var5 = this.world.getBlockState(this.getPos());
+            if (!(var5.getBlock() instanceof BlockBrewingStand)) {
                return;
             }
 
-            for(int var5 = 0; var5 < BlockBrewingStand.HAS_BOTTLE.length; ++var5) {
-               var4 = var4.withProperty(BlockBrewingStand.HAS_BOTTLE[var5], Boolean.valueOf(var6[var5]));
+            for(int var6 = 0; var6 < BlockBrewingStand.HAS_BOTTLE.length; ++var6) {
+               var5 = var5.withProperty(BlockBrewingStand.HAS_BOTTLE[var6], Boolean.valueOf(var7[var6]));
             }
 
-            this.world.setBlockState(this.pos, var4, 2);
+            this.world.setBlockState(this.pos, var5, 2);
          }
       }
 
@@ -125,35 +149,55 @@ public class TileEntityBrewingStand extends TileEntityLockable implements ITicka
 
    private boolean canBrew() {
       if (this.brewingItemStacks[3] != null && this.brewingItemStacks[3].stackSize > 0) {
-         ;
-      }
+         ItemStack var1 = this.brewingItemStacks[3];
+         if (!PotionHelper.isReagent(var1)) {
+            return false;
+         } else {
+            for(int var2 = 0; var2 < 3; ++var2) {
+               ItemStack var3 = this.brewingItemStacks[var2];
+               if (var3 != null && PotionHelper.hasConversions(var3, var1)) {
+                  return true;
+               }
+            }
 
-      return BrewingRecipeRegistry.canBrew(this.brewingItemStacks, this.brewingItemStacks[3], OUTPUT_SLOTS);
+            return false;
+         }
+      } else {
+         return false;
+      }
    }
 
    private void brewPotions() {
-      if (!ForgeEventFactory.onPotionAttemptBrew(this.brewingItemStacks)) {
-         ItemStack var1 = this.brewingItemStacks[3];
-         BrewingRecipeRegistry.brewPotions(this.brewingItemStacks, this.brewingItemStacks[3], OUTPUT_SLOTS);
-         --var1.stackSize;
-         BlockPos var2 = this.getPos();
-         if (var1.getItem().hasContainerItem(var1)) {
-            ItemStack var3 = var1.getItem().getContainerItem(var1);
-            if (var1.stackSize <= 0) {
-               var1 = var3;
-            } else {
-               InventoryHelper.spawnItemStack(this.world, (double)var2.getX(), (double)var2.getY(), (double)var2.getZ(), var3);
-            }
+      ItemStack var1 = this.brewingItemStacks[3];
+      if (this.getOwner() != null) {
+         BrewEvent var2 = new BrewEvent(this.world.getWorld().getBlockAt(this.pos.getX(), this.pos.getY(), this.pos.getZ()), (BrewerInventory)this.getOwner().getInventory());
+         Bukkit.getPluginManager().callEvent(var2);
+         if (var2.isCancelled()) {
+            return;
          }
-
-         if (var1.stackSize <= 0) {
-            var1 = null;
-         }
-
-         this.brewingItemStacks[3] = var1;
-         this.world.playEvent(1035, var2, 0);
-         ForgeEventFactory.onPotionBrewed(this.brewingItemStacks);
       }
+
+      for(int var4 = 0; var4 < 3; ++var4) {
+         this.brewingItemStacks[var4] = PotionHelper.doReaction(var1, this.brewingItemStacks[var4]);
+      }
+
+      --var1.stackSize;
+      BlockPos var5 = this.getPos();
+      if (var1.getItem().hasContainerItem()) {
+         ItemStack var3 = new ItemStack(var1.getItem().getContainerItem());
+         if (var1.stackSize <= 0) {
+            var1 = var3;
+         } else {
+            InventoryHelper.spawnItemStack(this.world, (double)var5.getX(), (double)var5.getY(), (double)var5.getZ(), var3);
+         }
+      }
+
+      if (var1.stackSize <= 0) {
+         var1 = null;
+      }
+
+      this.brewingItemStacks[3] = var1;
+      this.world.playEvent(1035, var5, 0);
    }
 
    public static void registerFixesBrewingStand(DataFixer var0) {
@@ -227,7 +271,7 @@ public class TileEntityBrewingStand extends TileEntityLockable implements ITicka
    }
 
    public int getInventoryStackLimit() {
-      return 64;
+      return this.maxStack;
    }
 
    public boolean isUsableByPlayer(EntityPlayer var1) {
@@ -242,10 +286,10 @@ public class TileEntityBrewingStand extends TileEntityLockable implements ITicka
 
    public boolean isItemValidForSlot(int var1, ItemStack var2) {
       if (var1 == 3) {
-         return BrewingRecipeRegistry.isValidIngredient(var2);
+         return PotionHelper.isReagent(var2);
       } else {
          Item var3 = var2.getItem();
-         return var1 == 4 ? var3 == Items.BLAZE_POWDER : BrewingRecipeRegistry.isValidInput(var2);
+         return var1 == 4 ? var3 == Items.BLAZE_POWDER : var3 == Items.POTIONITEM || var3 == Items.SPLASH_POTION || var3 == Items.LINGERING_POTION || var3 == Items.GLASS_BOTTLE;
       }
    }
 
@@ -289,18 +333,6 @@ public class TileEntityBrewingStand extends TileEntityLockable implements ITicka
          this.fuel = var2;
       }
 
-   }
-
-   public Object getCapability(Capability var1, EnumFacing var2) {
-      if (var2 != null && var1 == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-         if (var2 == EnumFacing.UP) {
-            return this.handlerInput;
-         } else {
-            return var2 == EnumFacing.DOWN ? this.handlerOutput : this.handlerSides;
-         }
-      } else {
-         return super.getCapability(var1, var2);
-      }
    }
 
    public int getFieldCount() {

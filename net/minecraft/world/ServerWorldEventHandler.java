@@ -1,5 +1,6 @@
 package net.minecraft.world;
 
+import java.util.Iterator;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -8,7 +9,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketBlockBreakAnim;
 import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.network.play.server.SPacketSoundEffect;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -43,7 +44,7 @@ public class ServerWorldEventHandler implements IWorldEventListener {
    }
 
    public void playSoundToAllNearExcept(@Nullable EntityPlayer var1, SoundEvent var2, SoundCategory var3, double var4, double var6, double var8, float var10, float var11) {
-      this.mcServer.getPlayerList().sendToAllNearExcept(var1, var4, var6, var8, var10 > 1.0F ? (double)(16.0F * var10) : 16.0D, this.world.provider.getDimension(), new SPacketSoundEffect(var2, var3, var4, var6, var8, var10, var11));
+      this.mcServer.getPlayerList().sendToAllNearExcept(var1, var4, var6, var8, var10 > 1.0F ? (double)(16.0F * var10) : 16.0D, this.world.dimension, new SPacketSoundEffect(var2, var3, var4, var6, var8, var10, var11));
    }
 
    public void markBlockRangeForRenderUpdate(int var1, int var2, int var3, int var4, int var5, int var6) {
@@ -60,7 +61,7 @@ public class ServerWorldEventHandler implements IWorldEventListener {
    }
 
    public void playEvent(EntityPlayer var1, int var2, BlockPos var3, int var4) {
-      this.mcServer.getPlayerList().sendToAllNearExcept(var1, (double)var3.getX(), (double)var3.getY(), (double)var3.getZ(), 64.0D, this.world.provider.getDimension(), new SPacketEffect(var2, var3, var4, false));
+      this.mcServer.getPlayerList().sendToAllNearExcept(var1, (double)var3.getX(), (double)var3.getY(), (double)var3.getZ(), 64.0D, this.world.dimension, new SPacketEffect(var2, var3, var4, false));
    }
 
    public void broadcastSound(int var1, BlockPos var2, int var3) {
@@ -68,13 +69,21 @@ public class ServerWorldEventHandler implements IWorldEventListener {
    }
 
    public void sendBlockBreakProgress(int var1, BlockPos var2, int var3) {
-      for(EntityPlayerMP var5 : this.mcServer.getPlayerList().getPlayers()) {
-         if (var5 != null && var5.world == this.world && var5.getEntityId() != var1) {
-            double var6 = (double)var2.getX() - var5.posX;
-            double var8 = (double)var2.getY() - var5.posY;
-            double var10 = (double)var2.getZ() - var5.posZ;
-            if (var6 * var6 + var8 * var8 + var10 * var10 < 1024.0D) {
-               var5.connection.sendPacket(new SPacketBlockBreakAnim(var1, var2, var3));
+      Iterator var4 = this.mcServer.getPlayerList().getPlayers().iterator();
+      EntityPlayer var5 = null;
+      Entity var6 = this.world.getEntityByID(var1);
+      if (var6 instanceof EntityPlayer) {
+         var5 = (EntityPlayer)var6;
+      }
+
+      while(var4.hasNext()) {
+         EntityPlayerMP var7 = (EntityPlayerMP)var4.next();
+         if (var7 != null && var7.world == this.world && var7.getEntityId() != var1) {
+            double var8 = (double)var2.getX() - var7.posX;
+            double var10 = (double)var2.getY() - var7.posY;
+            double var12 = (double)var2.getZ() - var7.posZ;
+            if ((var5 == null || !(var5 instanceof EntityPlayerMP) || var7.getBukkitEntity().canSee(((EntityPlayerMP)var5).getBukkitEntity())) && var8 * var8 + var10 * var10 + var12 * var12 < 1024.0D) {
+               var7.connection.sendPacket(new SPacketBlockBreakAnim(var1, var2, var3));
             }
          }
       }

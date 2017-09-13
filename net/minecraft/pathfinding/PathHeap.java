@@ -51,11 +51,11 @@ public class PathHeap {
    private void sortBack(int var1) {
       PathPoint var2 = this.pathPoints[var1];
 
-      int var3;
-      for(float var4 = var2.distanceToTarget; var1 > 0; var1 = var3) {
-         var3 = var1 - 1 >> 1;
-         PathPoint var5 = this.pathPoints[var3];
-         if (var4 >= var5.distanceToTarget) {
+      int var4;
+      for(float var3 = var2.distanceToTarget; var1 > 0; var1 = var4) {
+         var4 = var1 - 1 >> 1;
+         PathPoint var5 = this.pathPoints[var4];
+         if (var3 >= var5.distanceToTarget) {
             break;
          }
 

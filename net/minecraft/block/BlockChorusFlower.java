@@ -13,13 +13,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockChorusFlower extends Block {
    public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 5);
@@ -43,7 +40,7 @@ public class BlockChorusFlower extends Block {
          BlockPos var5 = var2.up();
          if (var1.isAirBlock(var5) && var5.getY() < 256) {
             int var6 = ((Integer)var3.getValue(AGE)).intValue();
-            if (var6 < 5 && ForgeHooks.onCropsGrowPre(var1, var5, var3, var4.nextInt(1) == 0)) {
+            if (var6 < 5 && var4.nextInt(1) == 0) {
                boolean var7 = false;
                boolean var8 = false;
                IBlockState var9 = var1.getBlockState(var2.down());
@@ -69,47 +66,45 @@ public class BlockChorusFlower extends Block {
                      ++var11;
                   }
 
-                  int var17 = 4;
+                  int var18 = 4;
                   if (var8) {
-                     ++var17;
+                     ++var18;
                   }
 
-                  if (var11 < 2 || var4.nextInt(var17) >= var11) {
+                  if (var11 < 2 || var4.nextInt(var18) >= var11) {
                      var7 = true;
                   }
                }
 
                if (var7 && areAllNeighborsEmpty(var1, var5, (EnumFacing)null) && var1.isAirBlock(var2.up(2))) {
-                  var1.setBlockState(var2, Blocks.CHORUS_PLANT.getDefaultState(), 2);
-                  this.placeGrownFlower(var1, var5, var6);
-               } else if (var6 >= 4) {
-                  if (var6 == 4) {
-                     this.placeDeadFlower(var1, var2);
+                  if (CraftEventFactory.handleBlockSpreadEvent(var1.getWorld().getBlockAt(var5.getX(), var5.getY(), var5.getZ()), var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ()), this, this.getMetaFromState(this.getDefaultState().withProperty(AGE, Integer.valueOf(var6))))) {
+                     var1.setBlockState(var2, Blocks.CHORUS_PLANT.getDefaultState(), 2);
+                     var1.playEvent(1033, var2, 0);
                   }
-               } else {
-                  int var16 = var4.nextInt(4);
-                  boolean var18 = false;
+               } else if (var6 < 4) {
+                  int var17 = var4.nextInt(4);
+                  boolean var19 = false;
                   if (var8) {
-                     ++var16;
+                     ++var17;
                   }
 
-                  for(int var19 = 0; var19 < var16; ++var19) {
+                  for(int var20 = 0; var20 < var17; ++var20) {
                      EnumFacing var14 = EnumFacing.Plane.HORIZONTAL.random(var4);
                      BlockPos var15 = var2.offset(var14);
-                     if (var1.isAirBlock(var15) && var1.isAirBlock(var15.down()) && areAllNeighborsEmpty(var1, var15, var14.getOpposite())) {
-                        this.placeGrownFlower(var1, var15, var6 + 1);
-                        var18 = true;
+                     if (var1.isAirBlock(var15) && var1.isAirBlock(var15.down()) && areAllNeighborsEmpty(var1, var15, var14.getOpposite()) && CraftEventFactory.handleBlockSpreadEvent(var1.getWorld().getBlockAt(var15.getX(), var15.getY(), var15.getZ()), var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ()), this, this.getMetaFromState(this.getDefaultState().withProperty(AGE, Integer.valueOf(var6 + 1))))) {
+                        var1.playEvent(1033, var2, 0);
+                        var19 = true;
                      }
                   }
 
-                  if (var18) {
+                  if (var19) {
                      var1.setBlockState(var2, Blocks.CHORUS_PLANT.getDefaultState(), 2);
-                  } else {
-                     this.placeDeadFlower(var1, var2);
+                  } else if (CraftEventFactory.handleBlockGrowEvent(var1, var2.getX(), var2.getY(), var2.getZ(), this, this.getMetaFromState(var3.withProperty(AGE, Integer.valueOf(5))))) {
+                     var1.playEvent(1034, var2, 0);
                   }
+               } else if (var6 == 4 && CraftEventFactory.handleBlockGrowEvent(var1, var2.getX(), var2.getY(), var2.getZ(), this, this.getMetaFromState(var3.withProperty(AGE, Integer.valueOf(5))))) {
+                  var1.playEvent(1034, var2, 0);
                }
-
-               ForgeHooks.onCropsGrowPost(var1, var2, var3, var1.getBlockState(var2));
             }
          }
       }
@@ -172,7 +167,11 @@ public class BlockChorusFlower extends Block {
                }
             }
 
-            return var5 == 1;
+            if (var5 == 1) {
+               return true;
+            } else {
+               return false;
+            }
          } else {
             return false;
          }
@@ -188,11 +187,6 @@ public class BlockChorusFlower extends Block {
 
    protected ItemStack getSilkTouchDrop(IBlockState var1) {
       return null;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 
    public IBlockState getStateFromMeta(int var1) {

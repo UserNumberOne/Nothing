@@ -6,13 +6,23 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryMerchant;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerMerchant extends Container {
    private final IMerchant theMerchant;
    private final InventoryMerchant merchantInventory;
    private final World world;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
+
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity == null) {
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), new CraftInventoryMerchant(this.merchantInventory), this);
+      }
+
+      return this.bukkitEntity;
+   }
 
    public ContainerMerchant(InventoryPlayer var1, IMerchant var2, World var3) {
       this.theMerchant = var2;
@@ -21,6 +31,7 @@ public class ContainerMerchant extends Container {
       this.addSlotToContainer(new Slot(this.merchantInventory, 0, 36, 53));
       this.addSlotToContainer(new Slot(this.merchantInventory, 1, 62, 53));
       this.addSlotToContainer(new SlotMerchantResult(var1.player, var2, this.merchantInventory, 2, 120, 53));
+      this.player = var1;
 
       for(int var4 = 0; var4 < 3; ++var4) {
          for(int var5 = 0; var5 < 9; ++var5) {
@@ -53,10 +64,6 @@ public class ContainerMerchant extends Container {
 
    public void setCurrentRecipeIndex(int var1) {
       this.merchantInventory.setCurrentRecipeIndex(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void updateProgressBar(int var1, int var2) {
    }
 
    public boolean canInteractWith(EntityPlayer var1) {

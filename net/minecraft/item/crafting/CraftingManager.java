@@ -21,16 +21,20 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.inventory.InventoryView;
 
 public class CraftingManager {
    private static final CraftingManager INSTANCE = new CraftingManager();
-   private final List recipes = Lists.newArrayList();
+   public List recipes = Lists.newArrayList();
+   public IRecipe lastRecipe;
+   public InventoryView lastCraftView;
 
    public static CraftingManager getInstance() {
       return INSTANCE;
    }
 
-   private CraftingManager() {
+   public CraftingManager() {
       (new RecipesTools()).addRecipes(this);
       (new RecipesWeapons()).addRecipes(this);
       (new RecipesIngots()).addRecipes(this);
@@ -189,9 +193,17 @@ public class CraftingManager {
       this.addRecipe(new ItemStack(Items.ARMOR_STAND, 1), "///", " / ", "/_/", '/', Items.STICK, '_', new ItemStack(Blocks.STONE_SLAB, 1, BlockStoneSlab.EnumType.STONE.getMetadata()));
       this.addRecipe(new ItemStack(Blocks.END_ROD, 4), "/", "#", '/', Items.BLAZE_ROD, '#', Items.CHORUS_FRUIT_POPPED);
       this.addRecipe(new ItemStack(Blocks.BONE_BLOCK, 1), "XXX", "XXX", "XXX", 'X', new ItemStack(Items.DYE, 1, EnumDyeColor.WHITE.getDyeDamage()));
+      this.sort();
+   }
+
+   public void sort() {
       Collections.sort(this.recipes, new Comparator() {
          public int compare(IRecipe var1, IRecipe var2) {
             return var1 instanceof ShapelessRecipes && var2 instanceof ShapedRecipes ? 1 : (var2 instanceof ShapelessRecipes && var1 instanceof ShapedRecipes ? -1 : (var2.getRecipeSize() < var1.getRecipeSize() ? -1 : (var2.getRecipeSize() > var1.getRecipeSize() ? 1 : 0)));
+         }
+
+         public int compare(Object var1, Object var2) {
+            return this.compare((IRecipe)var1, (IRecipe)var2);
          }
       });
    }
@@ -221,32 +233,32 @@ public class CraftingManager {
       HashMap var13;
       for(var13 = Maps.newHashMap(); var4 < var2.length; var4 += 2) {
          Character var14 = (Character)var2[var4];
-         ItemStack var16 = null;
+         ItemStack var17 = null;
          if (var2[var4 + 1] instanceof Item) {
-            var16 = new ItemStack((Item)var2[var4 + 1]);
+            var17 = new ItemStack((Item)var2[var4 + 1]);
          } else if (var2[var4 + 1] instanceof Block) {
-            var16 = new ItemStack((Block)var2[var4 + 1], 1, 32767);
+            var17 = new ItemStack((Block)var2[var4 + 1], 1, 32767);
          } else if (var2[var4 + 1] instanceof ItemStack) {
-            var16 = (ItemStack)var2[var4 + 1];
+            var17 = (ItemStack)var2[var4 + 1];
          }
 
-         var13.put(var14, var16);
+         var13.put(var14, var17);
       }
 
       ItemStack[] var15 = new ItemStack[var5 * var6];
 
-      for(int var17 = 0; var17 < var5 * var6; ++var17) {
-         char var19 = var3.charAt(var17);
-         if (var13.containsKey(Character.valueOf(var19))) {
-            var15[var17] = ((ItemStack)var13.get(Character.valueOf(var19))).copy();
+      for(int var16 = 0; var16 < var5 * var6; ++var16) {
+         char var18 = var3.charAt(var16);
+         if (var13.containsKey(Character.valueOf(var18))) {
+            var15[var16] = ((ItemStack)var13.get(Character.valueOf(var18))).copy();
          } else {
-            var15[var17] = null;
+            var15[var16] = null;
          }
       }
 
-      ShapedRecipes var18 = new ShapedRecipes(var5, var6, var15, var1);
-      this.recipes.add(var18);
-      return var18;
+      ShapedRecipes var19 = new ShapedRecipes(var5, var6, var15, var1);
+      this.recipes.add(var19);
+      return var19;
    }
 
    public void addShapelessRecipe(ItemStack var1, Object... var2) {
@@ -277,10 +289,13 @@ public class CraftingManager {
    public ItemStack findMatchingRecipe(InventoryCrafting var1, World var2) {
       for(IRecipe var4 : this.recipes) {
          if (var4.matches(var1, var2)) {
-            return var4.getCraftingResult(var1);
+            var1.currentRecipe = var4;
+            ItemStack var5 = var4.getCraftingResult(var1);
+            return CraftEventFactory.callPreCraftEvent(var1, var5, this.lastCraftView, false);
          }
       }
 
+      var1.currentRecipe = null;
       return null;
    }
 
@@ -291,13 +306,13 @@ public class CraftingManager {
          }
       }
 
-      ItemStack[] var5 = new ItemStack[var1.getSizeInventory()];
+      ItemStack[] var6 = new ItemStack[var1.getSizeInventory()];
 
-      for(int var6 = 0; var6 < var5.length; ++var6) {
-         var5[var6] = var1.getStackInSlot(var6);
+      for(int var5 = 0; var5 < var6.length; ++var5) {
+         var6[var5] = var1.getStackInSlot(var5);
       }
 
-      return var5;
+      return var6;
    }
 
    public List getRecipeList() {

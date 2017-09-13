@@ -6,7 +6,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.DecoderException;
 import java.util.List;
-import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 public class NettyCompressionDecoder extends ByteToMessageDecoder {
@@ -18,7 +17,7 @@ public class NettyCompressionDecoder extends ByteToMessageDecoder {
       this.inflater = new Inflater();
    }
 
-   protected void decode(ChannelHandlerContext var1, ByteBuf var2, List var3) throws DataFormatException, Exception {
+   protected void decode(ChannelHandlerContext var1, ByteBuf var2, List var3) throws Exception {
       if (var2.readableBytes() != 0) {
          PacketBuffer var4 = new PacketBuffer(var2);
          int var5 = var4.readVarInt();
@@ -41,8 +40,8 @@ public class NettyCompressionDecoder extends ByteToMessageDecoder {
             var3.add(Unpooled.wrappedBuffer(var7));
             this.inflater.reset();
          }
-      }
 
+      }
    }
 
    public void setCompressionThreshold(int var1) {

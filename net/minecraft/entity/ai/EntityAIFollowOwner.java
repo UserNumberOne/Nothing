@@ -70,29 +70,39 @@ public class EntityAIFollowOwner extends EntityAIBase {
 
    private boolean isEmptyBlock(BlockPos var1) {
       IBlockState var2 = this.world.getBlockState(var1);
-      return var2.getMaterial() == Material.AIR ? true : !var2.isFullCube();
+      if (var2.getMaterial() == Material.AIR) {
+         return true;
+      } else {
+         return !var2.isFullCube();
+      }
    }
 
    public void updateTask() {
       this.thePet.getLookHelper().setLookPositionWithEntity(this.theOwner, 10.0F, (float)this.thePet.getVerticalFaceSpeed());
-      if (!this.thePet.isSitting() && --this.timeToRecalcPath <= 0) {
-         this.timeToRecalcPath = 10;
-         if (!this.petPathfinder.tryMoveToEntityLiving(this.theOwner, this.followSpeed) && !this.thePet.getLeashed() && this.thePet.getDistanceSqToEntity(this.theOwner) >= 144.0D) {
-            int var1 = MathHelper.floor(this.theOwner.posX) - 2;
-            int var2 = MathHelper.floor(this.theOwner.posZ) - 2;
-            int var3 = MathHelper.floor(this.theOwner.getEntityBoundingBox().minY);
+      if (!this.thePet.isSitting()) {
+         if (--this.timeToRecalcPath <= 0) {
+            this.timeToRecalcPath = 10;
+            if (!this.petPathfinder.tryMoveToEntityLiving(this.theOwner, this.followSpeed)) {
+               if (!this.thePet.getLeashed()) {
+                  if (this.thePet.getDistanceSqToEntity(this.theOwner) >= 144.0D) {
+                     int var1 = MathHelper.floor(this.theOwner.posX) - 2;
+                     int var2 = MathHelper.floor(this.theOwner.posZ) - 2;
+                     int var3 = MathHelper.floor(this.theOwner.getEntityBoundingBox().minY);
 
-            for(int var4 = 0; var4 <= 4; ++var4) {
-               for(int var5 = 0; var5 <= 4; ++var5) {
-                  if ((var4 < 1 || var5 < 1 || var4 > 3 || var5 > 3) && this.world.getBlockState(new BlockPos(var1 + var4, var3 - 1, var2 + var5)).isFullyOpaque() && this.isEmptyBlock(new BlockPos(var1 + var4, var3, var2 + var5)) && this.isEmptyBlock(new BlockPos(var1 + var4, var3 + 1, var2 + var5))) {
-                     this.thePet.setLocationAndAngles((double)((float)(var1 + var4) + 0.5F), (double)var3, (double)((float)(var2 + var5) + 0.5F), this.thePet.rotationYaw, this.thePet.rotationPitch);
-                     this.petPathfinder.clearPathEntity();
-                     return;
+                     for(int var4 = 0; var4 <= 4; ++var4) {
+                        for(int var5 = 0; var5 <= 4; ++var5) {
+                           if ((var4 < 1 || var5 < 1 || var4 > 3 || var5 > 3) && this.world.getBlockState(new BlockPos(var1 + var4, var3 - 1, var2 + var5)).isFullyOpaque() && this.isEmptyBlock(new BlockPos(var1 + var4, var3, var2 + var5)) && this.isEmptyBlock(new BlockPos(var1 + var4, var3 + 1, var2 + var5))) {
+                              this.thePet.setLocationAndAngles((double)((float)(var1 + var4) + 0.5F), (double)var3, (double)((float)(var2 + var5) + 0.5F), this.thePet.rotationYaw, this.thePet.rotationPitch);
+                              this.petPathfinder.clearPathEntity();
+                              return;
+                           }
+                        }
+                     }
+
                   }
                }
             }
          }
       }
-
    }
 }

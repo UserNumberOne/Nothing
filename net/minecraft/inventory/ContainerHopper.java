@@ -4,33 +4,47 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerHopper extends Container {
    private final IInventory hopperInventory;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
+
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventory var1 = new CraftInventory(this.hopperInventory);
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), var1, this);
+         return this.bukkitEntity;
+      }
+   }
 
    public ContainerHopper(InventoryPlayer var1, IInventory var2, EntityPlayer var3) {
       this.hopperInventory = var2;
+      this.player = var1;
       var2.openInventory(var3);
-      boolean var4 = true;
 
-      for(int var5 = 0; var5 < var2.getSizeInventory(); ++var5) {
-         this.addSlotToContainer(new Slot(var2, var5, 44 + var5 * 18, 20));
+      for(int var4 = 0; var4 < var2.getSizeInventory(); ++var4) {
+         this.addSlotToContainer(new Slot(var2, var4, 44 + var4 * 18, 20));
       }
 
-      for(int var7 = 0; var7 < 3; ++var7) {
-         for(int var6 = 0; var6 < 9; ++var6) {
-            this.addSlotToContainer(new Slot(var1, var6 + var7 * 9 + 9, 8 + var6 * 18, var7 * 18 + 51));
+      for(int var6 = 0; var6 < 3; ++var6) {
+         for(int var5 = 0; var5 < 9; ++var5) {
+            this.addSlotToContainer(new Slot(var1, var5 + var6 * 9 + 9, 8 + var5 * 18, var6 * 18 + 51));
          }
       }
 
-      for(int var8 = 0; var8 < 9; ++var8) {
-         this.addSlotToContainer(new Slot(var1, var8, 8 + var8 * 18, 109));
+      for(int var7 = 0; var7 < 9; ++var7) {
+         this.addSlotToContainer(new Slot(var1, var7, 8 + var7 * 18, 109));
       }
 
    }
 
    public boolean canInteractWith(EntityPlayer var1) {
-      return this.hopperInventory.isUsableByPlayer(var1);
+      return !this.checkReachable ? true : this.hopperInventory.isUsableByPlayer(var1);
    }
 
    @Nullable

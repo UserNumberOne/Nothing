@@ -5,8 +5,6 @@ import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSpawnExperienceOrb implements Packet {
    private int entityID;
@@ -44,30 +42,5 @@ public class SPacketSpawnExperienceOrb implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleSpawnExperienceOrb(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getEntityID() {
-      return this.entityID;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getX() {
-      return this.posX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getY() {
-      return this.posY;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getZ() {
-      return this.posZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getXPValue() {
-      return this.xpValue;
    }
 }

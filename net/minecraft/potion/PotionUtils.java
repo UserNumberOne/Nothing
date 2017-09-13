@@ -5,21 +5,12 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.init.PotionTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Tuple;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class PotionUtils {
    public static List getEffectsFromStack(ItemStack var0) {
@@ -63,11 +54,6 @@ public class PotionUtils {
          }
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static int getPotionColor(PotionType var0) {
-      return getPotionColorFromEffectList(var0.getEffects());
    }
 
    public static int getPotionColorFromEffectList(Collection var0) {
@@ -136,66 +122,5 @@ public class PotionUtils {
          var0.setTagCompound(var2);
          return var0;
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static void addPotionTooltip(ItemStack var0, List var1, float var2) {
-      List var3 = getEffectsFromStack(var0);
-      ArrayList var4 = Lists.newArrayList();
-      if (var3.isEmpty()) {
-         String var5 = I18n.translateToLocal("effect.none").trim();
-         var1.add(TextFormatting.GRAY + var5);
-      } else {
-         for(PotionEffect var6 : var3) {
-            String var7 = I18n.translateToLocal(var6.getEffectName()).trim();
-            Potion var8 = var6.getPotion();
-            Map var9 = var8.getAttributeModifierMap();
-            if (!var9.isEmpty()) {
-               for(Entry var11 : var9.entrySet()) {
-                  AttributeModifier var12 = (AttributeModifier)var11.getValue();
-                  AttributeModifier var13 = new AttributeModifier(var12.getName(), var8.getAttributeModifierAmount(var6.getAmplifier(), var12), var12.getOperation());
-                  var4.add(new Tuple(((IAttribute)var11.getKey()).getName(), var13));
-               }
-            }
-
-            if (var6.getAmplifier() > 0) {
-               var7 = var7 + " " + I18n.translateToLocal("potion.potency." + var6.getAmplifier()).trim();
-            }
-
-            if (var6.getDuration() > 20) {
-               var7 = var7 + " (" + Potion.getPotionDurationString(var6, var2) + ")";
-            }
-
-            if (var8.isBadEffect()) {
-               var1.add(TextFormatting.RED + var7);
-            } else {
-               var1.add(TextFormatting.BLUE + var7);
-            }
-         }
-      }
-
-      if (!var4.isEmpty()) {
-         var1.add("");
-         var1.add(TextFormatting.DARK_PURPLE + I18n.translateToLocal("potion.whenDrank"));
-
-         for(Tuple var16 : var4) {
-            AttributeModifier var17 = (AttributeModifier)var16.getSecond();
-            double var18 = var17.getAmount();
-            double var19;
-            if (var17.getOperation() != 1 && var17.getOperation() != 2) {
-               var19 = var17.getAmount();
-            } else {
-               var19 = var17.getAmount() * 100.0D;
-            }
-
-            if (var18 > 0.0D) {
-               var1.add(TextFormatting.BLUE + I18n.translateToLocalFormatted("attribute.modifier.plus." + var17.getOperation(), ItemStack.DECIMALFORMAT.format(var19), I18n.translateToLocal("attribute.name." + (String)var16.getFirst())));
-            } else if (var18 < 0.0D) {
-               var19 = var19 * -1.0D;
-               var1.add(TextFormatting.RED + I18n.translateToLocalFormatted("attribute.modifier.take." + var17.getOperation(), ItemStack.DECIMALFORMAT.format(var19), I18n.translateToLocal("attribute.name." + (String)var16.getFirst())));
-            }
-         }
-      }
-
    }
 }

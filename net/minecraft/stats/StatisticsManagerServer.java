@@ -17,7 +17,7 @@ import java.util.Map.Entry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketStatistics;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.IJsonSerializable;
 import net.minecraft.util.TupleIntJsonSerializable;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -67,14 +67,14 @@ public class StatisticsManagerServer extends StatisticsManager {
       this.dirty.add(var2);
       if (var2.isAchievement() && var4 == 0 && var3 > 0) {
          this.hasUnsentAchievement = true;
-         if (this.mcServer.isAnnouncingPlayerAchievements()) {
+         if (this.mcServer.ax()) {
             this.mcServer.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.achievement", new Object[]{var1.getDisplayName(), var2.createChatComponent()}));
          }
       }
 
       if (var2.isAchievement() && var4 > 0 && var3 == 0) {
          this.hasUnsentAchievement = true;
-         if (this.mcServer.isAnnouncingPlayerAchievements()) {
+         if (this.mcServer.ax()) {
             this.mcServer.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.achievement.taken", new Object[]{var1.getDisplayName(), var2.createChatComponent()}));
          }
       }
@@ -161,7 +161,7 @@ public class StatisticsManagerServer extends StatisticsManager {
    }
 
    public void sendStats(EntityPlayerMP var1) {
-      int var2 = this.mcServer.getTickCounter();
+      int var2 = this.mcServer.ap();
       HashMap var3 = Maps.newHashMap();
       if (this.hasUnsentAchievement || var2 - this.lastStatRequest > 300) {
          this.lastStatRequest = var2;

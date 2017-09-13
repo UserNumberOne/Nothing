@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketEntityStatus;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.GameRules;
@@ -24,7 +24,7 @@ public class CommandGameRule extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      GameRules var4 = this.getOverWorldGameRules(var1);
+      GameRules var4 = var2.getEntityWorld().getGameRules();
       String var5 = var3.length > 0 ? var3[0] : "";
       String var6 = var3.length > 1 ? buildString(var3, 1) : "";
       switch(var3.length) {
@@ -46,29 +46,29 @@ public class CommandGameRule extends CommandBase {
          }
 
          var4.setOrCreateGameRule(var5, var6);
-         notifyGameRuleChange(var4, var5, var1);
+         a(var4, var5, var1);
          notifyCommandListener(var2, this, "commands.gamerule.success", new Object[]{var5, var6});
       }
 
    }
 
-   public static void notifyGameRuleChange(GameRules var0, String var1, MinecraftServer var2) {
+   public static void a(GameRules var0, String var1, MinecraftServer var2) {
       if ("reducedDebugInfo".equals(var1)) {
-         byte var3 = (byte)(var0.getBoolean(var1) ? 22 : 23);
+         int var3 = var0.getBoolean(var1) ? 22 : 23;
 
          for(EntityPlayerMP var5 : var2.getPlayerList().getPlayers()) {
-            var5.connection.sendPacket(new SPacketEntityStatus(var5, var3));
+            var5.connection.sendPacket(new SPacketEntityStatus(var5, (byte)var3));
          }
       }
 
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       if (var3.length == 1) {
-         return getListOfStringsMatchingLastWord(var3, this.getOverWorldGameRules(var1).getRules());
+         return getListOfStringsMatchingLastWord(var3, this.a(var1).getRules());
       } else {
          if (var3.length == 2) {
-            GameRules var5 = this.getOverWorldGameRules(var1);
+            GameRules var5 = this.a(var1);
             if (var5.areSameType(var3[0], GameRules.ValueType.BOOLEAN_VALUE)) {
                return getListOfStringsMatchingLastWord(var3, new String[]{"true", "false"});
             }
@@ -78,7 +78,11 @@ public class CommandGameRule extends CommandBase {
       }
    }
 
-   private GameRules getOverWorldGameRules(MinecraftServer var1) {
-      return var1.worldServerForDimension(0).getGameRules();
+   private GameRules a(MinecraftServer var1) {
+      return var1.getWorldServer(0).getGameRules();
+   }
+
+   public int compareTo(ICommand var1) {
+      return this.compareTo(var1);
    }
 }

@@ -8,9 +8,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 public class CommandTP extends CommandBase {
    public String getName() {
@@ -34,7 +35,7 @@ public class CommandTP extends CommandBase {
          if (var3.length != 2 && var3.length != 4 && var3.length != 6) {
             var5 = getCommandSenderAsPlayer(var2);
          } else {
-            var5 = getEntity(var1, var2, var3[0]);
+            var5 = b(var1, var2, var3[0]);
             var4 = 1;
          }
 
@@ -44,30 +45,20 @@ public class CommandTP extends CommandBase {
             }
 
             if (((Entity)var5).world != null) {
-               boolean var13 = true;
-               int var7 = var4 + 1;
-               CommandBase.CoordinateArg var8 = parseCoordinate(((Entity)var5).posX, var3[var4], true);
-               CommandBase.CoordinateArg var9 = parseCoordinate(((Entity)var5).posY, var3[var7++], -4096, 4096, false);
-               CommandBase.CoordinateArg var10 = parseCoordinate(((Entity)var5).posZ, var3[var7++], true);
-               CommandBase.CoordinateArg var11 = parseCoordinate((double)((Entity)var5).rotationYaw, var3.length > var7 ? var3[var7++] : "~", false);
-               CommandBase.CoordinateArg var12 = parseCoordinate((double)((Entity)var5).rotationPitch, var3.length > var7 ? var3[var7] : "~", false);
-               teleportEntityToCoordinates((Entity)var5, var8, var9, var10, var11, var12);
-               notifyCommandListener(var2, this, "commands.tp.success.coordinates", new Object[]{((Entity)var5).getName(), var8.getResult(), var9.getResult(), var10.getResult()});
+               int var12 = var4 + 1;
+               CommandBase.CoordinateArg var7 = parseCoordinate(((Entity)var5).posX, var3[var4], true);
+               CommandBase.CoordinateArg var8 = parseCoordinate(((Entity)var5).posY, var3[var12++], -4096, 4096, false);
+               CommandBase.CoordinateArg var9 = parseCoordinate(((Entity)var5).posZ, var3[var12++], true);
+               CommandBase.CoordinateArg var10 = parseCoordinate((double)((Entity)var5).rotationYaw, var3.length > var12 ? var3[var12++] : "~", false);
+               CommandBase.CoordinateArg var11 = parseCoordinate((double)((Entity)var5).rotationPitch, var3.length > var12 ? var3[var12] : "~", false);
+               teleportEntityToCoordinates((Entity)var5, var7, var8, var9, var10, var11);
+               notifyCommandListener(var2, this, "commands.tp.success.coordinates", new Object[]{((Entity)var5).getName(), var7.getResult(), var8.getResult(), var9.getResult()});
             }
          } else {
-            Entity var6 = getEntity(var1, var2, var3[var3.length - 1]);
-            if (var6.world != ((Entity)var5).world) {
-               throw new CommandException("commands.tp.notSameDimension", new Object[0]);
+            Entity var6 = b(var1, var2, var3[var3.length - 1]);
+            if (((Entity)var5).getBukkitEntity().teleport(var6.getBukkitEntity(), TeleportCause.COMMAND)) {
+               notifyCommandListener(var2, this, "commands.tp.success", new Object[]{((Entity)var5).getName(), var6.getName()});
             }
-
-            ((Entity)var5).dismountRidingEntity();
-            if (var5 instanceof EntityPlayerMP) {
-               ((EntityPlayerMP)var5).connection.setPlayerLocation(var6.posX, var6.posY, var6.posZ, var6.rotationYaw, var6.rotationPitch);
-            } else {
-               ((Entity)var5).setLocationAndAngles(var6.posX, var6.posY, var6.posZ, var6.rotationYaw, var6.rotationPitch);
-            }
-
-            notifyCommandListener(var2, this, "commands.tp.success", new Object[]{((Entity)var5).getName(), var6.getName()});
          }
 
       }
@@ -124,11 +115,15 @@ public class CommandTP extends CommandBase {
 
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length != 1 && var3.length != 2 ? Collections.emptyList() : getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return var3.length != 1 && var3.length != 2 ? Collections.emptyList() : getListOfStringsMatchingLastWord(var3, var1.getPlayers());
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
       return var2 == 0;
+   }
+
+   public int compareTo(ICommand var1) {
+      return this.compareTo(var1);
    }
 }

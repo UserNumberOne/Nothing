@@ -6,10 +6,7 @@ import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.SERVER)
 public abstract class RConThreadBase implements Runnable {
    private static final AtomicInteger THREAD_ID = new AtomicInteger(0);
    protected boolean running;

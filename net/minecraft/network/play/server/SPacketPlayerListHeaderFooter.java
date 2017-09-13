@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketPlayerListHeaderFooter implements Packet {
    private ITextComponent header;
@@ -31,15 +29,5 @@ public class SPacketPlayerListHeaderFooter implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handlePlayerListHeaderFooter(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getHeader() {
-      return this.header;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public ITextComponent getFooter() {
-      return this.footer;
    }
 }

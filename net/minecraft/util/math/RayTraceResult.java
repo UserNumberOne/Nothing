@@ -4,8 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 
 public class RayTraceResult {
-   public int subHit;
-   public Object hitInfo;
    private BlockPos blockPos;
    public RayTraceResult.Type typeOfHit;
    public EnumFacing sideHit;
@@ -25,8 +23,6 @@ public class RayTraceResult {
    }
 
    public RayTraceResult(RayTraceResult.Type var1, Vec3d var2, EnumFacing var3, BlockPos var4) {
-      this.subHit = -1;
-      this.hitInfo = null;
       this.typeOfHit = var1;
       this.blockPos = var4;
       this.sideHit = var3;
@@ -34,8 +30,6 @@ public class RayTraceResult {
    }
 
    public RayTraceResult(Entity var1, Vec3d var2) {
-      this.subHit = -1;
-      this.hitInfo = null;
       this.typeOfHit = RayTraceResult.Type.ENTITY;
       this.entityHit = var1;
       this.hitVec = var2;

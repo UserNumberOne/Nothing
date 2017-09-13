@@ -147,9 +147,9 @@ public class BlockRail extends BlockRailBase {
          case NORTH_EAST:
             return var1.withProperty(SHAPE, BlockRailBase.EnumRailDirection.NORTH_WEST);
          }
-      default:
-         return super.withMirror(var1, var2);
       }
+
+      return super.withMirror(var1, var2);
    }
 
    protected BlockStateContainer createBlockState() {

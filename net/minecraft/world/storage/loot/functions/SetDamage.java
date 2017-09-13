@@ -46,5 +46,10 @@ public class SetDamage extends LootFunction {
       public SetDamage deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
          return new SetDamage(var3, (RandomValueRange)JsonUtils.deserializeClass(var1, "damage", var2, RandomValueRange.class));
       }
+
+      // $FF: synthetic method
+      public LootFunction deserialize(JsonObject var1, JsonDeserializationContext var2, LootCondition[] var3) {
+         return this.deserialize(var1, var2, var3);
+      }
    }
 }

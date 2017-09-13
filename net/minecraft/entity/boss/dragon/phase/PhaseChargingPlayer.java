@@ -26,8 +26,8 @@ public class PhaseChargingPlayer extends PhaseBase {
          if (var1 < 100.0D || var1 > 22500.0D || this.dragon.isCollidedHorizontally || this.dragon.isCollidedVertically) {
             ++this.timeSinceCharge;
          }
-      }
 
+      }
    }
 
    public void initPhase() {

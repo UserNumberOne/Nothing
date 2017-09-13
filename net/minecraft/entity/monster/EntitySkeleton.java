@@ -54,8 +54,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeSnow;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 
 public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
    private static final DataParameter SKELETON_VARIANT = EntityDataManager.createKey(EntitySkeleton.class, DataSerializers.VARINT);
@@ -155,7 +156,11 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
             }
 
             if (var3) {
-               this.setFire(8);
+               EntityCombustEvent var5 = new EntityCombustEvent(this.getBukkitEntity(), 8);
+               this.world.getServer().getPluginManager().callEvent(var5);
+               if (!var5.isCancelled()) {
+                  this.setFire(var5.getDuration());
+               }
             }
          }
       }
@@ -177,7 +182,6 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
    }
 
    public void onDeath(DamageSource var1) {
-      super.onDeath(var1);
       if (var1.getSourceOfDamage() instanceof EntityArrow && var1.getEntity() instanceof EntityPlayer) {
          EntityPlayer var2 = (EntityPlayer)var1.getEntity();
          double var3 = var2.posX - this.posX;
@@ -190,6 +194,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
          this.entityDropItem(new ItemStack(Items.SKULL, 1, this.getSkeletonType() == SkeletonType.WITHER ? 1 : 0), 0.0F);
       }
 
+      super.onDeath(var1);
    }
 
    @Nullable
@@ -275,18 +280,30 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
       boolean var15 = this.isBurning() && var14.isHard() && this.rand.nextBoolean() || this.getSkeletonType() == SkeletonType.WITHER;
       var15 = var15 || EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this) > 0;
       if (var15) {
-         var3.setFire(100);
+         EntityCombustEvent var16 = new EntityCombustEvent(var3.getBukkitEntity(), 100);
+         this.world.getServer().getPluginManager().callEvent(var16);
+         if (!var16.isCancelled()) {
+            var3.setFire(var16.getDuration());
+         }
       }
 
-      ItemStack var16 = this.getHeldItem(EnumHand.OFF_HAND);
-      if (var16 != null && var16.getItem() == Items.TIPPED_ARROW) {
-         var3.setPotionEffect(var16);
+      ItemStack var19 = this.getHeldItem(EnumHand.OFF_HAND);
+      if (var19 != null && var19.getItem() == Items.TIPPED_ARROW) {
+         var3.setPotionEffect(var19);
       } else if (this.getSkeletonType() == SkeletonType.STRAY) {
          var3.addEffect(new PotionEffect(MobEffects.SLOWNESS, 600));
       }
 
-      this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-      this.world.spawnEntity(var3);
+      EntityShootBowEvent var17 = CraftEventFactory.callEntityShootBowEvent(this, this.getHeldItemMainhand(), var3, 0.8F);
+      if (var17.isCancelled()) {
+         var17.getProjectile().remove();
+      } else {
+         if (var17.getProjectile() == var3.getBukkitEntity()) {
+            this.world.spawnEntity(var3);
+         }
+
+         this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+      }
    }
 
    public SkeletonType getSkeletonType() {
@@ -341,11 +358,6 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 
    public double getYOffset() {
       return -0.35D;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isSwingingArms() {
-      return ((Boolean)this.dataManager.get(SWINGING_ARMS)).booleanValue();
    }
 
    public void setSwingingArms(boolean var1) {

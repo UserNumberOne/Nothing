@@ -1,10 +1,10 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
-import net.minecraft.block.BlockSapling;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -19,12 +19,14 @@ public class WorldGenShrub extends WorldGenTrees {
    }
 
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      for(IBlockState var4 = var1.getBlockState(var3); (var4.getBlock().isAir(var4, var1, var3) || var4.getBlock().isLeaves(var4, var1, var3)) && var3.getY() > 0; var4 = var1.getBlockState(var3)) {
+      for(IBlockState var4 = var1.getBlockState(var3); (var4.getMaterial() == Material.AIR || var4.getMaterial() == Material.LEAVES) && var3.getY() > 0; var4 = var1.getBlockState(var3)) {
          var3 = var3.down();
       }
 
-      IBlockState var14 = var1.getBlockState(var3);
-      if (var14.getBlock().canSustainPlant(var14, var1, var3, EnumFacing.UP, (BlockSapling)Blocks.SAPLING)) {
+      Block var15 = var1.getBlockState(var3).getBlock();
+      if (var15 != Blocks.DIRT && var15 != Blocks.GRASS) {
+         return false;
+      } else {
          var3 = var3.up();
          this.setBlockAndNotifyAdequately(var1, var3, this.woodMetadata);
 
@@ -39,16 +41,16 @@ public class WorldGenShrub extends WorldGenTrees {
                   int var11 = var10 - var3.getZ();
                   if (Math.abs(var9) != var7 || Math.abs(var11) != var7 || var2.nextInt(2) != 0) {
                      BlockPos var12 = new BlockPos(var8, var5, var10);
-                     var14 = var1.getBlockState(var12);
-                     if (var14.getBlock().canBeReplacedByLeaves(var14, var1, var12)) {
+                     Material var13 = var1.getBlockState(var12).getMaterial();
+                     if (var13 == Material.AIR || var13 == Material.LEAVES) {
                         this.setBlockAndNotifyAdequately(var1, var12, this.leavesMetadata);
                      }
                   }
                }
             }
          }
-      }
 
-      return true;
+         return true;
+      }
    }
 }

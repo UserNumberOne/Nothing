@@ -23,8 +23,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.entity.LivingEntity;
 
 public class EntityShulkerBullet extends Entity {
    private EntityLivingBase owner;
@@ -52,15 +51,6 @@ public class EntityShulkerBullet extends Entity {
       return SoundCategory.HOSTILE;
    }
 
-   @SideOnly(Side.CLIENT)
-   public EntityShulkerBullet(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
-      this(var1);
-      this.setLocationAndAngles(var2, var4, var6, this.rotationYaw, this.rotationPitch);
-      this.motionX = var8;
-      this.motionY = var10;
-      this.motionZ = var12;
-   }
-
    public EntityShulkerBullet(World var1, EntityLivingBase var2, Entity var3, EnumFacing.Axis var4) {
       this(var1);
       this.owner = var2;
@@ -72,6 +62,25 @@ public class EntityShulkerBullet extends Entity {
       this.target = var3;
       this.direction = EnumFacing.UP;
       this.selectNextMoveDirection(var4);
+      this.projectileSource = (LivingEntity)var2.getBukkitEntity();
+   }
+
+   public EntityLivingBase getShooter() {
+      return this.owner;
+   }
+
+   public void setShooter(EntityLivingBase var1) {
+      this.owner = var1;
+   }
+
+   public Entity getTarget() {
+      return this.target;
+   }
+
+   public void setTarget(Entity var1) {
+      this.target = var1;
+      this.direction = EnumFacing.UP;
+      this.selectNextMoveDirection(EnumFacing.Axis.X);
    }
 
    protected void writeEntityToNBT(NBTTagCompound var1) {
@@ -189,18 +198,18 @@ public class EntityShulkerBullet extends Entity {
       }
 
       this.setDirection(var11);
-      double var20 = var5 - this.posX;
-      double var21 = var7 - this.posY;
-      double var16 = var9 - this.posZ;
-      double var18 = (double)MathHelper.sqrt(var20 * var20 + var21 * var21 + var16 * var16);
-      if (var18 == 0.0D) {
+      double var15 = var5 - this.posX;
+      double var17 = var7 - this.posY;
+      double var19 = var9 - this.posZ;
+      double var21 = (double)MathHelper.sqrt(var15 * var15 + var17 * var17 + var19 * var19);
+      if (var21 == 0.0D) {
          this.targetDeltaX = 0.0D;
          this.targetDeltaY = 0.0D;
          this.targetDeltaZ = 0.0D;
       } else {
-         this.targetDeltaX = var20 / var18 * 0.15D;
-         this.targetDeltaY = var21 / var18 * 0.15D;
-         this.targetDeltaZ = var16 / var18 * 0.15D;
+         this.targetDeltaX = var15 / var21 * 0.15D;
+         this.targetDeltaY = var17 / var21 * 0.15D;
+         this.targetDeltaZ = var19 / var21 * 0.15D;
       }
 
       this.isAirBorne = true;
@@ -214,9 +223,9 @@ public class EntityShulkerBullet extends Entity {
          super.onUpdate();
          if (!this.world.isRemote) {
             if (this.target == null && this.targetUniqueId != null) {
-               for(EntityLivingBase var2 : this.world.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(this.targetBlockPos.add(-2, -2, -2), this.targetBlockPos.add(2, 2, 2)))) {
-                  if (var2.getUniqueID().equals(this.targetUniqueId)) {
-                     this.target = var2;
+               for(EntityLivingBase var3 : this.world.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(this.targetBlockPos.add(-2, -2, -2), this.targetBlockPos.add(2, 2, 2)))) {
+                  if (var3.getUniqueID().equals(this.targetUniqueId)) {
+                     this.target = var3;
                      break;
                   }
                }
@@ -225,9 +234,9 @@ public class EntityShulkerBullet extends Entity {
             }
 
             if (this.owner == null && this.ownerUniqueId != null) {
-               for(EntityLivingBase var7 : this.world.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(this.ownerBlockPos.add(-2, -2, -2), this.ownerBlockPos.add(2, 2, 2)))) {
-                  if (var7.getUniqueID().equals(this.ownerUniqueId)) {
-                     this.owner = var7;
+               for(EntityLivingBase var9 : this.world.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(this.ownerBlockPos.add(-2, -2, -2), this.ownerBlockPos.add(2, 2, 2)))) {
+                  if (var9.getUniqueID().equals(this.ownerUniqueId)) {
+                     this.owner = var9;
                      break;
                   }
                }
@@ -248,9 +257,9 @@ public class EntityShulkerBullet extends Entity {
                this.motionZ += (this.targetDeltaZ - this.motionZ) * 0.2D;
             }
 
-            RayTraceResult var5 = ProjectileHelper.forwardsRaycast(this, true, false, this.owner);
-            if (var5 != null) {
-               this.bulletHit(var5);
+            RayTraceResult var4 = ProjectileHelper.forwardsRaycast(this, true, false, this.owner);
+            if (var4 != null) {
+               this.bulletHit(var4);
             }
          }
 
@@ -272,8 +281,8 @@ public class EntityShulkerBullet extends Entity {
                if (this.world.isBlockNormalCube(var6.offset(this.direction), false)) {
                   this.selectNextMoveDirection(var8);
                } else {
-                  BlockPos var3 = new BlockPos(this.target);
-                  if (var8 == EnumFacing.Axis.X && var6.getX() == var3.getX() || var8 == EnumFacing.Axis.Z && var6.getZ() == var3.getZ() || var8 == EnumFacing.Axis.Y && var6.getY() == var3.getY()) {
+                  BlockPos var10 = new BlockPos(this.target);
+                  if (var8 == EnumFacing.Axis.X && var6.getX() == var10.getX() || var8 == EnumFacing.Axis.Z && var6.getZ() == var10.getZ() || var8 == EnumFacing.Axis.Y && var6.getY() == var10.getY()) {
                      this.selectNextMoveDirection(var8);
                   }
                }
@@ -287,18 +296,8 @@ public class EntityShulkerBullet extends Entity {
       return false;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      return var1 < 16384.0D;
-   }
-
    public float getBrightness(float var1) {
       return 1.0F;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return 15728880;
    }
 
    protected void bulletHit(RayTraceResult var1) {

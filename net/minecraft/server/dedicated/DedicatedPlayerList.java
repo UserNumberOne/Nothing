@@ -3,12 +3,10 @@ package net.minecraft.server.dedicated;
 import com.mojang.authlib.GameProfile;
 import java.io.IOException;
 import net.minecraft.server.management.PlayerList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.src.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@SideOnly(Side.SERVER)
 public class DedicatedPlayerList extends PlayerList {
    private static final Logger LOGGER = LogManager.getLogger();
 
@@ -17,7 +15,7 @@ public class DedicatedPlayerList extends PlayerList {
       this.setViewDistance(var1.getIntProperty("view-distance", 10));
       this.maxPlayers = var1.getIntProperty("max-players", 20);
       this.setWhiteListEnabled(var1.getBooleanProperty("white-list", false));
-      if (!var1.isSinglePlayer()) {
+      if (!var1.R()) {
          this.getBannedPlayers().setLanServer(true);
          this.getBannedIPs().setLanServer(true);
       }
@@ -142,10 +140,15 @@ public class DedicatedPlayerList extends PlayerList {
    }
 
    public DedicatedServer getServerInstance() {
-      return (DedicatedServer)super.getServerInstance();
+      return (DedicatedServer)super.getServer();
    }
 
    public boolean bypassesPlayerLimit(GameProfile var1) {
       return this.getOppedPlayers().bypassesPlayerLimit(var1);
+   }
+
+   // $FF: synthetic method
+   public MinecraftServer getServer() {
+      return this.getServerInstance();
    }
 }

@@ -37,6 +37,7 @@ public class BlockDispenser extends BlockContainer {
    public static final PropertyBool TRIGGERED = PropertyBool.create("triggered");
    public static final RegistryDefaulted DISPENSE_BEHAVIOR_REGISTRY = new RegistryDefaulted(new BehaviorDefaultDispenseItem());
    protected Random rand = new Random();
+   public static boolean eventFired = false;
 
    protected BlockDispenser() {
       super(Material.ROCK);
@@ -95,7 +96,7 @@ public class BlockDispenser extends BlockContainer {
       }
    }
 
-   protected void dispense(World var1, BlockPos var2) {
+   public void dispense(World var1, BlockPos var2) {
       BlockSourceImpl var3 = new BlockSourceImpl(var1, var2);
       TileEntityDispenser var4 = (TileEntityDispenser)var3.getBlockTileEntity();
       if (var4 != null) {
@@ -107,6 +108,7 @@ public class BlockDispenser extends BlockContainer {
             IBehaviorDispenseItem var7 = this.getBehavior(var6);
             if (var7 != IBehaviorDispenseItem.DEFAULT_BEHAVIOR) {
                ItemStack var8 = var7.dispense(var3, var6);
+               eventFired = false;
                var4.setInventorySlotContents(var5, var8.stackSize <= 0 ? null : var8);
             }
          }
@@ -191,13 +193,13 @@ public class BlockDispenser extends BlockContainer {
    }
 
    public int getMetaFromState(IBlockState var1) {
-      int var2 = 0;
-      var2 = var2 | ((EnumFacing)var1.getValue(FACING)).getIndex();
+      byte var2 = 0;
+      int var3 = var2 | ((EnumFacing)var1.getValue(FACING)).getIndex();
       if (((Boolean)var1.getValue(TRIGGERED)).booleanValue()) {
-         var2 |= 8;
+         var3 |= 8;
       }
 
-      return var2;
+      return var3;
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {

@@ -6,7 +6,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 
 public class CommandEntityData extends CommandBase {
    public String getName() {
@@ -25,7 +25,7 @@ public class CommandEntityData extends CommandBase {
       if (var3.length < 2) {
          throw new WrongUsageException("commands.entitydata.usage", new Object[0]);
       } else {
-         Entity var4 = getEntity(var1, var2, var3[0]);
+         Entity var4 = b(var1, var2, var3[0]);
          if (var4 instanceof EntityPlayer) {
             throw new CommandException("commands.entitydata.noPlayers", new Object[]{var4.getDisplayName()});
          } else {

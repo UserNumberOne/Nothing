@@ -1,15 +1,11 @@
 package net.minecraft.item;
 
 import com.google.common.collect.Maps;
-import java.util.List;
 import java.util.Map;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemFishFood extends ItemFood {
    private final boolean cooked;
@@ -38,16 +34,6 @@ public class ItemFishFood extends ItemFood {
       }
 
       super.onFoodEaten(var1, var2, var3);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void getSubItems(Item var1, CreativeTabs var2, List var3) {
-      for(ItemFishFood.FishType var7 : ItemFishFood.FishType.values()) {
-         if (!this.cooked || var7.canCook()) {
-            var3.add(new ItemStack(this, 1, var7.getMetadata()));
-         }
-      }
-
    }
 
    public String getUnlocalizedName(ItemStack var1) {

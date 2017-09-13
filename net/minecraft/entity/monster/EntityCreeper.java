@@ -31,8 +31,9 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.CreeperPowerEvent.PowerCause;
 
 public class EntityCreeper extends EntityMob {
    private static final DataParameter STATE = EntityDataManager.createKey(EntityCreeper.class, DataSerializers.VARINT);
@@ -153,7 +154,6 @@ public class EntityCreeper extends EntityMob {
    }
 
    public void onDeath(DamageSource var1) {
-      super.onDeath(var1);
       if (this.world.getGameRules().getBoolean("doMobLoot")) {
          if (var1.getEntity() instanceof EntitySkeleton) {
             int var2 = Item.getIdFromItem(Items.RECORD_13);
@@ -166,6 +166,7 @@ public class EntityCreeper extends EntityMob {
          }
       }
 
+      super.onDeath(var1);
    }
 
    public boolean attackEntityAsMob(Entity var1) {
@@ -174,11 +175,6 @@ public class EntityCreeper extends EntityMob {
 
    public boolean getPowered() {
       return ((Boolean)this.dataManager.get(POWERED)).booleanValue();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getCreeperFlashIntensity(float var1) {
-      return ((float)this.lastActiveTime + (float)(this.timeSinceIgnited - this.lastActiveTime) * var1) / (float)(this.fuseTime - 2);
    }
 
    @Nullable
@@ -196,7 +192,13 @@ public class EntityCreeper extends EntityMob {
 
    public void onStruckByLightning(EntityLightningBolt var1) {
       super.onStruckByLightning(var1);
-      this.dataManager.set(POWERED, Boolean.valueOf(true));
+      if (!CraftEventFactory.callCreeperPowerEvent(this, var1, PowerCause.LIGHTNING).isCancelled()) {
+         this.setPowered(true);
+      }
+   }
+
+   public void setPowered(boolean var1) {
+      this.dataManager.set(POWERED, Boolean.valueOf(var1));
    }
 
    protected boolean processInteract(EntityPlayer var1, EnumHand var2, @Nullable ItemStack var3) {
@@ -217,9 +219,15 @@ public class EntityCreeper extends EntityMob {
       if (!this.world.isRemote) {
          boolean var1 = this.world.getGameRules().getBoolean("mobGriefing");
          float var2 = this.getPowered() ? 2.0F : 1.0F;
-         this.dead = true;
-         this.world.createExplosion(this, this.posX, this.posY, this.posZ, (float)this.explosionRadius * var2, var1);
-         this.setDead();
+         ExplosionPrimeEvent var3 = new ExplosionPrimeEvent(this.getBukkitEntity(), (float)this.explosionRadius * var2, false);
+         this.world.getServer().getPluginManager().callEvent(var3);
+         if (!var3.isCancelled()) {
+            this.dead = true;
+            this.world.newExplosion(this, this.posX, this.posY, this.posZ, var3.getRadius(), var3.getFire(), var1);
+            this.setDead();
+         } else {
+            this.timeSinceIgnited = 0;
+         }
       }
 
    }

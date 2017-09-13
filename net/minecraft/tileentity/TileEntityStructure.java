@@ -3,7 +3,6 @@ package net.minecraft.tileentity;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -15,7 +14,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.Mirror;
@@ -32,8 +31,6 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.template.PlacementSettings;
 import net.minecraft.world.gen.structure.template.Template;
 import net.minecraft.world.gen.structure.template.TemplateManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityStructure extends TileEntity {
    private String name = "";
@@ -127,8 +124,8 @@ public class TileEntityStructure extends TileEntity {
          if (var2.getBlock() == Blocks.STRUCTURE_BLOCK) {
             this.world.setBlockState(var1, var2.withProperty(BlockStructure.MODE, this.mode), 2);
          }
-      }
 
+      }
    }
 
    @Nullable
@@ -173,27 +170,12 @@ public class TileEntityStructure extends TileEntity {
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockPos getPosition() {
-      return this.position;
-   }
-
    public void setPosition(BlockPos var1) {
       this.position = var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public BlockPos getStructureSize() {
-      return this.size;
-   }
-
    public void setSize(BlockPos var1) {
       this.size = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Mirror getMirror() {
-      return this.mirror;
    }
 
    public void setMirror(Mirror var1) {
@@ -206,16 +188,6 @@ public class TileEntityStructure extends TileEntity {
 
    public void setMetadata(String var1) {
       this.metadata = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Rotation getRotation() {
-      return this.rotation;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getMetadata() {
-      return this.metadata;
    }
 
    public TileEntityStructure.Mode getMode() {
@@ -241,39 +213,6 @@ public class TileEntityStructure extends TileEntity {
 
    public void setSeed(long var1) {
       this.seed = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void nextMode() {
-      switch(this.getMode()) {
-      case SAVE:
-         this.setMode(TileEntityStructure.Mode.LOAD);
-         break;
-      case LOAD:
-         this.setMode(TileEntityStructure.Mode.CORNER);
-         break;
-      case CORNER:
-         this.setMode(TileEntityStructure.Mode.DATA);
-         break;
-      case DATA:
-         this.setMode(TileEntityStructure.Mode.SAVE);
-      }
-
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean ignoresEntities() {
-      return this.ignoreEntities;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getIntegrity() {
-      return this.integrity;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public long getSeed() {
-      return this.seed;
    }
 
    public boolean detectSize() {
@@ -309,6 +248,11 @@ public class TileEntityStructure extends TileEntity {
          public boolean apply(@Nullable TileEntityStructure var1) {
             return var1.mode == TileEntityStructure.Mode.CORNER && TileEntityStructure.this.name.equals(var1.name);
          }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1) {
+            return this.apply((TileEntityStructure)var1);
+         }
       });
       return Lists.newArrayList(var2);
    }
@@ -330,43 +274,36 @@ public class TileEntityStructure extends TileEntity {
    }
 
    private StructureBoundingBox calculateEnclosingBoundingBox(BlockPos var1, List var2) {
-      StructureBoundingBox var3;
+      StructureBoundingBox var4;
       if (var2.size() > 1) {
-         BlockPos var4 = ((TileEntityStructure)var2.get(0)).getPos();
-         var3 = new StructureBoundingBox(var4, var4);
+         BlockPos var3 = ((TileEntityStructure)var2.get(0)).getPos();
+         var4 = new StructureBoundingBox(var3, var3);
       } else {
-         var3 = new StructureBoundingBox(var1, var1);
+         var4 = new StructureBoundingBox(var1, var1);
       }
 
       for(TileEntityStructure var5 : var2) {
          BlockPos var6 = var5.getPos();
-         if (var6.getX() < var3.minX) {
-            var3.minX = var6.getX();
-         } else if (var6.getX() > var3.maxX) {
-            var3.maxX = var6.getX();
+         if (var6.getX() < var4.minX) {
+            var4.minX = var6.getX();
+         } else if (var6.getX() > var4.maxX) {
+            var4.maxX = var6.getX();
          }
 
-         if (var6.getY() < var3.minY) {
-            var3.minY = var6.getY();
-         } else if (var6.getY() > var3.maxY) {
-            var3.maxY = var6.getY();
+         if (var6.getY() < var4.minY) {
+            var4.minY = var6.getY();
+         } else if (var6.getY() > var4.maxY) {
+            var4.maxY = var6.getY();
          }
 
-         if (var6.getZ() < var3.minZ) {
-            var3.minZ = var6.getZ();
-         } else if (var6.getZ() > var3.maxZ) {
-            var3.maxZ = var6.getZ();
+         if (var6.getZ() < var4.minZ) {
+            var4.minZ = var6.getZ();
+         } else if (var6.getZ() > var4.maxZ) {
+            var4.maxZ = var6.getZ();
          }
       }
 
-      return var3;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void writeCoordinates(ByteBuf var1) {
-      var1.writeInt(this.pos.getX());
-      var1.writeInt(this.pos.getY());
-      var1.writeInt(this.pos.getZ());
+      return var4;
    }
 
    public boolean save() {
@@ -379,10 +316,10 @@ public class TileEntityStructure extends TileEntity {
          WorldServer var3 = (WorldServer)this.world;
          MinecraftServer var4 = this.world.getMinecraftServer();
          TemplateManager var5 = var3.getStructureTemplateManager();
-         Template var6 = var5.getTemplate(var4, new ResourceLocation(this.name));
+         Template var6 = var5.a(var4, new ResourceLocation(this.name));
          var6.takeBlocksFromWorld(this.world, var2, this.size, !this.ignoreEntities, Blocks.STRUCTURE_VOID);
          var6.setAuthor(this.author);
-         return !var1 || var5.writeTemplate(var4, new ResourceLocation(this.name));
+         return !var1 || var5.d(var4, new ResourceLocation(this.name));
       } else {
          return false;
       }
@@ -399,7 +336,7 @@ public class TileEntityStructure extends TileEntity {
          WorldServer var4 = (WorldServer)this.world;
          MinecraftServer var5 = this.world.getMinecraftServer();
          TemplateManager var6 = var4.getStructureTemplateManager();
-         Template var7 = var6.get(var5, new ResourceLocation(this.name));
+         Template var7 = var6.b(var5, new ResourceLocation(this.name));
          if (var7 == null) {
             return false;
          } else {
@@ -444,7 +381,7 @@ public class TileEntityStructure extends TileEntity {
          WorldServer var1 = (WorldServer)this.world;
          MinecraftServer var2 = this.world.getMinecraftServer();
          TemplateManager var3 = var1.getStructureTemplateManager();
-         return var3.get(var2, new ResourceLocation(this.name)) != null;
+         return var3.b(var2, new ResourceLocation(this.name)) != null;
       } else {
          return false;
       }
@@ -458,18 +395,8 @@ public class TileEntityStructure extends TileEntity {
       this.powered = var1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean showsAir() {
-      return this.showAir;
-   }
-
    public void setShowAir(boolean var1) {
       this.showAir = var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean showsBoundingBox() {
-      return this.showBoundingBox;
    }
 
    public void setShowBoundingBox(boolean var1) {

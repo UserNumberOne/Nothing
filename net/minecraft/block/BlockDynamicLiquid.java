@@ -9,7 +9,11 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.block.CraftBlock;
+import org.bukkit.event.block.BlockFromToEvent;
 
 public class BlockDynamicLiquid extends BlockLiquid {
    int adjacentSourceBlocks;
@@ -19,62 +23,65 @@ public class BlockDynamicLiquid extends BlockLiquid {
    }
 
    private void placeStaticBlock(World var1, BlockPos var2, IBlockState var3) {
-      var1.setBlockState(var2, getStaticBlock(this.blockMaterial).getDefaultState().withProperty(LEVEL, var3.getValue(LEVEL)), 2);
+      var1.setBlockState(var2, getStaticBlock(this.blockMaterial).getDefaultState().withProperty(LEVEL, (Integer)var3.getValue(LEVEL)), 2);
    }
 
    public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
-      int var5 = ((Integer)var3.getValue(LEVEL)).intValue();
-      byte var6 = 1;
+      CraftWorld var5 = var1.getWorld();
+      CraftServer var6 = var1.getServer();
+      org.bukkit.block.Block var7 = var5 == null ? null : var5.getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+      int var8 = ((Integer)var3.getValue(LEVEL)).intValue();
+      byte var9 = 1;
       if (this.blockMaterial == Material.LAVA && !var1.provider.doesWaterVaporize()) {
-         var6 = 2;
+         var9 = 2;
       }
 
-      int var7 = this.tickRate(var1);
-      if (var5 > 0) {
-         int var8 = -100;
+      int var10 = this.tickRate(var1);
+      if (var8 > 0) {
+         int var11 = -100;
          this.adjacentSourceBlocks = 0;
 
-         for(EnumFacing var10 : EnumFacing.Plane.HORIZONTAL) {
-            var8 = this.checkAdjacentBlock(var1, var2.offset(var10), var8);
+         for(EnumFacing var13 : EnumFacing.Plane.HORIZONTAL) {
+            var11 = this.checkAdjacentBlock(var1, var2.offset(var13), var11);
          }
 
-         int var15 = var8 + var6;
-         if (var15 >= 8 || var8 < 0) {
-            var15 = -1;
+         int var19 = var11 + var9;
+         if (var19 >= 8 || var11 < 0) {
+            var19 = -1;
          }
 
-         int var17 = this.getDepth(var1.getBlockState(var2.up()));
-         if (var17 >= 0) {
-            if (var17 >= 8) {
-               var15 = var17;
+         int var14 = this.getDepth(var1.getBlockState(var2.up()));
+         if (var14 >= 0) {
+            if (var14 >= 8) {
+               var19 = var14;
             } else {
-               var15 = var17 + 8;
+               var19 = var14 + 8;
             }
          }
 
-         if (this.adjacentSourceBlocks >= 2 && ForgeEventFactory.canCreateFluidSource(var1, var2, var3, this.blockMaterial == Material.WATER)) {
-            IBlockState var11 = var1.getBlockState(var2.down());
-            if (var11.getMaterial().isSolid()) {
-               var15 = 0;
-            } else if (var11.getMaterial() == this.blockMaterial && ((Integer)var11.getValue(LEVEL)).intValue() == 0) {
-               var15 = 0;
+         if (this.adjacentSourceBlocks >= 2 && this.blockMaterial == Material.WATER) {
+            IBlockState var15 = var1.getBlockState(var2.down());
+            if (var15.getMaterial().isSolid()) {
+               var19 = 0;
+            } else if (var15.getMaterial() == this.blockMaterial && ((Integer)var15.getValue(LEVEL)).intValue() == 0) {
+               var19 = 0;
             }
          }
 
-         if (this.blockMaterial == Material.LAVA && var5 < 8 && var15 < 8 && var15 > var5 && var4.nextInt(4) != 0) {
-            var7 *= 4;
+         if (this.blockMaterial == Material.LAVA && var8 < 8 && var19 < 8 && var19 > var8 && var4.nextInt(4) != 0) {
+            var10 *= 4;
          }
 
-         if (var15 == var5) {
+         if (var19 == var8) {
             this.placeStaticBlock(var1, var2, var3);
          } else {
-            var5 = var15;
-            if (var15 < 0) {
+            var8 = var19;
+            if (var19 < 0) {
                var1.setBlockToAir(var2);
             } else {
-               var3 = var3.withProperty(LEVEL, Integer.valueOf(var15));
+               var3 = var3.withProperty(LEVEL, Integer.valueOf(var19));
                var1.setBlockState(var2, var3, 2);
-               var1.scheduleUpdate(var2, this, var7);
+               var1.scheduleUpdate(var2, this, var10);
                var1.notifyNeighborsOfStateChange(var2, this);
             }
          }
@@ -82,43 +89,57 @@ public class BlockDynamicLiquid extends BlockLiquid {
          this.placeStaticBlock(var1, var2, var3);
       }
 
-      IBlockState var14 = var1.getBlockState(var2.down());
-      if (this.canFlowInto(var1, var2.down(), var14)) {
-         if (this.blockMaterial == Material.LAVA && var1.getBlockState(var2.down()).getMaterial() == Material.WATER) {
-            var1.setBlockState(var2.down(), Blocks.STONE.getDefaultState());
-            this.triggerMixEffects(var1, var2.down());
+      IBlockState var18 = var1.getBlockState(var2.down());
+      if (this.canFlowInto(var1, var2.down(), var18)) {
+         BlockFromToEvent var21 = new BlockFromToEvent(var7, BlockFace.DOWN);
+         if (var6 != null) {
+            var6.getPluginManager().callEvent(var21);
+         }
+
+         if (!var21.isCancelled()) {
+            if (this.blockMaterial == Material.LAVA && var1.getBlockState(var2.down()).getMaterial() == Material.WATER) {
+               var1.setBlockState(var2.down(), Blocks.STONE.getDefaultState());
+               this.triggerMixEffects(var1, var2.down());
+               return;
+            }
+
+            if (var8 >= 8) {
+               this.tryFlowInto(var1, var2.down(), var18, var8);
+            } else {
+               this.tryFlowInto(var1, var2.down(), var18, var8 + 8);
+            }
+         }
+      } else if (var8 >= 0 && (var8 == 0 || this.isBlocked(var1, var2.down(), var18))) {
+         Set var22 = this.getPossibleFlowDirections(var1, var2);
+         int var23 = var8 + var9;
+         if (var8 >= 8) {
+            var23 = 1;
+         }
+
+         if (var23 >= 8) {
             return;
          }
 
-         if (var5 >= 8) {
-            this.tryFlowInto(var1, var2.down(), var14, var5);
-         } else {
-            this.tryFlowInto(var1, var2.down(), var14, var5 + 8);
-         }
-      } else if (var5 >= 0 && (var5 == 0 || this.isBlocked(var1, var2.down(), var14))) {
-         Set var16 = this.getPossibleFlowDirections(var1, var2);
-         int var18 = var5 + var6;
-         if (var5 >= 8) {
-            var18 = 1;
-         }
+         for(EnumFacing var24 : var22) {
+            BlockFromToEvent var16 = new BlockFromToEvent(var7, CraftBlock.notchToBlockFace(var24));
+            if (var6 != null) {
+               var6.getPluginManager().callEvent(var16);
+            }
 
-         if (var18 >= 8) {
-            return;
-         }
-
-         for(EnumFacing var12 : var16) {
-            this.tryFlowInto(var1, var2.offset(var12), var1.getBlockState(var2.offset(var12)), var18);
+            if (!var16.isCancelled()) {
+               this.tryFlowInto(var1, var2.offset(var24), var1.getBlockState(var2.offset(var24)), var23);
+            }
          }
       }
 
    }
 
    private void tryFlowInto(World var1, BlockPos var2, IBlockState var3, int var4) {
-      if (this.canFlowInto(var1, var2, var3)) {
+      if (var1.isBlockLoaded(var2) && this.canFlowInto(var1, var2, var3)) {
          if (var3.getMaterial() != Material.AIR) {
             if (this.blockMaterial == Material.LAVA) {
                this.triggerMixEffects(var1, var2);
-            } else if (var3.getBlock() != Blocks.SNOW_LAYER) {
+            } else {
                var3.getBlock().dropBlockAsItem(var1, var2, var3, 0);
             }
          }

@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -12,7 +11,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -20,9 +18,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockCocoa extends BlockHorizontal implements IGrowable {
    public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 2);
@@ -40,11 +36,11 @@ public class BlockCocoa extends BlockHorizontal implements IGrowable {
    public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
       if (!this.canBlockStay(var1, var2, var3)) {
          this.dropBlock(var1, var2, var3);
-      } else {
+      } else if (var1.rand.nextInt(5) == 0) {
          int var5 = ((Integer)var3.getValue(AGE)).intValue();
-         if (var5 < 2 && ForgeHooks.onCropsGrowPre(var1, var2, var3, var4.nextInt(5) == 0)) {
-            var1.setBlockState(var2, var3.withProperty(AGE, Integer.valueOf(var5 + 1)), 2);
-            ForgeHooks.onCropsGrowPost(var1, var2, var3, var1.getBlockState(var2));
+         if (var5 < 2) {
+            IBlockState var6 = var3.withProperty(AGE, Integer.valueOf(var5 + 1));
+            CraftEventFactory.handleBlockGrowEvent(var1, var2.getX(), var2.getY(), var2.getZ(), this, this.getMetaFromState(var6));
          }
       }
 
@@ -66,15 +62,15 @@ public class BlockCocoa extends BlockHorizontal implements IGrowable {
 
    public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
       int var4 = ((Integer)var1.getValue(AGE)).intValue();
-      switch((EnumFacing)var1.getValue(FACING)) {
-      case SOUTH:
+      switch(BlockCocoa.SyntheticClass_1.a[((EnumFacing)var1.getValue(FACING)).ordinal()]) {
+      case 1:
          return COCOA_SOUTH_AABB[var4];
-      case NORTH:
+      case 2:
       default:
          return COCOA_NORTH_AABB[var4];
-      case WEST:
+      case 3:
          return COCOA_WEST_AABB[var4];
-      case EAST:
+      case 4:
          return COCOA_EAST_AABB[var4];
       }
    }
@@ -113,11 +109,6 @@ public class BlockCocoa extends BlockHorizontal implements IGrowable {
    }
 
    public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
-      super.dropBlockAsItemWithChance(var1, var2, var3, var4, var5);
-   }
-
-   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
-      List var5 = super.getDrops(var1, var2, var3, var4);
       int var6 = ((Integer)var3.getValue(AGE)).intValue();
       byte var7 = 1;
       if (var6 >= 2) {
@@ -125,10 +116,9 @@ public class BlockCocoa extends BlockHorizontal implements IGrowable {
       }
 
       for(int var8 = 0; var8 < var7; ++var8) {
-         var5.add(new ItemStack(Items.DYE, 1, EnumDyeColor.BROWN.getDyeDamage()));
+         spawnAsEntity(var1, var2, new ItemStack(Items.DYE, 1, EnumDyeColor.BROWN.getDyeDamage()));
       }
 
-      return var5;
    }
 
    public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
@@ -144,12 +134,8 @@ public class BlockCocoa extends BlockHorizontal implements IGrowable {
    }
 
    public void grow(World var1, Random var2, BlockPos var3, IBlockState var4) {
-      var1.setBlockState(var3, var4.withProperty(AGE, Integer.valueOf(((Integer)var4.getValue(AGE)).intValue() + 1)), 2);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
+      IBlockState var5 = var4.withProperty(AGE, Integer.valueOf(((Integer)var4.getValue(AGE)).intValue() + 1));
+      CraftEventFactory.handleBlockGrowEvent(var1, var3.getX(), var3.getY(), var3.getZ(), this, this.getMetaFromState(var5));
    }
 
    public IBlockState getStateFromMeta(int var1) {
@@ -157,13 +143,44 @@ public class BlockCocoa extends BlockHorizontal implements IGrowable {
    }
 
    public int getMetaFromState(IBlockState var1) {
-      int var2 = 0;
-      var2 = var2 | ((EnumFacing)var1.getValue(FACING)).getHorizontalIndex();
-      var2 = var2 | ((Integer)var1.getValue(AGE)).intValue() << 2;
-      return var2;
+      byte var2 = 0;
+      int var3 = var2 | ((EnumFacing)var1.getValue(FACING)).getHorizontalIndex();
+      var3 = var3 | ((Integer)var1.getValue(AGE)).intValue() << 2;
+      return var3;
    }
 
    protected BlockStateContainer createBlockState() {
       return new BlockStateContainer(this, new IProperty[]{FACING, AGE});
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 1;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 2;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 3;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.EAST.ordinal()] = 4;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

@@ -117,7 +117,7 @@ public class EntityAIAttackRangedBow extends EntityAIBase {
          } else if (--this.attackTime <= 0 && this.seeTime >= -60) {
             this.entity.setActiveHand(EnumHand.MAIN_HAND);
          }
-      }
 
+      }
    }
 }

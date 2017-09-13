@@ -2,6 +2,7 @@ package net.minecraft.world.gen.feature;
 
 import java.util.Random;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -21,7 +22,7 @@ public class WorldGenLiquids extends WorldGenerator {
          return false;
       } else {
          IBlockState var4 = var1.getBlockState(var3);
-         if (!var4.getBlock().isAir(var4, var1, var3) && var4.getBlock() != Blocks.STONE) {
+         if (var4.getMaterial() != Material.AIR && var4.getBlock() != Blocks.STONE) {
             return false;
          } else {
             int var5 = 0;

@@ -14,38 +14,38 @@ import java.io.Reader;
 import java.io.StringReader;
 import javax.annotation.Nullable;
 import net.minecraft.item.Item;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class JsonUtils {
    public static boolean isString(JsonObject var0, String var1) {
       return !isJsonPrimitive(var0, var1) ? false : var0.getAsJsonPrimitive(var1).isString();
    }
 
-   @SideOnly(Side.CLIENT)
-   public static boolean isString(JsonElement var0) {
-      return !var0.isJsonPrimitive() ? false : var0.getAsJsonPrimitive().isString();
-   }
-
    public static boolean isNumber(JsonElement var0) {
       return !var0.isJsonPrimitive() ? false : var0.getAsJsonPrimitive().isNumber();
    }
 
-   @SideOnly(Side.CLIENT)
-   public static boolean isBoolean(JsonObject var0, String var1) {
-      return !isJsonPrimitive(var0, var1) ? false : var0.getAsJsonPrimitive(var1).isBoolean();
-   }
-
    public static boolean isJsonArray(JsonObject var0, String var1) {
-      return !hasField(var0, var1) ? false : var0.get(var1).isJsonArray();
+      if (!hasField(var0, var1)) {
+         return false;
+      } else {
+         return var0.get(var1).isJsonArray();
+      }
    }
 
    public static boolean isJsonPrimitive(JsonObject var0, String var1) {
-      return !hasField(var0, var1) ? false : var0.get(var1).isJsonPrimitive();
+      if (!hasField(var0, var1)) {
+         return false;
+      } else {
+         return var0.get(var1).isJsonPrimitive();
+      }
    }
 
    public static boolean hasField(JsonObject var0, String var1) {
-      return var0 == null ? false : var0.get(var1) != null;
+      if (var0 == null) {
+         return false;
+      } else {
+         return var0.get(var1) != null;
+      }
    }
 
    public static String getString(JsonElement var0, String var1) {
@@ -62,11 +62,6 @@ public class JsonUtils {
       } else {
          throw new JsonSyntaxException("Missing " + var1 + ", expected to find a string");
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static String getString(JsonObject var0, String var1, String var2) {
-      return var0.has(var1) ? getString(var0.get(var1), var1) : var2;
    }
 
    public static Item getItem(JsonElement var0, String var1) {
@@ -96,15 +91,6 @@ public class JsonUtils {
          return var0.getAsBoolean();
       } else {
          throw new JsonSyntaxException("Expected " + var1 + " to be a Boolean, was " + toString(var0));
-      }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static boolean getBoolean(JsonObject var0, String var1) {
-      if (var0.has(var1)) {
-         return getBoolean(var0.get(var1), var1);
-      } else {
-         throw new JsonSyntaxException("Missing " + var1 + ", expected to find a Boolean");
       }
    }
 
@@ -168,11 +154,6 @@ public class JsonUtils {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public static JsonObject getJsonObject(JsonObject var0, String var1, JsonObject var2) {
-      return var0.has(var1) ? getJsonObject(var0.get(var1), var1) : var2;
-   }
-
    public static JsonArray getJsonArray(JsonElement var0, String var1) {
       if (var0.isJsonArray()) {
          return var0.getAsJsonArray();
@@ -187,11 +168,6 @@ public class JsonUtils {
       } else {
          throw new JsonSyntaxException("Missing " + var1 + ", expected to find a JsonArray");
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static JsonArray getJsonArray(JsonObject var0, String var1, @Nullable JsonArray var2) {
-      return var0.has(var1) ? getJsonArray(var0.get(var1), var1) : var2;
    }
 
    public static Object deserializeClass(@Nullable JsonElement var0, String var1, JsonDeserializationContext var2, Class var3) {

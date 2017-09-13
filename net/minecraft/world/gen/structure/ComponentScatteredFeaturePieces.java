@@ -21,7 +21,7 @@ import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
@@ -33,6 +33,7 @@ import net.minecraft.world.gen.structure.template.PlacementSettings;
 import net.minecraft.world.gen.structure.template.Template;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class ComponentScatteredFeaturePieces {
    public static void registerScatteredFeaturePieces() {
@@ -76,31 +77,30 @@ public class ComponentScatteredFeaturePieces {
             this.fillWithBlocks(var1, var3, var4 + 1, var4, var4 + 1, this.scatteredFeatureSizeX - 2 - var4, var4, this.scatteredFeatureSizeZ - 2 - var4, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
          }
 
-         for(int var14 = 0; var14 < this.scatteredFeatureSizeX; ++var14) {
+         for(int var16 = 0; var16 < this.scatteredFeatureSizeX; ++var16) {
             for(int var5 = 0; var5 < this.scatteredFeatureSizeZ; ++var5) {
-               boolean var6 = true;
-               this.replaceAirAndLiquidDownwards(var1, Blocks.SANDSTONE.getDefaultState(), var14, -5, var5, var3);
+               this.replaceAirAndLiquidDownwards(var1, Blocks.SANDSTONE.getDefaultState(), var16, -5, var5, var3);
             }
          }
 
-         IBlockState var15 = Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH);
-         IBlockState var16 = Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.SOUTH);
-         IBlockState var17 = Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.EAST);
-         IBlockState var7 = Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.WEST);
-         int var8 = ~EnumDyeColor.ORANGE.getDyeDamage() & 15;
-         int var9 = ~EnumDyeColor.BLUE.getDyeDamage() & 15;
+         IBlockState var17 = Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH);
+         IBlockState var6 = Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.SOUTH);
+         IBlockState var7 = Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.EAST);
+         IBlockState var8 = Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.WEST);
+         int var9 = ~EnumDyeColor.ORANGE.getDyeDamage() & 15;
+         int var10 = ~EnumDyeColor.BLUE.getDyeDamage() & 15;
          this.fillWithBlocks(var1, var3, 0, 0, 0, 4, 9, 4, Blocks.SANDSTONE.getDefaultState(), Blocks.AIR.getDefaultState(), false);
          this.fillWithBlocks(var1, var3, 1, 10, 1, 3, 10, 3, Blocks.SANDSTONE.getDefaultState(), Blocks.SANDSTONE.getDefaultState(), false);
-         this.setBlockState(var1, var15, 2, 10, 0, var3);
-         this.setBlockState(var1, var16, 2, 10, 4, var3);
-         this.setBlockState(var1, var17, 0, 10, 2, var3);
-         this.setBlockState(var1, var7, 4, 10, 2, var3);
+         this.setBlockState(var1, var17, 2, 10, 0, var3);
+         this.setBlockState(var1, var6, 2, 10, 4, var3);
+         this.setBlockState(var1, var7, 0, 10, 2, var3);
+         this.setBlockState(var1, var8, 4, 10, 2, var3);
          this.fillWithBlocks(var1, var3, this.scatteredFeatureSizeX - 5, 0, 0, this.scatteredFeatureSizeX - 1, 9, 4, Blocks.SANDSTONE.getDefaultState(), Blocks.AIR.getDefaultState(), false);
          this.fillWithBlocks(var1, var3, this.scatteredFeatureSizeX - 4, 10, 1, this.scatteredFeatureSizeX - 2, 10, 3, Blocks.SANDSTONE.getDefaultState(), Blocks.SANDSTONE.getDefaultState(), false);
-         this.setBlockState(var1, var15, this.scatteredFeatureSizeX - 3, 10, 0, var3);
-         this.setBlockState(var1, var16, this.scatteredFeatureSizeX - 3, 10, 4, var3);
-         this.setBlockState(var1, var17, this.scatteredFeatureSizeX - 5, 10, 2, var3);
-         this.setBlockState(var1, var7, this.scatteredFeatureSizeX - 1, 10, 2, var3);
+         this.setBlockState(var1, var17, this.scatteredFeatureSizeX - 3, 10, 0, var3);
+         this.setBlockState(var1, var6, this.scatteredFeatureSizeX - 3, 10, 4, var3);
+         this.setBlockState(var1, var7, this.scatteredFeatureSizeX - 5, 10, 2, var3);
+         this.setBlockState(var1, var8, this.scatteredFeatureSizeX - 1, 10, 2, var3);
          this.fillWithBlocks(var1, var3, 8, 0, 0, 12, 4, 4, Blocks.SANDSTONE.getDefaultState(), Blocks.AIR.getDefaultState(), false);
          this.fillWithBlocks(var1, var3, 9, 1, 0, 11, 3, 4, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
          this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), 9, 1, 1, var3);
@@ -134,63 +134,63 @@ public class ComponentScatteredFeaturePieces {
          this.setBlockState(var1, Blocks.AIR.getDefaultState(), this.scatteredFeatureSizeX - 7, 6, 10, var3);
          this.fillWithBlocks(var1, var3, 2, 4, 4, 2, 6, 4, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
          this.fillWithBlocks(var1, var3, this.scatteredFeatureSizeX - 3, 4, 4, this.scatteredFeatureSizeX - 3, 6, 4, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
-         this.setBlockState(var1, var15, 2, 4, 5, var3);
-         this.setBlockState(var1, var15, 2, 3, 4, var3);
-         this.setBlockState(var1, var15, this.scatteredFeatureSizeX - 3, 4, 5, var3);
-         this.setBlockState(var1, var15, this.scatteredFeatureSizeX - 3, 3, 4, var3);
+         this.setBlockState(var1, var17, 2, 4, 5, var3);
+         this.setBlockState(var1, var17, 2, 3, 4, var3);
+         this.setBlockState(var1, var17, this.scatteredFeatureSizeX - 3, 4, 5, var3);
+         this.setBlockState(var1, var17, this.scatteredFeatureSizeX - 3, 3, 4, var3);
          this.fillWithBlocks(var1, var3, 1, 1, 3, 2, 2, 3, Blocks.SANDSTONE.getDefaultState(), Blocks.SANDSTONE.getDefaultState(), false);
          this.fillWithBlocks(var1, var3, this.scatteredFeatureSizeX - 3, 1, 3, this.scatteredFeatureSizeX - 2, 2, 3, Blocks.SANDSTONE.getDefaultState(), Blocks.SANDSTONE.getDefaultState(), false);
          this.setBlockState(var1, Blocks.SANDSTONE.getDefaultState(), 1, 1, 2, var3);
          this.setBlockState(var1, Blocks.SANDSTONE.getDefaultState(), this.scatteredFeatureSizeX - 2, 1, 2, var3);
          this.setBlockState(var1, Blocks.STONE_SLAB.getStateFromMeta(BlockStoneSlab.EnumType.SAND.getMetadata()), 1, 2, 2, var3);
          this.setBlockState(var1, Blocks.STONE_SLAB.getStateFromMeta(BlockStoneSlab.EnumType.SAND.getMetadata()), this.scatteredFeatureSizeX - 2, 2, 2, var3);
-         this.setBlockState(var1, var7, 2, 1, 2, var3);
-         this.setBlockState(var1, var17, this.scatteredFeatureSizeX - 3, 1, 2, var3);
+         this.setBlockState(var1, var8, 2, 1, 2, var3);
+         this.setBlockState(var1, var7, this.scatteredFeatureSizeX - 3, 1, 2, var3);
          this.fillWithBlocks(var1, var3, 4, 3, 5, 4, 3, 18, Blocks.SANDSTONE.getDefaultState(), Blocks.SANDSTONE.getDefaultState(), false);
          this.fillWithBlocks(var1, var3, this.scatteredFeatureSizeX - 5, 3, 5, this.scatteredFeatureSizeX - 5, 3, 17, Blocks.SANDSTONE.getDefaultState(), Blocks.SANDSTONE.getDefaultState(), false);
          this.fillWithBlocks(var1, var3, 3, 1, 5, 4, 2, 16, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
          this.fillWithBlocks(var1, var3, this.scatteredFeatureSizeX - 6, 1, 5, this.scatteredFeatureSizeX - 5, 2, 16, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
 
-         for(int var10 = 5; var10 <= 17; var10 += 2) {
-            this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), 4, 1, var10, var3);
-            this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), 4, 2, var10, var3);
-            this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), this.scatteredFeatureSizeX - 5, 1, var10, var3);
-            this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), this.scatteredFeatureSizeX - 5, 2, var10, var3);
+         for(int var11 = 5; var11 <= 17; var11 += 2) {
+            this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), 4, 1, var11, var3);
+            this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), 4, 2, var11, var3);
+            this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), this.scatteredFeatureSizeX - 5, 1, var11, var3);
+            this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), this.scatteredFeatureSizeX - 5, 2, var11, var3);
          }
 
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 10, 0, 7, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 10, 0, 8, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 9, 0, 9, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 11, 0, 9, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 8, 0, 10, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 12, 0, 10, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 7, 0, 10, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 13, 0, 10, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 9, 0, 11, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 11, 0, 11, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 10, 0, 12, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 10, 0, 13, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 10, 0, 10, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 10, 0, 7, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 10, 0, 8, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 9, 0, 9, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 11, 0, 9, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 8, 0, 10, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 12, 0, 10, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 7, 0, 10, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 13, 0, 10, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 9, 0, 11, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 11, 0, 11, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 10, 0, 12, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 10, 0, 13, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var10), 10, 0, 10, var3);
 
          for(int var18 = 0; var18 <= this.scatteredFeatureSizeX - 1; var18 += this.scatteredFeatureSizeX - 1) {
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var18, 2, 1, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 2, 2, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 2, 2, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var18, 2, 3, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var18, 3, 1, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 3, 2, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 3, 2, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var18, 3, 3, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 4, 1, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 4, 1, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), var18, 4, 2, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 4, 3, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 4, 3, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var18, 5, 1, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 5, 2, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 5, 2, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var18, 5, 3, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 6, 1, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 6, 1, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), var18, 6, 2, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 6, 3, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 7, 1, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 7, 2, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var18, 7, 3, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 6, 3, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 7, 1, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 7, 2, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var18, 7, 3, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var18, 8, 1, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var18, 8, 2, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var18, 8, 3, var3);
@@ -198,23 +198,23 @@ public class ComponentScatteredFeaturePieces {
 
          for(int var19 = 2; var19 <= this.scatteredFeatureSizeX - 3; var19 += this.scatteredFeatureSizeX - 3 - 2) {
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var19 - 1, 2, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19, 2, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19, 2, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var19 + 1, 2, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var19 - 1, 3, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19, 3, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19, 3, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var19 + 1, 3, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19 - 1, 4, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19 - 1, 4, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), var19, 4, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19 + 1, 4, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19 + 1, 4, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var19 - 1, 5, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19, 5, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19, 5, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var19 + 1, 5, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19 - 1, 6, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19 - 1, 6, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), var19, 6, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19 + 1, 6, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19 - 1, 7, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19, 7, 0, var3);
-            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), var19 + 1, 7, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19 + 1, 6, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19 - 1, 7, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19, 7, 0, var3);
+            this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), var19 + 1, 7, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var19 - 1, 8, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var19, 8, 0, var3);
             this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), var19 + 1, 8, 0, var3);
@@ -223,9 +223,9 @@ public class ComponentScatteredFeaturePieces {
          this.fillWithBlocks(var1, var3, 8, 4, 0, 12, 6, 0, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), false);
          this.setBlockState(var1, Blocks.AIR.getDefaultState(), 8, 6, 0, var3);
          this.setBlockState(var1, Blocks.AIR.getDefaultState(), 12, 6, 0, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 9, 5, 0, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 9, 5, 0, var3);
          this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), 10, 5, 0, var3);
-         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var8), 11, 5, 0, var3);
+         this.setBlockState(var1, Blocks.STAINED_HARDENED_CLAY.getStateFromMeta(var9), 11, 5, 0, var3);
          this.fillWithBlocks(var1, var3, 8, -14, 8, 12, -11, 12, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), false);
          this.fillWithBlocks(var1, var3, 8, -10, 8, 12, -10, 12, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), false);
          this.fillWithBlocks(var1, var3, 8, -9, 8, 12, -9, 12, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), false);
@@ -250,11 +250,11 @@ public class ComponentScatteredFeaturePieces {
          this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.CHISELED.getMetadata()), 10, -10, 13, var3);
          this.setBlockState(var1, Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()), 10, -11, 13, var3);
 
-         for(EnumFacing var11 : EnumFacing.Plane.HORIZONTAL) {
-            if (!this.hasPlacedChest[var11.getHorizontalIndex()]) {
-               int var12 = var11.getFrontOffsetX() * 2;
-               int var13 = var11.getFrontOffsetZ() * 2;
-               this.hasPlacedChest[var11.getHorizontalIndex()] = this.generateChest(var1, var3, var2, 10 + var12, -11, 10 + var13, LootTableList.CHESTS_DESERT_PYRAMID);
+         for(EnumFacing var13 : EnumFacing.Plane.HORIZONTAL) {
+            if (!this.hasPlacedChest[var13.getHorizontalIndex()]) {
+               int var14 = var13.getFrontOffsetX() * 2;
+               int var15 = var13.getFrontOffsetZ() * 2;
+               this.hasPlacedChest[var13.getHorizontalIndex()] = this.generateChest(var1, var3, var2, 10 + var14, -11, 10 + var15, LootTableList.CHESTS_DESERT_PYRAMID);
             }
          }
 
@@ -350,11 +350,11 @@ public class ComponentScatteredFeaturePieces {
             MinecraftServer var7 = var1.getMinecraftServer();
             TemplateManager var8 = var1.getSaveHandler().getStructureTemplateManager();
             PlacementSettings var9 = (new PlacementSettings()).setRotation(var6[var2.nextInt(var6.length)]).setReplacedBlock(Blocks.STRUCTURE_VOID).setBoundingBox(var4);
-            Template var10 = var8.getTemplate(var7, IGLOO_TOP_ID);
+            Template var10 = var8.a(var7, IGLOO_TOP_ID);
             var10.addBlocksToWorldChunk(var1, var5, var9);
             if (var2.nextDouble() < 0.5D) {
-               Template var11 = var8.getTemplate(var7, IGLOO_MIDDLE_ID);
-               Template var12 = var8.getTemplate(var7, IGLOO_BOTTOM_ID);
+               Template var11 = var8.a(var7, IGLOO_MIDDLE_ID);
+               Template var12 = var8.a(var7, IGLOO_BOTTOM_ID);
                int var13 = var2.nextInt(8) + 4;
 
                for(int var14 = 0; var14 < var13; ++var14) {
@@ -391,7 +391,7 @@ public class ComponentScatteredFeaturePieces {
       private boolean placedHiddenChest;
       private boolean placedTrap1;
       private boolean placedTrap2;
-      private static final ComponentScatteredFeaturePieces.JunglePyramid.Stones junglePyramidsRandomScatteredStones = new ComponentScatteredFeaturePieces.JunglePyramid.Stones();
+      private static final ComponentScatteredFeaturePieces.JunglePyramid.WorldGenJungleTemplePiece junglePyramidsRandomScatteredStones = new ComponentScatteredFeaturePieces.JunglePyramid.WorldGenJungleTemplePiece((ComponentScatteredFeaturePieces.SyntheticClass_1)null);
 
       public JunglePyramid() {
       }
@@ -456,13 +456,13 @@ public class ComponentScatteredFeaturePieces {
 
             this.fillWithRandomizedBlocks(var1, var3, 5, 6, 0, 6, 6, 0, false, var2, junglePyramidsRandomScatteredStones);
 
-            for(int var9 = 0; var9 <= 11; var9 += 11) {
+            for(int var11 = 0; var11 <= 11; var11 += 11) {
                for(int var5 = 2; var5 <= 12; var5 += 2) {
-                  this.fillWithRandomizedBlocks(var1, var3, var9, 4, var5, var9, 5, var5, false, var2, junglePyramidsRandomScatteredStones);
+                  this.fillWithRandomizedBlocks(var1, var3, var11, 4, var5, var11, 5, var5, false, var2, junglePyramidsRandomScatteredStones);
                }
 
-               this.fillWithRandomizedBlocks(var1, var3, var9, 6, 5, var9, 6, 5, false, var2, junglePyramidsRandomScatteredStones);
-               this.fillWithRandomizedBlocks(var1, var3, var9, 6, 9, var9, 6, 9, false, var2, junglePyramidsRandomScatteredStones);
+               this.fillWithRandomizedBlocks(var1, var3, var11, 6, 5, var11, 6, 5, false, var2, junglePyramidsRandomScatteredStones);
+               this.fillWithRandomizedBlocks(var1, var3, var11, 6, 9, var11, 6, 9, false, var2, junglePyramidsRandomScatteredStones);
             }
 
             this.fillWithRandomizedBlocks(var1, var3, 2, 7, 2, 2, 9, 2, false, var2, junglePyramidsRandomScatteredStones);
@@ -474,47 +474,47 @@ public class ComponentScatteredFeaturePieces {
             this.fillWithRandomizedBlocks(var1, var3, 4, 9, 10, 4, 9, 10, false, var2, junglePyramidsRandomScatteredStones);
             this.fillWithRandomizedBlocks(var1, var3, 7, 9, 10, 7, 9, 10, false, var2, junglePyramidsRandomScatteredStones);
             this.fillWithRandomizedBlocks(var1, var3, 5, 9, 7, 6, 9, 7, false, var2, junglePyramidsRandomScatteredStones);
-            IBlockState var10 = Blocks.STONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.EAST);
-            IBlockState var11 = Blocks.STONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.WEST);
-            IBlockState var6 = Blocks.STONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.SOUTH);
-            IBlockState var7 = Blocks.STONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH);
-            this.setBlockState(var1, var7, 5, 9, 6, var3);
-            this.setBlockState(var1, var7, 6, 9, 6, var3);
-            this.setBlockState(var1, var6, 5, 9, 8, var3);
-            this.setBlockState(var1, var6, 6, 9, 8, var3);
-            this.setBlockState(var1, var7, 4, 0, 0, var3);
-            this.setBlockState(var1, var7, 5, 0, 0, var3);
-            this.setBlockState(var1, var7, 6, 0, 0, var3);
-            this.setBlockState(var1, var7, 7, 0, 0, var3);
-            this.setBlockState(var1, var7, 4, 1, 8, var3);
-            this.setBlockState(var1, var7, 4, 2, 9, var3);
-            this.setBlockState(var1, var7, 4, 3, 10, var3);
-            this.setBlockState(var1, var7, 7, 1, 8, var3);
-            this.setBlockState(var1, var7, 7, 2, 9, var3);
-            this.setBlockState(var1, var7, 7, 3, 10, var3);
+            IBlockState var12 = Blocks.STONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.EAST);
+            IBlockState var6 = Blocks.STONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.WEST);
+            IBlockState var7 = Blocks.STONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.SOUTH);
+            IBlockState var8 = Blocks.STONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH);
+            this.setBlockState(var1, var8, 5, 9, 6, var3);
+            this.setBlockState(var1, var8, 6, 9, 6, var3);
+            this.setBlockState(var1, var7, 5, 9, 8, var3);
+            this.setBlockState(var1, var7, 6, 9, 8, var3);
+            this.setBlockState(var1, var8, 4, 0, 0, var3);
+            this.setBlockState(var1, var8, 5, 0, 0, var3);
+            this.setBlockState(var1, var8, 6, 0, 0, var3);
+            this.setBlockState(var1, var8, 7, 0, 0, var3);
+            this.setBlockState(var1, var8, 4, 1, 8, var3);
+            this.setBlockState(var1, var8, 4, 2, 9, var3);
+            this.setBlockState(var1, var8, 4, 3, 10, var3);
+            this.setBlockState(var1, var8, 7, 1, 8, var3);
+            this.setBlockState(var1, var8, 7, 2, 9, var3);
+            this.setBlockState(var1, var8, 7, 3, 10, var3);
             this.fillWithRandomizedBlocks(var1, var3, 4, 1, 9, 4, 1, 9, false, var2, junglePyramidsRandomScatteredStones);
             this.fillWithRandomizedBlocks(var1, var3, 7, 1, 9, 7, 1, 9, false, var2, junglePyramidsRandomScatteredStones);
             this.fillWithRandomizedBlocks(var1, var3, 4, 1, 10, 7, 2, 10, false, var2, junglePyramidsRandomScatteredStones);
             this.fillWithRandomizedBlocks(var1, var3, 5, 4, 5, 6, 4, 5, false, var2, junglePyramidsRandomScatteredStones);
-            this.setBlockState(var1, var10, 4, 4, 5, var3);
-            this.setBlockState(var1, var11, 7, 4, 5, var3);
+            this.setBlockState(var1, var12, 4, 4, 5, var3);
+            this.setBlockState(var1, var6, 7, 4, 5, var3);
 
-            for(int var8 = 0; var8 < 4; ++var8) {
-               this.setBlockState(var1, var6, 5, 0 - var8, 6 + var8, var3);
-               this.setBlockState(var1, var6, 6, 0 - var8, 6 + var8, var3);
-               this.fillWithAir(var1, var3, 5, 0 - var8, 7 + var8, 6, 0 - var8, 9 + var8);
+            for(int var9 = 0; var9 < 4; ++var9) {
+               this.setBlockState(var1, var7, 5, 0 - var9, 6 + var9, var3);
+               this.setBlockState(var1, var7, 6, 0 - var9, 6 + var9, var3);
+               this.fillWithAir(var1, var3, 5, 0 - var9, 7 + var9, 6, 0 - var9, 9 + var9);
             }
 
             this.fillWithAir(var1, var3, 1, -3, 12, 10, -1, 13);
             this.fillWithAir(var1, var3, 1, -3, 1, 3, -1, 13);
             this.fillWithAir(var1, var3, 1, -3, 1, 9, -1, 5);
 
-            for(int var12 = 1; var12 <= 13; var12 += 2) {
-               this.fillWithRandomizedBlocks(var1, var3, 1, -3, var12, 1, -2, var12, false, var2, junglePyramidsRandomScatteredStones);
+            for(int var13 = 1; var13 <= 13; var13 += 2) {
+               this.fillWithRandomizedBlocks(var1, var3, 1, -3, var13, 1, -2, var13, false, var2, junglePyramidsRandomScatteredStones);
             }
 
-            for(int var13 = 2; var13 <= 12; var13 += 2) {
-               this.fillWithRandomizedBlocks(var1, var3, 1, -1, var13, 3, -1, var13, false, var2, junglePyramidsRandomScatteredStones);
+            for(int var14 = 2; var14 <= 12; var14 += 2) {
+               this.fillWithRandomizedBlocks(var1, var3, 1, -1, var14, 3, -1, var14, false, var2, junglePyramidsRandomScatteredStones);
             }
 
             this.fillWithRandomizedBlocks(var1, var3, 2, -2, 1, 5, -2, 1, false, var2, junglePyramidsRandomScatteredStones);
@@ -573,10 +573,10 @@ public class ComponentScatteredFeaturePieces {
             this.setBlockState(var1, Blocks.STONEBRICK.getStateFromMeta(BlockStoneBrick.CHISELED_META), 8, -2, 11, var3);
             this.setBlockState(var1, Blocks.STONEBRICK.getStateFromMeta(BlockStoneBrick.CHISELED_META), 9, -2, 11, var3);
             this.setBlockState(var1, Blocks.STONEBRICK.getStateFromMeta(BlockStoneBrick.CHISELED_META), 10, -2, 11, var3);
-            IBlockState var14 = Blocks.LEVER.getDefaultState().withProperty(BlockLever.FACING, BlockLever.EnumOrientation.NORTH);
-            this.setBlockState(var1, var14, 8, -2, 12, var3);
-            this.setBlockState(var1, var14, 9, -2, 12, var3);
-            this.setBlockState(var1, var14, 10, -2, 12, var3);
+            IBlockState var10 = Blocks.LEVER.getDefaultState().withProperty(BlockLever.FACING, BlockLever.EnumOrientation.NORTH);
+            this.setBlockState(var1, var10, 8, -2, 12, var3);
+            this.setBlockState(var1, var10, 9, -2, 12, var3);
+            this.setBlockState(var1, var10, 10, -2, 12, var3);
             this.fillWithRandomizedBlocks(var1, var3, 8, -3, 8, 8, -3, 10, false, var2, junglePyramidsRandomScatteredStones);
             this.fillWithRandomizedBlocks(var1, var3, 10, -3, 8, 10, -3, 10, false, var2, junglePyramidsRandomScatteredStones);
             this.setBlockState(var1, Blocks.MOSSY_COBBLESTONE.getDefaultState(), 10, -2, 9, var3);
@@ -595,8 +595,8 @@ public class ComponentScatteredFeaturePieces {
          }
       }
 
-      static class Stones extends StructureComponent.BlockSelector {
-         private Stones() {
+      static class WorldGenJungleTemplePiece extends StructureComponent.BlockSelector {
+         private WorldGenJungleTemplePiece() {
          }
 
          public void selectBlocks(Random var1, int var2, int var3, int var4, boolean var5) {
@@ -606,6 +606,10 @@ public class ComponentScatteredFeaturePieces {
                this.blockstate = Blocks.MOSSY_COBBLESTONE.getDefaultState();
             }
 
+         }
+
+         WorldGenJungleTemplePiece(ComponentScatteredFeaturePieces.SyntheticClass_1 var1) {
+            this();
          }
       }
    }
@@ -679,12 +683,15 @@ public class ComponentScatteredFeaturePieces {
                   EntityWitch var11 = new EntityWitch(var1);
                   var11.setLocationAndAngles((double)var12 + 0.5D, (double)var13, (double)var10 + 0.5D, 0.0F, 0.0F);
                   var11.onInitialSpawn(var1.getDifficultyForLocation(new BlockPos(var12, var13, var10)), (IEntityLivingData)null);
-                  var1.spawnEntity(var11);
+                  var1.addEntity(var11, SpawnReason.CHUNK_GEN);
                }
             }
 
             return true;
          }
       }
+   }
+
+   static class SyntheticClass_1 {
    }
 }

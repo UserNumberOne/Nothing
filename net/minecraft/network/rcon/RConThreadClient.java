@@ -6,12 +6,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@SideOnly(Side.SERVER)
 public class RConThreadClient extends RConThreadBase {
    private static final Logger LOGGER = LogManager.getLogger();
    private boolean loggedIn;
@@ -42,60 +39,62 @@ public class RConThreadClient extends RConThreadBase {
 
             BufferedInputStream var1 = new BufferedInputStream(this.clientSocket.getInputStream());
             int var2 = var1.read(this.buffer, 0, 1460);
-            if (10 > var2) {
-               return;
-            }
+            if (10 <= var2) {
+               int var3 = 0;
+               int var4 = RConUtils.getBytesAsLEInt(this.buffer, 0, var2);
+               if (var4 != var2 - 4) {
+                  return;
+               }
 
-            int var3 = 0;
-            int var4 = RConUtils.getBytesAsLEInt(this.buffer, 0, var2);
-            if (var4 != var2 - 4) {
-               return;
-            }
+               var3 = var3 + 4;
+               int var5 = RConUtils.getBytesAsLEInt(this.buffer, var3, var2);
+               var3 = var3 + 4;
+               int var6 = RConUtils.getRemainingBytesAsLEInt(this.buffer, var3);
+               var3 = var3 + 4;
+               switch(var6) {
+               case 2:
+                  if (this.loggedIn) {
+                     String var8 = RConUtils.getBytesAsString(this.buffer, var3, var2);
 
-            var3 = var3 + 4;
-            int var5 = RConUtils.getBytesAsLEInt(this.buffer, var3, var2);
-            var3 = var3 + 4;
-            int var6 = RConUtils.getRemainingBytesAsLEInt(this.buffer, var3);
-            var3 = var3 + 4;
-            switch(var6) {
-            case 2:
-               if (!this.loggedIn) {
-                  this.sendLoginFailedResponse();
-               } else {
-                  String var23 = RConUtils.getBytesAsString(this.buffer, var3, var2);
-
-                  try {
-                     this.sendMultipacketResponse(var5, this.server.handleRConCommand(var23));
-                  } catch (Exception var15) {
-                     this.sendMultipacketResponse(var5, "Error executing: " + var23 + " (" + var15.getMessage() + ")");
+                     try {
+                        this.sendMultipacketResponse(var5, this.server.handleRConCommand(var8));
+                     } catch (Exception var16) {
+                        this.sendMultipacketResponse(var5, "Error executing: " + var8 + " (" + var16.getMessage() + ")");
+                     }
+                     continue;
                   }
-               }
-               break;
-            case 3:
-               String var7 = RConUtils.getBytesAsString(this.buffer, var3, var2);
-               int var10000 = var3 + var7.length();
-               if (!var7.isEmpty() && var7.equals(this.rconPassword)) {
-                  this.loggedIn = true;
-                  this.sendResponse(var5, 2, "");
-                  break;
-               }
 
-               this.loggedIn = false;
-               this.sendLoginFailedResponse();
-               break;
-            default:
-               this.sendMultipacketResponse(var5, String.format("Unknown request %s", Integer.toHexString(var6)));
+                  this.sendLoginFailedResponse();
+                  continue;
+               case 3:
+                  String var7 = RConUtils.getBytesAsString(this.buffer, var3, var2);
+                  int var10000 = var3 + var7.length();
+                  if (!var7.isEmpty() && var7.equals(this.rconPassword)) {
+                     this.loggedIn = true;
+                     this.sendResponse(var5, 2, "");
+                     continue;
+                  }
+
+                  this.loggedIn = false;
+                  this.sendLoginFailedResponse();
+                  continue;
+               default:
+                  this.sendMultipacketResponse(var5, String.format("Unknown request %s", Integer.toHexString(var6)));
+                  continue;
+               }
             }
-         } catch (SocketTimeoutException var16) {
+         } catch (SocketTimeoutException var17) {
             return;
-         } catch (IOException var17) {
+         } catch (IOException var18) {
             return;
-         } catch (Exception var18) {
-            LOGGER.error("Exception whilst parsing RCON input", var18);
+         } catch (Exception var19) {
+            LOGGER.error("Exception whilst parsing RCON input", var19);
             return;
          } finally {
             this.closeSocket();
          }
+
+         return;
       }
    }
 
@@ -141,6 +140,5 @@ public class RConThreadClient extends RConThreadBase {
 
          this.clientSocket = null;
       }
-
    }
 }

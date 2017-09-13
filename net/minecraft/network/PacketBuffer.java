@@ -25,8 +25,7 @@ import net.minecraft.nbt.NBTSizeTracker;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
 
 public class PacketBuffer extends ByteBuf {
    private final ByteBuf buf;
@@ -105,29 +104,6 @@ public class PacketBuffer extends ByteBuf {
       return this;
    }
 
-   @SideOnly(Side.CLIENT)
-   public long[] readLongArray(@Nullable long[] var1) {
-      return this.readLongArray(var1, this.readableBytes() / 8);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public long[] readLongArray(@Nullable long[] var1, int var2) {
-      int var3 = this.readVarInt();
-      if (var1 == null || var1.length != var3) {
-         if (var3 > var2) {
-            throw new DecoderException("LongArray with size " + var3 + " is bigger than allowed " + var2);
-         }
-
-         var1 = new long[var3];
-      }
-
-      for(int var4 = 0; var4 < var1.length; ++var4) {
-         var1[var4] = this.readLong();
-      }
-
-      return var1;
-   }
-
    public BlockPos readBlockPos() {
       return BlockPos.fromLong(this.readLong());
    }
@@ -137,7 +113,7 @@ public class PacketBuffer extends ByteBuf {
       return this;
    }
 
-   public ITextComponent readTextComponent() throws IOException {
+   public ITextComponent readTextComponent() {
       return ITextComponent.Serializer.jsonToComponent(this.readString(32767));
    }
 
@@ -146,7 +122,7 @@ public class PacketBuffer extends ByteBuf {
    }
 
    public Enum readEnumValue(Class var1) {
-      return ((Enum[])((Enum[])var1.getEnumConstants()))[this.readVarInt()];
+      return ((Enum[])var1.getEnumConstants())[this.readVarInt()];
    }
 
    public PacketBuffer writeEnumValue(Enum var1) {
@@ -227,7 +203,7 @@ public class PacketBuffer extends ByteBuf {
       } else {
          try {
             CompressedStreamTools.write(var1, new ByteBufOutputStream(this));
-         } catch (IOException var3) {
+         } catch (Exception var3) {
             throw new EncoderException(var3);
          }
       }
@@ -236,7 +212,7 @@ public class PacketBuffer extends ByteBuf {
    }
 
    @Nullable
-   public NBTTagCompound readCompoundTag() throws IOException {
+   public NBTTagCompound readCompoundTag() {
       int var1 = this.readerIndex();
       byte var2 = this.readByte();
       if (var2 == 0) {
@@ -253,25 +229,25 @@ public class PacketBuffer extends ByteBuf {
    }
 
    public PacketBuffer writeItemStack(@Nullable ItemStack var1) {
-      if (var1 == null) {
-         this.writeShort(-1);
-      } else {
+      if (var1 != null && var1.getItem() != null) {
          this.writeShort(Item.getIdFromItem(var1.getItem()));
          this.writeByte(var1.stackSize);
          this.writeShort(var1.getMetadata());
          NBTTagCompound var2 = null;
          if (var1.getItem().isDamageable() || var1.getItem().getShareTag()) {
-            var2 = var1.getItem().getNBTShareTag(var1);
+            var2 = var1.getTagCompound();
          }
 
          this.writeCompoundTag(var2);
+      } else {
+         this.writeShort(-1);
       }
 
       return this;
    }
 
    @Nullable
-   public ItemStack readItemStack() throws IOException {
+   public ItemStack readItemStack() {
       ItemStack var1 = null;
       short var2 = this.readShort();
       if (var2 >= 0) {
@@ -279,6 +255,9 @@ public class PacketBuffer extends ByteBuf {
          short var4 = this.readShort();
          var1 = new ItemStack(Item.getItemById(var2), var3, var4);
          var1.setTagCompound(this.readCompoundTag());
+         if (var1.getTagCompound() != null) {
+            CraftItemStack.setItemMeta(var1, CraftItemStack.getItemMeta(var1));
+         }
       }
 
       return var1;

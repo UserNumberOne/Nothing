@@ -14,8 +14,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketChunkData implements Packet {
    private int chunkX;
@@ -89,11 +87,6 @@ public class SPacketChunkData implements Packet {
       var1.handleChunkData(this);
    }
 
-   @SideOnly(Side.CLIENT)
-   public PacketBuffer getReadBuffer() {
-      return new PacketBuffer(Unpooled.wrappedBuffer(this.buffer));
-   }
-
    private ByteBuf getWriteBuffer() {
       ByteBuf var1 = Unpooled.wrappedBuffer(this.buffer);
       var1.writerIndex(0);
@@ -147,27 +140,7 @@ public class SPacketChunkData implements Packet {
       return var4;
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getChunkX() {
-      return this.chunkX;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getChunkZ() {
-      return this.chunkZ;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getExtractedSize() {
-      return this.availableSections;
-   }
-
    public boolean doChunkLoad() {
       return this.loadChunk;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getTileEntityTags() {
-      return this.tileEntityTags;
    }
 }

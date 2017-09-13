@@ -1,5 +1,7 @@
 package net.minecraft.inventory;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -9,11 +11,54 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.LockCode;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
+import org.bukkit.inventory.InventoryHolder;
 
 public class InventoryLargeChest implements ILockableContainer {
    private final String name;
-   private final ILockableContainer upperChest;
-   private final ILockableContainer lowerChest;
+   public final ILockableContainer upperChest;
+   public final ILockableContainer lowerChest;
+   public List transaction = new ArrayList();
+
+   public ItemStack[] getContents() {
+      ItemStack[] var1 = new ItemStack[this.getSizeInventory()];
+
+      for(int var2 = 0; var2 < var1.length; ++var2) {
+         var1[var2] = this.getStackInSlot(var2);
+      }
+
+      return var1;
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.upperChest.onOpen(var1);
+      this.lowerChest.onOpen(var1);
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.upperChest.onClose(var1);
+      this.lowerChest.onClose(var1);
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public InventoryHolder getOwner() {
+      return null;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.upperChest.setMaxStackSize(var1);
+      this.lowerChest.setMaxStackSize(var1);
+   }
+
+   public Location getLocation() {
+      return this.upperChest.getLocation();
+   }
 
    public InventoryLargeChest(String var1, ILockableContainer var2, ILockableContainer var3) {
       this.name = var1;
@@ -80,7 +125,7 @@ public class InventoryLargeChest implements ILockableContainer {
    }
 
    public int getInventoryStackLimit() {
-      return this.upperChest.getInventoryStackLimit();
+      return Math.min(this.upperChest.getInventoryStackLimit(), this.lowerChest.getInventoryStackLimit());
    }
 
    public void markDirty() {

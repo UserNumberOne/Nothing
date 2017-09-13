@@ -1,6 +1,5 @@
 package net.minecraft.entity.item;
 
-import io.netty.buffer.ByteBuf;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -11,7 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.datafix.DataFixer;
@@ -23,28 +22,19 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftMinecartCommand;
 
 public class EntityMinecartCommandBlock extends EntityMinecart {
-   private static final DataParameter COMMAND = EntityDataManager.createKey(EntityMinecartCommandBlock.class, DataSerializers.STRING);
+   public static final DataParameter COMMAND = EntityDataManager.createKey(EntityMinecartCommandBlock.class, DataSerializers.STRING);
    private static final DataParameter LAST_OUTPUT = EntityDataManager.createKey(EntityMinecartCommandBlock.class, DataSerializers.TEXT_COMPONENT);
    private final CommandBlockBaseLogic commandBlockLogic = new CommandBlockBaseLogic() {
+      {
+         this.sender = (CraftMinecartCommand)EntityMinecartCommandBlock.this.getBukkitEntity();
+      }
+
       public void updateCommand() {
          EntityMinecartCommandBlock.this.getDataManager().set(EntityMinecartCommandBlock.COMMAND, this.getCommand());
          EntityMinecartCommandBlock.this.getDataManager().set(EntityMinecartCommandBlock.LAST_OUTPUT, this.getLastOutput());
-      }
-
-      @SideOnly(Side.CLIENT)
-      public int getCommandBlockType() {
-         return 1;
-      }
-
-      @SideOnly(Side.CLIENT)
-      public void fillInInfo(ByteBuf var1) {
-         var1.writeInt(EntityMinecartCommandBlock.this.getEntityId());
       }
 
       public BlockPos getPosition() {
@@ -63,7 +53,7 @@ public class EntityMinecartCommandBlock extends EntityMinecart {
          return EntityMinecartCommandBlock.this;
       }
 
-      public MinecraftServer getServer() {
+      public MinecraftServer h() {
          return EntityMinecartCommandBlock.this.world.getMinecraftServer();
       }
    };
@@ -131,12 +121,8 @@ public class EntityMinecartCommandBlock extends EntityMinecart {
    }
 
    public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
-      if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, var1, var2, var3))) {
-         return true;
-      } else {
-         this.commandBlockLogic.tryOpenEditCommandBlock(var1);
-         return false;
-      }
+      this.commandBlockLogic.tryOpenEditCommandBlock(var1);
+      return false;
    }
 
    public void notifyDataManagerChange(DataParameter var1) {
@@ -144,7 +130,7 @@ public class EntityMinecartCommandBlock extends EntityMinecart {
       if (LAST_OUTPUT.equals(var1)) {
          try {
             this.commandBlockLogic.setLastOutput((ITextComponent)this.getDataManager().get(LAST_OUTPUT));
-         } catch (Throwable var3) {
+         } catch (Throwable var2) {
             ;
          }
       } else if (COMMAND.equals(var1)) {

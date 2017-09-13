@@ -25,8 +25,8 @@ public enum EnumFacing implements IStringSerializable {
    private final EnumFacing.Axis axis;
    private final EnumFacing.AxisDirection axisDirection;
    private final Vec3i directionVec;
-   public static final EnumFacing[] VALUES = new EnumFacing[6];
-   public static final EnumFacing[] HORIZONTALS = new EnumFacing[4];
+   private static final EnumFacing[] VALUES = new EnumFacing[6];
+   private static final EnumFacing[] HORIZONTALS = new EnumFacing[4];
    private static final Map NAME_LOOKUP = Maps.newHashMap();
 
    private EnumFacing(int var3, int var4, int var5, String var6, EnumFacing.AxisDirection var7, EnumFacing.Axis var8, Vec3i var9) {
@@ -55,31 +55,6 @@ public enum EnumFacing implements IStringSerializable {
       return getFront(this.opposite);
    }
 
-   public EnumFacing rotateAround(EnumFacing.Axis var1) {
-      switch(var1) {
-      case X:
-         if (this != WEST && this != EAST) {
-            return this.rotateX();
-         }
-
-         return this;
-      case Y:
-         if (this != UP && this != DOWN) {
-            return this.rotateY();
-         }
-
-         return this;
-      case Z:
-         if (this != NORTH && this != SOUTH) {
-            return this.rotateZ();
-         }
-
-         return this;
-      default:
-         throw new IllegalStateException("Unable to get CW facing for axis " + var1);
-      }
-   }
-
    public EnumFacing rotateY() {
       switch(this) {
       case NORTH:
@@ -92,39 +67,6 @@ public enum EnumFacing implements IStringSerializable {
          return NORTH;
       default:
          throw new IllegalStateException("Unable to get Y-rotated facing of " + this);
-      }
-   }
-
-   private EnumFacing rotateX() {
-      switch(this) {
-      case NORTH:
-         return DOWN;
-      case EAST:
-      case WEST:
-      default:
-         throw new IllegalStateException("Unable to get X-rotated facing of " + this);
-      case SOUTH:
-         return UP;
-      case UP:
-         return NORTH;
-      case DOWN:
-         return SOUTH;
-      }
-   }
-
-   private EnumFacing rotateZ() {
-      switch(this) {
-      case EAST:
-         return DOWN;
-      case SOUTH:
-      default:
-         throw new IllegalStateException("Unable to get Z-rotated facing of " + this);
-      case WEST:
-         return UP;
-      case UP:
-         return EAST;
-      case DOWN:
-         return WEST;
       }
    }
 
@@ -163,11 +105,6 @@ public enum EnumFacing implements IStringSerializable {
       return this.axis;
    }
 
-   @Nullable
-   public static EnumFacing byName(String var0) {
-      return var0 == null ? null : (EnumFacing)NAME_LOOKUP.get(var0.toLowerCase());
-   }
-
    public static EnumFacing getFront(int var0) {
       return VALUES[MathHelper.abs(var0 % VALUES.length)];
    }
@@ -188,21 +125,6 @@ public enum EnumFacing implements IStringSerializable {
       return values()[var0.nextInt(values().length)];
    }
 
-   public static EnumFacing getFacingFromVector(float var0, float var1, float var2) {
-      EnumFacing var3 = NORTH;
-      float var4 = Float.MIN_VALUE;
-
-      for(EnumFacing var8 : values()) {
-         float var9 = var0 * (float)var8.directionVec.getX() + var1 * (float)var8.directionVec.getY() + var2 * (float)var8.directionVec.getZ();
-         if (var9 > var4) {
-            var4 = var9;
-            var3 = var8;
-         }
-      }
-
-      return var3;
-   }
-
    public String toString() {
       return this.name;
    }
@@ -219,10 +141,6 @@ public enum EnumFacing implements IStringSerializable {
       }
 
       throw new IllegalArgumentException("No such direction: " + var0 + " " + var1);
-   }
-
-   public Vec3i getDirectionVec() {
-      return this.directionVec;
    }
 
    static {
@@ -251,11 +169,6 @@ public enum EnumFacing implements IStringSerializable {
          this.plane = var4;
       }
 
-      @Nullable
-      public static EnumFacing.Axis byName(String var0) {
-         return var0 == null ? null : (EnumFacing.Axis)NAME_LOOKUP.get(var0.toLowerCase());
-      }
-
       public String getName2() {
          return this.name;
       }
@@ -282,6 +195,11 @@ public enum EnumFacing implements IStringSerializable {
 
       public String getName() {
          return this.name;
+      }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((EnumFacing)var1);
       }
 
       static {
@@ -339,6 +257,11 @@ public enum EnumFacing implements IStringSerializable {
 
       public Iterator iterator() {
          return Iterators.forArray(this.facings());
+      }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((EnumFacing)var1);
       }
    }
 }

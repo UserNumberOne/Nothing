@@ -22,6 +22,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockTNT extends Block {
    public static final PropertyBool EXPLODE = PropertyBool.create("explode");
@@ -91,6 +92,10 @@ public class BlockTNT extends Block {
       if (!var1.isRemote && var4 instanceof EntityArrow) {
          EntityArrow var5 = (EntityArrow)var4;
          if (var5.isBurning()) {
+            if (CraftEventFactory.callEntityChangeBlockEvent(var5, var2, Blocks.AIR, 0).isCancelled()) {
+               return;
+            }
+
             this.explode(var1, var2, var1.getBlockState(var2).withProperty(EXPLODE, Boolean.valueOf(true)), var5.shootingEntity instanceof EntityLivingBase ? (EntityLivingBase)var5.shootingEntity : null);
             var1.setBlockToAir(var2);
          }

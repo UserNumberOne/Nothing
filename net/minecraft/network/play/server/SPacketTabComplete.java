@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketTabComplete implements Packet {
    private String[] matches;
@@ -37,10 +35,5 @@ public class SPacketTabComplete implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleTabComplete(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String[] getMatches() {
-      return this.matches;
    }
 }

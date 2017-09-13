@@ -51,17 +51,17 @@ public class WorldGenLakes extends WorldGenerator {
             }
          }
 
-         for(int var32 = 0; var32 < 16; ++var32) {
-            for(int var37 = 0; var37 < 16; ++var37) {
-               for(int var8 = 0; var8 < 8; ++var8) {
-                  boolean var46 = !var4[(var32 * 16 + var37) * 8 + var8] && (var32 < 15 && var4[((var32 + 1) * 16 + var37) * 8 + var8] || var32 > 0 && var4[((var32 - 1) * 16 + var37) * 8 + var8] || var37 < 15 && var4[(var32 * 16 + var37 + 1) * 8 + var8] || var37 > 0 && var4[(var32 * 16 + (var37 - 1)) * 8 + var8] || var8 < 7 && var4[(var32 * 16 + var37) * 8 + var8 + 1] || var8 > 0 && var4[(var32 * 16 + var37) * 8 + (var8 - 1)]);
-                  if (var46) {
-                     Material var10 = var1.getBlockState(var3.add(var32, var8, var37)).getMaterial();
-                     if (var8 >= 4 && var10.isLiquid()) {
+         for(int var36 = 0; var36 < 16; ++var36) {
+            for(int var30 = 0; var30 < 16; ++var30) {
+               for(int var31 = 0; var31 < 8; ++var31) {
+                  boolean var32 = !var4[(var36 * 16 + var30) * 8 + var31] && (var36 < 15 && var4[((var36 + 1) * 16 + var30) * 8 + var31] || var36 > 0 && var4[((var36 - 1) * 16 + var30) * 8 + var31] || var30 < 15 && var4[(var36 * 16 + var30 + 1) * 8 + var31] || var30 > 0 && var4[(var36 * 16 + (var30 - 1)) * 8 + var31] || var31 < 7 && var4[(var36 * 16 + var30) * 8 + var31 + 1] || var31 > 0 && var4[(var36 * 16 + var30) * 8 + (var31 - 1)]);
+                  if (var32) {
+                     Material var33 = var1.getBlockState(var3.add(var36, var31, var30)).getMaterial();
+                     if (var31 >= 4 && var33.isLiquid()) {
                         return false;
                      }
 
-                     if (var8 < 4 && !var10.isSolid() && var1.getBlockState(var3.add(var32, var8, var37)).getBlock() != this.block) {
+                     if (var31 < 4 && !var33.isSolid() && var1.getBlockState(var3.add(var36, var31, var30)).getBlock() != this.block) {
                         return false;
                      }
                   }
@@ -69,27 +69,27 @@ public class WorldGenLakes extends WorldGenerator {
             }
          }
 
-         for(int var33 = 0; var33 < 16; ++var33) {
-            for(int var38 = 0; var38 < 16; ++var38) {
-               for(int var42 = 0; var42 < 8; ++var42) {
-                  if (var4[(var33 * 16 + var38) * 8 + var42]) {
-                     var1.setBlockState(var3.add(var33, var42, var38), var42 >= 4 ? Blocks.AIR.getDefaultState() : this.block.getDefaultState(), 2);
+         for(int var37 = 0; var37 < 16; ++var37) {
+            for(int var41 = 0; var41 < 16; ++var41) {
+               for(int var45 = 0; var45 < 8; ++var45) {
+                  if (var4[(var37 * 16 + var41) * 8 + var45]) {
+                     var1.setBlockState(var3.add(var37, var45, var41), var45 >= 4 ? Blocks.AIR.getDefaultState() : this.block.getDefaultState(), 2);
                   }
                }
             }
          }
 
-         for(int var34 = 0; var34 < 16; ++var34) {
-            for(int var39 = 0; var39 < 16; ++var39) {
-               for(int var43 = 4; var43 < 8; ++var43) {
-                  if (var4[(var34 * 16 + var39) * 8 + var43]) {
-                     BlockPos var47 = var3.add(var34, var43 - 1, var39);
-                     if (var1.getBlockState(var47).getBlock() == Blocks.DIRT && var1.getLightFor(EnumSkyBlock.SKY, var3.add(var34, var43, var39)) > 0) {
-                        Biome var49 = var1.getBiome(var47);
-                        if (var49.topBlock.getBlock() == Blocks.MYCELIUM) {
-                           var1.setBlockState(var47, Blocks.MYCELIUM.getDefaultState(), 2);
+         for(int var38 = 0; var38 < 16; ++var38) {
+            for(int var42 = 0; var42 < 16; ++var42) {
+               for(int var46 = 4; var46 < 8; ++var46) {
+                  if (var4[(var38 * 16 + var42) * 8 + var46]) {
+                     BlockPos var49 = var3.add(var38, var46 - 1, var42);
+                     if (var1.getBlockState(var49).getBlock() == Blocks.DIRT && var1.getLightFor(EnumSkyBlock.SKY, var3.add(var38, var46, var42)) > 0) {
+                        Biome var51 = var1.getBiome(var49);
+                        if (var51.topBlock.getBlock() == Blocks.MYCELIUM) {
+                           var1.setBlockState(var49, Blocks.MYCELIUM.getDefaultState(), 2);
                         } else {
-                           var1.setBlockState(var47, Blocks.GRASS.getDefaultState(), 2);
+                           var1.setBlockState(var49, Blocks.GRASS.getDefaultState(), 2);
                         }
                      }
                   }
@@ -98,12 +98,12 @@ public class WorldGenLakes extends WorldGenerator {
          }
 
          if (this.block.getDefaultState().getMaterial() == Material.LAVA) {
-            for(int var35 = 0; var35 < 16; ++var35) {
-               for(int var40 = 0; var40 < 16; ++var40) {
-                  for(int var44 = 0; var44 < 8; ++var44) {
-                     boolean var48 = !var4[(var35 * 16 + var40) * 8 + var44] && (var35 < 15 && var4[((var35 + 1) * 16 + var40) * 8 + var44] || var35 > 0 && var4[((var35 - 1) * 16 + var40) * 8 + var44] || var40 < 15 && var4[(var35 * 16 + var40 + 1) * 8 + var44] || var40 > 0 && var4[(var35 * 16 + (var40 - 1)) * 8 + var44] || var44 < 7 && var4[(var35 * 16 + var40) * 8 + var44 + 1] || var44 > 0 && var4[(var35 * 16 + var40) * 8 + (var44 - 1)]);
-                     if (var48 && (var44 < 4 || var2.nextInt(2) != 0) && var1.getBlockState(var3.add(var35, var44, var40)).getMaterial().isSolid()) {
-                        var1.setBlockState(var3.add(var35, var44, var40), Blocks.STONE.getDefaultState(), 2);
+            for(int var39 = 0; var39 < 16; ++var39) {
+               for(int var43 = 0; var43 < 16; ++var43) {
+                  for(int var47 = 0; var47 < 8; ++var47) {
+                     boolean var50 = !var4[(var39 * 16 + var43) * 8 + var47] && (var39 < 15 && var4[((var39 + 1) * 16 + var43) * 8 + var47] || var39 > 0 && var4[((var39 - 1) * 16 + var43) * 8 + var47] || var43 < 15 && var4[(var39 * 16 + var43 + 1) * 8 + var47] || var43 > 0 && var4[(var39 * 16 + (var43 - 1)) * 8 + var47] || var47 < 7 && var4[(var39 * 16 + var43) * 8 + var47 + 1] || var47 > 0 && var4[(var39 * 16 + var43) * 8 + (var47 - 1)]);
+                     if (var50 && (var47 < 4 || var2.nextInt(2) != 0) && var1.getBlockState(var3.add(var39, var47, var43)).getMaterial().isSolid()) {
+                        var1.setBlockState(var3.add(var39, var47, var43), Blocks.STONE.getDefaultState(), 2);
                      }
                   }
                }
@@ -111,11 +111,11 @@ public class WorldGenLakes extends WorldGenerator {
          }
 
          if (this.block.getDefaultState().getMaterial() == Material.WATER) {
-            for(int var36 = 0; var36 < 16; ++var36) {
-               for(int var41 = 0; var41 < 16; ++var41) {
-                  boolean var45 = true;
-                  if (var1.canBlockFreezeWater(var3.add(var36, 4, var41))) {
-                     var1.setBlockState(var3.add(var36, 4, var41), Blocks.ICE.getDefaultState(), 2);
+            for(int var40 = 0; var40 < 16; ++var40) {
+               for(int var44 = 0; var44 < 16; ++var44) {
+                  boolean var48 = true;
+                  if (var1.canBlockFreezeWater(var3.add(var40, 4, var44))) {
+                     var1.setBlockState(var3.add(var40, 4, var44), Blocks.ICE.getDefaultState(), 2);
                   }
                }
             }

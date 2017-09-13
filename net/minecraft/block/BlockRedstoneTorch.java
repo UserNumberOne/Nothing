@@ -1,10 +1,10 @@
 package net.minecraft.block;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.WeakHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
@@ -19,11 +19,11 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.plugin.PluginManager;
 
 public class BlockRedstoneTorch extends BlockTorch {
-   private static final Map toggles = new WeakHashMap();
+   private static final Map toggles = Maps.newHashMap();
    private final boolean isOn;
 
    private boolean isBurnedOut(World var1, BlockPos var2, boolean var3) {
@@ -99,24 +99,44 @@ public class BlockRedstoneTorch extends BlockTorch {
          var6.remove(0);
       }
 
+      PluginManager var7 = var1.getServer().getPluginManager();
+      org.bukkit.block.Block var8 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+      int var9 = this.isOn ? 15 : 0;
+      BlockRedstoneEvent var10 = new BlockRedstoneEvent(var8, var9, var9);
       if (this.isOn) {
          if (var5) {
-            var1.setBlockState(var2, Blocks.UNLIT_REDSTONE_TORCH.getDefaultState().withProperty(FACING, var3.getValue(FACING)), 3);
+            if (var9 != 0) {
+               var10.setNewCurrent(0);
+               var7.callEvent(var10);
+               if (var10.getNewCurrent() != 0) {
+                  return;
+               }
+            }
+
+            var1.setBlockState(var2, Blocks.UNLIT_REDSTONE_TORCH.getDefaultState().withProperty(FACING, (EnumFacing)var3.getValue(FACING)), 3);
             if (this.isBurnedOut(var1, var2, true)) {
                var1.playSound((EntityPlayer)null, var2, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5F, 2.6F + (var1.rand.nextFloat() - var1.rand.nextFloat()) * 0.8F);
 
-               for(int var7 = 0; var7 < 5; ++var7) {
-                  double var8 = (double)var2.getX() + var4.nextDouble() * 0.6D + 0.2D;
-                  double var10 = (double)var2.getY() + var4.nextDouble() * 0.6D + 0.2D;
-                  double var12 = (double)var2.getZ() + var4.nextDouble() * 0.6D + 0.2D;
-                  var1.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var8, var10, var12, 0.0D, 0.0D, 0.0D);
+               for(int var11 = 0; var11 < 5; ++var11) {
+                  double var12 = (double)var2.getX() + var4.nextDouble() * 0.6D + 0.2D;
+                  double var14 = (double)var2.getY() + var4.nextDouble() * 0.6D + 0.2D;
+                  double var16 = (double)var2.getZ() + var4.nextDouble() * 0.6D + 0.2D;
+                  var1.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var12, var14, var16, 0.0D, 0.0D, 0.0D);
                }
 
                var1.scheduleUpdate(var2, var1.getBlockState(var2).getBlock(), 160);
             }
          }
       } else if (!var5 && !this.isBurnedOut(var1, var2, false)) {
-         var1.setBlockState(var2, Blocks.REDSTONE_TORCH.getDefaultState().withProperty(FACING, var3.getValue(FACING)), 3);
+         if (var9 != 15) {
+            var10.setNewCurrent(15);
+            var7.callEvent(var10);
+            if (var10.getNewCurrent() != 15) {
+               return;
+            }
+         }
+
+         var1.setBlockState(var2, Blocks.REDSTONE_TORCH.getDefaultState().withProperty(FACING, (EnumFacing)var3.getValue(FACING)), 3);
       }
 
    }
@@ -139,26 +159,6 @@ public class BlockRedstoneTorch extends BlockTorch {
 
    public boolean canProvidePower(IBlockState var1) {
       return true;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
-      if (this.isOn) {
-         double var5 = (double)var3.getX() + 0.5D + (var4.nextDouble() - 0.5D) * 0.2D;
-         double var7 = (double)var3.getY() + 0.7D + (var4.nextDouble() - 0.5D) * 0.2D;
-         double var9 = (double)var3.getZ() + 0.5D + (var4.nextDouble() - 0.5D) * 0.2D;
-         EnumFacing var11 = (EnumFacing)var1.getValue(FACING);
-         if (var11.getAxis().isHorizontal()) {
-            EnumFacing var12 = var11.getOpposite();
-            double var13 = 0.27D;
-            var5 += 0.27D * (double)var12.getFrontOffsetX();
-            var7 += 0.22D;
-            var9 += 0.27D * (double)var12.getFrontOffsetZ();
-         }
-
-         var2.spawnParticle(EnumParticleTypes.REDSTONE, var5, var7, var9, 0.0D, 0.0D, 0.0D);
-      }
-
    }
 
    public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {

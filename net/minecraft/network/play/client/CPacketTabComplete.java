@@ -6,8 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
 
 public class CPacketTabComplete implements Packet {
@@ -15,16 +13,6 @@ public class CPacketTabComplete implements Packet {
    private boolean hasTargetBlock;
    @Nullable
    private BlockPos targetBlock;
-
-   public CPacketTabComplete() {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public CPacketTabComplete(String var1, @Nullable BlockPos var2, boolean var3) {
-      this.message = var1;
-      this.targetBlock = var2;
-      this.hasTargetBlock = var3;
-   }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
       this.message = var1.readString(32767);

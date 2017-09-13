@@ -2,7 +2,6 @@ package net.minecraft.block.state;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Iterables;
 import java.util.Collection;
 import java.util.Iterator;
@@ -26,6 +25,11 @@ public abstract class BlockStateBase implements IBlockState {
 
       private String getPropertyName(IProperty var1, Comparable var2) {
          return var1.getName(var2);
+      }
+
+      // $FF: synthetic method
+      public Object apply(Object var1) {
+         return this.apply((Entry)var1);
       }
    };
 
@@ -59,9 +63,5 @@ public abstract class BlockStateBase implements IBlockState {
       }
 
       return var1.toString();
-   }
-
-   public ImmutableTable getPropertyValueTable() {
-      return null;
    }
 }

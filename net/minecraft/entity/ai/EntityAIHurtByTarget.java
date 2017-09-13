@@ -4,6 +4,7 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.util.math.AxisAlignedBB;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIHurtByTarget extends EntityAITarget {
    private final boolean entityCallsForHelp;
@@ -24,7 +25,7 @@ public class EntityAIHurtByTarget extends EntityAITarget {
    }
 
    public void startExecuting() {
-      this.taskOwner.setAttackTarget(this.taskOwner.getAITarget());
+      this.taskOwner.setGoalTarget(this.taskOwner.getAITarget(), TargetReason.TARGET_ATTACKED_ENTITY, true);
       this.target = this.taskOwner.getAttackTarget();
       this.revengeTimerOld = this.taskOwner.getRevengeTimer();
       this.unseenMemoryTicks = 300;
@@ -38,19 +39,19 @@ public class EntityAIHurtByTarget extends EntityAITarget {
    protected void alertOthers() {
       double var1 = this.getTargetDistance();
 
-      for(EntityCreature var4 : this.taskOwner.world.getEntitiesWithinAABB(this.taskOwner.getClass(), (new AxisAlignedBB(this.taskOwner.posX, this.taskOwner.posY, this.taskOwner.posZ, this.taskOwner.posX + 1.0D, this.taskOwner.posY + 1.0D, this.taskOwner.posZ + 1.0D)).expand(var1, 10.0D, var1))) {
-         if (this.taskOwner != var4 && var4.getAttackTarget() == null && (!(this.taskOwner instanceof EntityTameable) || ((EntityTameable)this.taskOwner).getOwner() == ((EntityTameable)var4).getOwner()) && !var4.isOnSameTeam(this.taskOwner.getAITarget())) {
-            boolean var5 = false;
+      for(EntityCreature var5 : this.taskOwner.world.getEntitiesWithinAABB(this.taskOwner.getClass(), (new AxisAlignedBB(this.taskOwner.posX, this.taskOwner.posY, this.taskOwner.posZ, this.taskOwner.posX + 1.0D, this.taskOwner.posY + 1.0D, this.taskOwner.posZ + 1.0D)).expand(var1, 10.0D, var1))) {
+         if (this.taskOwner != var5 && var5.getAttackTarget() == null && (!(this.taskOwner instanceof EntityTameable) || ((EntityTameable)this.taskOwner).getOwner() == ((EntityTameable)var5).getOwner()) && !var5.isOnSameTeam(this.taskOwner.getAITarget())) {
+            boolean var6 = false;
 
-            for(Class var9 : this.targetClasses) {
-               if (var4.getClass() == var9) {
-                  var5 = true;
+            for(Class var10 : this.targetClasses) {
+               if (var5.getClass() == var10) {
+                  var6 = true;
                   break;
                }
             }
 
-            if (!var5) {
-               this.setEntityAttackTarget(var4, this.taskOwner.getAITarget());
+            if (!var6) {
+               this.setEntityAttackTarget(var5, this.taskOwner.getAITarget());
             }
          }
       }
@@ -58,6 +59,6 @@ public class EntityAIHurtByTarget extends EntityAITarget {
    }
 
    protected void setEntityAttackTarget(EntityCreature var1, EntityLivingBase var2) {
-      var1.setAttackTarget(var2);
+      var1.setGoalTarget(var2, TargetReason.TARGET_ATTACKED_NEARBY_ENTITY, true);
    }
 }

@@ -1,7 +1,5 @@
 package net.minecraft.block;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
@@ -12,10 +10,12 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -23,11 +23,9 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IShearable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
-public class BlockVine extends Block implements IShearable {
+public class BlockVine extends Block {
    public static final PropertyBool UP = PropertyBool.create("up");
    public static final PropertyBool NORTH = PropertyBool.create("north");
    public static final PropertyBool EAST = PropertyBool.create("east");
@@ -101,13 +99,13 @@ public class BlockVine extends Block implements IShearable {
    }
 
    public boolean canPlaceBlockOnSide(World var1, BlockPos var2, EnumFacing var3) {
-      switch(var3) {
-      case UP:
+      switch(BlockVine.SyntheticClass_1.a[var3.ordinal()]) {
+      case 1:
          return this.canAttachVineOn(var1.getBlockState(var2.up()));
-      case NORTH:
-      case SOUTH:
-      case EAST:
-      case WEST:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
          return this.canAttachVineOn(var1.getBlockState(var2.offset(var3.getOpposite())));
       default:
          return false;
@@ -152,96 +150,103 @@ public class BlockVine extends Block implements IShearable {
 
    public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
       if (!var1.isRemote && var1.rand.nextInt(4) == 0) {
-         boolean var5 = true;
-         int var6 = 5;
-         boolean var7 = false;
+         int var5 = 5;
+         boolean var6 = false;
 
-         label184:
-         for(int var8 = -4; var8 <= 4; ++var8) {
-            for(int var9 = -4; var9 <= 4; ++var9) {
-               for(int var10 = -1; var10 <= 1; ++var10) {
-                  if (var1.getBlockState(var2.add(var8, var10, var9)).getBlock() == this) {
-                     --var6;
-                     if (var6 <= 0) {
-                        var7 = true;
-                        break label184;
+         label177:
+         for(int var7 = -4; var7 <= 4; ++var7) {
+            for(int var8 = -4; var8 <= 4; ++var8) {
+               for(int var9 = -1; var9 <= 1; ++var9) {
+                  if (var1.getBlockState(var2.add(var7, var9, var8)).getBlock() == this) {
+                     --var5;
+                     if (var5 <= 0) {
+                        var6 = true;
+                        break label177;
                      }
                   }
                }
             }
          }
 
-         EnumFacing var19 = EnumFacing.random(var4);
-         BlockPos var20 = var2.up();
-         if (var19 == EnumFacing.UP && var2.getY() < 255 && var1.isAirBlock(var20)) {
-            if (!var7) {
-               IBlockState var23 = var3;
+         EnumFacing var20 = EnumFacing.random(var4);
+         BlockPos var21 = var2.up();
+         if (var20 == EnumFacing.UP && var2.getY() < 255 && var1.isAirBlock(var21)) {
+            if (!var6) {
+               IBlockState var24 = var3;
 
-               for(EnumFacing var27 : EnumFacing.Plane.HORIZONTAL) {
-                  if (var4.nextBoolean() || !this.canAttachVineOn(var1.getBlockState(var20.offset(var27)))) {
-                     var23 = var23.withProperty(getPropertyFor(var27), Boolean.valueOf(false));
+               for(EnumFacing var28 : EnumFacing.Plane.HORIZONTAL) {
+                  if (var4.nextBoolean() || !this.canAttachVineOn(var1.getBlockState(var21.offset(var28)))) {
+                     var24 = var24.withProperty(getPropertyFor(var28), Boolean.valueOf(false));
                   }
                }
 
-               if (((Boolean)var23.getValue(NORTH)).booleanValue() || ((Boolean)var23.getValue(EAST)).booleanValue() || ((Boolean)var23.getValue(SOUTH)).booleanValue() || ((Boolean)var23.getValue(WEST)).booleanValue()) {
-                  var1.setBlockState(var20, var23, 2);
+               if (((Boolean)var24.getValue(NORTH)).booleanValue() || ((Boolean)var24.getValue(EAST)).booleanValue() || ((Boolean)var24.getValue(SOUTH)).booleanValue() || ((Boolean)var24.getValue(WEST)).booleanValue()) {
+                  org.bukkit.block.Block var31 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+                  org.bukkit.block.Block var34 = var1.getWorld().getBlockAt(var21.getX(), var21.getY(), var21.getZ());
+                  CraftEventFactory.handleBlockSpreadEvent(var34, var31, this, this.getMetaFromState(var24));
                }
             }
-         } else if (var19.getAxis().isHorizontal() && !((Boolean)var3.getValue(getPropertyFor(var19))).booleanValue()) {
-            if (!var7) {
-               BlockPos var22 = var2.offset(var19);
-               IBlockState var24 = var1.getBlockState(var22);
-               Block var26 = var24.getBlock();
-               if (var26.blockMaterial == Material.AIR) {
-                  EnumFacing var29 = var19.rotateY();
-                  EnumFacing var31 = var19.rotateYCCW();
-                  boolean var33 = ((Boolean)var3.getValue(getPropertyFor(var29))).booleanValue();
-                  boolean var34 = ((Boolean)var3.getValue(getPropertyFor(var31))).booleanValue();
-                  BlockPos var17 = var22.offset(var29);
-                  BlockPos var18 = var22.offset(var31);
-                  if (var33 && this.canAttachVineOn(var1.getBlockState(var17))) {
-                     var1.setBlockState(var22, this.getDefaultState().withProperty(getPropertyFor(var29), Boolean.valueOf(true)), 2);
-                  } else if (var34 && this.canAttachVineOn(var1.getBlockState(var18))) {
-                     var1.setBlockState(var22, this.getDefaultState().withProperty(getPropertyFor(var31), Boolean.valueOf(true)), 2);
-                  } else if (var33 && var1.isAirBlock(var17) && this.canAttachVineOn(var1.getBlockState(var2.offset(var29)))) {
-                     var1.setBlockState(var17, this.getDefaultState().withProperty(getPropertyFor(var19.getOpposite()), Boolean.valueOf(true)), 2);
-                  } else if (var34 && var1.isAirBlock(var18) && this.canAttachVineOn(var1.getBlockState(var2.offset(var31)))) {
-                     var1.setBlockState(var18, this.getDefaultState().withProperty(getPropertyFor(var19.getOpposite()), Boolean.valueOf(true)), 2);
-                  } else if (this.canAttachVineOn(var1.getBlockState(var22.up()))) {
-                     var1.setBlockState(var22, this.getDefaultState(), 2);
+         } else if (var20.getAxis().isHorizontal() && !((Boolean)var3.getValue(getPropertyFor(var20))).booleanValue()) {
+            if (!var6) {
+               BlockPos var27 = var2.offset(var20);
+               IBlockState var23 = var1.getBlockState(var27);
+               Block var25 = var23.getBlock();
+               if (var25.blockMaterial == Material.AIR) {
+                  EnumFacing var30 = var20.rotateY();
+                  EnumFacing var33 = var20.rotateYCCW();
+                  boolean var36 = ((Boolean)var3.getValue(getPropertyFor(var30))).booleanValue();
+                  boolean var38 = ((Boolean)var3.getValue(getPropertyFor(var33))).booleanValue();
+                  BlockPos var39 = var27.offset(var30);
+                  BlockPos var17 = var27.offset(var33);
+                  org.bukkit.block.Block var18 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+                  org.bukkit.block.Block var19 = var1.getWorld().getBlockAt(var27.getX(), var27.getY(), var27.getZ());
+                  if (var36 && this.canAttachVineOn(var1.getBlockState(var39))) {
+                     CraftEventFactory.handleBlockSpreadEvent(var19, var18, this, this.getMetaFromState(this.getDefaultState().withProperty(getPropertyFor(var30), Boolean.valueOf(true))));
+                  } else if (var38 && this.canAttachVineOn(var1.getBlockState(var17))) {
+                     CraftEventFactory.handleBlockSpreadEvent(var19, var18, this, this.getMetaFromState(this.getDefaultState().withProperty(getPropertyFor(var33), Boolean.valueOf(true))));
+                  } else if (var36 && var1.isAirBlock(var39) && this.canAttachVineOn(var1.getBlockState(var2.offset(var30)))) {
+                     var19 = var1.getWorld().getBlockAt(var39.getX(), var39.getY(), var39.getZ());
+                     CraftEventFactory.handleBlockSpreadEvent(var19, var18, this, this.getMetaFromState(this.getDefaultState().withProperty(getPropertyFor(var20.getOpposite()), Boolean.valueOf(true))));
+                  } else if (var38 && var1.isAirBlock(var17) && this.canAttachVineOn(var1.getBlockState(var2.offset(var33)))) {
+                     var19 = var1.getWorld().getBlockAt(var17.getX(), var17.getY(), var17.getZ());
+                     CraftEventFactory.handleBlockSpreadEvent(var19, var18, this, this.getMetaFromState(this.getDefaultState().withProperty(getPropertyFor(var20.getOpposite()), Boolean.valueOf(true))));
+                  } else if (this.canAttachVineOn(var1.getBlockState(var27.up()))) {
+                     CraftEventFactory.handleBlockSpreadEvent(var19, var18, this, this.getMetaFromState(this.getDefaultState()));
                   }
-               } else if (var26.blockMaterial.isOpaque() && var24.isFullCube()) {
-                  var1.setBlockState(var2, var3.withProperty(getPropertyFor(var19), Boolean.valueOf(true)), 2);
+               } else if (var25.blockMaterial.isOpaque() && var23.isFullCube()) {
+                  var1.setBlockState(var2, var3.withProperty(getPropertyFor(var20), Boolean.valueOf(true)), 2);
                }
             }
          } else if (var2.getY() > 1) {
-            BlockPos var21 = var2.down();
-            IBlockState var11 = var1.getBlockState(var21);
-            Block var12 = var11.getBlock();
-            if (var12.blockMaterial == Material.AIR) {
-               IBlockState var13 = var3;
+            BlockPos var11 = var2.down();
+            IBlockState var22 = var1.getBlockState(var11);
+            Block var10 = var22.getBlock();
+            if (var10.blockMaterial == Material.AIR) {
+               IBlockState var12 = var3;
 
-               for(EnumFacing var15 : EnumFacing.Plane.HORIZONTAL) {
+               for(EnumFacing var14 : EnumFacing.Plane.HORIZONTAL) {
                   if (var4.nextBoolean()) {
-                     var13 = var13.withProperty(getPropertyFor(var15), Boolean.valueOf(false));
+                     var12 = var12.withProperty(getPropertyFor(var14), Boolean.valueOf(false));
                   }
                }
 
-               if (((Boolean)var13.getValue(NORTH)).booleanValue() || ((Boolean)var13.getValue(EAST)).booleanValue() || ((Boolean)var13.getValue(SOUTH)).booleanValue() || ((Boolean)var13.getValue(WEST)).booleanValue()) {
-                  var1.setBlockState(var21, var13, 2);
+               if (((Boolean)var12.getValue(NORTH)).booleanValue() || ((Boolean)var12.getValue(EAST)).booleanValue() || ((Boolean)var12.getValue(SOUTH)).booleanValue() || ((Boolean)var12.getValue(WEST)).booleanValue()) {
+                  org.bukkit.block.Block var15 = var1.getWorld().getBlockAt(var2.getX(), var2.getY(), var2.getZ());
+                  org.bukkit.block.Block var16 = var1.getWorld().getBlockAt(var11.getX(), var11.getY(), var11.getZ());
+                  CraftEventFactory.handleBlockSpreadEvent(var16, var15, this, this.getMetaFromState(var12));
                }
-            } else if (var12 == this) {
-               IBlockState var28 = var11;
+            } else if (var10 == this) {
+               IBlockState var29 = var22;
 
-               for(EnumFacing var32 : EnumFacing.Plane.HORIZONTAL) {
-                  PropertyBool var16 = getPropertyFor(var32);
-                  if (var4.nextBoolean() && ((Boolean)var3.getValue(var16)).booleanValue()) {
-                     var28 = var28.withProperty(var16, Boolean.valueOf(true));
+               for(EnumFacing var35 : EnumFacing.Plane.HORIZONTAL) {
+                  PropertyBool var37 = getPropertyFor(var35);
+                  if (var4.nextBoolean() && ((Boolean)var3.getValue(var37)).booleanValue()) {
+                     var29 = var29.withProperty(var37, Boolean.valueOf(true));
                   }
                }
 
-               if (((Boolean)var28.getValue(NORTH)).booleanValue() || ((Boolean)var28.getValue(EAST)).booleanValue() || ((Boolean)var28.getValue(SOUTH)).booleanValue() || ((Boolean)var28.getValue(WEST)).booleanValue()) {
-                  var1.setBlockState(var21, var28, 2);
+               if (((Boolean)var29.getValue(NORTH)).booleanValue() || ((Boolean)var29.getValue(EAST)).booleanValue() || ((Boolean)var29.getValue(SOUTH)).booleanValue() || ((Boolean)var29.getValue(WEST)).booleanValue()) {
+                  var1.setBlockState(var11, var29, 2);
                }
             }
          }
@@ -264,16 +269,17 @@ public class BlockVine extends Block implements IShearable {
    }
 
    public void harvestBlock(World var1, EntityPlayer var2, BlockPos var3, IBlockState var4, @Nullable TileEntity var5, @Nullable ItemStack var6) {
-      super.harvestBlock(var1, var2, var3, var4, var5, var6);
+      if (!var1.isRemote && var6 != null && var6.getItem() == Items.SHEARS) {
+         var2.addStat(StatList.getBlockStats(this));
+         spawnAsEntity(var1, var3, new ItemStack(Blocks.VINE, 1, 0));
+      } else {
+         super.harvestBlock(var1, var2, var3, var4, var5, var6);
+      }
+
    }
 
    public IBlockState getStateFromMeta(int var1) {
       return this.getDefaultState().withProperty(SOUTH, Boolean.valueOf((var1 & 1) > 0)).withProperty(WEST, Boolean.valueOf((var1 & 2) > 0)).withProperty(NORTH, Boolean.valueOf((var1 & 4) > 0)).withProperty(EAST, Boolean.valueOf((var1 & 8) > 0));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 
    public int getMetaFromState(IBlockState var1) {
@@ -302,40 +308,40 @@ public class BlockVine extends Block implements IShearable {
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      switch(var2) {
-      case CLOCKWISE_180:
-         return var1.withProperty(NORTH, var1.getValue(SOUTH)).withProperty(EAST, var1.getValue(WEST)).withProperty(SOUTH, var1.getValue(NORTH)).withProperty(WEST, var1.getValue(EAST));
-      case COUNTERCLOCKWISE_90:
-         return var1.withProperty(NORTH, var1.getValue(EAST)).withProperty(EAST, var1.getValue(SOUTH)).withProperty(SOUTH, var1.getValue(WEST)).withProperty(WEST, var1.getValue(NORTH));
-      case CLOCKWISE_90:
-         return var1.withProperty(NORTH, var1.getValue(WEST)).withProperty(EAST, var1.getValue(NORTH)).withProperty(SOUTH, var1.getValue(EAST)).withProperty(WEST, var1.getValue(SOUTH));
+      switch(BlockVine.SyntheticClass_1.b[var2.ordinal()]) {
+      case 1:
+         return var1.withProperty(NORTH, (Boolean)var1.getValue(SOUTH)).withProperty(EAST, (Boolean)var1.getValue(WEST)).withProperty(SOUTH, (Boolean)var1.getValue(NORTH)).withProperty(WEST, (Boolean)var1.getValue(EAST));
+      case 2:
+         return var1.withProperty(NORTH, (Boolean)var1.getValue(EAST)).withProperty(EAST, (Boolean)var1.getValue(SOUTH)).withProperty(SOUTH, (Boolean)var1.getValue(WEST)).withProperty(WEST, (Boolean)var1.getValue(NORTH));
+      case 3:
+         return var1.withProperty(NORTH, (Boolean)var1.getValue(WEST)).withProperty(EAST, (Boolean)var1.getValue(NORTH)).withProperty(SOUTH, (Boolean)var1.getValue(EAST)).withProperty(WEST, (Boolean)var1.getValue(SOUTH));
       default:
          return var1;
       }
    }
 
    public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      switch(var2) {
-      case LEFT_RIGHT:
-         return var1.withProperty(NORTH, var1.getValue(SOUTH)).withProperty(SOUTH, var1.getValue(NORTH));
-      case FRONT_BACK:
-         return var1.withProperty(EAST, var1.getValue(WEST)).withProperty(WEST, var1.getValue(EAST));
+      switch(BlockVine.SyntheticClass_1.c[var2.ordinal()]) {
+      case 1:
+         return var1.withProperty(NORTH, (Boolean)var1.getValue(SOUTH)).withProperty(SOUTH, (Boolean)var1.getValue(NORTH));
+      case 2:
+         return var1.withProperty(EAST, (Boolean)var1.getValue(WEST)).withProperty(WEST, (Boolean)var1.getValue(EAST));
       default:
          return super.withMirror(var1, var2);
       }
    }
 
    public static PropertyBool getPropertyFor(EnumFacing var0) {
-      switch(var0) {
-      case UP:
+      switch(BlockVine.SyntheticClass_1.a[var0.ordinal()]) {
+      case 1:
          return UP;
-      case NORTH:
+      case 2:
          return NORTH;
-      case SOUTH:
+      case 3:
          return SOUTH;
-      case EAST:
+      case 4:
          return EAST;
-      case WEST:
+      case 5:
          return WEST;
       default:
          throw new IllegalArgumentException(var0 + " is an invalid choice");
@@ -354,15 +360,76 @@ public class BlockVine extends Block implements IShearable {
       return var1;
    }
 
-   public boolean isLadder(IBlockState var1, IBlockAccess var2, BlockPos var3, EntityLivingBase var4) {
-      return true;
-   }
+   static class SyntheticClass_1 {
+      static final int[] a;
+      static final int[] b;
+      static final int[] c = new int[Mirror.values().length];
 
-   public boolean isShearable(ItemStack var1, IBlockAccess var2, BlockPos var3) {
-      return true;
-   }
+      static {
+         try {
+            c[Mirror.LEFT_RIGHT.ordinal()] = 1;
+         } catch (NoSuchFieldError var9) {
+            ;
+         }
 
-   public List onSheared(ItemStack var1, IBlockAccess var2, BlockPos var3, int var4) {
-      return Arrays.asList(new ItemStack(this, 1));
+         try {
+            c[Mirror.FRONT_BACK.ordinal()] = 2;
+         } catch (NoSuchFieldError var8) {
+            ;
+         }
+
+         b = new int[Rotation.values().length];
+
+         try {
+            b[Rotation.CLOCKWISE_180.ordinal()] = 1;
+         } catch (NoSuchFieldError var7) {
+            ;
+         }
+
+         try {
+            b[Rotation.COUNTERCLOCKWISE_90.ordinal()] = 2;
+         } catch (NoSuchFieldError var6) {
+            ;
+         }
+
+         try {
+            b[Rotation.CLOCKWISE_90.ordinal()] = 3;
+         } catch (NoSuchFieldError var5) {
+            ;
+         }
+
+         a = new int[EnumFacing.values().length];
+
+         try {
+            a[EnumFacing.UP.ordinal()] = 1;
+         } catch (NoSuchFieldError var4) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 2;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 3;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.EAST.ordinal()] = 4;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 5;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

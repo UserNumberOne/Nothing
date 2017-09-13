@@ -1,10 +1,13 @@
 package net.minecraft.entity.projectile;
 
 import com.google.common.base.Optional;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.PotionTypes;
@@ -27,6 +30,11 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.LingeringPotionSplashEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 
 public class EntityPotion extends EntityThrowable {
    private static final DataParameter ITEM = EntityDataManager.createKey(EntityPotion.class, DataSerializers.OPTIONAL_ITEM_STACK);
@@ -81,75 +89,114 @@ public class EntityPotion extends EntityThrowable {
          PotionType var3 = PotionUtils.getPotionFromItem(var2);
          List var4 = PotionUtils.getEffectsFromStack(var2);
          if (var1.typeOfHit == RayTraceResult.Type.BLOCK && var3 == PotionTypes.WATER && var4.isEmpty()) {
-            BlockPos var18 = var1.getBlockPos().offset(var1.sideHit);
-            this.extinguishFires(var18);
+            BlockPos var22 = var1.getBlockPos().offset(var1.sideHit);
+            this.extinguishFires(var22);
 
-            for(EnumFacing var22 : EnumFacing.Plane.HORIZONTAL) {
-               this.extinguishFires(var18.offset(var22));
+            for(EnumFacing var26 : EnumFacing.Plane.HORIZONTAL) {
+               this.extinguishFires(var22.offset(var26));
             }
 
             this.world.playEvent(2002, new BlockPos(this), PotionType.getID(var3));
             this.setDead();
+         } else if (this.isLingering()) {
+            EntityAreaEffectCloud var21 = new EntityAreaEffectCloud(this.world, this.posX, this.posY, this.posZ);
+            var21.projectileSource = this.projectileSource;
+            var21.setOwner(this.getThrower());
+            var21.setRadius(3.0F);
+            var21.setRadiusOnUse(-0.5F);
+            var21.setWaitTime(10);
+            var21.setRadiusPerTick(-var21.getRadius() / (float)var21.getDuration());
+            var21.setPotion(var3);
+
+            for(PotionEffect var24 : PotionUtils.getFullEffectsFromItem(var2)) {
+               var21.addEffect(new PotionEffect(var24.getPotion(), var24.getDuration(), var24.getAmplifier()));
+            }
+
+            LingeringPotionSplashEvent var25 = CraftEventFactory.callLingeringPotionSplashEvent(this, var21);
+            if (!var25.isCancelled() && !var21.isDead) {
+               this.world.spawnEntity(var21);
+            } else {
+               var21.isDead = true;
+            }
          } else {
-            if (!var4.isEmpty()) {
-               if (this.isLingering()) {
-                  EntityAreaEffectCloud var17 = new EntityAreaEffectCloud(this.world, this.posX, this.posY, this.posZ);
-                  var17.setOwner(this.getThrower());
-                  var17.setRadius(3.0F);
-                  var17.setRadiusOnUse(-0.5F);
-                  var17.setWaitTime(10);
-                  var17.setRadiusPerTick(-var17.getRadius() / (float)var17.getDuration());
-                  var17.setPotion(var3);
+            AxisAlignedBB var5 = this.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D);
+            List var7 = this.world.getEntitiesWithinAABB(EntityLivingBase.class, var5);
+            HashMap var8 = new HashMap();
+            if (!var7.isEmpty()) {
+               for(EntityLivingBase var10 : var7) {
+                  if (var10.canBeHitWithPotion()) {
+                     double var11 = this.getDistanceSqToEntity(var10);
+                     if (var11 < 16.0D) {
+                        double var13 = 1.0D - Math.sqrt(var11) / 4.0D;
+                        if (var10 == var1.entityHit) {
+                           var13 = 1.0D;
+                        }
 
-                  for(PotionEffect var21 : PotionUtils.getFullEffectsFromItem(var2)) {
-                     var17.addEffect(new PotionEffect(var21.getPotion(), var21.getDuration(), var21.getAmplifier()));
+                        var8.put((LivingEntity)var10.getBukkitEntity(), Double.valueOf(var13));
+                     }
                   }
+               }
+            }
 
-                  this.world.spawnEntity(var17);
-               } else {
-                  AxisAlignedBB var5 = this.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D);
-                  List var6 = this.world.getEntitiesWithinAABB(EntityLivingBase.class, var5);
-                  if (!var6.isEmpty()) {
-                     for(EntityLivingBase var8 : var6) {
-                        if (var8.canBeHitWithPotion()) {
-                           double var9 = this.getDistanceSqToEntity(var8);
-                           if (var9 < 16.0D) {
-                              double var11 = 1.0D - Math.sqrt(var9) / 4.0D;
-                              if (var8 == var1.entityHit) {
-                                 var11 = 1.0D;
-                              }
+            PotionSplashEvent var27 = CraftEventFactory.callPotionSplashEvent(this, var8);
+            if (!var27.isCancelled() && var4 != null && !var4.isEmpty()) {
+               label123:
+               for(LivingEntity var28 : var27.getAffectedEntities()) {
+                  if (var28 instanceof CraftLivingEntity) {
+                     EntityLivingBase var16 = ((CraftLivingEntity)var28).getHandle();
+                     double var29 = var27.getIntensity(var28);
+                     Iterator var17 = var4.iterator();
 
-                              for(PotionEffect var14 : var4) {
-                                 Potion var15 = var14.getPotion();
-                                 if (var15.isInstant()) {
-                                    var15.affectEntity(this, this.getThrower(), var8, var14.getAmplifier(), var11);
-                                 } else {
-                                    int var16 = (int)(var11 * (double)var14.getDuration() + 0.5D);
-                                    if (var16 > 20) {
-                                       var8.addPotionEffect(new PotionEffect(var15, var16, var14.getAmplifier()));
-                                    }
-                                 }
-                              }
+                     while(true) {
+                        PotionEffect var18;
+                        Potion var19;
+                        while(true) {
+                           if (!var17.hasNext()) {
+                              continue label123;
+                           }
+
+                           var18 = (PotionEffect)var17.next();
+                           var19 = var18.getPotion();
+                           if (this.world.pvpMode || !(this.getThrower() instanceof EntityPlayerMP) || !(var16 instanceof EntityPlayerMP) || var16 == this.getThrower()) {
+                              break;
+                           }
+
+                           int var20 = Potion.getIdFromPotion(var19);
+                           if (var20 != 2 && var20 != 4 && var20 != 7 && var20 != 15 && var20 != 17 && var20 != 18 && var20 != 19) {
+                              break;
+                           }
+                        }
+
+                        if (var19.isInstant()) {
+                           var19.affectEntity(this, this.getThrower(), var16, var18.getAmplifier(), var29);
+                        } else {
+                           int var30 = (int)(var29 * (double)var18.getDuration() + 0.5D);
+                           if (var30 > 20) {
+                              var16.addPotionEffect(new PotionEffect(var19, var30, var18.getAmplifier()));
                            }
                         }
                      }
                   }
                }
             }
-
-            this.world.playEvent(2002, new BlockPos(this), PotionType.getID(var3));
-            this.setDead();
          }
+
+         this.world.playEvent(2002, new BlockPos(this), PotionType.getID(var3));
+         this.setDead();
       }
 
    }
 
-   private boolean isLingering() {
+   public boolean isLingering() {
       return this.getPotion().getItem() == Items.LINGERING_POTION;
    }
 
    private void extinguishFires(BlockPos var1) {
       if (this.world.getBlockState(var1).getBlock() == Blocks.FIRE) {
+         if (CraftEventFactory.callEntityChangeBlockEvent(this, var1, Blocks.AIR, 0).isCancelled()) {
+            return;
+         }
+
          this.world.setBlockState(var1, Blocks.AIR.getDefaultState(), 2);
       }
 

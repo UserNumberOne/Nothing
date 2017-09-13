@@ -9,13 +9,12 @@ import java.util.Random;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
-import net.minecraftforge.common.ForgeHooks;
 
 public class LootEntryTable extends LootEntry {
    protected final ResourceLocation table;
 
-   public LootEntryTable(ResourceLocation var1, int var2, int var3, LootCondition[] var4, String var5) {
-      super(var2, var3, var4, var5);
+   public LootEntryTable(ResourceLocation var1, int var2, int var3, LootCondition[] var4) {
+      super(var2, var3, var4);
       this.table = var1;
    }
 
@@ -30,8 +29,7 @@ public class LootEntryTable extends LootEntry {
    }
 
    public static LootEntryTable deserialize(JsonObject var0, JsonDeserializationContext var1, int var2, int var3, LootCondition[] var4) {
-      String var5 = ForgeHooks.readLootEntryName(var0, "loot_table");
-      ResourceLocation var6 = new ResourceLocation(JsonUtils.getString(var0, "name"));
-      return new LootEntryTable(var6, var2, var3, var4, var5);
+      ResourceLocation var5 = new ResourceLocation(JsonUtils.getString(var0, "name"));
+      return new LootEntryTable(var5, var2, var3, var4);
    }
 }

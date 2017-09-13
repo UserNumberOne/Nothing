@@ -11,6 +11,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntityAISkeletonRiders extends EntityAIBase {
    private final EntityHorse horse;
@@ -31,13 +32,20 @@ public class EntityAISkeletonRiders extends EntityAIBase {
       this.horse.setGrowingAge(0);
       this.horse.world.addWeatherEffect(new EntityLightningBolt(this.horse.world, this.horse.posX, this.horse.posY, this.horse.posZ, true));
       EntitySkeleton var2 = this.createSkeleton(var1, this.horse);
-      var2.startRiding(this.horse);
+      if (var2 != null) {
+         var2.startRiding(this.horse);
+      }
 
       for(int var3 = 0; var3 < 3; ++var3) {
          EntityHorse var4 = this.createHorse(var1);
-         EntitySkeleton var5 = this.createSkeleton(var1, var4);
-         var5.startRiding(var4);
-         var4.addVelocity(this.horse.getRNG().nextGaussian() * 0.5D, 0.0D, this.horse.getRNG().nextGaussian() * 0.5D);
+         if (var4 != null) {
+            EntitySkeleton var5 = this.createSkeleton(var1, var4);
+            if (var5 != null) {
+               var5.startRiding(var4);
+            }
+
+            var4.addVelocity(this.horse.getRNG().nextGaussian() * 0.5D, 0.0D, this.horse.getRNG().nextGaussian() * 0.5D);
+         }
       }
 
    }
@@ -51,8 +59,7 @@ public class EntityAISkeletonRiders extends EntityAIBase {
       var2.setType(HorseType.SKELETON);
       var2.setHorseTamed(true);
       var2.setGrowingAge(0);
-      var2.world.spawnEntity(var2);
-      return var2;
+      return !var2.world.addEntity(var2, SpawnReason.TRAP) ? null : var2;
    }
 
    private EntitySkeleton createSkeleton(DifficultyInstance var1, EntityHorse var2) {
@@ -67,7 +74,6 @@ public class EntityAISkeletonRiders extends EntityAIBase {
 
       EnchantmentHelper.addRandomEnchantment(var3.getRNG(), var3.getHeldItemMainhand(), (int)(5.0F + var1.getClampedAdditionalDifficulty() * (float)var3.getRNG().nextInt(18)), false);
       EnchantmentHelper.addRandomEnchantment(var3.getRNG(), var3.getItemStackFromSlot(EntityEquipmentSlot.HEAD), (int)(5.0F + var1.getClampedAdditionalDifficulty() * (float)var3.getRNG().nextInt(18)), false);
-      var3.world.spawnEntity(var3);
-      return var3;
+      return !var3.world.addEntity(var3, SpawnReason.JOCKEY) ? null : var3;
    }
 }

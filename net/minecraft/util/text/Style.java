@@ -3,17 +3,13 @@ package net.minecraft.util.text;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import javax.annotation.Nullable;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class Style {
    private Style parentStyle;
@@ -114,11 +110,6 @@ public class Style {
       public Style createDeepCopy() {
          return this;
       }
-
-      @SideOnly(Side.CLIENT)
-      public String getFormattingCode() {
-         return "";
-      }
    };
 
    @Nullable
@@ -215,39 +206,6 @@ public class Style {
       return this;
    }
 
-   public String getFormattingCode() {
-      if (this.isEmpty()) {
-         return this.parentStyle != null ? this.parentStyle.getFormattingCode() : "";
-      } else {
-         StringBuilder var1 = new StringBuilder();
-         if (this.getColor() != null) {
-            var1.append(this.getColor());
-         }
-
-         if (this.getBold()) {
-            var1.append(TextFormatting.BOLD);
-         }
-
-         if (this.getItalic()) {
-            var1.append(TextFormatting.ITALIC);
-         }
-
-         if (this.getUnderlined()) {
-            var1.append(TextFormatting.UNDERLINE);
-         }
-
-         if (this.getObfuscated()) {
-            var1.append(TextFormatting.OBFUSCATED);
-         }
-
-         if (this.getStrikethrough()) {
-            var1.append(TextFormatting.STRIKETHROUGH);
-         }
-
-         return var1.toString();
-      }
-   }
-
    private Style getParent() {
       return this.parentStyle == null ? ROOT : this.parentStyle;
    }
@@ -262,53 +220,55 @@ public class Style {
       } else if (!(var1 instanceof Style)) {
          return false;
       } else {
-         Style var3 = (Style)var1;
-         if (this.getBold() == var3.getBold() && this.getColor() == var3.getColor() && this.getItalic() == var3.getItalic() && this.getObfuscated() == var3.getObfuscated() && this.getStrikethrough() == var3.getStrikethrough() && this.getUnderlined() == var3.getUnderlined()) {
-            label71: {
-               if (this.getClickEvent() != null) {
-                  if (!this.getClickEvent().equals(var3.getClickEvent())) {
-                     break label71;
+         label73: {
+            Style var2 = (Style)var1;
+            if (this.getBold() == var2.getBold() && this.getColor() == var2.getColor() && this.getItalic() == var2.getItalic() && this.getObfuscated() == var2.getObfuscated() && this.getStrikethrough() == var2.getStrikethrough() && this.getUnderlined() == var2.getUnderlined()) {
+               label72: {
+                  if (this.getClickEvent() != null) {
+                     if (!this.getClickEvent().equals(var2.getClickEvent())) {
+                        break label72;
+                     }
+                  } else if (var2.getClickEvent() != null) {
+                     break label72;
                   }
-               } else if (var3.getClickEvent() != null) {
-                  break label71;
-               }
 
-               if (this.getHoverEvent() != null) {
-                  if (!this.getHoverEvent().equals(var3.getHoverEvent())) {
-                     break label71;
+                  if (this.getHoverEvent() != null) {
+                     if (!this.getHoverEvent().equals(var2.getHoverEvent())) {
+                        break label72;
+                     }
+                  } else if (var2.getHoverEvent() != null) {
+                     break label72;
                   }
-               } else if (var3.getHoverEvent() != null) {
-                  break label71;
-               }
 
-               if (this.getInsertion() != null) {
-                  if (!this.getInsertion().equals(var3.getInsertion())) {
-                     break label71;
+                  if (this.getInsertion() != null) {
+                     if (this.getInsertion().equals(var2.getInsertion())) {
+                        break label73;
+                     }
+                  } else if (var2.getInsertion() == null) {
+                     break label73;
                   }
-               } else if (var3.getInsertion() != null) {
-                  break label71;
                }
-
-               boolean var2 = true;
-               return var2;
             }
+
+            boolean var4 = false;
+            return var4;
          }
 
-         boolean var4 = false;
-         return var4;
+         boolean var3 = true;
+         return var3;
       }
    }
 
    public int hashCode() {
-      int var1 = this.color.hashCode();
-      var1 = 31 * var1 + this.bold.hashCode();
-      var1 = 31 * var1 + this.italic.hashCode();
-      var1 = 31 * var1 + this.underlined.hashCode();
-      var1 = 31 * var1 + this.strikethrough.hashCode();
-      var1 = 31 * var1 + this.obfuscated.hashCode();
-      var1 = 31 * var1 + this.clickEvent.hashCode();
-      var1 = 31 * var1 + this.hoverEvent.hashCode();
-      var1 = 31 * var1 + this.insertion.hashCode();
+      int var1 = this.color == null ? 0 : this.color.hashCode();
+      var1 = 31 * var1 + (this.bold == null ? 0 : this.bold.hashCode());
+      var1 = 31 * var1 + (this.italic == null ? 0 : this.italic.hashCode());
+      var1 = 31 * var1 + (this.underlined == null ? 0 : this.underlined.hashCode());
+      var1 = 31 * var1 + (this.strikethrough == null ? 0 : this.strikethrough.hashCode());
+      var1 = 31 * var1 + (this.obfuscated == null ? 0 : this.obfuscated.hashCode());
+      var1 = 31 * var1 + (this.clickEvent == null ? 0 : this.clickEvent.hashCode());
+      var1 = 31 * var1 + (this.hoverEvent == null ? 0 : this.hoverEvent.hashCode());
+      var1 = 31 * var1 + (this.insertion == null ? 0 : this.insertion.hashCode());
       return var1;
    }
 
@@ -343,123 +303,21 @@ public class Style {
 
    public static class Serializer implements JsonDeserializer, JsonSerializer {
       @Nullable
-      public Style deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-         if (var1.isJsonObject()) {
-            Style var4 = new Style();
-            JsonObject var5 = var1.getAsJsonObject();
-            if (var5 == null) {
-               return null;
-            } else {
-               if (var5.has("bold")) {
-                  var4.bold = var5.get("bold").getAsBoolean();
-               }
-
-               if (var5.has("italic")) {
-                  var4.italic = var5.get("italic").getAsBoolean();
-               }
-
-               if (var5.has("underlined")) {
-                  var4.underlined = var5.get("underlined").getAsBoolean();
-               }
-
-               if (var5.has("strikethrough")) {
-                  var4.strikethrough = var5.get("strikethrough").getAsBoolean();
-               }
-
-               if (var5.has("obfuscated")) {
-                  var4.obfuscated = var5.get("obfuscated").getAsBoolean();
-               }
-
-               if (var5.has("color")) {
-                  var4.color = (TextFormatting)var3.deserialize(var5.get("color"), TextFormatting.class);
-               }
-
-               if (var5.has("insertion")) {
-                  var4.insertion = var5.get("insertion").getAsString();
-               }
-
-               if (var5.has("clickEvent")) {
-                  JsonObject var6 = var5.getAsJsonObject("clickEvent");
-                  if (var6 != null) {
-                     JsonPrimitive var7 = var6.getAsJsonPrimitive("action");
-                     ClickEvent.Action var8 = var7 == null ? null : ClickEvent.Action.getValueByCanonicalName(var7.getAsString());
-                     JsonPrimitive var9 = var6.getAsJsonPrimitive("value");
-                     String var10 = var9 == null ? null : var9.getAsString();
-                     if (var8 != null && var10 != null && var8.shouldAllowInChat()) {
-                        var4.clickEvent = new ClickEvent(var8, var10);
-                     }
-                  }
-               }
-
-               if (var5.has("hoverEvent")) {
-                  JsonObject var11 = var5.getAsJsonObject("hoverEvent");
-                  if (var11 != null) {
-                     JsonPrimitive var12 = var11.getAsJsonPrimitive("action");
-                     HoverEvent.Action var13 = var12 == null ? null : HoverEvent.Action.getValueByCanonicalName(var12.getAsString());
-                     ITextComponent var14 = (ITextComponent)var3.deserialize(var11.get("value"), ITextComponent.class);
-                     if (var13 != null && var14 != null && var13.shouldAllowInChat()) {
-                        var4.hoverEvent = new HoverEvent(var13, var14);
-                     }
-                  }
-               }
-
-               return var4;
-            }
-         } else {
-            return null;
-         }
+      public Style deserialize(JsonElement param1, Type param2, JsonDeserializationContext param3) throws JsonParseException {
+         // $FF: Couldn't be decompiled
       }
 
       @Nullable
-      public JsonElement serialize(Style var1, Type var2, JsonSerializationContext var3) {
-         if (var1.isEmpty()) {
-            return null;
-         } else {
-            JsonObject var4 = new JsonObject();
-            if (var1.bold != null) {
-               var4.addProperty("bold", var1.bold);
-            }
+      public JsonElement serialize(Style param1, Type param2, JsonSerializationContext param3) {
+         // $FF: Couldn't be decompiled
+      }
 
-            if (var1.italic != null) {
-               var4.addProperty("italic", var1.italic);
-            }
+      public JsonElement serialize(Style param1, Type param2, JsonSerializationContext param3) {
+         // $FF: Couldn't be decompiled
+      }
 
-            if (var1.underlined != null) {
-               var4.addProperty("underlined", var1.underlined);
-            }
-
-            if (var1.strikethrough != null) {
-               var4.addProperty("strikethrough", var1.strikethrough);
-            }
-
-            if (var1.obfuscated != null) {
-               var4.addProperty("obfuscated", var1.obfuscated);
-            }
-
-            if (var1.color != null) {
-               var4.add("color", var3.serialize(var1.color));
-            }
-
-            if (var1.insertion != null) {
-               var4.add("insertion", var3.serialize(var1.insertion));
-            }
-
-            if (var1.clickEvent != null) {
-               JsonObject var5 = new JsonObject();
-               var5.addProperty("action", var1.clickEvent.getAction().getCanonicalName());
-               var5.addProperty("value", var1.clickEvent.getValue());
-               var4.add("clickEvent", var5);
-            }
-
-            if (var1.hoverEvent != null) {
-               JsonObject var6 = new JsonObject();
-               var6.addProperty("action", var1.hoverEvent.getAction().getCanonicalName());
-               var6.add("value", var3.serialize(var1.hoverEvent.getValue()));
-               var4.add("hoverEvent", var6);
-            }
-
-            return var4;
-         }
+      public Style deserialize(JsonElement param1, Type param2, JsonDeserializationContext param3) throws JsonParseException {
+         // $FF: Couldn't be decompiled
       }
    }
 }

@@ -2,6 +2,7 @@ package net.minecraft.world.gen.feature;
 
 import java.util.Random;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -36,14 +37,14 @@ public class WorldGenIceSpike extends WorldGenerator {
                   if ((var9 == 0 && var11 == 0 || var10 * var10 + var12 * var12 <= var7 * var7) && (var9 != -var8 && var9 != var8 && var11 != -var8 && var11 != var8 || var2.nextFloat() <= 0.75F)) {
                      IBlockState var13 = var1.getBlockState(var3.add(var9, var6, var11));
                      Block var14 = var13.getBlock();
-                     if (var13.getBlock().isAir(var13, var1, var3.add(var9, var6, var11)) || var14 == Blocks.DIRT || var14 == Blocks.SNOW || var14 == Blocks.ICE) {
+                     if (var13.getMaterial() == Material.AIR || var14 == Blocks.DIRT || var14 == Blocks.SNOW || var14 == Blocks.ICE) {
                         this.setBlockAndNotifyAdequately(var1, var3.add(var9, var6, var11), Blocks.PACKED_ICE.getDefaultState());
                      }
 
                      if (var6 != 0 && var8 > 1) {
                         var13 = var1.getBlockState(var3.add(var9, -var6, var11));
                         var14 = var13.getBlock();
-                        if (var13.getBlock().isAir(var13, var1, var3.add(var9, -var6, var11)) || var14 == Blocks.DIRT || var14 == Blocks.SNOW || var14 == Blocks.ICE) {
+                        if (var13.getMaterial() == Material.AIR || var14 == Blocks.DIRT || var14 == Blocks.SNOW || var14 == Blocks.ICE) {
                            this.setBlockAndNotifyAdequately(var1, var3.add(var9, -var6, var11), Blocks.PACKED_ICE.getDefaultState());
                         }
                      }
@@ -70,7 +71,7 @@ public class WorldGenIceSpike extends WorldGenerator {
                while(var19.getY() > 50) {
                   IBlockState var21 = var1.getBlockState(var19);
                   Block var22 = var21.getBlock();
-                  if (!var21.getBlock().isAir(var21, var1, var19) && var22 != Blocks.DIRT && var22 != Blocks.SNOW && var22 != Blocks.ICE && var22 != Blocks.PACKED_ICE) {
+                  if (var21.getMaterial() != Material.AIR && var22 != Blocks.DIRT && var22 != Blocks.SNOW && var22 != Blocks.ICE && var22 != Blocks.PACKED_ICE) {
                      break;
                   }
 

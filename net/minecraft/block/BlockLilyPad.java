@@ -12,6 +12,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class BlockLilyPad extends BlockBush {
    protected static final AxisAlignedBB LILY_PAD_AABB = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 0.09375D, 0.9375D);
@@ -29,7 +30,7 @@ public class BlockLilyPad extends BlockBush {
 
    public void onEntityCollidedWithBlock(World var1, BlockPos var2, IBlockState var3, Entity var4) {
       super.onEntityCollidedWithBlock(var1, var2, var3, var4);
-      if (var4 instanceof EntityBoat) {
+      if (var4 instanceof EntityBoat && !CraftEventFactory.callEntityChangeBlockEvent(var4, var2, Blocks.AIR, 0).isCancelled()) {
          var1.destroyBlock(new BlockPos(var2), true);
       }
 

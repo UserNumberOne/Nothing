@@ -1,9 +1,9 @@
 package net.minecraft.entity;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,9 +12,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockWall;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.EnumPushReaction;
@@ -29,21 +29,15 @@ import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityBoat;
-import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
@@ -55,7 +49,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumBlockRenderType;
@@ -70,38 +64,53 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityDispatcher;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
-import net.minecraftforge.event.world.GetCollisionBoxesEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.TravelAgent;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_10_R1.CraftTravelAgent;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Hanging;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Vehicle;
+import org.bukkit.event.entity.EntityAirChangeEvent;
+import org.bukkit.event.entity.EntityCombustByBlockEvent;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
+import org.bukkit.event.entity.EntityPortalEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.projectiles.ProjectileSource;
 
-public abstract class Entity implements ICommandSender, ICapabilitySerializable {
+public abstract class Entity implements ICommandSender {
+   private static final int CURRENT_LEVEL = 2;
+   protected CraftEntity bukkitEntity;
    private static final Logger LOGGER = LogManager.getLogger();
    private static final AxisAlignedBB ZERO_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
    private static double renderDistanceWeight = 1.0D;
    private static int nextEntityID;
    private int entityId;
    public boolean preventEntitySpawning;
-   private final List riddenByEntities;
+   public final List riddenByEntities;
    protected int rideCooldown;
    private Entity ridingEntity;
    public boolean forceSpawn;
@@ -144,8 +153,8 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    protected Random rand;
    public int ticksExisted;
    public int fireResistance;
-   private int fire;
-   protected boolean inWater;
+   public int fire;
+   public boolean inWater;
    public int hurtResistantTime;
    protected boolean firstUpdate;
    protected boolean isImmuneToFire;
@@ -160,12 +169,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    public int chunkCoordX;
    public int chunkCoordY;
    public int chunkCoordZ;
-   @SideOnly(Side.CLIENT)
-   public long serverPosX;
-   @SideOnly(Side.CLIENT)
-   public long serverPosY;
-   @SideOnly(Side.CLIENT)
-   public long serverPosZ;
    public boolean ignoreFrustumCheck;
    public boolean isAirBorne;
    public int timeUntilPortal;
@@ -180,13 +183,24 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    protected String cachedUniqueIdString;
    private final CommandResultStats cmdResultStats;
    private final List emptyItemStackList;
-   protected boolean glowing;
+   public boolean glowing;
    private final Set tags;
    private boolean isPositionDirty;
-   private NBTTagCompound customEntityData;
-   public boolean captureDrops = false;
-   public ArrayList capturedDrops = new ArrayList();
-   private CapabilityDispatcher capabilities;
+   public boolean valid;
+   public ProjectileSource projectileSource;
+   public boolean forceExplosionKnockback;
+
+   static boolean isLevelAtLeast(NBTTagCompound var0, int var1) {
+      return var0.hasKey("Bukkit.updateLevel") && var0.getInteger("Bukkit.updateLevel") >= var1;
+   }
+
+   public CraftEntity getBukkitEntity() {
+      if (this.bukkitEntity == null) {
+         this.bukkitEntity = CraftEntity.getEntity(this.world.getServer(), this);
+      }
+
+      return this.bukkitEntity;
+   }
 
    public Entity(World var1) {
       this.entityId = nextEntityID++;
@@ -206,7 +220,7 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       this.world = var1;
       this.setPosition(0.0D, 0.0D, 0.0D);
       if (var1 != null) {
-         this.dimension = var1.provider.getDimension();
+         this.dimension = var1.provider.getDimensionType().getId();
       }
 
       this.dataManager = new EntityDataManager(this);
@@ -217,8 +231,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       this.dataManager.register(SILENT, Boolean.valueOf(false));
       this.dataManager.register(NO_GRAVITY, Boolean.valueOf(false));
       this.entityInit();
-      MinecraftForge.EVENT_BUS.post(new EntityConstructing(this));
-      this.capabilities = ForgeEventFactory.gatherCapabilities(this);
    }
 
    public int getEntityId() {
@@ -264,28 +276,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       return this.entityId;
    }
 
-   @SideOnly(Side.CLIENT)
-   protected void preparePlayerToSpawn() {
-      if (this.world != null) {
-         while(true) {
-            if (this.posY > 0.0D && this.posY < 256.0D) {
-               this.setPosition(this.posX, this.posY, this.posZ);
-               if (!this.world.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty()) {
-                  ++this.posY;
-                  continue;
-               }
-            }
-
-            this.motionX = 0.0D;
-            this.motionY = 0.0D;
-            this.motionZ = 0.0D;
-            this.rotationPitch = 0.0F;
-            break;
-         }
-      }
-
-   }
-
    public void setDead() {
       this.isDead = true;
    }
@@ -293,7 +283,7 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    public void setDropItemsWhenDead(boolean var1) {
    }
 
-   protected void setSize(float var1, float var2) {
+   public void setSize(float var1, float var2) {
       if (var1 != this.width || var2 != this.height) {
          float var3 = this.width;
          this.width = var1;
@@ -308,6 +298,32 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    }
 
    protected void setRotation(float var1, float var2) {
+      if (Float.isNaN(var1)) {
+         var1 = 0.0F;
+      }
+
+      if (var1 == Float.POSITIVE_INFINITY || var1 == Float.NEGATIVE_INFINITY) {
+         if (this instanceof EntityPlayerMP) {
+            this.world.getServer().getLogger().warning(this.getName() + " was caught trying to crash the server with an invalid yaw");
+            ((CraftPlayer)this.getBukkitEntity()).kickPlayer("Nope");
+         }
+
+         var1 = 0.0F;
+      }
+
+      if (Float.isNaN(var2)) {
+         var2 = 0.0F;
+      }
+
+      if (var2 == Float.POSITIVE_INFINITY || var2 == Float.NEGATIVE_INFINITY) {
+         if (this instanceof EntityPlayerMP) {
+            this.world.getServer().getLogger().warning(this.getName() + " was caught trying to crash the server with an invalid pitch");
+            ((CraftPlayer)this.getBukkitEntity()).kickPlayer("Nope");
+         }
+
+         var2 = 0.0F;
+      }
+
       this.rotationYaw = var1 % 360.0F;
       this.rotationPitch = var2 % 360.0F;
    }
@@ -319,21 +335,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       float var7 = this.width / 2.0F;
       float var8 = this.height;
       this.setEntityBoundingBox(new AxisAlignedBB(var1 - (double)var7, var3, var5 - (double)var7, var1 + (double)var7, var3 + (double)var8, var5 + (double)var7));
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void turn(float var1, float var2) {
-      float var3 = this.rotationPitch;
-      float var4 = this.rotationYaw;
-      this.rotationYaw = (float)((double)this.rotationYaw + (double)var1 * 0.15D);
-      this.rotationPitch = (float)((double)this.rotationPitch - (double)var2 * 0.15D);
-      this.rotationPitch = MathHelper.clamp(this.rotationPitch, -90.0F, 90.0F);
-      this.prevRotationPitch += this.rotationPitch - var3;
-      this.prevRotationYaw += this.rotationYaw - var4;
-      if (this.ridingEntity != null) {
-         this.ridingEntity.applyOrientationToEntity(this);
-      }
-
    }
 
    public void onUpdate() {
@@ -364,25 +365,23 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
          this.world.theProfiler.startSection("portal");
          if (this.inPortal) {
             MinecraftServer var1 = this.world.getMinecraftServer();
-            if (var1.getAllowNether()) {
-               if (!this.isRiding()) {
-                  int var2 = this.getMaxInPortalTime();
-                  if (this.portalCounter++ >= var2) {
-                     this.portalCounter = var2;
-                     this.timeUntilPortal = this.getPortalCooldown();
-                     byte var3;
-                     if (this.world.provider.getDimensionType().getId() == -1) {
-                        var3 = 0;
-                     } else {
-                        var3 = -1;
-                     }
-
-                     this.changeDimension(var3);
+            if (!this.isRiding()) {
+               int var2 = this.getMaxInPortalTime();
+               if (this.portalCounter++ >= var2) {
+                  this.portalCounter = var2;
+                  this.timeUntilPortal = this.getPortalCooldown();
+                  byte var3;
+                  if (this.world.provider.getDimensionType().getId() == -1) {
+                     var3 = 0;
+                  } else {
+                     var3 = -1;
                   }
-               }
 
-               this.inPortal = false;
+                  this.changeDimension(var3);
+               }
             }
+
+            this.inPortal = false;
          } else {
             if (this.portalCounter > 0) {
                this.portalCounter -= 4;
@@ -447,6 +446,22 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    protected void setOnFireFromLava() {
       if (!this.isImmuneToFire) {
          this.attackEntityFrom(DamageSource.lava, 4.0F);
+         if (this instanceof EntityLivingBase) {
+            if (this.fire <= 0) {
+               Object var1 = null;
+               CraftEntity var2 = this.getBukkitEntity();
+               EntityCombustByBlockEvent var3 = new EntityCombustByBlockEvent((Block)var1, var2, 15);
+               this.world.getServer().getPluginManager().callEvent(var3);
+               if (!var3.isCancelled()) {
+                  this.setFire(var3.getDuration());
+               }
+            } else {
+               this.setFire(15);
+            }
+
+            return;
+         }
+
          this.setFire(15);
       }
 
@@ -486,10 +501,23 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
          this.setEntityBoundingBox(this.getEntityBoundingBox().offset(var1, var3, var5));
          this.resetPositionToBB();
       } else {
+         try {
+            this.doBlockCollisions();
+         } catch (Throwable var77) {
+            CrashReport var8 = CrashReport.makeCrashReport(var77, "Checking entity block collision");
+            CrashReportCategory var9 = var8.makeCategory("Entity being checked for collision");
+            this.addEntityCrashInfo(var9);
+            throw new ReportedException(var8);
+         }
+
+         if (var1 == 0.0D && var3 == 0.0D && var5 == 0.0D && this.isBeingRidden() && this.isRiding()) {
+            return;
+         }
+
          this.world.theProfiler.startSection("move");
-         double var7 = this.posX;
-         double var9 = this.posY;
-         double var11 = this.posZ;
+         double var10 = this.posX;
+         double var12 = this.posY;
+         double var14 = this.posZ;
          if (this.isInWeb) {
             this.isInWeb = false;
             var1 *= 0.25D;
@@ -500,12 +528,12 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
             this.motionZ = 0.0D;
          }
 
-         double var13 = var1;
-         double var15 = var3;
-         double var17 = var5;
-         boolean var19 = this.onGround && this.isSneaking() && this instanceof EntityPlayer;
-         if (var19) {
-            for(double var20 = 0.05D; var1 != 0.0D && this.world.getCollisionBoxes(this, this.getEntityBoundingBox().offset(var1, -1.0D, 0.0D)).isEmpty(); var13 = var1) {
+         double var16 = var1;
+         double var18 = var3;
+         double var20 = var5;
+         boolean var22 = this.onGround && this.isSneaking() && this instanceof EntityPlayer;
+         if (var22) {
+            for(; var1 != 0.0D && this.world.getCollisionBoxes(this, this.getEntityBoundingBox().offset(var1, -1.0D, 0.0D)).isEmpty(); var16 = var1) {
                if (var1 < 0.05D && var1 >= -0.05D) {
                   var1 = 0.0D;
                } else if (var1 > 0.0D) {
@@ -515,7 +543,7 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
                }
             }
 
-            for(; var5 != 0.0D && this.world.getCollisionBoxes(this, this.getEntityBoundingBox().offset(0.0D, -1.0D, var5)).isEmpty(); var17 = var5) {
+            for(; var5 != 0.0D && this.world.getCollisionBoxes(this, this.getEntityBoundingBox().offset(0.0D, -1.0D, var5)).isEmpty(); var20 = var5) {
                if (var5 < 0.05D && var5 >= -0.05D) {
                   var5 = 0.0D;
                } else if (var5 > 0.0D) {
@@ -525,7 +553,7 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
                }
             }
 
-            for(; var1 != 0.0D && var5 != 0.0D && this.world.getCollisionBoxes(this, this.getEntityBoundingBox().offset(var1, -1.0D, var5)).isEmpty(); var17 = var5) {
+            for(; var1 != 0.0D && var5 != 0.0D && this.world.getCollisionBoxes(this, this.getEntityBoundingBox().offset(var1, -1.0D, var5)).isEmpty(); var20 = var5) {
                if (var1 < 0.05D && var1 >= -0.05D) {
                   var1 = 0.0D;
                } else if (var1 > 0.0D) {
@@ -534,7 +562,7 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
                   var1 += 0.05D;
                }
 
-               var13 = var1;
+               var16 = var1;
                if (var5 < 0.05D && var5 >= -0.05D) {
                   var5 = 0.0D;
                } else if (var5 > 0.0D) {
@@ -545,206 +573,220 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
             }
          }
 
-         List var62 = this.world.getCollisionBoxes(this, this.getEntityBoundingBox().addCoord(var1, var3, var5));
-         AxisAlignedBB var21 = this.getEntityBoundingBox();
-         int var22 = 0;
+         List var23 = this.world.getCollisionBoxes(this, this.getEntityBoundingBox().addCoord(var1, var3, var5));
+         AxisAlignedBB var24 = this.getEntityBoundingBox();
+         int var25 = 0;
 
-         for(int var23 = var62.size(); var22 < var23; ++var22) {
-            var3 = ((AxisAlignedBB)var62.get(var22)).calculateYOffset(this.getEntityBoundingBox(), var3);
+         for(int var26 = var23.size(); var25 < var26; ++var25) {
+            var3 = ((AxisAlignedBB)var23.get(var25)).calculateYOffset(this.getEntityBoundingBox(), var3);
          }
 
          this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, var3, 0.0D));
-         boolean var63 = this.onGround || var15 != var3 && var15 < 0.0D;
-         int var24 = 0;
+         boolean var27 = this.onGround || var18 != var3 && var18 < 0.0D;
+         int var79 = 0;
 
-         for(int var25 = var62.size(); var24 < var25; ++var24) {
-            var1 = ((AxisAlignedBB)var62.get(var24)).calculateXOffset(this.getEntityBoundingBox(), var1);
+         for(int var28 = var23.size(); var79 < var28; ++var79) {
+            var1 = ((AxisAlignedBB)var23.get(var79)).calculateXOffset(this.getEntityBoundingBox(), var1);
          }
 
          this.setEntityBoundingBox(this.getEntityBoundingBox().offset(var1, 0.0D, 0.0D));
-         var24 = 0;
+         var79 = 0;
 
-         for(int var66 = var62.size(); var24 < var66; ++var24) {
-            var5 = ((AxisAlignedBB)var62.get(var24)).calculateZOffset(this.getEntityBoundingBox(), var5);
+         for(int var82 = var23.size(); var79 < var82; ++var79) {
+            var5 = ((AxisAlignedBB)var23.get(var79)).calculateZOffset(this.getEntityBoundingBox(), var5);
          }
 
          this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, 0.0D, var5));
-         if (this.stepHeight > 0.0F && var63 && (var13 != var1 || var17 != var5)) {
-            double var67 = var1;
-            double var27 = var3;
-            double var29 = var5;
-            AxisAlignedBB var31 = this.getEntityBoundingBox();
-            this.setEntityBoundingBox(var21);
+         if (this.stepHeight > 0.0F && var27 && (var16 != var1 || var20 != var5)) {
+            double var29 = var1;
+            double var31 = var3;
+            double var33 = var5;
+            AxisAlignedBB var35 = this.getEntityBoundingBox();
+            this.setEntityBoundingBox(var24);
             var3 = (double)this.stepHeight;
-            List var32 = this.world.getCollisionBoxes(this, this.getEntityBoundingBox().addCoord(var13, var3, var17));
-            AxisAlignedBB var33 = this.getEntityBoundingBox();
-            AxisAlignedBB var34 = var33.addCoord(var13, 0.0D, var17);
-            double var35 = var3;
-            int var37 = 0;
+            List var36 = this.world.getCollisionBoxes(this, this.getEntityBoundingBox().addCoord(var16, var3, var20));
+            AxisAlignedBB var37 = this.getEntityBoundingBox();
+            AxisAlignedBB var38 = var37.addCoord(var16, 0.0D, var20);
+            double var39 = var3;
+            int var41 = 0;
 
-            for(int var38 = var32.size(); var37 < var38; ++var37) {
-               var35 = ((AxisAlignedBB)var32.get(var37)).calculateYOffset(var34, var35);
+            for(int var42 = var36.size(); var41 < var42; ++var41) {
+               var39 = ((AxisAlignedBB)var36.get(var41)).calculateYOffset(var38, var39);
             }
 
-            var33 = var33.offset(0.0D, var35, 0.0D);
-            double var82 = var13;
-            int var40 = 0;
+            var37 = var37.offset(0.0D, var39, 0.0D);
+            double var43 = var16;
+            int var45 = 0;
 
-            for(int var41 = var32.size(); var40 < var41; ++var40) {
-               var82 = ((AxisAlignedBB)var32.get(var40)).calculateXOffset(var33, var82);
+            for(int var46 = var36.size(); var45 < var46; ++var45) {
+               var43 = ((AxisAlignedBB)var36.get(var45)).calculateXOffset(var37, var43);
             }
 
-            var33 = var33.offset(var82, 0.0D, 0.0D);
-            double var83 = var17;
-            int var43 = 0;
+            var37 = var37.offset(var43, 0.0D, 0.0D);
+            double var47 = var20;
+            int var49 = 0;
 
-            for(int var44 = var32.size(); var43 < var44; ++var43) {
-               var83 = ((AxisAlignedBB)var32.get(var43)).calculateZOffset(var33, var83);
+            for(int var50 = var36.size(); var49 < var50; ++var49) {
+               var47 = ((AxisAlignedBB)var36.get(var49)).calculateZOffset(var37, var47);
             }
 
-            var33 = var33.offset(0.0D, 0.0D, var83);
-            AxisAlignedBB var84 = this.getEntityBoundingBox();
-            double var45 = var3;
-            int var47 = 0;
-
-            for(int var48 = var32.size(); var47 < var48; ++var47) {
-               var45 = ((AxisAlignedBB)var32.get(var47)).calculateYOffset(var84, var45);
-            }
-
-            var84 = var84.offset(0.0D, var45, 0.0D);
-            double var88 = var13;
-            int var50 = 0;
-
-            for(int var51 = var32.size(); var50 < var51; ++var50) {
-               var88 = ((AxisAlignedBB)var32.get(var50)).calculateXOffset(var84, var88);
-            }
-
-            var84 = var84.offset(var88, 0.0D, 0.0D);
-            double var89 = var17;
+            var37 = var37.offset(0.0D, 0.0D, var47);
+            AxisAlignedBB var91 = this.getEntityBoundingBox();
+            double var51 = var3;
             int var53 = 0;
 
-            for(int var54 = var32.size(); var53 < var54; ++var53) {
-               var89 = ((AxisAlignedBB)var32.get(var53)).calculateZOffset(var84, var89);
+            for(int var54 = var36.size(); var53 < var54; ++var53) {
+               var51 = ((AxisAlignedBB)var36.get(var53)).calculateYOffset(var91, var51);
             }
 
-            var84 = var84.offset(0.0D, 0.0D, var89);
-            double var90 = var82 * var82 + var83 * var83;
-            double var56 = var88 * var88 + var89 * var89;
-            if (var90 > var56) {
-               var1 = var82;
-               var5 = var83;
-               var3 = -var35;
-               this.setEntityBoundingBox(var33);
+            var91 = var91.offset(0.0D, var51, 0.0D);
+            double var55 = var16;
+            int var57 = 0;
+
+            for(int var58 = var36.size(); var57 < var58; ++var57) {
+               var55 = ((AxisAlignedBB)var36.get(var57)).calculateXOffset(var91, var55);
+            }
+
+            var91 = var91.offset(var55, 0.0D, 0.0D);
+            double var59 = var20;
+            int var61 = 0;
+
+            for(int var62 = var36.size(); var61 < var62; ++var61) {
+               var59 = ((AxisAlignedBB)var36.get(var61)).calculateZOffset(var91, var59);
+            }
+
+            var91 = var91.offset(0.0D, 0.0D, var59);
+            double var63 = var43 * var43 + var47 * var47;
+            double var65 = var55 * var55 + var59 * var59;
+            if (var63 > var65) {
+               var1 = var43;
+               var5 = var47;
+               var3 = -var39;
+               this.setEntityBoundingBox(var37);
             } else {
-               var1 = var88;
-               var5 = var89;
-               var3 = -var45;
-               this.setEntityBoundingBox(var84);
+               var1 = var55;
+               var5 = var59;
+               var3 = -var51;
+               this.setEntityBoundingBox(var91);
             }
 
-            int var58 = 0;
+            int var67 = 0;
 
-            for(int var59 = var32.size(); var58 < var59; ++var58) {
-               var3 = ((AxisAlignedBB)var32.get(var58)).calculateYOffset(this.getEntityBoundingBox(), var3);
+            for(int var68 = var36.size(); var67 < var68; ++var67) {
+               var3 = ((AxisAlignedBB)var36.get(var67)).calculateYOffset(this.getEntityBoundingBox(), var3);
             }
 
             this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, var3, 0.0D));
-            if (var67 * var67 + var29 * var29 >= var1 * var1 + var5 * var5) {
-               var1 = var67;
-               var3 = var27;
-               var5 = var29;
-               this.setEntityBoundingBox(var31);
+            if (var29 * var29 + var33 * var33 >= var1 * var1 + var5 * var5) {
+               var1 = var29;
+               var3 = var31;
+               var5 = var33;
+               this.setEntityBoundingBox(var35);
             }
          }
 
          this.world.theProfiler.endSection();
          this.world.theProfiler.startSection("rest");
          this.resetPositionToBB();
-         this.isCollidedHorizontally = var13 != var1 || var17 != var5;
-         this.isCollidedVertically = var15 != var3;
-         this.onGround = this.isCollidedVertically && var15 < 0.0D;
+         this.isCollidedHorizontally = var16 != var1 || var20 != var5;
+         this.isCollidedVertically = var18 != var3;
+         this.onGround = this.isCollidedVertically && var18 < 0.0D;
          this.isCollided = this.isCollidedHorizontally || this.isCollidedVertically;
-         var24 = MathHelper.floor(this.posX);
-         int var68 = MathHelper.floor(this.posY - 0.20000000298023224D);
-         int var26 = MathHelper.floor(this.posZ);
-         BlockPos var69 = new BlockPos(var24, var68, var26);
-         IBlockState var28 = this.world.getBlockState(var69);
-         if (var28.getMaterial() == Material.AIR) {
-            BlockPos var70 = var69.down();
-            IBlockState var30 = this.world.getBlockState(var70);
-            Block var74 = var30.getBlock();
+         var79 = MathHelper.floor(this.posX);
+         int var83 = MathHelper.floor(this.posY - 0.20000000298023224D);
+         int var69 = MathHelper.floor(this.posZ);
+         BlockPos var70 = new BlockPos(var79, var83, var69);
+         IBlockState var71 = this.world.getBlockState(var70);
+         if (var71.getMaterial() == Material.AIR) {
+            BlockPos var72 = var70.down();
+            IBlockState var73 = this.world.getBlockState(var72);
+            net.minecraft.block.Block var74 = var73.getBlock();
             if (var74 instanceof BlockFence || var74 instanceof BlockWall || var74 instanceof BlockFenceGate) {
-               var28 = var30;
-               var69 = var70;
+               var71 = var73;
+               var70 = var72;
             }
          }
 
-         this.updateFallState(var3, this.onGround, var28, var69);
-         if (var13 != var1) {
+         this.updateFallState(var3, this.onGround, var71, var70);
+         if (var16 != var1) {
             this.motionX = 0.0D;
          }
 
-         if (var17 != var5) {
+         if (var20 != var5) {
             this.motionZ = 0.0D;
          }
 
-         Block var71 = var28.getBlock();
-         if (var15 != var3) {
-            var71.onLanded(this.world, this);
+         net.minecraft.block.Block var95 = var71.getBlock();
+         if (var18 != var3) {
+            var95.onLanded(this.world, this);
          }
 
-         if (this.canTriggerWalking() && !var19 && !this.isRiding()) {
-            double var72 = this.posX - var7;
-            double var76 = this.posY - var9;
-            double var81 = this.posZ - var11;
-            if (var71 != Blocks.LADDER) {
-               var76 = 0.0D;
+         if (this.isCollidedHorizontally && this.getBukkitEntity() instanceof Vehicle) {
+            Vehicle var96 = (Vehicle)this.getBukkitEntity();
+            Block var98 = this.world.getWorld().getBlockAt(MathHelper.floor(this.posX), MathHelper.floor(this.posY), MathHelper.floor(this.posZ));
+            if (var16 > var1) {
+               var98 = var98.getRelative(BlockFace.EAST);
+            } else if (var16 < var1) {
+               var98 = var98.getRelative(BlockFace.WEST);
+            } else if (var20 > var5) {
+               var98 = var98.getRelative(BlockFace.SOUTH);
+            } else if (var20 < var5) {
+               var98 = var98.getRelative(BlockFace.NORTH);
             }
 
-            if (var71 != null && this.onGround) {
-               var71.onEntityWalk(this.world, var69, this);
+            if (var98.getType() != org.bukkit.Material.AIR) {
+               VehicleBlockCollisionEvent var85 = new VehicleBlockCollisionEvent(var96, var98);
+               this.world.getServer().getPluginManager().callEvent(var85);
+            }
+         }
+
+         if (this.canTriggerWalking() && !var22 && !this.isRiding()) {
+            double var84 = this.posX - var10;
+            double var75 = this.posY - var12;
+            double var90 = this.posZ - var14;
+            if (var95 != Blocks.LADDER) {
+               var75 = 0.0D;
             }
 
-            this.distanceWalkedModified = (float)((double)this.distanceWalkedModified + (double)MathHelper.sqrt(var72 * var72 + var81 * var81) * 0.6D);
-            this.distanceWalkedOnStepModified = (float)((double)this.distanceWalkedOnStepModified + (double)MathHelper.sqrt(var72 * var72 + var76 * var76 + var81 * var81) * 0.6D);
-            if (this.distanceWalkedOnStepModified > (float)this.nextStepDistance && var28.getMaterial() != Material.AIR) {
+            if (var95 != null && this.onGround) {
+               var95.onEntityWalk(this.world, var70, this);
+            }
+
+            this.distanceWalkedModified = (float)((double)this.distanceWalkedModified + (double)MathHelper.sqrt(var84 * var84 + var90 * var90) * 0.6D);
+            this.distanceWalkedOnStepModified = (float)((double)this.distanceWalkedOnStepModified + (double)MathHelper.sqrt(var84 * var84 + var75 * var75 + var90 * var90) * 0.6D);
+            if (this.distanceWalkedOnStepModified > (float)this.nextStepDistance && var71.getMaterial() != Material.AIR) {
                this.nextStepDistance = (int)this.distanceWalkedOnStepModified + 1;
                if (this.isInWater()) {
-                  float var36 = MathHelper.sqrt(this.motionX * this.motionX * 0.20000000298023224D + this.motionY * this.motionY + this.motionZ * this.motionZ * 0.20000000298023224D) * 0.35F;
-                  if (var36 > 1.0F) {
-                     var36 = 1.0F;
+                  float var89 = MathHelper.sqrt(this.motionX * this.motionX * 0.20000000298023224D + this.motionY * this.motionY + this.motionZ * this.motionZ * 0.20000000298023224D) * 0.35F;
+                  if (var89 > 1.0F) {
+                     var89 = 1.0F;
                   }
 
-                  this.playSound(this.getSwimSound(), var36, 1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
+                  this.playSound(this.getSwimSound(), var89, 1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
                }
 
-               this.playStepSound(var69, var71);
+               this.playStepSound(var70, var95);
             }
          }
 
-         try {
-            this.doBlockCollisions();
-         } catch (Throwable var60) {
-            CrashReport var75 = CrashReport.makeCrashReport(var60, "Checking entity block collision");
-            CrashReportCategory var77 = var75.makeCategory("Entity being checked for collision");
-            this.addEntityCrashInfo(var77);
-            throw new ReportedException(var75);
-         }
-
-         boolean var73 = this.isWet();
+         boolean var97 = this.isWet();
          if (this.world.isFlammableWithin(this.getEntityBoundingBox().contract(0.001D))) {
-            this.dealFireDamage(1);
-            if (!var73) {
+            this.burn(1.0F);
+            if (!var97) {
                ++this.fire;
                if (this.fire == 0) {
-                  this.setFire(8);
+                  EntityCombustByBlockEvent var99 = new EntityCombustByBlockEvent((Block)null, this.getBukkitEntity(), 8);
+                  this.world.getServer().getPluginManager().callEvent(var99);
+                  if (!var99.isCancelled()) {
+                     this.setFire(var99.getDuration());
+                  }
                }
             }
          } else if (this.fire <= 0) {
             this.fire = -this.fireResistance;
          }
 
-         if (var73 && this.fire > 0) {
+         if (var97 && this.fire > 0) {
             this.playSound(SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, 0.7F, 1.6F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
             this.fire = -this.fireResistance;
          }
@@ -799,8 +841,8 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       var4.release();
    }
 
-   protected void playStepSound(BlockPos var1, Block var2) {
-      SoundType var3 = var2.getSoundType(this.world.getBlockState(var1), this.world, var1, this);
+   protected void playStepSound(BlockPos var1, net.minecraft.block.Block var2) {
+      SoundType var3 = var2.getSoundType();
       if (this.world.getBlockState(var1.up()).getBlock() == Blocks.SNOW_LAYER) {
          var3 = Blocks.SNOW_LAYER.getSoundType();
          this.playSound(var3.getStepSound(), var3.getVolume() * 0.15F, var3.getPitch());
@@ -855,9 +897,9 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       return null;
    }
 
-   protected void dealFireDamage(int var1) {
+   protected void burn(float var1) {
       if (!this.isImmuneToFire) {
-         this.attackEntityFrom(DamageSource.inFire, (float)var1);
+         this.attackEntityFrom(DamageSource.inFire, var1);
       }
 
    }
@@ -949,7 +991,7 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       BlockPos var4 = new BlockPos(var1, var2, var3);
       IBlockState var5 = this.world.getBlockState(var4);
       if (var5.getRenderType() != EnumBlockRenderType.INVISIBLE) {
-         this.world.spawnParticle(EnumParticleTypes.BLOCK_CRACK, this.posX + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, this.getEntityBoundingBox().minY + 0.1D, this.posZ + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, -this.motionX * 4.0D, 1.5D, -this.motionZ * 4.0D, Block.getStateId(var5));
+         this.world.spawnParticle(EnumParticleTypes.BLOCK_CRACK, this.posX + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, this.getEntityBoundingBox().minY + 0.1D, this.posZ + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, -this.motionX * 4.0D, 1.5D, -this.motionZ * 4.0D, net.minecraft.block.Block.getStateId(var5));
       }
 
    }
@@ -961,11 +1003,13 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
          double var2 = this.posY + (double)this.getEyeHeight();
          BlockPos var4 = new BlockPos(this.posX, var2, this.posZ);
          IBlockState var5 = this.world.getBlockState(var4);
-         Boolean var6 = var5.getBlock().isEntityInsideMaterial(this.world, var4, var5, this, var2, var1, true);
-         if (var6 != null) {
-            return var6.booleanValue();
+         if (var5.getMaterial() == var1) {
+            float var6 = BlockLiquid.getLiquidHeightPercent(var5.getBlock().getMetaFromState(var5)) - 0.11111111F;
+            float var7 = (float)(var4.getY() + 1) - var6;
+            boolean var8 = var2 < (double)var7;
+            return !var8 && this instanceof EntityPlayer ? false : var8;
          } else {
-            return var5.getMaterial() == var1 ? ForgeHooks.isInsideOfMaterial(var1, this, var4) : false;
+            return false;
          }
       }
    }
@@ -993,17 +1037,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      BlockPos.MutableBlockPos var2 = new BlockPos.MutableBlockPos(MathHelper.floor(this.posX), 0, MathHelper.floor(this.posZ));
-      if (this.world.isBlockLoaded(var2)) {
-         var2.setY(MathHelper.floor(this.posY + (double)this.getEyeHeight()));
-         return this.world.getCombinedLight(var2, 0);
-      } else {
-         return 0;
-      }
-   }
-
    public float getBrightness(float var1) {
       BlockPos.MutableBlockPos var2 = new BlockPos.MutableBlockPos(MathHelper.floor(this.posX), 0, MathHelper.floor(this.posZ));
       if (this.world.isBlockLoaded(var2)) {
@@ -1015,7 +1048,12 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    }
 
    public void setWorld(World var1) {
-      this.world = var1;
+      if (var1 == null) {
+         this.setDead();
+         this.world = ((CraftWorld)Bukkit.getServer().getWorlds().get(0)).getHandle();
+      } else {
+         this.world = var1;
+      }
    }
 
    public void setPositionAndRotation(double var1, double var3, double var5, float var7, float var8) {
@@ -1171,27 +1209,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       return new Vec3d((double)(var4 * var5), (double)var6, (double)(var3 * var5));
    }
 
-   @SideOnly(Side.CLIENT)
-   public Vec3d getPositionEyes(float var1) {
-      if (var1 == 1.0F) {
-         return new Vec3d(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ);
-      } else {
-         double var2 = this.prevPosX + (this.posX - this.prevPosX) * (double)var1;
-         double var4 = this.prevPosY + (this.posY - this.prevPosY) * (double)var1 + (double)this.getEyeHeight();
-         double var6 = this.prevPosZ + (this.posZ - this.prevPosZ) * (double)var1;
-         return new Vec3d(var2, var4, var6);
-      }
-   }
-
-   @Nullable
-   @SideOnly(Side.CLIENT)
-   public RayTraceResult rayTrace(double var1, float var3) {
-      Vec3d var4 = this.getPositionEyes(var3);
-      Vec3d var5 = this.getLook(var3);
-      Vec3d var6 = var4.addVector(var5.xCoord * var1, var5.yCoord * var1, var5.zCoord * var1);
-      return this.world.rayTraceBlocks(var4, var6, false, false, true);
-   }
-
    public boolean canBeCollidedWith() {
       return false;
    }
@@ -1201,26 +1218,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    }
 
    public void addToPlayerScore(Entity var1, int var2) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRender3d(double var1, double var3, double var5) {
-      double var7 = this.posX - var1;
-      double var9 = this.posY - var3;
-      double var11 = this.posZ - var5;
-      double var13 = var7 * var7 + var9 * var9 + var11 * var11;
-      return this.isInRangeToRenderDist(var13);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isInRangeToRenderDist(double var1) {
-      double var3 = this.getEntityBoundingBox().getAverageEdgeLength();
-      if (Double.isNaN(var3)) {
-         var3 = 1.0D;
-      }
-
-      var3 = var3 * 64.0D * renderDistanceWeight;
-      return var1 < var3 * var3;
    }
 
    public boolean writeToNBTAtomically(NBTTagCompound var1) {
@@ -1249,6 +1246,14 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       try {
          var1.setTag("Pos", this.newDoubleNBTList(this.posX, this.posY, this.posZ));
          var1.setTag("Motion", this.newDoubleNBTList(this.motionX, this.motionY, this.motionZ));
+         if (Float.isNaN(this.rotationYaw)) {
+            this.rotationYaw = 0.0F;
+         }
+
+         if (Float.isNaN(this.rotationPitch)) {
+            this.rotationPitch = 0.0F;
+         }
+
          var1.setTag("Rotation", this.newFloatNBTList(this.rotationYaw, this.rotationPitch));
          var1.setFloat("FallDistance", this.fallDistance);
          var1.setShort("Fire", (short)this.fire);
@@ -1258,6 +1263,9 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
          var1.setBoolean("Invulnerable", this.invulnerable);
          var1.setInteger("PortalCooldown", this.timeUntilPortal);
          var1.setUniqueId("UUID", this.getUniqueID());
+         var1.setLong("WorldUUIDLeast", this.world.getSaveHandler().getUUID().getLeastSignificantBits());
+         var1.setLong("WorldUUIDMost", this.world.getSaveHandler().getUUID().getMostSignificantBits());
+         var1.setInteger("Bukkit.updateLevel", 2);
          if (this.getCustomNameTag() != null && !this.getCustomNameTag().isEmpty()) {
             var1.setString("CustomName", this.getCustomNameTag());
          }
@@ -1289,14 +1297,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
             var1.setTag("Tags", var2);
          }
 
-         if (this.customEntityData != null) {
-            var1.setTag("ForgeData", this.customEntityData);
-         }
-
-         if (this.capabilities != null) {
-            var1.setTag("ForgeCaps", this.capabilities.serializeNBT());
-         }
-
          this.writeEntityToNBT(var1);
          if (this.isBeingRidden()) {
             NBTTagList var7 = new NBTTagList();
@@ -1325,23 +1325,11 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    public void readFromNBT(NBTTagCompound var1) {
       try {
          NBTTagList var2 = var1.getTagList("Pos", 6);
-         NBTTagList var9 = var1.getTagList("Motion", 6);
-         NBTTagList var10 = var1.getTagList("Rotation", 5);
-         this.motionX = var9.getDoubleAt(0);
-         this.motionY = var9.getDoubleAt(1);
-         this.motionZ = var9.getDoubleAt(2);
-         if (Math.abs(this.motionX) > 10.0D) {
-            this.motionX = 0.0D;
-         }
-
-         if (Math.abs(this.motionY) > 10.0D) {
-            this.motionY = 0.0D;
-         }
-
-         if (Math.abs(this.motionZ) > 10.0D) {
-            this.motionZ = 0.0D;
-         }
-
+         NBTTagList var10 = var1.getTagList("Motion", 6);
+         NBTTagList var11 = var1.getTagList("Rotation", 5);
+         this.motionX = var10.getDoubleAt(0);
+         this.motionY = var10.getDoubleAt(1);
+         this.motionZ = var10.getDoubleAt(2);
          this.posX = var2.getDoubleAt(0);
          this.posY = var2.getDoubleAt(1);
          this.posZ = var2.getDoubleAt(2);
@@ -1351,8 +1339,8 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
          this.prevPosX = this.posX;
          this.prevPosY = this.posY;
          this.prevPosZ = this.posZ;
-         this.rotationYaw = var10.getFloatAt(0);
-         this.rotationPitch = var10.getFloatAt(1);
+         this.rotationYaw = var11.getFloatAt(0);
+         this.rotationPitch = var11.getFloatAt(1);
          this.prevRotationYaw = this.rotationYaw;
          this.prevRotationPitch = this.rotationPitch;
          this.setRotationYawHead(this.rotationYaw);
@@ -1383,14 +1371,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
          this.setSilent(var1.getBoolean("Silent"));
          this.setNoGravity(var1.getBoolean("NoGravity"));
          this.setGlowing(var1.getBoolean("Glowing"));
-         if (var1.hasKey("ForgeData")) {
-            this.customEntityData = var1.getCompoundTag("ForgeData");
-         }
-
-         if (this.capabilities != null && var1.hasKey("ForgeCaps")) {
-            this.capabilities.deserializeNBT(var1.getCompoundTag("ForgeCaps"));
-         }
-
          if (var1.hasKey("Tags", 9)) {
             this.tags.clear();
             NBTTagList var5 = var1.getTagList("Tags", 8);
@@ -1406,8 +1386,49 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
             this.setPosition(this.posX, this.posY, this.posZ);
          }
 
-      } catch (Throwable var8) {
-         CrashReport var3 = CrashReport.makeCrashReport(var8, "Loading entity NBT");
+         if (this instanceof EntityLivingBase) {
+            EntityLivingBase var12 = (EntityLivingBase)this;
+            if (var12 instanceof EntityTameable && !isLevelAtLeast(var1, 2) && !var1.getBoolean("PersistenceRequired")) {
+               EntityLiving var14 = (EntityLiving)var12;
+               var14.persistenceRequired = !var14.canDespawn();
+            }
+         }
+
+         if (!(this.getBukkitEntity() instanceof Vehicle)) {
+            if (Math.abs(this.motionX) > 10.0D) {
+               this.motionX = 0.0D;
+            }
+
+            if (Math.abs(this.motionY) > 10.0D) {
+               this.motionY = 0.0D;
+            }
+
+            if (Math.abs(this.motionZ) > 10.0D) {
+               this.motionZ = 0.0D;
+            }
+         }
+
+         if (this instanceof EntityPlayerMP) {
+            Server var13 = Bukkit.getServer();
+            Object var15 = null;
+            String var17 = var1.getString("world");
+            if (var1.hasKey("WorldUUIDMost") && var1.hasKey("WorldUUIDLeast")) {
+               UUID var8 = new UUID(var1.getLong("WorldUUIDMost"), var1.getLong("WorldUUIDLeast"));
+               var15 = var13.getWorld(var8);
+            } else {
+               var15 = var13.getWorld(var17);
+            }
+
+            if (var15 == null) {
+               EntityPlayerMP var18 = (EntityPlayerMP)this;
+               var15 = ((CraftServer)var13).getServer().getWorldServer(var18.dimension).getWorld();
+            }
+
+            this.setWorld(var15 == null ? null : ((CraftWorld)var15).getHandle());
+         }
+
+      } catch (Throwable var9) {
+         CrashReport var3 = CrashReport.makeCrashReport(var9, "Loading entity NBT");
          CrashReportCategory var4 = var3.makeCategory("Entity being loaded");
          this.addEntityCrashInfo(var4);
          throw new ReportedException(var3);
@@ -1456,15 +1477,15 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
 
    public EntityItem entityDropItem(ItemStack var1, float var2) {
       if (var1.stackSize != 0 && var1.getItem() != null) {
-         EntityItem var3 = new EntityItem(this.world, this.posX, this.posY + (double)var2, this.posZ, var1);
-         var3.setDefaultPickupDelay();
-         if (this.captureDrops) {
-            this.capturedDrops.add(var3);
+         if (this instanceof EntityLivingBase && !((EntityLivingBase)this).forceDrops) {
+            ((EntityLivingBase)this).drops.add(CraftItemStack.asBukkitCopy(var1));
+            return null;
          } else {
+            EntityItem var3 = new EntityItem(this.world, this.posX, this.posY + (double)var2, this.posZ, var1);
+            var3.setDefaultPickupDelay();
             this.world.spawnEntity(var3);
+            return var3;
          }
-
-         return var3;
       } else {
          return null;
       }
@@ -1530,10 +1551,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
 
    }
 
-   @SideOnly(Side.CLIENT)
-   public void applyOrientationToEntity(Entity var1) {
-   }
-
    public double getYOffset() {
       return 0.0D;
    }
@@ -1547,9 +1564,7 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    }
 
    public boolean startRiding(Entity var1, boolean var2) {
-      if (!ForgeEventFactory.canMountEntity(this, var1, true)) {
-         return false;
-      } else if (var2 || this.canBeRidden(var1) && var1.canFitPassenger(this)) {
+      if (var2 || this.canBeRidden(var1) && var1.canFitPassenger(this)) {
          if (this.isRiding()) {
             this.dismountRidingEntity();
          }
@@ -1576,10 +1591,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    public void dismountRidingEntity() {
       if (this.ridingEntity != null) {
          Entity var1 = this.ridingEntity;
-         if (!ForgeEventFactory.canMountEntity(this, var1, false)) {
-            return;
-         }
-
          this.ridingEntity = null;
          var1.removePassenger(this);
       }
@@ -1590,6 +1601,19 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       if (var1.getRidingEntity() != this) {
          throw new IllegalStateException("Use x.startRiding(y), not y.addPassenger(x)");
       } else {
+         Preconditions.checkState(!var1.riddenByEntities.contains(this), "Circular entity riding! %s %s", new Object[]{this, var1});
+         CraftEntity var2 = (CraftEntity)var1.getBukkitEntity().getVehicle();
+         Entity var3 = var2 == null ? null : var2.getHandle();
+         if (this.getBukkitEntity() instanceof Vehicle && var1.getBukkitEntity() instanceof LivingEntity && var1.world.isChunkLoaded((int)var1.posX >> 4, (int)var1.posZ >> 4, false)) {
+            VehicleEnterEvent var4 = new VehicleEnterEvent((Vehicle)this.getBukkitEntity(), var1.getBukkitEntity());
+            Bukkit.getPluginManager().callEvent(var4);
+            CraftEntity var5 = (CraftEntity)var1.getBukkitEntity().getVehicle();
+            Entity var6 = var5 == null ? null : var5.getHandle();
+            if (var4.isCancelled() || var6 != var3) {
+               return;
+            }
+         }
+
          if (!this.world.isRemote && var1 instanceof EntityPlayer && !(this.getControllingPassenger() instanceof EntityPlayer)) {
             this.riddenByEntities.add(0, var1);
          } else {
@@ -1603,6 +1627,18 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       if (var1.getRidingEntity() == this) {
          throw new IllegalStateException("Use x.stopRiding(y), not y.removePassenger(x)");
       } else {
+         CraftEntity var2 = (CraftEntity)var1.getBukkitEntity().getVehicle();
+         Entity var3 = var2 == null ? null : var2.getHandle();
+         if (this.getBukkitEntity() instanceof Vehicle && var1.getBukkitEntity() instanceof LivingEntity) {
+            VehicleExitEvent var4 = new VehicleExitEvent((Vehicle)this.getBukkitEntity(), (LivingEntity)var1.getBukkitEntity());
+            Bukkit.getPluginManager().callEvent(var4);
+            CraftEntity var5 = (CraftEntity)var1.getBukkitEntity().getVehicle();
+            Entity var6 = var5 == null ? null : var5.getHandle();
+            if (var4.isCancelled() || var6 != var3) {
+               return;
+            }
+         }
+
          this.riddenByEntities.remove(var1);
          var1.rideCooldown = 60;
       }
@@ -1612,29 +1648,12 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       return this.getPassengers().size() < 1;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void setPositionAndRotationDirect(double var1, double var3, double var5, float var7, float var8, int var9, boolean var10) {
-      this.setPosition(var1, var3, var5);
-      this.setRotation(var7, var8);
-   }
-
    public float getCollisionBorderSize() {
       return 0.0F;
    }
 
    public Vec3d getLookVec() {
       return null;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Vec2f getPitchYaw() {
-      Vec2f var1 = new Vec2f(this.rotationPitch, this.rotationYaw);
-      return var1;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public Vec3d getForward() {
-      return Vec3d.fromPitchYawVector(this.getPitchYaw());
    }
 
    public void setPortal(BlockPos var1) {
@@ -1659,21 +1678,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
 
    public int getPortalCooldown() {
       return 300;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void setVelocity(double var1, double var3, double var5) {
-      this.motionX = var1;
-      this.motionY = var3;
-      this.motionZ = var5;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void performHurtAnimation() {
    }
 
    public Iterable getHeldEquipment() {
@@ -1736,16 +1740,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       return this.getFlag(5);
    }
 
-   @SideOnly(Side.CLIENT)
-   public boolean isInvisibleToPlayer(EntityPlayer var1) {
-      if (var1.isSpectator()) {
-         return false;
-      } else {
-         Team var2 = this.getTeam();
-         return var2 != null && var1 != null && var1.getTeam() == var2 && var2.getSeeFriendlyInvisiblesEnabled() ? false : this.isInvisible();
-      }
-   }
-
    @Nullable
    public Team getTeam() {
       return this.world.getScoreboard().getPlayersTeam(this.getCachedUniqueIdString());
@@ -1763,11 +1757,11 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       this.setFlag(5, var1);
    }
 
-   protected boolean getFlag(int var1) {
+   public boolean getFlag(int var1) {
       return (((Byte)this.dataManager.get(FLAGS)).byteValue() & 1 << var1) != 0;
    }
 
-   protected void setFlag(int var1, boolean var2) {
+   public void setFlag(int var1, boolean var2) {
       byte var3 = ((Byte)this.dataManager.get(FLAGS)).byteValue();
       if (var2) {
          this.dataManager.set(FLAGS, Byte.valueOf((byte)(var3 | 1 << var1)));
@@ -1782,16 +1776,40 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    }
 
    public void setAir(int var1) {
-      this.dataManager.set(AIR, Integer.valueOf(var1));
+      EntityAirChangeEvent var2 = new EntityAirChangeEvent(this.getBukkitEntity(), var1);
+      if (!var2.isCancelled()) {
+         this.dataManager.set(AIR, Integer.valueOf(var2.getAmount()));
+      }
    }
 
    public void onStruckByLightning(EntityLightningBolt var1) {
-      this.attackEntityFrom(DamageSource.lightningBolt, 5.0F);
-      ++this.fire;
-      if (this.fire == 0) {
-         this.setFire(8);
+      CraftEntity var2 = this.getBukkitEntity();
+      CraftEntity var3 = var1.getBukkitEntity();
+      PluginManager var4 = Bukkit.getPluginManager();
+      if (var2 instanceof Hanging) {
+         HangingBreakByEntityEvent var5 = new HangingBreakByEntityEvent((Hanging)var2, var3);
+         var4.callEvent(var5);
+         if (var5.isCancelled()) {
+            return;
+         }
       }
 
+      if (!this.isImmuneToFire) {
+         CraftEventFactory.entityDamage = var1;
+         if (!this.attackEntityFrom(DamageSource.lightningBolt, 5.0F)) {
+            CraftEventFactory.entityDamage = null;
+         } else {
+            ++this.fire;
+            if (this.fire == 0) {
+               EntityCombustByEntityEvent var6 = new EntityCombustByEntityEvent(var3, var2, 8);
+               var4.callEvent(var6);
+               if (!var6.isCancelled()) {
+                  this.setFire(var6.getDuration());
+               }
+            }
+
+         }
+      }
    }
 
    public void onKillEntity(EntityLivingBase var1) {
@@ -1803,7 +1821,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       double var10 = var3 - (double)var7.getY();
       double var12 = var5 - (double)var7.getZ();
       List var14 = this.world.getCollisionBoxes(this.getEntityBoundingBox());
-      MinecraftForge.EVENT_BUS.post(new GetCollisionBoxesEvent(this.world, this, this.getEntityBoundingBox(), var14));
       if (var14.isEmpty()) {
          return false;
       } else {
@@ -1921,76 +1938,77 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    @Nullable
    public Entity changeDimension(int var1) {
       if (!this.world.isRemote && !this.isDead) {
-         if (!ForgeHooks.onTravelToDimension(this, var1)) {
-            return null;
-         } else {
-            this.world.theProfiler.startSection("changeDimension");
-            MinecraftServer var2 = this.getServer();
-            int var3 = this.dimension;
-            WorldServer var4 = var2.worldServerForDimension(var3);
-            WorldServer var5 = var2.worldServerForDimension(var1);
-            this.dimension = var1;
-            if (var3 == 1 && var1 == 1) {
-               var5 = var2.worldServerForDimension(0);
-               this.dimension = 0;
+         this.world.theProfiler.startSection("changeDimension");
+         MinecraftServer var2 = this.h();
+         WorldServer var3 = null;
+         if (this.dimension < 10) {
+            for(WorldServer var5 : var2.worlds) {
+               if (var5.dimension == var1) {
+                  var3 = var5;
+               }
             }
+         }
 
-            this.world.removeEntity(this);
-            this.isDead = false;
-            this.world.theProfiler.startSection("reposition");
-            BlockPos var6;
-            if (var1 == 1) {
-               var6 = var5.getSpawnCoordinate();
+         Object var11 = null;
+         Location var10 = this.getBukkitEntity().getLocation();
+         Location var6;
+         if (var3 != null) {
+            if (var11 != null) {
+               var6 = new Location(var3.getWorld(), (double)((BlockPos)var11).getX(), (double)((BlockPos)var11).getY(), (double)((BlockPos)var11).getZ());
             } else {
-               double var7 = this.posX;
-               double var9 = this.posZ;
-               double var11 = 8.0D;
-               if (var1 == -1) {
-                  var7 = MathHelper.clamp(var7 / 8.0D, var5.getWorldBorder().minX() + 16.0D, var5.getWorldBorder().maxX() - 16.0D);
-                  var9 = MathHelper.clamp(var9 / 8.0D, var5.getWorldBorder().minZ() + 16.0D, var5.getWorldBorder().maxZ() - 16.0D);
-               } else if (var1 == 0) {
-                  var7 = MathHelper.clamp(var7 * 8.0D, var5.getWorldBorder().minX() + 16.0D, var5.getWorldBorder().maxX() - 16.0D);
-                  var9 = MathHelper.clamp(var9 * 8.0D, var5.getWorldBorder().minZ() + 16.0D, var5.getWorldBorder().maxZ() - 16.0D);
-               }
-
-               var7 = (double)MathHelper.clamp((int)var7, -29999872, 29999872);
-               var9 = (double)MathHelper.clamp((int)var9, -29999872, 29999872);
-               float var13 = this.rotationYaw;
-               this.setLocationAndAngles(var7, this.posY, var9, 90.0F, 0.0F);
-               Teleporter var14 = var5.getDefaultTeleporter();
-               var14.placeInExistingPortal(this, var13);
-               var6 = new BlockPos(this);
+               var6 = var2.getPlayerList().calculateTarget(var10, var2.getWorldServer(var1));
             }
+         } else {
+            var6 = null;
+         }
 
-            var4.updateEntityWithOptionalForce(this, false);
-            this.world.theProfiler.endStartSection("reloading");
-            Entity var16 = EntityList.createEntityByName(EntityList.getEntityString(this), var5);
-            if (var16 != null) {
-               var16.copyDataFromOld(this);
-               if (var3 == 1 && var1 == 1) {
-                  BlockPos var8 = var5.getTopSolidOrLiquidBlock(var5.getSpawnPoint());
-                  var16.moveToBlockPosAndAngles(var8, var16.rotationYaw, var16.rotationPitch);
-               } else {
-                  var16.moveToBlockPosAndAngles(var6, var16.rotationYaw, var16.rotationPitch);
-               }
-
-               boolean var17 = var16.forceSpawn;
-               var16.forceSpawn = true;
-               var5.spawnEntity(var16);
-               var16.forceSpawn = var17;
-               var5.updateEntityWithOptionalForce(var16, false);
-            }
-
-            this.isDead = true;
-            this.world.theProfiler.endSection();
-            var4.resetUpdateEntityTick();
-            var5.resetUpdateEntityTick();
-            this.world.theProfiler.endSection();
-            return var16;
+         boolean var7 = var3 != null && (this.dimension != 1 || var3.dimension != 1);
+         TravelAgent var8 = var6 != null ? (TravelAgent)((CraftWorld)var6.getWorld()).getHandle().getDefaultTeleporter() : CraftTravelAgent.DEFAULT;
+         EntityPortalEvent var9 = new EntityPortalEvent(this.getBukkitEntity(), var10, var6, var8);
+         var9.useTravelAgent(var7);
+         var9.getEntity().getServer().getPluginManager().callEvent(var9);
+         if (!var9.isCancelled() && var9.getTo() != null && var9.getTo().getWorld() != null && this.isEntityAlive()) {
+            var6 = var9.useTravelAgent() ? var9.getPortalTravelAgent().findOrCreate(var9.getTo()) : var9.getTo();
+            return this.teleportTo(var6, true);
+         } else {
+            return null;
          }
       } else {
          return null;
       }
+   }
+
+   public Entity teleportTo(Location var1, boolean var2) {
+      WorldServer var3 = ((CraftWorld)this.getBukkitEntity().getLocation().getWorld()).getHandle();
+      WorldServer var4 = ((CraftWorld)var1.getWorld()).getHandle();
+      int var5 = var4.dimension;
+      this.dimension = var5;
+      this.world.removeEntity(this);
+      this.isDead = false;
+      this.world.theProfiler.startSection("reposition");
+      var4.getMinecraftServer().getPlayerList().repositionEntity(this, var1, var2);
+      this.world.theProfiler.endStartSection("reloading");
+      Entity var6 = EntityList.createEntityByName(EntityList.getEntityString(this), var4);
+      if (var6 != null) {
+         var6.copyDataFromOld(this);
+         boolean var7 = var6.forceSpawn;
+         var6.forceSpawn = true;
+         var4.spawnEntity(var6);
+         var6.forceSpawn = var7;
+         var4.updateEntityWithOptionalForce(var6, false);
+         this.getBukkitEntity().setHandle(var6);
+         var6.bukkitEntity = this.getBukkitEntity();
+         if (this instanceof EntityLiving) {
+            ((EntityLiving)this).clearLeashed(true, false);
+         }
+      }
+
+      this.isDead = true;
+      this.world.theProfiler.endSection();
+      var3.resetUpdateEntityTick();
+      var4.resetUpdateEntityTick();
+      this.world.theProfiler.endSection();
+      return var6;
    }
 
    public boolean isNonBoss() {
@@ -1998,7 +2016,7 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    }
 
    public float getExplosionResistance(Explosion var1, World var2, BlockPos var3, IBlockState var4) {
-      return var4.getBlock().getExplosionResistance(var2, var3, this, var1);
+      return var4.getBlock().getExplosionResistance(this);
    }
 
    public boolean verifyExplosion(Explosion var1, World var2, BlockPos var3, IBlockState var4, float var5) {
@@ -2026,11 +2044,19 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
          public String call() throws Exception {
             return EntityList.getEntityString(Entity.this) + " (" + Entity.this.getClass().getCanonicalName() + ")";
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var1.addCrashSection("Entity ID", Integer.valueOf(this.entityId));
       var1.setDetail("Entity Name", new ICrashReportDetail() {
          public String call() throws Exception {
             return Entity.this.getName();
+         }
+
+         public Object call() throws Exception {
+            return this.call();
          }
       });
       var1.addCrashSection("Entity's Exact location", String.format("%.2f, %.2f, %.2f", this.posX, this.posY, this.posZ));
@@ -2040,10 +2066,18 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
          public String call() throws Exception {
             return Entity.this.getPassengers().toString();
          }
+
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var1.setDetail("Entity's Vehicle", new ICrashReportDetail() {
          public String call() throws Exception {
             return Entity.this.getRidingEntity().toString();
+         }
+
+         public Object call() throws Exception {
+            return this.call();
          }
       });
    }
@@ -2051,11 +2085,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    public void setUniqueId(UUID var1) {
       this.entityUniqueID = var1;
       this.cachedUniqueIdString = this.entityUniqueID.toString();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean canRenderOnFire() {
-      return this.isBurning();
    }
 
    public UUID getUniqueID() {
@@ -2070,16 +2099,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       return true;
    }
 
-   @SideOnly(Side.CLIENT)
-   public static double getRenderDistanceWeight() {
-      return renderDistanceWeight;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static void setRenderDistanceWeight(double var0) {
-      renderDistanceWeight = var0;
-   }
-
    public ITextComponent getDisplayName() {
       TextComponentString var1 = new TextComponentString(ScorePlayerTeam.formatPlayerName(this.getTeam(), this.getName()));
       var1.getStyle().setHoverEvent(this.getHoverEvent());
@@ -2088,6 +2107,10 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    }
 
    public void setCustomNameTag(String var1) {
+      if (var1.length() > 256) {
+         var1 = var1.substring(0, 256);
+      }
+
       this.dataManager.set(CUSTOM_NAME, var1);
    }
 
@@ -2114,11 +2137,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
    }
 
    public void notifyDataManagerChange(DataParameter var1) {
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean getAlwaysRenderNameTagForRender() {
-      return this.getAlwaysRenderNameTag();
    }
 
    public EnumFacing getHorizontalFacing() {
@@ -2149,13 +2167,41 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       return this.boundingBox;
    }
 
-   @SideOnly(Side.CLIENT)
-   public AxisAlignedBB getRenderBoundingBox() {
-      return this.getEntityBoundingBox();
-   }
-
    public void setEntityBoundingBox(AxisAlignedBB var1) {
-      this.boundingBox = var1;
+      double var2 = var1.minX;
+      double var4 = var1.minY;
+      double var6 = var1.minZ;
+      double var8 = var1.maxX;
+      double var10 = var1.maxY;
+      double var12 = var1.maxZ;
+      double var14 = var1.maxX - var1.minX;
+      if (var14 < 0.0D) {
+         var8 = var2;
+      }
+
+      if (var14 > 64.0D) {
+         var8 = var2 + 64.0D;
+      }
+
+      var14 = var1.maxY - var1.minY;
+      if (var14 < 0.0D) {
+         var10 = var4;
+      }
+
+      if (var14 > 64.0D) {
+         var10 = var4 + 64.0D;
+      }
+
+      var14 = var1.maxZ - var1.minZ;
+      if (var14 < 0.0D) {
+         var12 = var6;
+      }
+
+      if (var14 > 64.0D) {
+         var12 = var6 + 64.0D;
+      }
+
+      this.boundingBox = new AxisAlignedBB(var2, var4, var6, var8, var10, var12);
    }
 
    public float getEyeHeight() {
@@ -2203,13 +2249,13 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
 
    public void setCommandStat(CommandResultStats.Type var1, int var2) {
       if (this.world != null && !this.world.isRemote) {
-         this.cmdResultStats.setCommandStatForSender(this.world.getMinecraftServer(), this, var1, var2);
+         this.cmdResultStats.a(this.world.getMinecraftServer(), this, var1, var2);
       }
 
    }
 
    @Nullable
-   public MinecraftServer getServer() {
+   public MinecraftServer h() {
       return this.world.getMinecraftServer();
    }
 
@@ -2237,92 +2283,6 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
       EnchantmentHelper.applyArthropodEnchantments(var1, var2);
    }
 
-   public NBTTagCompound getEntityData() {
-      if (this.customEntityData == null) {
-         this.customEntityData = new NBTTagCompound();
-      }
-
-      return this.customEntityData;
-   }
-
-   public boolean shouldRiderSit() {
-      return true;
-   }
-
-   public ItemStack getPickedResult(RayTraceResult var1) {
-      if (this instanceof EntityPainting) {
-         return new ItemStack(Items.PAINTING);
-      } else if (this instanceof EntityLeashKnot) {
-         return new ItemStack(Items.LEAD);
-      } else if (this instanceof EntityItemFrame) {
-         ItemStack var4 = ((EntityItemFrame)this).getDisplayedItem();
-         return var4 == null ? new ItemStack(Items.ITEM_FRAME) : var4.copy();
-      } else if (this instanceof EntityMinecart) {
-         return ((EntityMinecart)this).getCartItem();
-      } else if (this instanceof EntityBoat) {
-         return new ItemStack(((EntityBoat)this).getItemBoat());
-      } else if (this instanceof EntityArmorStand) {
-         return new ItemStack(Items.ARMOR_STAND);
-      } else if (this instanceof EntityEnderCrystal) {
-         return new ItemStack(Items.END_CRYSTAL);
-      } else {
-         String var2 = EntityList.getEntityString(this);
-         if (EntityList.ENTITY_EGGS.containsKey(var2)) {
-            ItemStack var3 = new ItemStack(Items.SPAWN_EGG);
-            ItemMonsterPlacer.applyEntityIdToItemStack(var3, var2);
-            return var3;
-         } else {
-            return null;
-         }
-      }
-   }
-
-   public UUID getPersistentID() {
-      return this.entityUniqueID;
-   }
-
-   public final void resetEntityId() {
-      this.entityId = nextEntityID++;
-   }
-
-   public boolean shouldRenderInPass(int var1) {
-      return var1 == 0;
-   }
-
-   public boolean isCreatureType(EnumCreatureType var1, boolean var2) {
-      return var2 && this instanceof EntityLiving && ((EntityLiving)this).isNoDespawnRequired() ? false : var1.getCreatureClass().isAssignableFrom(this.getClass());
-   }
-
-   public boolean canRiderInteract() {
-      return false;
-   }
-
-   public boolean shouldDismountInWater(Entity var1) {
-      return this instanceof EntityLivingBase;
-   }
-
-   public boolean hasCapability(Capability var1, EnumFacing var2) {
-      if (this.getCapability(var1, var2) != null) {
-         return true;
-      } else {
-         return this.capabilities == null ? false : this.capabilities.hasCapability(var1, var2);
-      }
-   }
-
-   public Object getCapability(Capability var1, EnumFacing var2) {
-      return this.capabilities == null ? null : this.capabilities.getCapability(var1, var2);
-   }
-
-   public void deserializeNBT(NBTTagCompound var1) {
-      this.readFromNBT(var1);
-   }
-
-   public NBTTagCompound serializeNBT() {
-      NBTTagCompound var1 = new NBTTagCompound();
-      var1.setString("id", this.getEntityString());
-      return this.writeToNBT(var1);
-   }
-
    public void addTrackingPlayer(EntityPlayerMP var1) {
    }
 
@@ -2331,12 +2291,12 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
 
    public float getRotatedYaw(Rotation var1) {
       float var2 = MathHelper.wrapDegrees(this.rotationYaw);
-      switch(var1) {
-      case CLOCKWISE_180:
+      switch(Entity.SyntheticClass_1.a[var1.ordinal()]) {
+      case 1:
          return var2 + 180.0F;
-      case COUNTERCLOCKWISE_90:
+      case 2:
          return var2 + 270.0F;
-      case CLOCKWISE_90:
+      case 3:
          return var2 + 90.0F;
       default:
          return var2;
@@ -2345,10 +2305,10 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
 
    public float getMirroredYaw(Mirror var1) {
       float var2 = MathHelper.wrapDegrees(this.rotationYaw);
-      switch(var1) {
-      case LEFT_RIGHT:
+      switch(Entity.SyntheticClass_1.b[var1.ordinal()]) {
+      case 1:
          return -var2;
-      case FRONT_BACK:
+      case 2:
          return 180.0F - var2;
       default:
          return var2;
@@ -2450,5 +2410,45 @@ public abstract class Entity implements ICommandSender, ICapabilitySerializable 
 
    public SoundCategory getSoundCategory() {
       return SoundCategory.NEUTRAL;
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a;
+      static final int[] b = new int[Mirror.values().length];
+
+      static {
+         try {
+            b[Mirror.LEFT_RIGHT.ordinal()] = 1;
+         } catch (NoSuchFieldError var4) {
+            ;
+         }
+
+         try {
+            b[Mirror.FRONT_BACK.ordinal()] = 2;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         a = new int[Rotation.values().length];
+
+         try {
+            a[Rotation.CLOCKWISE_180.ordinal()] = 1;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[Rotation.COUNTERCLOCKWISE_90.ordinal()] = 2;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[Rotation.CLOCKWISE_90.ordinal()] = 3;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
+      }
    }
 }

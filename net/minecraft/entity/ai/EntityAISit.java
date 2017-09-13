@@ -14,7 +14,7 @@ public class EntityAISit extends EntityAIBase {
 
    public boolean shouldExecute() {
       if (!this.theEntity.isTamed()) {
-         return false;
+         return this.isSitting && this.theEntity.getAttackTarget() == null;
       } else if (this.theEntity.isInWater()) {
          return false;
       } else if (!this.theEntity.onGround) {

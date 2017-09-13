@@ -1,21 +1,17 @@
 package net.minecraft.block;
 
-import java.util.EnumSet;
 import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public abstract class BlockRedstoneDiode extends BlockHorizontal {
    protected static final AxisAlignedBB REDSTONE_DIODE_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D);
@@ -49,8 +45,16 @@ public abstract class BlockRedstoneDiode extends BlockHorizontal {
       if (!this.isLocked(var1, var2, var3)) {
          boolean var5 = this.shouldBePowered(var1, var2, var3);
          if (this.isRepeaterPowered && !var5) {
+            if (CraftEventFactory.callRedstoneChange(var1, var2.getX(), var2.getY(), var2.getZ(), 15, 0).getNewCurrent() != 0) {
+               return;
+            }
+
             var1.setBlockState(var2, this.getUnpoweredState(var3), 2);
          } else if (!this.isRepeaterPowered) {
+            if (CraftEventFactory.callRedstoneChange(var1, var2.getX(), var2.getY(), var2.getZ(), 0, 15).getNewCurrent() != 15) {
+               return;
+            }
+
             var1.setBlockState(var2, this.getPoweredState(var3), 2);
             if (!var5) {
                var1.updateBlockTick(var2, this.getPoweredState(var3).getBlock(), this.getTickDelay(var3), -1);
@@ -58,11 +62,6 @@ public abstract class BlockRedstoneDiode extends BlockHorizontal {
          }
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
-      return var4.getAxis() != EnumFacing.Axis.Y;
    }
 
    protected boolean isPowered(IBlockState var1) {
@@ -163,10 +162,8 @@ public abstract class BlockRedstoneDiode extends BlockHorizontal {
    protected void notifyNeighbors(World var1, BlockPos var2, IBlockState var3) {
       EnumFacing var4 = (EnumFacing)var3.getValue(FACING);
       BlockPos var5 = var2.offset(var4.getOpposite());
-      if (!ForgeEventFactory.onNeighborNotify(var1, var2, var1.getBlockState(var2), EnumSet.of(var4.getOpposite())).isCanceled()) {
-         var1.notifyBlockOfStateChange(var5, this);
-         var1.notifyNeighborsOfStateExcept(var5, this, var4);
-      }
+      var1.notifyBlockOfStateChange(var5, this);
+      var1.notifyNeighborsOfStateExcept(var5, this, var4);
    }
 
    public void onBlockDestroyedByPlayer(World var1, BlockPos var2, IBlockState var3) {
@@ -218,10 +215,5 @@ public abstract class BlockRedstoneDiode extends BlockHorizontal {
 
    public boolean isAssociatedBlock(Block var1) {
       return this.isSameDiode(var1.getDefaultState());
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
    }
 }

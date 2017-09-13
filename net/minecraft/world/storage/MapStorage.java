@@ -96,8 +96,8 @@ public class MapStorage {
          } catch (Exception var5) {
             var5.printStackTrace();
          }
-      }
 
+      }
    }
 
    private void loadIdCounts() {

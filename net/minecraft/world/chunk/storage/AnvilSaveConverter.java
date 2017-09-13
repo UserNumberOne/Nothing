@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import net.minecraft.client.AnvilConverterException;
 import net.minecraft.init.Biomes;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,10 +20,6 @@ import net.minecraft.world.biome.BiomeProviderSingle;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveFormatOld;
 import net.minecraft.world.storage.WorldInfo;
-import net.minecraft.world.storage.WorldSummary;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,57 +30,12 @@ public class AnvilSaveConverter extends SaveFormatOld {
       super(var1, var2);
    }
 
-   @SideOnly(Side.CLIENT)
-   public String getName() {
-      return "Anvil";
-   }
-
-   @SideOnly(Side.CLIENT)
-   public List getSaveList() throws AnvilConverterException {
-      if (this.savesDirectory != null && this.savesDirectory.exists() && this.savesDirectory.isDirectory()) {
-         ArrayList var1 = Lists.newArrayList();
-         File[] var2 = this.savesDirectory.listFiles();
-
-         for(File var6 : var2) {
-            if (var6.isDirectory()) {
-               String var7 = var6.getName();
-               WorldInfo var8 = this.getWorldInfo(var7);
-               if (var8 != null && (var8.getSaveVersion() == 19132 || var8.getSaveVersion() == 19133)) {
-                  boolean var9 = var8.getSaveVersion() != this.getSaveVersion();
-                  String var10 = var8.getWorldName();
-                  if (StringUtils.isEmpty(var10)) {
-                     var10 = var7;
-                  }
-
-                  long var11 = 0L;
-                  var1.add(new WorldSummary(var8, var7, var10, 0L, var9));
-               }
-            }
-         }
-
-         return var1;
-      } else {
-         throw new AnvilConverterException("Unable to read or access folder where game worlds are saved!");
-      }
-   }
-
    protected int getSaveVersion() {
       return 19133;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void flushCache() {
-      RegionFileCache.clearRegionFileReferences();
-   }
-
    public ISaveHandler getSaveLoader(String var1, boolean var2) {
       return new AnvilSaveHandler(this.savesDirectory, var1, var2, this.dataFixer);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isConvertible(String var1) {
-      WorldInfo var2 = this.getWorldInfo(var1);
-      return var2 != null && var2.getSaveVersion() == 19132;
    }
 
    public boolean isOldMapFormat(String var1) {
@@ -149,9 +98,9 @@ public class AnvilSaveConverter extends SaveFormatOld {
             if (!var3.renameTo(var4)) {
                LOGGER.warn("Unable to create level.dat_mcr backup");
             }
+
          }
       }
-
    }
 
    private void convertFile(File var1, Iterable var2, BiomeProvider var3, int var4, int var5, IProgressUpdate var6) {

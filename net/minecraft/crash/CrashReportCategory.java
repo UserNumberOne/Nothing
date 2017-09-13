@@ -5,8 +5,6 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CrashReportCategory {
    private final CrashReport crashReport;
@@ -17,11 +15,6 @@ public class CrashReportCategory {
    public CrashReportCategory(CrashReport var1, String var2) {
       this.crashReport = var1;
       this.name = var2;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public static String getCoordinateInfo(double var0, double var2, double var4) {
-      return String.format("%.2f,%.2f,%.2f - %s", var0, var2, var4, getCoordinateInfo(new BlockPos(var0, var2, var4)));
    }
 
    public static String getCoordinateInfo(BlockPos var0) {
@@ -97,13 +90,8 @@ public class CrashReportCategory {
       if (var2.length <= 0) {
          return 0;
       } else {
-         int var3 = var2.length - 3 - var1;
-         if (var3 <= 0) {
-            var3 = var2.length;
-         }
-
-         this.stackTrace = new StackTraceElement[var3];
-         System.arraycopy(var2, var2.length - var3, this.stackTrace, 0, this.stackTrace.length);
+         this.stackTrace = new StackTraceElement[var2.length - 3 - var1];
+         System.arraycopy(var2, 3 + var1, this.stackTrace, 0, this.stackTrace.length);
          return this.stackTrace.length;
       }
    }
@@ -170,6 +158,11 @@ public class CrashReportCategory {
                return "ID #" + var4;
             }
          }
+
+         // $FF: synthetic method
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var0.setDetail("Block data value", new ICrashReportDetail() {
          public String call() throws Exception {
@@ -180,10 +173,20 @@ public class CrashReportCategory {
                return String.format("%1$d / 0x%1$X / 0b%2$s", var3, var1);
             }
          }
+
+         // $FF: synthetic method
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var0.setDetail("Block location", new ICrashReportDetail() {
          public String call() throws Exception {
             return CrashReportCategory.getCoordinateInfo(var1);
+         }
+
+         // $FF: synthetic method
+         public Object call() throws Exception {
+            return this.call();
          }
       });
    }
@@ -193,10 +196,20 @@ public class CrashReportCategory {
          public String call() throws Exception {
             return var2.toString();
          }
+
+         // $FF: synthetic method
+         public Object call() throws Exception {
+            return this.call();
+         }
       });
       var0.setDetail("Block location", new ICrashReportDetail() {
          public String call() throws Exception {
             return CrashReportCategory.getCoordinateInfo(var1);
+         }
+
+         // $FF: synthetic method
+         public Object call() throws Exception {
+            return this.call();
          }
       });
    }

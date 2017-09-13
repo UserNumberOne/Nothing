@@ -5,8 +5,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.IntIdentityHashBiMap;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockStatePaletteHashMap implements IBlockStatePalette {
    private final IntIdentityHashBiMap statePaletteMap;
@@ -34,17 +32,6 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
    @Nullable
    public IBlockState getBlockState(int var1) {
       return (IBlockState)this.statePaletteMap.get(var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void read(PacketBuffer var1) {
-      this.statePaletteMap.clear();
-      int var2 = var1.readVarInt();
-
-      for(int var3 = 0; var3 < var2; ++var3) {
-         this.statePaletteMap.add(Block.BLOCK_STATE_IDS.getByValue(var1.readVarInt()));
-      }
-
    }
 
    public void write(PacketBuffer var1) {

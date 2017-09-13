@@ -37,43 +37,43 @@ public class RandomPositionGenerator {
       int var8 = 0;
       int var9 = 0;
       float var10 = -99999.0F;
-      boolean var11;
+      boolean var15;
       if (var0.hasHome()) {
-         double var12 = var0.getHomePosition().distanceSq((double)MathHelper.floor(var0.posX), (double)MathHelper.floor(var0.posY), (double)MathHelper.floor(var0.posZ)) + 4.0D;
-         double var14 = (double)(var0.getMaximumHomeDistance() + (float)var1);
-         var11 = var12 < var14 * var14;
+         double var11 = var0.getHomePosition().distanceSq((double)MathHelper.floor(var0.posX), (double)MathHelper.floor(var0.posY), (double)MathHelper.floor(var0.posZ)) + 4.0D;
+         double var13 = (double)(var0.getMaximumHomeDistance() + (float)var1);
+         var15 = var11 < var13 * var13;
       } else {
-         var11 = false;
+         var15 = false;
       }
 
-      for(int var18 = 0; var18 < 10; ++var18) {
-         int var13 = var5.nextInt(2 * var1 + 1) - var1;
-         int var19 = var5.nextInt(2 * var2 + 1) - var2;
-         int var15 = var5.nextInt(2 * var1 + 1) - var1;
-         if (var3 == null || (double)var13 * var3.xCoord + (double)var15 * var3.zCoord >= 0.0D) {
+      for(int var16 = 0; var16 < 10; ++var16) {
+         int var17 = var5.nextInt(2 * var1 + 1) - var1;
+         int var18 = var5.nextInt(2 * var2 + 1) - var2;
+         int var19 = var5.nextInt(2 * var1 + 1) - var1;
+         if (var3 == null || (double)var17 * var3.xCoord + (double)var19 * var3.zCoord >= 0.0D) {
             if (var0.hasHome() && var1 > 1) {
-               BlockPos var16 = var0.getHomePosition();
-               if (var0.posX > (double)var16.getX()) {
-                  var13 -= var5.nextInt(var1 / 2);
+               BlockPos var20 = var0.getHomePosition();
+               if (var0.posX > (double)var20.getX()) {
+                  var17 -= var5.nextInt(var1 / 2);
                } else {
-                  var13 += var5.nextInt(var1 / 2);
+                  var17 += var5.nextInt(var1 / 2);
                }
 
-               if (var0.posZ > (double)var16.getZ()) {
-                  var15 -= var5.nextInt(var1 / 2);
+               if (var0.posZ > (double)var20.getZ()) {
+                  var19 -= var5.nextInt(var1 / 2);
                } else {
-                  var15 += var5.nextInt(var1 / 2);
+                  var19 += var5.nextInt(var1 / 2);
                }
             }
 
-            BlockPos var20 = new BlockPos((double)var13 + var0.posX, (double)var19 + var0.posY, (double)var15 + var0.posZ);
-            if ((!var11 || var0.isWithinHomeDistanceFromPosition(var20)) && var4.canEntityStandOnPos(var20)) {
-               float var17 = var0.getBlockPathWeight(var20);
-               if (var17 > var10) {
-                  var10 = var17;
-                  var7 = var13;
-                  var8 = var19;
-                  var9 = var15;
+            BlockPos var22 = new BlockPos((double)var17 + var0.posX, (double)var18 + var0.posY, (double)var19 + var0.posZ);
+            if ((!var15 || var0.isWithinHomeDistanceFromPosition(var22)) && var4.canEntityStandOnPos(var22)) {
+               float var21 = var0.getBlockPathWeight(var22);
+               if (var21 > var10) {
+                  var10 = var21;
+                  var7 = var17;
+                  var8 = var18;
+                  var9 = var19;
                   var6 = true;
                }
             }

@@ -5,11 +5,11 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -20,17 +20,20 @@ import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.feature.WorldGenEndGateway;
 import net.minecraft.world.gen.feature.WorldGenEndIsland;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 public class TileEntityEndGateway extends TileEntity implements ITickable {
    private static final Logger LOG = LogManager.getLogger();
    private long age;
    private int teleportCooldown;
-   private BlockPos exitPortal;
-   private boolean exactTeleport;
+   public BlockPos exitPortal;
+   public boolean exactTeleport;
 
    public NBTTagCompound writeToNBT(NBTTagCompound var1) {
       super.writeToNBT(var1);
@@ -54,11 +57,6 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
       }
 
       this.exactTeleport = var1.getBoolean("ExactTeleport");
-   }
-
-   @SideOnly(Side.CLIENT)
-   public double getMaxRenderDistanceSquared() {
-      return 65536.0D;
    }
 
    public void update() {
@@ -86,16 +84,6 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
 
    public boolean isCoolingDown() {
       return this.teleportCooldown > 0;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getSpawnPercent() {
-      return MathHelper.clamp((float)this.age / 200.0F, 0.0F, 1.0F);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float getCooldownPercent() {
-      return 1.0F - MathHelper.clamp((float)this.teleportCooldown / 20.0F, 0.0F, 1.0F);
    }
 
    @Nullable
@@ -134,6 +122,22 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
 
          if (this.exitPortal != null) {
             BlockPos var2 = this.exactTeleport ? this.exitPortal : this.findExitPosition();
+            if (var1 instanceof EntityPlayerMP) {
+               CraftPlayer var3 = (CraftPlayer)var1.getBukkitEntity();
+               Location var4 = new Location(this.world.getWorld(), (double)var2.getX() + 0.5D, (double)var2.getY() + 0.5D, (double)var2.getZ() + 0.5D);
+               var4.setPitch(var3.getLocation().getPitch());
+               var4.setYaw(var3.getLocation().getYaw());
+               PlayerTeleportEvent var5 = new PlayerTeleportEvent(var3, var3.getLocation(), var4, TeleportCause.END_GATEWAY);
+               Bukkit.getPluginManager().callEvent(var5);
+               if (var5.isCancelled()) {
+                  return;
+               }
+
+               ((EntityPlayerMP)var1).connection.teleport(var5.getTo());
+               this.triggerCooldown();
+               return;
+            }
+
             var1.setPositionAndUpdate((double)var2.getX() + 0.5D, (double)var2.getY() + 0.5D, (double)var2.getZ() + 0.5D);
          }
 
@@ -156,13 +160,13 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
          LOG.debug("Skipping backwards past nonempty chunk at {}", new Object[]{var2});
       }
 
-      for(int var4 = 16; getChunk(this.world, var2).getTopFilledSegment() == 0 && var4-- > 0; var2 = var2.add(var1.scale(16.0D))) {
+      for(int var5 = 16; getChunk(this.world, var2).getTopFilledSegment() == 0 && var5-- > 0; var2 = var2.add(var1.scale(16.0D))) {
          LOG.debug("Skipping forward past empty chunk at {}", new Object[]{var2});
       }
 
       LOG.debug("Found chunk at {}", new Object[]{var2});
-      Chunk var5 = getChunk(this.world, var2);
-      this.exitPortal = findSpawnpointInChunk(var5);
+      Chunk var4 = getChunk(this.world, var2);
+      this.exitPortal = findSpawnpointInChunk(var4);
       if (this.exitPortal == null) {
          this.exitPortal = new BlockPos(var2.xCoord + 0.5D, 75.0D, var2.zCoord + 0.5D);
          LOG.debug("Failed to find suitable block, settling on {}", new Object[]{this.exitPortal});
@@ -236,21 +240,5 @@ public class TileEntityEndGateway extends TileEntity implements ITickable {
          LOG.warn("Couldn't save exit portal at {}", new Object[]{var1});
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean shouldRenderFace(EnumFacing var1) {
-      return this.getBlockType().getDefaultState().shouldSideBeRendered(this.world, this.getPos(), var1);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getParticleAmount() {
-      int var1 = 0;
-
-      for(EnumFacing var5 : EnumFacing.values()) {
-         var1 += this.shouldRenderFace(var5) ? 1 : 0;
-      }
-
-      return var1;
    }
 }

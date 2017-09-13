@@ -1,5 +1,7 @@
 package net.minecraft.tileentity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,11 +16,34 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.walkers.ItemStackDataLists;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftHumanEntity;
 
 public class TileEntityDispenser extends TileEntityLockableLoot implements IInventory {
    private static final Random RNG = new Random();
    private ItemStack[] stacks = new ItemStack[9];
    protected String customName;
+   public List transaction = new ArrayList();
+   private int maxStack = 64;
+
+   public ItemStack[] getContents() {
+      return this.stacks;
+   }
+
+   public void onOpen(CraftHumanEntity var1) {
+      this.transaction.add(var1);
+   }
+
+   public void onClose(CraftHumanEntity var1) {
+      this.transaction.remove(var1);
+   }
+
+   public List getViewers() {
+      return this.transaction;
+   }
+
+   public void setMaxStackSize(int var1) {
+      this.maxStack = var1;
+   }
 
    public int getSizeInventory() {
       return 9;
@@ -53,7 +78,7 @@ public class TileEntityDispenser extends TileEntityLockableLoot implements IInve
       int var2 = 1;
 
       for(int var3 = 0; var3 < this.stacks.length; ++var3) {
-         if (this.stacks[var3] != null && RNG.nextInt(var2++) == 0) {
+         if (this.stacks[var3] != null && RNG.nextInt(var2++) == 0 && this.stacks[var3].stackSize != 0) {
             var1 = var3;
          }
       }
@@ -144,7 +169,7 @@ public class TileEntityDispenser extends TileEntityLockableLoot implements IInve
    }
 
    public int getInventoryStackLimit() {
-      return 64;
+      return this.maxStack;
    }
 
    public boolean isUsableByPlayer(EntityPlayer var1) {

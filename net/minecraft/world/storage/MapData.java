@@ -2,35 +2,44 @@ package net.minecraft.world.storage;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketMaps;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec4b;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_10_R1.map.CraftMapView;
+import org.bukkit.craftbukkit.v1_10_R1.map.RenderData;
+import org.bukkit.map.MapCursor;
 
 public class MapData extends WorldSavedData {
    public int xCenter;
    public int zCenter;
-   public int dimension;
+   public byte dimension;
    public boolean trackingPosition;
    public byte scale;
    public byte[] colors = new byte[16384];
    public List playersArrayList = Lists.newArrayList();
    private final Map playersHashMap = Maps.newHashMap();
    public Map mapDecorations = Maps.newLinkedHashMap();
+   public final CraftMapView mapView = new CraftMapView(this);
+   private CraftServer server = (CraftServer)Bukkit.getServer();
+   private UUID uniqueId = null;
 
    public MapData(String var1) {
       super(var1);
@@ -45,13 +54,22 @@ public class MapData extends WorldSavedData {
    }
 
    public void readFromNBT(NBTTagCompound var1) {
-      NBTBase var2 = var1.getTag("dimension");
-      if (var2 instanceof NBTTagByte) {
-         this.dimension = ((NBTTagByte)var2).getByte();
-      } else {
-         this.dimension = ((NBTTagInt)var2).getInt();
+      byte var2 = var1.getByte("dimension");
+      if (var2 >= 10) {
+         long var3 = var1.getLong("UUIDLeast");
+         long var5 = var1.getLong("UUIDMost");
+         if (var3 != 0L && var5 != 0L) {
+            this.uniqueId = new UUID(var5, var3);
+            CraftWorld var7 = (CraftWorld)this.server.getWorld(this.uniqueId);
+            if (var7 == null) {
+               var2 = 127;
+            } else {
+               var2 = (byte)var7.getHandle().dimension;
+            }
+         }
       }
 
+      this.dimension = var2;
       this.xCenter = var1.getInteger("xCenter");
       this.zCenter = var1.getInteger("zCenter");
       this.scale = var1.getByte("scale");
@@ -62,23 +80,23 @@ public class MapData extends WorldSavedData {
          this.trackingPosition = true;
       }
 
-      short var3 = var1.getShort("width");
-      short var4 = var1.getShort("height");
-      if (var3 == 128 && var4 == 128) {
+      short var8 = var1.getShort("width");
+      short var9 = var1.getShort("height");
+      if (var8 == 128 && var9 == 128) {
          this.colors = var1.getByteArray("colors");
       } else {
-         byte[] var5 = var1.getByteArray("colors");
+         byte[] var10 = var1.getByteArray("colors");
          this.colors = new byte[16384];
-         int var6 = (128 - var3) / 2;
-         int var7 = (128 - var4) / 2;
+         int var11 = (128 - var8) / 2;
+         int var16 = (128 - var9) / 2;
 
-         for(int var8 = 0; var8 < var4; ++var8) {
-            int var9 = var8 + var7;
-            if (var9 >= 0 || var9 < 128) {
-               for(int var10 = 0; var10 < var3; ++var10) {
-                  int var11 = var10 + var6;
-                  if (var11 >= 0 || var11 < 128) {
-                     this.colors[var11 + var9 * 128] = var5[var10 + var8 * var3];
+         for(int var12 = 0; var12 < var9; ++var12) {
+            int var13 = var12 + var16;
+            if (var13 >= 0 || var13 < 128) {
+               for(int var14 = 0; var14 < var8; ++var14) {
+                  int var15 = var14 + var11;
+                  if (var15 >= 0 || var15 < 128) {
+                     this.colors[var15 + var13 * 128] = var10[var14 + var12 * var8];
                   }
                }
             }
@@ -88,7 +106,24 @@ public class MapData extends WorldSavedData {
    }
 
    public NBTTagCompound writeToNBT(NBTTagCompound var1) {
-      var1.setInteger("dimension", this.dimension);
+      if (this.dimension >= 10) {
+         if (this.uniqueId == null) {
+            for(World var3 : this.server.getWorlds()) {
+               CraftWorld var4 = (CraftWorld)var3;
+               if (var4.getHandle().dimension == this.dimension) {
+                  this.uniqueId = var4.getUID();
+                  break;
+               }
+            }
+         }
+
+         if (this.uniqueId != null) {
+            var1.setLong("UUIDLeast", this.uniqueId.getLeastSignificantBits());
+            var1.setLong("UUIDMost", this.uniqueId.getMostSignificantBits());
+         }
+      }
+
+      var1.setByte("dimension", this.dimension);
       var1.setInteger("xCenter", this.xCenter);
       var1.setInteger("zCenter", this.zCenter);
       var1.setByte("scale", this.scale);
@@ -141,20 +176,19 @@ public class MapData extends WorldSavedData {
 
    }
 
-   private void updateDecorations(int var1, World var2, String var3, double var4, double var6, double var8) {
+   private void updateDecorations(int var1, net.minecraft.world.World var2, String var3, double var4, double var6, double var8) {
       int var10 = 1 << this.scale;
       float var11 = (float)(var4 - (double)this.xCenter) / (float)var10;
       float var12 = (float)(var6 - (double)this.zCenter) / (float)var10;
       byte var13 = (byte)((int)((double)(var11 * 2.0F) + 0.5D));
       byte var14 = (byte)((int)((double)(var12 * 2.0F) + 0.5D));
-      boolean var15 = true;
-      byte var16;
+      byte var15;
       if (var11 >= -63.0F && var12 >= -63.0F && var11 <= 63.0F && var12 <= 63.0F) {
          var8 = var8 + (var8 < 0.0D ? -8.0D : 8.0D);
-         var16 = (byte)((int)(var8 * 16.0D / 360.0D));
-         if (var2.provider.shouldMapSpin(var3, var4, var6, var8)) {
-            int var17 = (int)(var2.getWorldInfo().getWorldTime() / 10L);
-            var16 = (byte)(var17 * var17 * 34187121 + var17 * 121 >> 15 & 15);
+         var15 = (byte)((int)(var8 * 16.0D / 360.0D));
+         if (this.dimension < 0) {
+            int var16 = (int)(var2.getWorldInfo().getWorldTime() / 10L);
+            var15 = (byte)(var16 * var16 * 34187121 + var16 * 121 >> 15 & 15);
          }
       } else {
          if (Math.abs(var11) >= 320.0F || Math.abs(var12) >= 320.0F) {
@@ -163,7 +197,7 @@ public class MapData extends WorldSavedData {
          }
 
          var1 = 6;
-         var16 = 0;
+         var15 = 0;
          if (var11 <= -63.0F) {
             var13 = -128;
          }
@@ -181,11 +215,11 @@ public class MapData extends WorldSavedData {
          }
       }
 
-      this.mapDecorations.put(var3, new Vec4b((byte)var1, var13, var14, var16));
+      this.mapDecorations.put(var3, new Vec4b((byte)var1, var13, var14, var15));
    }
 
    @Nullable
-   public Packet getMapPacket(ItemStack var1, World var2, EntityPlayer var3) {
+   public Packet getMapPacket(ItemStack var1, net.minecraft.world.World var2, EntityPlayer var3) {
       MapData.MapInfo var4 = (MapData.MapInfo)this.playersHashMap.get(var3);
       return var4 == null ? null : var4.getPacket(var1);
    }
@@ -225,11 +259,20 @@ public class MapData extends WorldSavedData {
       }
 
       public Packet getPacket(ItemStack var1) {
+         RenderData var2 = MapData.this.mapView.render((CraftPlayer)this.entityplayerObj.getBukkitEntity());
+         ArrayList var3 = new ArrayList();
+
+         for(MapCursor var5 : var2.cursors) {
+            if (var5.isVisible()) {
+               var3.add(new Vec4b(var5.getRawType(), var5.getX(), var5.getY(), var5.getDirection()));
+            }
+         }
+
          if (this.isDirty) {
             this.isDirty = false;
-            return new SPacketMaps(var1.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, MapData.this.mapDecorations.values(), MapData.this.colors, this.minX, this.minY, this.maxX + 1 - this.minX, this.maxY + 1 - this.minY);
+            return new SPacketMaps(var1.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, var3, var2.buffer, this.minX, this.minY, this.maxX + 1 - this.minX, this.maxY + 1 - this.minY);
          } else {
-            return this.tick++ % 5 == 0 ? new SPacketMaps(var1.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, MapData.this.mapDecorations.values(), MapData.this.colors, 0, 0, 0, 0) : null;
+            return this.tick++ % 5 == 0 ? new SPacketMaps(var1.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, var3, var2.buffer, 0, 0, 0, 0) : null;
          }
       }
 

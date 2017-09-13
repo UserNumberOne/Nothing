@@ -57,9 +57,9 @@ public final class ProjectileHelper {
       double var4 = var0.motionY;
       double var6 = var0.motionZ;
       float var8 = MathHelper.sqrt(var2 * var2 + var6 * var6);
-      var0.rotationYaw = (float)(MathHelper.atan2(var6, var2) * 57.29577951308232D) + 90.0F;
+      var0.rotationYaw = (float)(MathHelper.atan2(var6, var2) * 57.2957763671875D) + 90.0F;
 
-      for(var0.rotationPitch = (float)(MathHelper.atan2((double)var8, var4) * 57.29577951308232D) - 90.0F; var0.rotationPitch - var0.prevRotationPitch < -180.0F; var0.prevRotationPitch -= 360.0F) {
+      for(var0.rotationPitch = (float)(MathHelper.atan2((double)var8, var4) * 57.2957763671875D) - 90.0F; var0.rotationPitch - var0.prevRotationPitch < -180.0F; var0.prevRotationPitch -= 360.0F) {
          ;
       }
 

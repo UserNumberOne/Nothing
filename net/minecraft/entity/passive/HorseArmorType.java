@@ -4,8 +4,6 @@ import javax.annotation.Nullable;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public enum HorseArmorType {
    NONE(0),
@@ -33,19 +31,8 @@ public enum HorseArmorType {
       return this.ordinal();
    }
 
-   @SideOnly(Side.CLIENT)
-   public String getHash() {
-      return this.hash;
-   }
-
    public int getProtection() {
       return this.protection;
-   }
-
-   @Nullable
-   @SideOnly(Side.CLIENT)
-   public String getTextureName() {
-      return this.textureName;
    }
 
    public static HorseArmorType getByOrdinal(int var0) {
@@ -57,7 +44,13 @@ public enum HorseArmorType {
    }
 
    public static HorseArmorType getByItem(@Nullable Item var0) {
-      return var0 == Items.IRON_HORSE_ARMOR ? IRON : (var0 == Items.GOLDEN_HORSE_ARMOR ? GOLD : (var0 == Items.DIAMOND_HORSE_ARMOR ? DIAMOND : NONE));
+      if (var0 == Items.IRON_HORSE_ARMOR) {
+         return IRON;
+      } else if (var0 == Items.GOLDEN_HORSE_ARMOR) {
+         return GOLD;
+      } else {
+         return var0 == Items.DIAMOND_HORSE_ARMOR ? DIAMOND : NONE;
+      }
    }
 
    public static boolean isHorseArmor(@Nullable Item var0) {

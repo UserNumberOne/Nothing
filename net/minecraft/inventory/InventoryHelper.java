@@ -35,7 +35,16 @@ public class InventoryHelper {
 
       while(var7.stackSize > 0) {
          int var11 = RANDOM.nextInt(21) + 10;
-         EntityItem var12 = new EntityItem(var0, var1 + (double)var8, var3 + (double)var9, var5 + (double)var10, var7.splitStack(var11));
+         if (var11 > var7.stackSize) {
+            var11 = var7.stackSize;
+         }
+
+         var7.stackSize -= var11;
+         EntityItem var12 = new EntityItem(var0, var1 + (double)var8, var3 + (double)var9, var5 + (double)var10, new ItemStack(var7.getItem(), var11, var7.getMetadata()));
+         if (var7.hasTagCompound()) {
+            var12.getEntityItem().setTagCompound(var7.getTagCompound().copy());
+         }
+
          float var13 = 0.05F;
          var12.motionX = RANDOM.nextGaussian() * 0.05000000074505806D;
          var12.motionY = RANDOM.nextGaussian() * 0.05000000074505806D + 0.20000000298023224D;

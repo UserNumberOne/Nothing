@@ -19,13 +19,11 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityTippedArrow extends EntityArrow {
    private static final DataParameter COLOR = EntityDataManager.createKey(EntityTippedArrow.class, DataSerializers.VARINT);
    private PotionType potion = PotionTypes.EMPTY;
-   private final Set customPotionEffects = Sets.newHashSet();
+   public final Set customPotionEffects = Sets.newHashSet();
 
    public EntityTippedArrow(World var1) {
       super(var1);
@@ -101,6 +99,23 @@ public class EntityTippedArrow extends EntityArrow {
 
    }
 
+   public void refreshEffects() {
+      this.getDataManager().set(COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(this.potion, this.customPotionEffects))));
+   }
+
+   public String getType() {
+      return ((ResourceLocation)PotionType.REGISTRY.getNameForObject(this.potion)).toString();
+   }
+
+   public void setType(String var1) {
+      this.potion = (PotionType)PotionType.REGISTRY.getObject(new ResourceLocation(var1));
+      this.dataManager.set(COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(this.potion, this.customPotionEffects))));
+   }
+
+   public boolean isTipped() {
+      return !this.customPotionEffects.isEmpty() || this.potion != PotionTypes.EMPTY;
+   }
+
    public int getColor() {
       return ((Integer)this.dataManager.get(COLOR)).intValue();
    }
@@ -147,11 +162,7 @@ public class EntityTippedArrow extends EntityArrow {
       super.arrowHit(var1);
 
       for(PotionEffect var3 : this.potion.getEffects()) {
-         if (var3.getPotion().isInstant()) {
-            var3.getPotion().affectEntity(this, this.shootingEntity, var1, var3.getAmplifier(), 1.0D);
-         } else {
-            var1.addPotionEffect(new PotionEffect(var3.getPotion(), var3.getDuration() / 8, var3.getAmplifier(), var3.getIsAmbient(), var3.doesShowParticles()));
-         }
+         var1.addPotionEffect(new PotionEffect(var3.getPotion(), var3.getDuration() / 8, var3.getAmplifier(), var3.getIsAmbient(), var3.doesShowParticles()));
       }
 
       if (!this.customPotionEffects.isEmpty()) {
@@ -171,24 +182,5 @@ public class EntityTippedArrow extends EntityArrow {
          PotionUtils.appendEffects(var1, this.customPotionEffects);
          return var1;
       }
-   }
-
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 0) {
-         int var2 = this.getColor();
-         if (var2 > 0) {
-            double var3 = (double)(var2 >> 16 & 255) / 255.0D;
-            double var5 = (double)(var2 >> 8 & 255) / 255.0D;
-            double var7 = (double)(var2 >> 0 & 255) / 255.0D;
-
-            for(int var9 = 0; var9 < 20; ++var9) {
-               this.world.spawnParticle(EnumParticleTypes.SPELL_MOB, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, var3, var5, var7);
-            }
-         }
-      } else {
-         super.handleStatusUpdate(var1);
-      }
-
    }
 }

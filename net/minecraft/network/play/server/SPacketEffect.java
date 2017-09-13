@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEffect implements Packet {
    private int soundType;
@@ -40,25 +38,5 @@ public class SPacketEffect implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleEffect(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public boolean isSoundServerwide() {
-      return this.serverWide;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSoundType() {
-      return this.soundType;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getSoundData() {
-      return this.soundData;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockPos getSoundPos() {
-      return this.soundPos;
    }
 }

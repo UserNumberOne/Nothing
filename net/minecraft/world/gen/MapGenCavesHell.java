@@ -25,10 +25,10 @@ public class MapGenCavesHell extends MapGenBase {
          var16 = var26 - var25.nextInt(var26 / 4);
       }
 
-      boolean var63 = false;
+      boolean var65 = false;
       if (var15 == -1) {
          var15 = var16 / 2;
-         var63 = true;
+         var65 = true;
       }
 
       int var27 = var25.nextInt(var16 / 2) + var16 / 4;
@@ -53,13 +53,13 @@ public class MapGenCavesHell extends MapGenBase {
          var23 = var23 * 0.75F;
          var24 = var24 + (var25.nextFloat() - var25.nextFloat()) * var25.nextFloat() * 2.0F;
          var23 = var23 + (var25.nextFloat() - var25.nextFloat()) * var25.nextFloat() * 4.0F;
-         if (!var63 && var15 == var27 && var12 > 1.0F) {
+         if (!var65 && var15 == var27 && var12 > 1.0F) {
             this.addTunnel(var25.nextLong(), var3, var4, var5, var6, var8, var10, var25.nextFloat() * 0.5F + 0.5F, var13 - 1.5707964F, var14 / 3.0F, var15, var16, 1.0D);
             this.addTunnel(var25.nextLong(), var3, var4, var5, var6, var8, var10, var25.nextFloat() * 0.5F + 0.5F, var13 + 1.5707964F, var14 / 3.0F, var15, var16, 1.0D);
             return;
          }
 
-         if (var63 || var25.nextInt(4) != 0) {
+         if (var65 || var25.nextInt(4) != 0) {
             double var35 = var6 - var19;
             double var37 = var10 - var21;
             double var39 = (double)(var16 - var15);
@@ -119,25 +119,25 @@ public class MapGenCavesHell extends MapGenBase {
                }
 
                if (!var49) {
-                  for(int var64 = var43; var64 < var44; ++var64) {
-                     double var65 = ((double)(var64 + var3 * 16) + 0.5D - var6) / var29;
+                  for(int var66 = var43; var66 < var44; ++var66) {
+                     double var54 = ((double)(var66 + var3 * 16) + 0.5D - var6) / var29;
 
-                     for(int var66 = var47; var66 < var48; ++var66) {
-                        double var54 = ((double)(var66 + var4 * 16) + 0.5D - var10) / var29;
+                     for(int var67 = var47; var67 < var48; ++var67) {
+                        double var56 = ((double)(var67 + var4 * 16) + 0.5D - var10) / var29;
 
-                        for(int var56 = var46; var56 > var45; --var56) {
-                           double var57 = ((double)(var56 - 1) + 0.5D - var8) / var31;
-                           if (var57 > -0.7D && var65 * var65 + var57 * var57 + var54 * var54 < 1.0D) {
-                              IBlockState var59 = var5.getBlockState(var64, var56, var66);
-                              if (var59.getBlock() == Blocks.NETHERRACK || var59.getBlock() == Blocks.DIRT || var59.getBlock() == Blocks.GRASS) {
-                                 var5.setBlockState(var64, var56, var66, AIR);
+                        for(int var58 = var46; var58 > var45; --var58) {
+                           double var59 = ((double)(var58 - 1) + 0.5D - var8) / var31;
+                           if (var59 > -0.7D && var54 * var54 + var59 * var59 + var56 * var56 < 1.0D) {
+                              IBlockState var61 = var5.getBlockState(var66, var58, var67);
+                              if (var61.getBlock() == Blocks.NETHERRACK || var61.getBlock() == Blocks.DIRT || var61.getBlock() == Blocks.GRASS) {
+                                 var5.setBlockState(var66, var58, var67, AIR);
                               }
                            }
                         }
                      }
                   }
 
-                  if (var63) {
+                  if (var65) {
                      break;
                   }
                }

@@ -5,21 +5,24 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.PotionTypes;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionHelper;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.stats.AchievementList;
-import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryBrewer;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
 
 public class ContainerBrewingStand extends Container {
    private final IInventory tileBrewingStand;
    private final Slot theSlot;
    private int prevBrewTime;
    private int prevFuel;
+   private CraftInventoryView bukkitEntity = null;
+   private InventoryPlayer player;
 
    public ContainerBrewingStand(InventoryPlayer var1, IInventory var2) {
+      this.player = var1;
       this.tileBrewingStand = var2;
       this.addSlotToContainer(new ContainerBrewingStand.Potion(var1.player, var2, 0, 56, 51));
       this.addSlotToContainer(new ContainerBrewingStand.Potion(var1.player, var2, 1, 79, 58));
@@ -62,13 +65,8 @@ public class ContainerBrewingStand extends Container {
       this.prevFuel = this.tileBrewingStand.getField(1);
    }
 
-   @SideOnly(Side.CLIENT)
-   public void updateProgressBar(int var1, int var2) {
-      this.tileBrewingStand.setField(var1, var2);
-   }
-
    public boolean canInteractWith(EntityPlayer var1) {
-      return this.tileBrewingStand.isUsableByPlayer(var1);
+      return !this.checkReachable ? true : this.tileBrewingStand.isUsableByPlayer(var1);
    }
 
    @Nullable
@@ -126,6 +124,16 @@ public class ContainerBrewingStand extends Container {
       return var3;
    }
 
+   public CraftInventoryView getBukkitView() {
+      if (this.bukkitEntity != null) {
+         return this.bukkitEntity;
+      } else {
+         CraftInventoryBrewer var1 = new CraftInventoryBrewer(this.tileBrewingStand);
+         this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), var1, this);
+         return this.bukkitEntity;
+      }
+   }
+
    static class Fuel extends Slot {
       public Fuel(IInventory var1, int var2, int var3, int var4) {
          super(var1, var2, var3, var4);
@@ -150,7 +158,7 @@ public class ContainerBrewingStand extends Container {
       }
 
       public boolean isItemValid(@Nullable ItemStack var1) {
-         return var1 != null && BrewingRecipeRegistry.isValidIngredient(var1);
+         return var1 != null && PotionHelper.isReagent(var1);
       }
 
       public int getSlotStackLimit() {
@@ -176,7 +184,6 @@ public class ContainerBrewingStand extends Container {
 
       public void onPickupFromSlot(EntityPlayer var1, ItemStack var2) {
          if (PotionUtils.getPotionFromItem(var2) != PotionTypes.WATER) {
-            ForgeEventFactory.onPlayerBrewedPotion(var1, var2);
             this.player.addStat(AchievementList.POTION);
          }
 
@@ -184,7 +191,12 @@ public class ContainerBrewingStand extends Container {
       }
 
       public static boolean canHoldPotion(@Nullable ItemStack var0) {
-         return var0 == null ? false : BrewingRecipeRegistry.isValidInput(var0);
+         if (var0 == null) {
+            return false;
+         } else {
+            Item var1 = var0.getItem();
+            return var1 == Items.POTIONITEM || var1 == Items.GLASS_BOTTLE || var1 == Items.SPLASH_POTION || var1 == Items.LINGERING_POTION;
+         }
       }
    }
 }

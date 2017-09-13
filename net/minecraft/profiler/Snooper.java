@@ -6,17 +6,13 @@ import java.lang.management.RuntimeMXBean;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.Map.Entry;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.HttpUtil;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class Snooper {
    private final Map snooperStats = Maps.newHashMap();
@@ -48,25 +44,23 @@ public class Snooper {
          this.threadTrigger.schedule(new TimerTask() {
             public void run() {
                if (Snooper.this.playerStatsCollector.isSnooperEnabled()) {
-                  HashMap var1;
+                  HashMap var2;
                   synchronized(Snooper.this.syncLock) {
-                     var1 = Maps.newHashMap(Snooper.this.clientStats);
+                     var2 = Maps.newHashMap(Snooper.this.clientStats);
                      if (Snooper.this.selfCounter == 0) {
-                        var1.putAll(Snooper.this.snooperStats);
+                        var2.putAll(Snooper.this.snooperStats);
                      }
 
-                     var1.put("snooper_count", Integer.valueOf(Snooper.this.selfCounter++));
-                     var1.put("snooper_token", Snooper.this.uniqueID);
+                     var2.put("snooper_count", Integer.valueOf(Snooper.this.selfCounter++));
+                     var2.put("snooper_token", Snooper.this.uniqueID);
                   }
 
-                  MinecraftServer var2 = Snooper.this.playerStatsCollector instanceof MinecraftServer ? (MinecraftServer)Snooper.this.playerStatsCollector : null;
-                  HttpUtil.postMap(Snooper.this.serverUrl, var1, true, var2 == null ? null : var2.getServerProxy());
+                  MinecraftServer var1 = Snooper.this.playerStatsCollector instanceof MinecraftServer ? (MinecraftServer)Snooper.this.playerStatsCollector : null;
+                  HttpUtil.postMap(Snooper.this.serverUrl, var2, true, var1 == null ? null : var1.au());
                }
-
             }
          }, 0L, 900000L);
       }
-
    }
 
    private void addOSData() {
@@ -115,35 +109,12 @@ public class Snooper {
       }
    }
 
-   @SideOnly(Side.CLIENT)
-   public Map getCurrentStats() {
-      LinkedHashMap var1 = Maps.newLinkedHashMap();
-      synchronized(this.syncLock) {
-         this.addMemoryStatsToSnooper();
-
-         for(Entry var4 : this.snooperStats.entrySet()) {
-            var1.put(var4.getKey(), var4.getValue().toString());
-         }
-
-         for(Entry var8 : this.clientStats.entrySet()) {
-            var1.put(var8.getKey(), var8.getValue().toString());
-         }
-
-         return var1;
-      }
-   }
-
    public boolean isSnooperRunning() {
       return this.isRunning;
    }
 
    public void stopSnooper() {
       this.threadTrigger.cancel();
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getUniqueID() {
-      return this.uniqueID;
    }
 
    public long getMinecraftStartTimeMillis() {

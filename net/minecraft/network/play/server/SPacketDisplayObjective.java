@@ -5,8 +5,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketDisplayObjective implements Packet {
    private int position;
@@ -37,15 +35,5 @@ public class SPacketDisplayObjective implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.handleDisplayObjective(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getPosition() {
-      return this.position;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public String getName() {
-      return this.scoreName;
    }
 }

@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -53,7 +54,12 @@ public class EntityAIPanic extends EntityAIBase {
    }
 
    public boolean continueExecuting() {
-      return !this.theEntityCreature.getNavigator().noPath();
+      if (this.theEntityCreature.ticksExisted - this.theEntityCreature.restoreWaterCost > 100) {
+         this.theEntityCreature.onKillEntity((EntityLivingBase)null);
+         return false;
+      } else {
+         return !this.theEntityCreature.getNavigator().noPath();
+      }
    }
 
    private BlockPos getRandPos(World var1, Entity var2, int var3, int var4) {

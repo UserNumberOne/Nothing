@@ -1,6 +1,5 @@
 package net.minecraft.tileentity;
 
-import io.netty.buffer.ByteBuf;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCommandBlock;
@@ -10,12 +9,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.command.CraftBlockCommandSender;
 
 public class TileEntityCommandBlock extends TileEntity {
    private boolean powered;
@@ -23,6 +21,10 @@ public class TileEntityCommandBlock extends TileEntity {
    private boolean conditionMet;
    private boolean sendToClient;
    private final CommandBlockBaseLogic commandBlockLogic = new CommandBlockBaseLogic() {
+      {
+         this.sender = new CraftBlockCommandSender(this);
+      }
+
       public BlockPos getPosition() {
          return TileEntityCommandBlock.this.pos;
       }
@@ -45,23 +47,11 @@ public class TileEntityCommandBlock extends TileEntity {
          TileEntityCommandBlock.this.getWorld().notifyBlockUpdate(TileEntityCommandBlock.this.pos, var1, var1, 3);
       }
 
-      @SideOnly(Side.CLIENT)
-      public int getCommandBlockType() {
-         return 0;
-      }
-
-      @SideOnly(Side.CLIENT)
-      public void fillInInfo(ByteBuf var1) {
-         var1.writeInt(TileEntityCommandBlock.this.pos.getX());
-         var1.writeInt(TileEntityCommandBlock.this.pos.getY());
-         var1.writeInt(TileEntityCommandBlock.this.pos.getZ());
-      }
-
       public Entity getCommandSenderEntity() {
          return null;
       }
 
-      public MinecraftServer getServer() {
+      public MinecraftServer h() {
          return TileEntityCommandBlock.this.world.getMinecraftServer();
       }
    };

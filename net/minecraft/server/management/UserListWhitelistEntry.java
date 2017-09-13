@@ -19,7 +19,6 @@ public class UserListWhitelistEntry extends UserListEntry {
          var1.addProperty("name", ((GameProfile)this.getValue()).getName());
          super.onSerialization(var1);
       }
-
    }
 
    private static GameProfile gameProfileFromJsonObject(JsonObject var0) {

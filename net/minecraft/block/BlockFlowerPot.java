@@ -1,6 +1,5 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
@@ -18,7 +17,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFlowerPot;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -30,8 +28,6 @@ import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockFlowerPot extends BlockContainer {
    public static final PropertyInteger LEGACY_DATA = PropertyInteger.create("legacy_data", 0, 15);
@@ -92,7 +88,11 @@ public class BlockFlowerPot extends BlockContainer {
    }
 
    private boolean canContain(@Nullable Block var1, int var2) {
-      return var1 != Blocks.YELLOW_FLOWER && var1 != Blocks.RED_FLOWER && var1 != Blocks.CACTUS && var1 != Blocks.BROWN_MUSHROOM && var1 != Blocks.RED_MUSHROOM && var1 != Blocks.SAPLING && var1 != Blocks.DEADBUSH ? var1 == Blocks.TALLGRASS && var2 == BlockTallGrass.EnumType.FERN.getMeta() : true;
+      if (var1 != Blocks.YELLOW_FLOWER && var1 != Blocks.RED_FLOWER && var1 != Blocks.CACTUS && var1 != Blocks.BROWN_MUSHROOM && var1 != Blocks.RED_MUSHROOM && var1 != Blocks.SAPLING && var1 != Blocks.DEADBUSH) {
+         return var1 == Blocks.TALLGRASS && var2 == BlockTallGrass.EnumType.FERN.getMeta();
+      } else {
+         return true;
+      }
    }
 
    public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
@@ -120,6 +120,11 @@ public class BlockFlowerPot extends BlockContainer {
    }
 
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
+      TileEntityFlowerPot var4 = this.getTileEntity(var1, var2);
+      if (var4 != null && var4.getFlowerPotItem() != null) {
+         spawnAsEntity(var1, var2, new ItemStack(var4.getFlowerPotItem(), 1, var4.getFlowerPotData()));
+      }
+
       super.breakBlock(var1, var2, var3);
    }
 
@@ -298,30 +303,6 @@ public class BlockFlowerPot extends BlockContainer {
       }
 
       return var1.withProperty(CONTENTS, var4);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public BlockRenderLayer getBlockLayer() {
-      return BlockRenderLayer.CUTOUT;
-   }
-
-   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
-      List var5 = super.getDrops(var1, var2, var3, var4);
-      TileEntityFlowerPot var6 = var1.getTileEntity(var2) instanceof TileEntityFlowerPot ? (TileEntityFlowerPot)var1.getTileEntity(var2) : null;
-      if (var6 != null && var6.getFlowerPotItem() != null) {
-         var5.add(new ItemStack(var6.getFlowerPotItem(), 1, var6.getFlowerPotData()));
-      }
-
-      return var5;
-   }
-
-   public boolean removedByPlayer(IBlockState var1, World var2, BlockPos var3, EntityPlayer var4, boolean var5) {
-      return var5 ? true : super.removedByPlayer(var1, var2, var3, var4, var5);
-   }
-
-   public void harvestBlock(World var1, EntityPlayer var2, BlockPos var3, IBlockState var4, TileEntity var5, ItemStack var6) {
-      super.harvestBlock(var1, var2, var3, var4, var5, var6);
-      var1.setBlockToAir(var3);
    }
 
    public static enum EnumFlowerType implements IStringSerializable {

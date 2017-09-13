@@ -50,8 +50,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeDesert;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 
 public class EntityRabbit extends EntityAnimal {
    private static final DataParameter RABBIT_TYPE = EntityDataManager.createKey(EntityRabbit.class, DataSerializers.VARINT);
@@ -66,6 +65,10 @@ public class EntityRabbit extends EntityAnimal {
       this.setSize(0.4F, 0.5F);
       this.jumpHelper = new EntityRabbit.RabbitJumpHelper(this);
       this.moveHelper = new EntityRabbit.RabbitMoveHelper(this);
+      this.initializePathFinderGoals();
+   }
+
+   public void initializePathFinderGoals() {
       this.setMovementSpeed(0.0D);
    }
 
@@ -114,11 +117,6 @@ public class EntityRabbit extends EntityAnimal {
          this.world.setEntityState(this, (byte)1);
       }
 
-   }
-
-   @SideOnly(Side.CLIENT)
-   public float setJumpCompletion(float var1) {
-      return this.jumpDuration == 0 ? 0.0F : ((float)this.jumpTicks + var1) / (float)this.jumpDuration;
    }
 
    public void setMovementSpeed(double var1) {
@@ -197,7 +195,7 @@ public class EntityRabbit extends EntityAnimal {
    }
 
    private void calculateRotationYaw(double var1, double var3) {
-      this.rotationYaw = (float)(MathHelper.atan2(var3 - this.posZ, var1 - this.posX) * 57.29577951308232D) - 90.0F;
+      this.rotationYaw = (float)(MathHelper.atan2(var3 - this.posZ, var1 - this.posX) * 57.2957763671875D) - 90.0F;
    }
 
    private void enableJumpControl() {
@@ -338,22 +336,22 @@ public class EntityRabbit extends EntityAnimal {
 
    @Nullable
    public IEntityLivingData onInitialSpawn(DifficultyInstance var1, @Nullable IEntityLivingData var2) {
-      var2 = super.onInitialSpawn(var1, var2);
-      int var3 = this.getRandomRabbitType();
-      boolean var4 = false;
-      if (var2 instanceof EntityRabbit.RabbitTypeData) {
-         var3 = ((EntityRabbit.RabbitTypeData)var2).typeData;
-         var4 = true;
+      Object var3 = super.onInitialSpawn(var1, var2);
+      int var4 = this.getRandomRabbitType();
+      boolean var5 = false;
+      if (var3 instanceof EntityRabbit.RabbitTypeData) {
+         var4 = ((EntityRabbit.RabbitTypeData)var3).typeData;
+         var5 = true;
       } else {
-         var2 = new EntityRabbit.RabbitTypeData(var3);
+         var3 = new EntityRabbit.RabbitTypeData(var4);
       }
 
-      this.setRabbitType(var3);
-      if (var4) {
+      this.setRabbitType(var4);
+      if (var5) {
          this.setGrowingAge(-24000);
       }
 
-      return var2;
+      return (IEntityLivingData)var3;
    }
 
    private int getRandomRabbitType() {
@@ -373,20 +371,12 @@ public class EntityRabbit extends EntityAnimal {
       this.carrotTicks = 40;
    }
 
-   @SideOnly(Side.CLIENT)
-   public void handleStatusUpdate(byte var1) {
-      if (var1 == 1) {
-         this.createRunningParticles();
-         this.jumpDuration = 10;
-         this.jumpTicks = 0;
-      } else {
-         super.handleStatusUpdate(var1);
-      }
-
-   }
-
    public void notifyDataManagerChange(DataParameter var1) {
       super.notifyDataManagerChange(var1);
+   }
+
+   public EntityAgeable createChild(EntityAgeable var1) {
+      return this.createChild(var1);
    }
 
    static class AIAvoidEntity extends EntityAIAvoidEntity {
@@ -473,9 +463,17 @@ public class EntityRabbit extends EntityAnimal {
             if (this.canRaid && var4 instanceof BlockCarrot) {
                Integer var5 = (Integer)var3.getValue(BlockCarrot.AGE);
                if (var5.intValue() == 0) {
+                  if (CraftEventFactory.callEntityChangeBlockEvent(this.rabbit, var2, Blocks.AIR, 0).isCancelled()) {
+                     return;
+                  }
+
                   var1.setBlockState(var2, Blocks.AIR.getDefaultState(), 2);
                   var1.destroyBlock(var2, true);
                } else {
+                  if (CraftEventFactory.callEntityChangeBlockEvent(this.rabbit, var2, var4, var4.getMetaFromState(var3.withProperty(BlockCarrot.AGE, Integer.valueOf(var5.intValue() - 1)))).isCancelled()) {
+                     return;
+                  }
+
                   var1.setBlockState(var2, var3.withProperty(BlockCarrot.AGE, Integer.valueOf(var5.intValue() - 1)), 2);
                   var1.playEvent(2001, var2, Block.getStateId(var3));
                }

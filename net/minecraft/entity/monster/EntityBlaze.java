@@ -27,8 +27,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityBlaze extends EntityMob {
    private float heightOffset = 0.5F;
@@ -81,11 +79,6 @@ public class EntityBlaze extends EntityMob {
 
    protected SoundEvent getDeathSound() {
       return SoundEvents.ENTITY_BLAZE_DEATH;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getBrightnessForRender(float var1) {
-      return 15728880;
    }
 
    public float getBrightness(float var1) {

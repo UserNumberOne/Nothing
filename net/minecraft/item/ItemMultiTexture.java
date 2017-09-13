@@ -27,6 +27,11 @@ public class ItemMultiTexture extends ItemBlock {
 
             return var3[var2];
          }
+
+         // $FF: synthetic method
+         public Object apply(Object var1) {
+            return this.apply((ItemStack)var1);
+         }
       });
    }
 

@@ -28,7 +28,7 @@ import net.minecraft.command.server.CommandTestForBlock;
 import net.minecraft.command.server.CommandWhitelist;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.rcon.RConConsoleSource;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -83,7 +83,7 @@ public class ServerCommandManager extends CommandHandler implements ICommandList
       this.registerCommand(new CommandTitle());
       this.registerCommand(new CommandEntityData());
       this.registerCommand(new CommandStopSound());
-      if (var1.isDedicatedServer()) {
+      if (var1.aa()) {
          this.registerCommand(new CommandOp());
          this.registerCommand(new CommandDeOp());
          this.registerCommand(new CommandStop());
@@ -118,9 +118,9 @@ public class ServerCommandManager extends CommandHandler implements ICommandList
       var8.getStyle().setItalic(Boolean.valueOf(true));
       if (var6) {
          for(EntityPlayer var10 : var7.getPlayerList().getPlayers()) {
-            if (var10 != var1 && var7.getPlayerList().canSendCommands(var10.getGameProfile()) && var2.checkPermission(this.server, var1)) {
-               boolean var11 = var1 instanceof MinecraftServer && this.server.shouldBroadcastConsoleToOps();
-               boolean var12 = var1 instanceof RConConsoleSource && this.server.shouldBroadcastRconToOps();
+            if (var10 != var1 && var7.getPlayerList().canSendCommands(var10.getGameProfile()) && var2.canUse(this.server, var1)) {
+               boolean var11 = var1 instanceof MinecraftServer && this.server.s();
+               boolean var12 = var1 instanceof RConConsoleSource && this.server.r();
                if (var11 || var12 || !(var1 instanceof RConConsoleSource) && !(var1 instanceof MinecraftServer)) {
                   var10.sendMessage(var8);
                }
@@ -128,11 +128,11 @@ public class ServerCommandManager extends CommandHandler implements ICommandList
          }
       }
 
-      if (var1 != var7 && var7.worlds[0].getGameRules().getBoolean("logAdminCommands")) {
+      if (var1 != var7 && var7.worldServer[0].getGameRules().getBoolean("logAdminCommands")) {
          var7.sendMessage(var8);
       }
 
-      boolean var13 = var7.worlds[0].getGameRules().getBoolean("sendCommandFeedback");
+      boolean var13 = var7.worldServer[0].getGameRules().getBoolean("sendCommandFeedback");
       if (var1 instanceof CommandBlockBaseLogic) {
          var13 = ((CommandBlockBaseLogic)var1).shouldTrackOutput();
       }
@@ -143,7 +143,7 @@ public class ServerCommandManager extends CommandHandler implements ICommandList
 
    }
 
-   protected MinecraftServer getServer() {
+   protected MinecraftServer a() {
       return this.server;
    }
 }

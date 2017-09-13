@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketTitle;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentUtils;
@@ -42,53 +42,52 @@ public class CommandTitle extends CommandBase {
             }
          }
 
-         EntityPlayerMP var4 = getPlayer(var1, var2, var3[0]);
+         EntityPlayerMP var4 = a(var1, var2, var3[0]);
          SPacketTitle.Type var5 = SPacketTitle.Type.byName(var3[1]);
          if (var5 != SPacketTitle.Type.CLEAR && var5 != SPacketTitle.Type.RESET) {
             if (var5 == SPacketTitle.Type.TIMES) {
                if (var3.length != 5) {
                   throw new WrongUsageException("commands.title.usage", new Object[0]);
+               } else {
+                  int var12 = parseInt(var3[2]);
+                  int var13 = parseInt(var3[3]);
+                  int var14 = parseInt(var3[4]);
+                  SPacketTitle var9 = new SPacketTitle(var12, var13, var14);
+                  var4.connection.sendPacket(var9);
+                  notifyCommandListener(var2, this, "commands.title.success", new Object[0]);
                }
-
-               int var11 = parseInt(var3[2]);
-               int var7 = parseInt(var3[3]);
-               int var8 = parseInt(var3[4]);
-               SPacketTitle var9 = new SPacketTitle(var11, var7, var8);
-               var4.connection.sendPacket(var9);
-               notifyCommandListener(var2, this, "commands.title.success", new Object[0]);
+            } else if (var3.length < 3) {
+               throw new WrongUsageException("commands.title.usage", new Object[0]);
             } else {
-               if (var3.length < 3) {
-                  throw new WrongUsageException("commands.title.usage", new Object[0]);
-               }
+               String var11 = buildString(var3, 2);
 
-               String var12 = buildString(var3, 2);
-
-               ITextComponent var13;
+               ITextComponent var7;
                try {
-                  var13 = ITextComponent.Serializer.jsonToComponent(var12);
+                  var7 = ITextComponent.Serializer.jsonToComponent(var11);
                } catch (JsonParseException var10) {
                   throw toSyntaxException(var10);
                }
 
-               SPacketTitle var14 = new SPacketTitle(var5, TextComponentUtils.processComponent(var2, var13, var4));
-               var4.connection.sendPacket(var14);
+               SPacketTitle var8 = new SPacketTitle(var5, TextComponentUtils.processComponent(var2, var7, var4));
+               var4.connection.sendPacket(var8);
                notifyCommandListener(var2, this, "commands.title.success", new Object[0]);
             }
+         } else if (var3.length != 2) {
+            throw new WrongUsageException("commands.title.usage", new Object[0]);
          } else {
-            if (var3.length != 2) {
-               throw new WrongUsageException("commands.title.usage", new Object[0]);
-            }
-
             SPacketTitle var6 = new SPacketTitle(var5, (ITextComponent)null);
             var4.connection.sendPacket(var6);
             notifyCommandListener(var2, this, "commands.title.success", new Object[0]);
          }
-
       }
    }
 
-   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, var1.getOnlinePlayerNames()) : (var3.length == 2 ? getListOfStringsMatchingLastWord(var3, SPacketTitle.Type.getNames()) : Collections.emptyList());
+   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (var3.length == 1) {
+         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
+      } else {
+         return var3.length == 2 ? getListOfStringsMatchingLastWord(var3, SPacketTitle.Type.getNames()) : Collections.emptyList();
+      }
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {

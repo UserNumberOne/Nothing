@@ -71,17 +71,19 @@ public class DataFixer implements IDataFixer {
       int var4 = var2.getFixVersion();
       if (var4 > this.version) {
          LOGGER.warn("Ignored fix registered for version: {} as the DataVersion of the game is: {}", new Object[]{var4, this.version});
-      } else if (!var3.isEmpty() && ((IFixableData)Util.getLastElement(var3)).getFixVersion() > var4) {
-         for(int var5 = 0; var5 < var3.size(); ++var5) {
-            if (((IFixableData)var3.get(var5)).getFixVersion() > var4) {
-               var3.add(var5, var2);
-               break;
-            }
-         }
       } else {
-         var3.add(var2);
-      }
+         if (!var3.isEmpty() && ((IFixableData)Util.getLastElement(var3)).getFixVersion() > var4) {
+            for(int var5 = 0; var5 < var3.size(); ++var5) {
+               if (((IFixableData)var3.get(var5)).getFixVersion() > var4) {
+                  var3.add(var5, var2);
+                  break;
+               }
+            }
+         } else {
+            var3.add(var2);
+         }
 
+      }
    }
 
    private List getTypeList(Map var1, IFixType var2) {

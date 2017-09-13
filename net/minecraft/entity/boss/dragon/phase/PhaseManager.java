@@ -3,6 +3,8 @@ package net.minecraft.entity.boss.dragon.phase;
 import net.minecraft.entity.boss.EntityDragon;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEnderDragon;
+import org.bukkit.event.entity.EnderDragonChangePhaseEvent;
 
 public class PhaseManager {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -21,6 +23,13 @@ public class PhaseManager {
             this.phase.removeAreaEffect();
          }
 
+         EnderDragonChangePhaseEvent var2 = new EnderDragonChangePhaseEvent((CraftEnderDragon)this.dragon.getBukkitEntity(), this.phase == null ? null : CraftEnderDragon.getBukkitPhase(this.phase.getPhaseList()), CraftEnderDragon.getBukkitPhase(var1));
+         this.dragon.world.getServer().getPluginManager().callEvent(var2);
+         if (var2.isCancelled()) {
+            return;
+         }
+
+         var1 = CraftEnderDragon.getMinecraftPhase(var2.getNewPhase());
          this.phase = this.getPhase(var1);
          if (!this.dragon.world.isRemote) {
             this.dragon.getDataManager().set(EntityDragon.PHASE, Integer.valueOf(var1.getId()));

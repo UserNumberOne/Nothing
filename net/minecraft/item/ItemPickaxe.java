@@ -25,7 +25,13 @@ public class ItemPickaxe extends ItemTool {
                   if (var2 != Blocks.LAPIS_BLOCK && var2 != Blocks.LAPIS_ORE) {
                      if (var2 != Blocks.REDSTONE_ORE && var2 != Blocks.LIT_REDSTONE_ORE) {
                         Material var3 = var1.getMaterial();
-                        return var3 == Material.ROCK ? true : (var3 == Material.IRON ? true : var3 == Material.ANVIL);
+                        if (var3 == Material.ROCK) {
+                           return true;
+                        } else if (var3 == Material.IRON) {
+                           return true;
+                        } else {
+                           return var3 == Material.ANVIL;
+                        }
                      } else {
                         return this.toolMaterial.getHarvestLevel() >= 2;
                      }

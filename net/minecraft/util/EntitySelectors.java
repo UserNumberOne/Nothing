@@ -18,30 +18,60 @@ public final class EntitySelectors {
       public boolean apply(@Nullable Entity var1) {
          return var1.isEntityAlive();
       }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((Entity)var1);
+      }
    };
    public static final Predicate IS_STANDALONE = new Predicate() {
       public boolean apply(@Nullable Entity var1) {
          return var1.isEntityAlive() && !var1.isBeingRidden() && !var1.isRiding();
+      }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((Entity)var1);
       }
    };
    public static final Predicate HAS_INVENTORY = new Predicate() {
       public boolean apply(@Nullable Entity var1) {
          return var1 instanceof IInventory && var1.isEntityAlive();
       }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((Entity)var1);
+      }
    };
    public static final Predicate CAN_AI_TARGET = new Predicate() {
       public boolean apply(@Nullable Entity var1) {
          return !(var1 instanceof EntityPlayer) || !((EntityPlayer)var1).isSpectator() && !((EntityPlayer)var1).isCreative();
+      }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((Entity)var1);
       }
    };
    public static final Predicate NOT_SPECTATING = new Predicate() {
       public boolean apply(@Nullable Entity var1) {
          return !(var1 instanceof EntityPlayer) || !((EntityPlayer)var1).isSpectator();
       }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((Entity)var1);
+      }
    };
    public static final Predicate IS_SHULKER = new Predicate() {
       public boolean apply(@Nullable Entity var1) {
          return var1 instanceof EntityShulker && var1.isEntityAlive();
+      }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((Entity)var1);
       }
    };
 
@@ -51,13 +81,18 @@ public final class EntitySelectors {
          public boolean apply(@Nullable Entity var1) {
             return var1 != null && var1.getDistanceSq(var0, var2, var4) <= var8;
          }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1) {
+            return this.apply((Entity)var1);
+         }
       };
    }
 
    public static Predicate getTeamCollisionPredicate(final Entity var0) {
       final Team var1 = var0.getTeam();
       final Team.CollisionRule var2 = var1 == null ? Team.CollisionRule.ALWAYS : var1.getCollisionRule();
-      Predicate var3 = var2 == Team.CollisionRule.NEVER ? Predicates.alwaysFalse() : Predicates.and(NOT_SPECTATING, new Predicate() {
+      return var2 == Team.CollisionRule.NEVER ? Predicates.alwaysFalse() : Predicates.and(NOT_SPECTATING, new Predicate() {
          public boolean apply(@Nullable Entity var1x) {
             if (!var1x.canBePushed()) {
                return false;
@@ -68,14 +103,22 @@ public final class EntitySelectors {
                   return false;
                } else {
                   boolean var4 = var1 != null && var1.isSameTeam(var2x);
-                  return (var2 == Team.CollisionRule.HIDE_FOR_OWN_TEAM || var3 == Team.CollisionRule.HIDE_FOR_OWN_TEAM) && var4 ? false : var2 != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS && var3 != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS || var4;
+                  if ((var2 == Team.CollisionRule.HIDE_FOR_OWN_TEAM || var3 == Team.CollisionRule.HIDE_FOR_OWN_TEAM) && var4) {
+                     return false;
+                  } else {
+                     return var2 != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS && var3 != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS || var4;
+                  }
                }
             } else {
                return false;
             }
          }
+
+         // $FF: synthetic method
+         public boolean apply(Object var1x) {
+            return this.apply((Entity)var1x);
+         }
       });
-      return var3;
    }
 
    public static class ArmoredMob implements Predicate {
@@ -92,8 +135,21 @@ public final class EntitySelectors {
             return false;
          } else {
             EntityLivingBase var2 = (EntityLivingBase)var1;
-            return var2.getItemStackFromSlot(EntityLiving.getSlotForItemStack(this.armor)) != null ? false : (var2 instanceof EntityLiving ? ((EntityLiving)var2).canPickUpLoot() : (var2 instanceof EntityArmorStand ? true : var2 instanceof EntityPlayer));
+            if (var2.getItemStackFromSlot(EntityLiving.getSlotForItemStack(this.armor)) != null) {
+               return false;
+            } else if (var2 instanceof EntityLiving) {
+               return ((EntityLiving)var2).canPickUpLoot();
+            } else if (var2 instanceof EntityArmorStand) {
+               return true;
+            } else {
+               return var2 instanceof EntityPlayer;
+            }
          }
+      }
+
+      // $FF: synthetic method
+      public boolean apply(Object var1) {
+         return this.apply((Entity)var1);
       }
    }
 }

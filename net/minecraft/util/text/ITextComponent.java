@@ -30,8 +30,6 @@ public interface ITextComponent extends Iterable {
 
    String getUnformattedText();
 
-   String getFormattedText();
-
    List getSiblings();
 
    ITextComponent createCopy();
@@ -194,6 +192,16 @@ public interface ITextComponent extends Iterable {
 
       public static ITextComponent fromJsonLenient(String var0) {
          return (ITextComponent)JsonUtils.gsonDeserialize(GSON, var0, ITextComponent.class, true);
+      }
+
+      // $FF: synthetic method
+      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
+         return this.serialize((ITextComponent)var1, var2, var3);
+      }
+
+      // $FF: synthetic method
+      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
+         return this.deserialize(var1, var2, var3);
       }
 
       static {

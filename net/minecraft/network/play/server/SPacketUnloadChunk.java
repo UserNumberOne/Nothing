@@ -4,8 +4,6 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketUnloadChunk implements Packet {
    private int x;
@@ -31,15 +29,5 @@ public class SPacketUnloadChunk implements Packet {
 
    public void processPacket(INetHandlerPlayClient var1) {
       var1.processChunkUnload(this);
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getX() {
-      return this.x;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public int getZ() {
-      return this.z;
    }
 }

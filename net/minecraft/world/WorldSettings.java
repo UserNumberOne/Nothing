@@ -1,8 +1,6 @@
 package net.minecraft.world;
 
 import net.minecraft.world.storage.WorldInfo;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public final class WorldSettings {
    private final long seed;
@@ -34,12 +32,6 @@ public final class WorldSettings {
 
    public WorldSettings setGeneratorOptions(String var1) {
       this.generatorOptions = var1;
-      return this;
-   }
-
-   @SideOnly(Side.CLIENT)
-   public WorldSettings enableCommands() {
-      this.commandsAllowed = true;
       return this;
    }
 

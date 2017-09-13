@@ -34,6 +34,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntitySpider extends EntityMob {
    private static final DataParameter CLIMBING = EntityDataManager.createKey(EntitySpider.class, DataSerializers.BYTE);
@@ -139,30 +140,30 @@ public class EntitySpider extends EntityMob {
 
    @Nullable
    public IEntityLivingData onInitialSpawn(DifficultyInstance var1, @Nullable IEntityLivingData var2) {
-      var2 = super.onInitialSpawn(var1, var2);
+      Object var3 = super.onInitialSpawn(var1, var2);
       if (this.world.rand.nextInt(100) == 0) {
-         EntitySkeleton var3 = new EntitySkeleton(this.world);
-         var3.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-         var3.onInitialSpawn(var1, (IEntityLivingData)null);
-         this.world.spawnEntity(var3);
-         var3.startRiding(this);
+         EntitySkeleton var4 = new EntitySkeleton(this.world);
+         var4.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
+         var4.onInitialSpawn(var1, (IEntityLivingData)null);
+         this.world.addEntity(var4, SpawnReason.JOCKEY);
+         var4.startRiding(this);
       }
 
-      if (var2 == null) {
-         var2 = new EntitySpider.GroupData();
+      if (var3 == null) {
+         var3 = new EntitySpider.GroupData();
          if (this.world.getDifficulty() == EnumDifficulty.HARD && this.world.rand.nextFloat() < 0.1F * var1.getClampedAdditionalDifficulty()) {
-            ((EntitySpider.GroupData)var2).setRandomEffect(this.world.rand);
+            ((EntitySpider.GroupData)var3).setRandomEffect(this.world.rand);
          }
       }
 
-      if (var2 instanceof EntitySpider.GroupData) {
-         Potion var5 = ((EntitySpider.GroupData)var2).effect;
+      if (var3 instanceof EntitySpider.GroupData) {
+         Potion var5 = ((EntitySpider.GroupData)var3).effect;
          if (var5 != null) {
             this.addPotionEffect(new PotionEffect(var5, Integer.MAX_VALUE));
          }
       }
 
-      return var2;
+      return (IEntityLivingData)var3;
    }
 
    public float getEyeHeight() {

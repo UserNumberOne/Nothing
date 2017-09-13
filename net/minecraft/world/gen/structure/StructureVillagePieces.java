@@ -20,13 +20,13 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.ZombieType;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -36,12 +36,7 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.biome.BiomeSavanna;
 import net.minecraft.world.biome.BiomeTaiga;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.terraingen.BiomeEvent.GetVillageBlockID;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.fml.common.registry.VillagerRegistry;
-import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class StructureVillagePieces {
    public static void registerVillagePieces() {
@@ -71,7 +66,6 @@ public class StructureVillagePieces {
       var2.add(new StructureVillagePieces.PieceWeight(StructureVillagePieces.Field2.class, 3, MathHelper.getInt(var0, 2 + var1, 4 + var1 * 2)));
       var2.add(new StructureVillagePieces.PieceWeight(StructureVillagePieces.House2.class, 15, MathHelper.getInt(var0, 0, 1 + var1)));
       var2.add(new StructureVillagePieces.PieceWeight(StructureVillagePieces.House3.class, 8, MathHelper.getInt(var0, 0 + var1, 3 + var1 * 2)));
-      VillagerRegistry.addExtraVillageComponents(var2, var0, var1);
       Iterator var3 = var2.iterator();
 
       while(var3.hasNext()) {
@@ -119,8 +113,6 @@ public class StructureVillagePieces {
          var10 = StructureVillagePieces.House2.createPiece(var0, var2, var3, var4, var5, var6, var7, var8);
       } else if (var9 == StructureVillagePieces.House3.class) {
          var10 = StructureVillagePieces.House3.createPiece(var0, var2, var3, var4, var5, var6, var7, var8);
-      } else {
-         var10 = VillagerRegistry.getVillageComponent(var1, var0, var2, var3, var4, var5, var6, var7, var8);
       }
 
       return (StructureVillagePieces.Village)var10;
@@ -737,10 +729,10 @@ public class StructureVillagePieces {
             }
          }
 
-         for(int var13 = 0; var13 < 6; ++var13) {
-            for(int var14 = 0; var14 < 9; ++var14) {
-               this.clearCurrentPositionBlocksUpwards(var1, var14, 9, var13, var3);
-               this.replaceAirAndLiquidDownwards(var1, var4, var14, -1, var13, var3);
+         for(int var14 = 0; var14 < 6; ++var14) {
+            for(int var13 = 0; var13 < 9; ++var13) {
+               this.clearCurrentPositionBlocksUpwards(var1, var13, 9, var14, var3);
+               this.replaceAirAndLiquidDownwards(var1, var4, var13, -1, var14, var3);
             }
          }
 
@@ -1161,45 +1153,45 @@ public class StructureVillagePieces {
             }
          }
 
-         for(int var7 = var3.nextInt(5); var7 < this.length - 8; var7 += 2 + var3.nextInt(5)) {
-            StructureComponent var9 = this.getNextComponentPP((StructureVillagePieces.Start)var1, var2, var3, 0, var7);
+         for(int var8 = var3.nextInt(5); var8 < this.length - 8; var8 += 2 + var3.nextInt(5)) {
+            StructureComponent var9 = this.getNextComponentPP((StructureVillagePieces.Start)var1, var2, var3, 0, var8);
             if (var9 != null) {
-               var7 += Math.max(var9.boundingBox.getXSize(), var9.boundingBox.getZSize());
+               var8 += Math.max(var9.boundingBox.getXSize(), var9.boundingBox.getZSize());
                var4 = true;
             }
          }
 
-         EnumFacing var8 = this.getCoordBaseMode();
-         if (var4 && var3.nextInt(3) > 0 && var8 != null) {
-            switch(var8) {
-            case NORTH:
+         EnumFacing var7 = this.getCoordBaseMode();
+         if (var4 && var3.nextInt(3) > 0 && var7 != null) {
+            switch(StructureVillagePieces.SyntheticClass_1.a[var7.ordinal()]) {
+            case 1:
             default:
                StructureVillagePieces.generateAndAddRoadPiece((StructureVillagePieces.Start)var1, var2, var3, this.boundingBox.minX - 1, this.boundingBox.minY, this.boundingBox.minZ, EnumFacing.WEST, this.getComponentType());
                break;
-            case SOUTH:
+            case 2:
                StructureVillagePieces.generateAndAddRoadPiece((StructureVillagePieces.Start)var1, var2, var3, this.boundingBox.minX - 1, this.boundingBox.minY, this.boundingBox.maxZ - 2, EnumFacing.WEST, this.getComponentType());
                break;
-            case WEST:
+            case 3:
                StructureVillagePieces.generateAndAddRoadPiece((StructureVillagePieces.Start)var1, var2, var3, this.boundingBox.minX, this.boundingBox.minY, this.boundingBox.minZ - 1, EnumFacing.NORTH, this.getComponentType());
                break;
-            case EAST:
+            case 4:
                StructureVillagePieces.generateAndAddRoadPiece((StructureVillagePieces.Start)var1, var2, var3, this.boundingBox.maxX - 2, this.boundingBox.minY, this.boundingBox.minZ - 1, EnumFacing.NORTH, this.getComponentType());
             }
          }
 
-         if (var4 && var3.nextInt(3) > 0 && var8 != null) {
-            switch(var8) {
-            case NORTH:
+         if (var4 && var3.nextInt(3) > 0 && var7 != null) {
+            switch(StructureVillagePieces.SyntheticClass_1.a[var7.ordinal()]) {
+            case 1:
             default:
                StructureVillagePieces.generateAndAddRoadPiece((StructureVillagePieces.Start)var1, var2, var3, this.boundingBox.maxX + 1, this.boundingBox.minY, this.boundingBox.minZ, EnumFacing.EAST, this.getComponentType());
                break;
-            case SOUTH:
+            case 2:
                StructureVillagePieces.generateAndAddRoadPiece((StructureVillagePieces.Start)var1, var2, var3, this.boundingBox.maxX + 1, this.boundingBox.minY, this.boundingBox.maxZ - 2, EnumFacing.EAST, this.getComponentType());
                break;
-            case WEST:
+            case 3:
                StructureVillagePieces.generateAndAddRoadPiece((StructureVillagePieces.Start)var1, var2, var3, this.boundingBox.minX, this.boundingBox.minY, this.boundingBox.maxZ + 1, EnumFacing.SOUTH, this.getComponentType());
                break;
-            case EAST:
+            case 4:
                StructureVillagePieces.generateAndAddRoadPiece((StructureVillagePieces.Start)var1, var2, var3, this.boundingBox.maxX - 2, this.boundingBox.minY, this.boundingBox.maxZ + 1, EnumFacing.SOUTH, this.getComponentType());
             }
          }
@@ -1297,7 +1289,6 @@ public class StructureVillagePieces {
       public List structureVillageWeightedPieceList;
       public List pendingHouses = Lists.newArrayList();
       public List pendingRoads = Lists.newArrayList();
-      public Biome biome;
 
       public Start() {
       }
@@ -1308,8 +1299,6 @@ public class StructureVillagePieces {
          this.structureVillageWeightedPieceList = var6;
          this.terrainType = var7;
          Biome var8 = var1.getBiome(new BlockPos(var4, 0, var5), Biomes.DEFAULT);
-         this.biome = var8;
-         this.startPiece = this;
          if (var8 instanceof BiomeDesert) {
             this.structureType = 1;
          } else if (var8 instanceof BiomeSavanna) {
@@ -1320,6 +1309,37 @@ public class StructureVillagePieces {
 
          this.func_189924_a(this.structureType);
          this.isZombieInfested = var3.nextInt(50) == 0;
+      }
+   }
+
+   static class SyntheticClass_1 {
+      static final int[] a = new int[EnumFacing.values().length];
+
+      static {
+         try {
+            a[EnumFacing.NORTH.ordinal()] = 1;
+         } catch (NoSuchFieldError var3) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.SOUTH.ordinal()] = 2;
+         } catch (NoSuchFieldError var2) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.WEST.ordinal()] = 3;
+         } catch (NoSuchFieldError var1) {
+            ;
+         }
+
+         try {
+            a[EnumFacing.EAST.ordinal()] = 4;
+         } catch (NoSuchFieldError var0) {
+            ;
+         }
+
       }
    }
 
@@ -1362,12 +1382,11 @@ public class StructureVillagePieces {
       }
    }
 
-   public abstract static class Village extends StructureComponent {
+   abstract static class Village extends StructureComponent {
       protected int averageGroundLvl = -1;
       private int villagersSpawned;
       protected int structureType;
       protected boolean isZombieInfested;
-      protected StructureVillagePieces.Start startPiece;
 
       public Village() {
       }
@@ -1377,7 +1396,6 @@ public class StructureVillagePieces {
          if (var1 != null) {
             this.structureType = var1.structureType;
             this.isZombieInfested = var1.isZombieInfested;
-            this.startPiece = var1;
          }
 
       }
@@ -1403,15 +1421,15 @@ public class StructureVillagePieces {
       protected StructureComponent getNextComponentNN(StructureVillagePieces.Start var1, List var2, Random var3, int var4, int var5) {
          EnumFacing var6 = this.getCoordBaseMode();
          if (var6 != null) {
-            switch(var6) {
-            case NORTH:
+            switch(StructureVillagePieces.SyntheticClass_1.a[var6.ordinal()]) {
+            case 1:
             default:
                return StructureVillagePieces.generateAndAddComponent(var1, var2, var3, this.boundingBox.minX - 1, this.boundingBox.minY + var4, this.boundingBox.minZ + var5, EnumFacing.WEST, this.getComponentType());
-            case SOUTH:
+            case 2:
                return StructureVillagePieces.generateAndAddComponent(var1, var2, var3, this.boundingBox.minX - 1, this.boundingBox.minY + var4, this.boundingBox.minZ + var5, EnumFacing.WEST, this.getComponentType());
-            case WEST:
+            case 3:
                return StructureVillagePieces.generateAndAddComponent(var1, var2, var3, this.boundingBox.minX + var5, this.boundingBox.minY + var4, this.boundingBox.minZ - 1, EnumFacing.NORTH, this.getComponentType());
-            case EAST:
+            case 4:
                return StructureVillagePieces.generateAndAddComponent(var1, var2, var3, this.boundingBox.minX + var5, this.boundingBox.minY + var4, this.boundingBox.minZ - 1, EnumFacing.NORTH, this.getComponentType());
             }
          } else {
@@ -1422,15 +1440,15 @@ public class StructureVillagePieces {
       protected StructureComponent getNextComponentPP(StructureVillagePieces.Start var1, List var2, Random var3, int var4, int var5) {
          EnumFacing var6 = this.getCoordBaseMode();
          if (var6 != null) {
-            switch(var6) {
-            case NORTH:
+            switch(StructureVillagePieces.SyntheticClass_1.a[var6.ordinal()]) {
+            case 1:
             default:
                return StructureVillagePieces.generateAndAddComponent(var1, var2, var3, this.boundingBox.maxX + 1, this.boundingBox.minY + var4, this.boundingBox.minZ + var5, EnumFacing.EAST, this.getComponentType());
-            case SOUTH:
+            case 2:
                return StructureVillagePieces.generateAndAddComponent(var1, var2, var3, this.boundingBox.maxX + 1, this.boundingBox.minY + var4, this.boundingBox.minZ + var5, EnumFacing.EAST, this.getComponentType());
-            case WEST:
+            case 3:
                return StructureVillagePieces.generateAndAddComponent(var1, var2, var3, this.boundingBox.minX + var5, this.boundingBox.minY + var4, this.boundingBox.maxZ + 1, EnumFacing.SOUTH, this.getComponentType());
-            case EAST:
+            case 4:
                return StructureVillagePieces.generateAndAddComponent(var1, var2, var3, this.boundingBox.minX + var5, this.boundingBox.minY + var4, this.boundingBox.maxZ + 1, EnumFacing.SOUTH, this.getComponentType());
             }
          } else {
@@ -1479,101 +1497,89 @@ public class StructureVillagePieces {
                   EntityZombie var11 = new EntityZombie(var1);
                   var11.setLocationAndAngles((double)var8 + 0.5D, (double)var9, (double)var10 + 0.5D, 0.0F, 0.0F);
                   var11.onInitialSpawn(var1.getDifficultyForLocation(new BlockPos(var11)), (IEntityLivingData)null);
-                  var11.setVillagerType(this.chooseForgeProfession(var7, (VillagerProfession)ForgeRegistries.VILLAGER_PROFESSIONS.getValue(new ResourceLocation("minecraft:farmer"))));
+                  var11.setZombieType(ZombieType.getVillagerByOrdinal(this.chooseProfession(var7, 0)));
                   var11.enablePersistence();
-                  var1.spawnEntity(var11);
+                  var1.addEntity(var11, SpawnReason.CHUNK_GEN);
                } else {
                   EntityVillager var12 = new EntityVillager(var1);
                   var12.setLocationAndAngles((double)var8 + 0.5D, (double)var9, (double)var10 + 0.5D, 0.0F, 0.0F);
                   var12.onInitialSpawn(var1.getDifficultyForLocation(new BlockPos(var12)), (IEntityLivingData)null);
-                  var12.setProfession(this.chooseForgeProfession(var7, var12.getProfessionForge()));
-                  var1.spawnEntity(var12);
+                  var12.setProfession(this.chooseProfession(var7, var12.getProfession()));
+                  var1.addEntity(var12, SpawnReason.CHUNK_GEN);
                }
             }
          }
 
       }
 
-      /** @deprecated */
-      @Deprecated
       protected int chooseProfession(int var1, int var2) {
          return var2;
       }
 
-      protected VillagerProfession chooseForgeProfession(int var1, VillagerProfession var2) {
-         return VillagerRegistry.getById(this.chooseProfession(var1, VillagerRegistry.getId(var2)));
-      }
-
       protected IBlockState getBiomeSpecificBlockState(IBlockState var1) {
-         GetVillageBlockID var2 = new GetVillageBlockID(this.startPiece == null ? null : this.startPiece.biome, var1);
-         MinecraftForge.TERRAIN_GEN_BUS.post(var2);
-         if (var2.getResult() == Result.DENY) {
-            return var2.getReplacement();
-         } else {
-            if (this.structureType == 1) {
-               if (var1.getBlock() == Blocks.LOG || var1.getBlock() == Blocks.LOG2) {
-                  return Blocks.SANDSTONE.getDefaultState();
-               }
-
-               if (var1.getBlock() == Blocks.COBBLESTONE) {
-                  return Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.DEFAULT.getMetadata());
-               }
-
-               if (var1.getBlock() == Blocks.PLANKS) {
-                  return Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata());
-               }
-
-               if (var1.getBlock() == Blocks.OAK_STAIRS) {
-                  return Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, var1.getValue(BlockStairs.FACING));
-               }
-
-               if (var1.getBlock() == Blocks.STONE_STAIRS) {
-                  return Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, var1.getValue(BlockStairs.FACING));
-               }
-
-               if (var1.getBlock() == Blocks.GRAVEL) {
-                  return Blocks.SANDSTONE.getDefaultState();
-               }
-            } else if (this.structureType == 3) {
-               if (var1.getBlock() == Blocks.LOG || var1.getBlock() == Blocks.LOG2) {
-                  return Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.SPRUCE).withProperty(BlockLog.LOG_AXIS, var1.getValue(BlockLog.LOG_AXIS));
-               }
-
-               if (var1.getBlock() == Blocks.PLANKS) {
-                  return Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.SPRUCE);
-               }
-
-               if (var1.getBlock() == Blocks.OAK_STAIRS) {
-                  return Blocks.SPRUCE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, var1.getValue(BlockStairs.FACING));
-               }
-
-               if (var1.getBlock() == Blocks.OAK_FENCE) {
-                  return Blocks.SPRUCE_FENCE.getDefaultState();
-               }
-            } else if (this.structureType == 2) {
-               if (var1.getBlock() == Blocks.LOG || var1.getBlock() == Blocks.LOG2) {
-                  return Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.ACACIA).withProperty(BlockLog.LOG_AXIS, var1.getValue(BlockLog.LOG_AXIS));
-               }
-
-               if (var1.getBlock() == Blocks.PLANKS) {
-                  return Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.ACACIA);
-               }
-
-               if (var1.getBlock() == Blocks.OAK_STAIRS) {
-                  return Blocks.ACACIA_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, var1.getValue(BlockStairs.FACING));
-               }
-
-               if (var1.getBlock() == Blocks.COBBLESTONE) {
-                  return Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.ACACIA).withProperty(BlockLog.LOG_AXIS, BlockLog.EnumAxis.Y);
-               }
-
-               if (var1.getBlock() == Blocks.OAK_FENCE) {
-                  return Blocks.ACACIA_FENCE.getDefaultState();
-               }
+         if (this.structureType == 1) {
+            if (var1.getBlock() == Blocks.LOG || var1.getBlock() == Blocks.LOG2) {
+               return Blocks.SANDSTONE.getDefaultState();
             }
 
-            return var1;
+            if (var1.getBlock() == Blocks.COBBLESTONE) {
+               return Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.DEFAULT.getMetadata());
+            }
+
+            if (var1.getBlock() == Blocks.PLANKS) {
+               return Blocks.SANDSTONE.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata());
+            }
+
+            if (var1.getBlock() == Blocks.OAK_STAIRS) {
+               return Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, (EnumFacing)var1.getValue(BlockStairs.FACING));
+            }
+
+            if (var1.getBlock() == Blocks.STONE_STAIRS) {
+               return Blocks.SANDSTONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, (EnumFacing)var1.getValue(BlockStairs.FACING));
+            }
+
+            if (var1.getBlock() == Blocks.GRAVEL) {
+               return Blocks.SANDSTONE.getDefaultState();
+            }
+         } else if (this.structureType == 3) {
+            if (var1.getBlock() == Blocks.LOG || var1.getBlock() == Blocks.LOG2) {
+               return Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.SPRUCE).withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis)var1.getValue(BlockLog.LOG_AXIS));
+            }
+
+            if (var1.getBlock() == Blocks.PLANKS) {
+               return Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.SPRUCE);
+            }
+
+            if (var1.getBlock() == Blocks.OAK_STAIRS) {
+               return Blocks.SPRUCE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, (EnumFacing)var1.getValue(BlockStairs.FACING));
+            }
+
+            if (var1.getBlock() == Blocks.OAK_FENCE) {
+               return Blocks.SPRUCE_FENCE.getDefaultState();
+            }
+         } else if (this.structureType == 2) {
+            if (var1.getBlock() == Blocks.LOG || var1.getBlock() == Blocks.LOG2) {
+               return Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.ACACIA).withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis)var1.getValue(BlockLog.LOG_AXIS));
+            }
+
+            if (var1.getBlock() == Blocks.PLANKS) {
+               return Blocks.PLANKS.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.ACACIA);
+            }
+
+            if (var1.getBlock() == Blocks.OAK_STAIRS) {
+               return Blocks.ACACIA_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, (EnumFacing)var1.getValue(BlockStairs.FACING));
+            }
+
+            if (var1.getBlock() == Blocks.COBBLESTONE) {
+               return Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.ACACIA).withProperty(BlockLog.LOG_AXIS, BlockLog.EnumAxis.Y);
+            }
+
+            if (var1.getBlock() == Blocks.OAK_FENCE) {
+               return Blocks.ACACIA_FENCE.getDefaultState();
+            }
          }
+
+         return var1;
       }
 
       protected BlockDoor func_189925_i() {
