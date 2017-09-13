@@ -11,31 +11,31 @@ public class IntCache {
    private static final List inUseLargeArrays = Lists.newArrayList();
 
    public static synchronized int[] getIntCache(int var0) {
-      if (var0 <= 256) {
+      if (p_76445_0_ <= 256) {
          if (freeSmallArrays.isEmpty()) {
-            int[] var5 = new int[256];
-            inUseSmallArrays.add(var5);
-            return var5;
+            int[] aint4 = new int[256];
+            inUseSmallArrays.add(aint4);
+            return aint4;
          } else {
-            int[] var4 = (int[])freeSmallArrays.remove(freeSmallArrays.size() - 1);
-            inUseSmallArrays.add(var4);
-            return var4;
+            int[] aint3 = (int[])freeSmallArrays.remove(freeSmallArrays.size() - 1);
+            inUseSmallArrays.add(aint3);
+            return aint3;
          }
-      } else if (var0 > intCacheSize) {
-         intCacheSize = var0;
+      } else if (p_76445_0_ > intCacheSize) {
+         intCacheSize = p_76445_0_;
          freeLargeArrays.clear();
          inUseLargeArrays.clear();
-         int[] var3 = new int[intCacheSize];
-         inUseLargeArrays.add(var3);
-         return var3;
+         int[] aint2 = new int[intCacheSize];
+         inUseLargeArrays.add(aint2);
+         return aint2;
       } else if (freeLargeArrays.isEmpty()) {
-         int[] var2 = new int[intCacheSize];
-         inUseLargeArrays.add(var2);
-         return var2;
+         int[] aint1 = new int[intCacheSize];
+         inUseLargeArrays.add(aint1);
+         return aint1;
       } else {
-         int[] var1 = (int[])freeLargeArrays.remove(freeLargeArrays.size() - 1);
-         inUseLargeArrays.add(var1);
-         return var1;
+         int[] aint = (int[])freeLargeArrays.remove(freeLargeArrays.size() - 1);
+         inUseLargeArrays.add(aint);
+         return aint;
       }
    }
 

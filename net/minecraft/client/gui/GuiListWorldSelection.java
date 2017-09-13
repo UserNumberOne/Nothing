@@ -20,7 +20,7 @@ public class GuiListWorldSelection extends GuiListExtended {
    private final List entries = Lists.newArrayList();
    private int selectedIdx = -1;
 
-   public GuiListWorldSelection(GuiWorldSelection p_i46590_1_, Minecraft clientIn, int p_i46590_3_, int p_i46590_4_, int p_i46590_5_, int p_i46590_6_, int p_i46590_7_) {
+   public GuiListWorldSelection(GuiWorldSelection var1, Minecraft var2, int var3, int var4, int var5, int var6, int var7) {
       super(clientIn, p_i46590_3_, p_i46590_4_, p_i46590_5_, p_i46590_6_, p_i46590_7_);
       this.worldSelectionObj = p_i46590_1_;
       this.refreshList();
@@ -46,7 +46,7 @@ public class GuiListWorldSelection extends GuiListExtended {
 
    }
 
-   public GuiListWorldSelectionEntry getListEntry(int index) {
+   public GuiListWorldSelectionEntry getListEntry(int var1) {
       return (GuiListWorldSelectionEntry)this.entries.get(index);
    }
 
@@ -62,12 +62,12 @@ public class GuiListWorldSelection extends GuiListExtended {
       return super.getListWidth() + 50;
    }
 
-   public void selectWorld(int idx) {
+   public void selectWorld(int var1) {
       this.selectedIdx = idx;
       this.worldSelectionObj.selectWorld(this.getSelectedWorld());
    }
 
-   protected boolean isSelected(int slotIndex) {
+   protected boolean isSelected(int var1) {
       return slotIndex == this.selectedIdx;
    }
 

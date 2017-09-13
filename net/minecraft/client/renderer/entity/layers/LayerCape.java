@@ -15,11 +15,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LayerCape implements LayerRenderer {
    private final RenderPlayer playerRenderer;
 
-   public LayerCape(RenderPlayer playerRendererIn) {
+   public LayerCape(RenderPlayer var1) {
       this.playerRenderer = playerRendererIn;
    }
 
-   public void doRenderLayer(AbstractClientPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(AbstractClientPlayer var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (entitylivingbaseIn.hasPlayerInfo() && !entitylivingbaseIn.isInvisible() && entitylivingbaseIn.isWearing(EnumPlayerModelParts.CAPE) && entitylivingbaseIn.getLocationCape() != null) {
          ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
          if (itemstack == null || itemstack.getItem() != Items.ELYTRA) {

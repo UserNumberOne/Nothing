@@ -30,11 +30,11 @@ public class ScreenShotHelper {
    private static IntBuffer pixelBuffer;
    private static int[] pixelValues;
 
-   public static ITextComponent saveScreenshot(File gameDirectory, int width, int height, Framebuffer buffer) {
+   public static ITextComponent saveScreenshot(File var0, int var1, int var2, Framebuffer var3) {
       return saveScreenshot(gameDirectory, (String)null, width, height, buffer);
    }
 
-   public static ITextComponent saveScreenshot(File gameDirectory, String screenshotName, int width, int height, Framebuffer buffer) {
+   public static ITextComponent saveScreenshot(File var0, String var1, int var2, int var3, Framebuffer var4) {
       try {
          File file1 = new File(gameDirectory, "screenshots");
          file1.mkdir();
@@ -64,7 +64,7 @@ public class ScreenShotHelper {
       }
    }
 
-   public static BufferedImage createScreenshot(int width, int height, Framebuffer framebufferIn) {
+   public static BufferedImage createScreenshot(int var0, int var1, Framebuffer var2) {
       if (OpenGlHelper.isFramebufferEnabled()) {
          width = framebufferIn.framebufferTextureWidth;
          height = framebufferIn.framebufferTextureHeight;
@@ -106,7 +106,7 @@ public class ScreenShotHelper {
       return bufferedimage;
    }
 
-   private static File getTimestampedPNGFileForDirectory(File gameDirectory) {
+   private static File getTimestampedPNGFileForDirectory(File var0) {
       String s = DATE_FORMAT.format(new Date()).toString();
       int i = 1;
 

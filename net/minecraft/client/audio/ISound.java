@@ -40,7 +40,7 @@ public interface ISound {
 
       private final int type;
 
-      private AttenuationType(int typeIn) {
+      private AttenuationType(int var3) {
          this.type = typeIn;
       }
 

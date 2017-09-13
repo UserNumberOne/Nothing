@@ -153,7 +153,7 @@ public class GameSettings {
    public boolean forceUnicodeFont;
    private boolean needsResourceRefresh = false;
 
-   public GameSettings(Minecraft mcIn, File optionsFileIn) {
+   public GameSettings(Minecraft var1, File var2) {
       this.setForgeKeybindProperties();
       this.keyBindings = (KeyBinding[])ArrayUtils.addAll(new KeyBinding[]{this.keyBindAttack, this.keyBindUseItem, this.keyBindForward, this.keyBindLeft, this.keyBindBack, this.keyBindRight, this.keyBindJump, this.keyBindSneak, this.keyBindSprint, this.keyBindDrop, this.keyBindInventory, this.keyBindChat, this.keyBindPlayerList, this.keyBindPickBlock, this.keyBindCommand, this.keyBindScreenshot, this.keyBindTogglePerspective, this.keyBindSmoothCamera, this.keyBindFullscreen, this.keyBindSpectatorOutlines, this.keyBindSwapHands}, this.keyBindsHotbar);
       this.difficulty = EnumDifficulty.NORMAL;
@@ -181,21 +181,21 @@ public class GameSettings {
       this.language = "en_US";
    }
 
-   public static String getKeyDisplayString(int key) {
+   public static String getKeyDisplayString(int var0) {
       return key < 0 ? I18n.format("key.mouseButton", key + 101) : (key < 256 ? Keyboard.getKeyName(key) : String.format("%c", (char)(key - 256)).toUpperCase());
    }
 
-   public static boolean isKeyDown(KeyBinding key) {
+   public static boolean isKeyDown(KeyBinding var0) {
       int i = key.getKeyCode();
       return i != 0 && i < 256 ? (i < 0 ? Mouse.isButtonDown(i + 100) : Keyboard.isKeyDown(i)) : false;
    }
 
-   public void setOptionKeyBinding(KeyBinding key, int keyCode) {
+   public void setOptionKeyBinding(KeyBinding var1, int var2) {
       key.setKeyCode(keyCode);
       this.saveOptions();
    }
 
-   public void setOptionFloatValue(GameSettings.Options settingsOption, float value) {
+   public void setOptionFloatValue(GameSettings.Options var1, float var2) {
       if (settingsOption == GameSettings.Options.SENSITIVITY) {
          this.mouseSensitivity = value;
       }
@@ -255,7 +255,7 @@ public class GameSettings {
 
    }
 
-   public void setOptionValue(GameSettings.Options settingsOption, int value) {
+   public void setOptionValue(GameSettings.Options var1, int var2) {
       if (settingsOption == GameSettings.Options.RENDER_DISTANCE) {
          this.setOptionFloatValue(settingsOption, MathHelper.clamp((float)(this.renderDistanceChunks + value), settingsOption.getValueMin(), settingsOption.getValueMax()));
       }
@@ -376,11 +376,11 @@ public class GameSettings {
       this.saveOptions();
    }
 
-   public float getOptionFloatValue(GameSettings.Options settingOption) {
+   public float getOptionFloatValue(GameSettings.Options var1) {
       return settingOption == GameSettings.Options.FOV ? this.fovSetting : (settingOption == GameSettings.Options.GAMMA ? this.gammaSetting : (settingOption == GameSettings.Options.SATURATION ? this.saturation : (settingOption == GameSettings.Options.SENSITIVITY ? this.mouseSensitivity : (settingOption == GameSettings.Options.CHAT_OPACITY ? this.chatOpacity : (settingOption == GameSettings.Options.CHAT_HEIGHT_FOCUSED ? this.chatHeightFocused : (settingOption == GameSettings.Options.CHAT_HEIGHT_UNFOCUSED ? this.chatHeightUnfocused : (settingOption == GameSettings.Options.CHAT_SCALE ? this.chatScale : (settingOption == GameSettings.Options.CHAT_WIDTH ? this.chatWidth : (settingOption == GameSettings.Options.FRAMERATE_LIMIT ? (float)this.limitFramerate : (settingOption == GameSettings.Options.MIPMAP_LEVELS ? (float)this.mipmapLevels : (settingOption == GameSettings.Options.RENDER_DISTANCE ? (float)this.renderDistanceChunks : 0.0F)))))))))));
    }
 
-   public boolean getOptionOrdinalValue(GameSettings.Options settingOption) {
+   public boolean getOptionOrdinalValue(GameSettings.Options var1) {
       switch(settingOption) {
       case INVERT_MOUSE:
          return this.invertMouse;
@@ -425,7 +425,7 @@ public class GameSettings {
       }
    }
 
-   private static String getTranslation(String[] strArray, int index) {
+   private static String getTranslation(String[] var0, int var1) {
       if (index < 0 || index >= strArray.length) {
          index = 0;
       }
@@ -433,7 +433,7 @@ public class GameSettings {
       return I18n.format(strArray[index]);
    }
 
-   public String getKeyBinding(GameSettings.Options settingOption) {
+   public String getKeyBinding(GameSettings.Options var1) {
       String s = I18n.format(settingOption.getEnumString()) + ": ";
       if (settingOption.getEnumFloat()) {
          float f1 = this.getOptionFloatValue(settingOption);
@@ -757,7 +757,7 @@ public class GameSettings {
 
    }
 
-   private NBTTagCompound dataFix(NBTTagCompound p_189988_1_) {
+   private NBTTagCompound dataFix(NBTTagCompound var1) {
       int i = 0;
 
       try {
@@ -769,7 +769,7 @@ public class GameSettings {
       return this.mc.getDataFixer().process(FixTypes.OPTIONS, p_189988_1_, i);
    }
 
-   private float parseFloat(String str) {
+   private float parseFloat(String var1) {
       return "true".equals(str) ? 1.0F : ("false".equals(str) ? 0.0F : Float.parseFloat(str));
    }
 
@@ -865,11 +865,11 @@ public class GameSettings {
       }
    }
 
-   public float getSoundLevel(SoundCategory category) {
+   public float getSoundLevel(SoundCategory var1) {
       return this.soundLevels.containsKey(category) ? ((Float)this.soundLevels.get(category)).floatValue() : 1.0F;
    }
 
-   public void setSoundLevel(SoundCategory category, float volume) {
+   public void setSoundLevel(SoundCategory var1, float var2) {
       this.mc.getSoundHandler().setSoundLevel(category, volume);
       this.soundLevels.put(category, Float.valueOf(volume));
    }
@@ -891,7 +891,7 @@ public class GameSettings {
       return ImmutableSet.copyOf(this.setModelParts);
    }
 
-   public void setModelPartEnabled(EnumPlayerModelParts modelPart, boolean enable) {
+   public void setModelPartEnabled(EnumPlayerModelParts var1, boolean var2) {
       if (enable) {
          this.setModelParts.add(modelPart);
       } else {
@@ -901,7 +901,7 @@ public class GameSettings {
       this.sendSettingsToServer();
    }
 
-   public void switchModelPartEnabled(EnumPlayerModelParts modelPart) {
+   public void switchModelPartEnabled(EnumPlayerModelParts var1) {
       if (this.getModelParts().contains(modelPart)) {
          this.setModelParts.remove(modelPart);
       } else {
@@ -994,7 +994,7 @@ public class GameSettings {
       private float valueMin;
       private float valueMax;
 
-      public static GameSettings.Options getEnumOptions(int ordinal) {
+      public static GameSettings.Options getEnumOptions(int var0) {
          for(GameSettings.Options gamesettings$options : values()) {
             if (gamesettings$options.returnEnumOrdinal() == ordinal) {
                return gamesettings$options;
@@ -1004,11 +1004,11 @@ public class GameSettings {
          return null;
       }
 
-      private Options(String str, boolean isFloat, boolean isBoolean) {
+      private Options(String var3, boolean var4, boolean var5) {
          this(str, isFloat, isBoolean, 0.0F, 1.0F, 0.0F);
       }
 
-      private Options(String str, boolean isFloat, boolean isBoolean, float valMin, float valMax, float valStep) {
+      private Options(String var3, boolean var4, boolean var5, float var6, float var7, float var8) {
          this.enumString = str;
          this.enumFloat = isFloat;
          this.enumBoolean = isBoolean;
@@ -1041,24 +1041,24 @@ public class GameSettings {
          return this.valueMax;
       }
 
-      public void setValueMax(float value) {
+      public void setValueMax(float var1) {
          this.valueMax = value;
       }
 
-      public float normalizeValue(float value) {
+      public float normalizeValue(float var1) {
          return MathHelper.clamp((this.snapToStepClamp(value) - this.valueMin) / (this.valueMax - this.valueMin), 0.0F, 1.0F);
       }
 
-      public float denormalizeValue(float value) {
+      public float denormalizeValue(float var1) {
          return this.snapToStepClamp(this.valueMin + (this.valueMax - this.valueMin) * MathHelper.clamp(value, 0.0F, 1.0F));
       }
 
-      public float snapToStepClamp(float value) {
+      public float snapToStepClamp(float var1) {
          value = this.snapToStep(value);
          return MathHelper.clamp(value, this.valueMin, this.valueMax);
       }
 
-      private float snapToStep(float value) {
+      private float snapToStep(float var1) {
          if (this.valueStep > 0.0F) {
             value = this.valueStep * (float)Math.round(value / this.valueStep);
          }

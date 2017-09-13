@@ -113,7 +113,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
    private int autoJumpTime;
    private boolean wasFallFlying;
 
-   public EntityPlayerSP(Minecraft mcIn, World worldIn, NetHandlerPlayClient netHandler, StatisticsManager statFile) {
+   public EntityPlayerSP(Minecraft var1, World var2, NetHandlerPlayClient var3, StatisticsManager var4) {
       super(worldIn, netHandler.getGameProfile());
       this.connection = netHandler;
       this.statWriter = statFile;
@@ -121,14 +121,14 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       this.dimension = 0;
    }
 
-   public boolean attackEntityFrom(DamageSource source, float amount) {
+   public boolean attackEntityFrom(DamageSource var1, float var2) {
       return false;
    }
 
-   public void heal(float healAmount) {
+   public void heal(float var1) {
    }
 
-   public boolean startRiding(Entity entityIn, boolean force) {
+   public boolean startRiding(Entity var1, boolean var2) {
       if (!super.startRiding(entityIn, force)) {
          return false;
       } else {
@@ -233,22 +233,22 @@ public class EntityPlayerSP extends AbstractClientPlayer {
    }
 
    @Nullable
-   public EntityItem dropItem(boolean dropAll) {
+   public EntityItem dropItem(boolean var1) {
       CPacketPlayerDigging.Action cpacketplayerdigging$action = dropAll ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
       this.connection.sendPacket(new CPacketPlayerDigging(cpacketplayerdigging$action, BlockPos.ORIGIN, EnumFacing.DOWN));
       return null;
    }
 
    @Nullable
-   public ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {
+   public ItemStack dropItemAndGetStack(EntityItem var1) {
       return null;
    }
 
-   public void sendChatMessage(String message) {
+   public void sendChatMessage(String var1) {
       this.connection.sendPacket(new CPacketChatMessage(message));
    }
 
-   public void swingArm(EnumHand hand) {
+   public void swingArm(EnumHand var1) {
       super.swingArm(hand);
       this.connection.sendPacket(new CPacketAnimation(hand));
    }
@@ -257,7 +257,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       this.connection.sendPacket(new CPacketClientStatus(CPacketClientStatus.State.PERFORM_RESPAWN));
    }
 
-   protected void damageEntity(DamageSource damageSrc, float damageAmount) {
+   protected void damageEntity(DamageSource var1, float var2) {
       if (!this.isEntityInvulnerable(damageSrc)) {
          this.setHealth(this.getHealth() - damageAmount);
       }
@@ -275,7 +275,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       this.mc.displayGuiScreen((GuiScreen)null);
    }
 
-   public void setPlayerSPHealth(float health) {
+   public void setPlayerSPHealth(float var1) {
       if (this.hasValidHealth) {
          float f = this.getHealth() - health;
          if (f <= 0.0F) {
@@ -298,7 +298,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
 
    }
 
-   public void addStat(StatBase stat, int amount) {
+   public void addStat(StatBase var1, int var2) {
       if (stat != null && stat.isIndependent) {
          super.addStat(stat, amount);
       }
@@ -321,7 +321,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.OPEN_INVENTORY));
    }
 
-   public void setServerBrand(String brand) {
+   public void setServerBrand(String var1) {
       this.serverBrand = brand;
    }
 
@@ -337,15 +337,15 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       return this.permissionLevel;
    }
 
-   public void setPermissionLevel(int p_184839_1_) {
+   public void setPermissionLevel(int var1) {
       this.permissionLevel = p_184839_1_;
    }
 
-   public void sendStatusMessage(ITextComponent chatComponent) {
+   public void sendStatusMessage(ITextComponent var1) {
       this.mc.ingameGUI.getChatGUI().printChatMessage(chatComponent);
    }
 
-   private boolean isHeadspaceFree(BlockPos pos, int height) {
+   private boolean isHeadspaceFree(BlockPos var1, int var2) {
       for(int y = 0; y < height; ++y) {
          if (!this.isOpenBlockSpace(pos.add(0, y, 0))) {
             return false;
@@ -355,7 +355,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       return true;
    }
 
-   protected boolean pushOutOfBlocks(double x, double y, double z) {
+   protected boolean pushOutOfBlocks(double var1, double var3, double var5) {
       if (this.noClip) {
          return false;
       } else {
@@ -409,30 +409,30 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       }
    }
 
-   private boolean isOpenBlockSpace(BlockPos pos) {
+   private boolean isOpenBlockSpace(BlockPos var1) {
       return !this.world.getBlockState(pos).isNormalCube();
    }
 
-   public void setSprinting(boolean sprinting) {
+   public void setSprinting(boolean var1) {
       super.setSprinting(sprinting);
       this.sprintingTicksLeft = 0;
    }
 
-   public void setXPStats(float currentXP, int maxXP, int level) {
+   public void setXPStats(float var1, int var2, int var3) {
       this.experience = currentXP;
       this.experienceTotal = maxXP;
       this.experienceLevel = level;
    }
 
-   public void sendMessage(ITextComponent component) {
+   public void sendMessage(ITextComponent var1) {
       this.mc.ingameGUI.getChatGUI().printChatMessage(component);
    }
 
-   public boolean canUseCommand(int permLevel, String commandName) {
+   public boolean canUseCommand(int var1, String var2) {
       return permLevel <= this.getPermissionLevel();
    }
 
-   public void handleStatusUpdate(byte id) {
+   public void handleStatusUpdate(byte var1) {
       if (id >= 24 && id <= 28) {
          this.setPermissionLevel(id - 24);
       } else {
@@ -445,7 +445,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       return new BlockPos(this.posX + 0.5D, this.posY + 0.5D, this.posZ + 0.5D);
    }
 
-   public void playSound(SoundEvent soundIn, float volume, float pitch) {
+   public void playSound(SoundEvent var1, float var2, float var3) {
       PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(this, soundIn, this.getSoundCategory(), volume, pitch);
       if (!event.isCanceled() && event.getSound() != null) {
          soundIn = event.getSound();
@@ -459,7 +459,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       return true;
    }
 
-   public void setActiveHand(EnumHand hand) {
+   public void setActiveHand(EnumHand var1) {
       ItemStack itemstack = this.getHeldItem(hand);
       if (itemstack != null && !this.isHandActive()) {
          super.setActiveHand(hand);
@@ -482,7 +482,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       return this.activeHand;
    }
 
-   public void notifyDataManagerChange(DataParameter key) {
+   public void notifyDataManagerChange(DataParameter var1) {
       super.notifyDataManagerChange(key);
       if (HAND_STATES.equals(key)) {
          boolean flag = (((Byte)this.dataManager.get(HAND_STATES)).byteValue() & 1) > 0;
@@ -509,23 +509,23 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       return this.horseJumpPower;
    }
 
-   public void openEditSign(TileEntitySign signTile) {
+   public void openEditSign(TileEntitySign var1) {
       this.mc.displayGuiScreen(new GuiEditSign(signTile));
    }
 
-   public void displayGuiEditCommandCart(CommandBlockBaseLogic commandBlock) {
+   public void displayGuiEditCommandCart(CommandBlockBaseLogic var1) {
       this.mc.displayGuiScreen(new GuiEditCommandBlockMinecart(commandBlock));
    }
 
-   public void displayGuiCommandBlock(TileEntityCommandBlock commandBlock) {
+   public void displayGuiCommandBlock(TileEntityCommandBlock var1) {
       this.mc.displayGuiScreen(new GuiCommandBlock(commandBlock));
    }
 
-   public void openEditStructure(TileEntityStructure structure) {
+   public void openEditStructure(TileEntityStructure var1) {
       this.mc.displayGuiScreen(new GuiEditStructure(structure));
    }
 
-   public void openBook(ItemStack stack, EnumHand hand) {
+   public void openBook(ItemStack var1, EnumHand var2) {
       Item item = stack.getItem();
       if (item == Items.WRITABLE_BOOK) {
          this.mc.displayGuiScreen(new GuiScreenBook(this, stack, true));
@@ -533,7 +533,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
 
    }
 
-   public void displayGUIChest(IInventory chestInventory) {
+   public void displayGUIChest(IInventory var1) {
       String s = chestInventory instanceof IInteractionObject ? ((IInteractionObject)chestInventory).getGuiID() : "minecraft:container";
       if ("minecraft:chest".equals(s)) {
          this.mc.displayGuiScreen(new GuiChest(this.inventory, chestInventory));
@@ -553,11 +553,11 @@ public class EntityPlayerSP extends AbstractClientPlayer {
 
    }
 
-   public void openGuiHorseInventory(EntityHorse horse, IInventory inventoryIn) {
+   public void openGuiHorseInventory(EntityHorse var1, IInventory var2) {
       this.mc.displayGuiScreen(new GuiScreenHorseInventory(this.inventory, inventoryIn, horse));
    }
 
-   public void displayGui(IInteractionObject guiOwner) {
+   public void displayGui(IInteractionObject var1) {
       String s = guiOwner.getGuiID();
       if ("minecraft:crafting_table".equals(s)) {
          this.mc.displayGuiScreen(new GuiCrafting(this.inventory, this.world));
@@ -569,15 +569,15 @@ public class EntityPlayerSP extends AbstractClientPlayer {
 
    }
 
-   public void displayVillagerTradeGui(IMerchant villager) {
+   public void displayVillagerTradeGui(IMerchant var1) {
       this.mc.displayGuiScreen(new GuiMerchant(this.inventory, villager, this.world));
    }
 
-   public void onCriticalHit(Entity entityHit) {
+   public void onCriticalHit(Entity var1) {
       this.mc.effectRenderer.emitParticleAtEntity(entityHit, EnumParticleTypes.CRIT);
    }
 
-   public void onEnchantmentCritical(Entity entityHit) {
+   public void onEnchantmentCritical(Entity var1) {
       this.mc.effectRenderer.emitParticleAtEntity(entityHit, EnumParticleTypes.CRIT_MAGIC);
    }
 
@@ -774,7 +774,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
    }
 
    @Nullable
-   public PotionEffect removeActivePotionEffect(@Nullable Potion potioneffectin) {
+   public PotionEffect removeActivePotionEffect(@Nullable Potion var1) {
       if (potioneffectin == MobEffects.NAUSEA) {
          this.prevTimeInPortal = 0.0F;
          this.timeInPortal = 0.0F;
@@ -783,7 +783,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       return super.removeActivePotionEffect(potioneffectin);
    }
 
-   public void move(double x, double y, double z) {
+   public void move(double var1, double var3, double var5) {
       double d0 = this.posX;
       double d1 = this.posZ;
       super.move(x, y, z);
@@ -794,7 +794,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       return this.autoJumpEnabled;
    }
 
-   protected void updateAutoJump(float p_189810_1_, float p_189810_2_) {
+   protected void updateAutoJump(float var1, float var2) {
       if (this.isAutoJumpEnabled() && this.autoJumpTime <= 0 && this.onGround && !this.isSneaking() && !this.isRiding()) {
          Vec2f vec2f = this.movementInput.getMoveVector();
          if (vec2f.x != 0.0F || vec2f.y != 0.0F) {

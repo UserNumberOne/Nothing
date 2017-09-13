@@ -51,7 +51,7 @@ public class ModelWolf extends ModelBase {
       this.wolfHeadMain.setTextureOffset(0, 10).addBox(-0.5F, 0.0F, -5.0F, 3, 3, 4, 0.0F);
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       super.render(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
       this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
       if (this.isChild) {
@@ -84,7 +84,7 @@ public class ModelWolf extends ModelBase {
 
    }
 
-   public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
+   public void setLivingAnimations(EntityLivingBase var1, float var2, float var3, float var4) {
       EntityWolf entitywolf = (EntityWolf)entitylivingbaseIn;
       if (entitywolf.isAngry()) {
          this.wolfTail.rotateAngleY = 0.0F;
@@ -129,7 +129,7 @@ public class ModelWolf extends ModelBase {
       this.wolfTail.rotateAngleZ = entitywolf.getShakeAngle(partialTickTime, -0.2F);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
       this.wolfHeadMain.rotateAngleX = headPitch * 0.017453292F;
       this.wolfHeadMain.rotateAngleY = netHeadYaw * 0.017453292F;

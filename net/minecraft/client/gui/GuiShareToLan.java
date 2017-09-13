@@ -2,7 +2,6 @@ package net.minecraft.client.gui;
 
 import java.io.IOException;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameType;
@@ -17,7 +16,7 @@ public class GuiShareToLan extends GuiScreen {
    private String gameMode = "survival";
    private boolean allowCheats;
 
-   public GuiShareToLan(GuiScreen p_i1055_1_) {
+   public GuiShareToLan(GuiScreen var1) {
       this.lastScreen = p_i1055_1_;
    }
 
@@ -41,7 +40,7 @@ public class GuiShareToLan extends GuiScreen {
 
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 102) {
          this.mc.displayGuiScreen(this.lastScreen);
       } else if (button.id == 104) {
@@ -62,7 +61,7 @@ public class GuiShareToLan extends GuiScreen {
       } else if (button.id == 101) {
          this.mc.displayGuiScreen((GuiScreen)null);
          String s = this.mc.getIntegratedServer().shareToLAN(GameType.getByName(this.gameMode), this.allowCheats);
-         ITextComponent itextcomponent;
+         Object itextcomponent;
          if (s != null) {
             itextcomponent = new TextComponentTranslation("commands.publish.started", new Object[]{s});
          } else {
@@ -74,7 +73,7 @@ public class GuiShareToLan extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, I18n.format("lanServer.title"), this.width / 2, 50, 16777215);
       this.drawCenteredString(this.fontRendererObj, I18n.format("lanServer.otherPlayers"), this.width / 2, 82, 16777215);

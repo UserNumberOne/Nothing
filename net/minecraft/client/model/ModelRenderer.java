@@ -33,7 +33,7 @@ public class ModelRenderer {
    public float offsetY;
    public float offsetZ;
 
-   public ModelRenderer(ModelBase model, String boxNameIn) {
+   public ModelRenderer(ModelBase var1, String var2) {
       this.textureWidth = 64.0F;
       this.textureHeight = 32.0F;
       this.showModel = true;
@@ -44,16 +44,16 @@ public class ModelRenderer {
       this.setTextureSize(model.textureWidth, model.textureHeight);
    }
 
-   public ModelRenderer(ModelBase model) {
+   public ModelRenderer(ModelBase var1) {
       this(model, (String)null);
    }
 
-   public ModelRenderer(ModelBase model, int texOffX, int texOffY) {
+   public ModelRenderer(ModelBase var1, int var2, int var3) {
       this(model);
       this.setTextureOffset(texOffX, texOffY);
    }
 
-   public void addChild(ModelRenderer renderer) {
+   public void addChild(ModelRenderer var1) {
       if (this.childModels == null) {
          this.childModels = Lists.newArrayList();
       }
@@ -61,13 +61,13 @@ public class ModelRenderer {
       this.childModels.add(renderer);
    }
 
-   public ModelRenderer setTextureOffset(int x, int y) {
+   public ModelRenderer setTextureOffset(int var1, int var2) {
       this.textureOffsetX = x;
       this.textureOffsetY = y;
       return this;
    }
 
-   public ModelRenderer addBox(String partName, float offX, float offY, float offZ, int width, int height, int depth) {
+   public ModelRenderer addBox(String var1, float var2, float var3, float var4, int var5, int var6, int var7) {
       partName = this.boxName + "." + partName;
       TextureOffset textureoffset = this.baseModel.getTextureOffset(partName);
       this.setTextureOffset(textureoffset.textureOffsetX, textureoffset.textureOffsetY);
@@ -75,28 +75,28 @@ public class ModelRenderer {
       return this;
    }
 
-   public ModelRenderer addBox(float offX, float offY, float offZ, int width, int height, int depth) {
+   public ModelRenderer addBox(float var1, float var2, float var3, int var4, int var5, int var6) {
       this.cubeList.add(new ModelBox(this, this.textureOffsetX, this.textureOffsetY, offX, offY, offZ, width, height, depth, 0.0F));
       return this;
    }
 
-   public ModelRenderer addBox(float offX, float offY, float offZ, int width, int height, int depth, boolean mirrored) {
+   public ModelRenderer addBox(float var1, float var2, float var3, int var4, int var5, int var6, boolean var7) {
       this.cubeList.add(new ModelBox(this, this.textureOffsetX, this.textureOffsetY, offX, offY, offZ, width, height, depth, 0.0F, mirrored));
       return this;
    }
 
-   public void addBox(float offX, float offY, float offZ, int width, int height, int depth, float scaleFactor) {
+   public void addBox(float var1, float var2, float var3, int var4, int var5, int var6, float var7) {
       this.cubeList.add(new ModelBox(this, this.textureOffsetX, this.textureOffsetY, offX, offY, offZ, width, height, depth, scaleFactor));
    }
 
-   public void setRotationPoint(float rotationPointXIn, float rotationPointYIn, float rotationPointZIn) {
+   public void setRotationPoint(float var1, float var2, float var3) {
       this.rotationPointX = rotationPointXIn;
       this.rotationPointY = rotationPointYIn;
       this.rotationPointZ = rotationPointZIn;
    }
 
    @SideOnly(Side.CLIENT)
-   public void render(float scale) {
+   public void render(float var1) {
       if (!this.isHidden && this.showModel) {
          if (!this.compiled) {
             this.compileDisplayList(scale);
@@ -153,7 +153,7 @@ public class ModelRenderer {
    }
 
    @SideOnly(Side.CLIENT)
-   public void renderWithRotation(float scale) {
+   public void renderWithRotation(float var1) {
       if (!this.isHidden && this.showModel) {
          if (!this.compiled) {
             this.compileDisplayList(scale);
@@ -180,7 +180,7 @@ public class ModelRenderer {
    }
 
    @SideOnly(Side.CLIENT)
-   public void postRender(float scale) {
+   public void postRender(float var1) {
       if (!this.isHidden && this.showModel) {
          if (!this.compiled) {
             this.compileDisplayList(scale);
@@ -209,7 +209,7 @@ public class ModelRenderer {
    }
 
    @SideOnly(Side.CLIENT)
-   private void compileDisplayList(float scale) {
+   private void compileDisplayList(float var1) {
       this.displayList = GLAllocation.generateDisplayLists(1);
       GlStateManager.glNewList(this.displayList, 4864);
       VertexBuffer vertexbuffer = Tessellator.getInstance().getBuffer();
@@ -222,7 +222,7 @@ public class ModelRenderer {
       this.compiled = true;
    }
 
-   public ModelRenderer setTextureSize(int textureWidthIn, int textureHeightIn) {
+   public ModelRenderer setTextureSize(int var1, int var2) {
       this.textureWidth = (float)textureWidthIn;
       this.textureHeight = (float)textureHeightIn;
       return this;

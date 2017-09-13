@@ -18,7 +18,7 @@ public class GuiBossOverlay extends Gui {
    private final Minecraft client;
    private final Map mapBossInfos = Maps.newLinkedHashMap();
 
-   public GuiBossOverlay(Minecraft clientIn) {
+   public GuiBossOverlay(Minecraft var1) {
       this.client = clientIn;
    }
 
@@ -49,7 +49,7 @@ public class GuiBossOverlay extends Gui {
 
    }
 
-   private void render(int x, int y, net.minecraft.world.BossInfo info) {
+   private void render(int var1, int var2, net.minecraft.world.BossInfo var3) {
       this.drawTexturedModalRect(x, y, 0, info.getColor().ordinal() * 5 * 2, 182, 5);
       if (info.getOverlay() != net.minecraft.world.BossInfo.Overlay.PROGRESS) {
          this.drawTexturedModalRect(x, y, 0, 80 + (info.getOverlay().ordinal() - 1) * 5 * 2, 182, 5);
@@ -65,7 +65,7 @@ public class GuiBossOverlay extends Gui {
 
    }
 
-   public void read(SPacketUpdateBossInfo packetIn) {
+   public void read(SPacketUpdateBossInfo var1) {
       if (packetIn.getOperation() == SPacketUpdateBossInfo.Operation.ADD) {
          this.mapBossInfos.put(packetIn.getUniqueId(), new BossInfoLerping(packetIn));
       } else if (packetIn.getOperation() == SPacketUpdateBossInfo.Operation.REMOVE) {

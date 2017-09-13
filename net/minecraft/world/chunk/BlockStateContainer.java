@@ -7,6 +7,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BitArray;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockStateContainer implements IBlockStatePaletteResizer {
    private static final IBlockStatePalette REGISTRY_BASED_PALETTE = new BlockStatePaletteRegistry();
@@ -19,13 +21,17 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
       this.setBits(4);
    }
 
-   private static int getIndex(int i, int j, int k) {
-      return j << 8 | k << 4 | i;
+   private static int getIndex(int var0, int var1, int var2) {
+      return y << 8 | z << 4 | x;
    }
 
-   private void setBits(int i) {
-      if (i != this.bits) {
-         this.bits = i;
+   private void setBits(int var1) {
+      this.setBits(bitsIn, false);
+   }
+
+   private void setBits(int var1, boolean var2) {
+      if (bitsIn != this.bits) {
+         this.bits = bitsIn;
          if (this.bits <= 4) {
             this.bits = 4;
             this.palette = new BlockStatePaletteLinear(this.bits, this);
@@ -34,6 +40,9 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
          } else {
             this.palette = REGISTRY_BASED_PALETTE;
             this.bits = MathHelper.log2DeBruijn(Block.BLOCK_STATE_IDS.size());
+            if (forceBits) {
+               this.bits = bitsIn;
+            }
          }
 
          this.palette.idFor(AIR_BLOCK_STATE);
@@ -42,48 +51,64 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
 
    }
 
-   public int onResize(int i, IBlockState iblockdata) {
-      BitArray databits = this.storage;
-      IBlockStatePalette datapalette = this.palette;
-      this.setBits(i);
+   public int onResize(int var1, IBlockState var2) {
+      BitArray bitarray = this.storage;
+      IBlockStatePalette iblockstatepalette = this.palette;
+      this.setBits(p_186008_1_);
 
-      for(int j = 0; j < databits.size(); ++j) {
-         IBlockState iblockdata1 = datapalette.getBlockState(databits.getAt(j));
-         if (iblockdata1 != null) {
-            this.set(j, iblockdata1);
+      for(int i = 0; i < bitarray.size(); ++i) {
+         IBlockState iblockstate = iblockstatepalette.getBlockState(bitarray.getAt(i));
+         if (iblockstate != null) {
+            this.set(i, iblockstate);
          }
       }
 
-      return this.palette.idFor(iblockdata);
+      return this.palette.idFor(state);
    }
 
-   public void set(int i, int j, int k, IBlockState iblockdata) {
-      this.set(getIndex(i, j, k), iblockdata);
+   public void set(int var1, int var2, int var3, IBlockState var4) {
+      this.set(getIndex(x, y, z), state);
    }
 
-   protected void set(int i, IBlockState iblockdata) {
-      int j = this.palette.idFor(iblockdata);
-      this.storage.setAt(i, j);
+   protected void set(int var1, IBlockState var2) {
+      int i = this.palette.idFor(state);
+      this.storage.setAt(index, i);
    }
 
-   public IBlockState get(int i, int j, int k) {
-      return this.get(getIndex(i, j, k));
+   public IBlockState get(int var1, int var2, int var3) {
+      return this.get(getIndex(x, y, z));
    }
 
-   protected IBlockState get(int i) {
-      IBlockState iblockdata = this.palette.getBlockState(this.storage.getAt(i));
-      return iblockdata == null ? AIR_BLOCK_STATE : iblockdata;
+   protected IBlockState get(int var1) {
+      IBlockState iblockstate = this.palette.getBlockState(this.storage.getAt(index));
+      return iblockstate == null ? AIR_BLOCK_STATE : iblockstate;
    }
 
-   public void write(PacketBuffer packetdataserializer) {
-      packetdataserializer.writeByte(this.bits);
-      this.palette.write(packetdataserializer);
-      packetdataserializer.writeLongArray(this.storage.getBackingLongArray());
+   @SideOnly(Side.CLIENT)
+   public void read(PacketBuffer var1) {
+      int i = buf.readByte();
+      if (this.bits != i) {
+         this.setBits(i, true);
+      }
+
+      this.palette.read(buf);
+      buf.readLongArray(this.storage.getBackingLongArray());
+      int regSize = MathHelper.log2DeBruijn(Block.BLOCK_STATE_IDS.size());
+      if (this.palette == REGISTRY_BASED_PALETTE && this.bits != regSize) {
+         this.onResize(regSize, AIR_BLOCK_STATE);
+      }
+
+   }
+
+   public void write(PacketBuffer var1) {
+      buf.writeByte(this.bits);
+      this.palette.write(buf);
+      buf.writeLongArray(this.storage.getBackingLongArray());
    }
 
    @Nullable
-   public NibbleArray getDataForNBT(byte[] abyte, NibbleArray nibblearray) {
-      NibbleArray nibblearray1 = null;
+   public NibbleArray getDataForNBT(byte[] var1, NibbleArray var2) {
+      NibbleArray nibblearray = null;
 
       for(int i = 0; i < 4096; ++i) {
          int j = Block.BLOCK_STATE_IDS.get(this.get(i));
@@ -91,40 +116,28 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
          int l = i >> 8 & 15;
          int i1 = i >> 4 & 15;
          if ((j >> 12 & 15) != 0) {
-            if (nibblearray1 == null) {
-               nibblearray1 = new NibbleArray();
+            if (nibblearray == null) {
+               nibblearray = new NibbleArray();
             }
 
-            nibblearray1.set(k, l, i1, j >> 12 & 15);
+            nibblearray.set(k, l, i1, j >> 12 & 15);
          }
 
-         abyte[i] = (byte)(j >> 4 & 255);
-         nibblearray.set(k, l, i1, j & 15);
+         p_186017_1_[i] = (byte)(j >> 4 & 255);
+         p_186017_2_.set(k, l, i1, j & 15);
       }
 
-      return nibblearray1;
+      return nibblearray;
    }
 
-   public void setDataFromNBT(byte[] abyte, NibbleArray nibblearray, @Nullable NibbleArray nibblearray1) {
+   public void setDataFromNBT(byte[] var1, NibbleArray var2, @Nullable NibbleArray var3) {
       for(int i = 0; i < 4096; ++i) {
          int j = i & 15;
          int k = i >> 8 & 15;
          int l = i >> 4 & 15;
-         int i1 = nibblearray1 == null ? 0 : nibblearray1.get(j, k, l);
-         int j1 = i1 << 12 | (abyte[i] & 255) << 4 | nibblearray.get(j, k, l);
-         IBlockState data = (IBlockState)Block.BLOCK_STATE_IDS.getByValue(j1);
-         if (data == null) {
-            Block block = Block.getBlockById(j1 >> 4);
-            if (block != null) {
-               try {
-                  data = block.getStateFromMeta(j1 & 15);
-               } catch (Exception var12) {
-                  data = block.getDefaultState();
-               }
-            }
-         }
-
-         this.set(i, data);
+         int i1 = p_186019_3_ == null ? 0 : p_186019_3_.get(j, k, l);
+         int j1 = i1 << 12 | (p_186019_1_[i] & 255) << 4 | p_186019_2_.get(j, k, l);
+         this.set(i, (IBlockState)Block.BLOCK_STATE_IDS.getByValue(j1));
       }
 
    }

@@ -13,7 +13,7 @@ public class PngSizeInfo {
    public final int pngWidth;
    public final int pngHeight;
 
-   public PngSizeInfo(InputStream stream) throws IOException {
+   public PngSizeInfo(InputStream var1) throws IOException {
       DataInputStream datainputstream = new DataInputStream(stream);
       if (datainputstream.readLong() != -8552249625308161526L) {
          throw new IOException("Bad PNG Signature");
@@ -28,7 +28,7 @@ public class PngSizeInfo {
       }
    }
 
-   public static PngSizeInfo makeFromResource(IResource resource) throws IOException {
+   public static PngSizeInfo makeFromResource(IResource var0) throws IOException {
       PngSizeInfo pngsizeinfo;
       try {
          pngsizeinfo = new PngSizeInfo(resource.getInputStream());

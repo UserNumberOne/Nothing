@@ -10,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
@@ -21,133 +22,124 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.capability.wrappers.FluidBucketWrapper;
+import net.minecraftforge.fluids.capability.wrappers.FluidContainerRegistryWrapper;
 
 public class ItemBucket extends Item {
    private final Block containedBlock;
 
-   public ItemBucket(Block block) {
+   public ItemBucket(Block var1) {
       this.maxStackSize = 1;
-      this.containedBlock = block;
+      this.containedBlock = containedBlockIn;
       this.setCreativeTab(CreativeTabs.MISC);
    }
 
-   public ActionResult onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityhuman, EnumHand enumhand) {
+   public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
       boolean flag = this.containedBlock == Blocks.AIR;
-      RayTraceResult movingobjectposition = this.rayTrace(world, entityhuman, flag);
-      if (movingobjectposition == null) {
-         return new ActionResult(EnumActionResult.PASS, itemstack);
-      } else if (movingobjectposition.typeOfHit != RayTraceResult.Type.BLOCK) {
-         return new ActionResult(EnumActionResult.PASS, itemstack);
+      RayTraceResult raytraceresult = this.rayTrace(worldIn, playerIn, flag);
+      ActionResult ret = ForgeEventFactory.onBucketUse(playerIn, worldIn, itemStackIn, raytraceresult);
+      if (ret != null) {
+         return ret;
+      } else if (raytraceresult == null) {
+         return new ActionResult(EnumActionResult.PASS, itemStackIn);
+      } else if (raytraceresult.typeOfHit != RayTraceResult.Type.BLOCK) {
+         return new ActionResult(EnumActionResult.PASS, itemStackIn);
       } else {
-         BlockPos blockposition = movingobjectposition.getBlockPos();
-         if (!world.isBlockModifiable(entityhuman, blockposition)) {
-            return new ActionResult(EnumActionResult.FAIL, itemstack);
+         BlockPos blockpos = raytraceresult.getBlockPos();
+         if (!worldIn.isBlockModifiable(playerIn, blockpos)) {
+            return new ActionResult(EnumActionResult.FAIL, itemStackIn);
          } else if (flag) {
-            if (!entityhuman.canPlayerEdit(blockposition.offset(movingobjectposition.sideHit), movingobjectposition.sideHit, itemstack)) {
-               return new ActionResult(EnumActionResult.FAIL, itemstack);
+            if (!playerIn.canPlayerEdit(blockpos.offset(raytraceresult.sideHit), raytraceresult.sideHit, itemStackIn)) {
+               return new ActionResult(EnumActionResult.FAIL, itemStackIn);
             } else {
-               IBlockState iblockdata = world.getBlockState(blockposition);
-               Material material = iblockdata.getMaterial();
-               if (material == Material.WATER && ((Integer)iblockdata.getValue(BlockLiquid.LEVEL)).intValue() == 0) {
-                  PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(entityhuman, blockposition.getX(), blockposition.getY(), blockposition.getZ(), (EnumFacing)null, itemstack, Items.WATER_BUCKET);
-                  if (event.isCancelled()) {
-                     return new ActionResult(EnumActionResult.FAIL, itemstack);
-                  } else {
-                     world.setBlockState(blockposition, Blocks.AIR.getDefaultState(), 11);
-                     entityhuman.addStat(StatList.getObjectUseStats(this));
-                     entityhuman.playSound(SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
-                     return new ActionResult(EnumActionResult.SUCCESS, this.a(itemstack, entityhuman, Items.WATER_BUCKET, event.getItemStack()));
-                  }
-               } else if (material == Material.LAVA && ((Integer)iblockdata.getValue(BlockLiquid.LEVEL)).intValue() == 0) {
-                  PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(entityhuman, blockposition.getX(), blockposition.getY(), blockposition.getZ(), (EnumFacing)null, itemstack, Items.LAVA_BUCKET);
-                  if (event.isCancelled()) {
-                     return new ActionResult(EnumActionResult.FAIL, itemstack);
-                  } else {
-                     entityhuman.playSound(SoundEvents.ITEM_BUCKET_FILL_LAVA, 1.0F, 1.0F);
-                     world.setBlockState(blockposition, Blocks.AIR.getDefaultState(), 11);
-                     entityhuman.addStat(StatList.getObjectUseStats(this));
-                     return new ActionResult(EnumActionResult.SUCCESS, this.a(itemstack, entityhuman, Items.LAVA_BUCKET, event.getItemStack()));
-                  }
+               IBlockState iblockstate = worldIn.getBlockState(blockpos);
+               Material material = iblockstate.getMaterial();
+               if (material == Material.WATER && ((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue() == 0) {
+                  worldIn.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 11);
+                  playerIn.addStat(StatList.getObjectUseStats(this));
+                  playerIn.playSound(SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
+                  return new ActionResult(EnumActionResult.SUCCESS, this.fillBucket(itemStackIn, playerIn, Items.WATER_BUCKET));
+               } else if (material == Material.LAVA && ((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue() == 0) {
+                  playerIn.playSound(SoundEvents.ITEM_BUCKET_FILL_LAVA, 1.0F, 1.0F);
+                  worldIn.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 11);
+                  playerIn.addStat(StatList.getObjectUseStats(this));
+                  return new ActionResult(EnumActionResult.SUCCESS, this.fillBucket(itemStackIn, playerIn, Items.LAVA_BUCKET));
                } else {
-                  return new ActionResult(EnumActionResult.FAIL, itemstack);
+                  return new ActionResult(EnumActionResult.FAIL, itemStackIn);
                }
             }
          } else {
-            boolean flag1 = world.getBlockState(blockposition).getBlock().isReplaceable(world, blockposition);
-            BlockPos blockposition1 = flag1 && movingobjectposition.sideHit == EnumFacing.UP ? blockposition : blockposition.offset(movingobjectposition.sideHit);
-            if (!entityhuman.canPlayerEdit(blockposition1, movingobjectposition.sideHit, itemstack)) {
-               return new ActionResult(EnumActionResult.FAIL, itemstack);
-            } else if (this.a(entityhuman, world, blockposition1, movingobjectposition.sideHit, blockposition, itemstack)) {
-               entityhuman.addStat(StatList.getObjectUseStats(this));
-               return !entityhuman.capabilities.isCreativeMode ? new ActionResult(EnumActionResult.SUCCESS, new ItemStack(Items.BUCKET)) : new ActionResult(EnumActionResult.SUCCESS, itemstack);
+            boolean flag1 = worldIn.getBlockState(blockpos).getBlock().isReplaceable(worldIn, blockpos);
+            BlockPos blockpos1 = flag1 && raytraceresult.sideHit == EnumFacing.UP ? blockpos : blockpos.offset(raytraceresult.sideHit);
+            if (!playerIn.canPlayerEdit(blockpos1, raytraceresult.sideHit, itemStackIn)) {
+               return new ActionResult(EnumActionResult.FAIL, itemStackIn);
+            } else if (this.tryPlaceContainedLiquid(playerIn, worldIn, blockpos1)) {
+               playerIn.addStat(StatList.getObjectUseStats(this));
+               return !playerIn.capabilities.isCreativeMode ? new ActionResult(EnumActionResult.SUCCESS, new ItemStack(Items.BUCKET)) : new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
             } else {
-               return new ActionResult(EnumActionResult.FAIL, itemstack);
+               return new ActionResult(EnumActionResult.FAIL, itemStackIn);
             }
          }
       }
    }
 
-   private ItemStack a(ItemStack itemstack, EntityPlayer entityhuman, Item item, org.bukkit.inventory.ItemStack result) {
-      if (entityhuman.capabilities.isCreativeMode) {
-         return itemstack;
-      } else if (--itemstack.stackSize <= 0) {
-         return CraftItemStack.asNMSCopy(result);
+   private ItemStack fillBucket(ItemStack var1, EntityPlayer var2, Item var3) {
+      if (player.capabilities.isCreativeMode) {
+         return emptyBuckets;
+      } else if (--emptyBuckets.stackSize <= 0) {
+         return new ItemStack(fullBucket);
       } else {
-         if (!entityhuman.inventory.addItemStackToInventory(CraftItemStack.asNMSCopy(result))) {
-            entityhuman.dropItem(CraftItemStack.asNMSCopy(result), false);
+         if (!player.inventory.addItemStackToInventory(new ItemStack(fullBucket))) {
+            player.dropItem(new ItemStack(fullBucket), false);
          }
 
-         return itemstack;
+         return emptyBuckets;
       }
    }
 
-   public boolean tryPlaceContainedLiquid(@Nullable EntityPlayer entityhuman, World world, BlockPos blockposition) {
-      return this.a(entityhuman, world, blockposition, (EnumFacing)null, blockposition, (ItemStack)null);
-   }
-
-   public boolean a(EntityPlayer entityhuman, World world, BlockPos blockposition, EnumFacing enumdirection, BlockPos clicked, ItemStack itemstack) {
+   public boolean tryPlaceContainedLiquid(@Nullable EntityPlayer var1, World var2, BlockPos var3) {
       if (this.containedBlock == Blocks.AIR) {
          return false;
       } else {
-         IBlockState iblockdata = world.getBlockState(blockposition);
-         Material material = iblockdata.getMaterial();
+         IBlockState iblockstate = worldIn.getBlockState(posIn);
+         Material material = iblockstate.getMaterial();
          boolean flag = !material.isSolid();
-         boolean flag1 = iblockdata.getBlock().isReplaceable(world, blockposition);
-         if (!world.isAirBlock(blockposition) && !flag && !flag1) {
+         boolean flag1 = iblockstate.getBlock().isReplaceable(worldIn, posIn);
+         if (!worldIn.isAirBlock(posIn) && !flag && !flag1) {
             return false;
          } else {
-            if (entityhuman != null) {
-               PlayerBucketEmptyEvent event = CraftEventFactory.callPlayerBucketEmptyEvent(entityhuman, clicked.getX(), clicked.getY(), clicked.getZ(), enumdirection, itemstack);
-               if (event.isCancelled()) {
-                  return false;
-               }
-            }
+            if (worldIn.provider.doesWaterVaporize() && this.containedBlock == Blocks.FLOWING_WATER) {
+               int l = posIn.getX();
+               int i = posIn.getY();
+               int j = posIn.getZ();
+               worldIn.playSound(player, posIn, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
 
-            if (world.provider.doesWaterVaporize() && this.containedBlock == Blocks.FLOWING_WATER) {
-               int i = blockposition.getX();
-               int j = blockposition.getY();
-               int k = blockposition.getZ();
-               world.playSound(entityhuman, blockposition, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
-
-               for(int l = 0; l < 8; ++l) {
-                  world.spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0D, 0.0D, 0.0D);
+               for(int k = 0; k < 8; ++k) {
+                  worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)l + Math.random(), (double)i + Math.random(), (double)j + Math.random(), 0.0D, 0.0D, 0.0D);
                }
             } else {
-               if (!world.isRemote && (flag || flag1) && !material.isLiquid()) {
-                  world.destroyBlock(blockposition, true);
+               if (!worldIn.isRemote && (flag || flag1) && !material.isLiquid()) {
+                  worldIn.destroyBlock(posIn, true);
                }
 
-               SoundEvent soundeffect = this.containedBlock == Blocks.FLOWING_LAVA ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
-               world.playSound(entityhuman, blockposition, soundeffect, SoundCategory.BLOCKS, 1.0F, 1.0F);
-               world.setBlockState(blockposition, this.containedBlock.getDefaultState(), 11);
+               SoundEvent soundevent = this.containedBlock == Blocks.FLOWING_LAVA ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
+               worldIn.playSound(player, posIn, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+               worldIn.setBlockState(posIn, this.containedBlock.getDefaultState(), 11);
             }
 
             return true;
          }
+      }
+   }
+
+   public ICapabilityProvider initCapabilities(ItemStack var1, NBTTagCompound var2) {
+      if (this.getClass() == ItemBucket.class) {
+         return (ICapabilityProvider)(FluidRegistry.isUniversalBucketEnabled() ? new FluidBucketWrapper(stack) : new FluidContainerRegistryWrapper(stack));
+      } else {
+         return super.initCapabilities(stack, nbt);
       }
    }
 }

@@ -17,7 +17,7 @@ public class ModelSkeleton extends ModelBiped {
       this(0.0F, false);
    }
 
-   public ModelSkeleton(float modelSize, boolean p_i46303_2_) {
+   public ModelSkeleton(float var1, boolean var2) {
       super(modelSize, 0.0F, 64, 32);
       if (!p_i46303_2_) {
          this.bipedRightArm = new ModelRenderer(this, 40, 16);
@@ -38,7 +38,7 @@ public class ModelSkeleton extends ModelBiped {
 
    }
 
-   public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
+   public void setLivingAnimations(EntityLivingBase var1, float var2, float var3, float var4) {
       this.rightArmPose = ModelBiped.ArmPose.EMPTY;
       this.leftArmPose = ModelBiped.ArmPose.EMPTY;
       ItemStack itemstack = entitylivingbaseIn.getHeldItem(EnumHand.MAIN_HAND);
@@ -53,7 +53,7 @@ public class ModelSkeleton extends ModelBiped {
       super.setLivingAnimations(entitylivingbaseIn, p_78086_2_, p_78086_3_, partialTickTime);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
       ItemStack itemstack = ((EntityLivingBase)entityIn).getHeldItemMainhand();
       EntitySkeleton entityskeleton = (EntitySkeleton)entityIn;
@@ -76,7 +76,7 @@ public class ModelSkeleton extends ModelBiped {
 
    }
 
-   public void postRenderArm(float scale, EnumHandSide side) {
+   public void postRenderArm(float var1, EnumHandSide var2) {
       float f = side == EnumHandSide.RIGHT ? 1.0F : -1.0F;
       ModelRenderer modelrenderer = this.getArmForSide(side);
       modelrenderer.rotationPointX += f;

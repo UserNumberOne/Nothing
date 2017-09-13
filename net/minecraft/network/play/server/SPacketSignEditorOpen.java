@@ -5,6 +5,8 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketSignEditorOpen implements Packet {
    private BlockPos signPosition;
@@ -13,18 +15,23 @@ public class SPacketSignEditorOpen implements Packet {
    }
 
    public SPacketSignEditorOpen(BlockPos var1) {
-      this.signPosition = var1;
+      this.signPosition = posIn;
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      var1.handleSignEditorOpen(this);
+      handler.handleSignEditorOpen(this);
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.signPosition = var1.readBlockPos();
+      this.signPosition = buf.readBlockPos();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeBlockPos(this.signPosition);
+      buf.writeBlockPos(this.signPosition);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public BlockPos getSignPosition() {
+      return this.signPosition;
    }
 }

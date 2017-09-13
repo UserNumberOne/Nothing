@@ -10,60 +10,60 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class TextComponentUtils {
    public static ITextComponent processComponent(ICommandSender var0, ITextComponent var1, Entity var2) throws CommandException {
-      Object var3 = null;
-      if (var1 instanceof TextComponentScore) {
-         TextComponentScore var4 = (TextComponentScore)var1;
-         String var5 = var4.getName();
-         if (EntitySelector.hasArguments(var5)) {
-            List var6 = EntitySelector.matchEntities(var0, var5, Entity.class);
-            if (var6.size() != 1) {
+      ITextComponent itextcomponent = null;
+      if (component instanceof TextComponentScore) {
+         TextComponentScore textcomponentscore = (TextComponentScore)component;
+         String s = textcomponentscore.getName();
+         if (EntitySelector.hasArguments(s)) {
+            List list = EntitySelector.matchEntities(commandSender, s, Entity.class);
+            if (list.size() != 1) {
                throw new EntityNotFoundException();
             }
 
-            Entity var7 = (Entity)var6.get(0);
-            if (var7 instanceof EntityPlayer) {
-               var5 = var7.getName();
+            Entity entity = (Entity)list.get(0);
+            if (entity instanceof EntityPlayer) {
+               s = entity.getName();
             } else {
-               var5 = var7.getCachedUniqueIdString();
+               s = entity.getCachedUniqueIdString();
             }
          }
 
-         var3 = var2 != null && var5.equals("*") ? new TextComponentScore(var2.getName(), var4.getObjective()) : new TextComponentScore(var5, var4.getObjective());
-         ((TextComponentScore)var3).resolve(var0);
-      } else if (var1 instanceof TextComponentSelector) {
-         String var9 = ((TextComponentSelector)var1).getSelector();
-         var3 = EntitySelector.matchEntitiesToTextComponent(var0, var9);
-         if (var3 == null) {
-            var3 = new TextComponentString("");
+         itextcomponent = entityIn != null && s.equals("*") ? new TextComponentScore(entityIn.getName(), textcomponentscore.getObjective()) : new TextComponentScore(s, textcomponentscore.getObjective());
+         ((TextComponentScore)itextcomponent).resolve(commandSender);
+      } else if (component instanceof TextComponentSelector) {
+         String s1 = ((TextComponentSelector)component).getSelector();
+         itextcomponent = EntitySelector.matchEntitiesToTextComponent(commandSender, s1);
+         if (itextcomponent == null) {
+            itextcomponent = new TextComponentString("");
          }
-      } else if (var1 instanceof TextComponentString) {
-         var3 = new TextComponentString(((TextComponentString)var1).getText());
+      } else if (component instanceof TextComponentString) {
+         itextcomponent = new TextComponentString(((TextComponentString)component).getText());
       } else {
-         if (!(var1 instanceof TextComponentTranslation)) {
-            return var1;
+         if (!(component instanceof TextComponentTranslation)) {
+            return component;
          }
 
-         Object[] var10 = ((TextComponentTranslation)var1).getFormatArgs();
+         Object[] aobject = ((TextComponentTranslation)component).getFormatArgs();
 
-         for(int var12 = 0; var12 < var10.length; ++var12) {
-            Object var14 = var10[var12];
-            if (var14 instanceof ITextComponent) {
-               var10[var12] = processComponent(var0, (ITextComponent)var14, var2);
+         for(int i = 0; i < aobject.length; ++i) {
+            Object object = aobject[i];
+            if (object instanceof ITextComponent) {
+               aobject[i] = processComponent(commandSender, (ITextComponent)object, entityIn);
             }
          }
 
-         var3 = new TextComponentTranslation(((TextComponentTranslation)var1).getKey(), var10);
+         itextcomponent = new TextComponentTranslation(((TextComponentTranslation)component).getKey(), aobject);
       }
 
-      Style var11 = var1.getStyle();
-      if (var11 != null) {
-         ((ITextComponent)var3).setStyle(var11.createShallowCopy());
+      Style style = component.getStyle();
+      if (style != null) {
+         itextcomponent.setStyle(style.createShallowCopy());
       }
 
-      for(ITextComponent var15 : var1.getSiblings()) {
-         ((ITextComponent)var3).appendSibling(processComponent(var0, var15, var2));
+      for(ITextComponent itextcomponent1 : component.getSiblings()) {
+         itextcomponent.appendSibling(processComponent(commandSender, itextcomponent1, entityIn));
       }
 
-      return (ITextComponent)var3;
+      return itextcomponent;
    }
 }

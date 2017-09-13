@@ -4,7 +4,7 @@ public class TextComponentSelector extends TextComponentBase {
    private final String selector;
 
    public TextComponentSelector(String var1) {
-      this.selector = var1;
+      this.selector = selectorIn;
    }
 
    public String getSelector() {
@@ -16,33 +16,28 @@ public class TextComponentSelector extends TextComponentBase {
    }
 
    public TextComponentSelector createCopy() {
-      TextComponentSelector var1 = new TextComponentSelector(this.selector);
-      var1.setStyle(this.getStyle().createShallowCopy());
+      TextComponentSelector textcomponentselector = new TextComponentSelector(this.selector);
+      textcomponentselector.setStyle(this.getStyle().createShallowCopy());
 
-      for(ITextComponent var3 : this.getSiblings()) {
-         var1.appendSibling(var3.createCopy());
+      for(ITextComponent itextcomponent : this.getSiblings()) {
+         textcomponentselector.appendSibling(itextcomponent.createCopy());
       }
 
-      return var1;
+      return textcomponentselector;
    }
 
    public boolean equals(Object var1) {
-      if (this == var1) {
+      if (this == p_equals_1_) {
          return true;
-      } else if (!(var1 instanceof TextComponentSelector)) {
+      } else if (!(p_equals_1_ instanceof TextComponentSelector)) {
          return false;
       } else {
-         TextComponentSelector var2 = (TextComponentSelector)var1;
-         return this.selector.equals(var2.selector) && super.equals(var1);
+         TextComponentSelector textcomponentselector = (TextComponentSelector)p_equals_1_;
+         return this.selector.equals(textcomponentselector.selector) && super.equals(p_equals_1_);
       }
    }
 
    public String toString() {
       return "SelectorComponent{pattern='" + this.selector + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
-   }
-
-   // $FF: synthetic method
-   public ITextComponent createCopy() {
-      return this.createCopy();
    }
 }

@@ -12,12 +12,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class IntegratedPlayerList extends PlayerList {
    private NBTTagCompound hostPlayerData;
 
-   public IntegratedPlayerList(IntegratedServer server) {
+   public IntegratedPlayerList(IntegratedServer var1) {
       super(server);
       this.setViewDistance(10);
    }
 
-   protected void writePlayerData(EntityPlayerMP playerIn) {
+   protected void writePlayerData(EntityPlayerMP var1) {
       if (playerIn.getName().equals(this.getServerInstance().getServerOwner())) {
          this.hostPlayerData = playerIn.writeToNBT(new NBTTagCompound());
       }
@@ -25,7 +25,7 @@ public class IntegratedPlayerList extends PlayerList {
       super.writePlayerData(playerIn);
    }
 
-   public String allowUserToConnect(SocketAddress address, GameProfile profile) {
+   public String allowUserToConnect(SocketAddress var1, GameProfile var2) {
       return profile.getName().equalsIgnoreCase(this.getServerInstance().getServerOwner()) && this.getPlayerByUsername(profile.getName()) != null ? "That name is already taken." : super.allowUserToConnect(address, profile);
    }
 

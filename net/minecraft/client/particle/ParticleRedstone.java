@@ -11,11 +11,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ParticleRedstone extends Particle {
    float reddustParticleScale;
 
-   protected ParticleRedstone(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, float p_i46349_8_, float p_i46349_9_, float p_i46349_10_) {
+   protected ParticleRedstone(World var1, double var2, double var4, double var6, float var8, float var9, float var10) {
       this(worldIn, xCoordIn, yCoordIn, zCoordIn, 1.0F, p_i46349_8_, p_i46349_9_, p_i46349_10_);
    }
 
-   protected ParticleRedstone(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, float p_i46350_8_, float p_i46350_9_, float p_i46350_10_, float p_i46350_11_) {
+   protected ParticleRedstone(World var1, double var2, double var4, double var6, float var8, float var9, float var10, float var11) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0D, 0.0D, 0.0D);
       this.motionX *= 0.10000000149011612D;
       this.motionY *= 0.10000000149011612D;
@@ -35,7 +35,7 @@ public class ParticleRedstone extends Particle {
       this.particleMaxAge = (int)((float)this.particleMaxAge * p_i46350_8_);
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge * 32.0F;
       f = MathHelper.clamp(f, 0.0F, 1.0F);
       this.particleScale = this.reddustParticleScale * f;
@@ -69,7 +69,7 @@ public class ParticleRedstone extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleRedstone(worldIn, xCoordIn, yCoordIn, zCoordIn, (float)xSpeedIn, (float)ySpeedIn, (float)zSpeedIn);
       }
    }

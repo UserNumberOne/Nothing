@@ -8,7 +8,7 @@ public class TextureOffset {
    public final int textureOffsetX;
    public final int textureOffsetY;
 
-   public TextureOffset(int textureOffsetXIn, int textureOffsetYIn) {
+   public TextureOffset(int var1, int var2) {
       this.textureOffsetX = textureOffsetXIn;
       this.textureOffsetY = textureOffsetYIn;
    }

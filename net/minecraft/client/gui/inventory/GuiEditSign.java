@@ -24,7 +24,7 @@ public class GuiEditSign extends GuiScreen {
    private int editLine;
    private GuiButton doneBtn;
 
-   public GuiEditSign(TileEntitySign teSign) {
+   public GuiEditSign(TileEntitySign var1) {
       this.tileSign = teSign;
    }
 
@@ -49,7 +49,7 @@ public class GuiEditSign extends GuiScreen {
       ++this.updateCounter;
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled && button.id == 0) {
          this.tileSign.markDirty();
          this.mc.displayGuiScreen((GuiScreen)null);
@@ -57,7 +57,7 @@ public class GuiEditSign extends GuiScreen {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (keyCode == 200) {
          this.editLine = this.editLine - 1 & 3;
       }
@@ -82,7 +82,7 @@ public class GuiEditSign extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, I18n.format("sign.edit"), this.width / 2, 40, 16777215);
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

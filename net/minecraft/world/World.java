@@ -3,14 +3,14 @@ package net.minecraft.world;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -23,25 +23,19 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.monster.EntityGhast;
-import net.minecraft.entity.monster.EntityGolem;
-import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.monster.EntitySlime;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.pathfinding.PathWorldListener;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.src.MinecraftServer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
@@ -53,38 +47,41 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.VillageCollection;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.world.storage.loot.LootTableManager;
-import org.bukkit.Bukkit;
-import org.bukkit.World.Environment;
-import org.bukkit.block.BlockState;
-import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_10_R1.block.CraftBlockState;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.block.BlockCanBuildEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.generator.ChunkGenerator;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ForgeModContainer;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityDispatcher;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.common.util.WorldCapabilityData;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
+import net.minecraftforge.event.world.GetCollisionBoxesEvent;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public abstract class World implements IBlockAccess {
+public abstract class World implements IBlockAccess, ICapabilityProvider {
+   public static double MAX_ENTITY_RADIUS = 2.0D;
    private int seaLevel = 63;
    protected boolean scheduledUpdatesAreImmediate;
    public final List loadedEntityList = Lists.newArrayList();
@@ -100,140 +97,80 @@ public abstract class World implements IBlockAccess {
    private int skylightSubtracted;
    protected int updateLCG = (new Random()).nextInt();
    protected final int DIST_HASH_MAGIC = 1013904223;
-   protected float prevRainingStrength;
-   protected float rainingStrength;
-   protected float prevThunderingStrength;
-   protected float thunderingStrength;
+   public float prevRainingStrength;
+   public float rainingStrength;
+   public float prevThunderingStrength;
+   public float thunderingStrength;
    private int lastLightningBolt;
    public final Random rand = new Random();
-   public WorldProvider provider;
+   public final WorldProvider provider;
    protected PathWorldListener pathListener = new PathWorldListener();
    protected List eventListeners;
    protected IChunkProvider chunkProvider;
    protected final ISaveHandler saveHandler;
-   public WorldInfo worldInfo;
+   protected WorldInfo worldInfo;
    protected boolean findingSpawnPoint;
-   public MapStorage mapStorage;
-   protected VillageCollection villageCollectionObj;
+   protected MapStorage mapStorage;
+   public VillageCollection villageCollectionObj;
    protected LootTableManager lootTable;
    public final Profiler theProfiler;
    private final Calendar theCalendar;
-   public Scoreboard worldScoreboard;
+   protected Scoreboard worldScoreboard;
    public final boolean isRemote;
-   public boolean spawnHostileMobs;
-   public boolean spawnPeacefulMobs;
+   protected boolean spawnHostileMobs;
+   protected boolean spawnPeacefulMobs;
    private boolean processingLoadedTiles;
    private final WorldBorder worldBorder;
    int[] lightUpdateBlockList;
-   private final CraftWorld world;
-   public boolean pvpMode;
-   public boolean keepSpawnInMemory = true;
-   public ChunkGenerator generator;
-   public boolean captureBlockStates = false;
-   public boolean captureTreeGeneration = false;
-   public ArrayList capturedBlockStates = new ArrayList() {
-      public boolean add(BlockState blockState) {
-         for(BlockState blockState1 : this) {
-            if (blockState1.getLocation().equals(blockState.getLocation())) {
-               return false;
-            }
-         }
+   public boolean restoringBlockSnapshots = false;
+   public boolean captureBlockSnapshots = false;
+   public ArrayList capturedBlockSnapshots = new ArrayList();
+   private CapabilityDispatcher capabilities;
+   private WorldCapabilityData capabilityData;
+   protected MapStorage perWorldStorage;
 
-         return super.add(blockState);
-      }
-   };
-   public long ticksPerAnimalSpawns;
-   public long ticksPerMonsterSpawns;
-   public boolean populating;
-   private int tickPosition;
-   public Map capturedTileEntities = Maps.newHashMap();
-
-   public CraftWorld getWorld() {
-      return this.world;
-   }
-
-   public CraftServer getServer() {
-      return (CraftServer)Bukkit.getServer();
-   }
-
-   public Chunk getChunkIfLoaded(int x, int z) {
-      return ((ChunkProviderServer)this.chunkProvider).getChunkIfLoaded(x, z);
-   }
-
-   protected World(ISaveHandler idatamanager, WorldInfo worlddata, WorldProvider worldprovider, Profiler methodprofiler, boolean flag, ChunkGenerator gen, Environment env) {
-      this.generator = gen;
-      this.world = new CraftWorld((WorldServer)this, gen, env);
-      this.ticksPerAnimalSpawns = (long)this.getServer().getTicksPerAnimalSpawns();
-      this.ticksPerMonsterSpawns = (long)this.getServer().getTicksPerMonsterSpawns();
+   protected World(ISaveHandler var1, WorldInfo var2, WorldProvider var3, Profiler var4, boolean var5) {
       this.eventListeners = Lists.newArrayList(new IWorldEventListener[]{this.pathListener});
       this.theCalendar = Calendar.getInstance();
       this.worldScoreboard = new Scoreboard();
       this.spawnHostileMobs = true;
       this.spawnPeacefulMobs = true;
       this.lightUpdateBlockList = new int['耀'];
-      this.saveHandler = idatamanager;
-      this.theProfiler = methodprofiler;
-      this.worldInfo = worlddata;
-      this.provider = worldprovider;
-      this.isRemote = flag;
-      this.worldBorder = worldprovider.createWorldBorder();
-      this.getWorldBorder().world = (WorldServer)this;
-      this.getWorldBorder().addListener(new IBorderListener() {
-         public void onSizeChanged(WorldBorder worldborder, double d0) {
-            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.SET_SIZE), worldborder.world);
-         }
-
-         public void onTransitionStarted(WorldBorder worldborder, double d0, double d1, long i) {
-            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.LERP_SIZE), worldborder.world);
-         }
-
-         public void onCenterChanged(WorldBorder worldborder, double d0, double d1) {
-            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.SET_CENTER), worldborder.world);
-         }
-
-         public void onWarningTimeChanged(WorldBorder worldborder, int i) {
-            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.SET_WARNING_TIME), worldborder.world);
-         }
-
-         public void onWarningDistanceChanged(WorldBorder worldborder, int i) {
-            World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.SET_WARNING_BLOCKS), worldborder.world);
-         }
-
-         public void onDamageAmountChanged(WorldBorder worldborder, double d0) {
-         }
-
-         public void onDamageBufferChanged(WorldBorder worldborder, double d0) {
-         }
-      });
-      this.getServer().addWorld(this.world);
+      this.saveHandler = saveHandlerIn;
+      this.theProfiler = profilerIn;
+      this.worldInfo = info;
+      this.provider = providerIn;
+      this.isRemote = client;
+      this.worldBorder = providerIn.createWorldBorder();
+      this.perWorldStorage = new MapStorage((ISaveHandler)null);
    }
 
    public World init() {
       return this;
    }
 
-   public Biome getBiome(final BlockPos blockposition) {
-      if (this.isBlockLoaded(blockposition)) {
-         Chunk chunk = this.getChunkFromBlockCoords(blockposition);
+   public Biome getBiome(BlockPos var1) {
+      return this.provider.getBiomeForCoords(pos);
+   }
+
+   public Biome getBiomeForCoordsBody(final BlockPos var1) {
+      if (this.isBlockLoaded(pos)) {
+         Chunk chunk = this.getChunkFromBlockCoords(pos);
 
          try {
-            return chunk.getBiome(blockposition, this.provider.getBiomeProvider());
+            return chunk.getBiome(pos, this.provider.getBiomeProvider());
          } catch (Throwable var6) {
             CrashReport crashreport = CrashReport.makeCrashReport(var6, "Getting biome");
-            CrashReportCategory crashreportsystemdetails = crashreport.makeCategory("Coordinates of biome request");
-            crashreportsystemdetails.setDetail("Location", new ICrashReportDetail() {
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Coordinates of biome request");
+            crashreportcategory.setDetail("Location", new ICrashReportDetail() {
                public String call() throws Exception {
-                  return CrashReportCategory.getCoordinateInfo(blockposition);
-               }
-
-               public Object call() throws Exception {
-                  return this.call();
+                  return CrashReportCategory.getCoordinateInfo(pos);
                }
             });
             throw new ReportedException(crashreport);
          }
       } else {
-         return this.provider.getBiomeProvider().getBiome(blockposition, Biomes.PLAINS);
+         return this.provider.getBiomeProvider().getBiome(pos, Biomes.PLAINS);
       }
    }
 
@@ -243,7 +180,7 @@ public abstract class World implements IBlockAccess {
 
    protected abstract IChunkProvider createChunkProvider();
 
-   public void initialize(WorldSettings worldsettings) {
+   public void initialize(WorldSettings var1) {
       this.worldInfo.setServerInitialized(true);
    }
 
@@ -252,69 +189,74 @@ public abstract class World implements IBlockAccess {
       return null;
    }
 
-   public IBlockState getGroundAboveSeaLevel(BlockPos blockposition) {
-      BlockPos blockposition1;
-      for(blockposition1 = new BlockPos(blockposition.getX(), this.getSeaLevel(), blockposition.getZ()); !this.isAirBlock(blockposition1.up()); blockposition1 = blockposition1.up()) {
+   @SideOnly(Side.CLIENT)
+   public void setInitialSpawnLocation() {
+      this.setSpawnPoint(new BlockPos(8, 64, 8));
+   }
+
+   public IBlockState getGroundAboveSeaLevel(BlockPos var1) {
+      BlockPos blockpos;
+      for(blockpos = new BlockPos(pos.getX(), this.getSeaLevel(), pos.getZ()); !this.isAirBlock(blockpos.up()); blockpos = blockpos.up()) {
          ;
       }
 
-      return this.getBlockState(blockposition1);
+      return this.getBlockState(blockpos);
    }
 
-   private boolean isValid(BlockPos blockposition) {
-      return !this.isOutsideBuildHeight(blockposition) && blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000;
+   private boolean isValid(BlockPos var1) {
+      return !this.isOutsideBuildHeight(pos) && pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000;
    }
 
-   private boolean isOutsideBuildHeight(BlockPos blockposition) {
-      return blockposition.getY() < 0 || blockposition.getY() >= 256;
+   private boolean isOutsideBuildHeight(BlockPos var1) {
+      return pos.getY() < 0 || pos.getY() >= 256;
    }
 
-   public boolean isAirBlock(BlockPos blockposition) {
-      return this.getBlockState(blockposition).getMaterial() == Material.AIR;
+   public boolean isAirBlock(BlockPos var1) {
+      return this.getBlockState(pos).getBlock().isAir(this.getBlockState(pos), this, pos);
    }
 
-   public boolean isBlockLoaded(BlockPos blockposition) {
-      return this.isBlockLoaded(blockposition, true);
+   public boolean isBlockLoaded(BlockPos var1) {
+      return this.isBlockLoaded(pos, true);
    }
 
-   public boolean isBlockLoaded(BlockPos blockposition, boolean flag) {
-      return this.isChunkLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4, flag);
+   public boolean isBlockLoaded(BlockPos var1, boolean var2) {
+      return this.isChunkLoaded(pos.getX() >> 4, pos.getZ() >> 4, allowEmpty);
    }
 
-   public boolean isAreaLoaded(BlockPos blockposition, int i) {
-      return this.isAreaLoaded(blockposition, i, true);
+   public boolean isAreaLoaded(BlockPos var1, int var2) {
+      return this.isAreaLoaded(center, radius, true);
    }
 
-   public boolean isAreaLoaded(BlockPos blockposition, int i, boolean flag) {
-      return this.isAreaLoaded(blockposition.getX() - i, blockposition.getY() - i, blockposition.getZ() - i, blockposition.getX() + i, blockposition.getY() + i, blockposition.getZ() + i, flag);
+   public boolean isAreaLoaded(BlockPos var1, int var2, boolean var3) {
+      return this.isAreaLoaded(center.getX() - radius, center.getY() - radius, center.getZ() - radius, center.getX() + radius, center.getY() + radius, center.getZ() + radius, allowEmpty);
    }
 
-   public boolean isAreaLoaded(BlockPos blockposition, BlockPos blockposition1) {
-      return this.isAreaLoaded(blockposition, blockposition1, true);
+   public boolean isAreaLoaded(BlockPos var1, BlockPos var2) {
+      return this.isAreaLoaded(from, to, true);
    }
 
-   public boolean isAreaLoaded(BlockPos blockposition, BlockPos blockposition1, boolean flag) {
-      return this.isAreaLoaded(blockposition.getX(), blockposition.getY(), blockposition.getZ(), blockposition1.getX(), blockposition1.getY(), blockposition1.getZ(), flag);
+   public boolean isAreaLoaded(BlockPos var1, BlockPos var2, boolean var3) {
+      return this.isAreaLoaded(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ(), allowEmpty);
    }
 
-   public boolean isAreaLoaded(StructureBoundingBox structureboundingbox) {
-      return this.isAreaLoaded(structureboundingbox, true);
+   public boolean isAreaLoaded(StructureBoundingBox var1) {
+      return this.isAreaLoaded(box, true);
    }
 
-   public boolean isAreaLoaded(StructureBoundingBox structureboundingbox, boolean flag) {
-      return this.isAreaLoaded(structureboundingbox.minX, structureboundingbox.minY, structureboundingbox.minZ, structureboundingbox.maxX, structureboundingbox.maxY, structureboundingbox.maxZ, flag);
+   public boolean isAreaLoaded(StructureBoundingBox var1, boolean var2) {
+      return this.isAreaLoaded(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, allowEmpty);
    }
 
-   private boolean isAreaLoaded(int i, int j, int k, int l, int i1, int j1, boolean flag) {
-      if (i1 >= 0 && j < 256) {
-         i = i >> 4;
-         k = k >> 4;
-         l = l >> 4;
-         j1 = j1 >> 4;
+   private boolean isAreaLoaded(int var1, int var2, int var3, int var4, int var5, int var6, boolean var7) {
+      if (yEnd >= 0 && yStart < 256) {
+         xStart = xStart >> 4;
+         zStart = zStart >> 4;
+         xEnd = xEnd >> 4;
+         zEnd = zEnd >> 4;
 
-         for(int k1 = i; k1 <= l; ++k1) {
-            for(int l1 = k; l1 <= j1; ++l1) {
-               if (!this.isChunkLoaded(k1, l1, flag)) {
+         for(int i = xStart; i <= xEnd; ++i) {
+            for(int j = zStart; j <= zEnd; ++j) {
+               if (!this.isChunkLoaded(i, j, allowEmpty)) {
                   return false;
                }
             }
@@ -328,65 +270,47 @@ public abstract class World implements IBlockAccess {
 
    protected abstract boolean isChunkLoaded(int var1, int var2, boolean var3);
 
-   public Chunk getChunkFromBlockCoords(BlockPos blockposition) {
-      return this.getChunkFromChunkCoords(blockposition.getX() >> 4, blockposition.getZ() >> 4);
+   public Chunk getChunkFromBlockCoords(BlockPos var1) {
+      return this.getChunkFromChunkCoords(pos.getX() >> 4, pos.getZ() >> 4);
    }
 
-   public Chunk getChunkFromChunkCoords(int i, int j) {
-      return this.chunkProvider.provideChunk(i, j);
+   public Chunk getChunkFromChunkCoords(int var1, int var2) {
+      return this.chunkProvider.provideChunk(chunkX, chunkZ);
    }
 
-   public boolean setBlockState(BlockPos blockposition, IBlockState iblockdata, int i) {
-      if (this.captureTreeGeneration) {
-         BlockState blockstate = null;
-         Iterator it = this.capturedBlockStates.iterator();
-
-         while(it.hasNext()) {
-            BlockState previous = (BlockState)it.next();
-            if (previous.getX() == blockposition.getX() && previous.getY() == blockposition.getY() && previous.getZ() == blockposition.getZ()) {
-               blockstate = previous;
-               it.remove();
-               break;
-            }
-         }
-
-         if (blockstate == null) {
-            blockstate = CraftBlockState.getBlockState(this, blockposition.getX(), blockposition.getY(), blockposition.getZ(), i);
-         }
-
-         blockstate.setTypeId(CraftMagicNumbers.getId(iblockdata.getBlock()));
-         blockstate.setRawData((byte)iblockdata.getBlock().getMetaFromState(iblockdata));
-         this.capturedBlockStates.add(blockstate);
-         return true;
-      } else if (this.isOutsideBuildHeight(blockposition)) {
+   public boolean setBlockState(BlockPos var1, IBlockState var2, int var3) {
+      if (this.isOutsideBuildHeight(pos)) {
          return false;
       } else if (!this.isRemote && this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) {
          return false;
       } else {
-         Chunk chunk = this.getChunkFromBlockCoords(blockposition);
-         iblockdata.getBlock();
-         BlockState blockstate = null;
-         if (this.captureBlockStates) {
-            blockstate = CraftBlockState.getBlockState(this, blockposition.getX(), blockposition.getY(), blockposition.getZ(), i);
-            this.capturedBlockStates.add(blockstate);
+         Chunk chunk = this.getChunkFromBlockCoords(pos);
+         Block block = newState.getBlock();
+         BlockSnapshot blockSnapshot = null;
+         if (this.captureBlockSnapshots && !this.isRemote) {
+            blockSnapshot = BlockSnapshot.getBlockSnapshot(this, pos, flags);
+            this.capturedBlockSnapshots.add(blockSnapshot);
          }
 
-         IBlockState iblockdata1 = chunk.setBlockState(blockposition, iblockdata);
-         if (iblockdata1 == null) {
-            if (this.captureBlockStates) {
-               this.capturedBlockStates.remove(blockstate);
+         IBlockState oldState = this.getBlockState(pos);
+         int oldLight = oldState.getLightValue(this, pos);
+         int oldOpacity = oldState.getLightOpacity(this, pos);
+         IBlockState iblockstate = chunk.setBlockState(pos, newState);
+         if (iblockstate == null) {
+            if (blockSnapshot != null) {
+               this.capturedBlockSnapshots.remove(blockSnapshot);
             }
 
             return false;
          } else {
-            if (iblockdata.getLightOpacity() != iblockdata1.getLightOpacity() || iblockdata.getLightValue() != iblockdata1.getLightValue()) {
+            if (newState.getLightOpacity(this, pos) != oldOpacity || newState.getLightValue(this, pos) != oldLight) {
                this.theProfiler.startSection("checkLight");
-               this.checkLight(blockposition);
+               this.checkLight(pos);
                this.theProfiler.endSection();
             }
 
-            if (!this.captureBlockStates) {
-               this.notifyAndUpdatePhysics(blockposition, chunk, iblockdata1, iblockdata, i);
+            if (blockSnapshot == null) {
+               this.markAndNotifyBlock(pos, chunk, iblockstate, newState, flags);
             }
 
             return true;
@@ -394,181 +318,170 @@ public abstract class World implements IBlockAccess {
       }
    }
 
-   public void notifyAndUpdatePhysics(BlockPos blockposition, Chunk chunk, IBlockState oldBlock, IBlockState newBlock, int flag) {
-      if ((flag & 2) != 0 && (chunk == null || chunk.isPopulated())) {
-         this.notifyBlockUpdate(blockposition, oldBlock, newBlock, flag);
+   public void markAndNotifyBlock(BlockPos var1, Chunk var2, IBlockState var3, IBlockState var4, int var5) {
+      if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (chunk == null || chunk.isPopulated())) {
+         this.notifyBlockUpdate(pos, iblockstate, newState, flags);
       }
 
-      if (!this.isRemote && (flag & 1) != 0) {
-         this.notifyNeighborsRespectDebug(blockposition, oldBlock.getBlock());
-         if (newBlock.hasComparatorInputOverride()) {
-            this.updateComparatorOutputLevel(blockposition, newBlock.getBlock());
+      if (!this.isRemote && (flags & 1) != 0) {
+         this.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
+         if (newState.hasComparatorInputOverride()) {
+            this.updateComparatorOutputLevel(pos, newState.getBlock());
          }
       }
 
    }
 
-   public boolean setBlockToAir(BlockPos blockposition) {
-      return this.setBlockState(blockposition, Blocks.AIR.getDefaultState(), 3);
+   public boolean setBlockToAir(BlockPos var1) {
+      return this.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
    }
 
-   public boolean destroyBlock(BlockPos blockposition, boolean flag) {
-      IBlockState iblockdata = this.getBlockState(blockposition);
-      Block block = iblockdata.getBlock();
-      if (iblockdata.getMaterial() == Material.AIR) {
+   public boolean destroyBlock(BlockPos var1, boolean var2) {
+      IBlockState iblockstate = this.getBlockState(pos);
+      Block block = iblockstate.getBlock();
+      if (block.isAir(iblockstate, this, pos)) {
          return false;
       } else {
-         this.playEvent(2001, blockposition, Block.getStateId(iblockdata));
-         if (flag) {
-            block.dropBlockAsItem(this, blockposition, iblockdata, 0);
+         this.playEvent(2001, pos, Block.getStateId(iblockstate));
+         if (dropBlock) {
+            block.dropBlockAsItem(this, pos, iblockstate, 0);
          }
 
-         return this.setBlockState(blockposition, Blocks.AIR.getDefaultState(), 3);
+         return this.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
       }
    }
 
-   public boolean setBlockState(BlockPos blockposition, IBlockState iblockdata) {
-      return this.setBlockState(blockposition, iblockdata, 3);
+   public boolean setBlockState(BlockPos var1, IBlockState var2) {
+      return this.setBlockState(pos, state, 3);
    }
 
-   public void notifyBlockUpdate(BlockPos blockposition, IBlockState iblockdata, IBlockState iblockdata1, int i) {
-      for(int j = 0; j < this.eventListeners.size(); ++j) {
-         ((IWorldEventListener)this.eventListeners.get(j)).notifyBlockUpdate(this, blockposition, iblockdata, iblockdata1, i);
+   public void notifyBlockUpdate(BlockPos var1, IBlockState var2, IBlockState var3, int var4) {
+      for(int i = 0; i < this.eventListeners.size(); ++i) {
+         ((IWorldEventListener)this.eventListeners.get(i)).notifyBlockUpdate(this, pos, oldState, newState, flags);
       }
 
    }
 
-   public void notifyNeighborsRespectDebug(BlockPos blockposition, Block block) {
+   public void notifyNeighborsRespectDebug(BlockPos var1, Block var2) {
       if (this.worldInfo.getTerrainType() != WorldType.DEBUG_WORLD) {
-         if (this.populating) {
-            return;
-         }
-
-         this.notifyNeighborsOfStateChange(blockposition, block);
+         this.notifyNeighborsOfStateChange(pos, blockType);
       }
 
    }
 
-   public void markBlocksDirtyVertical(int i, int j, int k, int l) {
-      if (k > l) {
-         int i1 = l;
-         l = k;
-         k = i1;
+   public void markBlocksDirtyVertical(int var1, int var2, int var3, int var4) {
+      if (x2 > z2) {
+         int i = z2;
+         z2 = x2;
+         x2 = i;
       }
 
       if (!this.provider.hasNoSky()) {
-         for(int i1 = k; i1 <= l; ++i1) {
-            this.checkLightFor(EnumSkyBlock.SKY, new BlockPos(i, i1, j));
+         for(int j = x2; j <= z2; ++j) {
+            this.checkLightFor(EnumSkyBlock.SKY, new BlockPos(x1, j, z1));
          }
       }
 
-      this.markBlockRangeForRenderUpdate(i, k, j, i, l, j);
+      this.markBlockRangeForRenderUpdate(x1, x2, z1, x1, z2, z1);
    }
 
-   public void markBlockRangeForRenderUpdate(BlockPos blockposition, BlockPos blockposition1) {
-      this.markBlockRangeForRenderUpdate(blockposition.getX(), blockposition.getY(), blockposition.getZ(), blockposition1.getX(), blockposition1.getY(), blockposition1.getZ());
+   public void markBlockRangeForRenderUpdate(BlockPos var1, BlockPos var2) {
+      this.markBlockRangeForRenderUpdate(rangeMin.getX(), rangeMin.getY(), rangeMin.getZ(), rangeMax.getX(), rangeMax.getY(), rangeMax.getZ());
    }
 
-   public void markBlockRangeForRenderUpdate(int i, int j, int k, int l, int i1, int j1) {
-      for(int k1 = 0; k1 < this.eventListeners.size(); ++k1) {
-         ((IWorldEventListener)this.eventListeners.get(k1)).markBlockRangeForRenderUpdate(i, j, k, l, i1, j1);
-      }
-
-   }
-
-   public void notifyNeighborsOfStateChange(BlockPos blockposition, Block block) {
-      this.notifyBlockOfStateChange(blockposition.west(), block);
-      this.notifyBlockOfStateChange(blockposition.east(), block);
-      this.notifyBlockOfStateChange(blockposition.down(), block);
-      this.notifyBlockOfStateChange(blockposition.up(), block);
-      this.notifyBlockOfStateChange(blockposition.north(), block);
-      this.notifyBlockOfStateChange(blockposition.south(), block);
-   }
-
-   public void notifyNeighborsOfStateExcept(BlockPos blockposition, Block block, EnumFacing enumdirection) {
-      if (enumdirection != EnumFacing.WEST) {
-         this.notifyBlockOfStateChange(blockposition.west(), block);
-      }
-
-      if (enumdirection != EnumFacing.EAST) {
-         this.notifyBlockOfStateChange(blockposition.east(), block);
-      }
-
-      if (enumdirection != EnumFacing.DOWN) {
-         this.notifyBlockOfStateChange(blockposition.down(), block);
-      }
-
-      if (enumdirection != EnumFacing.UP) {
-         this.notifyBlockOfStateChange(blockposition.up(), block);
-      }
-
-      if (enumdirection != EnumFacing.NORTH) {
-         this.notifyBlockOfStateChange(blockposition.north(), block);
-      }
-
-      if (enumdirection != EnumFacing.SOUTH) {
-         this.notifyBlockOfStateChange(blockposition.south(), block);
+   public void markBlockRangeForRenderUpdate(int var1, int var2, int var3, int var4, int var5, int var6) {
+      for(int i = 0; i < this.eventListeners.size(); ++i) {
+         ((IWorldEventListener)this.eventListeners.get(i)).markBlockRangeForRenderUpdate(x1, y1, z1, x2, y2, z2);
       }
 
    }
 
-   public void notifyBlockOfStateChange(BlockPos blockposition, final Block block) {
+   public void notifyNeighborsOfStateChange(BlockPos var1, Block var2) {
+      if (!ForgeEventFactory.onNeighborNotify(this, pos, this.getBlockState(pos), EnumSet.allOf(EnumFacing.class)).isCanceled()) {
+         this.notifyBlockOfStateChange(pos.west(), blockType);
+         this.notifyBlockOfStateChange(pos.east(), blockType);
+         this.notifyBlockOfStateChange(pos.down(), blockType);
+         this.notifyBlockOfStateChange(pos.up(), blockType);
+         this.notifyBlockOfStateChange(pos.north(), blockType);
+         this.notifyBlockOfStateChange(pos.south(), blockType);
+      }
+   }
+
+   public void notifyNeighborsOfStateExcept(BlockPos var1, Block var2, EnumFacing var3) {
+      EnumSet directions = EnumSet.allOf(EnumFacing.class);
+      directions.remove(skipSide);
+      if (!ForgeEventFactory.onNeighborNotify(this, pos, this.getBlockState(pos), directions).isCanceled()) {
+         if (skipSide != EnumFacing.WEST) {
+            this.notifyBlockOfStateChange(pos.west(), blockType);
+         }
+
+         if (skipSide != EnumFacing.EAST) {
+            this.notifyBlockOfStateChange(pos.east(), blockType);
+         }
+
+         if (skipSide != EnumFacing.DOWN) {
+            this.notifyBlockOfStateChange(pos.down(), blockType);
+         }
+
+         if (skipSide != EnumFacing.UP) {
+            this.notifyBlockOfStateChange(pos.up(), blockType);
+         }
+
+         if (skipSide != EnumFacing.NORTH) {
+            this.notifyBlockOfStateChange(pos.north(), blockType);
+         }
+
+         if (skipSide != EnumFacing.SOUTH) {
+            this.notifyBlockOfStateChange(pos.south(), blockType);
+         }
+
+      }
+   }
+
+   public void notifyBlockOfStateChange(BlockPos var1, final Block var2) {
       if (!this.isRemote) {
-         IBlockState iblockdata = this.getBlockState(blockposition);
+         IBlockState iblockstate = this.getBlockState(pos);
 
          try {
-            CraftWorld world = ((WorldServer)this).getWorld();
-            if (world != null) {
-               BlockPhysicsEvent event = new BlockPhysicsEvent(world.getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), CraftMagicNumbers.getId(block));
-               this.getServer().getPluginManager().callEvent(event);
-               if (event.isCancelled()) {
-                  return;
-               }
-            }
-
-            iblockdata.neighborChanged(this, blockposition, block);
+            iblockstate.neighborChanged(this, pos, blockIn);
          } catch (Throwable var7) {
             CrashReport crashreport = CrashReport.makeCrashReport(var7, "Exception while updating neighbours");
-            CrashReportCategory crashreportsystemdetails = crashreport.makeCategory("Block being updated");
-            crashreportsystemdetails.setDetail("Source block type", new ICrashReportDetail() {
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
+            crashreportcategory.setDetail("Source block type", new ICrashReportDetail() {
                public String call() throws Exception {
                   try {
-                     return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(block), block.getUnlocalizedName(), block.getClass().getCanonicalName());
-                  } catch (Throwable var1) {
-                     return "ID #" + Block.getIdFromBlock(block);
+                     return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(blockIn), blockIn.getUnlocalizedName(), blockIn.getClass().getCanonicalName());
+                  } catch (Throwable var2x) {
+                     return "ID #" + Block.getIdFromBlock(blockIn);
                   }
                }
-
-               public Object call() throws Exception {
-                  return this.call();
-               }
             });
-            CrashReportCategory.addBlockInfo(crashreportsystemdetails, blockposition, iblockdata);
+            CrashReportCategory.addBlockInfo(crashreportcategory, pos, iblockstate);
             throw new ReportedException(crashreport);
          }
       }
 
    }
 
-   public boolean isBlockTickPending(BlockPos blockposition, Block block) {
+   public boolean isBlockTickPending(BlockPos var1, Block var2) {
       return false;
    }
 
-   public boolean canSeeSky(BlockPos blockposition) {
-      return this.getChunkFromBlockCoords(blockposition).canSeeSky(blockposition);
+   public boolean canSeeSky(BlockPos var1) {
+      return this.getChunkFromBlockCoords(pos).canSeeSky(pos);
    }
 
-   public boolean canBlockSeeSky(BlockPos blockposition) {
-      if (blockposition.getY() >= this.getSeaLevel()) {
-         return this.canSeeSky(blockposition);
+   public boolean canBlockSeeSky(BlockPos var1) {
+      if (pos.getY() >= this.getSeaLevel()) {
+         return this.canSeeSky(pos);
       } else {
-         BlockPos blockposition1 = new BlockPos(blockposition.getX(), this.getSeaLevel(), blockposition.getZ());
-         if (!this.canSeeSky(blockposition1)) {
+         BlockPos blockpos = new BlockPos(pos.getX(), this.getSeaLevel(), pos.getZ());
+         if (!this.canSeeSky(blockpos)) {
             return false;
          } else {
-            for(BlockPos var4 = blockposition1.down(); var4.getY() > blockposition.getY(); var4 = var4.down()) {
-               IBlockState iblockdata = this.getBlockState(var4);
-               if (iblockdata.getLightOpacity() > 0 && !iblockdata.getMaterial().isLiquid()) {
+            for(BlockPos var4 = blockpos.down(); var4.getY() > pos.getY(); var4 = var4.down()) {
+               IBlockState iblockstate = this.getBlockState(var4);
+               if (iblockstate.getBlock().getLightOpacity(iblockstate, this, var4) > 0 && !iblockstate.getMaterial().isLiquid()) {
                   return false;
                }
             }
@@ -578,89 +491,89 @@ public abstract class World implements IBlockAccess {
       }
    }
 
-   public int getLight(BlockPos blockposition) {
-      if (blockposition.getY() < 0) {
+   public int getLight(BlockPos var1) {
+      if (pos.getY() < 0) {
          return 0;
       } else {
-         if (blockposition.getY() >= 256) {
-            blockposition = new BlockPos(blockposition.getX(), 255, blockposition.getZ());
+         if (pos.getY() >= 256) {
+            pos = new BlockPos(pos.getX(), 255, pos.getZ());
          }
 
-         return this.getChunkFromBlockCoords(blockposition).getLightSubtracted(blockposition, 0);
+         return this.getChunkFromBlockCoords(pos).getLightSubtracted(pos, 0);
       }
    }
 
-   public int getLightFromNeighbors(BlockPos blockposition) {
-      return this.getLight(blockposition, true);
+   public int getLightFromNeighbors(BlockPos var1) {
+      return this.getLight(pos, true);
    }
 
-   public int getLight(BlockPos blockposition, boolean flag) {
-      if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
-         if (flag && this.getBlockState(blockposition).useNeighborBrightness()) {
-            int i = this.getLight(blockposition.up(), false);
-            int j = this.getLight(blockposition.east(), false);
-            int k = this.getLight(blockposition.west(), false);
-            int l = this.getLight(blockposition.south(), false);
-            int i1 = this.getLight(blockposition.north(), false);
-            if (j > i) {
-               i = j;
+   public int getLight(BlockPos var1, boolean var2) {
+      if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000) {
+         if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
+            int i1 = this.getLight(pos.up(), false);
+            int i = this.getLight(pos.east(), false);
+            int j = this.getLight(pos.west(), false);
+            int k = this.getLight(pos.south(), false);
+            int l = this.getLight(pos.north(), false);
+            if (i > i1) {
+               i1 = i;
             }
 
-            if (k > i) {
-               i = k;
+            if (j > i1) {
+               i1 = j;
             }
 
-            if (l > i) {
-               i = l;
+            if (k > i1) {
+               i1 = k;
             }
 
-            if (i1 > i) {
-               i = i1;
+            if (l > i1) {
+               i1 = l;
             }
 
-            return i;
-         } else if (blockposition.getY() < 0) {
+            return i1;
+         } else if (pos.getY() < 0) {
             return 0;
          } else {
-            if (blockposition.getY() >= 256) {
-               blockposition = new BlockPos(blockposition.getX(), 255, blockposition.getZ());
+            if (pos.getY() >= 256) {
+               pos = new BlockPos(pos.getX(), 255, pos.getZ());
             }
 
-            Chunk chunk = this.getChunkFromBlockCoords(blockposition);
-            return chunk.getLightSubtracted(blockposition, this.skylightSubtracted);
+            Chunk chunk = this.getChunkFromBlockCoords(pos);
+            return chunk.getLightSubtracted(pos, this.skylightSubtracted);
          }
       } else {
          return 15;
       }
    }
 
-   public BlockPos getHeight(BlockPos blockposition) {
-      return new BlockPos(blockposition.getX(), this.getHeight(blockposition.getX(), blockposition.getZ()), blockposition.getZ());
+   public BlockPos getHeight(BlockPos var1) {
+      return new BlockPos(pos.getX(), this.getHeight(pos.getX(), pos.getZ()), pos.getZ());
    }
 
-   public int getHeight(int i, int j) {
-      int k;
-      if (i >= -30000000 && j >= -30000000 && i < 30000000 && j < 30000000) {
-         if (this.isChunkLoaded(i >> 4, j >> 4, true)) {
-            k = this.getChunkFromChunkCoords(i >> 4, j >> 4).getHeightValue(i & 15, j & 15);
+   public int getHeight(int var1, int var2) {
+      int i;
+      if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
+         if (this.isChunkLoaded(x >> 4, z >> 4, true)) {
+            i = this.getChunkFromChunkCoords(x >> 4, z >> 4).getHeightValue(x & 15, z & 15);
          } else {
-            k = 0;
+            i = 0;
          }
       } else {
-         k = this.getSeaLevel() + 1;
+         i = this.getSeaLevel() + 1;
       }
 
-      return k;
+      return i;
    }
 
    /** @deprecated */
    @Deprecated
-   public int getChunksLowestHorizon(int i, int j) {
-      if (i >= -30000000 && j >= -30000000 && i < 30000000 && j < 30000000) {
-         if (!this.isChunkLoaded(i >> 4, j >> 4, true)) {
+   public int getChunksLowestHorizon(int var1, int var2) {
+      if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
+         if (!this.isChunkLoaded(x >> 4, z >> 4, true)) {
             return 0;
          } else {
-            Chunk chunk = this.getChunkFromChunkCoords(i >> 4, j >> 4);
+            Chunk chunk = this.getChunkFromChunkCoords(x >> 4, z >> 4);
             return chunk.getLowestHeight();
          }
       } else {
@@ -668,107 +581,153 @@ public abstract class World implements IBlockAccess {
       }
    }
 
-   public int getLightFor(EnumSkyBlock enumskyblock, BlockPos blockposition) {
-      if (blockposition.getY() < 0) {
-         blockposition = new BlockPos(blockposition.getX(), 0, blockposition.getZ());
-      }
-
-      if (!this.isValid(blockposition)) {
-         return enumskyblock.defaultLightValue;
-      } else if (!this.isBlockLoaded(blockposition)) {
-         return enumskyblock.defaultLightValue;
+   @SideOnly(Side.CLIENT)
+   public int getLightFromNeighborsFor(EnumSkyBlock var1, BlockPos var2) {
+      if (this.provider.hasNoSky() && type == EnumSkyBlock.SKY) {
+         return 0;
       } else {
-         Chunk chunk = this.getChunkFromBlockCoords(blockposition);
-         return chunk.getLightFor(enumskyblock, blockposition);
-      }
-   }
+         if (pos.getY() < 0) {
+            pos = new BlockPos(pos.getX(), 0, pos.getZ());
+         }
 
-   public void setLightFor(EnumSkyBlock enumskyblock, BlockPos blockposition, int i) {
-      if (this.isValid(blockposition) && this.isBlockLoaded(blockposition)) {
-         Chunk chunk = this.getChunkFromBlockCoords(blockposition);
-         chunk.setLightFor(enumskyblock, blockposition, i);
-         this.notifyLightSet(blockposition);
-      }
-
-   }
-
-   public void notifyLightSet(BlockPos blockposition) {
-      for(int i = 0; i < this.eventListeners.size(); ++i) {
-         ((IWorldEventListener)this.eventListeners.get(i)).notifyLightSet(blockposition);
-      }
-
-   }
-
-   public float getLightBrightness(BlockPos blockposition) {
-      return this.provider.getLightBrightnessTable()[this.getLightFromNeighbors(blockposition)];
-   }
-
-   public IBlockState getBlockState(BlockPos blockposition) {
-      if (this.captureTreeGeneration) {
-         for(BlockState previous : this.capturedBlockStates) {
-            if (previous.getX() == blockposition.getX() && previous.getY() == blockposition.getY() && previous.getZ() == blockposition.getZ()) {
-               return CraftMagicNumbers.getBlock(previous.getTypeId()).getStateFromMeta(previous.getRawData());
+         if (!this.isValid(pos)) {
+            return type.defaultLightValue;
+         } else if (!this.isBlockLoaded(pos)) {
+            return type.defaultLightValue;
+         } else if (this.getBlockState(pos).useNeighborBrightness()) {
+            int i1 = this.getLightFor(type, pos.up());
+            int i = this.getLightFor(type, pos.east());
+            int j = this.getLightFor(type, pos.west());
+            int k = this.getLightFor(type, pos.south());
+            int l = this.getLightFor(type, pos.north());
+            if (i > i1) {
+               i1 = i;
             }
+
+            if (j > i1) {
+               i1 = j;
+            }
+
+            if (k > i1) {
+               i1 = k;
+            }
+
+            if (l > i1) {
+               i1 = l;
+            }
+
+            return i1;
+         } else {
+            Chunk chunk = this.getChunkFromBlockCoords(pos);
+            return chunk.getLightFor(type, pos);
          }
       }
+   }
 
-      if (this.isOutsideBuildHeight(blockposition)) {
+   public int getLightFor(EnumSkyBlock var1, BlockPos var2) {
+      if (pos.getY() < 0) {
+         pos = new BlockPos(pos.getX(), 0, pos.getZ());
+      }
+
+      if (!this.isValid(pos)) {
+         return type.defaultLightValue;
+      } else if (!this.isBlockLoaded(pos)) {
+         return type.defaultLightValue;
+      } else {
+         Chunk chunk = this.getChunkFromBlockCoords(pos);
+         return chunk.getLightFor(type, pos);
+      }
+   }
+
+   public void setLightFor(EnumSkyBlock var1, BlockPos var2, int var3) {
+      if (this.isValid(pos) && this.isBlockLoaded(pos)) {
+         Chunk chunk = this.getChunkFromBlockCoords(pos);
+         chunk.setLightFor(type, pos, lightValue);
+         this.notifyLightSet(pos);
+      }
+
+   }
+
+   public void notifyLightSet(BlockPos var1) {
+      for(int i = 0; i < this.eventListeners.size(); ++i) {
+         ((IWorldEventListener)this.eventListeners.get(i)).notifyLightSet(pos);
+      }
+
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getCombinedLight(BlockPos var1, int var2) {
+      int i = this.getLightFromNeighborsFor(EnumSkyBlock.SKY, pos);
+      int j = this.getLightFromNeighborsFor(EnumSkyBlock.BLOCK, pos);
+      if (j < lightValue) {
+         j = lightValue;
+      }
+
+      return i << 20 | j << 4;
+   }
+
+   public float getLightBrightness(BlockPos var1) {
+      return this.provider.getLightBrightnessTable()[this.getLightFromNeighbors(pos)];
+   }
+
+   public IBlockState getBlockState(BlockPos var1) {
+      if (this.isOutsideBuildHeight(pos)) {
          return Blocks.AIR.getDefaultState();
       } else {
-         Chunk chunk = this.getChunkFromBlockCoords(blockposition);
-         return chunk.getBlockState(blockposition);
+         Chunk chunk = this.getChunkFromBlockCoords(pos);
+         return chunk.getBlockState(pos);
       }
    }
 
    public boolean isDaytime() {
-      return this.skylightSubtracted < 4;
+      return this.provider.isDaytime();
    }
 
    @Nullable
-   public RayTraceResult rayTraceBlocks(Vec3d vec3d, Vec3d vec3d1) {
-      return this.rayTraceBlocks(vec3d, vec3d1, false, false, false);
+   public RayTraceResult rayTraceBlocks(Vec3d var1, Vec3d var2) {
+      return this.rayTraceBlocks(start, end, false, false, false);
    }
 
    @Nullable
-   public RayTraceResult rayTraceBlocks(Vec3d vec3d, Vec3d vec3d1, boolean flag) {
-      return this.rayTraceBlocks(vec3d, vec3d1, flag, false, false);
+   public RayTraceResult rayTraceBlocks(Vec3d var1, Vec3d var2, boolean var3) {
+      return this.rayTraceBlocks(start, end, stopOnLiquid, false, false);
    }
 
    @Nullable
-   public RayTraceResult rayTraceBlocks(Vec3d vec3d, Vec3d vec3d1, boolean flag, boolean flag1, boolean flag2) {
-      if (!Double.isNaN(vec3d.xCoord) && !Double.isNaN(vec3d.yCoord) && !Double.isNaN(vec3d.zCoord)) {
-         if (!Double.isNaN(vec3d1.xCoord) && !Double.isNaN(vec3d1.yCoord) && !Double.isNaN(vec3d1.zCoord)) {
-            int i = MathHelper.floor(vec3d1.xCoord);
-            int j = MathHelper.floor(vec3d1.yCoord);
-            int k = MathHelper.floor(vec3d1.zCoord);
-            int l = MathHelper.floor(vec3d.xCoord);
-            int i1 = MathHelper.floor(vec3d.yCoord);
-            int j1 = MathHelper.floor(vec3d.zCoord);
-            BlockPos blockposition = new BlockPos(l, i1, j1);
-            IBlockState iblockdata = this.getBlockState(blockposition);
-            Block block = iblockdata.getBlock();
-            if ((!flag1 || iblockdata.getCollisionBoundingBox(this, blockposition) != Block.NULL_AABB) && block.canCollideCheck(iblockdata, flag)) {
-               RayTraceResult movingobjectposition = iblockdata.collisionRayTrace(this, blockposition, vec3d, vec3d1);
-               if (movingobjectposition != null) {
-                  return movingobjectposition;
+   public RayTraceResult rayTraceBlocks(Vec3d var1, Vec3d var2, boolean var3, boolean var4, boolean var5) {
+      if (!Double.isNaN(vec31.xCoord) && !Double.isNaN(vec31.yCoord) && !Double.isNaN(vec31.zCoord)) {
+         if (!Double.isNaN(vec32.xCoord) && !Double.isNaN(vec32.yCoord) && !Double.isNaN(vec32.zCoord)) {
+            int i = MathHelper.floor(vec32.xCoord);
+            int j = MathHelper.floor(vec32.yCoord);
+            int k = MathHelper.floor(vec32.zCoord);
+            int l = MathHelper.floor(vec31.xCoord);
+            int i1 = MathHelper.floor(vec31.yCoord);
+            int j1 = MathHelper.floor(vec31.zCoord);
+            BlockPos blockpos = new BlockPos(l, i1, j1);
+            IBlockState iblockstate = this.getBlockState(blockpos);
+            Block block = iblockstate.getBlock();
+            if ((!ignoreBlockWithoutBoundingBox || iblockstate.getCollisionBoundingBox(this, blockpos) != Block.NULL_AABB) && block.canCollideCheck(iblockstate, stopOnLiquid)) {
+               RayTraceResult raytraceresult = iblockstate.collisionRayTrace(this, blockpos, vec31, vec32);
+               if (raytraceresult != null) {
+                  return raytraceresult;
                }
             }
 
-            RayTraceResult movingobjectposition1 = null;
+            RayTraceResult raytraceresult2 = null;
             int k1 = 200;
 
             while(k1-- >= 0) {
-               if (Double.isNaN(vec3d.xCoord) || Double.isNaN(vec3d.yCoord) || Double.isNaN(vec3d.zCoord)) {
+               if (Double.isNaN(vec31.xCoord) || Double.isNaN(vec31.yCoord) || Double.isNaN(vec31.zCoord)) {
                   return null;
                }
 
                if (l == i && i1 == j && j1 == k) {
-                  return flag2 ? movingobjectposition1 : null;
+                  return returnLastUncollidableBlock ? raytraceresult2 : null;
                }
 
-               boolean flag3 = true;
-               boolean flag4 = true;
-               boolean flag5 = true;
+               boolean flag2 = true;
+               boolean flag = true;
+               boolean flag1 = true;
                double d0 = 999.0D;
                double d1 = 999.0D;
                double d2 = 999.0D;
@@ -777,7 +736,7 @@ public abstract class World implements IBlockAccess {
                } else if (i < l) {
                   d0 = (double)l + 0.0D;
                } else {
-                  flag3 = false;
+                  flag2 = false;
                }
 
                if (j > i1) {
@@ -785,7 +744,7 @@ public abstract class World implements IBlockAccess {
                } else if (j < i1) {
                   d1 = (double)i1 + 0.0D;
                } else {
-                  flag4 = false;
+                  flag = false;
                }
 
                if (k > j1) {
@@ -793,25 +752,25 @@ public abstract class World implements IBlockAccess {
                } else if (k < j1) {
                   d2 = (double)j1 + 0.0D;
                } else {
-                  flag5 = false;
+                  flag1 = false;
                }
 
                double d3 = 999.0D;
                double d4 = 999.0D;
                double d5 = 999.0D;
-               double d6 = vec3d1.xCoord - vec3d.xCoord;
-               double d7 = vec3d1.yCoord - vec3d.yCoord;
-               double d8 = vec3d1.zCoord - vec3d.zCoord;
-               if (flag3) {
-                  d3 = (d0 - vec3d.xCoord) / d6;
+               double d6 = vec32.xCoord - vec31.xCoord;
+               double d7 = vec32.yCoord - vec31.yCoord;
+               double d8 = vec32.zCoord - vec31.zCoord;
+               if (flag2) {
+                  d3 = (d0 - vec31.xCoord) / d6;
                }
 
-               if (flag4) {
-                  d4 = (d1 - vec3d.yCoord) / d7;
+               if (flag) {
+                  d4 = (d1 - vec31.yCoord) / d7;
                }
 
-               if (flag5) {
-                  d5 = (d2 - vec3d.zCoord) / d8;
+               if (flag1) {
+                  d5 = (d2 - vec31.zCoord) / d8;
                }
 
                if (d3 == -0.0D) {
@@ -826,37 +785,37 @@ public abstract class World implements IBlockAccess {
                   d5 = -1.0E-4D;
                }
 
-               EnumFacing enumdirection;
+               EnumFacing enumfacing;
                if (d3 < d4 && d3 < d5) {
-                  enumdirection = i > l ? EnumFacing.WEST : EnumFacing.EAST;
-                  vec3d = new Vec3d(d0, vec3d.yCoord + d7 * d3, vec3d.zCoord + d8 * d3);
+                  enumfacing = i > l ? EnumFacing.WEST : EnumFacing.EAST;
+                  vec31 = new Vec3d(d0, vec31.yCoord + d7 * d3, vec31.zCoord + d8 * d3);
                } else if (d4 < d5) {
-                  enumdirection = j > i1 ? EnumFacing.DOWN : EnumFacing.UP;
-                  vec3d = new Vec3d(vec3d.xCoord + d6 * d4, d1, vec3d.zCoord + d8 * d4);
+                  enumfacing = j > i1 ? EnumFacing.DOWN : EnumFacing.UP;
+                  vec31 = new Vec3d(vec31.xCoord + d6 * d4, d1, vec31.zCoord + d8 * d4);
                } else {
-                  enumdirection = k > j1 ? EnumFacing.NORTH : EnumFacing.SOUTH;
-                  vec3d = new Vec3d(vec3d.xCoord + d6 * d5, vec3d.yCoord + d7 * d5, d2);
+                  enumfacing = k > j1 ? EnumFacing.NORTH : EnumFacing.SOUTH;
+                  vec31 = new Vec3d(vec31.xCoord + d6 * d5, vec31.yCoord + d7 * d5, d2);
                }
 
-               l = MathHelper.floor(vec3d.xCoord) - (enumdirection == EnumFacing.EAST ? 1 : 0);
-               i1 = MathHelper.floor(vec3d.yCoord) - (enumdirection == EnumFacing.UP ? 1 : 0);
-               j1 = MathHelper.floor(vec3d.zCoord) - (enumdirection == EnumFacing.SOUTH ? 1 : 0);
-               blockposition = new BlockPos(l, i1, j1);
-               IBlockState iblockdata1 = this.getBlockState(blockposition);
-               Block block1 = iblockdata1.getBlock();
-               if (!flag1 || iblockdata1.getMaterial() == Material.PORTAL || iblockdata1.getCollisionBoundingBox(this, blockposition) != Block.NULL_AABB) {
-                  if (block1.canCollideCheck(iblockdata1, flag)) {
-                     RayTraceResult movingobjectposition2 = iblockdata1.collisionRayTrace(this, blockposition, vec3d, vec3d1);
-                     if (movingobjectposition2 != null) {
-                        return movingobjectposition2;
+               l = MathHelper.floor(vec31.xCoord) - (enumfacing == EnumFacing.EAST ? 1 : 0);
+               i1 = MathHelper.floor(vec31.yCoord) - (enumfacing == EnumFacing.UP ? 1 : 0);
+               j1 = MathHelper.floor(vec31.zCoord) - (enumfacing == EnumFacing.SOUTH ? 1 : 0);
+               blockpos = new BlockPos(l, i1, j1);
+               IBlockState iblockstate1 = this.getBlockState(blockpos);
+               Block block1 = iblockstate1.getBlock();
+               if (!ignoreBlockWithoutBoundingBox || iblockstate1.getMaterial() == Material.PORTAL || iblockstate1.getCollisionBoundingBox(this, blockpos) != Block.NULL_AABB) {
+                  if (block1.canCollideCheck(iblockstate1, stopOnLiquid)) {
+                     RayTraceResult raytraceresult1 = iblockstate1.collisionRayTrace(this, blockpos, vec31, vec32);
+                     if (raytraceresult1 != null) {
+                        return raytraceresult1;
                      }
                   } else {
-                     movingobjectposition1 = new RayTraceResult(RayTraceResult.Type.MISS, vec3d, enumdirection, blockposition);
+                     raytraceresult2 = new RayTraceResult(RayTraceResult.Type.MISS, vec31, enumfacing, blockpos);
                   }
                }
             }
 
-            return flag2 ? movingobjectposition1 : null;
+            return returnLastUncollidableBlock ? raytraceresult2 : null;
          } else {
             return null;
          }
@@ -865,230 +824,213 @@ public abstract class World implements IBlockAccess {
       }
    }
 
-   public void playSound(@Nullable EntityPlayer entityhuman, BlockPos blockposition, SoundEvent soundeffect, SoundCategory soundcategory, float f, float f1) {
-      this.playSound(entityhuman, (double)blockposition.getX() + 0.5D, (double)blockposition.getY() + 0.5D, (double)blockposition.getZ() + 0.5D, soundeffect, soundcategory, f, f1);
+   public void playSound(@Nullable EntityPlayer var1, BlockPos var2, SoundEvent var3, SoundCategory var4, float var5, float var6) {
+      this.playSound(player, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, soundIn, category, volume, pitch);
    }
 
-   public void playSound(@Nullable EntityPlayer entityhuman, double d0, double d1, double d2, SoundEvent soundeffect, SoundCategory soundcategory, float f, float f1) {
+   public void playSound(@Nullable EntityPlayer var1, double var2, double var4, double var6, SoundEvent var8, SoundCategory var9, float var10, float var11) {
+      PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(player, soundIn, category, volume, pitch);
+      if (!event.isCanceled() && event.getSound() != null) {
+         soundIn = event.getSound();
+         category = event.getCategory();
+         volume = event.getVolume();
+         pitch = event.getPitch();
+
+         for(int i = 0; i < this.eventListeners.size(); ++i) {
+            ((IWorldEventListener)this.eventListeners.get(i)).playSoundToAllNearExcept(player, soundIn, category, x, y, z, volume, pitch);
+         }
+
+      }
+   }
+
+   public void playSound(double var1, double var3, double var5, SoundEvent var7, SoundCategory var8, float var9, float var10, boolean var11) {
+   }
+
+   public void playRecord(BlockPos var1, @Nullable SoundEvent var2) {
       for(int i = 0; i < this.eventListeners.size(); ++i) {
-         ((IWorldEventListener)this.eventListeners.get(i)).playSoundToAllNearExcept(entityhuman, soundeffect, soundcategory, d0, d1, d2, f, f1);
+         ((IWorldEventListener)this.eventListeners.get(i)).playRecord(soundEventIn, blockPositionIn);
       }
 
    }
 
-   public void playSound(double d0, double d1, double d2, SoundEvent soundeffect, SoundCategory soundcategory, float f, float f1, boolean flag) {
+   public void spawnParticle(EnumParticleTypes var1, double var2, double var4, double var6, double var8, double var10, double var12, int... var14) {
+      this.spawnParticle(particleType.getParticleID(), particleType.getShouldIgnoreRange(), xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
    }
 
-   public void playRecord(BlockPos blockposition, @Nullable SoundEvent soundeffect) {
+   @SideOnly(Side.CLIENT)
+   public void spawnParticle(EnumParticleTypes var1, boolean var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
+      this.spawnParticle(particleType.getParticleID(), particleType.getShouldIgnoreRange() | ignoreRange, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
+   }
+
+   private void spawnParticle(int var1, boolean var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
       for(int i = 0; i < this.eventListeners.size(); ++i) {
-         ((IWorldEventListener)this.eventListeners.get(i)).playRecord(soundeffect, blockposition);
+         ((IWorldEventListener)this.eventListeners.get(i)).spawnParticle(particleID, ignoreRange, xCood, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
       }
 
    }
 
-   public void spawnParticle(EnumParticleTypes enumparticle, double d0, double d1, double d2, double d3, double d4, double d5, int... aint) {
-      this.spawnParticle(enumparticle.getParticleID(), enumparticle.getShouldIgnoreRange(), d0, d1, d2, d3, d4, d5, aint);
-   }
-
-   private void spawnParticle(int i, boolean flag, double d0, double d1, double d2, double d3, double d4, double d5, int... aint) {
-      for(int j = 0; j < this.eventListeners.size(); ++j) {
-         ((IWorldEventListener)this.eventListeners.get(j)).spawnParticle(i, flag, d0, d1, d2, d3, d4, d5, aint);
-      }
-
-   }
-
-   public boolean addWeatherEffect(Entity entity) {
-      this.weatherEffects.add(entity);
+   public boolean addWeatherEffect(Entity var1) {
+      this.weatherEffects.add(entityIn);
       return true;
    }
 
-   public boolean spawnEntity(Entity entity) {
-      return this.addEntity(entity, SpawnReason.DEFAULT);
-   }
-
-   public boolean addEntity(Entity entity, SpawnReason spawnReason) {
-      if (entity == null) {
-         return false;
-      } else {
-         int i = MathHelper.floor(entity.posX / 16.0D);
-         int j = MathHelper.floor(entity.posZ / 16.0D);
-         boolean flag = entity.forceSpawn;
-         if (entity instanceof EntityPlayer) {
+   public boolean spawnEntity(Entity var1) {
+      if (this.isRemote || entityIn != null && (!(entityIn instanceof EntityItem) || !this.restoringBlockSnapshots)) {
+         int i = MathHelper.floor(entityIn.posX / 16.0D);
+         int j = MathHelper.floor(entityIn.posZ / 16.0D);
+         boolean flag = entityIn.forceSpawn;
+         if (entityIn instanceof EntityPlayer) {
             flag = true;
          }
 
-         Cancellable event = null;
-         if (entity instanceof EntityLivingBase && !(entity instanceof EntityPlayerMP)) {
-            boolean isAnimal = entity instanceof EntityAnimal || entity instanceof EntityWaterMob || entity instanceof EntityGolem;
-            boolean isMonster = entity instanceof EntityMob || entity instanceof EntityGhast || entity instanceof EntitySlime;
-            if (spawnReason != SpawnReason.CUSTOM && (isAnimal && !this.spawnPeacefulMobs || isMonster && !this.spawnHostileMobs)) {
-               entity.isDead = true;
-               return false;
+         if (!flag && !this.isChunkLoaded(i, j, false)) {
+            return false;
+         } else {
+            if (entityIn instanceof EntityPlayer) {
+               EntityPlayer entityplayer = (EntityPlayer)entityIn;
+               this.playerEntities.add(entityplayer);
+               this.updateAllPlayersSleepingFlag();
             }
 
-            event = CraftEventFactory.callCreatureSpawnEvent((EntityLivingBase)entity, spawnReason);
-         } else if (entity instanceof EntityItem) {
-            event = CraftEventFactory.callItemSpawnEvent((EntityItem)entity);
-         } else if (entity.getBukkitEntity() instanceof Projectile) {
-            event = CraftEventFactory.callProjectileLaunchEvent(entity);
-         }
-
-         if (event == null || !event.isCancelled() && !entity.isDead) {
-            if (!flag && !this.isChunkLoaded(i, j, false)) {
+            if (MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(entityIn, this)) && !flag) {
                return false;
             } else {
-               if (entity instanceof EntityPlayer) {
-                  EntityPlayer entityhuman = (EntityPlayer)entity;
-                  this.playerEntities.add(entityhuman);
-                  this.updateAllPlayersSleepingFlag();
-               }
-
-               this.getChunkFromChunkCoords(i, j).addEntity(entity);
-               this.loadedEntityList.add(entity);
-               this.onEntityAdded(entity);
+               this.getChunkFromChunkCoords(i, j).addEntity(entityIn);
+               this.loadedEntityList.add(entityIn);
+               this.onEntityAdded(entityIn);
                return true;
             }
-         } else {
-            entity.isDead = true;
-            return false;
          }
+      } else {
+         return false;
       }
    }
 
-   protected void onEntityAdded(Entity entity) {
+   public void onEntityAdded(Entity var1) {
       for(int i = 0; i < this.eventListeners.size(); ++i) {
-         ((IWorldEventListener)this.eventListeners.get(i)).onEntityAdded(entity);
+         ((IWorldEventListener)this.eventListeners.get(i)).onEntityAdded(entityIn);
       }
 
-      entity.valid = true;
    }
 
-   protected void onEntityRemoved(Entity entity) {
+   public void onEntityRemoved(Entity var1) {
       for(int i = 0; i < this.eventListeners.size(); ++i) {
-         ((IWorldEventListener)this.eventListeners.get(i)).onEntityRemoved(entity);
+         ((IWorldEventListener)this.eventListeners.get(i)).onEntityRemoved(entityIn);
       }
 
-      entity.valid = false;
    }
 
-   public void removeEntity(Entity entity) {
-      if (entity.isBeingRidden()) {
-         entity.removePassengers();
+   public void removeEntity(Entity var1) {
+      if (entityIn.isBeingRidden()) {
+         entityIn.removePassengers();
       }
 
-      if (entity.isRiding()) {
-         entity.dismountRidingEntity();
+      if (entityIn.isRiding()) {
+         entityIn.dismountRidingEntity();
       }
 
-      entity.setDead();
-      if (entity instanceof EntityPlayer) {
-         this.playerEntities.remove(entity);
+      entityIn.setDead();
+      if (entityIn instanceof EntityPlayer) {
+         this.playerEntities.remove(entityIn);
          this.updateAllPlayersSleepingFlag();
-         this.onEntityRemoved(entity);
+         this.onEntityRemoved(entityIn);
       }
 
    }
 
-   public void removeEntityDangerously(Entity entity) {
-      entity.setDropItemsWhenDead(false);
-      entity.setDead();
-      if (entity instanceof EntityPlayer) {
-         this.playerEntities.remove(entity);
+   public void removeEntityDangerously(Entity var1) {
+      entityIn.setDropItemsWhenDead(false);
+      entityIn.setDead();
+      if (entityIn instanceof EntityPlayer) {
+         this.playerEntities.remove(entityIn);
          this.updateAllPlayersSleepingFlag();
       }
 
-      int i = entity.chunkCoordX;
-      int j = entity.chunkCoordZ;
-      if (entity.addedToChunk && this.isChunkLoaded(i, j, true)) {
-         this.getChunkFromChunkCoords(i, j).removeEntity(entity);
+      int i = entityIn.chunkCoordX;
+      int j = entityIn.chunkCoordZ;
+      if (entityIn.addedToChunk && this.isChunkLoaded(i, j, true)) {
+         this.getChunkFromChunkCoords(i, j).removeEntity(entityIn);
       }
 
-      int index = this.loadedEntityList.indexOf(entity);
-      if (index != -1) {
-         if (index <= this.tickPosition) {
-            --this.tickPosition;
-         }
-
-         this.loadedEntityList.remove(index);
-      }
-
-      this.onEntityRemoved(entity);
+      this.loadedEntityList.remove(entityIn);
+      this.onEntityRemoved(entityIn);
    }
 
-   public void addEventListener(IWorldEventListener iworldaccess) {
-      this.eventListeners.add(iworldaccess);
+   public void addEventListener(IWorldEventListener var1) {
+      this.eventListeners.add(listener);
    }
 
-   public List getCollisionBoxes(@Nullable Entity entity, AxisAlignedBB axisalignedbb) {
-      ArrayList arraylist = Lists.newArrayList();
-      int i = MathHelper.floor(axisalignedbb.minX) - 1;
-      int j = MathHelper.ceil(axisalignedbb.maxX) + 1;
-      int k = MathHelper.floor(axisalignedbb.minY) - 1;
-      int l = MathHelper.ceil(axisalignedbb.maxY) + 1;
-      int i1 = MathHelper.floor(axisalignedbb.minZ) - 1;
-      int j1 = MathHelper.ceil(axisalignedbb.maxZ) + 1;
+   public List getCollisionBoxes(@Nullable Entity var1, AxisAlignedBB var2) {
+      List list = Lists.newArrayList();
+      int i = MathHelper.floor(aabb.minX) - 1;
+      int j = MathHelper.ceil(aabb.maxX) + 1;
+      int k = MathHelper.floor(aabb.minY) - 1;
+      int l = MathHelper.ceil(aabb.maxY) + 1;
+      int i1 = MathHelper.floor(aabb.minZ) - 1;
+      int j1 = MathHelper.ceil(aabb.maxZ) + 1;
       WorldBorder worldborder = this.getWorldBorder();
-      boolean flag = entity != null && entity.isOutsideBorder();
-      boolean flag1 = entity != null && this.isInsideBorder(worldborder, entity);
-      IBlockState iblockdata = Blocks.STONE.getDefaultState();
-      BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+      boolean flag = entityIn != null && entityIn.isOutsideBorder();
+      boolean flag1 = entityIn != null && this.isInsideBorder(worldborder, entityIn);
+      IBlockState iblockstate = Blocks.STONE.getDefaultState();
+      BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
-      for(int l1 = i; l1 < j; ++l1) {
-         for(int k1 = i1; k1 < j1; ++k1) {
-            int i2 = (l1 != i && l1 != j - 1 ? 0 : 1) + (k1 != i1 && k1 != j1 - 1 ? 0 : 1);
-            if (i2 != 2 && this.isBlockLoaded(blockposition_pooledblockposition.setPos(l1, 64, k1))) {
+      for(int k1 = i; k1 < j; ++k1) {
+         for(int l1 = i1; l1 < j1; ++l1) {
+            int i2 = (k1 != i && k1 != j - 1 ? 0 : 1) + (l1 != i1 && l1 != j1 - 1 ? 0 : 1);
+            if (i2 != 2 && this.isBlockLoaded(blockpos$pooledmutableblockpos.setPos(k1, 64, l1))) {
                for(int j2 = k; j2 < l; ++j2) {
                   if (i2 <= 0 || j2 != k && j2 != l - 1) {
-                     blockposition_pooledblockposition.setPos(l1, j2, k1);
-                     if (entity != null) {
+                     blockpos$pooledmutableblockpos.setPos(k1, j2, l1);
+                     if (entityIn != null) {
                         if (flag && flag1) {
-                           entity.setOutsideBorder(false);
+                           entityIn.setOutsideBorder(false);
                         } else if (!flag && !flag1) {
-                           entity.setOutsideBorder(true);
+                           entityIn.setOutsideBorder(true);
                         }
                      }
 
-                     IBlockState iblockdata1 = iblockdata;
-                     if (worldborder.contains(blockposition_pooledblockposition) || !flag1) {
-                        iblockdata1 = this.getBlockState(blockposition_pooledblockposition);
+                     IBlockState iblockstate1 = iblockstate;
+                     if (worldborder.contains(blockpos$pooledmutableblockpos) || !flag1) {
+                        iblockstate1 = this.getBlockState(blockpos$pooledmutableblockpos);
                      }
 
-                     iblockdata1.addCollisionBoxToList(this, blockposition_pooledblockposition, axisalignedbb, arraylist, entity);
+                     iblockstate1.addCollisionBoxToList(this, blockpos$pooledmutableblockpos, aabb, list, entityIn);
                   }
                }
             }
          }
       }
 
-      blockposition_pooledblockposition.release();
-      if (entity != null) {
-         List list = this.getEntitiesWithinAABBExcludingEntity(entity, axisalignedbb.expandXyz(0.25D));
+      blockpos$pooledmutableblockpos.release();
+      if (entityIn != null) {
+         List list1 = this.getEntitiesWithinAABBExcludingEntity(entityIn, aabb.expandXyz(0.25D));
 
-         for(int k1 = 0; k1 < list.size(); ++k1) {
-            Entity entity1 = (Entity)list.get(k1);
-            if (!entity.isRidingSameEntity(entity1)) {
-               AxisAlignedBB axisalignedbb1 = entity1.getCollisionBoundingBox();
-               if (axisalignedbb1 != null && axisalignedbb1.intersectsWith(axisalignedbb)) {
-                  arraylist.add(axisalignedbb1);
+         for(int k2 = 0; k2 < list1.size(); ++k2) {
+            Entity entity = (Entity)list1.get(k2);
+            if (!entityIn.isRidingSameEntity(entity)) {
+               AxisAlignedBB axisalignedbb = entity.getCollisionBoundingBox();
+               if (axisalignedbb != null && axisalignedbb.intersectsWith(aabb)) {
+                  list.add(axisalignedbb);
                }
 
-               axisalignedbb1 = entity.getCollisionBox(entity1);
-               if (axisalignedbb1 != null && axisalignedbb1.intersectsWith(axisalignedbb)) {
-                  arraylist.add(axisalignedbb1);
+               axisalignedbb = entityIn.getCollisionBox(entity);
+               if (axisalignedbb != null && axisalignedbb.intersectsWith(aabb)) {
+                  list.add(axisalignedbb);
                }
             }
          }
       }
 
-      return arraylist;
+      MinecraftForge.EVENT_BUS.post(new GetCollisionBoxesEvent(this, entityIn, aabb, list));
+      return list;
    }
 
-   public boolean isInsideBorder(WorldBorder worldborder, Entity entity) {
-      double d0 = worldborder.minX();
-      double d1 = worldborder.minZ();
-      double d2 = worldborder.maxX();
-      double d3 = worldborder.maxZ();
-      if (entity.isOutsideBorder()) {
+   public boolean isInsideBorder(WorldBorder var1, Entity var2) {
+      double d0 = worldBorderIn.minX();
+      double d1 = worldBorderIn.minZ();
+      double d2 = worldBorderIn.maxX();
+      double d3 = worldBorderIn.maxZ();
+      if (entityIn.isOutsideBorder()) {
          ++d0;
          ++d1;
          --d2;
@@ -1100,74 +1042,78 @@ public abstract class World implements IBlockAccess {
          ++d3;
       }
 
-      return entity.posX > d0 && entity.posX < d2 && entity.posZ > d1 && entity.posZ < d3;
+      return entityIn.posX > d0 && entityIn.posX < d2 && entityIn.posZ > d1 && entityIn.posZ < d3;
    }
 
-   public List getCollisionBoxes(AxisAlignedBB axisalignedbb) {
-      ArrayList arraylist = Lists.newArrayList();
-      int i = MathHelper.floor(axisalignedbb.minX) - 1;
-      int j = MathHelper.ceil(axisalignedbb.maxX) + 1;
-      int k = MathHelper.floor(axisalignedbb.minY) - 1;
-      int l = MathHelper.ceil(axisalignedbb.maxY) + 1;
-      int i1 = MathHelper.floor(axisalignedbb.minZ) - 1;
-      int j1 = MathHelper.ceil(axisalignedbb.maxZ) + 1;
-      BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+   public List getCollisionBoxes(AxisAlignedBB var1) {
+      List list = Lists.newArrayList();
+      int i = MathHelper.floor(bb.minX) - 1;
+      int j = MathHelper.ceil(bb.maxX) + 1;
+      int k = MathHelper.floor(bb.minY) - 1;
+      int l = MathHelper.ceil(bb.maxY) + 1;
+      int i1 = MathHelper.floor(bb.minZ) - 1;
+      int j1 = MathHelper.ceil(bb.maxZ) + 1;
+      BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
       for(int k1 = i; k1 < j; ++k1) {
          for(int l1 = i1; l1 < j1; ++l1) {
             int i2 = (k1 != i && k1 != j - 1 ? 0 : 1) + (l1 != i1 && l1 != j1 - 1 ? 0 : 1);
-            if (i2 != 2 && this.isBlockLoaded(blockposition_pooledblockposition.setPos(k1, 64, l1))) {
+            if (i2 != 2 && this.isBlockLoaded(blockpos$pooledmutableblockpos.setPos(k1, 64, l1))) {
                for(int j2 = k; j2 < l; ++j2) {
                   if (i2 <= 0 || j2 != k && j2 != l - 1) {
-                     blockposition_pooledblockposition.setPos(k1, j2, l1);
-                     IBlockState iblockdata;
+                     blockpos$pooledmutableblockpos.setPos(k1, j2, l1);
+                     IBlockState iblockstate;
                      if (k1 >= -30000000 && k1 < 30000000 && l1 >= -30000000 && l1 < 30000000) {
-                        iblockdata = this.getBlockState(blockposition_pooledblockposition);
+                        iblockstate = this.getBlockState(blockpos$pooledmutableblockpos);
                      } else {
-                        iblockdata = Blocks.BEDROCK.getDefaultState();
+                        iblockstate = Blocks.BEDROCK.getDefaultState();
                      }
 
-                     iblockdata.addCollisionBoxToList(this, blockposition_pooledblockposition, axisalignedbb, arraylist, (Entity)null);
+                     iblockstate.addCollisionBoxToList(this, blockpos$pooledmutableblockpos, bb, list, (Entity)null);
                   }
                }
             }
          }
       }
 
-      blockposition_pooledblockposition.release();
-      return arraylist;
+      blockpos$pooledmutableblockpos.release();
+      return list;
    }
 
-   public boolean collidesWithAnyBlock(AxisAlignedBB axisalignedbb) {
-      ArrayList arraylist = Lists.newArrayList();
-      int i = MathHelper.floor(axisalignedbb.minX) - 1;
-      int j = MathHelper.ceil(axisalignedbb.maxX) + 1;
-      int k = MathHelper.floor(axisalignedbb.minY) - 1;
-      int l = MathHelper.ceil(axisalignedbb.maxY) + 1;
-      int i1 = MathHelper.floor(axisalignedbb.minZ) - 1;
-      int j1 = MathHelper.ceil(axisalignedbb.maxZ) + 1;
-      BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+   public void removeEventListener(IWorldEventListener var1) {
+      this.eventListeners.remove(listener);
+   }
+
+   public boolean collidesWithAnyBlock(AxisAlignedBB var1) {
+      List list = Lists.newArrayList();
+      int i = MathHelper.floor(bbox.minX) - 1;
+      int j = MathHelper.ceil(bbox.maxX) + 1;
+      int k = MathHelper.floor(bbox.minY) - 1;
+      int l = MathHelper.ceil(bbox.maxY) + 1;
+      int i1 = MathHelper.floor(bbox.minZ) - 1;
+      int j1 = MathHelper.ceil(bbox.maxZ) + 1;
+      BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
       try {
          for(int k1 = i; k1 < j; ++k1) {
             for(int l1 = i1; l1 < j1; ++l1) {
                int i2 = (k1 != i && k1 != j - 1 ? 0 : 1) + (l1 != i1 && l1 != j1 - 1 ? 0 : 1);
-               if (i2 != 2 && this.isBlockLoaded(blockposition_pooledblockposition.setPos(k1, 64, l1))) {
+               if (i2 != 2 && this.isBlockLoaded(blockpos$pooledmutableblockpos.setPos(k1, 64, l1))) {
                   for(int j2 = k; j2 < l; ++j2) {
                      if (i2 <= 0 || j2 != k && j2 != l - 1) {
-                        blockposition_pooledblockposition.setPos(k1, j2, l1);
+                        blockpos$pooledmutableblockpos.setPos(k1, j2, l1);
                         if (k1 < -30000000 || k1 >= 30000000 || l1 < -30000000 || l1 >= 30000000) {
-                           boolean flag = true;
-                           boolean var21 = flag;
-                           return var21;
+                           boolean flag1 = true;
+                           boolean var22 = flag1;
+                           return var22;
                         }
 
-                        IBlockState iblockdata = this.getBlockState(blockposition_pooledblockposition);
-                        iblockdata.addCollisionBoxToList(this, blockposition_pooledblockposition, axisalignedbb, arraylist, (Entity)null);
-                        if (!arraylist.isEmpty()) {
-                           boolean flag1 = true;
-                           boolean var15 = flag1;
-                           return var15;
+                        IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos);
+                        iblockstate.addCollisionBoxToList(this, blockpos$pooledmutableblockpos, bbox, list, (Entity)null);
+                        if (!list.isEmpty()) {
+                           boolean flag = true;
+                           boolean var16 = flag;
+                           return var16;
                         }
                      }
                   }
@@ -1175,67 +1121,208 @@ public abstract class World implements IBlockAccess {
             }
          }
 
-         return false;
+         boolean var20 = false;
+         return var20;
       } finally {
-         blockposition_pooledblockposition.release();
+         blockpos$pooledmutableblockpos.release();
       }
    }
 
-   public int calculateSkylightSubtracted(float f) {
-      float f1 = this.getCelestialAngle(f);
-      float f2 = 1.0F - (MathHelper.cos(f1 * 6.2831855F) * 2.0F + 0.5F);
-      f2 = MathHelper.clamp(f2, 0.0F, 1.0F);
-      f2 = 1.0F - f2;
-      f2 = (float)((double)f2 * (1.0D - (double)(this.getRainStrength(f) * 5.0F) / 16.0D));
-      f2 = (float)((double)f2 * (1.0D - (double)(this.getThunderStrength(f) * 5.0F) / 16.0D));
-      f2 = 1.0F - f2;
-      return (int)(f2 * 11.0F);
+   public int calculateSkylightSubtracted(float var1) {
+      float f = this.provider.getSunBrightnessFactor(partialTicks);
+      f = 1.0F - f;
+      return (int)(f * 11.0F);
    }
 
-   public float getCelestialAngle(float f) {
-      return this.provider.calculateCelestialAngle(this.worldInfo.getWorldTime(), f);
+   public float getSunBrightnessFactor(float var1) {
+      float f = this.getCelestialAngle(partialTicks);
+      float f1 = 1.0F - (MathHelper.cos(f * 6.2831855F) * 2.0F + 0.5F);
+      f1 = MathHelper.clamp(f1, 0.0F, 1.0F);
+      f1 = 1.0F - f1;
+      f1 = (float)((double)f1 * (1.0D - (double)(this.getRainStrength(partialTicks) * 5.0F) / 16.0D));
+      f1 = (float)((double)f1 * (1.0D - (double)(this.getThunderStrength(partialTicks) * 5.0F) / 16.0D));
+      return f1;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public float getSunBrightness(float var1) {
+      return this.provider.getSunBrightness(p_72971_1_);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public float getSunBrightnessBody(float var1) {
+      float f = this.getCelestialAngle(p_72971_1_);
+      float f1 = 1.0F - (MathHelper.cos(f * 6.2831855F) * 2.0F + 0.2F);
+      f1 = MathHelper.clamp(f1, 0.0F, 1.0F);
+      f1 = 1.0F - f1;
+      f1 = (float)((double)f1 * (1.0D - (double)(this.getRainStrength(p_72971_1_) * 5.0F) / 16.0D));
+      f1 = (float)((double)f1 * (1.0D - (double)(this.getThunderStrength(p_72971_1_) * 5.0F) / 16.0D));
+      return f1 * 0.8F + 0.2F;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public Vec3d getSkyColor(Entity var1, float var2) {
+      return this.provider.getSkyColor(entityIn, partialTicks);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public Vec3d getSkyColorBody(Entity var1, float var2) {
+      float f = this.getCelestialAngle(partialTicks);
+      float f1 = MathHelper.cos(f * 6.2831855F) * 2.0F + 0.5F;
+      f1 = MathHelper.clamp(f1, 0.0F, 1.0F);
+      int i = MathHelper.floor(entityIn.posX);
+      int j = MathHelper.floor(entityIn.posY);
+      int k = MathHelper.floor(entityIn.posZ);
+      BlockPos blockpos = new BlockPos(i, j, k);
+      int l = ForgeHooksClient.getSkyBlendColour(this, blockpos);
+      float f3 = (float)(l >> 16 & 255) / 255.0F;
+      float f4 = (float)(l >> 8 & 255) / 255.0F;
+      float f5 = (float)(l & 255) / 255.0F;
+      f3 = f3 * f1;
+      f4 = f4 * f1;
+      f5 = f5 * f1;
+      float f6 = this.getRainStrength(partialTicks);
+      if (f6 > 0.0F) {
+         float f7 = (f3 * 0.3F + f4 * 0.59F + f5 * 0.11F) * 0.6F;
+         float f8 = 1.0F - f6 * 0.75F;
+         f3 = f3 * f8 + f7 * (1.0F - f8);
+         f4 = f4 * f8 + f7 * (1.0F - f8);
+         f5 = f5 * f8 + f7 * (1.0F - f8);
+      }
+
+      float f10 = this.getThunderStrength(partialTicks);
+      if (f10 > 0.0F) {
+         float f11 = (f3 * 0.3F + f4 * 0.59F + f5 * 0.11F) * 0.2F;
+         float f9 = 1.0F - f10 * 0.75F;
+         f3 = f3 * f9 + f11 * (1.0F - f9);
+         f4 = f4 * f9 + f11 * (1.0F - f9);
+         f5 = f5 * f9 + f11 * (1.0F - f9);
+      }
+
+      if (this.lastLightningBolt > 0) {
+         float f12 = (float)this.lastLightningBolt - partialTicks;
+         if (f12 > 1.0F) {
+            f12 = 1.0F;
+         }
+
+         f12 = f12 * 0.45F;
+         f3 = f3 * (1.0F - f12) + 0.8F * f12;
+         f4 = f4 * (1.0F - f12) + 0.8F * f12;
+         f5 = f5 * (1.0F - f12) + 1.0F * f12;
+      }
+
+      return new Vec3d((double)f3, (double)f4, (double)f5);
+   }
+
+   public float getCelestialAngle(float var1) {
+      return this.provider.calculateCelestialAngle(this.worldInfo.getWorldTime(), partialTicks);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getMoonPhase() {
+      return this.provider.getMoonPhase(this.worldInfo.getWorldTime());
    }
 
    public float getCurrentMoonPhaseFactor() {
+      return this.provider.getCurrentMoonPhaseFactor();
+   }
+
+   public float getCurrentMoonPhaseFactorBody() {
       return WorldProvider.MOON_PHASE_FACTORS[this.provider.getMoonPhase(this.worldInfo.getWorldTime())];
    }
 
-   public float getCelestialAngleRadians(float f) {
-      float f1 = this.getCelestialAngle(f);
-      return f1 * 6.2831855F;
+   public float getCelestialAngleRadians(float var1) {
+      float f = this.getCelestialAngle(partialTicks);
+      return f * 6.2831855F;
    }
 
-   public BlockPos getPrecipitationHeight(BlockPos blockposition) {
-      return this.getChunkFromBlockCoords(blockposition).getPrecipitationHeight(blockposition);
+   @SideOnly(Side.CLIENT)
+   public Vec3d getCloudColour(float var1) {
+      return this.provider.getCloudColor(partialTicks);
    }
 
-   public BlockPos getTopSolidOrLiquidBlock(BlockPos blockposition) {
-      Chunk chunk = this.getChunkFromBlockCoords(blockposition);
+   @SideOnly(Side.CLIENT)
+   public Vec3d getCloudColorBody(float var1) {
+      float f = this.getCelestialAngle(partialTicks);
+      float f1 = MathHelper.cos(f * 6.2831855F) * 2.0F + 0.5F;
+      f1 = MathHelper.clamp(f1, 0.0F, 1.0F);
+      float f2 = 1.0F;
+      float f3 = 1.0F;
+      float f4 = 1.0F;
+      float f5 = this.getRainStrength(partialTicks);
+      if (f5 > 0.0F) {
+         float f6 = (f2 * 0.3F + f3 * 0.59F + f4 * 0.11F) * 0.6F;
+         float f7 = 1.0F - f5 * 0.95F;
+         f2 = f2 * f7 + f6 * (1.0F - f7);
+         f3 = f3 * f7 + f6 * (1.0F - f7);
+         f4 = f4 * f7 + f6 * (1.0F - f7);
+      }
 
-      BlockPos blockposition1;
-      BlockPos blockposition2;
-      for(blockposition1 = new BlockPos(blockposition.getX(), chunk.getTopFilledSegment() + 16, blockposition.getZ()); blockposition1.getY() >= 0; blockposition1 = blockposition2) {
-         blockposition2 = blockposition1.down();
-         Material material = chunk.getBlockState(blockposition2).getMaterial();
-         if (material.blocksMovement() && material != Material.LEAVES) {
+      f2 = f2 * (f1 * 0.9F + 0.1F);
+      f3 = f3 * (f1 * 0.9F + 0.1F);
+      f4 = f4 * (f1 * 0.85F + 0.15F);
+      float f9 = this.getThunderStrength(partialTicks);
+      if (f9 > 0.0F) {
+         float f10 = (f2 * 0.3F + f3 * 0.59F + f4 * 0.11F) * 0.2F;
+         float f8 = 1.0F - f9 * 0.95F;
+         f2 = f2 * f8 + f10 * (1.0F - f8);
+         f3 = f3 * f8 + f10 * (1.0F - f8);
+         f4 = f4 * f8 + f10 * (1.0F - f8);
+      }
+
+      return new Vec3d((double)f2, (double)f3, (double)f4);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public Vec3d getFogColor(float var1) {
+      float f = this.getCelestialAngle(partialTicks);
+      return this.provider.getFogColor(f, partialTicks);
+   }
+
+   public BlockPos getPrecipitationHeight(BlockPos var1) {
+      return this.getChunkFromBlockCoords(pos).getPrecipitationHeight(pos);
+   }
+
+   public BlockPos getTopSolidOrLiquidBlock(BlockPos var1) {
+      Chunk chunk = this.getChunkFromBlockCoords(pos);
+
+      BlockPos blockpos;
+      BlockPos blockpos1;
+      for(blockpos = new BlockPos(pos.getX(), chunk.getTopFilledSegment() + 16, pos.getZ()); blockpos.getY() >= 0; blockpos = blockpos1) {
+         blockpos1 = blockpos.down();
+         IBlockState state = chunk.getBlockState(blockpos1);
+         if (state.getMaterial().blocksMovement() && !state.getBlock().isLeaves(state, this, blockpos1) && !state.getBlock().isFoliage(this, blockpos1)) {
             break;
          }
       }
 
-      return blockposition1;
+      return blockpos;
    }
 
-   public boolean isUpdateScheduled(BlockPos blockposition, Block block) {
+   @SideOnly(Side.CLIENT)
+   public float getStarBrightness(float var1) {
+      return this.provider.getStarBrightness(partialTicks);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public float getStarBrightnessBody(float var1) {
+      float f = this.getCelestialAngle(partialTicks);
+      float f1 = 1.0F - (MathHelper.cos(f * 6.2831855F) * 2.0F + 0.25F);
+      f1 = MathHelper.clamp(f1, 0.0F, 1.0F);
+      return f1 * f1 * 0.5F;
+   }
+
+   public boolean isUpdateScheduled(BlockPos var1, Block var2) {
       return true;
    }
 
-   public void scheduleUpdate(BlockPos blockposition, Block block, int i) {
+   public void scheduleUpdate(BlockPos var1, Block var2, int var3) {
    }
 
-   public void updateBlockTick(BlockPos blockposition, Block block, int i, int j) {
+   public void updateBlockTick(BlockPos var1, Block var2, int var3, int var4) {
    }
 
-   public void scheduleBlockUpdate(BlockPos blockposition, Block block, int i, int j) {
+   public void scheduleBlockUpdate(BlockPos var1, Block var2, int var3, int var4) {
    }
 
    public void updateEntities() {
@@ -1244,82 +1331,91 @@ public abstract class World implements IBlockAccess {
 
       for(int i = 0; i < this.weatherEffects.size(); ++i) {
          Entity entity = (Entity)this.weatherEffects.get(i);
-         if (entity != null) {
-            try {
-               ++entity.ticksExisted;
-               entity.onUpdate();
-            } catch (Throwable var13) {
-               CrashReport crashreport = CrashReport.makeCrashReport(var13, "Ticking entity");
-               CrashReportCategory crashreportsystemdetails = crashreport.makeCategory("Entity being ticked");
-               if (entity == null) {
-                  crashreportsystemdetails.addCrashSection("Entity", "~~NULL~~");
-               } else {
-                  entity.addEntityCrashInfo(crashreportsystemdetails);
-               }
 
+         try {
+            ++entity.ticksExisted;
+            entity.onUpdate();
+         } catch (Throwable var9) {
+            CrashReport crashreport = CrashReport.makeCrashReport(var9, "Ticking entity");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being ticked");
+            if (entity == null) {
+               crashreportcategory.addCrashSection("Entity", "~~NULL~~");
+            } else {
+               entity.addEntityCrashInfo(crashreportcategory);
+            }
+
+            if (!ForgeModContainer.removeErroringEntities) {
                throw new ReportedException(crashreport);
             }
 
-            if (entity.isDead) {
-               this.weatherEffects.remove(i--);
-            }
+            FMLLog.severe(crashreport.getCompleteReport(), new Object[0]);
+            this.removeEntity(entity);
+         }
+
+         if (entity.isDead) {
+            this.weatherEffects.remove(i--);
          }
       }
 
       this.theProfiler.endStartSection("remove");
       this.loadedEntityList.removeAll(this.unloadedEntityList);
 
-      for(int var14 = 0; var14 < this.unloadedEntityList.size(); ++var14) {
-         Entity entity = (Entity)this.unloadedEntityList.get(var14);
-         int k = entity.chunkCoordX;
-         int j = entity.chunkCoordZ;
-         if (entity.addedToChunk && this.isChunkLoaded(k, j, true)) {
-            this.getChunkFromChunkCoords(k, j).removeEntity(entity);
+      for(int k = 0; k < this.unloadedEntityList.size(); ++k) {
+         Entity entity1 = (Entity)this.unloadedEntityList.get(k);
+         int j = entity1.chunkCoordX;
+         int k1 = entity1.chunkCoordZ;
+         if (entity1.addedToChunk && this.isChunkLoaded(j, k1, true)) {
+            this.getChunkFromChunkCoords(j, k1).removeEntity(entity1);
          }
       }
 
-      for(int var15 = 0; var15 < this.unloadedEntityList.size(); ++var15) {
-         this.onEntityRemoved((Entity)this.unloadedEntityList.get(var15));
+      for(int l = 0; l < this.unloadedEntityList.size(); ++l) {
+         this.onEntityRemoved((Entity)this.unloadedEntityList.get(l));
       }
 
       this.unloadedEntityList.clear();
       this.tickPlayers();
       this.theProfiler.endStartSection("regular");
 
-      for(this.tickPosition = 0; this.tickPosition < this.loadedEntityList.size(); ++this.tickPosition) {
-         Entity entity = (Entity)this.loadedEntityList.get(this.tickPosition);
-         Entity entity1 = entity.getRidingEntity();
-         if (entity1 != null) {
-            if (!entity1.isDead && entity1.isPassenger(entity)) {
+      for(int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
+         Entity entity2 = (Entity)this.loadedEntityList.get(i1);
+         Entity entity3 = entity2.getRidingEntity();
+         if (entity3 != null) {
+            if (!entity3.isDead && entity3.isPassenger(entity2)) {
                continue;
             }
 
-            entity.dismountRidingEntity();
+            entity2.dismountRidingEntity();
          }
 
          this.theProfiler.startSection("tick");
-         if (!entity.isDead && !(entity instanceof EntityPlayerMP)) {
+         if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
             try {
-               this.updateEntity(entity);
-            } catch (Throwable var12) {
-               CrashReport crashreport1 = CrashReport.makeCrashReport(var12, "Ticking entity");
-               CrashReportCategory crashreportsystemdetails1 = crashreport1.makeCategory("Entity being ticked");
-               entity.addEntityCrashInfo(crashreportsystemdetails1);
-               throw new ReportedException(crashreport1);
+               this.updateEntity(entity2);
+            } catch (Throwable var8) {
+               CrashReport crashreport1 = CrashReport.makeCrashReport(var8, "Ticking entity");
+               CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Entity being ticked");
+               entity2.addEntityCrashInfo(crashreportcategory1);
+               if (!ForgeModContainer.removeErroringEntities) {
+                  throw new ReportedException(crashreport1);
+               }
+
+               FMLLog.severe(crashreport1.getCompleteReport(), new Object[0]);
+               this.removeEntity(entity2);
             }
          }
 
          this.theProfiler.endSection();
          this.theProfiler.startSection("remove");
-         if (entity.isDead) {
-            int j = entity.chunkCoordX;
-            int l = entity.chunkCoordZ;
-            if (entity.addedToChunk && this.isChunkLoaded(j, l, true)) {
-               this.getChunkFromChunkCoords(j, l).removeEntity(entity);
+         if (entity2.isDead) {
+            int l1 = entity2.chunkCoordX;
+            int i2 = entity2.chunkCoordZ;
+            if (entity2.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
+               this.getChunkFromChunkCoords(l1, i2).removeEntity(entity2);
             }
 
-            this.loadedEntityList.remove(this.tickPosition--);
-            this.onEntityRemoved(entity);
+            this.loadedEntityList.remove(i1--);
+            this.onEntityRemoved(entity2);
          }
 
          this.theProfiler.endSection();
@@ -1327,28 +1423,28 @@ public abstract class World implements IBlockAccess {
 
       this.theProfiler.endStartSection("blockEntities");
       this.processingLoadedTiles = true;
-      if (!this.tileEntitiesToBeRemoved.isEmpty()) {
-         this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
-         this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
-         this.tileEntitiesToBeRemoved.clear();
-      }
-
       Iterator iterator = this.tickableTileEntities.iterator();
 
       while(iterator.hasNext()) {
          TileEntity tileentity = (TileEntity)iterator.next();
          if (!tileentity.isInvalid() && tileentity.hasWorld()) {
-            BlockPos blockposition = tileentity.getPos();
-            if (this.isBlockLoaded(blockposition) && this.worldBorder.contains(blockposition)) {
+            BlockPos blockpos = tileentity.getPos();
+            if (this.isBlockLoaded(blockpos, false) && this.worldBorder.contains(blockpos)) {
                try {
-                  this.theProfiler.startSection("");
+                  this.theProfiler.startSection(tileentity.getClass().getSimpleName());
                   ((ITickable)tileentity).update();
                   this.theProfiler.endSection();
-               } catch (Throwable var11) {
-                  CrashReport crashreport1 = CrashReport.makeCrashReport(var11, "Ticking block entity");
-                  CrashReportCategory crashreportsystemdetails1 = crashreport1.makeCategory("Block entity being ticked");
-                  tileentity.addInfoToCrashReport(crashreportsystemdetails1);
-                  throw new ReportedException(crashreport1);
+               } catch (Throwable var7) {
+                  CrashReport crashreport2 = CrashReport.makeCrashReport(var7, "Ticking block entity");
+                  CrashReportCategory crashreportcategory2 = crashreport2.makeCategory("Block entity being ticked");
+                  tileentity.addInfoToCrashReport(crashreportcategory2);
+                  if (!ForgeModContainer.removeErroringTileEntities) {
+                     throw new ReportedException(crashreport2);
+                  }
+
+                  FMLLog.severe(crashreport2.getCompleteReport(), new Object[0]);
+                  tileentity.invalidate();
+                  this.removeTileEntity(tileentity.getPos());
                }
             }
          }
@@ -1357,23 +1453,39 @@ public abstract class World implements IBlockAccess {
             iterator.remove();
             this.loadedTileEntityList.remove(tileentity);
             if (this.isBlockLoaded(tileentity.getPos())) {
-               this.getChunkFromBlockCoords(tileentity.getPos()).removeTileEntity(tileentity.getPos());
+               Chunk chunk = this.getChunkFromBlockCoords(tileentity.getPos());
+               if (chunk.getTileEntity(tileentity.getPos(), Chunk.EnumCreateEntityType.CHECK) == tileentity) {
+                  chunk.removeTileEntity(tileentity.getPos());
+               }
             }
          }
+      }
+
+      if (!this.tileEntitiesToBeRemoved.isEmpty()) {
+         for(Object tile : this.tileEntitiesToBeRemoved) {
+            ((TileEntity)tile).onChunkUnload();
+         }
+
+         this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
+         this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
+         this.tileEntitiesToBeRemoved.clear();
       }
 
       this.processingLoadedTiles = false;
       this.theProfiler.endStartSection("pendingBlockEntities");
       if (!this.addedTileEntityList.isEmpty()) {
-         for(int i1 = 0; i1 < this.addedTileEntityList.size(); ++i1) {
-            TileEntity tileentity1 = (TileEntity)this.addedTileEntityList.get(i1);
-            if (!tileentity1.isInvalid() && this.isBlockLoaded(tileentity1.getPos())) {
-               Chunk chunk = this.getChunkFromBlockCoords(tileentity1.getPos());
-               IBlockState iblockdata = chunk.getBlockState(tileentity1.getPos());
-               chunk.addTileEntity(tileentity1.getPos(), tileentity1);
-               this.notifyBlockUpdate(tileentity1.getPos(), iblockdata, iblockdata, 3);
+         for(int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
+            TileEntity tileentity1 = (TileEntity)this.addedTileEntityList.get(j1);
+            if (!tileentity1.isInvalid()) {
                if (!this.loadedTileEntityList.contains(tileentity1)) {
                   this.addTileEntity(tileentity1);
+               }
+
+               if (this.isBlockLoaded(tileentity1.getPos())) {
+                  Chunk chunk = this.getChunkFromBlockCoords(tileentity1.getPos());
+                  IBlockState iblockstate = chunk.getBlockState(tileentity1.getPos());
+                  chunk.addTileEntity(tileentity1.getPos(), tileentity1);
+                  this.notifyBlockUpdate(tileentity1.getPos(), iblockstate, iblockstate, 3);
                }
             }
          }
@@ -1388,98 +1500,115 @@ public abstract class World implements IBlockAccess {
    protected void tickPlayers() {
    }
 
-   public boolean addTileEntity(TileEntity tileentity) {
-      boolean flag = this.loadedTileEntityList.add(tileentity);
-      if (flag && tileentity instanceof ITickable) {
-         this.tickableTileEntities.add(tileentity);
+   public boolean addTileEntity(TileEntity var1) {
+      if (tile.getWorld() != null) {
+         tile.setWorld(this);
+      }
+
+      List dest = this.processingLoadedTiles ? this.addedTileEntityList : this.loadedTileEntityList;
+      boolean flag = dest.add(tile);
+      if (flag && tile instanceof ITickable) {
+         this.tickableTileEntities.add(tile);
       }
 
       if (this.isRemote) {
-         BlockPos blockposition = tileentity.getPos();
-         IBlockState iblockdata = this.getBlockState(blockposition);
-         this.notifyBlockUpdate(blockposition, iblockdata, iblockdata, 2);
+         BlockPos blockpos = tile.getPos();
+         IBlockState iblockstate = this.getBlockState(blockpos);
+         this.notifyBlockUpdate(blockpos, iblockstate, iblockstate, 2);
       }
 
       return flag;
    }
 
-   public void addTileEntities(Collection collection) {
+   public void addTileEntities(Collection var1) {
       if (this.processingLoadedTiles) {
-         this.addedTileEntityList.addAll(collection);
+         for(TileEntity te : tileEntityCollection) {
+            if (te.getWorld() != this) {
+               te.setWorld(this);
+            }
+         }
+
+         this.addedTileEntityList.addAll(tileEntityCollection);
       } else {
-         for(TileEntity tileentity : collection) {
+         for(TileEntity tileentity : tileEntityCollection) {
             this.addTileEntity(tileentity);
          }
       }
 
    }
 
-   public void updateEntity(Entity entity) {
-      this.updateEntityWithOptionalForce(entity, true);
+   public void updateEntity(Entity var1) {
+      this.updateEntityWithOptionalForce(ent, true);
    }
 
-   public void updateEntityWithOptionalForce(Entity entity, boolean flag) {
-      int i = MathHelper.floor(entity.posX);
-      int j = MathHelper.floor(entity.posZ);
-      Chunk startingChunk = this.getChunkIfLoaded(i >> 4, j >> 4);
-      if (!flag || startingChunk != null && startingChunk.areNeighborsLoaded(2)) {
-         entity.lastTickPosX = entity.posX;
-         entity.lastTickPosY = entity.posY;
-         entity.lastTickPosZ = entity.posZ;
-         entity.prevRotationYaw = entity.rotationYaw;
-         entity.prevRotationPitch = entity.rotationPitch;
-         if (flag && entity.addedToChunk) {
-            ++entity.ticksExisted;
-            if (entity.isRiding()) {
-               entity.updateRidden();
+   public void updateEntityWithOptionalForce(Entity var1, boolean var2) {
+      int i = MathHelper.floor(entityIn.posX);
+      int j = MathHelper.floor(entityIn.posZ);
+      boolean isForced = this.getPersistentChunks().containsKey(new ChunkPos(i >> 4, j >> 4));
+      int k = isForced ? 0 : 32;
+      boolean canUpdate = !forceUpdate || this.isAreaLoaded(i - k, 0, j - k, i + k, 0, j + k, true);
+      if (!canUpdate) {
+         canUpdate = ForgeEventFactory.canEntityUpdate(entityIn);
+      }
+
+      if (canUpdate) {
+         entityIn.lastTickPosX = entityIn.posX;
+         entityIn.lastTickPosY = entityIn.posY;
+         entityIn.lastTickPosZ = entityIn.posZ;
+         entityIn.prevRotationYaw = entityIn.rotationYaw;
+         entityIn.prevRotationPitch = entityIn.rotationPitch;
+         if (forceUpdate && entityIn.addedToChunk) {
+            ++entityIn.ticksExisted;
+            if (entityIn.isRiding()) {
+               entityIn.updateRidden();
             } else {
-               entity.onUpdate();
+               entityIn.onUpdate();
             }
          }
 
          this.theProfiler.startSection("chunkCheck");
-         if (Double.isNaN(entity.posX) || Double.isInfinite(entity.posX)) {
-            entity.posX = entity.lastTickPosX;
+         if (Double.isNaN(entityIn.posX) || Double.isInfinite(entityIn.posX)) {
+            entityIn.posX = entityIn.lastTickPosX;
          }
 
-         if (Double.isNaN(entity.posY) || Double.isInfinite(entity.posY)) {
-            entity.posY = entity.lastTickPosY;
+         if (Double.isNaN(entityIn.posY) || Double.isInfinite(entityIn.posY)) {
+            entityIn.posY = entityIn.lastTickPosY;
          }
 
-         if (Double.isNaN(entity.posZ) || Double.isInfinite(entity.posZ)) {
-            entity.posZ = entity.lastTickPosZ;
+         if (Double.isNaN(entityIn.posZ) || Double.isInfinite(entityIn.posZ)) {
+            entityIn.posZ = entityIn.lastTickPosZ;
          }
 
-         if (Double.isNaN((double)entity.rotationPitch) || Double.isInfinite((double)entity.rotationPitch)) {
-            entity.rotationPitch = entity.prevRotationPitch;
+         if (Double.isNaN((double)entityIn.rotationPitch) || Double.isInfinite((double)entityIn.rotationPitch)) {
+            entityIn.rotationPitch = entityIn.prevRotationPitch;
          }
 
-         if (Double.isNaN((double)entity.rotationYaw) || Double.isInfinite((double)entity.rotationYaw)) {
-            entity.rotationYaw = entity.prevRotationYaw;
+         if (Double.isNaN((double)entityIn.rotationYaw) || Double.isInfinite((double)entityIn.rotationYaw)) {
+            entityIn.rotationYaw = entityIn.prevRotationYaw;
          }
 
-         int k = MathHelper.floor(entity.posX / 16.0D);
-         int l = MathHelper.floor(entity.posY / 16.0D);
-         int i1 = MathHelper.floor(entity.posZ / 16.0D);
-         if (!entity.addedToChunk || entity.chunkCoordX != k || entity.chunkCoordY != l || entity.chunkCoordZ != i1) {
-            if (entity.addedToChunk && this.isChunkLoaded(entity.chunkCoordX, entity.chunkCoordZ, true)) {
-               this.getChunkFromChunkCoords(entity.chunkCoordX, entity.chunkCoordZ).removeEntityAtIndex(entity, entity.chunkCoordY);
+         int l = MathHelper.floor(entityIn.posX / 16.0D);
+         int i1 = MathHelper.floor(entityIn.posY / 16.0D);
+         int j1 = MathHelper.floor(entityIn.posZ / 16.0D);
+         if (!entityIn.addedToChunk || entityIn.chunkCoordX != l || entityIn.chunkCoordY != i1 || entityIn.chunkCoordZ != j1) {
+            if (entityIn.addedToChunk && this.isChunkLoaded(entityIn.chunkCoordX, entityIn.chunkCoordZ, true)) {
+               this.getChunkFromChunkCoords(entityIn.chunkCoordX, entityIn.chunkCoordZ).removeEntityAtIndex(entityIn, entityIn.chunkCoordY);
             }
 
-            if (!entity.setPositionNonDirty() && !this.isChunkLoaded(k, i1, true)) {
-               entity.addedToChunk = false;
+            if (!entityIn.setPositionNonDirty() && !this.isChunkLoaded(l, j1, true)) {
+               entityIn.addedToChunk = false;
             } else {
-               this.getChunkFromChunkCoords(k, i1).addEntity(entity);
+               this.getChunkFromChunkCoords(l, j1).addEntity(entityIn);
             }
          }
 
          this.theProfiler.endSection();
-         if (flag && entity.addedToChunk) {
-            for(Entity entity1 : entity.getPassengers()) {
-               if (!entity1.isDead && entity1.getRidingEntity() == entity) {
-                  this.updateEntity(entity1);
+         if (forceUpdate && entityIn.addedToChunk) {
+            for(Entity entity : entityIn.getPassengers()) {
+               if (!entity.isDead && entity.getRidingEntity() == entityIn) {
+                  this.updateEntity(entity);
                } else {
-                  entity1.dismountRidingEntity();
+                  entity.dismountRidingEntity();
                }
             }
          }
@@ -1487,16 +1616,16 @@ public abstract class World implements IBlockAccess {
 
    }
 
-   public boolean checkNoEntityCollision(AxisAlignedBB axisalignedbb) {
-      return this.checkNoEntityCollision(axisalignedbb, (Entity)null);
+   public boolean checkNoEntityCollision(AxisAlignedBB var1) {
+      return this.checkNoEntityCollision(bb, (Entity)null);
    }
 
-   public boolean checkNoEntityCollision(AxisAlignedBB axisalignedbb, @Nullable Entity entity) {
-      List list = this.getEntitiesWithinAABBExcludingEntity((Entity)null, axisalignedbb);
+   public boolean checkNoEntityCollision(AxisAlignedBB var1, @Nullable Entity var2) {
+      List list = this.getEntitiesWithinAABBExcludingEntity((Entity)null, bb);
 
       for(int i = 0; i < list.size(); ++i) {
-         Entity entity1 = (Entity)list.get(i);
-         if (!entity1.isDead && entity1.preventEntitySpawning && entity1 != entity && (entity == null || entity1.isRidingSameEntity(entity))) {
+         Entity entity = (Entity)list.get(i);
+         if (!entity.isDead && entity.preventEntitySpawning && entity != entityIn && (entityIn == null || entity.isRidingSameEntity(entityIn))) {
             return false;
          }
       }
@@ -1504,173 +1633,187 @@ public abstract class World implements IBlockAccess {
       return true;
    }
 
-   public boolean checkBlockCollision(AxisAlignedBB axisalignedbb) {
-      int i = MathHelper.floor(axisalignedbb.minX);
-      int j = MathHelper.ceil(axisalignedbb.maxX);
-      int k = MathHelper.floor(axisalignedbb.minY);
-      int l = MathHelper.ceil(axisalignedbb.maxY);
-      int i1 = MathHelper.floor(axisalignedbb.minZ);
-      int j1 = MathHelper.ceil(axisalignedbb.maxZ);
-      BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+   public boolean checkBlockCollision(AxisAlignedBB var1) {
+      int i = MathHelper.floor(bb.minX);
+      int j = MathHelper.ceil(bb.maxX);
+      int k = MathHelper.floor(bb.minY);
+      int l = MathHelper.ceil(bb.maxY);
+      int i1 = MathHelper.floor(bb.minZ);
+      int j1 = MathHelper.ceil(bb.maxZ);
+      BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
       for(int k1 = i; k1 < j; ++k1) {
          for(int l1 = k; l1 < l; ++l1) {
             for(int i2 = i1; i2 < j1; ++i2) {
-               IBlockState iblockdata = this.getBlockState(blockposition_pooledblockposition.setPos(k1, l1, i2));
-               if (iblockdata.getMaterial() != Material.AIR) {
-                  blockposition_pooledblockposition.release();
+               IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos.setPos(k1, l1, i2));
+               if (iblockstate.getMaterial() != Material.AIR) {
+                  blockpos$pooledmutableblockpos.release();
                   return true;
                }
             }
          }
       }
 
-      blockposition_pooledblockposition.release();
+      blockpos$pooledmutableblockpos.release();
       return false;
    }
 
-   public boolean containsAnyLiquid(AxisAlignedBB axisalignedbb) {
-      int i = MathHelper.floor(axisalignedbb.minX);
-      int j = MathHelper.ceil(axisalignedbb.maxX);
-      int k = MathHelper.floor(axisalignedbb.minY);
-      int l = MathHelper.ceil(axisalignedbb.maxY);
-      int i1 = MathHelper.floor(axisalignedbb.minZ);
-      int j1 = MathHelper.ceil(axisalignedbb.maxZ);
-      BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+   public boolean containsAnyLiquid(AxisAlignedBB var1) {
+      int i = MathHelper.floor(bb.minX);
+      int j = MathHelper.ceil(bb.maxX);
+      int k = MathHelper.floor(bb.minY);
+      int l = MathHelper.ceil(bb.maxY);
+      int i1 = MathHelper.floor(bb.minZ);
+      int j1 = MathHelper.ceil(bb.maxZ);
+      BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
       for(int k1 = i; k1 < j; ++k1) {
          for(int l1 = k; l1 < l; ++l1) {
             for(int i2 = i1; i2 < j1; ++i2) {
-               IBlockState iblockdata = this.getBlockState(blockposition_pooledblockposition.setPos(k1, l1, i2));
-               if (iblockdata.getMaterial().isLiquid()) {
-                  blockposition_pooledblockposition.release();
+               IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos.setPos(k1, l1, i2));
+               if (iblockstate.getMaterial().isLiquid()) {
+                  blockpos$pooledmutableblockpos.release();
                   return true;
                }
             }
          }
       }
 
-      blockposition_pooledblockposition.release();
+      blockpos$pooledmutableblockpos.release();
       return false;
    }
 
-   public boolean isFlammableWithin(AxisAlignedBB axisalignedbb) {
-      int i = MathHelper.floor(axisalignedbb.minX);
-      int j = MathHelper.ceil(axisalignedbb.maxX);
-      int k = MathHelper.floor(axisalignedbb.minY);
-      int l = MathHelper.ceil(axisalignedbb.maxY);
-      int i1 = MathHelper.floor(axisalignedbb.minZ);
-      int j1 = MathHelper.ceil(axisalignedbb.maxZ);
+   public boolean isFlammableWithin(AxisAlignedBB var1) {
+      int i = MathHelper.floor(bb.minX);
+      int j = MathHelper.ceil(bb.maxX);
+      int k = MathHelper.floor(bb.minY);
+      int l = MathHelper.ceil(bb.maxY);
+      int i1 = MathHelper.floor(bb.minZ);
+      int j1 = MathHelper.ceil(bb.maxZ);
       if (this.isAreaLoaded(i, k, i1, j, l, j1, true)) {
-         BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+         BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
          for(int k1 = i; k1 < j; ++k1) {
             for(int l1 = k; l1 < l; ++l1) {
                for(int i2 = i1; i2 < j1; ++i2) {
-                  Block block = this.getBlockState(blockposition_pooledblockposition.setPos(k1, l1, i2)).getBlock();
+                  Block block = this.getBlockState(blockpos$pooledmutableblockpos.setPos(k1, l1, i2)).getBlock();
                   if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA) {
-                     blockposition_pooledblockposition.release();
+                     blockpos$pooledmutableblockpos.release();
+                     return true;
+                  }
+
+                  if (block.isBurning(this, new BlockPos(k1, l1, i2))) {
                      return true;
                   }
                }
             }
          }
 
-         blockposition_pooledblockposition.release();
+         blockpos$pooledmutableblockpos.release();
       }
 
       return false;
    }
 
-   public boolean handleMaterialAcceleration(AxisAlignedBB axisalignedbb, Material material, Entity entity) {
-      int i = MathHelper.floor(axisalignedbb.minX);
-      int j = MathHelper.ceil(axisalignedbb.maxX);
-      int k = MathHelper.floor(axisalignedbb.minY);
-      int l = MathHelper.ceil(axisalignedbb.maxY);
-      int i1 = MathHelper.floor(axisalignedbb.minZ);
-      int j1 = MathHelper.ceil(axisalignedbb.maxZ);
+   public boolean handleMaterialAcceleration(AxisAlignedBB var1, Material var2, Entity var3) {
+      int i = MathHelper.floor(bb.minX);
+      int j = MathHelper.ceil(bb.maxX);
+      int k = MathHelper.floor(bb.minY);
+      int l = MathHelper.ceil(bb.maxY);
+      int i1 = MathHelper.floor(bb.minZ);
+      int j1 = MathHelper.ceil(bb.maxZ);
       if (!this.isAreaLoaded(i, k, i1, j, l, j1, true)) {
          return false;
       } else {
          boolean flag = false;
          Vec3d vec3d = Vec3d.ZERO;
-         BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+         BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
          for(int k1 = i; k1 < j; ++k1) {
             for(int l1 = k; l1 < l; ++l1) {
                for(int i2 = i1; i2 < j1; ++i2) {
-                  blockposition_pooledblockposition.setPos(k1, l1, i2);
-                  IBlockState iblockdata = this.getBlockState(blockposition_pooledblockposition);
-                  Block block = iblockdata.getBlock();
-                  if (iblockdata.getMaterial() == material) {
-                     double d0 = (double)((float)(l1 + 1) - BlockLiquid.getLiquidHeightPercent(((Integer)iblockdata.getValue(BlockLiquid.LEVEL)).intValue()));
+                  blockpos$pooledmutableblockpos.setPos(k1, l1, i2);
+                  IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos);
+                  Block block = iblockstate.getBlock();
+                  Boolean result = block.isEntityInsideMaterial(this, blockpos$pooledmutableblockpos, iblockstate, entityIn, (double)l, materialIn, false);
+                  if (result != null && result.booleanValue()) {
+                     flag = true;
+                     vec3d = block.modifyAcceleration(this, blockpos$pooledmutableblockpos, entityIn, vec3d);
+                  } else if ((result == null || result.booleanValue()) && iblockstate.getMaterial() == materialIn) {
+                     double d0 = (double)((float)(l1 + 1) - BlockLiquid.getLiquidHeightPercent(((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue()));
                      if ((double)l >= d0) {
                         flag = true;
-                        vec3d = block.modifyAcceleration(this, blockposition_pooledblockposition, entity, vec3d);
+                        vec3d = block.modifyAcceleration(this, blockpos$pooledmutableblockpos, entityIn, vec3d);
                      }
                   }
                }
             }
          }
 
-         blockposition_pooledblockposition.release();
-         if (vec3d.lengthVector() > 0.0D && entity.isPushedByWater()) {
+         blockpos$pooledmutableblockpos.release();
+         if (vec3d.lengthVector() > 0.0D && entityIn.isPushedByWater()) {
             vec3d = vec3d.normalize();
-            entity.motionX += vec3d.xCoord * 0.014D;
-            entity.motionY += vec3d.yCoord * 0.014D;
-            entity.motionZ += vec3d.zCoord * 0.014D;
+            double d1 = 0.014D;
+            entityIn.motionX += vec3d.xCoord * 0.014D;
+            entityIn.motionY += vec3d.yCoord * 0.014D;
+            entityIn.motionZ += vec3d.zCoord * 0.014D;
          }
 
          return flag;
       }
    }
 
-   public boolean isMaterialInBB(AxisAlignedBB axisalignedbb, Material material) {
-      int i = MathHelper.floor(axisalignedbb.minX);
-      int j = MathHelper.ceil(axisalignedbb.maxX);
-      int k = MathHelper.floor(axisalignedbb.minY);
-      int l = MathHelper.ceil(axisalignedbb.maxY);
-      int i1 = MathHelper.floor(axisalignedbb.minZ);
-      int j1 = MathHelper.ceil(axisalignedbb.maxZ);
-      BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+   public boolean isMaterialInBB(AxisAlignedBB var1, Material var2) {
+      int i = MathHelper.floor(bb.minX);
+      int j = MathHelper.ceil(bb.maxX);
+      int k = MathHelper.floor(bb.minY);
+      int l = MathHelper.ceil(bb.maxY);
+      int i1 = MathHelper.floor(bb.minZ);
+      int j1 = MathHelper.ceil(bb.maxZ);
+      BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
       for(int k1 = i; k1 < j; ++k1) {
          for(int l1 = k; l1 < l; ++l1) {
             for(int i2 = i1; i2 < j1; ++i2) {
-               if (this.getBlockState(blockposition_pooledblockposition.setPos(k1, l1, i2)).getMaterial() == material) {
-                  blockposition_pooledblockposition.release();
+               if (this.getBlockState(blockpos$pooledmutableblockpos.setPos(k1, l1, i2)).getMaterial() == materialIn) {
+                  blockpos$pooledmutableblockpos.release();
                   return true;
                }
             }
          }
       }
 
-      blockposition_pooledblockposition.release();
+      blockpos$pooledmutableblockpos.release();
       return false;
    }
 
-   public boolean isAABBInMaterial(AxisAlignedBB axisalignedbb, Material material) {
-      int i = MathHelper.floor(axisalignedbb.minX);
-      int j = MathHelper.ceil(axisalignedbb.maxX);
-      int k = MathHelper.floor(axisalignedbb.minY);
-      int l = MathHelper.ceil(axisalignedbb.maxY);
-      int i1 = MathHelper.floor(axisalignedbb.minZ);
-      int j1 = MathHelper.ceil(axisalignedbb.maxZ);
-      BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+   public boolean isAABBInMaterial(AxisAlignedBB var1, Material var2) {
+      int i = MathHelper.floor(bb.minX);
+      int j = MathHelper.ceil(bb.maxX);
+      int k = MathHelper.floor(bb.minY);
+      int l = MathHelper.ceil(bb.maxY);
+      int i1 = MathHelper.floor(bb.minZ);
+      int j1 = MathHelper.ceil(bb.maxZ);
+      BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
       for(int k1 = i; k1 < j; ++k1) {
          for(int l1 = k; l1 < l; ++l1) {
             for(int i2 = i1; i2 < j1; ++i2) {
-               IBlockState iblockdata = this.getBlockState(blockposition_pooledblockposition.setPos(k1, l1, i2));
-               if (iblockdata.getMaterial() == material) {
-                  int j2 = ((Integer)iblockdata.getValue(BlockLiquid.LEVEL)).intValue();
+               IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos.setPos(k1, l1, i2));
+               Boolean result = iblockstate.getBlock().isAABBInsideMaterial(this, blockpos$pooledmutableblockpos, bb, materialIn);
+               if (result != null) {
+                  return result.booleanValue();
+               }
+
+               if (iblockstate.getMaterial() == materialIn) {
+                  int j2 = ((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue();
                   double d0 = (double)(l1 + 1);
                   if (j2 < 8) {
                      d0 = (double)(l1 + 1) - (double)j2 / 8.0D;
                   }
 
-                  if (d0 >= axisalignedbb.minY) {
-                     blockposition_pooledblockposition.release();
+                  if (d0 >= bb.minY) {
+                     blockpos$pooledmutableblockpos.release();
                      return true;
                   }
                }
@@ -1678,25 +1821,29 @@ public abstract class World implements IBlockAccess {
          }
       }
 
-      blockposition_pooledblockposition.release();
+      blockpos$pooledmutableblockpos.release();
       return false;
    }
 
-   public Explosion createExplosion(@Nullable Entity entity, double d0, double d1, double d2, float f, boolean flag) {
-      return this.newExplosion(entity, d0, d1, d2, f, false, flag);
+   public Explosion createExplosion(@Nullable Entity var1, double var2, double var4, double var6, float var8, boolean var9) {
+      return this.newExplosion(entityIn, x, y, z, strength, false, isSmoking);
    }
 
-   public Explosion newExplosion(@Nullable Entity entity, double d0, double d1, double d2, float f, boolean flag, boolean flag1) {
-      Explosion explosion = new Explosion(this, entity, d0, d1, d2, f, flag, flag1);
-      explosion.doExplosionA();
-      explosion.doExplosionB(true);
-      return explosion;
+   public Explosion newExplosion(@Nullable Entity var1, double var2, double var4, double var6, float var8, boolean var9, boolean var10) {
+      Explosion explosion = new Explosion(this, entityIn, x, y, z, strength, isFlaming, isSmoking);
+      if (ForgeEventFactory.onExplosionStart(this, explosion)) {
+         return explosion;
+      } else {
+         explosion.doExplosionA();
+         explosion.doExplosionB(true);
+         return explosion;
+      }
    }
 
-   public float getBlockDensity(Vec3d vec3d, AxisAlignedBB axisalignedbb) {
-      double d0 = 1.0D / ((axisalignedbb.maxX - axisalignedbb.minX) * 2.0D + 1.0D);
-      double d1 = 1.0D / ((axisalignedbb.maxY - axisalignedbb.minY) * 2.0D + 1.0D);
-      double d2 = 1.0D / ((axisalignedbb.maxZ - axisalignedbb.minZ) * 2.0D + 1.0D);
+   public float getBlockDensity(Vec3d var1, AxisAlignedBB var2) {
+      double d0 = 1.0D / ((bb.maxX - bb.minX) * 2.0D + 1.0D);
+      double d1 = 1.0D / ((bb.maxY - bb.minY) * 2.0D + 1.0D);
+      double d2 = 1.0D / ((bb.maxZ - bb.minZ) * 2.0D + 1.0D);
       double d3 = (1.0D - Math.floor(1.0D / d0) * d0) / 2.0D;
       double d4 = (1.0D - Math.floor(1.0D / d2) * d2) / 2.0D;
       if (d0 >= 0.0D && d1 >= 0.0D && d2 >= 0.0D) {
@@ -1706,10 +1853,10 @@ public abstract class World implements IBlockAccess {
          for(float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0)) {
             for(float f1 = 0.0F; f1 <= 1.0F; f1 = (float)((double)f1 + d1)) {
                for(float f2 = 0.0F; f2 <= 1.0F; f2 = (float)((double)f2 + d2)) {
-                  double d5 = axisalignedbb.minX + (axisalignedbb.maxX - axisalignedbb.minX) * (double)f;
-                  double d6 = axisalignedbb.minY + (axisalignedbb.maxY - axisalignedbb.minY) * (double)f1;
-                  double d7 = axisalignedbb.minZ + (axisalignedbb.maxZ - axisalignedbb.minZ) * (double)f2;
-                  if (this.rayTraceBlocks(new Vec3d(d5 + d3, d6, d7 + d4), vec3d) == null) {
+                  double d5 = bb.minX + (bb.maxX - bb.minX) * (double)f;
+                  double d6 = bb.minY + (bb.maxY - bb.minY) * (double)f1;
+                  double d7 = bb.minZ + (bb.maxZ - bb.minZ) * (double)f2;
+                  if (this.rayTraceBlocks(new Vec3d(d5 + d3, d6, d7 + d4), vec) == null) {
                      ++i;
                   }
 
@@ -1724,35 +1871,43 @@ public abstract class World implements IBlockAccess {
       }
    }
 
-   public boolean extinguishFire(@Nullable EntityPlayer entityhuman, BlockPos blockposition, EnumFacing enumdirection) {
-      blockposition = blockposition.offset(enumdirection);
-      if (this.getBlockState(blockposition).getBlock() == Blocks.FIRE) {
-         this.playEvent(entityhuman, 1009, blockposition, 0);
-         this.setBlockToAir(blockposition);
+   public boolean extinguishFire(@Nullable EntityPlayer var1, BlockPos var2, EnumFacing var3) {
+      pos = pos.offset(side);
+      if (this.getBlockState(pos).getBlock() == Blocks.FIRE) {
+         this.playEvent(player, 1009, pos, 0);
+         this.setBlockToAir(pos);
          return true;
       } else {
          return false;
       }
    }
 
+   @SideOnly(Side.CLIENT)
+   public String getDebugLoadedEntities() {
+      return "All: " + this.loadedEntityList.size();
+   }
+
+   @SideOnly(Side.CLIENT)
+   public String getProviderName() {
+      return this.chunkProvider.makeString();
+   }
+
    @Nullable
-   public TileEntity getTileEntity(BlockPos blockposition) {
-      if (this.isOutsideBuildHeight(blockposition)) {
+   public TileEntity getTileEntity(BlockPos var1) {
+      if (this.isOutsideBuildHeight(pos)) {
          return null;
-      } else if (this.capturedTileEntities.containsKey(blockposition)) {
-         return (TileEntity)this.capturedTileEntities.get(blockposition);
       } else {
          TileEntity tileentity = null;
          if (this.processingLoadedTiles) {
-            tileentity = this.getPendingTileEntityAt(blockposition);
+            tileentity = this.getPendingTileEntityAt(pos);
          }
 
          if (tileentity == null) {
-            tileentity = this.getChunkFromBlockCoords(blockposition).getTileEntity(blockposition, Chunk.EnumCreateEntityType.IMMEDIATE);
+            tileentity = this.getChunkFromBlockCoords(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
          }
 
          if (tileentity == null) {
-            tileentity = this.getPendingTileEntityAt(blockposition);
+            tileentity = this.getPendingTileEntityAt(pos);
          }
 
          return tileentity;
@@ -1760,10 +1915,10 @@ public abstract class World implements IBlockAccess {
    }
 
    @Nullable
-   private TileEntity getPendingTileEntityAt(BlockPos blockposition) {
+   private TileEntity getPendingTileEntityAt(BlockPos var1) {
       for(int i = 0; i < this.addedTileEntityList.size(); ++i) {
          TileEntity tileentity = (TileEntity)this.addedTileEntityList.get(i);
-         if (!tileentity.isInvalid() && tileentity.getPos().equals(blockposition)) {
+         if (!tileentity.isInvalid() && tileentity.getPos().equals(p_189508_1_)) {
             return tileentity;
          }
       }
@@ -1771,41 +1926,47 @@ public abstract class World implements IBlockAccess {
       return null;
    }
 
-   public void setTileEntity(BlockPos blockposition, @Nullable TileEntity tileentity) {
-      if (!this.isOutsideBuildHeight(blockposition) && tileentity != null && !tileentity.isInvalid()) {
-         if (this.captureBlockStates) {
-            tileentity.setWorld(this);
-            tileentity.setPos(blockposition);
-            this.capturedTileEntities.put(blockposition, tileentity);
-            return;
-         }
+   public void setTileEntity(BlockPos var1, @Nullable TileEntity var2) {
+      pos = pos.toImmutable();
+      if (!this.isOutsideBuildHeight(pos) && tileEntityIn != null && !tileEntityIn.isInvalid()) {
+         if (!this.processingLoadedTiles) {
+            this.addTileEntity(tileEntityIn);
+            Chunk chunk = this.getChunkFromBlockCoords(pos);
+            if (chunk != null) {
+               chunk.addTileEntity(pos, tileEntityIn);
+            }
+         } else {
+            tileEntityIn.setPos(pos);
+            if (tileEntityIn.getWorld() != this) {
+               tileEntityIn.setWorld(this);
+            }
 
-         if (this.processingLoadedTiles) {
-            tileentity.setPos(blockposition);
             Iterator iterator = this.addedTileEntityList.iterator();
 
             while(iterator.hasNext()) {
-               TileEntity tileentity1 = (TileEntity)iterator.next();
-               if (tileentity1.getPos().equals(blockposition)) {
-                  tileentity1.invalidate();
+               TileEntity tileentity = (TileEntity)iterator.next();
+               if (tileentity.getPos().equals(pos)) {
+                  tileentity.invalidate();
                   iterator.remove();
                }
             }
 
-            this.addedTileEntityList.add(tileentity);
-         } else {
-            this.addTileEntity(tileentity);
-            this.getChunkFromBlockCoords(blockposition).addTileEntity(blockposition, tileentity);
+            this.addedTileEntityList.add(tileEntityIn);
          }
+
+         this.updateComparatorOutputLevel(pos, this.getBlockState(pos).getBlock());
       }
 
    }
 
-   public void removeTileEntity(BlockPos blockposition) {
-      TileEntity tileentity = this.getTileEntity(blockposition);
+   public void removeTileEntity(BlockPos var1) {
+      TileEntity tileentity = this.getTileEntity(pos);
       if (tileentity != null && this.processingLoadedTiles) {
          tileentity.invalidate();
          this.addedTileEntityList.remove(tileentity);
+         if (!(tileentity instanceof ITickable)) {
+            this.loadedTileEntityList.remove(tileentity);
+         }
       } else {
          if (tileentity != null) {
             this.addedTileEntityList.remove(tileentity);
@@ -1813,30 +1974,31 @@ public abstract class World implements IBlockAccess {
             this.tickableTileEntities.remove(tileentity);
          }
 
-         this.getChunkFromBlockCoords(blockposition).removeTileEntity(blockposition);
+         this.getChunkFromBlockCoords(pos).removeTileEntity(pos);
       }
 
+      this.updateComparatorOutputLevel(pos, this.getBlockState(pos).getBlock());
    }
 
-   public void markTileEntityForRemoval(TileEntity tileentity) {
-      this.tileEntitiesToBeRemoved.add(tileentity);
+   public void markTileEntityForRemoval(TileEntity var1) {
+      this.tileEntitiesToBeRemoved.add(tileEntityIn);
    }
 
-   public boolean isBlockFullCube(BlockPos blockposition) {
-      AxisAlignedBB axisalignedbb = this.getBlockState(blockposition).getCollisionBoundingBox(this, blockposition);
+   public boolean isBlockFullCube(BlockPos var1) {
+      AxisAlignedBB axisalignedbb = this.getBlockState(pos).getCollisionBoundingBox(this, pos);
       return axisalignedbb != Block.NULL_AABB && axisalignedbb.getAverageEdgeLength() >= 1.0D;
    }
 
-   public boolean isBlockNormalCube(BlockPos blockposition, boolean flag) {
-      if (this.isOutsideBuildHeight(blockposition)) {
+   public boolean isBlockNormalCube(BlockPos var1, boolean var2) {
+      if (this.isOutsideBuildHeight(pos)) {
          return false;
       } else {
-         Chunk chunk = this.chunkProvider.getLoadedChunk(blockposition.getX() >> 4, blockposition.getZ() >> 4);
+         Chunk chunk = this.chunkProvider.getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
          if (chunk != null && !chunk.isEmpty()) {
-            IBlockState iblockdata = this.getBlockState(blockposition);
-            return iblockdata.getMaterial().isOpaque() && iblockdata.isFullCube();
+            IBlockState iblockstate = this.getBlockState(pos);
+            return iblockstate.getBlock().isNormalCube(iblockstate, this, pos);
          } else {
-            return flag;
+            return _default;
          }
       }
    }
@@ -1849,9 +2011,10 @@ public abstract class World implements IBlockAccess {
 
    }
 
-   public void setAllowedSpawnTypes(boolean flag, boolean flag1) {
-      this.spawnHostileMobs = flag;
-      this.spawnPeacefulMobs = flag1;
+   public void setAllowedSpawnTypes(boolean var1, boolean var2) {
+      this.spawnHostileMobs = hostile;
+      this.spawnPeacefulMobs = peaceful;
+      this.provider.setAllowedSpawnTypes(hostile, peaceful);
    }
 
    public void tick() {
@@ -1859,6 +2022,10 @@ public abstract class World implements IBlockAccess {
    }
 
    protected void calculateInitialWeather() {
+      this.provider.calculateInitialWeather();
+   }
+
+   public void calculateInitialWeatherBody() {
       if (this.worldInfo.isRaining()) {
          this.rainingStrength = 1.0F;
          if (this.worldInfo.isThundering()) {
@@ -1869,6 +2036,10 @@ public abstract class World implements IBlockAccess {
    }
 
    protected void updateWeather() {
+      this.provider.updateWeather();
+   }
+
+   public void updateWeatherBody() {
       if (!this.provider.hasNoSky() && !this.isRemote) {
          int i = this.worldInfo.getCleanWeatherTime();
          if (i > 0) {
@@ -1924,49 +2095,52 @@ public abstract class World implements IBlockAccess {
          }
 
          this.rainingStrength = MathHelper.clamp(this.rainingStrength, 0.0F, 1.0F);
-
-         for(int idx = 0; idx < this.playerEntities.size(); ++idx) {
-            if (((EntityPlayerMP)this.playerEntities.get(idx)).world == this) {
-               ((EntityPlayerMP)this.playerEntities.get(idx)).tickWeather();
-            }
-         }
       }
 
+   }
+
+   @SideOnly(Side.CLIENT)
+   protected void playMoodSoundAndCheckLight(int var1, int var2, Chunk var3) {
+      chunkIn.enqueueRelightChecks();
    }
 
    protected void updateBlocks() {
    }
 
-   public void immediateBlockTick(BlockPos blockposition, IBlockState iblockdata, Random random) {
+   public void immediateBlockTick(BlockPos var1, IBlockState var2, Random var3) {
       this.scheduledUpdatesAreImmediate = true;
-      iblockdata.getBlock().updateTick(this, blockposition, iblockdata, random);
+      state.getBlock().updateTick(this, pos, state, random);
       this.scheduledUpdatesAreImmediate = false;
    }
 
-   public boolean canBlockFreezeWater(BlockPos blockposition) {
-      return this.canBlockFreeze(blockposition, false);
+   public boolean canBlockFreezeWater(BlockPos var1) {
+      return this.canBlockFreeze(pos, false);
    }
 
-   public boolean canBlockFreezeNoWater(BlockPos blockposition) {
-      return this.canBlockFreeze(blockposition, true);
+   public boolean canBlockFreezeNoWater(BlockPos var1) {
+      return this.canBlockFreeze(pos, true);
    }
 
-   public boolean canBlockFreeze(BlockPos blockposition, boolean flag) {
-      Biome biomebase = this.getBiome(blockposition);
-      float f = biomebase.getFloatTemperature(blockposition);
+   public boolean canBlockFreeze(BlockPos var1, boolean var2) {
+      return this.provider.canBlockFreeze(pos, noWaterAdj);
+   }
+
+   public boolean canBlockFreezeBody(BlockPos var1, boolean var2) {
+      Biome biome = this.getBiome(pos);
+      float f = biome.getFloatTemperature(pos);
       if (f > 0.15F) {
          return false;
       } else {
-         if (blockposition.getY() >= 0 && blockposition.getY() < 256 && this.getLightFor(EnumSkyBlock.BLOCK, blockposition) < 10) {
-            IBlockState iblockdata = this.getBlockState(blockposition);
-            Block block = iblockdata.getBlock();
-            if ((block == Blocks.WATER || block == Blocks.FLOWING_WATER) && ((Integer)iblockdata.getValue(BlockLiquid.LEVEL)).intValue() == 0) {
-               if (!flag) {
+         if (pos.getY() >= 0 && pos.getY() < 256 && this.getLightFor(EnumSkyBlock.BLOCK, pos) < 10) {
+            IBlockState iblockstate = this.getBlockState(pos);
+            Block block = iblockstate.getBlock();
+            if ((block == Blocks.WATER || block == Blocks.FLOWING_WATER) && ((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue() == 0) {
+               if (!noWaterAdj) {
                   return true;
                }
 
-               boolean flag1 = this.isWater(blockposition.west()) && this.isWater(blockposition.east()) && this.isWater(blockposition.north()) && this.isWater(blockposition.south());
-               if (!flag1) {
+               boolean flag = this.isWater(pos.west()) && this.isWater(pos.east()) && this.isWater(pos.north()) && this.isWater(pos.south());
+               if (!flag) {
                   return true;
                }
             }
@@ -1976,21 +2150,25 @@ public abstract class World implements IBlockAccess {
       }
    }
 
-   private boolean isWater(BlockPos blockposition) {
-      return this.getBlockState(blockposition).getMaterial() == Material.WATER;
+   private boolean isWater(BlockPos var1) {
+      return this.getBlockState(pos).getMaterial() == Material.WATER;
    }
 
-   public boolean canSnowAt(BlockPos blockposition, boolean flag) {
-      Biome biomebase = this.getBiome(blockposition);
-      float f = biomebase.getFloatTemperature(blockposition);
+   public boolean canSnowAt(BlockPos var1, boolean var2) {
+      return this.provider.canSnowAt(pos, checkLight);
+   }
+
+   public boolean canSnowAtBody(BlockPos var1, boolean var2) {
+      Biome biome = this.getBiome(pos);
+      float f = biome.getFloatTemperature(pos);
       if (f > 0.15F) {
          return false;
-      } else if (!flag) {
+      } else if (!checkLight) {
          return true;
       } else {
-         if (blockposition.getY() >= 0 && blockposition.getY() < 256 && this.getLightFor(EnumSkyBlock.BLOCK, blockposition) < 10) {
-            IBlockState iblockdata = this.getBlockState(blockposition);
-            if (iblockdata.getMaterial() == Material.AIR && Blocks.SNOW_LAYER.canPlaceBlockAt(this, blockposition)) {
+         if (pos.getY() >= 0 && pos.getY() < 256 && this.getLightFor(EnumSkyBlock.BLOCK, pos) < 10) {
+            IBlockState iblockstate = this.getBlockState(pos);
+            if (iblockstate.getBlock().isAir(iblockstate, this, pos) && Blocks.SNOW_LAYER.canPlaceBlockAt(this, pos)) {
                return true;
             }
          }
@@ -1999,24 +2177,25 @@ public abstract class World implements IBlockAccess {
       }
    }
 
-   public boolean checkLight(BlockPos blockposition) {
+   public boolean checkLight(BlockPos var1) {
       boolean flag = false;
       if (!this.provider.hasNoSky()) {
-         flag |= this.checkLightFor(EnumSkyBlock.SKY, blockposition);
+         flag |= this.checkLightFor(EnumSkyBlock.SKY, pos);
       }
 
-      flag = flag | this.checkLightFor(EnumSkyBlock.BLOCK, blockposition);
+      flag = flag | this.checkLightFor(EnumSkyBlock.BLOCK, pos);
       return flag;
    }
 
-   private int getRawLight(BlockPos blockposition, EnumSkyBlock enumskyblock) {
-      if (enumskyblock == EnumSkyBlock.SKY && this.canSeeSky(blockposition)) {
+   private int getRawLight(BlockPos var1, EnumSkyBlock var2) {
+      if (lightType == EnumSkyBlock.SKY && this.canSeeSky(pos)) {
          return 15;
       } else {
-         IBlockState iblockdata = this.getBlockState(blockposition);
-         int i = enumskyblock == EnumSkyBlock.SKY ? 0 : iblockdata.getLightValue();
-         int j = iblockdata.getLightOpacity();
-         if (j >= 15 && iblockdata.getLightValue() > 0) {
+         IBlockState iblockstate = this.getBlockState(pos);
+         int blockLight = iblockstate.getBlock().getLightValue(iblockstate, this, pos);
+         int i = lightType == EnumSkyBlock.SKY ? 0 : blockLight;
+         int j = iblockstate.getBlock().getLightOpacity(iblockstate, this, pos);
+         if (j >= 15 && blockLight > 0) {
             j = 1;
          }
 
@@ -2029,13 +2208,13 @@ public abstract class World implements IBlockAccess {
          } else if (i >= 14) {
             return i;
          } else {
-            BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+            BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
-            for(EnumFacing enumdirection : EnumFacing.values()) {
-               blockposition_pooledblockposition.setPos(blockposition).move(enumdirection);
-               int i1 = this.getLightFor(enumskyblock, blockposition_pooledblockposition) - j;
-               if (i1 > i) {
-                  i = i1;
+            for(EnumFacing enumfacing : EnumFacing.values()) {
+               blockpos$pooledmutableblockpos.setPos(pos).move(enumfacing);
+               int k = this.getLightFor(lightType, blockpos$pooledmutableblockpos) - j;
+               if (k > i) {
+                  i = k;
                }
 
                if (i >= 14) {
@@ -2043,23 +2222,24 @@ public abstract class World implements IBlockAccess {
                }
             }
 
-            blockposition_pooledblockposition.release();
+            blockpos$pooledmutableblockpos.release();
             return i;
          }
       }
    }
 
-   public boolean checkLightFor(EnumSkyBlock enumskyblock, BlockPos blockposition) {
-      Chunk chunk = this.getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4);
-      if (chunk != null && chunk.areNeighborsLoaded(1)) {
+   public boolean checkLightFor(EnumSkyBlock var1, BlockPos var2) {
+      if (!this.isAreaLoaded(pos, 17, false)) {
+         return false;
+      } else {
          int i = 0;
          int j = 0;
          this.theProfiler.startSection("getBrightness");
-         int k = this.getLightFor(enumskyblock, blockposition);
-         int l = this.getRawLight(blockposition, enumskyblock);
-         int i1 = blockposition.getX();
-         int j1 = blockposition.getY();
-         int k1 = blockposition.getZ();
+         int k = this.getLightFor(lightType, pos);
+         int l = this.getRawLight(pos, lightType);
+         int i1 = pos.getX();
+         int j1 = pos.getY();
+         int k1 = pos.getZ();
          if (l > k) {
             this.lightUpdateBlockList[j++] = 133152;
          } else if (l < k) {
@@ -2070,31 +2250,31 @@ public abstract class World implements IBlockAccess {
                int i2 = (l1 & 63) - 32 + i1;
                int j2 = (l1 >> 6 & 63) - 32 + j1;
                int k2 = (l1 >> 12 & 63) - 32 + k1;
-               int l3 = l1 >> 18 & 15;
-               BlockPos blockposition1 = new BlockPos(i2, j2, k2);
-               int l2 = this.getLightFor(enumskyblock, blockposition1);
-               if (l2 == l3) {
-                  this.setLightFor(enumskyblock, blockposition1, 0);
-                  if (l3 > 0) {
-                     int i3 = MathHelper.abs(i2 - i1);
-                     int j3 = MathHelper.abs(j2 - j1);
-                     int k3 = MathHelper.abs(k2 - k1);
-                     if (i3 + j3 + k3 < 17) {
-                        BlockPos.PooledMutableBlockPos blockposition_pooledblockposition = BlockPos.PooledMutableBlockPos.retain();
+               int l2 = l1 >> 18 & 15;
+               BlockPos blockpos = new BlockPos(i2, j2, k2);
+               int i3 = this.getLightFor(lightType, blockpos);
+               if (i3 == l2) {
+                  this.setLightFor(lightType, blockpos, 0);
+                  if (l2 > 0) {
+                     int j3 = MathHelper.abs(i2 - i1);
+                     int k3 = MathHelper.abs(j2 - j1);
+                     int l3 = MathHelper.abs(k2 - k1);
+                     if (j3 + k3 + l3 < 17) {
+                        BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
-                        for(EnumFacing enumdirection : EnumFacing.values()) {
-                           int k4 = i2 + enumdirection.getFrontOffsetX();
-                           int l4 = j2 + enumdirection.getFrontOffsetY();
-                           int i5 = k2 + enumdirection.getFrontOffsetZ();
-                           blockposition_pooledblockposition.setPos(k4, l4, i5);
-                           int j5 = Math.max(1, this.getBlockState(blockposition_pooledblockposition).getLightOpacity());
-                           l2 = this.getLightFor(enumskyblock, blockposition_pooledblockposition);
-                           if (l2 == l3 - j5 && j < this.lightUpdateBlockList.length) {
-                              this.lightUpdateBlockList[j++] = k4 - i1 + 32 | l4 - j1 + 32 << 6 | i5 - k1 + 32 << 12 | l3 - j5 << 18;
+                        for(EnumFacing enumfacing : EnumFacing.values()) {
+                           int i4 = i2 + enumfacing.getFrontOffsetX();
+                           int j4 = j2 + enumfacing.getFrontOffsetY();
+                           int k4 = k2 + enumfacing.getFrontOffsetZ();
+                           blockpos$pooledmutableblockpos.setPos(i4, j4, k4);
+                           int l4 = Math.max(1, this.getBlockState(blockpos$pooledmutableblockpos).getBlock().getLightOpacity(this.getBlockState(blockpos$pooledmutableblockpos), this, blockpos$pooledmutableblockpos));
+                           i3 = this.getLightFor(lightType, blockpos$pooledmutableblockpos);
+                           if (i3 == l2 - l4 && j < this.lightUpdateBlockList.length) {
+                              this.lightUpdateBlockList[j++] = i4 - i1 + 32 | j4 - j1 + 32 << 6 | k4 - k1 + 32 << 12 | l2 - l4 << 18;
                            }
                         }
 
-                        blockposition_pooledblockposition.release();
+                        blockpos$pooledmutableblockpos.release();
                      }
                   }
                }
@@ -2107,43 +2287,43 @@ public abstract class World implements IBlockAccess {
          this.theProfiler.startSection("checkedPosition < toCheckCount");
 
          while(i < j) {
-            int l1 = this.lightUpdateBlockList[i++];
-            int i2 = (l1 & 63) - 32 + i1;
-            int j2 = (l1 >> 6 & 63) - 32 + j1;
-            int k2 = (l1 >> 12 & 63) - 32 + k1;
-            BlockPos blockposition2 = new BlockPos(i2, j2, k2);
-            int k5 = this.getLightFor(enumskyblock, blockposition2);
-            int l2 = this.getRawLight(blockposition2, enumskyblock);
-            if (l2 != k5) {
-               this.setLightFor(enumskyblock, blockposition2, l2);
-               if (l2 > k5) {
-                  int i3 = Math.abs(i2 - i1);
-                  int j3 = Math.abs(j2 - j1);
-                  int k3 = Math.abs(k2 - k1);
+            int i5 = this.lightUpdateBlockList[i++];
+            int j5 = (i5 & 63) - 32 + i1;
+            int k5 = (i5 >> 6 & 63) - 32 + j1;
+            int l5 = (i5 >> 12 & 63) - 32 + k1;
+            BlockPos blockpos1 = new BlockPos(j5, k5, l5);
+            int i6 = this.getLightFor(lightType, blockpos1);
+            int j6 = this.getRawLight(blockpos1, lightType);
+            if (j6 != i6) {
+               this.setLightFor(lightType, blockpos1, j6);
+               if (j6 > i6) {
+                  int k6 = Math.abs(j5 - i1);
+                  int l6 = Math.abs(k5 - j1);
+                  int i7 = Math.abs(l5 - k1);
                   boolean flag = j < this.lightUpdateBlockList.length - 6;
-                  if (i3 + j3 + k3 < 17 && flag) {
-                     if (this.getLightFor(enumskyblock, blockposition2.west()) < l2) {
-                        this.lightUpdateBlockList[j++] = i2 - 1 - i1 + 32 + (j2 - j1 + 32 << 6) + (k2 - k1 + 32 << 12);
+                  if (k6 + l6 + i7 < 17 && flag) {
+                     if (this.getLightFor(lightType, blockpos1.west()) < j6) {
+                        this.lightUpdateBlockList[j++] = j5 - 1 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
                      }
 
-                     if (this.getLightFor(enumskyblock, blockposition2.east()) < l2) {
-                        this.lightUpdateBlockList[j++] = i2 + 1 - i1 + 32 + (j2 - j1 + 32 << 6) + (k2 - k1 + 32 << 12);
+                     if (this.getLightFor(lightType, blockpos1.east()) < j6) {
+                        this.lightUpdateBlockList[j++] = j5 + 1 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
                      }
 
-                     if (this.getLightFor(enumskyblock, blockposition2.down()) < l2) {
-                        this.lightUpdateBlockList[j++] = i2 - i1 + 32 + (j2 - 1 - j1 + 32 << 6) + (k2 - k1 + 32 << 12);
+                     if (this.getLightFor(lightType, blockpos1.down()) < j6) {
+                        this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - 1 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
                      }
 
-                     if (this.getLightFor(enumskyblock, blockposition2.up()) < l2) {
-                        this.lightUpdateBlockList[j++] = i2 - i1 + 32 + (j2 + 1 - j1 + 32 << 6) + (k2 - k1 + 32 << 12);
+                     if (this.getLightFor(lightType, blockpos1.up()) < j6) {
+                        this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 + 1 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
                      }
 
-                     if (this.getLightFor(enumskyblock, blockposition2.north()) < l2) {
-                        this.lightUpdateBlockList[j++] = i2 - i1 + 32 + (j2 - j1 + 32 << 6) + (k2 - 1 - k1 + 32 << 12);
+                     if (this.getLightFor(lightType, blockpos1.north()) < j6) {
+                        this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - 1 - k1 + 32 << 12);
                      }
 
-                     if (this.getLightFor(enumskyblock, blockposition2.south()) < l2) {
-                        this.lightUpdateBlockList[j++] = i2 - i1 + 32 + (j2 - j1 + 32 << 6) + (k2 + 1 - k1 + 32 << 12);
+                     if (this.getLightFor(lightType, blockpos1.south()) < j6) {
+                        this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 + 1 - k1 + 32 << 12);
                      }
                   }
                }
@@ -2152,156 +2332,143 @@ public abstract class World implements IBlockAccess {
 
          this.theProfiler.endSection();
          return true;
-      } else {
-         return false;
       }
    }
 
-   public boolean tickUpdates(boolean flag) {
+   public boolean tickUpdates(boolean var1) {
       return false;
    }
 
    @Nullable
-   public List getPendingBlockUpdates(Chunk chunk, boolean flag) {
+   public List getPendingBlockUpdates(Chunk var1, boolean var2) {
       return null;
    }
 
    @Nullable
-   public List getPendingBlockUpdates(StructureBoundingBox structureboundingbox, boolean flag) {
+   public List getPendingBlockUpdates(StructureBoundingBox var1, boolean var2) {
       return null;
    }
 
-   public List getEntitiesWithinAABBExcludingEntity(@Nullable Entity entity, AxisAlignedBB axisalignedbb) {
-      return this.getEntitiesInAABBexcluding(entity, axisalignedbb, EntitySelectors.NOT_SPECTATING);
+   public List getEntitiesWithinAABBExcludingEntity(@Nullable Entity var1, AxisAlignedBB var2) {
+      return this.getEntitiesInAABBexcluding(entityIn, bb, EntitySelectors.NOT_SPECTATING);
    }
 
-   public List getEntitiesInAABBexcluding(@Nullable Entity entity, AxisAlignedBB axisalignedbb, @Nullable Predicate predicate) {
-      ArrayList arraylist = Lists.newArrayList();
-      int i = MathHelper.floor((axisalignedbb.minX - 2.0D) / 16.0D);
-      int j = MathHelper.floor((axisalignedbb.maxX + 2.0D) / 16.0D);
-      int k = MathHelper.floor((axisalignedbb.minZ - 2.0D) / 16.0D);
-      int l = MathHelper.floor((axisalignedbb.maxZ + 2.0D) / 16.0D);
+   public List getEntitiesInAABBexcluding(@Nullable Entity var1, AxisAlignedBB var2, @Nullable Predicate var3) {
+      List list = Lists.newArrayList();
+      int i = MathHelper.floor((boundingBox.minX - MAX_ENTITY_RADIUS) / 16.0D);
+      int j = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
+      int k = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
+      int l = MathHelper.floor((boundingBox.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
 
       for(int i1 = i; i1 <= j; ++i1) {
          for(int j1 = k; j1 <= l; ++j1) {
             if (this.isChunkLoaded(i1, j1, true)) {
-               this.getChunkFromChunkCoords(i1, j1).getEntitiesWithinAABBForEntity(entity, axisalignedbb, arraylist, predicate);
+               this.getChunkFromChunkCoords(i1, j1).getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
             }
          }
       }
 
-      return arraylist;
+      return list;
    }
 
-   public List getEntities(Class oclass, Predicate predicate) {
-      ArrayList arraylist = Lists.newArrayList();
+   public List getEntities(Class var1, Predicate var2) {
+      List list = Lists.newArrayList();
 
       for(Entity entity : this.loadedEntityList) {
-         if (oclass.isAssignableFrom(entity.getClass()) && predicate.apply(entity)) {
-            arraylist.add(entity);
+         if (entityType.isAssignableFrom(entity.getClass()) && filter.apply(entity)) {
+            list.add(entity);
          }
       }
 
-      return arraylist;
+      return list;
    }
 
-   public List getPlayers(Class oclass, Predicate predicate) {
-      ArrayList arraylist = Lists.newArrayList();
+   public List getPlayers(Class var1, Predicate var2) {
+      List list = Lists.newArrayList();
 
       for(Entity entity : this.playerEntities) {
-         if (oclass.isAssignableFrom(entity.getClass()) && predicate.apply(entity)) {
-            arraylist.add(entity);
+         if (playerType.isAssignableFrom(entity.getClass()) && filter.apply(entity)) {
+            list.add(entity);
          }
       }
 
-      return arraylist;
+      return list;
    }
 
-   public List getEntitiesWithinAABB(Class oclass, AxisAlignedBB axisalignedbb) {
-      return this.getEntitiesWithinAABB(oclass, axisalignedbb, EntitySelectors.NOT_SPECTATING);
+   public List getEntitiesWithinAABB(Class var1, AxisAlignedBB var2) {
+      return this.getEntitiesWithinAABB(classEntity, bb, EntitySelectors.NOT_SPECTATING);
    }
 
-   public List getEntitiesWithinAABB(Class oclass, AxisAlignedBB axisalignedbb, @Nullable Predicate predicate) {
-      int i = MathHelper.floor((axisalignedbb.minX - 2.0D) / 16.0D);
-      int j = MathHelper.ceil((axisalignedbb.maxX + 2.0D) / 16.0D);
-      int k = MathHelper.floor((axisalignedbb.minZ - 2.0D) / 16.0D);
-      int l = MathHelper.ceil((axisalignedbb.maxZ + 2.0D) / 16.0D);
-      ArrayList arraylist = Lists.newArrayList();
+   public List getEntitiesWithinAABB(Class var1, AxisAlignedBB var2, @Nullable Predicate var3) {
+      int i = MathHelper.floor((aabb.minX - MAX_ENTITY_RADIUS) / 16.0D);
+      int j = MathHelper.ceil((aabb.maxX + MAX_ENTITY_RADIUS) / 16.0D);
+      int k = MathHelper.floor((aabb.minZ - MAX_ENTITY_RADIUS) / 16.0D);
+      int l = MathHelper.ceil((aabb.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
+      List list = Lists.newArrayList();
 
       for(int i1 = i; i1 < j; ++i1) {
          for(int j1 = k; j1 < l; ++j1) {
             if (this.isChunkLoaded(i1, j1, true)) {
-               this.getChunkFromChunkCoords(i1, j1).getEntitiesOfTypeWithinAAAB(oclass, axisalignedbb, arraylist, predicate);
+               this.getChunkFromChunkCoords(i1, j1).getEntitiesOfTypeWithinAAAB(clazz, aabb, list, filter);
             }
          }
       }
 
-      return arraylist;
+      return list;
    }
 
    @Nullable
-   public Entity findNearestEntityWithinAABB(Class oclass, AxisAlignedBB axisalignedbb, Entity t0) {
-      List list = this.getEntitiesWithinAABB(oclass, axisalignedbb);
-      Entity entity = null;
+   public Entity findNearestEntityWithinAABB(Class var1, AxisAlignedBB var2, Entity var3) {
+      List list = this.getEntitiesWithinAABB(entityType, aabb);
+      Entity t = (T)null;
       double d0 = Double.MAX_VALUE;
 
       for(int i = 0; i < list.size(); ++i) {
-         Entity entity1 = (Entity)list.get(i);
-         if (entity1 != t0 && EntitySelectors.NOT_SPECTATING.apply(entity1)) {
-            double d1 = t0.getDistanceSqToEntity(entity1);
+         Entity t1 = (T)((Entity)list.get(i));
+         if (t1 != closestTo && EntitySelectors.NOT_SPECTATING.apply(t1)) {
+            double d1 = closestTo.getDistanceSqToEntity(t1);
             if (d1 <= d0) {
-               entity = entity1;
+               t = t1;
                d0 = d1;
             }
          }
       }
 
-      return entity;
+      return t;
    }
 
    @Nullable
-   public Entity getEntityByID(int i) {
-      return (Entity)this.entitiesById.lookup(i);
+   public Entity getEntityByID(int var1) {
+      return (Entity)this.entitiesById.lookup(id);
    }
 
-   public void markChunkDirty(BlockPos blockposition, TileEntity tileentity) {
-      if (this.isBlockLoaded(blockposition)) {
-         this.getChunkFromBlockCoords(blockposition).setChunkModified();
+   @SideOnly(Side.CLIENT)
+   public List getLoadedEntityList() {
+      return this.loadedEntityList;
+   }
+
+   public void markChunkDirty(BlockPos var1, TileEntity var2) {
+      if (this.isBlockLoaded(pos)) {
+         this.getChunkFromBlockCoords(pos).setChunkModified();
       }
 
    }
 
-   public int countEntities(Class oclass) {
+   public int countEntities(Class var1) {
       int i = 0;
-      Iterator iterator = this.loadedEntityList.iterator();
 
-      while(true) {
-         Entity entity;
-         while(true) {
-            if (!iterator.hasNext()) {
-               return i;
-            }
-
-            entity = (Entity)iterator.next();
-            if (!(entity instanceof EntityLiving)) {
-               break;
-            }
-
-            EntityLiving entityinsentient = (EntityLiving)entity;
-            if (!entityinsentient.canDespawn() || !entityinsentient.isNoDespawnRequired()) {
-               break;
-            }
-         }
-
-         if (oclass.isAssignableFrom(entity.getClass())) {
+      for(Entity entity : this.loadedEntityList) {
+         if ((!(entity instanceof EntityLiving) || !((EntityLiving)entity).isNoDespawnRequired()) && entityType.isAssignableFrom(entity.getClass())) {
             ++i;
          }
       }
+
+      return i;
    }
 
-   public void loadEntities(Collection collection) {
-      for(Entity entity : collection) {
-         if (entity != null) {
+   public void loadEntities(Collection var1) {
+      for(Entity entity : entityCollection) {
+         if (!MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(entity, this))) {
             this.loadedEntityList.add(entity);
             this.onEntityAdded(entity);
          }
@@ -2309,58 +2476,55 @@ public abstract class World implements IBlockAccess {
 
    }
 
-   public void unloadEntities(Collection collection) {
-      this.unloadedEntityList.addAll(collection);
+   public void unloadEntities(Collection var1) {
+      this.unloadedEntityList.addAll(entityCollection);
    }
 
-   public boolean canBlockBePlaced(Block block, BlockPos blockposition, boolean flag, EnumFacing enumdirection, @Nullable Entity entity, @Nullable ItemStack itemstack) {
-      IBlockState iblockdata = this.getBlockState(blockposition);
-      AxisAlignedBB axisalignedbb = flag ? null : block.getDefaultState().getCollisionBoundingBox(this, blockposition);
-      boolean defaultReturn = axisalignedbb != Block.NULL_AABB && !this.checkNoEntityCollision(axisalignedbb.offset(blockposition), entity) ? false : (iblockdata.getMaterial() == Material.CIRCUITS && block == Blocks.ANVIL ? true : iblockdata.getMaterial().isReplaceable() && block.canReplace(this, blockposition, enumdirection, itemstack));
-      BlockCanBuildEvent event = new BlockCanBuildEvent(this.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), CraftMagicNumbers.getId(block), defaultReturn);
-      this.getServer().getPluginManager().callEvent(event);
-      return event.isBuildable();
+   public boolean canBlockBePlaced(Block var1, BlockPos var2, boolean var3, EnumFacing var4, @Nullable Entity var5, @Nullable ItemStack var6) {
+      IBlockState iblockstate = this.getBlockState(pos);
+      AxisAlignedBB axisalignedbb = p_175716_3_ ? null : blockIn.getDefaultState().getCollisionBoundingBox(this, pos);
+      return axisalignedbb != Block.NULL_AABB && !this.checkNoEntityCollision(axisalignedbb.offset(pos), entityIn) ? false : (iblockstate.getMaterial() == Material.CIRCUITS && blockIn == Blocks.ANVIL ? true : iblockstate.getBlock().isReplaceable(this, pos) && blockIn.canReplace(this, pos, side, itemStackIn));
    }
 
    public int getSeaLevel() {
       return this.seaLevel;
    }
 
-   public void setSeaLevel(int i) {
-      this.seaLevel = i;
+   public void setSeaLevel(int var1) {
+      this.seaLevel = seaLevelIn;
    }
 
-   public int getStrongPower(BlockPos blockposition, EnumFacing enumdirection) {
-      return this.getBlockState(blockposition).getStrongPower(this, blockposition, enumdirection);
+   public int getStrongPower(BlockPos var1, EnumFacing var2) {
+      return this.getBlockState(pos).getStrongPower(this, pos, direction);
    }
 
    public WorldType getWorldType() {
       return this.worldInfo.getTerrainType();
    }
 
-   public int getStrongPower(BlockPos blockposition) {
-      byte b0 = 0;
-      int i = Math.max(b0, this.getStrongPower(blockposition.down(), EnumFacing.DOWN));
+   public int getStrongPower(BlockPos var1) {
+      int i = 0;
+      i = Math.max(i, this.getStrongPower(pos.down(), EnumFacing.DOWN));
       if (i >= 15) {
          return i;
       } else {
-         i = Math.max(i, this.getStrongPower(blockposition.up(), EnumFacing.UP));
+         i = Math.max(i, this.getStrongPower(pos.up(), EnumFacing.UP));
          if (i >= 15) {
             return i;
          } else {
-            i = Math.max(i, this.getStrongPower(blockposition.north(), EnumFacing.NORTH));
+            i = Math.max(i, this.getStrongPower(pos.north(), EnumFacing.NORTH));
             if (i >= 15) {
                return i;
             } else {
-               i = Math.max(i, this.getStrongPower(blockposition.south(), EnumFacing.SOUTH));
+               i = Math.max(i, this.getStrongPower(pos.south(), EnumFacing.SOUTH));
                if (i >= 15) {
                   return i;
                } else {
-                  i = Math.max(i, this.getStrongPower(blockposition.west(), EnumFacing.WEST));
+                  i = Math.max(i, this.getStrongPower(pos.west(), EnumFacing.WEST));
                   if (i >= 15) {
                      return i;
                   } else {
-                     i = Math.max(i, this.getStrongPower(blockposition.east(), EnumFacing.EAST));
+                     i = Math.max(i, this.getStrongPower(pos.east(), EnumFacing.EAST));
                      return i >= 15 ? i : i;
                   }
                }
@@ -2369,30 +2533,30 @@ public abstract class World implements IBlockAccess {
       }
    }
 
-   public boolean isSidePowered(BlockPos blockposition, EnumFacing enumdirection) {
-      return this.getRedstonePower(blockposition, enumdirection) > 0;
+   public boolean isSidePowered(BlockPos var1, EnumFacing var2) {
+      return this.getRedstonePower(pos, side) > 0;
    }
 
-   public int getRedstonePower(BlockPos blockposition, EnumFacing enumdirection) {
-      IBlockState iblockdata = this.getBlockState(blockposition);
-      return iblockdata.isNormalCube() ? this.getStrongPower(blockposition) : iblockdata.getWeakPower(this, blockposition, enumdirection);
+   public int getRedstonePower(BlockPos var1, EnumFacing var2) {
+      IBlockState iblockstate = this.getBlockState(pos);
+      return iblockstate.getBlock().shouldCheckWeakPower(iblockstate, this, pos, facing) ? this.getStrongPower(pos) : iblockstate.getWeakPower(this, pos, facing);
    }
 
-   public boolean isBlockPowered(BlockPos blockposition) {
-      return this.getRedstonePower(blockposition.down(), EnumFacing.DOWN) > 0 ? true : (this.getRedstonePower(blockposition.up(), EnumFacing.UP) > 0 ? true : (this.getRedstonePower(blockposition.north(), EnumFacing.NORTH) > 0 ? true : (this.getRedstonePower(blockposition.south(), EnumFacing.SOUTH) > 0 ? true : (this.getRedstonePower(blockposition.west(), EnumFacing.WEST) > 0 ? true : this.getRedstonePower(blockposition.east(), EnumFacing.EAST) > 0))));
+   public boolean isBlockPowered(BlockPos var1) {
+      return this.getRedstonePower(pos.down(), EnumFacing.DOWN) > 0 ? true : (this.getRedstonePower(pos.up(), EnumFacing.UP) > 0 ? true : (this.getRedstonePower(pos.north(), EnumFacing.NORTH) > 0 ? true : (this.getRedstonePower(pos.south(), EnumFacing.SOUTH) > 0 ? true : (this.getRedstonePower(pos.west(), EnumFacing.WEST) > 0 ? true : this.getRedstonePower(pos.east(), EnumFacing.EAST) > 0))));
    }
 
-   public int isBlockIndirectlyGettingPowered(BlockPos blockposition) {
+   public int isBlockIndirectlyGettingPowered(BlockPos var1) {
       int i = 0;
 
-      for(EnumFacing enumdirection : EnumFacing.values()) {
-         int l = this.getRedstonePower(blockposition.offset(enumdirection), enumdirection);
-         if (l >= 15) {
+      for(EnumFacing enumfacing : EnumFacing.values()) {
+         int j = this.getRedstonePower(pos.offset(enumfacing), enumfacing);
+         if (j >= 15) {
             return 15;
          }
 
-         if (l > i) {
-            i = l;
+         if (j > i) {
+            i = j;
          }
       }
 
@@ -2400,40 +2564,40 @@ public abstract class World implements IBlockAccess {
    }
 
    @Nullable
-   public EntityPlayer getClosestPlayerToEntity(Entity entity, double d0) {
-      return this.getClosestPlayer(entity.posX, entity.posY, entity.posZ, d0, false);
+   public EntityPlayer getClosestPlayerToEntity(Entity var1, double var2) {
+      return this.getClosestPlayer(entityIn.posX, entityIn.posY, entityIn.posZ, distance, false);
    }
 
    @Nullable
-   public EntityPlayer getNearestPlayerNotCreative(Entity entity, double d0) {
-      return this.getClosestPlayer(entity.posX, entity.posY, entity.posZ, d0, true);
+   public EntityPlayer getNearestPlayerNotCreative(Entity var1, double var2) {
+      return this.getClosestPlayer(entityIn.posX, entityIn.posY, entityIn.posZ, distance, true);
    }
 
    @Nullable
-   public EntityPlayer getClosestPlayer(double d0, double d1, double d2, double d3, boolean flag) {
-      double d4 = -1.0D;
-      EntityPlayer entityhuman = null;
+   public EntityPlayer getClosestPlayer(double var1, double var3, double var5, double var7, boolean var9) {
+      double d0 = -1.0D;
+      EntityPlayer entityplayer = null;
 
       for(int i = 0; i < this.playerEntities.size(); ++i) {
-         EntityPlayer entityhuman1 = (EntityPlayer)this.playerEntities.get(i);
-         if (entityhuman1 != null && !entityhuman1.isDead && (EntitySelectors.CAN_AI_TARGET.apply(entityhuman1) || !flag) && (EntitySelectors.NOT_SPECTATING.apply(entityhuman1) || flag)) {
-            double d5 = entityhuman1.getDistanceSq(d0, d1, d2);
-            if ((d3 < 0.0D || d5 < d3 * d3) && (d4 == -1.0D || d5 < d4)) {
-               d4 = d5;
-               entityhuman = entityhuman1;
+         EntityPlayer entityplayer1 = (EntityPlayer)this.playerEntities.get(i);
+         if ((EntitySelectors.CAN_AI_TARGET.apply(entityplayer1) || !spectator) && (EntitySelectors.NOT_SPECTATING.apply(entityplayer1) || spectator)) {
+            double d1 = entityplayer1.getDistanceSq(posX, posY, posZ);
+            if ((distance < 0.0D || d1 < distance * distance) && (d0 == -1.0D || d1 < d0)) {
+               d0 = d1;
+               entityplayer = entityplayer1;
             }
          }
       }
 
-      return entityhuman;
+      return entityplayer;
    }
 
-   public boolean isAnyPlayerWithinRangeAt(double d0, double d1, double d2, double d3) {
+   public boolean isAnyPlayerWithinRangeAt(double var1, double var3, double var5, double var7) {
       for(int i = 0; i < this.playerEntities.size(); ++i) {
-         EntityPlayer entityhuman = (EntityPlayer)this.playerEntities.get(i);
-         if (EntitySelectors.NOT_SPECTATING.apply(entityhuman)) {
-            double d4 = entityhuman.getDistanceSq(d0, d1, d2);
-            if (d3 < 0.0D || d4 < d3 * d3) {
+         EntityPlayer entityplayer = (EntityPlayer)this.playerEntities.get(i);
+         if (EntitySelectors.NOT_SPECTATING.apply(entityplayer)) {
+            double d0 = entityplayer.getDistanceSq(x, y, z);
+            if (range < 0.0D || d0 < range * range) {
                return true;
             }
          }
@@ -2443,58 +2607,59 @@ public abstract class World implements IBlockAccess {
    }
 
    @Nullable
-   public EntityPlayer getNearestAttackablePlayer(Entity entity, double d0, double d1) {
-      return this.getNearestAttackablePlayer(entity.posX, entity.posY, entity.posZ, d0, d1, (Function)null, (Predicate)null);
+   public EntityPlayer getNearestAttackablePlayer(Entity var1, double var2, double var4) {
+      return this.getNearestAttackablePlayer(entityIn.posX, entityIn.posY, entityIn.posZ, maxXZDistance, maxYDistance, (Function)null, (Predicate)null);
    }
 
    @Nullable
-   public EntityPlayer getNearestAttackablePlayer(BlockPos blockposition, double d0, double d1) {
-      return this.getNearestAttackablePlayer((double)((float)blockposition.getX() + 0.5F), (double)((float)blockposition.getY() + 0.5F), (double)((float)blockposition.getZ() + 0.5F), d0, d1, (Function)null, (Predicate)null);
+   public EntityPlayer getNearestAttackablePlayer(BlockPos var1, double var2, double var4) {
+      return this.getNearestAttackablePlayer((double)((float)pos.getX() + 0.5F), (double)((float)pos.getY() + 0.5F), (double)((float)pos.getZ() + 0.5F), maxXZDistance, maxYDistance, (Function)null, (Predicate)null);
    }
 
    @Nullable
-   public EntityPlayer getNearestAttackablePlayer(double d0, double d1, double d2, double d3, double d4, @Nullable Function function, @Nullable Predicate predicate) {
-      double d5 = -1.0D;
-      EntityPlayer entityhuman = null;
+   public EntityPlayer getNearestAttackablePlayer(double var1, double var3, double var5, double var7, double var9, @Nullable Function var11, @Nullable Predicate var12) {
+      double d0 = -1.0D;
+      EntityPlayer entityplayer = null;
 
       for(int i = 0; i < this.playerEntities.size(); ++i) {
-         EntityPlayer entityhuman1 = (EntityPlayer)this.playerEntities.get(i);
-         if (!entityhuman1.capabilities.disableDamage && entityhuman1.isEntityAlive() && !entityhuman1.isSpectator() && (predicate == null || predicate.apply(entityhuman1))) {
-            double d6 = entityhuman1.getDistanceSq(d0, entityhuman1.posY, d2);
-            double d7 = d3;
-            if (entityhuman1.isSneaking()) {
-               d7 = d3 * 0.800000011920929D;
+         EntityPlayer entityplayer1 = (EntityPlayer)this.playerEntities.get(i);
+         if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive() && !entityplayer1.isSpectator() && (p_184150_12_ == null || p_184150_12_.apply(entityplayer1))) {
+            double d1 = entityplayer1.getDistanceSq(posX, entityplayer1.posY, posZ);
+            double d2 = maxXZDistance;
+            if (entityplayer1.isSneaking()) {
+               d2 = maxXZDistance * 0.800000011920929D;
             }
 
-            if (entityhuman1.isInvisible()) {
-               float f = entityhuman1.getArmorVisibility();
+            if (entityplayer1.isInvisible()) {
+               float f = entityplayer1.getArmorVisibility();
                if (f < 0.1F) {
                   f = 0.1F;
                }
 
-               d7 *= (double)(0.7F * f);
+               d2 *= (double)(0.7F * f);
             }
 
-            if (function != null) {
-               d7 *= ((Double)Objects.firstNonNull((Double)function.apply(entityhuman1), Double.valueOf(1.0D))).doubleValue();
+            if (playerToDouble != null) {
+               d2 *= ((Double)Objects.firstNonNull(playerToDouble.apply(entityplayer1), Double.valueOf(1.0D))).doubleValue();
             }
 
-            if ((d4 < 0.0D || Math.abs(entityhuman1.posY - d1) < d4 * d4) && (d3 < 0.0D || d6 < d7 * d7) && (d5 == -1.0D || d6 < d5)) {
-               d5 = d6;
-               entityhuman = entityhuman1;
+            d2 = ForgeHooks.getPlayerVisibilityDistance(entityplayer1, d2, maxXZDistance);
+            if ((maxYDistance < 0.0D || Math.abs(entityplayer1.posY - posY) < maxYDistance * maxYDistance) && (maxXZDistance < 0.0D || d1 < d2 * d2) && (d0 == -1.0D || d1 < d0)) {
+               d0 = d1;
+               entityplayer = entityplayer1;
             }
          }
       }
 
-      return entityhuman;
+      return entityplayer;
    }
 
    @Nullable
-   public EntityPlayer getPlayerEntityByName(String s) {
+   public EntityPlayer getPlayerEntityByName(String var1) {
       for(int i = 0; i < this.playerEntities.size(); ++i) {
-         EntityPlayer entityhuman = (EntityPlayer)this.playerEntities.get(i);
-         if (s.equals(entityhuman.getName())) {
-            return entityhuman;
+         EntityPlayer entityplayer = (EntityPlayer)this.playerEntities.get(i);
+         if (name.equals(entityplayer.getName())) {
+            return entityplayer;
          }
       }
 
@@ -2502,23 +2667,32 @@ public abstract class World implements IBlockAccess {
    }
 
    @Nullable
-   public EntityPlayer getPlayerEntityByUUID(UUID uuid) {
+   public EntityPlayer getPlayerEntityByUUID(UUID var1) {
       for(int i = 0; i < this.playerEntities.size(); ++i) {
-         EntityPlayer entityhuman = (EntityPlayer)this.playerEntities.get(i);
-         if (uuid.equals(entityhuman.getUniqueID())) {
-            return entityhuman;
+         EntityPlayer entityplayer = (EntityPlayer)this.playerEntities.get(i);
+         if (uuid.equals(entityplayer.getUniqueID())) {
+            return entityplayer;
          }
       }
 
       return null;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void sendQuittingDisconnectingPacket() {
    }
 
    public void checkSessionLock() throws MinecraftException {
       this.saveHandler.checkSessionLock();
    }
 
+   @SideOnly(Side.CLIENT)
+   public void setTotalWorldTime(long var1) {
+      this.worldInfo.setWorldTotalTime(worldTime);
+   }
+
    public long getSeed() {
-      return this.worldInfo.getSeed();
+      return this.provider.getSeed();
    }
 
    public long getTotalWorldTime() {
@@ -2526,39 +2700,61 @@ public abstract class World implements IBlockAccess {
    }
 
    public long getWorldTime() {
-      return this.worldInfo.getWorldTime();
+      return this.provider.getWorldTime();
    }
 
-   public void setWorldTime(long i) {
-      this.worldInfo.setWorldTime(i);
+   public void setWorldTime(long var1) {
+      this.provider.setWorldTime(time);
    }
 
    public BlockPos getSpawnPoint() {
-      BlockPos blockposition = new BlockPos(this.worldInfo.getSpawnX(), this.worldInfo.getSpawnY(), this.worldInfo.getSpawnZ());
-      if (!this.getWorldBorder().contains(blockposition)) {
-         blockposition = this.getHeight(new BlockPos(this.getWorldBorder().getCenterX(), 0.0D, this.getWorldBorder().getCenterZ()));
+      BlockPos blockpos = this.provider.getSpawnPoint();
+      if (!this.getWorldBorder().contains(blockpos)) {
+         blockpos = this.getHeight(new BlockPos(this.getWorldBorder().getCenterX(), 0.0D, this.getWorldBorder().getCenterZ()));
       }
 
-      return blockposition;
+      return blockpos;
    }
 
-   public void setSpawnPoint(BlockPos blockposition) {
-      this.worldInfo.setSpawn(blockposition);
+   public void setSpawnPoint(BlockPos var1) {
+      this.provider.setSpawnPoint(pos);
    }
 
-   public boolean isBlockModifiable(EntityPlayer entityhuman, BlockPos blockposition) {
+   @SideOnly(Side.CLIENT)
+   public void joinEntityInSurroundings(Entity var1) {
+      int i = MathHelper.floor(entityIn.posX / 16.0D);
+      int j = MathHelper.floor(entityIn.posZ / 16.0D);
+      int k = 2;
+
+      for(int l = -2; l <= 2; ++l) {
+         for(int i1 = -2; i1 <= 2; ++i1) {
+            this.getChunkFromChunkCoords(i + l, j + i1);
+         }
+      }
+
+      if (!this.loadedEntityList.contains(entityIn) && !MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(entityIn, this))) {
+         this.loadedEntityList.add(entityIn);
+      }
+
+   }
+
+   public boolean isBlockModifiable(EntityPlayer var1, BlockPos var2) {
+      return this.provider.canMineBlock(player, pos);
+   }
+
+   public boolean canMineBlockBody(EntityPlayer var1, BlockPos var2) {
       return true;
    }
 
-   public void setEntityState(Entity entity, byte b0) {
+   public void setEntityState(Entity var1, byte var2) {
    }
 
    public IChunkProvider getChunkProvider() {
       return this.chunkProvider;
    }
 
-   public void addBlockEvent(BlockPos blockposition, Block block, int i, int j) {
-      this.getBlockState(blockposition).onBlockEventReceived(this, blockposition, i, j);
+   public void addBlockEvent(BlockPos var1, Block var2, int var3, int var4) {
+      this.getBlockState(pos).onBlockEventReceived(this, pos, eventID, eventParam);
    }
 
    public ISaveHandler getSaveHandler() {
@@ -2576,19 +2772,24 @@ public abstract class World implements IBlockAccess {
    public void updateAllPlayersSleepingFlag() {
    }
 
-   public void checkSleepStatus() {
-      if (!this.isRemote) {
-         this.updateAllPlayersSleepingFlag();
-      }
-
+   public float getThunderStrength(float var1) {
+      return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * delta) * this.getRainStrength(delta);
    }
 
-   public float getThunderStrength(float f) {
-      return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * f) * this.getRainStrength(f);
+   @SideOnly(Side.CLIENT)
+   public void setThunderStrength(float var1) {
+      this.prevThunderingStrength = strength;
+      this.thunderingStrength = strength;
    }
 
-   public float getRainStrength(float f) {
-      return this.prevRainingStrength + (this.rainingStrength - this.prevRainingStrength) * f;
+   public float getRainStrength(float var1) {
+      return this.prevRainingStrength + (this.rainingStrength - this.prevRainingStrength) * delta;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void setRainStrength(float var1) {
+      this.prevRainingStrength = strength;
+      this.rainingStrength = strength;
    }
 
    public boolean isThundering() {
@@ -2599,22 +2800,21 @@ public abstract class World implements IBlockAccess {
       return (double)this.getRainStrength(1.0F) > 0.2D;
    }
 
-   public boolean isRainingAt(BlockPos blockposition) {
+   public boolean isRainingAt(BlockPos var1) {
       if (!this.isRaining()) {
          return false;
-      } else if (!this.canSeeSky(blockposition)) {
+      } else if (!this.canSeeSky(strikePosition)) {
          return false;
-      } else if (this.getPrecipitationHeight(blockposition).getY() > blockposition.getY()) {
+      } else if (this.getPrecipitationHeight(strikePosition).getY() > strikePosition.getY()) {
          return false;
       } else {
-         Biome biomebase = this.getBiome(blockposition);
-         return biomebase.getEnableSnow() ? false : (this.canSnowAt(blockposition, false) ? false : biomebase.canRain());
+         Biome biome = this.getBiome(strikePosition);
+         return biome.getEnableSnow() ? false : (this.canSnowAt(strikePosition, false) ? false : biome.canRain());
       }
    }
 
-   public boolean isBlockinHighHumidity(BlockPos blockposition) {
-      Biome biomebase = this.getBiome(blockposition);
-      return biomebase.isHighHumidity();
+   public boolean isBlockinHighHumidity(BlockPos var1) {
+      return this.provider.isBlockHighHumidity(pos);
    }
 
    @Nullable
@@ -2622,124 +2822,124 @@ public abstract class World implements IBlockAccess {
       return this.mapStorage;
    }
 
-   public void setData(String s, WorldSavedData persistentbase) {
-      this.mapStorage.setData(s, persistentbase);
+   public void setData(String var1, WorldSavedData var2) {
+      this.mapStorage.setData(dataID, worldSavedDataIn);
    }
 
    @Nullable
-   public WorldSavedData loadData(Class oclass, String s) {
-      return this.mapStorage.getOrLoadData(oclass, s);
+   public WorldSavedData loadData(Class var1, String var2) {
+      return this.mapStorage.getOrLoadData(clazz, dataID);
    }
 
-   public int getUniqueDataId(String s) {
-      return this.mapStorage.getUniqueDataId(s);
+   public int getUniqueDataId(String var1) {
+      return this.mapStorage.getUniqueDataId(key);
    }
 
-   public void playBroadcastSound(int i, BlockPos blockposition, int j) {
-      for(int k = 0; k < this.eventListeners.size(); ++k) {
-         ((IWorldEventListener)this.eventListeners.get(k)).broadcastSound(i, blockposition, j);
+   public void playBroadcastSound(int var1, BlockPos var2, int var3) {
+      for(int i = 0; i < this.eventListeners.size(); ++i) {
+         ((IWorldEventListener)this.eventListeners.get(i)).broadcastSound(id, pos, data);
       }
 
    }
 
-   public void playEvent(int i, BlockPos blockposition, int j) {
-      this.playEvent((EntityPlayer)null, i, blockposition, j);
+   public void playEvent(int var1, BlockPos var2, int var3) {
+      this.playEvent((EntityPlayer)null, type, pos, data);
    }
 
-   public void playEvent(@Nullable EntityPlayer entityhuman, int i, BlockPos blockposition, int j) {
+   public void playEvent(@Nullable EntityPlayer var1, int var2, BlockPos var3, int var4) {
       try {
-         for(int k = 0; k < this.eventListeners.size(); ++k) {
-            ((IWorldEventListener)this.eventListeners.get(k)).playEvent(entityhuman, i, blockposition, j);
+         for(int i = 0; i < this.eventListeners.size(); ++i) {
+            ((IWorldEventListener)this.eventListeners.get(i)).playEvent(player, type, pos, data);
          }
 
       } catch (Throwable var8) {
          CrashReport crashreport = CrashReport.makeCrashReport(var8, "Playing level event");
-         CrashReportCategory crashreportsystemdetails = crashreport.makeCategory("Level event being played");
-         crashreportsystemdetails.addCrashSection("Block coordinates", CrashReportCategory.getCoordinateInfo(blockposition));
-         crashreportsystemdetails.addCrashSection("Event source", entityhuman);
-         crashreportsystemdetails.addCrashSection("Event type", Integer.valueOf(i));
-         crashreportsystemdetails.addCrashSection("Event data", Integer.valueOf(j));
+         CrashReportCategory crashreportcategory = crashreport.makeCategory("Level event being played");
+         crashreportcategory.addCrashSection("Block coordinates", CrashReportCategory.getCoordinateInfo(pos));
+         crashreportcategory.addCrashSection("Event source", player);
+         crashreportcategory.addCrashSection("Event type", Integer.valueOf(type));
+         crashreportcategory.addCrashSection("Event data", Integer.valueOf(data));
          throw new ReportedException(crashreport);
       }
    }
 
    public int getHeight() {
-      return 256;
+      return this.provider.getHeight();
    }
 
    public int getActualHeight() {
-      return this.provider.hasNoSky() ? 128 : 256;
+      return this.provider.getActualHeight();
    }
 
-   public Random setRandomSeed(int i, int j, int k) {
-      long l = (long)i * 341873128712L + (long)j * 132897987541L + this.getWorldInfo().getSeed() + (long)k;
-      this.rand.setSeed(l);
+   public Random setRandomSeed(int var1, int var2, int var3) {
+      long i = (long)p_72843_1_ * 341873128712L + (long)p_72843_2_ * 132897987541L + this.getWorldInfo().getSeed() + (long)p_72843_3_;
+      this.rand.setSeed(i);
       return this.rand;
    }
 
-   public CrashReportCategory addWorldInfoToCrashReport(CrashReport crashreport) {
-      CrashReportCategory crashreportsystemdetails = crashreport.makeCategoryDepth("Affected level", 1);
-      crashreportsystemdetails.addCrashSection("Level name", this.worldInfo == null ? "????" : this.worldInfo.getWorldName());
-      crashreportsystemdetails.setDetail("All players", new ICrashReportDetail() {
-         public String a() {
+   public CrashReportCategory addWorldInfoToCrashReport(CrashReport var1) {
+      CrashReportCategory crashreportcategory = report.makeCategoryDepth("Affected level", 1);
+      crashreportcategory.addCrashSection("Level name", this.worldInfo == null ? "????" : this.worldInfo.getWorldName());
+      crashreportcategory.setDetail("All players", new ICrashReportDetail() {
+         public String call() {
             return World.this.playerEntities.size() + " total; " + World.this.playerEntities;
          }
-
-         public Object call() throws Exception {
-            return this.a();
-         }
       });
-      crashreportsystemdetails.setDetail("Chunk stats", new ICrashReportDetail() {
-         public String a() {
+      crashreportcategory.setDetail("Chunk stats", new ICrashReportDetail() {
+         public String call() {
             return World.this.chunkProvider.makeString();
-         }
-
-         public Object call() throws Exception {
-            return this.a();
          }
       });
 
       try {
-         this.worldInfo.addToCrashReport(crashreportsystemdetails);
+         this.worldInfo.addToCrashReport(crashreportcategory);
       } catch (Throwable var4) {
-         crashreportsystemdetails.addCrashSectionThrowable("Level Data Unobtainable", var4);
+         crashreportcategory.addCrashSectionThrowable("Level Data Unobtainable", var4);
       }
 
-      return crashreportsystemdetails;
+      return crashreportcategory;
    }
 
-   public void sendBlockBreakProgress(int i, BlockPos blockposition, int j) {
-      for(int k = 0; k < this.eventListeners.size(); ++k) {
-         IWorldEventListener iworldaccess = (IWorldEventListener)this.eventListeners.get(k);
-         iworldaccess.sendBlockBreakProgress(i, blockposition, j);
+   @SideOnly(Side.CLIENT)
+   public double getHorizon() {
+      return this.provider.getHorizon();
+   }
+
+   public void sendBlockBreakProgress(int var1, BlockPos var2, int var3) {
+      for(int i = 0; i < this.eventListeners.size(); ++i) {
+         IWorldEventListener iworldeventlistener = (IWorldEventListener)this.eventListeners.get(i);
+         iworldeventlistener.sendBlockBreakProgress(breakerId, pos, progress);
       }
 
    }
 
    public Calendar getCurrentDate() {
       if (this.getTotalWorldTime() % 600L == 0L) {
-         this.theCalendar.setTimeInMillis(MinecraftServer.av());
+         this.theCalendar.setTimeInMillis(MinecraftServer.getCurrentTimeMillis());
       }
 
       return this.theCalendar;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void makeFireworks(double var1, double var3, double var5, double var7, double var9, double var11, @Nullable NBTTagCompound var13) {
    }
 
    public Scoreboard getScoreboard() {
       return this.worldScoreboard;
    }
 
-   public void updateComparatorOutputLevel(BlockPos blockposition, Block block) {
-      for(EnumFacing enumdirection : EnumFacing.Plane.HORIZONTAL) {
-         BlockPos blockposition1 = blockposition.offset(enumdirection);
-         if (this.isBlockLoaded(blockposition1)) {
-            IBlockState iblockdata = this.getBlockState(blockposition1);
-            if (Blocks.UNPOWERED_COMPARATOR.isSameDiode(iblockdata)) {
-               iblockdata.neighborChanged(this, blockposition1, block);
-            } else if (iblockdata.isNormalCube()) {
-               blockposition1 = blockposition1.offset(enumdirection);
-               iblockdata = this.getBlockState(blockposition1);
-               if (Blocks.UNPOWERED_COMPARATOR.isSameDiode(iblockdata)) {
-                  iblockdata.neighborChanged(this, blockposition1, block);
+   public void updateComparatorOutputLevel(BlockPos var1, Block var2) {
+      for(EnumFacing enumfacing : EnumFacing.VALUES) {
+         BlockPos blockpos = pos.offset(enumfacing);
+         if (this.isBlockLoaded(blockpos)) {
+            IBlockState iblockstate = this.getBlockState(blockpos);
+            iblockstate.getBlock().onNeighborChange(this, blockpos, pos);
+            if (iblockstate.getBlock().isNormalCube(iblockstate, this, blockpos)) {
+               blockpos = blockpos.offset(enumfacing);
+               iblockstate = this.getBlockState(blockpos);
+               if (iblockstate.getBlock().getWeakChanges(this, blockpos)) {
+                  iblockstate.getBlock().onNeighborChange(this, blockpos, pos);
                }
             }
          }
@@ -2747,12 +2947,12 @@ public abstract class World implements IBlockAccess {
 
    }
 
-   public DifficultyInstance getDifficultyForLocation(BlockPos blockposition) {
+   public DifficultyInstance getDifficultyForLocation(BlockPos var1) {
       long i = 0L;
       float f = 0.0F;
-      if (this.isBlockLoaded(blockposition)) {
+      if (this.isBlockLoaded(pos)) {
          f = this.getCurrentMoonPhaseFactor();
-         i = this.getChunkFromBlockCoords(blockposition).getInhabitedTime();
+         i = this.getChunkFromBlockCoords(pos).getInhabitedTime();
       }
 
       return new DifficultyInstance(this.getDifficulty(), this.getWorldTime(), i, f);
@@ -2766,12 +2966,17 @@ public abstract class World implements IBlockAccess {
       return this.skylightSubtracted;
    }
 
-   public void setSkylightSubtracted(int i) {
-      this.skylightSubtracted = i;
+   public void setSkylightSubtracted(int var1) {
+      this.skylightSubtracted = newSkylightSubtracted;
    }
 
-   public void setLastLightningBolt(int i) {
-      this.lastLightningBolt = i;
+   @SideOnly(Side.CLIENT)
+   public int getLastLightningBolt() {
+      return this.lastLightningBolt;
+   }
+
+   public void setLastLightningBolt(int var1) {
+      this.lastLightningBolt = lastLightningBoltIn;
    }
 
    public VillageCollection getVillageCollection() {
@@ -2782,14 +2987,78 @@ public abstract class World implements IBlockAccess {
       return this.worldBorder;
    }
 
-   public boolean isSpawnChunk(int i, int j) {
-      BlockPos blockposition = this.getSpawnPoint();
-      int k = i * 16 + 8 - blockposition.getX();
-      int l = j * 16 + 8 - blockposition.getZ();
-      return k >= -128 && k <= 128 && l >= -128 && l <= 128 && this.keepSpawnInMemory;
+   public boolean isSpawnChunk(int var1, int var2) {
+      BlockPos blockpos = this.getSpawnPoint();
+      int i = x * 16 + 8 - blockpos.getX();
+      int j = z * 16 + 8 - blockpos.getZ();
+      int k = 128;
+      return i >= -128 && i <= 128 && j >= -128 && j <= 128;
    }
 
-   public void sendPacketToServer(Packet packet) {
+   public boolean isSideSolid(BlockPos var1, EnumFacing var2) {
+      return this.isSideSolid(pos, side, false);
+   }
+
+   public boolean isSideSolid(BlockPos var1, EnumFacing var2, boolean var3) {
+      if (!this.isValid(pos)) {
+         return _default;
+      } else {
+         Chunk chunk = this.getChunkFromBlockCoords(pos);
+         return chunk != null && !chunk.isEmpty() ? this.getBlockState(pos).isSideSolid(this, pos, side) : _default;
+      }
+   }
+
+   public ImmutableSetMultimap getPersistentChunks() {
+      return ForgeChunkManager.getPersistentChunksFor(this);
+   }
+
+   public Iterator getPersistentChunkIterable(Iterator var1) {
+      return ForgeChunkManager.getPersistentChunksIterableFor(this, chunkIterator);
+   }
+
+   public int getBlockLightOpacity(BlockPos var1) {
+      return !this.isValid(pos) ? 0 : this.getChunkFromBlockCoords(pos).getBlockLightOpacity(pos);
+   }
+
+   public int countEntities(EnumCreatureType var1, boolean var2) {
+      int count = 0;
+
+      for(int x = 0; x < this.loadedEntityList.size(); ++x) {
+         if (((Entity)this.loadedEntityList.get(x)).isCreatureType(type, forSpawnCount)) {
+            ++count;
+         }
+      }
+
+      return count;
+   }
+
+   protected void initCapabilities() {
+      ICapabilityProvider parent = this.provider.initCapabilities();
+      this.capabilities = ForgeEventFactory.gatherCapabilities(this, parent);
+      WorldCapabilityData data = (WorldCapabilityData)this.perWorldStorage.getOrLoadData(WorldCapabilityData.class, "capabilities");
+      if (data == null) {
+         this.capabilityData = new WorldCapabilityData(this.capabilities);
+         this.perWorldStorage.setData(this.capabilityData.mapName, this.capabilityData);
+      } else {
+         this.capabilityData = data;
+         this.capabilityData.setCapabilities(this.provider, this.capabilities);
+      }
+
+   }
+
+   public boolean hasCapability(Capability var1, EnumFacing var2) {
+      return this.capabilities == null ? false : this.capabilities.hasCapability(capability, facing);
+   }
+
+   public Object getCapability(Capability var1, EnumFacing var2) {
+      return this.capabilities == null ? null : this.capabilities.getCapability(capability, facing);
+   }
+
+   public MapStorage getPerWorldStorage() {
+      return this.perWorldStorage;
+   }
+
+   public void sendPacketToServer(Packet var1) {
       throw new UnsupportedOperationException("Can't send packets to server unless you're on the client.");
    }
 

@@ -23,12 +23,12 @@ public class RenderGuardian extends RenderLiving {
    private static final ResourceLocation GUARDIAN_BEAM_TEXTURE = new ResourceLocation("textures/entity/guardian_beam.png");
    int lastModelVersion;
 
-   public RenderGuardian(RenderManager renderManagerIn) {
+   public RenderGuardian(RenderManager var1) {
       super(renderManagerIn, new ModelGuardian(), 0.5F);
       this.lastModelVersion = ((ModelGuardian)this.mainModel).getModelVersion();
    }
 
-   public boolean shouldRender(EntityGuardian livingEntity, ICamera camera, double camX, double camY, double camZ) {
+   public boolean shouldRender(EntityGuardian var1, ICamera var2, double var3, double var5, double var7) {
       if (super.shouldRender((EntityLiving)livingEntity, camera, camX, camY, camZ)) {
          return true;
       } else {
@@ -47,14 +47,14 @@ public class RenderGuardian extends RenderLiving {
       }
    }
 
-   private Vec3d getPosition(EntityLivingBase entityLivingBaseIn, double p_177110_2_, float p_177110_4_) {
+   private Vec3d getPosition(EntityLivingBase var1, double var2, float var4) {
       double d0 = entityLivingBaseIn.lastTickPosX + (entityLivingBaseIn.posX - entityLivingBaseIn.lastTickPosX) * (double)p_177110_4_;
       double d1 = p_177110_2_ + entityLivingBaseIn.lastTickPosY + (entityLivingBaseIn.posY - entityLivingBaseIn.lastTickPosY) * (double)p_177110_4_;
       double d2 = entityLivingBaseIn.lastTickPosZ + (entityLivingBaseIn.posZ - entityLivingBaseIn.lastTickPosZ) * (double)p_177110_4_;
       return new Vec3d(d0, d1, d2);
    }
 
-   public void doRender(EntityGuardian entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityGuardian var1, double var2, double var4, double var6, float var8, float var9) {
       if (this.lastModelVersion != ((ModelGuardian)this.mainModel).getModelVersion()) {
          this.mainModel = new ModelGuardian();
          this.lastModelVersion = ((ModelGuardian)this.mainModel).getModelVersion();
@@ -142,14 +142,14 @@ public class RenderGuardian extends RenderLiving {
 
    }
 
-   protected void preRenderCallback(EntityGuardian entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityGuardian var1, float var2) {
       if (entitylivingbaseIn.isElder()) {
          GlStateManager.scale(2.35F, 2.35F, 2.35F);
       }
 
    }
 
-   protected ResourceLocation getEntityTexture(EntityGuardian entity) {
+   protected ResourceLocation getEntityTexture(EntityGuardian var1) {
       return entity.isElder() ? GUARDIAN_ELDER_TEXTURE : GUARDIAN_TEXTURE;
    }
 }

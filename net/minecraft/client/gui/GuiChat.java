@@ -29,7 +29,7 @@ public class GuiChat extends GuiScreen implements ITabCompleter {
    public GuiChat() {
    }
 
-   public GuiChat(String defaultText) {
+   public GuiChat(String var1) {
       this.defaultInputFieldText = defaultText;
    }
 
@@ -54,7 +54,7 @@ public class GuiChat extends GuiScreen implements ITabCompleter {
       this.inputField.updateCursorCounter();
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       this.tabCompleter.resetRequested();
       if (keyCode == 15) {
          this.tabCompleter.complete();
@@ -108,7 +108,7 @@ public class GuiChat extends GuiScreen implements ITabCompleter {
 
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       if (mouseButton == 0) {
          ITextComponent itextcomponent = this.mc.ingameGUI.getChatGUI().getChatComponent(Mouse.getX(), Mouse.getY());
          if (itextcomponent != null && this.handleComponentClick(itextcomponent)) {
@@ -120,7 +120,7 @@ public class GuiChat extends GuiScreen implements ITabCompleter {
       super.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   protected void setText(String newChatText, boolean shouldOverwrite) {
+   protected void setText(String var1, boolean var2) {
       if (shouldOverwrite) {
          this.inputField.setText(newChatText);
       } else {
@@ -129,7 +129,7 @@ public class GuiChat extends GuiScreen implements ITabCompleter {
 
    }
 
-   public void getSentHistory(int msgPos) {
+   public void getSentHistory(int var1) {
       int i = this.sentHistoryCursor + msgPos;
       int j = this.mc.ingameGUI.getChatGUI().getSentMessages().size();
       i = MathHelper.clamp(i, 0, j);
@@ -149,7 +149,7 @@ public class GuiChat extends GuiScreen implements ITabCompleter {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       drawRect(2, this.height - 14, this.width - 2, this.height - 2, Integer.MIN_VALUE);
       this.inputField.drawTextBox();
       ITextComponent itextcomponent = this.mc.ingameGUI.getChatGUI().getChatComponent(Mouse.getX(), Mouse.getY());
@@ -164,7 +164,7 @@ public class GuiChat extends GuiScreen implements ITabCompleter {
       return false;
    }
 
-   public void setCompletions(String... newCompletions) {
+   public void setCompletions(String... var1) {
       this.tabCompleter.setCompletions(newCompletions);
    }
 
@@ -172,7 +172,7 @@ public class GuiChat extends GuiScreen implements ITabCompleter {
    public static class ChatTabCompleter extends TabCompleter {
       private final Minecraft clientInstance = Minecraft.getMinecraft();
 
-      public ChatTabCompleter(GuiTextField p_i46749_1_) {
+      public ChatTabCompleter(GuiTextField var1) {
          super(p_i46749_1_, false);
       }
 

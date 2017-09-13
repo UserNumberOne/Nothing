@@ -20,16 +20,16 @@ public class VisGraph {
    private static final int[] INDEX_OF_EDGES = new int[1352];
    private int empty = 4096;
 
-   public void setOpaqueCube(BlockPos pos) {
+   public void setOpaqueCube(BlockPos var1) {
       this.bitSet.set(getIndex(pos), true);
       --this.empty;
    }
 
-   private static int getIndex(BlockPos pos) {
+   private static int getIndex(BlockPos var0) {
       return getIndex(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
    }
 
-   private static int getIndex(int x, int y, int z) {
+   private static int getIndex(int var0, int var1, int var2) {
       return x << 0 | y << 8 | z << 4;
    }
 
@@ -50,17 +50,17 @@ public class VisGraph {
       return setvisibility;
    }
 
-   public Set getVisibleFacings(BlockPos pos) {
+   public Set getVisibleFacings(BlockPos var1) {
       return this.floodFill(getIndex(pos));
    }
 
-   private Set floodFill(int p_178604_1_) {
+   private Set floodFill(int var1) {
       Set set = EnumSet.noneOf(EnumFacing.class);
       Queue queue = Queues.newArrayDeque();
       queue.add(IntegerCache.getInteger(p_178604_1_));
       this.bitSet.set(p_178604_1_, true);
 
-      while(!queue.isEmpty()) {
+      while(!((Queue)queue).isEmpty()) {
          int i = ((Integer)queue.poll()).intValue();
          this.addEdges(i, set);
 
@@ -76,7 +76,7 @@ public class VisGraph {
       return set;
    }
 
-   private void addEdges(int p_178610_1_, Set p_178610_2_) {
+   private void addEdges(int var1, Set var2) {
       int i = p_178610_1_ >> 0 & 15;
       if (i == 0) {
          p_178610_2_.add(EnumFacing.WEST);
@@ -100,7 +100,7 @@ public class VisGraph {
 
    }
 
-   private int getNeighborIndexAtFace(int p_178603_1_, EnumFacing p_178603_2_) {
+   private int getNeighborIndexAtFace(int var1, EnumFacing var2) {
       switch(p_178603_2_) {
       case DOWN:
          if ((p_178603_1_ >> 8 & 15) == 0) {

@@ -19,7 +19,7 @@ public abstract class TileEntitySpecialRenderer {
    protected static final ResourceLocation[] DESTROY_STAGES = new ResourceLocation[]{new ResourceLocation("textures/blocks/destroy_stage_0.png"), new ResourceLocation("textures/blocks/destroy_stage_1.png"), new ResourceLocation("textures/blocks/destroy_stage_2.png"), new ResourceLocation("textures/blocks/destroy_stage_3.png"), new ResourceLocation("textures/blocks/destroy_stage_4.png"), new ResourceLocation("textures/blocks/destroy_stage_5.png"), new ResourceLocation("textures/blocks/destroy_stage_6.png"), new ResourceLocation("textures/blocks/destroy_stage_7.png"), new ResourceLocation("textures/blocks/destroy_stage_8.png"), new ResourceLocation("textures/blocks/destroy_stage_9.png")};
    protected TileEntityRendererDispatcher rendererDispatcher;
 
-   public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntity var1, double var2, double var4, double var6, float var8, int var9) {
       ITextComponent itextcomponent = te.getDisplayName();
       if (itextcomponent != null && this.rendererDispatcher.cameraHitResult != null && te.getPos().equals(this.rendererDispatcher.cameraHitResult.getBlockPos())) {
          this.setLightmapDisabled(true);
@@ -29,7 +29,7 @@ public abstract class TileEntitySpecialRenderer {
 
    }
 
-   protected void setLightmapDisabled(boolean disabled) {
+   protected void setLightmapDisabled(boolean var1) {
       GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
       if (disabled) {
          GlStateManager.disableTexture2D();
@@ -40,7 +40,7 @@ public abstract class TileEntitySpecialRenderer {
       GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
    }
 
-   protected void bindTexture(ResourceLocation location) {
+   protected void bindTexture(ResourceLocation var1) {
       TextureManager texturemanager = this.rendererDispatcher.renderEngine;
       if (texturemanager != null) {
          texturemanager.bindTexture(location);
@@ -52,7 +52,7 @@ public abstract class TileEntitySpecialRenderer {
       return this.rendererDispatcher.world;
    }
 
-   public void setRendererDispatcher(TileEntityRendererDispatcher rendererDispatcherIn) {
+   public void setRendererDispatcher(TileEntityRendererDispatcher var1) {
       this.rendererDispatcher = rendererDispatcherIn;
    }
 
@@ -60,14 +60,14 @@ public abstract class TileEntitySpecialRenderer {
       return this.rendererDispatcher.getFontRenderer();
    }
 
-   public boolean isGlobalRenderer(TileEntity te) {
+   public boolean isGlobalRenderer(TileEntity var1) {
       return false;
    }
 
-   public void renderTileEntityFast(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage, VertexBuffer buffer) {
+   public void renderTileEntityFast(TileEntity var1, double var2, double var4, double var6, float var8, int var9, VertexBuffer var10) {
    }
 
-   protected void drawNameplate(TileEntity te, String str, double x, double y, double z, int maxDistance) {
+   protected void drawNameplate(TileEntity var1, String var2, double var3, double var5, double var7, int var9) {
       Entity entity = this.rendererDispatcher.entity;
       double d0 = te.getDistanceSq(entity.posX, entity.posY, entity.posZ);
       if (d0 <= (double)(maxDistance * maxDistance)) {

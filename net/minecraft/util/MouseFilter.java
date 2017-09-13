@@ -9,7 +9,7 @@ public class MouseFilter {
    private float remainingValue;
    private float lastAmount;
 
-   public float smooth(float p_76333_1_, float p_76333_2_) {
+   public float smooth(float var1, float var2) {
       this.targetValue += p_76333_1_;
       p_76333_1_ = (this.targetValue - this.remainingValue) * p_76333_2_;
       this.lastAmount += (p_76333_1_ - this.lastAmount) * 0.5F;

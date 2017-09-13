@@ -16,7 +16,7 @@ import org.apache.commons.lang3.Validate;
 
 @SideOnly(Side.CLIENT)
 public class SoundListSerializer implements JsonDeserializer {
-   public SoundList deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+   public SoundList deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
       JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "entry");
       boolean flag = JsonUtils.getBoolean(jsonobject, "replace", false);
       String s = JsonUtils.getString(jsonobject, "subtitle", (String)null);
@@ -24,7 +24,7 @@ public class SoundListSerializer implements JsonDeserializer {
       return new SoundList(list, flag, s);
    }
 
-   private List deserializeSounds(JsonObject object) {
+   private List deserializeSounds(JsonObject var1) {
       List list = Lists.newArrayList();
       if (object.has("sounds")) {
          JsonArray jsonarray = JsonUtils.getJsonArray(object, "sounds");
@@ -43,7 +43,7 @@ public class SoundListSerializer implements JsonDeserializer {
       return list;
    }
 
-   private Sound deserializeSound(JsonObject object) {
+   private Sound deserializeSound(JsonObject var1) {
       String s = JsonUtils.getString(object, "name");
       Sound.Type sound$type = this.deserializeType(object, Sound.Type.FILE);
       float f = JsonUtils.getFloat(object, "volume", 1.0F);
@@ -56,7 +56,7 @@ public class SoundListSerializer implements JsonDeserializer {
       return new Sound(s, f, f1, i, sound$type, flag);
    }
 
-   private Sound.Type deserializeType(JsonObject object, Sound.Type defaultValue) {
+   private Sound.Type deserializeType(JsonObject var1, Sound.Type var2) {
       Sound.Type sound$type = defaultValue;
       if (object.has("type")) {
          sound$type = Sound.Type.getByName(JsonUtils.getString(object, "type"));

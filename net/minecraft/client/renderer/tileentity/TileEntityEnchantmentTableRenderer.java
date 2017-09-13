@@ -14,7 +14,7 @@ public class TileEntityEnchantmentTableRenderer extends TileEntitySpecialRendere
    private static final ResourceLocation TEXTURE_BOOK = new ResourceLocation("textures/entity/enchanting_table_book.png");
    private final ModelBook modelBook = new ModelBook();
 
-   public void renderTileEntityAt(TileEntityEnchantmentTable te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntityEnchantmentTable var1, double var2, double var4, double var6, float var8, int var9) {
       GlStateManager.pushMatrix();
       GlStateManager.translate((float)x + 0.5F, (float)y + 0.75F, (float)z + 0.5F);
       float f = (float)te.tickCount + partialTicks;

@@ -33,11 +33,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderPlayer extends RenderLivingBase {
    private final boolean smallArms;
 
-   public RenderPlayer(RenderManager renderManager) {
+   public RenderPlayer(RenderManager var1) {
       this(renderManager, false);
    }
 
-   public RenderPlayer(RenderManager renderManager, boolean useSmallArms) {
+   public RenderPlayer(RenderManager var1, boolean var2) {
       super(renderManager, new ModelPlayer(0.0F, useSmallArms), 0.5F);
       this.smallArms = useSmallArms;
       this.addLayer(new LayerBipedArmor(this));
@@ -53,7 +53,7 @@ public class RenderPlayer extends RenderLivingBase {
       return (ModelPlayer)super.getMainModel();
    }
 
-   public void doRender(AbstractClientPlayer entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(AbstractClientPlayer var1, double var2, double var4, double var6, float var8, float var9) {
       if (!MinecraftForge.EVENT_BUS.post(new Pre(entity, this, partialTicks, x, y, z))) {
          if (!entity.isUser() || this.renderManager.renderViewEntity == entity) {
             double d0 = y;
@@ -71,7 +71,7 @@ public class RenderPlayer extends RenderLivingBase {
       }
    }
 
-   private void setModelVisibilities(AbstractClientPlayer clientPlayer) {
+   private void setModelVisibilities(AbstractClientPlayer var1) {
       ModelPlayer modelplayer = this.getMainModel();
       if (clientPlayer.isSpectator()) {
          modelplayer.setInvisible(false);
@@ -125,7 +125,7 @@ public class RenderPlayer extends RenderLivingBase {
 
    }
 
-   protected ResourceLocation getEntityTexture(AbstractClientPlayer entity) {
+   protected ResourceLocation getEntityTexture(AbstractClientPlayer var1) {
       return entity.getLocationSkin();
    }
 
@@ -133,12 +133,12 @@ public class RenderPlayer extends RenderLivingBase {
       GlStateManager.translate(0.0F, 0.1875F, 0.0F);
    }
 
-   protected void preRenderCallback(AbstractClientPlayer entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(AbstractClientPlayer var1, float var2) {
       float f = 0.9375F;
       GlStateManager.scale(0.9375F, 0.9375F, 0.9375F);
    }
 
-   protected void renderEntityName(AbstractClientPlayer entityIn, double x, double y, double z, String name, double distanceSq) {
+   protected void renderEntityName(AbstractClientPlayer var1, double var2, double var4, double var6, String var8, double var9) {
       if (distanceSq < 100.0D) {
          Scoreboard scoreboard = entityIn.getWorldScoreboard();
          ScoreObjective scoreobjective = scoreboard.getObjectiveInDisplaySlot(2);
@@ -152,7 +152,7 @@ public class RenderPlayer extends RenderLivingBase {
       super.renderEntityName(entityIn, x, y, z, name, distanceSq);
    }
 
-   public void renderRightArm(AbstractClientPlayer clientPlayer) {
+   public void renderRightArm(AbstractClientPlayer var1) {
       float f = 1.0F;
       GlStateManager.color(1.0F, 1.0F, 1.0F);
       float f1 = 0.0625F;
@@ -169,7 +169,7 @@ public class RenderPlayer extends RenderLivingBase {
       GlStateManager.disableBlend();
    }
 
-   public void renderLeftArm(AbstractClientPlayer clientPlayer) {
+   public void renderLeftArm(AbstractClientPlayer var1) {
       float f = 1.0F;
       GlStateManager.color(1.0F, 1.0F, 1.0F);
       float f1 = 0.0625F;
@@ -186,7 +186,7 @@ public class RenderPlayer extends RenderLivingBase {
       GlStateManager.disableBlend();
    }
 
-   protected void renderLivingAt(AbstractClientPlayer entityLivingBaseIn, double x, double y, double z) {
+   protected void renderLivingAt(AbstractClientPlayer var1, double var2, double var4, double var6) {
       if (entityLivingBaseIn.isEntityAlive() && entityLivingBaseIn.isPlayerSleeping()) {
          super.renderLivingAt(entityLivingBaseIn, x + (double)entityLivingBaseIn.renderOffsetX, y + (double)entityLivingBaseIn.renderOffsetY, z + (double)entityLivingBaseIn.renderOffsetZ);
       } else {
@@ -195,7 +195,7 @@ public class RenderPlayer extends RenderLivingBase {
 
    }
 
-   protected void applyRotations(AbstractClientPlayer entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
+   protected void applyRotations(AbstractClientPlayer var1, float var2, float var3, float var4) {
       if (entityLiving.isEntityAlive() && entityLiving.isPlayerSleeping()) {
          GlStateManager.rotate(entityLiving.getBedOrientationInDegrees(), 0.0F, 1.0F, 0.0F);
          GlStateManager.rotate(this.getDeathMaxRotation(entityLiving), 0.0F, 0.0F, 1.0F);

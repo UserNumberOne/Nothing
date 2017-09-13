@@ -19,7 +19,7 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
    private GuiLockIconButton lockButton;
    protected String title = "Options";
 
-   public GuiOptions(GuiScreen p_i1046_1_, GameSettings p_i1046_2_) {
+   public GuiOptions(GuiScreen var1, GameSettings var2) {
       this.lastScreen = p_i1046_1_;
       this.settings = p_i1046_2_;
    }
@@ -68,7 +68,7 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
       this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height / 6 + 168, I18n.format("gui.done")));
    }
 
-   public String getDifficultyText(EnumDifficulty p_175355_1_) {
+   public String getDifficultyText(EnumDifficulty var1) {
       ITextComponent itextcomponent = new TextComponentString("");
       itextcomponent.appendSibling(new TextComponentTranslation("options.difficulty", new Object[0]));
       itextcomponent.appendText(": ");
@@ -76,7 +76,7 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
       return itextcomponent.getFormattedText();
    }
 
-   public void confirmClicked(boolean result, int id) {
+   public void confirmClicked(boolean var1, int var2) {
       this.mc.displayGuiScreen(this);
       if (id == 109 && result && this.mc.world != null) {
          this.mc.world.getWorldInfo().setDifficultyLocked(true);
@@ -87,7 +87,7 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
 
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id < 100 && button instanceof GuiOptionButton) {
             GameSettings.Options gamesettings$options = ((GuiOptionButton)button).returnEnumOptions();
@@ -152,7 +152,7 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 15, 16777215);
       super.drawScreen(mouseX, mouseY, partialTicks);

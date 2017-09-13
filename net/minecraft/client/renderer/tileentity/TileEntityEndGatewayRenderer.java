@@ -27,7 +27,7 @@ public class TileEntityEndGatewayRenderer extends TileEntitySpecialRenderer {
    private static final FloatBuffer PROJECTION = GLAllocation.createDirectFloatBuffer(16);
    FloatBuffer buffer = GLAllocation.createDirectFloatBuffer(16);
 
-   public void renderTileEntityAt(TileEntityEndGateway te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntityEndGateway var1, double var2, double var4, double var6, float var8, int var9) {
       GlStateManager.disableFog();
       if (te.isSpawning() || te.isCoolingDown()) {
          GlStateManager.alphaFunc(516, 0.1F);
@@ -169,14 +169,14 @@ public class TileEntityEndGatewayRenderer extends TileEntitySpecialRenderer {
       GlStateManager.enableFog();
    }
 
-   private FloatBuffer getBuffer(float p_188193_1_, float p_188193_2_, float p_188193_3_, float p_188193_4_) {
+   private FloatBuffer getBuffer(float var1, float var2, float var3, float var4) {
       this.buffer.clear();
       this.buffer.put(p_188193_1_).put(p_188193_2_).put(p_188193_3_).put(p_188193_4_);
       this.buffer.flip();
       return this.buffer;
    }
 
-   public boolean isGlobalRenderer(TileEntityEndGateway te) {
+   public boolean isGlobalRenderer(TileEntityEndGateway var1) {
       return te.isSpawning() || te.isCoolingDown();
    }
 }

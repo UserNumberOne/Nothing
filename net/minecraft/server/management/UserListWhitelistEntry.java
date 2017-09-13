@@ -6,33 +6,34 @@ import java.util.UUID;
 
 public class UserListWhitelistEntry extends UserListEntry {
    public UserListWhitelistEntry(GameProfile var1) {
-      super(var1);
+      super(profile);
    }
 
    public UserListWhitelistEntry(JsonObject var1) {
-      super(gameProfileFromJsonObject(var1), var1);
+      super(gameProfileFromJsonObject(json), json);
    }
 
    protected void onSerialization(JsonObject var1) {
       if (this.getValue() != null) {
-         var1.addProperty("uuid", ((GameProfile)this.getValue()).getId() == null ? "" : ((GameProfile)this.getValue()).getId().toString());
-         var1.addProperty("name", ((GameProfile)this.getValue()).getName());
-         super.onSerialization(var1);
+         data.addProperty("uuid", ((GameProfile)this.getValue()).getId() == null ? "" : ((GameProfile)this.getValue()).getId().toString());
+         data.addProperty("name", ((GameProfile)this.getValue()).getName());
+         super.onSerialization(data);
       }
+
    }
 
    private static GameProfile gameProfileFromJsonObject(JsonObject var0) {
-      if (var0.has("uuid") && var0.has("name")) {
-         String var1 = var0.get("uuid").getAsString();
+      if (json.has("uuid") && json.has("name")) {
+         String s = json.get("uuid").getAsString();
 
-         UUID var2;
+         UUID uuid;
          try {
-            var2 = UUID.fromString(var1);
+            uuid = UUID.fromString(s);
          } catch (Throwable var4) {
             return null;
          }
 
-         return new GameProfile(var2, var0.get("name").getAsString());
+         return new GameProfile(uuid, json.get("name").getAsString());
       } else {
          return null;
       }

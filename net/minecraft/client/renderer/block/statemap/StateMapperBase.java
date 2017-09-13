@@ -15,7 +15,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public abstract class StateMapperBase implements IStateMapper {
    protected Map mapStateModelLocations = Maps.newLinkedHashMap();
 
-   public String getPropertyString(Map values) {
+   public String getPropertyString(Map var1) {
       StringBuilder stringbuilder = new StringBuilder();
 
       for(Entry entry : values.entrySet()) {
@@ -36,11 +36,11 @@ public abstract class StateMapperBase implements IStateMapper {
       return stringbuilder.toString();
    }
 
-   private String getPropertyName(IProperty property, Comparable value) {
+   private String getPropertyName(IProperty var1, Comparable var2) {
       return property.getName(value);
    }
 
-   public Map putStateModelLocations(Block blockIn) {
+   public Map putStateModelLocations(Block var1) {
       UnmodifiableIterator var2 = blockIn.getBlockState().getValidStates().iterator();
 
       while(var2.hasNext()) {

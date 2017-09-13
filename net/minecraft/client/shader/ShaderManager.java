@@ -48,7 +48,7 @@ public class ShaderManager {
    private final ShaderLoader vertexShaderLoader;
    private final ShaderLoader fragmentShaderLoader;
 
-   public ShaderManager(IResourceManager resourceManager, String programName) throws JsonException, IOException {
+   public ShaderManager(IResourceManager var1, String var2) throws JsonException, IOException {
       JsonParser jsonparser = new JsonParser();
       ResourceLocation resourcelocation = new ResourceLocation("shaders/program/" + programName + ".json");
       this.programFilename = programName;
@@ -204,11 +204,11 @@ public class ShaderManager {
       this.isDirty = true;
    }
 
-   public ShaderUniform getShaderUniform(String name) {
+   public ShaderUniform getShaderUniform(String var1) {
       return this.mappedShaderUniforms.containsKey(name) ? (ShaderUniform)this.mappedShaderUniforms.get(name) : null;
    }
 
-   public ShaderUniform getShaderUniformOrDefault(String name) {
+   public ShaderUniform getShaderUniformOrDefault(String var1) {
       return (ShaderUniform)(this.mappedShaderUniforms.containsKey(name) ? (ShaderUniform)this.mappedShaderUniforms.get(name) : DEFAULT_SHADER_UNIFORM);
    }
 
@@ -244,7 +244,7 @@ public class ShaderManager {
 
    }
 
-   private void parseSampler(JsonElement element) throws JsonException {
+   private void parseSampler(JsonElement var1) throws JsonException {
       JsonObject jsonobject = JsonUtils.getJsonObject(element, "sampler");
       String s = JsonUtils.getString(jsonobject, "name");
       if (!JsonUtils.isString(jsonobject, "file")) {
@@ -256,7 +256,7 @@ public class ShaderManager {
 
    }
 
-   public void addSamplerTexture(String name, Object samplerTexture) {
+   public void addSamplerTexture(String var1, Object var2) {
       if (this.shaderSamplers.containsKey(name)) {
          this.shaderSamplers.remove(name);
       }
@@ -265,7 +265,7 @@ public class ShaderManager {
       this.markDirty();
    }
 
-   private void parseUniform(JsonElement element) throws JsonException {
+   private void parseUniform(JsonElement var1) throws JsonException {
       JsonObject jsonobject = JsonUtils.getJsonObject(element, "uniform");
       String s = JsonUtils.getString(jsonobject, "name");
       int i = ShaderUniform.parseType(JsonUtils.getString(jsonobject, "type"));

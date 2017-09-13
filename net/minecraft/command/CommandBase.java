@@ -5,7 +5,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
 import com.google.gson.JsonParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,39 +18,40 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.src.MinecraftServer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.common.ForgeHooks;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public abstract class CommandBase implements ICommand {
    private static ICommandListener commandListener;
 
    protected static SyntaxErrorException toSyntaxException(JsonParseException var0) {
-      Throwable var1 = ExceptionUtils.getRootCause(var0);
-      String var2 = "";
-      if (var1 != null) {
-         var2 = var1.getMessage();
-         if (var2.contains("setLenient")) {
-            var2 = var2.substring(var2.indexOf("to accept ") + 10);
+      Throwable throwable = ExceptionUtils.getRootCause(e);
+      String s = "";
+      if (throwable != null) {
+         s = throwable.getMessage();
+         if (s.contains("setLenient")) {
+            s = s.substring(s.indexOf("to accept ") + 10);
          }
       }
 
-      return new SyntaxErrorException("commands.tellraw.jsonException", new Object[]{var2});
+      return new SyntaxErrorException("commands.tellraw.jsonException", new Object[]{s});
    }
 
    protected static NBTTagCompound entityToNBT(Entity var0) {
-      NBTTagCompound var1 = var0.writeToNBT(new NBTTagCompound());
-      if (var0 instanceof EntityPlayer) {
-         ItemStack var2 = ((EntityPlayer)var0).inventory.getCurrentItem();
-         if (var2 != null && var2.getItem() != null) {
-            var1.setTag("SelectedItem", var2.writeToNBT(new NBTTagCompound()));
+      NBTTagCompound nbttagcompound = theEntity.writeToNBT(new NBTTagCompound());
+      if (theEntity instanceof EntityPlayer) {
+         ItemStack itemstack = ((EntityPlayer)theEntity).inventory.getCurrentItem();
+         if (itemstack != null && itemstack.getItem() != null) {
+            nbttagcompound.setTag("SelectedItem", itemstack.writeToNBT(new NBTTagCompound()));
          }
       }
 
-      return var1;
+      return nbttagcompound;
    }
 
    public int getRequiredPermissionLevel() {
@@ -62,93 +62,93 @@ public abstract class CommandBase implements ICommand {
       return Collections.emptyList();
    }
 
-   public boolean canUse(MinecraftServer var1, ICommandSender var2) {
-      return var2.canUseCommand(this.getRequiredPermissionLevel(), this.getName());
+   public boolean checkPermission(MinecraftServer var1, ICommandSender var2) {
+      return sender.canUseCommand(this.getRequiredPermissionLevel(), this.getName());
    }
 
-   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
       return Collections.emptyList();
    }
 
    public static int parseInt(String var0) throws NumberInvalidException {
       try {
-         return Integer.parseInt(var0);
+         return Integer.parseInt(input);
       } catch (NumberFormatException var2) {
-         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{var0});
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{input});
       }
    }
 
    public static int parseInt(String var0, int var1) throws NumberInvalidException {
-      return parseInt(var0, var1, Integer.MAX_VALUE);
+      return parseInt(input, min, Integer.MAX_VALUE);
    }
 
    public static int parseInt(String var0, int var1, int var2) throws NumberInvalidException {
-      int var3 = parseInt(var0);
-      if (var3 < var1) {
-         throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{var3, var1});
-      } else if (var3 > var2) {
-         throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{var3, var2});
+      int i = parseInt(input);
+      if (i < min) {
+         throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{i, min});
+      } else if (i > max) {
+         throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{i, max});
       } else {
-         return var3;
+         return i;
       }
    }
 
    public static long parseLong(String var0) throws NumberInvalidException {
       try {
-         return Long.parseLong(var0);
+         return Long.parseLong(input);
       } catch (NumberFormatException var2) {
-         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{var0});
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{input});
       }
    }
 
    public static long parseLong(String var0, long var1, long var3) throws NumberInvalidException {
-      long var5 = parseLong(var0);
-      if (var5 < var1) {
-         throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{var5, var1});
-      } else if (var5 > var3) {
-         throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{var5, var3});
+      long i = parseLong(input);
+      if (i < min) {
+         throw new NumberInvalidException("commands.generic.num.tooSmall", new Object[]{i, min});
+      } else if (i > max) {
+         throw new NumberInvalidException("commands.generic.num.tooBig", new Object[]{i, max});
       } else {
-         return var5;
+         return i;
       }
    }
 
    public static BlockPos parseBlockPos(ICommandSender var0, String[] var1, int var2, boolean var3) throws NumberInvalidException {
-      BlockPos var4 = var0.getPosition();
-      return new BlockPos(parseDouble((double)var4.getX(), var1[var2], -30000000, 30000000, var3), parseDouble((double)var4.getY(), var1[var2 + 1], 0, 256, false), parseDouble((double)var4.getZ(), var1[var2 + 2], -30000000, 30000000, var3));
+      BlockPos blockpos = sender.getPosition();
+      return new BlockPos(parseDouble((double)blockpos.getX(), args[startIndex], -30000000, 30000000, centerBlock), parseDouble((double)blockpos.getY(), args[startIndex + 1], 0, 256, false), parseDouble((double)blockpos.getZ(), args[startIndex + 2], -30000000, 30000000, centerBlock));
    }
 
    public static double parseDouble(String var0) throws NumberInvalidException {
       try {
-         double var1 = Double.parseDouble(var0);
-         if (!Doubles.isFinite(var1)) {
-            throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{var0});
+         double d0 = Double.parseDouble(input);
+         if (!Doubles.isFinite(d0)) {
+            throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{input});
          } else {
-            return var1;
+            return d0;
          }
-      } catch (NumberFormatException var4) {
-         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{var0});
+      } catch (NumberFormatException var3) {
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{input});
       }
    }
 
    public static double parseDouble(String var0, double var1) throws NumberInvalidException {
-      return parseDouble(var0, var1, Double.MAX_VALUE);
+      return parseDouble(input, min, Double.MAX_VALUE);
    }
 
    public static double parseDouble(String var0, double var1, double var3) throws NumberInvalidException {
-      double var5 = parseDouble(var0);
-      if (var5 < var1) {
-         throw new NumberInvalidException("commands.generic.double.tooSmall", new Object[]{var5, var1});
-      } else if (var5 > var3) {
-         throw new NumberInvalidException("commands.generic.double.tooBig", new Object[]{var5, var3});
+      double d0 = parseDouble(input);
+      if (d0 < min) {
+         throw new NumberInvalidException("commands.generic.double.tooSmall", new Object[]{d0, min});
+      } else if (d0 > max) {
+         throw new NumberInvalidException("commands.generic.double.tooBig", new Object[]{d0, max});
       } else {
-         return var5;
+         return d0;
       }
    }
 
    public static boolean parseBoolean(String var0) throws CommandException {
-      if (!"true".equals(var0) && !"1".equals(var0)) {
-         if (!"false".equals(var0) && !"0".equals(var0)) {
-            throw new CommandException("commands.generic.boolean.invalid", new Object[]{var0});
+      if (!"true".equals(input) && !"1".equals(input)) {
+         if (!"false".equals(input) && !"0".equals(input)) {
+            throw new CommandException("commands.generic.boolean.invalid", new Object[]{input});
          } else {
             return false;
          }
@@ -158,88 +158,88 @@ public abstract class CommandBase implements ICommand {
    }
 
    public static EntityPlayerMP getCommandSenderAsPlayer(ICommandSender var0) throws PlayerNotFoundException {
-      if (var0 instanceof EntityPlayerMP) {
-         return (EntityPlayerMP)var0;
+      if (sender instanceof EntityPlayerMP) {
+         return (EntityPlayerMP)sender;
       } else {
          throw new PlayerNotFoundException("You must specify which player you wish to perform this action on.", new Object[0]);
       }
    }
 
-   public static EntityPlayerMP a(MinecraftServer var0, ICommandSender var1, String var2) throws PlayerNotFoundException {
-      EntityPlayerMP var3 = EntitySelector.matchOnePlayer(var1, var2);
-      if (var3 == null) {
+   public static EntityPlayerMP getPlayer(MinecraftServer var0, ICommandSender var1, String var2) throws PlayerNotFoundException {
+      EntityPlayerMP entityplayermp = EntitySelector.matchOnePlayer(sender, target);
+      if (entityplayermp == null) {
          try {
-            var3 = var0.getPlayerList().getPlayerByUUID(UUID.fromString(var2));
+            entityplayermp = server.getPlayerList().getPlayerByUUID(UUID.fromString(target));
          } catch (IllegalArgumentException var5) {
             ;
          }
       }
 
-      if (var3 == null) {
-         var3 = var0.getPlayerList().getPlayerByUsername(var2);
+      if (entityplayermp == null) {
+         entityplayermp = server.getPlayerList().getPlayerByUsername(target);
       }
 
-      if (var3 == null) {
+      if (entityplayermp == null) {
          throw new PlayerNotFoundException();
       } else {
-         return var3;
+         return entityplayermp;
       }
    }
 
-   public static Entity b(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
-      return a(var0, var1, var2, Entity.class);
+   public static Entity getEntity(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
+      return getEntity(server, sender, target, Entity.class);
    }
 
-   public static Entity a(MinecraftServer var0, ICommandSender var1, String var2, Class var3) throws EntityNotFoundException {
-      Object var4 = EntitySelector.matchOneEntity(var1, var2, var3);
-      if (var4 == null) {
-         var4 = var0.getPlayerList().getPlayerByUsername(var2);
+   public static Entity getEntity(MinecraftServer var0, ICommandSender var1, String var2, Class var3) throws EntityNotFoundException {
+      Entity entity = EntitySelector.matchOneEntity(sender, target, targetClass);
+      if (entity == null) {
+         entity = server.getPlayerList().getPlayerByUsername(target);
       }
 
-      if (var4 == null) {
+      if (entity == null) {
          try {
-            UUID var5 = UUID.fromString(var2);
-            var4 = var0.a(var5);
-            if (var4 == null) {
-               var4 = var0.getPlayerList().getPlayerByUUID(var5);
+            UUID uuid = UUID.fromString(target);
+            entity = server.getEntityFromUuid(uuid);
+            if (entity == null) {
+               entity = server.getPlayerList().getPlayerByUUID(uuid);
             }
          } catch (IllegalArgumentException var6) {
             throw new EntityNotFoundException("commands.generic.entity.invalidUuid", new Object[0]);
          }
       }
 
-      if (var4 != null && var3.isAssignableFrom(var4.getClass())) {
-         return (Entity)var4;
+      if (entity != null && targetClass.isAssignableFrom(entity.getClass())) {
+         return entity;
       } else {
          throw new EntityNotFoundException();
       }
    }
 
-   public static List c(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
-      return (List)(EntitySelector.hasArguments(var2) ? EntitySelector.matchEntities(var1, var2, Entity.class) : Lists.newArrayList(new Entity[]{b(var0, var1, var2)}));
+   public static List getEntityList(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
+      return (List)(EntitySelector.hasArguments(target) ? EntitySelector.matchEntities(sender, target, Entity.class) : Lists.newArrayList(new Entity[]{getEntity(server, sender, target)}));
    }
 
-   public static String d(MinecraftServer var0, ICommandSender var1, String var2) throws PlayerNotFoundException {
+   public static String getPlayerName(MinecraftServer var0, ICommandSender var1, String var2) throws PlayerNotFoundException {
       try {
-         return a(var0, var1, var2).getName();
+         return getPlayer(server, sender, target).getName();
       } catch (PlayerNotFoundException var4) {
-         if (var2 != null && !var2.startsWith("@")) {
-            return var2;
+         if (target != null && !target.startsWith("@")) {
+            return target;
          } else {
             throw var4;
          }
       }
    }
 
-   public static String e(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
+   public static String getEntityName(MinecraftServer var0, ICommandSender var1, String var2) throws EntityNotFoundException {
       try {
-         return a(var0, var1, var2).getName();
+         return getPlayer(server, sender, target).getName();
       } catch (PlayerNotFoundException var6) {
          try {
-            return b(var0, var1, var2).getCachedUniqueIdString();
+            return getEntity(server, sender, target).getCachedUniqueIdString();
          } catch (EntityNotFoundException var5) {
-            if (var2 != null && !var2.startsWith("@")) {
-               return var2;
+            if (target != null && !target.startsWith("@")) {
+               return target;
             } else {
                throw var5;
             }
@@ -247,260 +247,260 @@ public abstract class CommandBase implements ICommand {
       }
    }
 
-   public static ITextComponent getChatComponentFromNthArg(ICommandSender var0, String[] var1, int var2) throws PlayerNotFoundException {
-      return getChatComponentFromNthArg(var0, var1, var2, false);
+   public static ITextComponent getChatComponentFromNthArg(ICommandSender var0, String[] var1, int var2) throws CommandException, PlayerNotFoundException {
+      return getChatComponentFromNthArg(sender, args, index, false);
    }
 
    public static ITextComponent getChatComponentFromNthArg(ICommandSender var0, String[] var1, int var2, boolean var3) throws PlayerNotFoundException {
-      TextComponentString var4 = new TextComponentString("");
+      ITextComponent itextcomponent = new TextComponentString("");
 
-      for(int var5 = var2; var5 < var1.length; ++var5) {
-         if (var5 > var2) {
-            var4.appendText(" ");
+      for(int i = index; i < args.length; ++i) {
+         if (i > index) {
+            itextcomponent.appendText(" ");
          }
 
-         Object var6 = new TextComponentString(var1[var5]);
-         if (var3) {
-            ITextComponent var7 = EntitySelector.matchEntitiesToTextComponent(var0, var1[var5]);
-            if (var7 == null) {
-               if (EntitySelector.hasArguments(var1[var5])) {
+         ITextComponent itextcomponent1 = ForgeHooks.newChatWithLinks(args[i]);
+         if (p_147176_3_) {
+            ITextComponent itextcomponent2 = EntitySelector.matchEntitiesToTextComponent(sender, args[i]);
+            if (itextcomponent2 == null) {
+               if (EntitySelector.hasArguments(args[i])) {
                   throw new PlayerNotFoundException();
                }
             } else {
-               var6 = var7;
+               itextcomponent1 = itextcomponent2;
             }
          }
 
-         var4.appendSibling((ITextComponent)var6);
+         itextcomponent.appendSibling(itextcomponent1);
       }
 
-      return var4;
+      return itextcomponent;
    }
 
    public static String buildString(String[] var0, int var1) {
-      StringBuilder var2 = new StringBuilder();
+      StringBuilder stringbuilder = new StringBuilder();
 
-      for(int var3 = var1; var3 < var0.length; ++var3) {
-         if (var3 > var1) {
-            var2.append(" ");
+      for(int i = startPos; i < args.length; ++i) {
+         if (i > startPos) {
+            stringbuilder.append(" ");
          }
 
-         String var4 = var0[var3];
-         var2.append(var4);
+         String s = args[i];
+         stringbuilder.append(s);
       }
 
-      return var2.toString();
+      return stringbuilder.toString();
    }
 
    public static CommandBase.CoordinateArg parseCoordinate(double var0, String var2, boolean var3) throws NumberInvalidException {
-      return parseCoordinate(var0, var2, -30000000, 30000000, var3);
+      return parseCoordinate(base, selectorArg, -30000000, 30000000, centerBlock);
    }
 
    public static CommandBase.CoordinateArg parseCoordinate(double var0, String var2, int var3, int var4, boolean var5) throws NumberInvalidException {
-      boolean var6 = var2.startsWith("~");
-      if (var6 && Double.isNaN(var0)) {
-         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{var0});
+      boolean flag = selectorArg.startsWith("~");
+      if (flag && Double.isNaN(base)) {
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{base});
       } else {
-         double var7 = 0.0D;
-         if (!var6 || var2.length() > 1) {
-            boolean var9 = var2.contains(".");
-            if (var6) {
-               var2 = var2.substring(1);
+         double d0 = 0.0D;
+         if (!flag || selectorArg.length() > 1) {
+            boolean flag1 = selectorArg.contains(".");
+            if (flag) {
+               selectorArg = selectorArg.substring(1);
             }
 
-            var7 += parseDouble(var2);
-            if (!var9 && !var6 && var5) {
-               var7 += 0.5D;
-            }
-         }
-
-         double var10 = var7 + (var6 ? var0 : 0.0D);
-         if (var3 != 0 || var4 != 0) {
-            if (var10 < (double)var3) {
-               throw new NumberInvalidException("commands.generic.double.tooSmall", new Object[]{var10, var3});
-            }
-
-            if (var10 > (double)var4) {
-               throw new NumberInvalidException("commands.generic.double.tooBig", new Object[]{var10, var4});
+            d0 += parseDouble(selectorArg);
+            if (!flag1 && !flag && centerBlock) {
+               d0 += 0.5D;
             }
          }
 
-         return new CommandBase.CoordinateArg(var10, var7, var6);
+         double d1 = d0 + (flag ? base : 0.0D);
+         if (min != 0 || max != 0) {
+            if (d1 < (double)min) {
+               throw new NumberInvalidException("commands.generic.double.tooSmall", new Object[]{d1, min});
+            }
+
+            if (d1 > (double)max) {
+               throw new NumberInvalidException("commands.generic.double.tooBig", new Object[]{d1, max});
+            }
+         }
+
+         return new CommandBase.CoordinateArg(d1, d0, flag);
       }
    }
 
    public static double parseDouble(double var0, String var2, boolean var3) throws NumberInvalidException {
-      return parseDouble(var0, var2, -30000000, 30000000, var3);
+      return parseDouble(base, input, -30000000, 30000000, centerBlock);
    }
 
    public static double parseDouble(double var0, String var2, int var3, int var4, boolean var5) throws NumberInvalidException {
-      boolean var6 = var2.startsWith("~");
-      if (var6 && Double.isNaN(var0)) {
-         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{var0});
+      boolean flag = input.startsWith("~");
+      if (flag && Double.isNaN(base)) {
+         throw new NumberInvalidException("commands.generic.num.invalid", new Object[]{base});
       } else {
-         double var7 = var6 ? var0 : 0.0D;
-         if (!var6 || var2.length() > 1) {
-            boolean var9 = var2.contains(".");
-            if (var6) {
-               var2 = var2.substring(1);
+         double d0 = flag ? base : 0.0D;
+         if (!flag || input.length() > 1) {
+            boolean flag1 = input.contains(".");
+            if (flag) {
+               input = input.substring(1);
             }
 
-            var7 += parseDouble(var2);
-            if (!var9 && !var6 && var5) {
-               var7 += 0.5D;
-            }
-         }
-
-         if (var3 != 0 || var4 != 0) {
-            if (var7 < (double)var3) {
-               throw new NumberInvalidException("commands.generic.double.tooSmall", new Object[]{var7, var3});
-            }
-
-            if (var7 > (double)var4) {
-               throw new NumberInvalidException("commands.generic.double.tooBig", new Object[]{var7, var4});
+            d0 += parseDouble(input);
+            if (!flag1 && !flag && centerBlock) {
+               d0 += 0.5D;
             }
          }
 
-         return var7;
+         if (min != 0 || max != 0) {
+            if (d0 < (double)min) {
+               throw new NumberInvalidException("commands.generic.double.tooSmall", new Object[]{d0, min});
+            }
+
+            if (d0 > (double)max) {
+               throw new NumberInvalidException("commands.generic.double.tooBig", new Object[]{d0, max});
+            }
+         }
+
+         return d0;
       }
    }
 
    public static Item getItemByText(ICommandSender var0, String var1) throws NumberInvalidException {
-      ResourceLocation var2 = new ResourceLocation(var1);
-      Item var3 = (Item)Item.REGISTRY.getObject(var2);
-      if (var3 == null) {
-         throw new NumberInvalidException("commands.give.item.notFound", new Object[]{var2});
+      ResourceLocation resourcelocation = new ResourceLocation(id);
+      Item item = (Item)Item.REGISTRY.getObject(resourcelocation);
+      if (item == null) {
+         throw new NumberInvalidException("commands.give.item.notFound", new Object[]{resourcelocation});
       } else {
-         return var3;
+         return item;
       }
    }
 
    public static Block getBlockByText(ICommandSender var0, String var1) throws NumberInvalidException {
-      ResourceLocation var2 = new ResourceLocation(var1);
-      if (!Block.REGISTRY.containsKey(var2)) {
-         throw new NumberInvalidException("commands.give.block.notFound", new Object[]{var2});
+      ResourceLocation resourcelocation = new ResourceLocation(id);
+      if (!Block.REGISTRY.containsKey(resourcelocation)) {
+         throw new NumberInvalidException("commands.give.block.notFound", new Object[]{resourcelocation});
       } else {
-         Block var3 = (Block)Block.REGISTRY.getObject(var2);
-         if (var3 == null) {
-            throw new NumberInvalidException("commands.give.block.notFound", new Object[]{var2});
+         Block block = (Block)Block.REGISTRY.getObject(resourcelocation);
+         if (block == null) {
+            throw new NumberInvalidException("commands.give.block.notFound", new Object[]{resourcelocation});
          } else {
-            return var3;
+            return block;
          }
       }
    }
 
    public static String joinNiceString(Object[] var0) {
-      StringBuilder var1 = new StringBuilder();
+      StringBuilder stringbuilder = new StringBuilder();
 
-      for(int var2 = 0; var2 < var0.length; ++var2) {
-         String var3 = var0[var2].toString();
-         if (var2 > 0) {
-            if (var2 == var0.length - 1) {
-               var1.append(" and ");
+      for(int i = 0; i < elements.length; ++i) {
+         String s = elements[i].toString();
+         if (i > 0) {
+            if (i == elements.length - 1) {
+               stringbuilder.append(" and ");
             } else {
-               var1.append(", ");
+               stringbuilder.append(", ");
             }
          }
 
-         var1.append(var3);
+         stringbuilder.append(s);
       }
 
-      return var1.toString();
+      return stringbuilder.toString();
    }
 
    public static ITextComponent join(List var0) {
-      TextComponentString var1 = new TextComponentString("");
+      ITextComponent itextcomponent = new TextComponentString("");
 
-      for(int var2 = 0; var2 < var0.size(); ++var2) {
-         if (var2 > 0) {
-            if (var2 == var0.size() - 1) {
-               var1.appendText(" and ");
-            } else if (var2 > 0) {
-               var1.appendText(", ");
+      for(int i = 0; i < components.size(); ++i) {
+         if (i > 0) {
+            if (i == components.size() - 1) {
+               itextcomponent.appendText(" and ");
+            } else if (i > 0) {
+               itextcomponent.appendText(", ");
             }
          }
 
-         var1.appendSibling((ITextComponent)var0.get(var2));
+         itextcomponent.appendSibling((ITextComponent)components.get(i));
       }
 
-      return var1;
+      return itextcomponent;
    }
 
    public static String joinNiceStringFromCollection(Collection var0) {
-      return joinNiceString(var0.toArray(new String[var0.size()]));
+      return joinNiceString(strings.toArray(new String[strings.size()]));
    }
 
    public static List getTabCompletionCoordinate(String[] var0, int var1, @Nullable BlockPos var2) {
-      if (var2 == null) {
+      if (pos == null) {
          return Lists.newArrayList(new String[]{"~"});
       } else {
-         int var3 = var0.length - 1;
-         String var4;
-         if (var3 == var1) {
-            var4 = Integer.toString(var2.getX());
-         } else if (var3 == var1 + 1) {
-            var4 = Integer.toString(var2.getY());
+         int i = inputArgs.length - 1;
+         String s;
+         if (i == index) {
+            s = Integer.toString(pos.getX());
+         } else if (i == index + 1) {
+            s = Integer.toString(pos.getY());
          } else {
-            if (var3 != var1 + 2) {
+            if (i != index + 2) {
                return Collections.emptyList();
             }
 
-            var4 = Integer.toString(var2.getZ());
+            s = Integer.toString(pos.getZ());
          }
 
-         return Lists.newArrayList(new String[]{var4});
+         return Lists.newArrayList(new String[]{s});
       }
    }
 
    @Nullable
    public static List getTabCompletionCoordinateXZ(String[] var0, int var1, @Nullable BlockPos var2) {
-      if (var2 == null) {
+      if (lookedPos == null) {
          return Lists.newArrayList(new String[]{"~"});
       } else {
-         int var3 = var0.length - 1;
-         String var4;
-         if (var3 == var1) {
-            var4 = Integer.toString(var2.getX());
+         int i = inputArgs.length - 1;
+         String s;
+         if (i == index) {
+            s = Integer.toString(lookedPos.getX());
          } else {
-            if (var3 != var1 + 1) {
+            if (i != index + 1) {
                return null;
             }
 
-            var4 = Integer.toString(var2.getZ());
+            s = Integer.toString(lookedPos.getZ());
          }
 
-         return Lists.newArrayList(new String[]{var4});
+         return Lists.newArrayList(new String[]{s});
       }
    }
 
    public static boolean doesStringStartWith(String var0, String var1) {
-      return var1.regionMatches(true, 0, var0, 0, var0.length());
+      return region.regionMatches(true, 0, original, 0, original.length());
    }
 
    public static List getListOfStringsMatchingLastWord(String[] var0, String... var1) {
-      return getListOfStringsMatchingLastWord(var0, Arrays.asList(var1));
+      return getListOfStringsMatchingLastWord(args, Arrays.asList(possibilities));
    }
 
    public static List getListOfStringsMatchingLastWord(String[] var0, Collection var1) {
-      String var2 = var0[var0.length - 1];
-      ArrayList var3 = Lists.newArrayList();
-      if (!var1.isEmpty()) {
-         for(String var5 : Iterables.transform(var1, Functions.toStringFunction())) {
-            if (doesStringStartWith(var2, var5)) {
-               var3.add(var5);
+      String s = inputArgs[inputArgs.length - 1];
+      List list = Lists.newArrayList();
+      if (!possibleCompletions.isEmpty()) {
+         for(String s1 : Iterables.transform(possibleCompletions, Functions.toStringFunction())) {
+            if (doesStringStartWith(s, s1)) {
+               list.add(s1);
             }
          }
 
-         if (var3.isEmpty()) {
-            for(Object var7 : var1) {
-               if (var7 instanceof ResourceLocation && doesStringStartWith(var2, ((ResourceLocation)var7).getResourcePath())) {
-                  var3.add(String.valueOf(var7));
+         if (list.isEmpty()) {
+            for(Object object : possibleCompletions) {
+               if (object instanceof ResourceLocation && doesStringStartWith(s, ((ResourceLocation)object).getResourcePath())) {
+                  list.add(String.valueOf(object));
                }
             }
          }
       }
 
-      return var3;
+      return list;
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
@@ -508,27 +508,22 @@ public abstract class CommandBase implements ICommand {
    }
 
    public static void notifyCommandListener(ICommandSender var0, ICommand var1, String var2, Object... var3) {
-      notifyCommandListener(var0, var1, 0, var2, var3);
+      notifyCommandListener(sender, command, 0, translationKey, translationArgs);
    }
 
    public static void notifyCommandListener(ICommandSender var0, ICommand var1, int var2, String var3, Object... var4) {
       if (commandListener != null) {
-         commandListener.notifyListener(var0, var1, var2, var3, var4);
+         commandListener.notifyListener(sender, command, flags, translationKey, translationArgs);
       }
 
    }
 
    public static void setCommandListener(ICommandListener var0) {
-      commandListener = var0;
+      commandListener = listener;
    }
 
    public int compareTo(ICommand var1) {
-      return this.getName().compareTo(var1.getName());
-   }
-
-   // $FF: synthetic method
-   public int compareTo(Object var1) {
-      return this.compareTo((ICommand)var1);
+      return this.getName().compareTo(p_compareTo_1_.getName());
    }
 
    public static class CoordinateArg {
@@ -537,9 +532,9 @@ public abstract class CommandBase implements ICommand {
       private final boolean isRelative;
 
       protected CoordinateArg(double var1, double var3, boolean var5) {
-         this.result = var1;
-         this.amount = var3;
-         this.isRelative = var5;
+         this.result = resultIn;
+         this.amount = amountIn;
+         this.isRelative = relative;
       }
 
       public double getResult() {

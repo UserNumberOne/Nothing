@@ -13,7 +13,7 @@ public abstract class GuiResourcePackList extends GuiListExtended {
    protected final Minecraft mc;
    protected final List resourcePackEntries;
 
-   public GuiResourcePackList(Minecraft mcIn, int p_i45055_2_, int p_i45055_3_, List p_i45055_4_) {
+   public GuiResourcePackList(Minecraft var1, int var2, int var3, List var4) {
       super(mcIn, p_i45055_2_, p_i45055_3_, 32, p_i45055_3_ - 55 + 4, 36);
       this.mc = mcIn;
       this.resourcePackEntries = p_i45055_4_;
@@ -21,7 +21,7 @@ public abstract class GuiResourcePackList extends GuiListExtended {
       this.setHasListHeader(true, (int)((float)mcIn.fontRendererObj.FONT_HEIGHT * 1.5F));
    }
 
-   protected void drawListHeader(int insideLeft, int insideTop, Tessellator tessellatorIn) {
+   protected void drawListHeader(int var1, int var2, Tessellator var3) {
       String s = TextFormatting.UNDERLINE + "" + TextFormatting.BOLD + this.getListHeader();
       this.mc.fontRendererObj.drawString(s, insideLeft + this.width / 2 - this.mc.fontRendererObj.getStringWidth(s) / 2, Math.min(this.top + 3, insideTop), 16777215);
    }
@@ -36,7 +36,7 @@ public abstract class GuiResourcePackList extends GuiListExtended {
       return this.getList().size();
    }
 
-   public ResourcePackListEntry getListEntry(int index) {
+   public ResourcePackListEntry getListEntry(int var1) {
       return (ResourcePackListEntry)this.getList().get(index);
    }
 

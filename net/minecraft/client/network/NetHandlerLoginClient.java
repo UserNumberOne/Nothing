@@ -41,13 +41,13 @@ public class NetHandlerLoginClient implements INetHandlerLoginClient {
    private final NetworkManager networkManager;
    private GameProfile gameProfile;
 
-   public NetHandlerLoginClient(NetworkManager networkManagerIn, Minecraft mcIn, GuiScreen previousScreenIn) {
+   public NetHandlerLoginClient(NetworkManager var1, Minecraft var2, GuiScreen var3) {
       this.networkManager = networkManagerIn;
       this.mc = mcIn;
       this.previousGuiScreen = previousScreenIn;
    }
 
-   public void handleEncryptionRequest(SPacketEncryptionRequest packetIn) {
+   public void handleEncryptionRequest(SPacketEncryptionRequest var1) {
       final SecretKey secretkey = CryptManager.createNewSharedKey();
       String s = packetIn.getServerId();
       PublicKey publickey = packetIn.getPublicKey();
@@ -74,7 +74,7 @@ public class NetHandlerLoginClient implements INetHandlerLoginClient {
       }
 
       this.networkManager.sendPacket(new CPacketEncryptionResponse(secretkey, publickey, packetIn.getVerifyToken()), new GenericFutureListener() {
-         public void operationComplete(Future p_operationComplete_1_) throws Exception {
+         public void operationComplete(Future var1) throws Exception {
             NetHandlerLoginClient.this.networkManager.enableEncryption(secretkey);
          }
       });
@@ -84,7 +84,7 @@ public class NetHandlerLoginClient implements INetHandlerLoginClient {
       return this.mc.getSessionService();
    }
 
-   public void handleLoginSuccess(SPacketLoginSuccess packetIn) {
+   public void handleLoginSuccess(SPacketLoginSuccess var1) {
       this.gameProfile = packetIn.getProfile();
       this.networkManager.setConnectionState(EnumConnectionState.PLAY);
       FMLNetworkHandler.fmlClientHandshake(this.networkManager);
@@ -93,7 +93,7 @@ public class NetHandlerLoginClient implements INetHandlerLoginClient {
       FMLClientHandler.instance().setPlayClient(nhpc);
    }
 
-   public void onDisconnect(ITextComponent reason) {
+   public void onDisconnect(ITextComponent var1) {
       if (this.previousGuiScreen != null && this.previousGuiScreen instanceof GuiScreenRealmsProxy) {
          this.mc.displayGuiScreen((new DisconnectedRealmsScreen(((GuiScreenRealmsProxy)this.previousGuiScreen).getProxy(), "connect.failed", reason)).getProxy());
       } else {
@@ -102,11 +102,11 @@ public class NetHandlerLoginClient implements INetHandlerLoginClient {
 
    }
 
-   public void handleDisconnect(SPacketDisconnect packetIn) {
+   public void handleDisconnect(SPacketDisconnect var1) {
       this.networkManager.closeChannel(packetIn.getReason());
    }
 
-   public void handleEnableCompression(SPacketEnableCompression packetIn) {
+   public void handleEnableCompression(SPacketEnableCompression var1) {
       if (!this.networkManager.isLocalChannel()) {
          this.networkManager.setCompressionThreshold(packetIn.getCompressionThreshold());
       }

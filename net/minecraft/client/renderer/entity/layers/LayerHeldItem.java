@@ -15,11 +15,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LayerHeldItem implements LayerRenderer {
    protected final RenderLivingBase livingEntityRenderer;
 
-   public LayerHeldItem(RenderLivingBase livingEntityRendererIn) {
+   public LayerHeldItem(RenderLivingBase var1) {
       this.livingEntityRenderer = livingEntityRendererIn;
    }
 
-   public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityLivingBase var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       boolean flag = entitylivingbaseIn.getPrimaryHand() == EnumHandSide.RIGHT;
       ItemStack itemstack = flag ? entitylivingbaseIn.getHeldItemOffhand() : entitylivingbaseIn.getHeldItemMainhand();
       ItemStack itemstack1 = flag ? entitylivingbaseIn.getHeldItemMainhand() : entitylivingbaseIn.getHeldItemOffhand();
@@ -39,7 +39,7 @@ public class LayerHeldItem implements LayerRenderer {
 
    }
 
-   private void renderHeldItem(EntityLivingBase p_188358_1_, ItemStack p_188358_2_, ItemCameraTransforms.TransformType p_188358_3_, EnumHandSide handSide) {
+   private void renderHeldItem(EntityLivingBase var1, ItemStack var2, ItemCameraTransforms.TransformType var3, EnumHandSide var4) {
       if (p_188358_2_ != null) {
          GlStateManager.pushMatrix();
          if (p_188358_1_.isSneaking()) {

@@ -13,17 +13,17 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderWitch extends RenderLiving {
    private static final ResourceLocation WITCH_TEXTURES = new ResourceLocation("textures/entity/witch.png");
 
-   public RenderWitch(RenderManager renderManagerIn) {
+   public RenderWitch(RenderManager var1) {
       super(renderManagerIn, new ModelWitch(0.0F), 0.5F);
       this.addLayer(new LayerHeldItemWitch(this));
    }
 
-   public void doRender(EntityWitch entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityWitch var1, double var2, double var4, double var6, float var8, float var9) {
       ((ModelWitch)this.mainModel).holdingItem = entity.getHeldItemMainhand() != null;
       super.doRender((EntityLiving)entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityWitch entity) {
+   protected ResourceLocation getEntityTexture(EntityWitch var1) {
       return WITCH_TEXTURES;
    }
 
@@ -31,7 +31,7 @@ public class RenderWitch extends RenderLiving {
       GlStateManager.translate(0.0F, 0.1875F, 0.0F);
    }
 
-   protected void preRenderCallback(EntityWitch entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityWitch var1, float var2) {
       float f = 0.9375F;
       GlStateManager.scale(0.9375F, 0.9375F, 0.9375F);
    }

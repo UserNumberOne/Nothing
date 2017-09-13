@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.src.MinecraftServer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -25,81 +25,73 @@ public class CommandParticle extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (var3.length < 8) {
+      if (args.length < 8) {
          throw new WrongUsageException("commands.particle.usage", new Object[0]);
       } else {
-         boolean var4 = false;
-         EnumParticleTypes var5 = EnumParticleTypes.getByName(var3[0]);
-         if (var5 == null) {
-            throw new CommandException("commands.particle.notFound", new Object[]{var3[0]});
+         boolean flag = false;
+         EnumParticleTypes enumparticletypes = EnumParticleTypes.getByName(args[0]);
+         if (enumparticletypes == null) {
+            throw new CommandException("commands.particle.notFound", new Object[]{args[0]});
          } else {
-            String var6 = var3[0];
-            Vec3d var7 = var2.getPositionVector();
-            double var8 = (double)((float)parseDouble(var7.xCoord, var3[1], true));
-            double var10 = (double)((float)parseDouble(var7.yCoord, var3[2], true));
-            double var12 = (double)((float)parseDouble(var7.zCoord, var3[3], true));
-            double var14 = (double)((float)parseDouble(var3[4]));
-            double var16 = (double)((float)parseDouble(var3[5]));
-            double var18 = (double)((float)parseDouble(var3[6]));
-            double var20 = (double)((float)parseDouble(var3[7]));
-            int var22 = 0;
-            if (var3.length > 8) {
-               var22 = parseInt(var3[8], 0);
+            String s = args[0];
+            Vec3d vec3d = sender.getPositionVector();
+            double d0 = (double)((float)parseDouble(vec3d.xCoord, args[1], true));
+            double d1 = (double)((float)parseDouble(vec3d.yCoord, args[2], true));
+            double d2 = (double)((float)parseDouble(vec3d.zCoord, args[3], true));
+            double d3 = (double)((float)parseDouble(args[4]));
+            double d4 = (double)((float)parseDouble(args[5]));
+            double d5 = (double)((float)parseDouble(args[6]));
+            double d6 = (double)((float)parseDouble(args[7]));
+            int i = 0;
+            if (args.length > 8) {
+               i = parseInt(args[8], 0);
             }
 
-            boolean var23 = false;
-            if (var3.length > 9 && "force".equals(var3[9])) {
-               var23 = true;
+            boolean flag1 = false;
+            if (args.length > 9 && "force".equals(args[9])) {
+               flag1 = true;
             }
 
-            EntityPlayerMP var24;
-            if (var3.length > 10) {
-               var24 = a(var1, var2, var3[10]);
+            EntityPlayerMP entityplayermp;
+            if (args.length > 10) {
+               entityplayermp = getPlayer(server, sender, args[10]);
             } else {
-               var24 = null;
+               entityplayermp = null;
             }
 
-            int[] var25 = new int[var5.getArgumentCount()];
+            int[] aint = new int[enumparticletypes.getArgumentCount()];
 
-            for(int var26 = 0; var26 < var25.length; ++var26) {
-               if (var3.length > 11 + var26) {
+            for(int j = 0; j < aint.length; ++j) {
+               if (args.length > 11 + j) {
                   try {
-                     var25[var26] = Integer.parseInt(var3[11 + var26]);
+                     aint[j] = Integer.parseInt(args[11 + j]);
                   } catch (NumberFormatException var28) {
-                     throw new CommandException("commands.particle.invalidParam", new Object[]{var3[11 + var26]});
+                     throw new CommandException("commands.particle.invalidParam", new Object[]{args[11 + j]});
                   }
                }
             }
 
-            World var29 = var2.getEntityWorld();
-            if (var29 instanceof WorldServer) {
-               WorldServer var27 = (WorldServer)var29;
-               if (var24 == null) {
-                  var27.spawnParticle(var5, var23, var8, var10, var12, var22, var14, var16, var18, var20, var25);
+            World world = sender.getEntityWorld();
+            if (world instanceof WorldServer) {
+               WorldServer worldserver = (WorldServer)world;
+               if (entityplayermp == null) {
+                  worldserver.spawnParticle(enumparticletypes, flag1, d0, d1, d2, i, d3, d4, d5, d6, aint);
                } else {
-                  var27.spawnParticle(var24, var5, var23, var8, var10, var12, var22, var14, var16, var18, var20, var25);
+                  worldserver.spawnParticle(entityplayermp, enumparticletypes, flag1, d0, d1, d2, i, d3, d4, d5, d6, aint);
                }
 
-               notifyCommandListener(var2, this, "commands.particle.success", new Object[]{var6, Math.max(var22, 1)});
+               notifyCommandListener(sender, this, "commands.particle.success", new Object[]{s, Math.max(i, 1)});
             }
 
          }
       }
    }
 
-   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      if (var3.length == 1) {
-         return getListOfStringsMatchingLastWord(var3, EnumParticleTypes.getParticleNames());
-      } else if (var3.length > 1 && var3.length <= 4) {
-         return getTabCompletionCoordinate(var3, 1, var4);
-      } else if (var3.length == 10) {
-         return getListOfStringsMatchingLastWord(var3, new String[]{"normal", "force"});
-      } else {
-         return var3.length == 11 ? getListOfStringsMatchingLastWord(var3, var1.getPlayers()) : Collections.emptyList();
-      }
+   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return args.length == 1 ? getListOfStringsMatchingLastWord(args, EnumParticleTypes.getParticleNames()) : (args.length > 1 && args.length <= 4 ? getTabCompletionCoordinate(args, 1, pos) : (args.length == 10 ? getListOfStringsMatchingLastWord(args, new String[]{"normal", "force"}) : (args.length == 11 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList())));
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return var2 == 10;
+      return index == 10;
    }
 }

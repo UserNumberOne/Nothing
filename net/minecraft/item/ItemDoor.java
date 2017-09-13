@@ -17,29 +17,29 @@ public class ItemDoor extends Item {
    private final Block block;
 
    public ItemDoor(Block var1) {
-      this.block = var1;
+      this.block = block;
       this.setCreativeTab(CreativeTabs.REDSTONE);
    }
 
    public EnumActionResult onItemUse(ItemStack var1, EntityPlayer var2, World var3, BlockPos var4, EnumHand var5, EnumFacing var6, float var7, float var8, float var9) {
-      if (var6 != EnumFacing.UP) {
+      if (facing != EnumFacing.UP) {
          return EnumActionResult.FAIL;
       } else {
-         IBlockState var10 = var3.getBlockState(var4);
-         Block var11 = var10.getBlock();
-         if (!var11.isReplaceable(var3, var4)) {
-            var4 = var4.offset(var6);
+         IBlockState iblockstate = worldIn.getBlockState(pos);
+         Block block = iblockstate.getBlock();
+         if (!block.isReplaceable(worldIn, pos)) {
+            pos = pos.offset(facing);
          }
 
-         if (var2.canPlayerEdit(var4, var6, var1) && this.block.canPlaceBlockAt(var3, var4)) {
-            EnumFacing var12 = EnumFacing.fromAngle((double)var2.rotationYaw);
-            int var13 = var12.getFrontOffsetX();
-            int var14 = var12.getFrontOffsetZ();
-            boolean var15 = var13 < 0 && var9 < 0.5F || var13 > 0 && var9 > 0.5F || var14 < 0 && var7 > 0.5F || var14 > 0 && var7 < 0.5F;
-            placeDoor(var3, var4, var12, this.block, var15);
-            SoundType var16 = this.block.getSoundType();
-            var3.playSound(var2, var4, var16.getPlaceSound(), SoundCategory.BLOCKS, (var16.getVolume() + 1.0F) / 2.0F, var16.getPitch() * 0.8F);
-            --var1.stackSize;
+         if (playerIn.canPlayerEdit(pos, facing, stack) && this.block.canPlaceBlockAt(worldIn, pos)) {
+            EnumFacing enumfacing = EnumFacing.fromAngle((double)playerIn.rotationYaw);
+            int i = enumfacing.getFrontOffsetX();
+            int j = enumfacing.getFrontOffsetZ();
+            boolean flag = i < 0 && hitZ < 0.5F || i > 0 && hitZ > 0.5F || j < 0 && hitX > 0.5F || j > 0 && hitX < 0.5F;
+            placeDoor(worldIn, pos, enumfacing, this.block, flag);
+            SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, playerIn);
+            worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+            --stack.stackSize;
             return EnumActionResult.SUCCESS;
          } else {
             return EnumActionResult.FAIL;
@@ -48,26 +48,26 @@ public class ItemDoor extends Item {
    }
 
    public static void placeDoor(World var0, BlockPos var1, EnumFacing var2, Block var3, boolean var4) {
-      BlockPos var5 = var1.offset(var2.rotateY());
-      BlockPos var6 = var1.offset(var2.rotateYCCW());
-      int var7 = (var0.getBlockState(var6).isNormalCube() ? 1 : 0) + (var0.getBlockState(var6.up()).isNormalCube() ? 1 : 0);
-      int var8 = (var0.getBlockState(var5).isNormalCube() ? 1 : 0) + (var0.getBlockState(var5.up()).isNormalCube() ? 1 : 0);
-      boolean var9 = var0.getBlockState(var6).getBlock() == var3 || var0.getBlockState(var6.up()).getBlock() == var3;
-      boolean var10 = var0.getBlockState(var5).getBlock() == var3 || var0.getBlockState(var5.up()).getBlock() == var3;
-      if ((!var9 || var10) && var8 <= var7) {
-         if (var10 && !var9 || var8 < var7) {
-            var4 = false;
+      BlockPos blockpos = pos.offset(facing.rotateY());
+      BlockPos blockpos1 = pos.offset(facing.rotateYCCW());
+      int i = (worldIn.getBlockState(blockpos1).isNormalCube() ? 1 : 0) + (worldIn.getBlockState(blockpos1.up()).isNormalCube() ? 1 : 0);
+      int j = (worldIn.getBlockState(blockpos).isNormalCube() ? 1 : 0) + (worldIn.getBlockState(blockpos.up()).isNormalCube() ? 1 : 0);
+      boolean flag = worldIn.getBlockState(blockpos1).getBlock() == door || worldIn.getBlockState(blockpos1.up()).getBlock() == door;
+      boolean flag1 = worldIn.getBlockState(blockpos).getBlock() == door || worldIn.getBlockState(blockpos.up()).getBlock() == door;
+      if ((!flag || flag1) && j <= i) {
+         if (flag1 && !flag || j < i) {
+            isRightHinge = false;
          }
       } else {
-         var4 = true;
+         isRightHinge = true;
       }
 
-      BlockPos var11 = var1.up();
-      boolean var12 = var0.isBlockPowered(var1) || var0.isBlockPowered(var11);
-      IBlockState var13 = var3.getDefaultState().withProperty(BlockDoor.FACING, var2).withProperty(BlockDoor.HINGE, var4 ? BlockDoor.EnumHingePosition.RIGHT : BlockDoor.EnumHingePosition.LEFT).withProperty(BlockDoor.POWERED, Boolean.valueOf(var12)).withProperty(BlockDoor.OPEN, Boolean.valueOf(var12));
-      var0.setBlockState(var1, var13.withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.LOWER), 2);
-      var0.setBlockState(var11, var13.withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.UPPER), 2);
-      var0.notifyNeighborsOfStateChange(var1, var3);
-      var0.notifyNeighborsOfStateChange(var11, var3);
+      BlockPos blockpos2 = pos.up();
+      boolean flag2 = worldIn.isBlockPowered(pos) || worldIn.isBlockPowered(blockpos2);
+      IBlockState iblockstate = door.getDefaultState().withProperty(BlockDoor.FACING, facing).withProperty(BlockDoor.HINGE, isRightHinge ? BlockDoor.EnumHingePosition.RIGHT : BlockDoor.EnumHingePosition.LEFT).withProperty(BlockDoor.POWERED, Boolean.valueOf(flag2)).withProperty(BlockDoor.OPEN, Boolean.valueOf(flag2));
+      worldIn.setBlockState(pos, iblockstate.withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.LOWER), 2);
+      worldIn.setBlockState(blockpos2, iblockstate.withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.UPPER), 2);
+      worldIn.notifyNeighborsOfStateChange(pos, door);
+      worldIn.notifyNeighborsOfStateChange(blockpos2, door);
    }
 }

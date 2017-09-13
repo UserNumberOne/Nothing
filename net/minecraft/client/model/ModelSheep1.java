@@ -33,13 +33,13 @@ public class ModelSheep1 extends ModelQuadruped {
       this.leg4.setRotationPoint(3.0F, 12.0F, -5.0F);
    }
 
-   public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
+   public void setLivingAnimations(EntityLivingBase var1, float var2, float var3, float var4) {
       super.setLivingAnimations(entitylivingbaseIn, p_78086_2_, p_78086_3_, partialTickTime);
       this.head.rotationPointY = 6.0F + ((EntitySheep)entitylivingbaseIn).getHeadRotationPointY(partialTickTime) * 9.0F;
       this.headRotationAngleX = ((EntitySheep)entitylivingbaseIn).getHeadRotationAngleX(partialTickTime);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
       this.head.rotateAngleX = this.headRotationAngleX;
    }

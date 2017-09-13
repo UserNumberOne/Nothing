@@ -13,12 +13,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderCreeper extends RenderLiving {
    private static final ResourceLocation CREEPER_TEXTURES = new ResourceLocation("textures/entity/creeper/creeper.png");
 
-   public RenderCreeper(RenderManager renderManagerIn) {
+   public RenderCreeper(RenderManager var1) {
       super(renderManagerIn, new ModelCreeper(), 0.5F);
       this.addLayer(new LayerCreeperCharge(this));
    }
 
-   protected void preRenderCallback(EntityCreeper entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityCreeper var1, float var2) {
       float f = entitylivingbaseIn.getCreeperFlashIntensity(partialTickTime);
       float f1 = 1.0F + MathHelper.sin(f * 100.0F) * f * 0.01F;
       f = MathHelper.clamp(f, 0.0F, 1.0F);
@@ -29,7 +29,7 @@ public class RenderCreeper extends RenderLiving {
       GlStateManager.scale(f2, f3, f2);
    }
 
-   protected int getColorMultiplier(EntityCreeper entitylivingbaseIn, float lightBrightness, float partialTickTime) {
+   protected int getColorMultiplier(EntityCreeper var1, float var2, float var3) {
       float f = entitylivingbaseIn.getCreeperFlashIntensity(partialTickTime);
       if ((int)(f * 10.0F) % 2 == 0) {
          return 0;
@@ -40,7 +40,7 @@ public class RenderCreeper extends RenderLiving {
       }
    }
 
-   protected ResourceLocation getEntityTexture(EntityCreeper entity) {
+   protected ResourceLocation getEntityTexture(EntityCreeper var1) {
       return CREEPER_TEXTURES;
    }
 }

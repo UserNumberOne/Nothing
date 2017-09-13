@@ -20,12 +20,12 @@ public class RenderEnderCrystal extends Render {
    private final ModelBase modelEnderCrystal = new ModelEnderCrystal(0.0F, true);
    private final ModelBase modelEnderCrystalNoBase = new ModelEnderCrystal(0.0F, false);
 
-   public RenderEnderCrystal(RenderManager renderManagerIn) {
+   public RenderEnderCrystal(RenderManager var1) {
       super(renderManagerIn);
       this.shadowSize = 0.5F;
    }
 
-   public void doRender(EntityEnderCrystal entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityEnderCrystal var1, double var2, double var4, double var6, float var8, float var9) {
       float f = (float)entity.innerRotation + partialTicks;
       GlStateManager.pushMatrix();
       GlStateManager.translate((float)x, (float)y, (float)z);
@@ -64,11 +64,11 @@ public class RenderEnderCrystal extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityEnderCrystal entity) {
+   protected ResourceLocation getEntityTexture(EntityEnderCrystal var1) {
       return ENDER_CRYSTAL_TEXTURES;
    }
 
-   public boolean shouldRender(EntityEnderCrystal livingEntity, ICamera camera, double camX, double camY, double camZ) {
+   public boolean shouldRender(EntityEnderCrystal var1, ICamera var2, double var3, double var5, double var7) {
       return super.shouldRender(livingEntity, camera, camX, camY, camZ) || livingEntity.getBeamTarget() != null;
    }
 }

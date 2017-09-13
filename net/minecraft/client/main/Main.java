@@ -22,7 +22,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class Main {
-   public static void main(String[] p_main_0_) {
+   public static void main(String[] var0) {
       OptionParser optionparser = new OptionParser();
       optionparser.allowsUnrecognizedOptions();
       optionparser.accepts("demo");
@@ -103,7 +103,7 @@ public class Main {
       (new Minecraft(gameconfiguration)).run();
    }
 
-   private static boolean isNullOrEmpty(String str) {
+   private static boolean isNullOrEmpty(String var0) {
       return str != null && !str.isEmpty();
    }
 }

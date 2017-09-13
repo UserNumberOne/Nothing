@@ -6,15 +6,13 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityCow;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.event.entity.EntityBreedEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 
 public class EntityAIMate extends EntityAIBase {
    private final EntityAnimal theAnimal;
@@ -23,10 +21,10 @@ public class EntityAIMate extends EntityAIBase {
    int spawnBabyDelay;
    double moveSpeed;
 
-   public EntityAIMate(EntityAnimal entityanimal, double d0) {
-      this.theAnimal = entityanimal;
-      this.world = entityanimal.world;
-      this.moveSpeed = d0;
+   public EntityAIMate(EntityAnimal var1, double var2) {
+      this.theAnimal = animal;
+      this.world = animal.world;
+      this.moveSpeed = speedIn;
       this.setMutexBits(3);
    }
 
@@ -75,52 +73,52 @@ public class EntityAIMate extends EntityAIBase {
 
    private void spawnBaby() {
       EntityAgeable entityageable = this.theAnimal.createChild(this.targetMate);
-      if (entityageable != null) {
-         if (entityageable instanceof EntityTameable && ((EntityTameable)entityageable).isTamed()) {
-            entityageable.persistenceRequired = true;
-         }
-
-         EntityPlayer entityhuman = this.theAnimal.getPlayerInLove();
-         if (entityhuman == null && this.targetMate.getPlayerInLove() != null) {
-            entityhuman = this.targetMate.getPlayerInLove();
-         }
-
-         int experience = this.theAnimal.getRNG().nextInt(7) + 1;
-         EntityBreedEvent entityBreedEvent = CraftEventFactory.callEntityBreedEvent(entityageable, this.theAnimal, this.targetMate, entityhuman, this.theAnimal.breedItem, experience);
-         if (entityBreedEvent.isCancelled()) {
-            return;
-         }
-
-         if (entityhuman != null) {
-            entityhuman.addStat(StatList.ANIMALS_BRED);
-            if (this.theAnimal instanceof EntityCow) {
-               entityhuman.addStat(AchievementList.BREED_COW);
-            }
-         }
-
+      BabyEntitySpawnEvent event = new BabyEntitySpawnEvent(this.theAnimal, this.targetMate, entityageable);
+      boolean cancelled = MinecraftForge.EVENT_BUS.post(event);
+      entityageable = event.getChild();
+      if (cancelled) {
          this.theAnimal.setGrowingAge(6000);
          this.targetMate.setGrowingAge(6000);
          this.theAnimal.resetInLove();
          this.targetMate.resetInLove();
-         entityageable.setGrowingAge(-24000);
-         entityageable.setLocationAndAngles(this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, 0.0F, 0.0F);
-         this.world.addEntity(entityageable, SpawnReason.BREEDING);
-         Random random = this.theAnimal.getRNG();
+      } else {
+         if (entityageable != null) {
+            EntityPlayer entityplayer = this.theAnimal.getPlayerInLove();
+            if (entityplayer == null && this.targetMate.getPlayerInLove() != null) {
+               entityplayer = this.targetMate.getPlayerInLove();
+            }
 
-         for(int i = 0; i < 7; ++i) {
-            double d0 = random.nextGaussian() * 0.02D;
-            double d1 = random.nextGaussian() * 0.02D;
-            double d2 = random.nextGaussian() * 0.02D;
-            double d3 = random.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
-            double d4 = 0.5D + random.nextDouble() * (double)this.theAnimal.height;
-            double d5 = random.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
-            this.world.spawnParticle(EnumParticleTypes.HEART, this.theAnimal.posX + d3, this.theAnimal.posY + d4, this.theAnimal.posZ + d5, d0, d1, d2);
+            if (entityplayer != null) {
+               entityplayer.addStat(StatList.ANIMALS_BRED);
+               if (this.theAnimal instanceof EntityCow) {
+                  entityplayer.addStat(AchievementList.BREED_COW);
+               }
+            }
+
+            this.theAnimal.setGrowingAge(6000);
+            this.targetMate.setGrowingAge(6000);
+            this.theAnimal.resetInLove();
+            this.targetMate.resetInLove();
+            entityageable.setGrowingAge(-24000);
+            entityageable.setLocationAndAngles(this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, 0.0F, 0.0F);
+            this.world.spawnEntity(entityageable);
+            Random random = this.theAnimal.getRNG();
+
+            for(int i = 0; i < 7; ++i) {
+               double d0 = random.nextGaussian() * 0.02D;
+               double d1 = random.nextGaussian() * 0.02D;
+               double d2 = random.nextGaussian() * 0.02D;
+               double d3 = random.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
+               double d4 = 0.5D + random.nextDouble() * (double)this.theAnimal.height;
+               double d5 = random.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
+               this.world.spawnParticle(EnumParticleTypes.HEART, this.theAnimal.posX + d3, this.theAnimal.posY + d4, this.theAnimal.posZ + d5, d0, d1, d2);
+            }
+
+            if (this.world.getGameRules().getBoolean("doMobLoot")) {
+               this.world.spawnEntity(new EntityXPOrb(this.world, this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, random.nextInt(7) + 1));
+            }
          }
 
-         if (this.world.getGameRules().getBoolean("doMobLoot")) {
-            this.world.spawnEntity(new EntityXPOrb(this.world, this.theAnimal.posX, this.theAnimal.posY, this.theAnimal.posZ, entityBreedEvent.getExperience()));
-         }
       }
-
    }
 }

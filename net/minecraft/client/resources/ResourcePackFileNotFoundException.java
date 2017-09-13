@@ -7,7 +7,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ResourcePackFileNotFoundException extends FileNotFoundException {
-   public ResourcePackFileNotFoundException(File resourcePack, String p_i1294_2_) {
+   public ResourcePackFileNotFoundException(File var1, String var2) {
       super(String.format("'%s' in ResourcePack '%s'", p_i1294_2_, resourcePack));
    }
 }

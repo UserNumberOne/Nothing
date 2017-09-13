@@ -14,12 +14,12 @@ public class BuiltInModel implements IBakedModel {
    private final ItemCameraTransforms cameraTransforms;
    private final ItemOverrideList overrideList;
 
-   public BuiltInModel(ItemCameraTransforms p_i46537_1_, ItemOverrideList p_i46537_2_) {
+   public BuiltInModel(ItemCameraTransforms var1, ItemOverrideList var2) {
       this.cameraTransforms = p_i46537_1_;
       this.overrideList = p_i46537_2_;
    }
 
-   public List getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
+   public List getQuads(@Nullable IBlockState var1, @Nullable EnumFacing var2, long var3) {
       return Collections.emptyList();
    }
 

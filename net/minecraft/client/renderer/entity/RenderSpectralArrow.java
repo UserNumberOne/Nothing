@@ -9,11 +9,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderSpectralArrow extends RenderArrow {
    public static final ResourceLocation RES_SPECTRAL_ARROW = new ResourceLocation("textures/entity/projectiles/spectral_arrow.png");
 
-   public RenderSpectralArrow(RenderManager manager) {
+   public RenderSpectralArrow(RenderManager var1) {
       super(manager);
    }
 
-   protected ResourceLocation getEntityTexture(EntitySpectralArrow entity) {
+   protected ResourceLocation getEntityTexture(EntitySpectralArrow var1) {
       return RES_SPECTRAL_ARROW;
    }
 }

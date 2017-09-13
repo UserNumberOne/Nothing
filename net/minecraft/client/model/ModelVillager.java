@@ -14,11 +14,11 @@ public class ModelVillager extends ModelBase {
    public ModelRenderer leftVillagerLeg;
    public ModelRenderer villagerNose;
 
-   public ModelVillager(float scale) {
+   public ModelVillager(float var1) {
       this(scale, 0.0F, 64, 64);
    }
 
-   public ModelVillager(float scale, float p_i1164_2_, int width, int height) {
+   public ModelVillager(float var1, float var2, int var3, int var4) {
       this.villagerHead = (new ModelRenderer(this)).setTextureSize(width, height);
       this.villagerHead.setRotationPoint(0.0F, 0.0F + p_i1164_2_, 0.0F);
       this.villagerHead.setTextureOffset(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8, 10, 8, scale);
@@ -44,7 +44,7 @@ public class ModelVillager extends ModelBase {
       this.leftVillagerLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, scale);
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
       this.villagerHead.render(scale);
       this.villagerBody.render(scale);
@@ -53,7 +53,7 @@ public class ModelVillager extends ModelBase {
       this.villagerArms.render(scale);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       this.villagerHead.rotateAngleY = netHeadYaw * 0.017453292F;
       this.villagerHead.rotateAngleX = headPitch * 0.017453292F;
       this.villagerArms.rotationPointY = 3.0F;

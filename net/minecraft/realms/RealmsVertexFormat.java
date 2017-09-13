@@ -11,11 +11,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RealmsVertexFormat {
    private VertexFormat v;
 
-   public RealmsVertexFormat(VertexFormat vIn) {
+   public RealmsVertexFormat(VertexFormat var1) {
       this.v = vIn;
    }
 
-   public RealmsVertexFormat from(VertexFormat p_from_1_) {
+   public RealmsVertexFormat from(VertexFormat var1) {
       this.v = p_from_1_;
       return this;
    }
@@ -28,7 +28,7 @@ public class RealmsVertexFormat {
       this.v.clear();
    }
 
-   public int getUvOffset(int p_getUvOffset_1_) {
+   public int getUvOffset(int var1) {
       return this.v.getUvOffsetById(p_getUvOffset_1_);
    }
 
@@ -40,15 +40,15 @@ public class RealmsVertexFormat {
       return this.v.hasColor();
    }
 
-   public boolean hasUv(int p_hasUv_1_) {
+   public boolean hasUv(int var1) {
       return this.v.hasUvOffset(p_hasUv_1_);
    }
 
-   public RealmsVertexFormatElement getElement(int p_getElement_1_) {
+   public RealmsVertexFormatElement getElement(int var1) {
       return new RealmsVertexFormatElement(this.v.getElement(p_getElement_1_));
    }
 
-   public RealmsVertexFormat addElement(RealmsVertexFormatElement p_addElement_1_) {
+   public RealmsVertexFormat addElement(RealmsVertexFormatElement var1) {
       return this.from(this.v.addElement(p_addElement_1_.getVertexFormatElement()));
    }
 
@@ -74,7 +74,7 @@ public class RealmsVertexFormat {
       return this.v.getNextOffset();
    }
 
-   public int getOffset(int p_getOffset_1_) {
+   public int getOffset(int var1) {
       return this.v.getOffset(p_getOffset_1_);
    }
 
@@ -86,7 +86,7 @@ public class RealmsVertexFormat {
       return this.v.getIntegerSize();
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       return this.v.equals(p_equals_1_);
    }
 

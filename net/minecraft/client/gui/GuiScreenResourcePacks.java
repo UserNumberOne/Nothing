@@ -24,7 +24,7 @@ public class GuiScreenResourcePacks extends GuiScreen {
    private GuiResourcePackSelected selectedResourcePacksList;
    private boolean changed;
 
-   public GuiScreenResourcePacks(GuiScreen parentScreenIn) {
+   public GuiScreenResourcePacks(GuiScreen var1) {
       this.parentScreen = parentScreenIn;
    }
 
@@ -69,11 +69,11 @@ public class GuiScreenResourcePacks extends GuiScreen {
       this.availableResourcePacksList.handleMouseInput();
    }
 
-   public boolean hasResourcePackEntry(ResourcePackListEntry p_146961_1_) {
+   public boolean hasResourcePackEntry(ResourcePackListEntry var1) {
       return this.selectedResourcePacks.contains(p_146961_1_);
    }
 
-   public List getListContaining(ResourcePackListEntry p_146962_1_) {
+   public List getListContaining(ResourcePackListEntry var1) {
       return this.hasResourcePackEntry(p_146962_1_) ? this.selectedResourcePacks : this.availableResourcePacks;
    }
 
@@ -85,7 +85,7 @@ public class GuiScreenResourcePacks extends GuiScreen {
       return this.selectedResourcePacks;
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 2) {
             File file1 = this.mc.getResourcePackRepository().getDirResourcepacks();
@@ -122,17 +122,17 @@ public class GuiScreenResourcePacks extends GuiScreen {
 
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       this.availableResourcePacksList.mouseClicked(mouseX, mouseY, mouseButton);
       this.selectedResourcePacksList.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   protected void mouseReleased(int mouseX, int mouseY, int state) {
+   protected void mouseReleased(int var1, int var2, int var3) {
       super.mouseReleased(mouseX, mouseY, state);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawBackground(0);
       this.availableResourcePacksList.drawScreen(mouseX, mouseY, partialTicks);
       this.selectedResourcePacksList.drawScreen(mouseX, mouseY, partialTicks);

@@ -36,17 +36,17 @@ public abstract class RenderLivingBase extends Render {
    public static float NAME_TAG_RANGE = 64.0F;
    public static float NAME_TAG_RANGE_SNEAK = 32.0F;
 
-   public RenderLivingBase(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn) {
+   public RenderLivingBase(RenderManager var1, ModelBase var2, float var3) {
       super(renderManagerIn);
       this.mainModel = modelBaseIn;
       this.shadowSize = shadowSizeIn;
    }
 
-   public boolean addLayer(LayerRenderer layer) {
+   public boolean addLayer(LayerRenderer var1) {
       return this.layerRenderers.add(layer);
    }
 
-   public boolean removeLayer(LayerRenderer layer) {
+   public boolean removeLayer(LayerRenderer var1) {
       return this.layerRenderers.remove(layer);
    }
 
@@ -54,7 +54,7 @@ public abstract class RenderLivingBase extends Render {
       return this.mainModel;
    }
 
-   protected float interpolateRotation(float prevYawOffset, float yawOffset, float partialTicks) {
+   protected float interpolateRotation(float var1, float var2, float var3) {
       float f;
       for(f = yawOffset - prevYawOffset; f < -180.0F; f += 360.0F) {
          ;
@@ -70,7 +70,7 @@ public abstract class RenderLivingBase extends Render {
    public void transformHeldFull3DItemLayer() {
    }
 
-   public void doRender(EntityLivingBase entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityLivingBase var1, double var2, double var4, double var6, float var8, float var9) {
       if (!MinecraftForge.EVENT_BUS.post(new Pre(entity, this, x, y, z))) {
          GlStateManager.pushMatrix();
          GlStateManager.disableCull();
@@ -169,7 +169,7 @@ public abstract class RenderLivingBase extends Render {
       }
    }
 
-   public float prepareScale(EntityLivingBase entitylivingbaseIn, float partialTicks) {
+   public float prepareScale(EntityLivingBase var1, float var2) {
       GlStateManager.enableRescaleNormal();
       GlStateManager.scale(-1.0F, -1.0F, 1.0F);
       this.preRenderCallback(entitylivingbaseIn, partialTicks);
@@ -178,7 +178,7 @@ public abstract class RenderLivingBase extends Render {
       return 0.0625F;
    }
 
-   protected boolean setScoreTeamColor(EntityLivingBase entityLivingBaseIn) {
+   protected boolean setScoreTeamColor(EntityLivingBase var1) {
       GlStateManager.disableLighting();
       GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
       GlStateManager.disableTexture2D();
@@ -193,7 +193,7 @@ public abstract class RenderLivingBase extends Render {
       GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
    }
 
-   protected void renderModel(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor) {
+   protected void renderModel(EntityLivingBase var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       boolean flag = !entitylivingbaseIn.isInvisible() || this.renderOutlines;
       boolean flag1 = !flag && !entitylivingbaseIn.isInvisibleToPlayer(Minecraft.getMinecraft().player);
       if (flag || flag1) {
@@ -213,11 +213,11 @@ public abstract class RenderLivingBase extends Render {
 
    }
 
-   protected boolean setDoRenderBrightness(EntityLivingBase entityLivingBaseIn, float partialTicks) {
+   protected boolean setDoRenderBrightness(EntityLivingBase var1, float var2) {
       return this.setBrightness(entityLivingBaseIn, partialTicks, true);
    }
 
-   protected boolean setBrightness(EntityLivingBase entitylivingbaseIn, float partialTicks, boolean combineTextures) {
+   protected boolean setBrightness(EntityLivingBase var1, float var2, boolean var3) {
       float f = entitylivingbaseIn.getBrightness(partialTicks);
       int i = this.getColorMultiplier(entitylivingbaseIn, f, partialTicks);
       boolean flag = (i >> 24 & 255) > 0;
@@ -327,11 +327,11 @@ public abstract class RenderLivingBase extends Render {
       GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
    }
 
-   protected void renderLivingAt(EntityLivingBase entityLivingBaseIn, double x, double y, double z) {
+   protected void renderLivingAt(EntityLivingBase var1, double var2, double var4, double var6) {
       GlStateManager.translate((float)x, (float)y, (float)z);
    }
 
-   protected void applyRotations(EntityLivingBase entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
+   protected void applyRotations(EntityLivingBase var1, float var2, float var3, float var4) {
       GlStateManager.rotate(180.0F - p_77043_3_, 0.0F, 1.0F, 0.0F);
       if (entityLiving.deathTime > 0) {
          float f = ((float)entityLiving.deathTime + partialTicks - 1.0F) / 20.0F * 1.6F;
@@ -351,15 +351,15 @@ public abstract class RenderLivingBase extends Render {
 
    }
 
-   protected float getSwingProgress(EntityLivingBase livingBase, float partialTickTime) {
+   protected float getSwingProgress(EntityLivingBase var1, float var2) {
       return livingBase.getSwingProgress(partialTickTime);
    }
 
-   protected float handleRotationFloat(EntityLivingBase livingBase, float partialTicks) {
+   protected float handleRotationFloat(EntityLivingBase var1, float var2) {
       return (float)livingBase.ticksExisted + partialTicks;
    }
 
-   protected void renderLayers(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scaleIn) {
+   protected void renderLayers(EntityLivingBase var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       for(LayerRenderer layerrenderer : this.layerRenderers) {
          boolean flag = this.setBrightness(entitylivingbaseIn, partialTicks, layerrenderer.shouldCombineTextures());
          layerrenderer.doRenderLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scaleIn);
@@ -370,18 +370,18 @@ public abstract class RenderLivingBase extends Render {
 
    }
 
-   protected float getDeathMaxRotation(EntityLivingBase entityLivingBaseIn) {
+   protected float getDeathMaxRotation(EntityLivingBase var1) {
       return 90.0F;
    }
 
-   protected int getColorMultiplier(EntityLivingBase entitylivingbaseIn, float lightBrightness, float partialTickTime) {
+   protected int getColorMultiplier(EntityLivingBase var1, float var2, float var3) {
       return 0;
    }
 
-   protected void preRenderCallback(EntityLivingBase entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityLivingBase var1, float var2) {
    }
 
-   public void renderName(EntityLivingBase entity, double x, double y, double z) {
+   public void renderName(EntityLivingBase var1, double var2, double var4, double var6) {
       if (!MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.RenderLivingEvent.Specials.Pre(entity, this, x, y, z))) {
          if (this.canRenderName(entity)) {
             double d0 = entity.getDistanceSqToEntity(this.renderManager.renderViewEntity);
@@ -397,7 +397,7 @@ public abstract class RenderLivingBase extends Render {
       }
    }
 
-   protected boolean canRenderName(EntityLivingBase entity) {
+   protected boolean canRenderName(EntityLivingBase var1) {
       EntityPlayerSP entityplayersp = Minecraft.getMinecraft().player;
       boolean flag = !entity.isInvisibleToPlayer(entityplayersp);
       if (entity != entityplayersp) {

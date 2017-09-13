@@ -6,26 +6,38 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CPacketPlayerDigging implements Packet {
    private BlockPos position;
    private EnumFacing facing;
    private CPacketPlayerDigging.Action action;
 
+   public CPacketPlayerDigging() {
+   }
+
+   @SideOnly(Side.CLIENT)
+   public CPacketPlayerDigging(CPacketPlayerDigging.Action var1, BlockPos var2, EnumFacing var3) {
+      this.action = actionIn;
+      this.position = posIn;
+      this.facing = facingIn;
+   }
+
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.action = (CPacketPlayerDigging.Action)var1.readEnumValue(CPacketPlayerDigging.Action.class);
-      this.position = var1.readBlockPos();
-      this.facing = EnumFacing.getFront(var1.readUnsignedByte());
+      this.action = (CPacketPlayerDigging.Action)buf.readEnumValue(CPacketPlayerDigging.Action.class);
+      this.position = buf.readBlockPos();
+      this.facing = EnumFacing.getFront(buf.readUnsignedByte());
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeEnumValue(this.action);
-      var1.writeBlockPos(this.position);
-      var1.writeByte(this.facing.getIndex());
+      buf.writeEnumValue(this.action);
+      buf.writeBlockPos(this.position);
+      buf.writeByte(this.facing.getIndex());
    }
 
    public void processPacket(INetHandlerPlayServer var1) {
-      var1.processPlayerDigging(this);
+      handler.processPlayerDigging(this);
    }
 
    public BlockPos getPosition() {

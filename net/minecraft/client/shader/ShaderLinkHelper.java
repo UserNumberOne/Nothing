@@ -21,7 +21,7 @@ public class ShaderLinkHelper {
       return staticShaderLinkHelper;
    }
 
-   public void deleteShader(ShaderManager manager) {
+   public void deleteShader(ShaderManager var1) {
       manager.getFragmentShaderLoader().deleteShader(manager);
       manager.getVertexShaderLoader().deleteShader(manager);
       OpenGlHelper.glDeleteProgram(manager.getProgram());
@@ -36,7 +36,7 @@ public class ShaderLinkHelper {
       }
    }
 
-   public void linkProgram(ShaderManager manager) throws IOException {
+   public void linkProgram(ShaderManager var1) throws IOException {
       manager.getFragmentShaderLoader().attachShader(manager);
       manager.getVertexShaderLoader().attachShader(manager);
       OpenGlHelper.glLinkProgram(manager.getProgram());

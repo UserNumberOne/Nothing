@@ -11,6 +11,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.stats.AchievementList;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class SlotCrafting extends Slot {
    private final InventoryCrafting craftMatrix;
@@ -18,9 +20,9 @@ public class SlotCrafting extends Slot {
    private int amountCrafted;
 
    public SlotCrafting(EntityPlayer var1, InventoryCrafting var2, IInventory var3, int var4, int var5, int var6) {
-      super(var3, var4, var5, var6);
-      this.player = var1;
-      this.craftMatrix = var2;
+      super(inventoryIn, slotIndex, xPosition, yPosition);
+      this.player = player;
+      this.craftMatrix = craftingInventory;
    }
 
    public boolean isItemValid(@Nullable ItemStack var1) {
@@ -29,85 +31,88 @@ public class SlotCrafting extends Slot {
 
    public ItemStack decrStackSize(int var1) {
       if (this.getHasStack()) {
-         this.amountCrafted += Math.min(var1, this.getStack().stackSize);
+         this.amountCrafted += Math.min(amount, this.getStack().stackSize);
       }
 
-      return super.decrStackSize(var1);
+      return super.decrStackSize(amount);
    }
 
    protected void onCrafting(ItemStack var1, int var2) {
-      this.amountCrafted += var2;
-      this.onCrafting(var1);
+      this.amountCrafted += amount;
+      this.onCrafting(stack);
    }
 
    protected void onCrafting(ItemStack var1) {
       if (this.amountCrafted > 0) {
-         var1.onCrafting(this.player.world, this.player, this.amountCrafted);
+         stack.onCrafting(this.player.world, this.player, this.amountCrafted);
       }
 
       this.amountCrafted = 0;
-      if (var1.getItem() == Item.getItemFromBlock(Blocks.CRAFTING_TABLE)) {
+      if (stack.getItem() == Item.getItemFromBlock(Blocks.CRAFTING_TABLE)) {
          this.player.addStat(AchievementList.BUILD_WORK_BENCH);
       }
 
-      if (var1.getItem() instanceof ItemPickaxe) {
+      if (stack.getItem() instanceof ItemPickaxe) {
          this.player.addStat(AchievementList.BUILD_PICKAXE);
       }
 
-      if (var1.getItem() == Item.getItemFromBlock(Blocks.FURNACE)) {
+      if (stack.getItem() == Item.getItemFromBlock(Blocks.FURNACE)) {
          this.player.addStat(AchievementList.BUILD_FURNACE);
       }
 
-      if (var1.getItem() instanceof ItemHoe) {
+      if (stack.getItem() instanceof ItemHoe) {
          this.player.addStat(AchievementList.BUILD_HOE);
       }
 
-      if (var1.getItem() == Items.BREAD) {
+      if (stack.getItem() == Items.BREAD) {
          this.player.addStat(AchievementList.MAKE_BREAD);
       }
 
-      if (var1.getItem() == Items.CAKE) {
+      if (stack.getItem() == Items.CAKE) {
          this.player.addStat(AchievementList.BAKE_CAKE);
       }
 
-      if (var1.getItem() instanceof ItemPickaxe && ((ItemPickaxe)var1.getItem()).getToolMaterial() != Item.ToolMaterial.WOOD) {
+      if (stack.getItem() instanceof ItemPickaxe && ((ItemPickaxe)stack.getItem()).getToolMaterial() != Item.ToolMaterial.WOOD) {
          this.player.addStat(AchievementList.BUILD_BETTER_PICKAXE);
       }
 
-      if (var1.getItem() instanceof ItemSword) {
+      if (stack.getItem() instanceof ItemSword) {
          this.player.addStat(AchievementList.BUILD_SWORD);
       }
 
-      if (var1.getItem() == Item.getItemFromBlock(Blocks.ENCHANTING_TABLE)) {
+      if (stack.getItem() == Item.getItemFromBlock(Blocks.ENCHANTING_TABLE)) {
          this.player.addStat(AchievementList.ENCHANTMENTS);
       }
 
-      if (var1.getItem() == Item.getItemFromBlock(Blocks.BOOKSHELF)) {
+      if (stack.getItem() == Item.getItemFromBlock(Blocks.BOOKSHELF)) {
          this.player.addStat(AchievementList.BOOKCASE);
       }
 
    }
 
    public void onPickupFromSlot(EntityPlayer var1, ItemStack var2) {
-      this.onCrafting(var2);
-      ItemStack[] var3 = CraftingManager.getInstance().getRemainingItems(this.craftMatrix, var1.world);
+      FMLCommonHandler.instance().firePlayerCraftingEvent(playerIn, stack, this.craftMatrix);
+      this.onCrafting(stack);
+      ForgeHooks.setCraftingPlayer(playerIn);
+      ItemStack[] aitemstack = CraftingManager.getInstance().getRemainingItems(this.craftMatrix, playerIn.world);
+      ForgeHooks.setCraftingPlayer((EntityPlayer)null);
 
-      for(int var4 = 0; var4 < var3.length; ++var4) {
-         ItemStack var5 = this.craftMatrix.getStackInSlot(var4);
-         ItemStack var6 = var3[var4];
-         if (var5 != null) {
-            this.craftMatrix.decrStackSize(var4, 1);
-            var5 = this.craftMatrix.getStackInSlot(var4);
+      for(int i = 0; i < aitemstack.length; ++i) {
+         ItemStack itemstack = this.craftMatrix.getStackInSlot(i);
+         ItemStack itemstack1 = aitemstack[i];
+         if (itemstack != null) {
+            this.craftMatrix.decrStackSize(i, 1);
+            itemstack = this.craftMatrix.getStackInSlot(i);
          }
 
-         if (var6 != null) {
-            if (var5 == null) {
-               this.craftMatrix.setInventorySlotContents(var4, var6);
-            } else if (ItemStack.areItemsEqual(var5, var6) && ItemStack.areItemStackTagsEqual(var5, var6)) {
-               var6.stackSize += var5.stackSize;
-               this.craftMatrix.setInventorySlotContents(var4, var6);
-            } else if (!this.player.inventory.addItemStackToInventory(var6)) {
-               this.player.dropItem(var6, false);
+         if (itemstack1 != null) {
+            if (itemstack == null) {
+               this.craftMatrix.setInventorySlotContents(i, itemstack1);
+            } else if (ItemStack.areItemsEqual(itemstack, itemstack1) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1)) {
+               itemstack1.stackSize += itemstack.stackSize;
+               this.craftMatrix.setInventorySlotContents(i, itemstack1);
+            } else if (!this.player.inventory.addItemStackToInventory(itemstack1)) {
+               this.player.dropItem(itemstack1, false);
             }
          }
       }

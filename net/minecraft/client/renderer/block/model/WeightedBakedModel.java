@@ -18,17 +18,17 @@ public class WeightedBakedModel implements IBakedModel {
    private final List models;
    private final IBakedModel baseModel;
 
-   public WeightedBakedModel(List modelsIn) {
+   public WeightedBakedModel(List var1) {
       this.models = modelsIn;
       this.totalWeight = WeightedRandom.getTotalWeight(modelsIn);
       this.baseModel = ((WeightedBakedModel.WeightedModel)modelsIn.get(0)).model;
    }
 
-   private IBakedModel getRandomModel(long p_188627_1_) {
+   private IBakedModel getRandomModel(long var1) {
       return ((WeightedBakedModel.WeightedModel)WeightedRandom.getRandomItem(this.models, Math.abs((int)p_188627_1_ >> 16) % this.totalWeight)).model;
    }
 
-   public List getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
+   public List getQuads(@Nullable IBlockState var1, @Nullable EnumFacing var2, long var3) {
       return this.getRandomModel(rand).getQuads(state, side, rand);
    }
 
@@ -60,7 +60,7 @@ public class WeightedBakedModel implements IBakedModel {
    public static class Builder {
       private final List listItems = Lists.newArrayList();
 
-      public WeightedBakedModel.Builder add(IBakedModel model, int weight) {
+      public WeightedBakedModel.Builder add(IBakedModel var1, int var2) {
          this.listItems.add(new WeightedBakedModel.WeightedModel(model, weight));
          return this;
       }
@@ -79,12 +79,12 @@ public class WeightedBakedModel implements IBakedModel {
    static class WeightedModel extends WeightedRandom.Item implements Comparable {
       protected final IBakedModel model;
 
-      public WeightedModel(IBakedModel modelIn, int itemWeightIn) {
+      public WeightedModel(IBakedModel var1, int var2) {
          super(itemWeightIn);
          this.model = modelIn;
       }
 
-      public int compareTo(WeightedBakedModel.WeightedModel p_compareTo_1_) {
+      public int compareTo(WeightedBakedModel.WeightedModel var1) {
          return ComparisonChain.start().compare(p_compareTo_1_.itemWeight, this.itemWeight).result();
       }
 

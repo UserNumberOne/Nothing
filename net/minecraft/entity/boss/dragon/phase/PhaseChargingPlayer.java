@@ -12,7 +12,7 @@ public class PhaseChargingPlayer extends PhaseBase {
    private int timeSinceCharge;
 
    public PhaseChargingPlayer(EntityDragon var1) {
-      super(var1);
+      super(dragonIn);
    }
 
    public void doLocalUpdate() {
@@ -22,12 +22,12 @@ public class PhaseChargingPlayer extends PhaseBase {
       } else if (this.timeSinceCharge > 0 && this.timeSinceCharge++ >= 10) {
          this.dragon.getPhaseManager().setPhase(PhaseList.HOLDING_PATTERN);
       } else {
-         double var1 = this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
-         if (var1 < 100.0D || var1 > 22500.0D || this.dragon.isCollidedHorizontally || this.dragon.isCollidedVertically) {
+         double d0 = this.targetLocation.squareDistanceTo(this.dragon.posX, this.dragon.posY, this.dragon.posZ);
+         if (d0 < 100.0D || d0 > 22500.0D || this.dragon.isCollidedHorizontally || this.dragon.isCollidedVertically) {
             ++this.timeSinceCharge;
          }
-
       }
+
    }
 
    public void initPhase() {
@@ -36,7 +36,7 @@ public class PhaseChargingPlayer extends PhaseBase {
    }
 
    public void setTarget(Vec3d var1) {
-      this.targetLocation = var1;
+      this.targetLocation = p_188668_1_;
    }
 
    public float getMaxRiseOrFall() {

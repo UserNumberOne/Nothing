@@ -17,7 +17,7 @@ public class RenderVillager extends RenderLiving {
    private static final ResourceLocation SMITH_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/smith.png");
    private static final ResourceLocation BUTCHER_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/butcher.png");
 
-   public RenderVillager(RenderManager renderManagerIn) {
+   public RenderVillager(RenderManager var1) {
       super(renderManagerIn, new ModelVillager(0.0F), 0.5F);
       this.addLayer(new LayerCustomHead(this.getMainModel().villagerHead));
    }
@@ -26,11 +26,11 @@ public class RenderVillager extends RenderLiving {
       return (ModelVillager)super.getMainModel();
    }
 
-   protected ResourceLocation getEntityTexture(EntityVillager entity) {
+   protected ResourceLocation getEntityTexture(EntityVillager var1) {
       return entity.getProfessionForge().getSkin();
    }
 
-   protected void preRenderCallback(EntityVillager entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityVillager var1, float var2) {
       float f = 0.9375F;
       if (entitylivingbaseIn.getGrowingAge() < 0) {
          f = (float)((double)f * 0.5D);

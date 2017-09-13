@@ -1,10 +1,14 @@
 package net.minecraft.block;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
-import java.util.HashSet;
+import com.google.common.collect.UnmodifiableIterator;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.MapColor;
@@ -12,19 +16,27 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityWitherSkull;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -41,11 +53,23 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.EnumPlantType;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.common.registry.GameData;
+import net.minecraftforge.fml.common.registry.IForgeRegistryEntry.Impl;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class Block {
+public class Block extends Impl {
    private static final ResourceLocation AIR_ID = new ResourceLocation("air");
-   public static final RegistryNamespacedDefaultedByKey REGISTRY = new RegistryNamespacedDefaultedByKey(AIR_ID);
-   public static final ObjectIntIdentityMap BLOCK_STATE_IDS = new ObjectIntIdentityMap();
+   public static final RegistryNamespacedDefaultedByKey REGISTRY = GameData.getBlockRegistry();
+   /** @deprecated */
+   @Deprecated
+   public static final ObjectIntIdentityMap BLOCK_STATE_IDS = GameData.getBlockStateIDMap();
    public static final AxisAlignedBB FULL_BLOCK_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
    public static final AxisAlignedBB NULL_AABB = null;
    private CreativeTabs displayOnCreativeTab;
@@ -67,39 +91,56 @@ public class Block {
    protected final BlockStateContainer blockState;
    private IBlockState defaultBlockState;
    private String unlocalizedName;
+   protected ThreadLocal harvesters;
+   private ThreadLocal silk_check_state;
+   protected static Random RANDOM = new Random();
+   private boolean isTileProvider;
+   private String[] harvestTool;
+   private int[] harvestLevel;
+   protected static ThreadLocal captureDrops = new ThreadLocal() {
+      protected Boolean initialValue() {
+         return false;
+      }
+   };
+   protected static ThreadLocal capturedDrops = new ThreadLocal() {
+      protected List initialValue() {
+         return new ArrayList();
+      }
+   };
 
-   public static int getIdFromBlock(Block block) {
-      return REGISTRY.getIDForObject(block);
+   public static int getIdFromBlock(Block var0) {
+      return REGISTRY.getIDForObject(blockIn);
    }
 
-   public static int getStateId(IBlockState iblockdata) {
-      Block block = iblockdata.getBlock();
-      return getIdFromBlock(block) + (block.getMetaFromState(iblockdata) << 12);
+   public static int getStateId(IBlockState var0) {
+      Block block = state.getBlock();
+      return getIdFromBlock(block) + (block.getMetaFromState(state) << 12);
    }
 
-   public static Block getBlockById(int i) {
-      return (Block)REGISTRY.getObjectById(i);
+   public static Block getBlockById(int var0) {
+      Block ret = (Block)REGISTRY.getObjectById(id);
+      return ret == null ? Blocks.AIR : ret;
    }
 
-   public static IBlockState getStateById(int i) {
-      int j = i & 4095;
-      int k = i >> 12 & 15;
-      return getBlockById(j).getStateFromMeta(k);
+   public static IBlockState getStateById(int var0) {
+      int i = id & 4095;
+      int j = id >> 12 & 15;
+      return getBlockById(i).getStateFromMeta(j);
    }
 
-   public static Block getBlockFromItem(Item item) {
-      return item instanceof ItemBlock ? ((ItemBlock)item).getBlock() : null;
+   public static Block getBlockFromItem(Item var0) {
+      return itemIn instanceof ItemBlock ? ((ItemBlock)itemIn).getBlock() : null;
    }
 
    @Nullable
-   public static Block getBlockFromName(String s) {
-      ResourceLocation minecraftkey = new ResourceLocation(s);
-      if (REGISTRY.containsKey(minecraftkey)) {
-         return (Block)REGISTRY.getObject(minecraftkey);
+   public static Block getBlockFromName(String var0) {
+      ResourceLocation resourcelocation = new ResourceLocation(name);
+      if (REGISTRY.containsKey(resourcelocation)) {
+         return (Block)REGISTRY.getObject(resourcelocation);
       } else {
          try {
-            return (Block)REGISTRY.getObjectById(Integer.parseInt(s));
-         } catch (NumberFormatException var2) {
+            return (Block)REGISTRY.getObjectById(Integer.parseInt(name));
+         } catch (NumberFormatException var3) {
             return null;
          }
       }
@@ -107,61 +148,68 @@ public class Block {
 
    /** @deprecated */
    @Deprecated
-   public boolean isFullyOpaque(IBlockState iblockdata) {
-      return iblockdata.getMaterial().isOpaque() && iblockdata.isFullCube();
+   public boolean isFullyOpaque(IBlockState var1) {
+      return state.getMaterial().isOpaque() && state.isFullCube();
    }
 
    /** @deprecated */
    @Deprecated
-   public boolean isFullBlock(IBlockState iblockdata) {
+   public boolean isFullBlock(IBlockState var1) {
       return this.fullBlock;
    }
 
    /** @deprecated */
    @Deprecated
-   public boolean canEntitySpawn(IBlockState iblockdata, Entity entity) {
+   public boolean canEntitySpawn(IBlockState var1, Entity var2) {
       return true;
    }
 
    /** @deprecated */
    @Deprecated
-   public int getLightOpacity(IBlockState iblockdata) {
+   public int getLightOpacity(IBlockState var1) {
       return this.lightOpacity;
    }
 
    /** @deprecated */
    @Deprecated
-   public int getLightValue(IBlockState iblockdata) {
+   @SideOnly(Side.CLIENT)
+   public boolean isTranslucent(IBlockState var1) {
+      return this.translucent;
+   }
+
+   /** @deprecated */
+   @Deprecated
+   public int getLightValue(IBlockState var1) {
       return this.lightValue;
    }
 
    /** @deprecated */
    @Deprecated
-   public boolean getUseNeighborBrightness(IBlockState iblockdata) {
+   public boolean getUseNeighborBrightness(IBlockState var1) {
       return this.useNeighborBrightness;
    }
 
    /** @deprecated */
    @Deprecated
-   public Material getMaterial(IBlockState iblockdata) {
+   public Material getMaterial(IBlockState var1) {
       return this.blockMaterial;
    }
 
    /** @deprecated */
    @Deprecated
-   public MapColor getMapColor(IBlockState iblockdata) {
+   public MapColor getMapColor(IBlockState var1) {
       return this.blockMapColor;
    }
 
    /** @deprecated */
    @Deprecated
-   public IBlockState getStateFromMeta(int i) {
+   public IBlockState getStateFromMeta(int var1) {
       return this.getDefaultState();
    }
 
-   public int getMetaFromState(IBlockState iblockdata) {
-      if (iblockdata != null && !iblockdata.getPropertyKeys().isEmpty()) {
-         throw new IllegalArgumentException("Don't know how to convert " + iblockdata + " back into data...");
+   public int getMetaFromState(IBlockState var1) {
+      if (state != null && !state.getPropertyKeys().isEmpty()) {
+         throw new IllegalArgumentException("Don't know how to convert " + state + " back into data...");
       } else {
          return 0;
       }
@@ -169,70 +217,75 @@ public class Block {
 
    /** @deprecated */
    @Deprecated
-   public IBlockState getActualState(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
-      return iblockdata;
+   public IBlockState getActualState(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return state;
    }
 
    /** @deprecated */
    @Deprecated
-   public IBlockState withRotation(IBlockState iblockdata, Rotation enumblockrotation) {
-      return iblockdata;
+   public IBlockState withRotation(IBlockState var1, Rotation var2) {
+      return state;
    }
 
    /** @deprecated */
    @Deprecated
-   public IBlockState withMirror(IBlockState iblockdata, Mirror enumblockmirror) {
-      return iblockdata;
+   public IBlockState withMirror(IBlockState var1, Mirror var2) {
+      return state;
    }
 
-   public Block(Material material, MapColor materialmapcolor) {
+   public Block(Material var1, MapColor var2) {
+      this.harvesters = new ThreadLocal();
+      this.silk_check_state = new ThreadLocal();
+      this.isTileProvider = this instanceof ITileEntityProvider;
+      this.harvestTool = new String[16];
+      this.harvestLevel = new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
       this.enableStats = true;
       this.blockSoundType = SoundType.STONE;
       this.blockParticleGravity = 1.0F;
       this.slipperiness = 0.6F;
-      this.blockMaterial = material;
-      this.blockMapColor = materialmapcolor;
+      this.blockMaterial = blockMaterialIn;
+      this.blockMapColor = blockMapColorIn;
       this.blockState = this.createBlockState();
       this.setDefaultState(this.blockState.getBaseState());
       this.fullBlock = this.getDefaultState().isOpaqueCube();
       this.lightOpacity = this.fullBlock ? 255 : 0;
-      this.translucent = !material.blocksLight();
+      this.translucent = !blockMaterialIn.blocksLight();
    }
 
-   protected Block(Material material) {
-      this(material, material.getMaterialMapColor());
+   public Block(Material var1) {
+      this(materialIn, materialIn.getMaterialMapColor());
    }
 
-   protected Block setSoundType(SoundType soundeffecttype) {
-      this.blockSoundType = soundeffecttype;
+   protected Block setSoundType(SoundType var1) {
+      this.blockSoundType = sound;
       return this;
    }
 
-   protected Block setLightOpacity(int i) {
-      this.lightOpacity = i;
+   public Block setLightOpacity(int var1) {
+      this.lightOpacity = opacity;
       return this;
    }
 
-   protected Block setLightLevel(float f) {
-      this.lightValue = (int)(15.0F * f);
+   public Block setLightLevel(float var1) {
+      this.lightValue = (int)(15.0F * value);
       return this;
    }
 
-   protected Block setResistance(float f) {
-      this.blockResistance = f * 3.0F;
+   public Block setResistance(float var1) {
+      this.blockResistance = resistance * 3.0F;
       return this;
    }
 
    /** @deprecated */
    @Deprecated
-   public boolean isBlockNormalCube(IBlockState iblockdata) {
-      return iblockdata.getMaterial().blocksMovement() && iblockdata.isFullCube();
+   public boolean isBlockNormalCube(IBlockState var1) {
+      return state.getMaterial().blocksMovement() && state.isFullCube();
    }
 
    /** @deprecated */
    @Deprecated
-   public boolean isNormalCube(IBlockState iblockdata) {
-      return iblockdata.getMaterial().isOpaque() && iblockdata.isFullCube() && !iblockdata.canProvidePower();
+   public boolean isNormalCube(IBlockState var1) {
+      return state.getMaterial().isOpaque() && state.isFullCube() && !state.canProvidePower();
    }
 
    public boolean causesSuffocation() {
@@ -241,46 +294,46 @@ public class Block {
 
    /** @deprecated */
    @Deprecated
-   public boolean isFullCube(IBlockState iblockdata) {
+   public boolean isFullCube(IBlockState var1) {
       return true;
    }
 
-   public boolean isPassable(IBlockAccess iblockaccess, BlockPos blockposition) {
+   public boolean isPassable(IBlockAccess var1, BlockPos var2) {
       return !this.blockMaterial.blocksMovement();
    }
 
    /** @deprecated */
    @Deprecated
-   public EnumBlockRenderType getRenderType(IBlockState iblockdata) {
+   public EnumBlockRenderType getRenderType(IBlockState var1) {
       return EnumBlockRenderType.MODEL;
    }
 
-   public boolean isReplaceable(IBlockAccess iblockaccess, BlockPos blockposition) {
-      return false;
+   public boolean isReplaceable(IBlockAccess var1, BlockPos var2) {
+      return worldIn.getBlockState(pos).getMaterial().isReplaceable();
    }
 
-   protected Block setHardness(float f) {
-      this.blockHardness = f;
-      if (this.blockResistance < f * 5.0F) {
-         this.blockResistance = f * 5.0F;
+   public Block setHardness(float var1) {
+      this.blockHardness = hardness;
+      if (this.blockResistance < hardness * 5.0F) {
+         this.blockResistance = hardness * 5.0F;
       }
 
       return this;
    }
 
-   protected Block setBlockUnbreakable() {
+   public Block setBlockUnbreakable() {
       this.setHardness(-1.0F);
       return this;
    }
 
    /** @deprecated */
    @Deprecated
-   public float getBlockHardness(IBlockState iblockdata, World world, BlockPos blockposition) {
+   public float getBlockHardness(IBlockState var1, World var2, BlockPos var3) {
       return this.blockHardness;
    }
 
-   protected Block setTickRandomly(boolean flag) {
-      this.needsRandomTick = flag;
+   public Block setTickRandomly(boolean var1) {
+      this.needsRandomTick = shouldTick;
       return this;
    }
 
@@ -288,31 +341,33 @@ public class Block {
       return this.needsRandomTick;
    }
 
+   /** @deprecated */
+   @Deprecated
    public boolean hasTileEntity() {
-      return this.isBlockContainer;
+      return this.hasTileEntity(this.getDefaultState());
    }
 
    /** @deprecated */
    @Deprecated
-   public AxisAlignedBB getBoundingBox(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition) {
+   public AxisAlignedBB getBoundingBox(IBlockState var1, IBlockAccess var2, BlockPos var3) {
       return FULL_BLOCK_AABB;
    }
 
-   public boolean isBlockSolid(IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
-      return iblockaccess.getBlockState(blockposition).getMaterial().isSolid();
+   public boolean isBlockSolid(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
+      return worldIn.getBlockState(pos).getMaterial().isSolid();
    }
 
    /** @deprecated */
    @Deprecated
-   public void addCollisionBoxToList(IBlockState iblockdata, World world, BlockPos blockposition, AxisAlignedBB axisalignedbb, List list, @Nullable Entity entity) {
-      addCollisionBoxToList(blockposition, axisalignedbb, list, iblockdata.getCollisionBoundingBox(world, blockposition));
+   public void addCollisionBoxToList(IBlockState var1, World var2, BlockPos var3, AxisAlignedBB var4, List var5, @Nullable Entity var6) {
+      addCollisionBoxToList(pos, entityBox, collidingBoxes, state.getCollisionBoundingBox(worldIn, pos));
    }
 
-   protected static void addCollisionBoxToList(BlockPos blockposition, AxisAlignedBB axisalignedbb, List list, @Nullable AxisAlignedBB axisalignedbb1) {
-      if (axisalignedbb1 != NULL_AABB) {
-         AxisAlignedBB axisalignedbb2 = axisalignedbb1.offset(blockposition);
-         if (axisalignedbb.intersectsWith(axisalignedbb2)) {
-            list.add(axisalignedbb2);
+   protected static void addCollisionBoxToList(BlockPos var0, AxisAlignedBB var1, List var2, @Nullable AxisAlignedBB var3) {
+      if (blockBox != NULL_AABB) {
+         AxisAlignedBB axisalignedbb = blockBox.offset(pos);
+         if (entityBox.intersectsWith(axisalignedbb)) {
+            collidingBoxes.add(axisalignedbb);
          }
       }
 
@@ -321,17 +376,78 @@ public class Block {
    /** @deprecated */
    @Deprecated
    @Nullable
-   public AxisAlignedBB getCollisionBoundingBox(IBlockState iblockdata, World world, BlockPos blockposition) {
-      return iblockdata.getBoundingBox(world, blockposition);
+   public AxisAlignedBB getCollisionBoundingBox(IBlockState var1, World var2, BlockPos var3) {
+      return blockState.getBoundingBox(worldIn, pos);
    }
 
    /** @deprecated */
    @Deprecated
-   public boolean isOpaqueCube(IBlockState iblockdata) {
+   @SideOnly(Side.CLIENT)
+   public int getPackedLightmapCoords(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      int i = source.getCombinedLight(pos, state.getLightValue(source, pos));
+      if (i == 0 && state.getBlock() instanceof BlockSlab) {
+         pos = pos.down();
+         state = source.getBlockState(pos);
+         return source.getCombinedLight(pos, state.getLightValue(source, pos));
+      } else {
+         return i;
+      }
+   }
+
+   /** @deprecated */
+   @Deprecated
+   @SideOnly(Side.CLIENT)
+   public boolean shouldSideBeRendered(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
+      AxisAlignedBB axisalignedbb = blockState.getBoundingBox(blockAccess, pos);
+      switch(side) {
+      case DOWN:
+         if (axisalignedbb.minY > 0.0D) {
+            return true;
+         }
+         break;
+      case UP:
+         if (axisalignedbb.maxY < 1.0D) {
+            return true;
+         }
+         break;
+      case NORTH:
+         if (axisalignedbb.minZ > 0.0D) {
+            return true;
+         }
+         break;
+      case SOUTH:
+         if (axisalignedbb.maxZ < 1.0D) {
+            return true;
+         }
+         break;
+      case WEST:
+         if (axisalignedbb.minX > 0.0D) {
+            return true;
+         }
+         break;
+      case EAST:
+         if (axisalignedbb.maxX < 1.0D) {
+            return true;
+         }
+      }
+
+      return !blockAccess.getBlockState(pos.offset(side)).doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
+   }
+
+   /** @deprecated */
+   @Deprecated
+   @SideOnly(Side.CLIENT)
+   public AxisAlignedBB getSelectedBoundingBox(IBlockState var1, World var2, BlockPos var3) {
+      return state.getBoundingBox(worldIn, pos).offset(pos);
+   }
+
+   /** @deprecated */
+   @Deprecated
+   public boolean isOpaqueCube(IBlockState var1) {
       return true;
    }
 
-   public boolean canCollideCheck(IBlockState iblockdata, boolean flag) {
+   public boolean canCollideCheck(IBlockState var1, boolean var2) {
       return this.isCollidable();
    }
 
@@ -339,214 +455,243 @@ public class Block {
       return true;
    }
 
-   public void randomTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
-      this.updateTick(world, blockposition, iblockdata, random);
+   public void randomTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
+      this.updateTick(worldIn, pos, state, random);
    }
 
-   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
    }
 
-   public void onBlockDestroyedByPlayer(World world, BlockPos blockposition, IBlockState iblockdata) {
+   @SideOnly(Side.CLIENT)
+   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
+   }
+
+   public void onBlockDestroyedByPlayer(World var1, BlockPos var2, IBlockState var3) {
    }
 
    /** @deprecated */
    @Deprecated
-   public void neighborChanged(IBlockState iblockdata, World world, BlockPos blockposition, Block block) {
+   public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
    }
 
-   public int tickRate(World world) {
+   public int tickRate(World var1) {
       return 10;
    }
 
-   public void onBlockAdded(World world, BlockPos blockposition, IBlockState iblockdata) {
+   public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
    }
 
-   public void breakBlock(World world, BlockPos blockposition, IBlockState iblockdata) {
+   public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
+      if (this.hasTileEntity(state) && !(this instanceof BlockContainer)) {
+         worldIn.removeTileEntity(pos);
+      }
+
    }
 
-   public int quantityDropped(Random random) {
+   public int quantityDropped(Random var1) {
       return 1;
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Item.getItemFromBlock(this);
    }
 
    /** @deprecated */
    @Deprecated
-   public float getPlayerRelativeBlockHardness(IBlockState iblockdata, EntityPlayer entityhuman, World world, BlockPos blockposition) {
-      float f = iblockdata.getBlockHardness(world, blockposition);
-      return f < 0.0F ? 0.0F : (!entityhuman.canHarvestBlock(iblockdata) ? entityhuman.getDigSpeed(iblockdata) / f / 100.0F : entityhuman.getDigSpeed(iblockdata) / f / 30.0F);
+   public float getPlayerRelativeBlockHardness(IBlockState var1, EntityPlayer var2, World var3, BlockPos var4) {
+      return ForgeHooks.blockStrength(state, player, worldIn, pos);
    }
 
-   public final void dropBlockAsItem(World world, BlockPos blockposition, IBlockState iblockdata, int i) {
-      this.dropBlockAsItemWithChance(world, blockposition, iblockdata, 1.0F, i);
+   public final void dropBlockAsItem(World var1, BlockPos var2, IBlockState var3, int var4) {
+      this.dropBlockAsItemWithChance(worldIn, pos, state, 1.0F, fortune);
    }
 
-   public void dropBlockAsItemWithChance(World world, BlockPos blockposition, IBlockState iblockdata, float f, int i) {
-      if (!world.isRemote) {
-         int j = this.quantityDroppedWithBonus(i, world.rand);
+   public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
+      if (!worldIn.isRemote && !worldIn.restoringBlockSnapshots) {
+         List items = this.getDrops(worldIn, pos, state, fortune);
+         chance = ForgeEventFactory.fireBlockHarvesting(items, worldIn, pos, state, fortune, chance, false, (EntityPlayer)this.harvesters.get());
 
-         for(int k = 0; k < j; ++k) {
-            if (world.rand.nextFloat() < f) {
-               Item item = this.getItemDropped(iblockdata, world.rand, i);
-               if (item != null) {
-                  spawnAsEntity(world, blockposition, new ItemStack(item, 1, this.damageDropped(iblockdata)));
-               }
+         for(ItemStack item : items) {
+            if (worldIn.rand.nextFloat() <= chance) {
+               spawnAsEntity(worldIn, pos, item);
             }
          }
       }
 
    }
 
-   public static void spawnAsEntity(World world, BlockPos blockposition, ItemStack itemstack) {
-      if (!world.isRemote && world.getGameRules().getBoolean("doTileDrops")) {
-         double d0 = (double)(world.rand.nextFloat() * 0.5F) + 0.25D;
-         double d1 = (double)(world.rand.nextFloat() * 0.5F) + 0.25D;
-         double d2 = (double)(world.rand.nextFloat() * 0.5F) + 0.25D;
-         EntityItem entityitem = new EntityItem(world, (double)blockposition.getX() + d0, (double)blockposition.getY() + d1, (double)blockposition.getZ() + d2, itemstack);
+   public static void spawnAsEntity(World var0, BlockPos var1, ItemStack var2) {
+      if (!worldIn.isRemote && worldIn.getGameRules().getBoolean("doTileDrops") && !worldIn.restoringBlockSnapshots) {
+         if (((Boolean)captureDrops.get()).booleanValue()) {
+            ((List)capturedDrops.get()).add(stack);
+            return;
+         }
+
+         float f = 0.5F;
+         double d0 = (double)(worldIn.rand.nextFloat() * 0.5F) + 0.25D;
+         double d1 = (double)(worldIn.rand.nextFloat() * 0.5F) + 0.25D;
+         double d2 = (double)(worldIn.rand.nextFloat() * 0.5F) + 0.25D;
+         EntityItem entityitem = new EntityItem(worldIn, (double)pos.getX() + d0, (double)pos.getY() + d1, (double)pos.getZ() + d2, stack);
          entityitem.setDefaultPickupDelay();
-         world.spawnEntity(entityitem);
+         worldIn.spawnEntity(entityitem);
       }
 
    }
 
-   protected void dropXpOnBlockBreak(World world, BlockPos blockposition, int i) {
-      if (!world.isRemote && world.getGameRules().getBoolean("doTileDrops")) {
-         while(i > 0) {
-            int j = EntityXPOrb.getXPSplit(i);
-            i -= j;
-            world.spawnEntity(new EntityXPOrb(world, (double)blockposition.getX() + 0.5D, (double)blockposition.getY() + 0.5D, (double)blockposition.getZ() + 0.5D, j));
+   public void dropXpOnBlockBreak(World var1, BlockPos var2, int var3) {
+      if (!worldIn.isRemote && worldIn.getGameRules().getBoolean("doTileDrops")) {
+         while(amount > 0) {
+            int i = EntityXPOrb.getXPSplit(amount);
+            amount -= i;
+            worldIn.spawnEntity(new EntityXPOrb(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, i));
          }
       }
 
    }
 
-   public int damageDropped(IBlockState iblockdata) {
+   public int damageDropped(IBlockState var1) {
       return 0;
    }
 
-   public float getExplosionResistance(Entity entity) {
+   public float getExplosionResistance(Entity var1) {
       return this.blockResistance / 5.0F;
    }
 
    /** @deprecated */
    @Deprecated
    @Nullable
-   public RayTraceResult collisionRayTrace(IBlockState iblockdata, World world, BlockPos blockposition, Vec3d vec3d, Vec3d vec3d1) {
-      return this.rayTrace(blockposition, vec3d, vec3d1, iblockdata.getBoundingBox(world, blockposition));
+   public RayTraceResult collisionRayTrace(IBlockState var1, World var2, BlockPos var3, Vec3d var4, Vec3d var5) {
+      return this.rayTrace(pos, start, end, blockState.getBoundingBox(worldIn, pos));
    }
 
    @Nullable
-   protected RayTraceResult rayTrace(BlockPos blockposition, Vec3d vec3d, Vec3d vec3d1, AxisAlignedBB axisalignedbb) {
-      Vec3d vec3d2 = vec3d.subtract((double)blockposition.getX(), (double)blockposition.getY(), (double)blockposition.getZ());
-      Vec3d vec3d3 = vec3d1.subtract((double)blockposition.getX(), (double)blockposition.getY(), (double)blockposition.getZ());
-      RayTraceResult movingobjectposition = axisalignedbb.calculateIntercept(vec3d2, vec3d3);
-      return movingobjectposition == null ? null : new RayTraceResult(movingobjectposition.hitVec.addVector((double)blockposition.getX(), (double)blockposition.getY(), (double)blockposition.getZ()), movingobjectposition.sideHit, blockposition);
+   protected RayTraceResult rayTrace(BlockPos var1, Vec3d var2, Vec3d var3, AxisAlignedBB var4) {
+      Vec3d vec3d = start.subtract((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
+      Vec3d vec3d1 = end.subtract((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
+      RayTraceResult raytraceresult = boundingBox.calculateIntercept(vec3d, vec3d1);
+      return raytraceresult == null ? null : new RayTraceResult(raytraceresult.hitVec.addVector((double)pos.getX(), (double)pos.getY(), (double)pos.getZ()), raytraceresult.sideHit, pos);
    }
 
-   public void onBlockDestroyedByExplosion(World world, BlockPos blockposition, Explosion explosion) {
+   public void onBlockDestroyedByExplosion(World var1, BlockPos var2, Explosion var3) {
    }
 
-   public boolean canReplace(World world, BlockPos blockposition, EnumFacing enumdirection, @Nullable ItemStack itemstack) {
-      return this.canPlaceBlockOnSide(world, blockposition, enumdirection);
+   public boolean canReplace(World var1, BlockPos var2, EnumFacing var3, @Nullable ItemStack var4) {
+      return this.canPlaceBlockOnSide(worldIn, pos, side);
    }
 
-   public boolean canPlaceBlockOnSide(World world, BlockPos blockposition, EnumFacing enumdirection) {
-      return this.canPlaceBlockAt(world, blockposition);
+   @SideOnly(Side.CLIENT)
+   public BlockRenderLayer getBlockLayer() {
+      return BlockRenderLayer.SOLID;
    }
 
-   public boolean canPlaceBlockAt(World world, BlockPos blockposition) {
-      return world.getBlockState(blockposition).getBlock().blockMaterial.isReplaceable();
+   public boolean canPlaceBlockOnSide(World var1, BlockPos var2, EnumFacing var3) {
+      return this.canPlaceBlockAt(worldIn, pos);
    }
 
-   public boolean onBlockActivated(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack, EnumFacing enumdirection, float f, float f1, float f2) {
+   public boolean canPlaceBlockAt(World var1, BlockPos var2) {
+      return worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos);
+   }
+
+   public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
       return false;
    }
 
-   public void onEntityWalk(World world, BlockPos blockposition, Entity entity) {
-   }
-
-   public IBlockState getStateForPlacement(World world, BlockPos blockposition, EnumFacing enumdirection, float f, float f1, float f2, int i, EntityLivingBase entityliving) {
-      return this.getStateFromMeta(i);
-   }
-
-   public void onBlockClicked(World world, BlockPos blockposition, EntityPlayer entityhuman) {
-   }
-
-   public Vec3d modifyAcceleration(World world, BlockPos blockposition, Entity entity, Vec3d vec3d) {
-      return vec3d;
+   public void onEntityWalk(World var1, BlockPos var2, Entity var3) {
    }
 
    /** @deprecated */
    @Deprecated
-   public int getWeakPower(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
+   public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
+      return this.getStateFromMeta(meta);
+   }
+
+   public void onBlockClicked(World var1, BlockPos var2, EntityPlayer var3) {
+   }
+
+   public Vec3d modifyAcceleration(World var1, BlockPos var2, Entity var3, Vec3d var4) {
+      return motion;
+   }
+
+   /** @deprecated */
+   @Deprecated
+   public int getWeakPower(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
       return 0;
    }
 
    /** @deprecated */
    @Deprecated
-   public boolean canProvidePower(IBlockState iblockdata) {
+   public boolean canProvidePower(IBlockState var1) {
       return false;
    }
 
-   public void onEntityCollidedWithBlock(World world, BlockPos blockposition, IBlockState iblockdata, Entity entity) {
+   public void onEntityCollidedWithBlock(World var1, BlockPos var2, IBlockState var3, Entity var4) {
    }
 
    /** @deprecated */
    @Deprecated
-   public int getStrongPower(IBlockState iblockdata, IBlockAccess iblockaccess, BlockPos blockposition, EnumFacing enumdirection) {
+   public int getStrongPower(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
       return 0;
    }
 
-   public void harvestBlock(World world, EntityPlayer entityhuman, BlockPos blockposition, IBlockState iblockdata, @Nullable TileEntity tileentity, @Nullable ItemStack itemstack) {
-      entityhuman.addStat(StatList.getBlockStats(this));
-      entityhuman.addExhaustion(0.025F);
-      if (this.canSilkHarvest() && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, itemstack) > 0) {
-         ItemStack itemstack1 = this.getSilkTouchDrop(iblockdata);
-         if (itemstack1 != null) {
-            spawnAsEntity(world, blockposition, itemstack1);
+   public void harvestBlock(World var1, EntityPlayer var2, BlockPos var3, IBlockState var4, @Nullable TileEntity var5, @Nullable ItemStack var6) {
+      player.addStat(StatList.getBlockStats(this));
+      player.addExhaustion(0.025F);
+      if (this.canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
+         List items = new ArrayList();
+         ItemStack itemstack = this.getSilkTouchDrop(state);
+         if (itemstack != null) {
+            items.add(itemstack);
+         }
+
+         ForgeEventFactory.fireBlockHarvesting(items, worldIn, pos, state, 0, 1.0F, true, player);
+
+         for(ItemStack item : items) {
+            spawnAsEntity(worldIn, pos, item);
          }
       } else {
-         int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, itemstack);
-         this.dropBlockAsItem(world, blockposition, iblockdata, i);
+         this.harvesters.set(player);
+         int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
+         this.dropBlockAsItem(worldIn, pos, state, i);
+         this.harvesters.set((Object)null);
       }
 
    }
 
+   /** @deprecated */
+   @Deprecated
    protected boolean canSilkHarvest() {
-      return this.getDefaultState().isFullCube() && !this.isBlockContainer;
+      return this.getDefaultState().isFullCube() && !this.hasTileEntity((IBlockState)this.silk_check_state.get());
    }
 
    @Nullable
-   protected ItemStack getSilkTouchDrop(IBlockState iblockdata) {
+   protected ItemStack getSilkTouchDrop(IBlockState var1) {
       Item item = Item.getItemFromBlock(this);
       if (item == null) {
          return null;
       } else {
          int i = 0;
          if (item.getHasSubtypes()) {
-            i = this.getMetaFromState(iblockdata);
+            i = this.getMetaFromState(state);
          }
 
          return new ItemStack(item, 1, i);
       }
    }
 
-   public int quantityDroppedWithBonus(int i, Random random) {
+   public int quantityDroppedWithBonus(int var1, Random var2) {
       return this.quantityDropped(random);
    }
 
-   public void onBlockPlacedBy(World world, BlockPos blockposition, IBlockState iblockdata, EntityLivingBase entityliving, ItemStack itemstack) {
+   public void onBlockPlacedBy(World var1, BlockPos var2, IBlockState var3, EntityLivingBase var4, ItemStack var5) {
    }
 
    public boolean canSpawnInBlock() {
       return !this.blockMaterial.isSolid() && !this.blockMaterial.isLiquid();
    }
 
-   public Block setUnlocalizedName(String s) {
-      this.unlocalizedName = s;
+   public Block setUnlocalizedName(String var1) {
+      this.unlocalizedName = name;
       return this;
    }
 
@@ -560,7 +705,7 @@ public class Block {
 
    /** @deprecated */
    @Deprecated
-   public boolean eventReceived(IBlockState iblockdata, World world, BlockPos blockposition, int i, int j) {
+   public boolean eventReceived(IBlockState var1, World var2, BlockPos var3, int var4, int var5) {
       return false;
    }
 
@@ -575,59 +720,79 @@ public class Block {
 
    /** @deprecated */
    @Deprecated
-   public EnumPushReaction getMobilityFlag(IBlockState iblockdata) {
+   public EnumPushReaction getMobilityFlag(IBlockState var1) {
       return this.blockMaterial.getMobilityFlag();
    }
 
-   public void onFallenUpon(World world, BlockPos blockposition, Entity entity, float f) {
-      entity.fall(f, 1.0F);
+   /** @deprecated */
+   @Deprecated
+   @SideOnly(Side.CLIENT)
+   public float getAmbientOcclusionLightValue(IBlockState var1) {
+      return state.isBlockNormalCube() ? 0.2F : 1.0F;
    }
 
-   public void onLanded(World world, Entity entity) {
-      entity.motionY = 0.0D;
+   public void onFallenUpon(World var1, BlockPos var2, Entity var3, float var4) {
+      entityIn.fall(fallDistance, 1.0F);
    }
 
+   public void onLanded(World var1, Entity var2) {
+      entityIn.motionY = 0.0D;
+   }
+
+   /** @deprecated */
    @Nullable
-   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
-      return new ItemStack(Item.getItemFromBlock(this), 1, this.damageDropped(iblockdata));
+   @Deprecated
+   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
+      Item item = Item.getItemFromBlock(this);
+      return item == null ? null : new ItemStack(item, 1, this.damageDropped(state));
    }
 
-   public Block setCreativeTab(CreativeTabs creativemodetab) {
-      this.displayOnCreativeTab = creativemodetab;
+   @SideOnly(Side.CLIENT)
+   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
+      list.add(new ItemStack(itemIn));
+   }
+
+   public Block setCreativeTab(CreativeTabs var1) {
+      this.displayOnCreativeTab = tab;
       return this;
    }
 
-   public void onBlockHarvested(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman) {
+   public void onBlockHarvested(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4) {
    }
 
-   public void fillWithRain(World world, BlockPos blockposition) {
+   @SideOnly(Side.CLIENT)
+   public CreativeTabs getCreativeTabToDisplayOn() {
+      return this.displayOnCreativeTab;
+   }
+
+   public void fillWithRain(World var1, BlockPos var2) {
    }
 
    public boolean requiresUpdates() {
       return true;
    }
 
-   public boolean canDropFromExplosion(Explosion explosion) {
+   public boolean canDropFromExplosion(Explosion var1) {
       return true;
    }
 
-   public boolean isAssociatedBlock(Block block) {
-      return this == block;
+   public boolean isAssociatedBlock(Block var1) {
+      return this == other;
    }
 
-   public static boolean isEqualTo(Block block, Block block1) {
-      return block != null && block1 != null ? (block == block1 ? true : block.isAssociatedBlock(block1)) : false;
+   public static boolean isEqualTo(Block var0, Block var1) {
+      return blockIn != null && other != null ? (blockIn == other ? true : blockIn.isAssociatedBlock(other)) : false;
    }
 
    /** @deprecated */
    @Deprecated
-   public boolean hasComparatorInputOverride(IBlockState iblockdata) {
+   public boolean hasComparatorInputOverride(IBlockState var1) {
       return false;
    }
 
    /** @deprecated */
    @Deprecated
-   public int getComparatorInputOverride(IBlockState iblockdata, World world, BlockPos blockposition) {
+   public int getComparatorInputOverride(IBlockState var1, World var2, BlockPos var3) {
       return 0;
    }
 
@@ -639,20 +804,474 @@ public class Block {
       return this.blockState;
    }
 
-   protected final void setDefaultState(IBlockState iblockdata) {
-      this.defaultBlockState = iblockdata;
+   protected final void setDefaultState(IBlockState var1) {
+      this.defaultBlockState = state;
    }
 
    public final IBlockState getDefaultState() {
       return this.defaultBlockState;
    }
 
+   @SideOnly(Side.CLIENT)
+   public Block.EnumOffsetType getOffsetType() {
+      return Block.EnumOffsetType.NONE;
+   }
+
+   /** @deprecated */
+   @Deprecated
    public SoundType getSoundType() {
       return this.blockSoundType;
    }
 
    public String toString() {
       return "Block{" + REGISTRY.getNameForObject(this) + "}";
+   }
+
+   public int getLightValue(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      IBlockState other = world.getBlockState(pos);
+      return other.getBlock() != this ? other.getLightValue(world, pos) : state.getLightValue();
+   }
+
+   public boolean isLadder(IBlockState var1, IBlockAccess var2, BlockPos var3, EntityLivingBase var4) {
+      return false;
+   }
+
+   public boolean isNormalCube(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return state.getMaterial().isOpaque() && state.isFullCube() && !state.canProvidePower();
+   }
+
+   public boolean doesSideBlockRendering(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
+      return state.isOpaqueCube();
+   }
+
+   public boolean isSideSolid(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
+      if (base_state.isFullyOpaque() && side == EnumFacing.UP) {
+         return true;
+      } else if (this instanceof BlockSlab) {
+         IBlockState state = this.getActualState(base_state, world, pos);
+         return base_state.isFullBlock() || state.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP && side == EnumFacing.UP || state.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.BOTTOM && side == EnumFacing.DOWN;
+      } else if (!(this instanceof BlockFarmland)) {
+         if (this instanceof BlockStairs) {
+            IBlockState state = this.getActualState(base_state, world, pos);
+            boolean flipped = state.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.TOP;
+            BlockStairs.EnumShape shape = (BlockStairs.EnumShape)state.getValue(BlockStairs.SHAPE);
+            EnumFacing facing = (EnumFacing)state.getValue(BlockStairs.FACING);
+            if (side == EnumFacing.UP) {
+               return flipped;
+            } else if (side == EnumFacing.DOWN) {
+               return !flipped;
+            } else if (facing == side) {
+               return true;
+            } else {
+               if (flipped) {
+                  if (shape == BlockStairs.EnumShape.INNER_LEFT) {
+                     return side == facing.rotateYCCW();
+                  }
+
+                  if (shape == BlockStairs.EnumShape.INNER_RIGHT) {
+                     return side == facing.rotateY();
+                  }
+               } else {
+                  if (shape == BlockStairs.EnumShape.INNER_LEFT) {
+                     return side == facing.rotateY();
+                  }
+
+                  if (shape == BlockStairs.EnumShape.INNER_RIGHT) {
+                     return side == facing.rotateYCCW();
+                  }
+               }
+
+               return false;
+            }
+         } else if (this instanceof BlockSnow) {
+            IBlockState state = this.getActualState(base_state, world, pos);
+            return ((Integer)state.getValue(BlockSnow.LAYERS)).intValue() >= 8;
+         } else if (this instanceof BlockHopper && side == EnumFacing.UP) {
+            return true;
+         } else {
+            return this instanceof BlockCompressedPowered ? true : this.isNormalCube(base_state, world, pos);
+         }
+      } else {
+         return side != EnumFacing.DOWN && side != EnumFacing.UP;
+      }
+   }
+
+   public boolean isBurning(IBlockAccess var1, BlockPos var2) {
+      return false;
+   }
+
+   public boolean isAir(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return state.getMaterial() == Material.AIR;
+   }
+
+   public boolean canHarvestBlock(IBlockAccess var1, BlockPos var2, EntityPlayer var3) {
+      return ForgeHooks.canHarvestBlock(this, player, world, pos);
+   }
+
+   public boolean removedByPlayer(IBlockState var1, World var2, BlockPos var3, EntityPlayer var4, boolean var5) {
+      this.onBlockHarvested(world, pos, state, player);
+      return world.setBlockState(pos, Blocks.AIR.getDefaultState(), world.isRemote ? 11 : 3);
+   }
+
+   public int getFlammability(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
+      return Blocks.FIRE.getFlammability(this);
+   }
+
+   public boolean isFlammable(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
+      return this.getFlammability(world, pos, face) > 0;
+   }
+
+   public int getFireSpreadSpeed(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
+      return Blocks.FIRE.getEncouragement(this);
+   }
+
+   public boolean isFireSource(World var1, BlockPos var2, EnumFacing var3) {
+      if (this == Blocks.NETHERRACK && side == EnumFacing.UP) {
+         return true;
+      } else {
+         return world.provider instanceof WorldProviderEnd && this == Blocks.BEDROCK && side == EnumFacing.UP;
+      }
+   }
+
+   public boolean hasTileEntity(IBlockState var1) {
+      return this.isTileProvider;
+   }
+
+   public TileEntity createTileEntity(World var1, IBlockState var2) {
+      return this.isTileProvider ? ((ITileEntityProvider)this).createNewTileEntity(world, this.getMetaFromState(state)) : null;
+   }
+
+   public int quantityDropped(IBlockState var1, int var2, Random var3) {
+      return this.quantityDroppedWithBonus(fortune, random);
+   }
+
+   public List getDrops(IBlockAccess var1, BlockPos var2, IBlockState var3, int var4) {
+      List ret = new ArrayList();
+      Random rand = world instanceof World ? ((World)world).rand : RANDOM;
+      int count = this.quantityDropped(state, fortune, rand);
+
+      for(int i = 0; i < count; ++i) {
+         Item item = this.getItemDropped(state, rand, fortune);
+         if (item != null) {
+            ret.add(new ItemStack(item, 1, this.damageDropped(state)));
+         }
+      }
+
+      return ret;
+   }
+
+   public boolean canSilkHarvest(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4) {
+      this.silk_check_state.set(state);
+      boolean ret = this.canSilkHarvest();
+      this.silk_check_state.set((Object)null);
+      return ret;
+   }
+
+   public boolean canCreatureSpawn(IBlockState var1, IBlockAccess var2, BlockPos var3, EntityLiving.SpawnPlacementType var4) {
+      return this.isSideSolid(state, world, pos, EnumFacing.UP);
+   }
+
+   public boolean isBed(IBlockState var1, IBlockAccess var2, BlockPos var3, Entity var4) {
+      return this == Blocks.BED;
+   }
+
+   public BlockPos getBedSpawnPosition(IBlockState var1, IBlockAccess var2, BlockPos var3, EntityPlayer var4) {
+      return world instanceof World ? BlockBed.getSafeExitLocation((World)world, pos, 0) : null;
+   }
+
+   public void setBedOccupied(IBlockAccess var1, BlockPos var2, EntityPlayer var3, boolean var4) {
+      if (world instanceof World) {
+         IBlockState state = world.getBlockState(pos);
+         state = state.getBlock().getActualState(state, world, pos);
+         state = state.withProperty(BlockBed.OCCUPIED, Boolean.valueOf(occupied));
+         ((World)world).setBlockState(pos, state, 4);
+      }
+
+   }
+
+   public EnumFacing getBedDirection(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return (EnumFacing)this.getActualState(state, world, pos).getValue(BlockHorizontal.FACING);
+   }
+
+   public boolean isBedFoot(IBlockAccess var1, BlockPos var2) {
+      return this.getActualState(world.getBlockState(pos), world, pos).getValue(BlockBed.PART) == BlockBed.EnumPartType.FOOT;
+   }
+
+   public void beginLeavesDecay(IBlockState var1, World var2, BlockPos var3) {
+   }
+
+   public boolean canSustainLeaves(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return false;
+   }
+
+   public boolean isLeaves(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return state.getMaterial() == Material.LEAVES;
+   }
+
+   public boolean canBeReplacedByLeaves(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return this.isAir(state, world, pos) || this.isLeaves(state, world, pos);
+   }
+
+   public boolean isWood(IBlockAccess var1, BlockPos var2) {
+      return false;
+   }
+
+   public boolean isReplaceableOreGen(IBlockState var1, IBlockAccess var2, BlockPos var3, Predicate var4) {
+      return target.apply(state);
+   }
+
+   public float getExplosionResistance(World var1, BlockPos var2, Entity var3, Explosion var4) {
+      return this.getExplosionResistance(exploder);
+   }
+
+   public void onBlockExploded(World var1, BlockPos var2, Explosion var3) {
+      world.setBlockToAir(pos);
+      this.onBlockDestroyedByExplosion(world, pos, explosion);
+   }
+
+   public boolean canConnectRedstone(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
+      return state.canProvidePower() && side != null;
+   }
+
+   public boolean canPlaceTorchOnTop(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      if (state.isSideSolid(world, pos, EnumFacing.UP)) {
+         return true;
+      } else {
+         return this instanceof BlockFence || this == Blocks.GLASS || this == Blocks.COBBLESTONE_WALL || this == Blocks.STAINED_GLASS;
+      }
+   }
+
+   public ItemStack getPickBlock(IBlockState var1, RayTraceResult var2, World var3, BlockPos var4, EntityPlayer var5) {
+      return this.getItem(world, pos, state);
+   }
+
+   public boolean isFoliage(IBlockAccess var1, BlockPos var2) {
+      return false;
+   }
+
+   public boolean addLandingEffects(IBlockState var1, WorldServer var2, BlockPos var3, IBlockState var4, EntityLivingBase var5, int var6) {
+      return false;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public boolean addHitEffects(IBlockState var1, World var2, RayTraceResult var3, ParticleManager var4) {
+      return false;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public boolean addDestroyEffects(World var1, BlockPos var2, ParticleManager var3) {
+      return false;
+   }
+
+   public boolean canSustainPlant(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4, IPlantable var5) {
+      IBlockState plant = plantable.getPlant(world, pos.offset(direction));
+      EnumPlantType plantType = plantable.getPlantType(world, pos.offset(direction));
+      if (plant.getBlock() == Blocks.CACTUS) {
+         return this == Blocks.CACTUS || this == Blocks.SAND;
+      } else if (plant.getBlock() == Blocks.REEDS && this == Blocks.REEDS) {
+         return true;
+      } else if (plantable instanceof BlockBush && ((BlockBush)plantable).canSustainBush(state)) {
+         return true;
+      } else {
+         switch(plantType) {
+         case Desert:
+            return this == Blocks.SAND || this == Blocks.HARDENED_CLAY || this == Blocks.STAINED_HARDENED_CLAY;
+         case Nether:
+            return this == Blocks.SOUL_SAND;
+         case Crop:
+            return this == Blocks.FARMLAND;
+         case Cave:
+            return state.isSideSolid(world, pos, EnumFacing.UP);
+         case Plains:
+            return this == Blocks.GRASS || this == Blocks.DIRT || this == Blocks.FARMLAND;
+         case Water:
+            return state.getMaterial() == Material.WATER && ((Integer)state.getValue(BlockLiquid.LEVEL)).intValue() == 0;
+         case Beach:
+            boolean isBeach = this == Blocks.GRASS || this == Blocks.DIRT || this == Blocks.SAND;
+            boolean hasWater = world.getBlockState(pos.east()).getMaterial() == Material.WATER || world.getBlockState(pos.west()).getMaterial() == Material.WATER || world.getBlockState(pos.north()).getMaterial() == Material.WATER || world.getBlockState(pos.south()).getMaterial() == Material.WATER;
+            return isBeach && hasWater;
+         default:
+            return false;
+         }
+      }
+   }
+
+   public void onPlantGrow(IBlockState var1, World var2, BlockPos var3, BlockPos var4) {
+      if (this == Blocks.GRASS || this == Blocks.FARMLAND) {
+         world.setBlockState(pos, Blocks.DIRT.getDefaultState(), 2);
+      }
+
+   }
+
+   public boolean isFertile(World var1, BlockPos var2) {
+      if (this == Blocks.FARMLAND) {
+         return ((Integer)world.getBlockState(pos).getValue(BlockFarmland.MOISTURE)).intValue() > 0;
+      } else {
+         return false;
+      }
+   }
+
+   public int getLightOpacity(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return state.getLightOpacity();
+   }
+
+   public boolean canEntityDestroy(IBlockState var1, IBlockAccess var2, BlockPos var3, Entity var4) {
+      if (!(entity instanceof EntityDragon)) {
+         return !(entity instanceof EntityWither) && !(entity instanceof EntityWitherSkull) ? true : EntityWither.canDestroyBlock(this);
+      } else {
+         return this != Blocks.BARRIER && this != Blocks.OBSIDIAN && this != Blocks.END_STONE && this != Blocks.BEDROCK && this != Blocks.END_PORTAL && this != Blocks.END_PORTAL_FRAME && this != Blocks.COMMAND_BLOCK && this != Blocks.REPEATING_COMMAND_BLOCK && this != Blocks.CHAIN_COMMAND_BLOCK && this != Blocks.IRON_BARS && this != Blocks.END_GATEWAY;
+      }
+   }
+
+   public boolean isBeaconBase(IBlockAccess var1, BlockPos var2, BlockPos var3) {
+      return this == Blocks.EMERALD_BLOCK || this == Blocks.GOLD_BLOCK || this == Blocks.DIAMOND_BLOCK || this == Blocks.IRON_BLOCK;
+   }
+
+   public boolean rotateBlock(World var1, BlockPos var2, EnumFacing var3) {
+      IBlockState state = world.getBlockState(pos);
+      UnmodifiableIterator var5 = state.getProperties().keySet().iterator();
+
+      while(var5.hasNext()) {
+         IProperty prop = (IProperty)var5.next();
+         if (prop.getName().equals("facing") || prop.getName().equals("rotation")) {
+            world.setBlockState(pos, state.cycleProperty(prop));
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public EnumFacing[] getValidRotations(World var1, BlockPos var2) {
+      IBlockState state = world.getBlockState(pos);
+      UnmodifiableIterator var4 = state.getProperties().keySet().iterator();
+
+      while(var4.hasNext()) {
+         IProperty prop = (IProperty)var4.next();
+         if (prop.getName().equals("facing") && prop.getValueClass() == EnumFacing.class) {
+            Collection values = prop.getAllowedValues();
+            return (EnumFacing[])values.toArray(new EnumFacing[values.size()]);
+         }
+      }
+
+      return null;
+   }
+
+   public float getEnchantPowerBonus(World var1, BlockPos var2) {
+      return this == Blocks.BOOKSHELF ? 1.0F : 0.0F;
+   }
+
+   public boolean recolorBlock(World var1, BlockPos var2, EnumFacing var3, EnumDyeColor var4) {
+      IBlockState state = world.getBlockState(pos);
+      UnmodifiableIterator var6 = state.getProperties().keySet().iterator();
+
+      while(var6.hasNext()) {
+         IProperty prop = (IProperty)var6.next();
+         if (prop.getName().equals("color") && prop.getValueClass() == EnumDyeColor.class) {
+            EnumDyeColor current = (EnumDyeColor)state.getValue(prop);
+            if (current != color) {
+               world.setBlockState(pos, state.withProperty(prop, color));
+               return true;
+            }
+         }
+      }
+
+      return false;
+   }
+
+   public int getExpDrop(IBlockState var1, IBlockAccess var2, BlockPos var3, int var4) {
+      return 0;
+   }
+
+   public void onNeighborChange(IBlockAccess var1, BlockPos var2, BlockPos var3) {
+   }
+
+   public boolean shouldCheckWeakPower(IBlockState var1, IBlockAccess var2, BlockPos var3, EnumFacing var4) {
+      return state.isNormalCube();
+   }
+
+   public boolean getWeakChanges(IBlockAccess var1, BlockPos var2) {
+      return false;
+   }
+
+   public void setHarvestLevel(String var1, int var2) {
+      Iterator itr = this.getBlockState().getValidStates().iterator();
+
+      while(((Iterator)itr).hasNext()) {
+         this.setHarvestLevel(toolClass, level, (IBlockState)itr.next());
+      }
+
+   }
+
+   public void setHarvestLevel(String var1, int var2, IBlockState var3) {
+      int idx = this.getMetaFromState(state);
+      this.harvestTool[idx] = toolClass;
+      this.harvestLevel[idx] = level;
+   }
+
+   public String getHarvestTool(IBlockState var1) {
+      return this.harvestTool[this.getMetaFromState(state)];
+   }
+
+   public int getHarvestLevel(IBlockState var1) {
+      return this.harvestLevel[this.getMetaFromState(state)];
+   }
+
+   public boolean isToolEffective(String var1, IBlockState var2) {
+      if (!"pickaxe".equals(type) || this != Blocks.REDSTONE_ORE && this != Blocks.LIT_REDSTONE_ORE && this != Blocks.OBSIDIAN) {
+         return type != null && type.equals(this.getHarvestTool(state));
+      } else {
+         return false;
+      }
+   }
+
+   public IBlockState getExtendedState(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return state;
+   }
+
+   public Boolean isEntityInsideMaterial(IBlockAccess var1, BlockPos var2, IBlockState var3, Entity var4, double var5, Material var7, boolean var8) {
+      return null;
+   }
+
+   public Boolean isAABBInsideMaterial(World var1, BlockPos var2, AxisAlignedBB var3, Material var4) {
+      return null;
+   }
+
+   /** @deprecated */
+   @Deprecated
+   public boolean canRenderInLayer(BlockRenderLayer var1) {
+      return this.getBlockLayer() == layer;
+   }
+
+   public boolean canRenderInLayer(IBlockState var1, BlockRenderLayer var2) {
+      return this.canRenderInLayer(layer);
+   }
+
+   protected List captureDrops(boolean var1) {
+      if (start) {
+         captureDrops.set(Boolean.valueOf(true));
+         ((List)capturedDrops.get()).clear();
+         return null;
+      } else {
+         captureDrops.set(Boolean.valueOf(false));
+         return (List)capturedDrops.get();
+      }
+   }
+
+   public void addInformation(ItemStack var1, EntityPlayer var2, List var3, boolean var4) {
+   }
+
+   public SoundType getSoundType(IBlockState var1, World var2, BlockPos var3, @Nullable Entity var4) {
+      return this.getSoundType();
+   }
+
+   @Nullable
+   public float[] getBeaconColorMultiplier(IBlockState var1, World var2, BlockPos var3, BlockPos var4) {
+      return null;
+   }
+
+   public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8, ItemStack var9) {
+      return this.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer);
    }
 
    public static void registerBlocks() {
@@ -910,36 +1529,31 @@ public class Block {
          }
       }
 
-      HashSet hashset = Sets.newHashSet(new Block[]{(Block)REGISTRY.getObject(new ResourceLocation("tripwire"))});
+      Set set = Sets.newHashSet(new Block[]{(Block)REGISTRY.getObject(new ResourceLocation("tripwire"))});
 
       for(Block block16 : REGISTRY) {
-         if (hashset.contains(block16)) {
+         if (set.contains(block16)) {
             for(int i = 0; i < 15; ++i) {
                int j = REGISTRY.getIDForObject(block16) << 4 | i;
                BLOCK_STATE_IDS.put(block16.getStateFromMeta(i), j);
-            }
-         } else {
-            Iterator iterator2 = block16.getBlockState().getValidStates().iterator();
-
-            while(iterator2.hasNext()) {
-               IBlockState iblockdata = (IBlockState)iterator2.next();
-               int k = REGISTRY.getIDForObject(block16) << 4 | block16.getMetaFromState(iblockdata);
-               BLOCK_STATE_IDS.put(iblockdata, k);
             }
          }
       }
 
    }
 
-   public int getExpDrop(World world, IBlockState data, int enchantmentLevel) {
-      return 0;
+   private static void registerBlock(int var0, ResourceLocation var1, Block var2) {
+      REGISTRY.register(id, textualID, block_);
    }
 
-   private static void registerBlock(int i, ResourceLocation minecraftkey, Block block) {
-      REGISTRY.register(i, minecraftkey, block);
+   private static void registerBlock(int var0, String var1, Block var2) {
+      registerBlock(id, new ResourceLocation(textualID), block_);
    }
 
-   private static void registerBlock(int i, String s, Block block) {
-      registerBlock(i, new ResourceLocation(s), block);
+   @SideOnly(Side.CLIENT)
+   public static enum EnumOffsetType {
+      NONE,
+      XZ,
+      XYZ;
    }
 }

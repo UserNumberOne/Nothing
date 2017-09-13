@@ -29,7 +29,7 @@ public class ResourceIndex {
    protected ResourceIndex() {
    }
 
-   public ResourceIndex(File assetsFolder, String indexName) {
+   public ResourceIndex(File var1, String var2) {
       File file1 = new File(assetsFolder, "objects");
       File file2 = new File(assetsFolder, "indexes/" + indexName + ".json");
       BufferedReader bufferedreader = null;
@@ -51,7 +51,7 @@ public class ResourceIndex {
          }
       } catch (JsonParseException var20) {
          LOGGER.error("Unable to parse resource index file: {}", new Object[]{file2});
-      } catch (FileNotFoundException var211) {
+      } catch (FileNotFoundException var21) {
          LOGGER.error("Can't find the resource index file: {}", new Object[]{file2});
       } finally {
          IOUtils.closeQuietly(bufferedreader);
@@ -60,12 +60,12 @@ public class ResourceIndex {
    }
 
    @Nullable
-   public File getFile(ResourceLocation location) {
+   public File getFile(ResourceLocation var1) {
       String s = location.toString();
       return (File)this.resourceMap.get(s);
    }
 
-   public boolean isFileExisting(ResourceLocation location) {
+   public boolean isFileExisting(ResourceLocation var1) {
       File file1 = this.getFile(location);
       return file1 != null && file1.isFile();
    }

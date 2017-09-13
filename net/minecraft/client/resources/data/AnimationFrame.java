@@ -8,11 +8,11 @@ public class AnimationFrame {
    private final int frameIndex;
    private final int frameTime;
 
-   public AnimationFrame(int frameIndexIn) {
+   public AnimationFrame(int var1) {
       this(frameIndexIn, -1);
    }
 
-   public AnimationFrame(int frameIndexIn, int frameTimeIn) {
+   public AnimationFrame(int var1, int var2) {
       this.frameIndex = frameIndexIn;
       this.frameTime = frameTimeIn;
    }

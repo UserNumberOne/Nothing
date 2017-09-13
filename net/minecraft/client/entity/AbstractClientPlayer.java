@@ -29,7 +29,7 @@ public abstract class AbstractClientPlayer extends EntityPlayer {
    public float rotateElytraY;
    public float rotateElytraZ;
 
-   public AbstractClientPlayer(World worldIn, GameProfile playerProfile) {
+   public AbstractClientPlayer(World var1, GameProfile var2) {
       super(worldIn, playerProfile);
    }
 
@@ -82,7 +82,7 @@ public abstract class AbstractClientPlayer extends EntityPlayer {
       return networkplayerinfo == null ? null : networkplayerinfo.getLocationElytra();
    }
 
-   public static ThreadDownloadImageData getDownloadImageSkin(ResourceLocation resourceLocationIn, String username) {
+   public static ThreadDownloadImageData getDownloadImageSkin(ResourceLocation var0, String var1) {
       TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
       ITextureObject itextureobject = texturemanager.getTexture(resourceLocationIn);
       if (itextureobject == null) {
@@ -93,7 +93,7 @@ public abstract class AbstractClientPlayer extends EntityPlayer {
       return (ThreadDownloadImageData)itextureobject;
    }
 
-   public static ResourceLocation getLocationSkin(String username) {
+   public static ResourceLocation getLocationSkin(String var0) {
       return new ResourceLocation("skins/" + StringUtils.stripControlCodes(username));
    }
 

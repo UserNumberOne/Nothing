@@ -65,7 +65,7 @@ public class SoundManager {
    private final List listeners;
    private final List pausedChannels;
 
-   public SoundManager(SoundHandler p_i45119_1_, GameSettings p_i45119_2_) {
+   public SoundManager(SoundHandler var1, GameSettings var2) {
       this.invPlayingSounds = ((BiMap)this.playingSounds).inverse();
       this.categorySounds = HashMultimap.create();
       this.tickableSounds = Lists.newArrayList();
@@ -108,21 +108,21 @@ public class SoundManager {
             (new Thread(new Runnable() {
                public void run() {
                   SoundSystemConfig.setLogger(new SoundSystemLogger() {
-                     public void message(String p_message_1_, int p_message_2_) {
+                     public void message(String var1, int var2) {
                         if (!p_message_1_.isEmpty()) {
                            SoundManager.LOGGER.info(p_message_1_);
                         }
 
                      }
 
-                     public void importantMessage(String p_importantMessage_1_, int p_importantMessage_2_) {
+                     public void importantMessage(String var1, int var2) {
                         if (!p_importantMessage_1_.isEmpty()) {
                            SoundManager.LOGGER.warn(p_importantMessage_1_);
                         }
 
                      }
 
-                     public void errorMessage(String p_errorMessage_1_, String p_errorMessage_2_, int p_errorMessage_3_) {
+                     public void errorMessage(String var1, String var2, int var3) {
                         if (!p_errorMessage_2_.isEmpty()) {
                            SoundManager.LOGGER.error("Error in class '{}'", new Object[]{p_errorMessage_1_});
                            SoundManager.LOGGER.error(p_errorMessage_2_);
@@ -148,11 +148,11 @@ public class SoundManager {
 
    }
 
-   private float getVolume(SoundCategory category) {
+   private float getVolume(SoundCategory var1) {
       return category != null && category != SoundCategory.MASTER ? this.options.getSoundLevel(category) : 1.0F;
    }
 
-   public void setVolume(SoundCategory category, float volume) {
+   public void setVolume(SoundCategory var1, float var2) {
       if (this.loaded) {
          if (category == SoundCategory.MASTER) {
             this.sndSystem.setMasterVolume(volume);
@@ -196,11 +196,11 @@ public class SoundManager {
 
    }
 
-   public void addListener(ISoundEventListener listener) {
+   public void addListener(ISoundEventListener var1) {
       this.listeners.add(listener);
    }
 
-   public void removeListener(ISoundEventListener listener) {
+   public void removeListener(ISoundEventListener var1) {
       this.listeners.remove(listener);
    }
 
@@ -268,7 +268,7 @@ public class SoundManager {
 
    }
 
-   public boolean isSoundPlaying(ISound sound) {
+   public boolean isSoundPlaying(ISound var1) {
       if (!this.loaded) {
          return false;
       } else {
@@ -277,7 +277,7 @@ public class SoundManager {
       }
    }
 
-   public void stopSound(ISound sound) {
+   public void stopSound(ISound var1) {
       if (this.loaded) {
          String s = (String)this.invPlayingSounds.get(sound);
          if (s != null) {
@@ -287,7 +287,7 @@ public class SoundManager {
 
    }
 
-   public void playSound(ISound p_sound) {
+   public void playSound(ISound var1) {
       if (this.loaded) {
          p_sound = ForgeHooksClient.playSound(this, p_sound);
          if (p_sound == null) {
@@ -360,11 +360,11 @@ public class SoundManager {
 
    }
 
-   private float getClampedPitch(ISound soundIn) {
+   private float getClampedPitch(ISound var1) {
       return MathHelper.clamp(soundIn.getPitch(), 0.5F, 2.0F);
    }
 
-   private float getClampedVolume(ISound soundIn) {
+   private float getClampedVolume(ISound var1) {
       return MathHelper.clamp(soundIn.getVolume() * this.getVolume(soundIn.getCategory()), 0.0F, 1.0F);
    }
 
@@ -390,14 +390,14 @@ public class SoundManager {
       this.pausedChannels.clear();
    }
 
-   public void playDelayedSound(ISound sound, int delay) {
+   public void playDelayedSound(ISound var1, int var2) {
       this.delayedSounds.put(sound, Integer.valueOf(this.playTime + delay));
    }
 
-   private static URL getURLForSoundResource(final ResourceLocation p_148612_0_) {
+   private static URL getURLForSoundResource(final ResourceLocation var0) {
       String s = String.format("%s:%s:%s", "mcsounddomain", p_148612_0_.getResourceDomain(), p_148612_0_.getResourcePath());
       URLStreamHandler urlstreamhandler = new URLStreamHandler() {
-         protected URLConnection openConnection(URL p_openConnection_1_) {
+         protected URLConnection openConnection(URL var1) {
             return new URLConnection(p_openConnection_1_) {
                public void connect() throws IOException {
                }
@@ -416,7 +416,7 @@ public class SoundManager {
       }
    }
 
-   public void setListener(EntityPlayer player, float p_148615_2_) {
+   public void setListener(EntityPlayer var1, float var2) {
       if (this.loaded && player != null) {
          float f = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * p_148615_2_;
          float f1 = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * p_148615_2_;
@@ -439,7 +439,7 @@ public class SoundManager {
 
    }
 
-   public void stop(String p_189567_1_, SoundCategory p_189567_2_) {
+   public void stop(String var1, SoundCategory var2) {
       if (p_189567_2_ != null) {
          for(String s : this.categorySounds.get(p_189567_2_)) {
             ISound isound = (ISound)this.playingSounds.get(s);
@@ -468,7 +468,7 @@ public class SoundManager {
       private SoundSystemStarterThread() {
       }
 
-      public boolean playing(String p_playing_1_) {
+      public boolean playing(String var1) {
          synchronized(SoundSystemConfig.THREAD_SYNC) {
             if (this.soundLibrary == null) {
                return false;

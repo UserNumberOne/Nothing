@@ -23,18 +23,18 @@ public class ShaderLoader {
    private final int shader;
    private int shaderAttachCount;
 
-   private ShaderLoader(ShaderLoader.ShaderType type, int shaderId, String filename) {
+   private ShaderLoader(ShaderLoader.ShaderType var1, int var2, String var3) {
       this.shaderType = type;
       this.shader = shaderId;
       this.shaderFilename = filename;
    }
 
-   public void attachShader(ShaderManager manager) {
+   public void attachShader(ShaderManager var1) {
       ++this.shaderAttachCount;
       OpenGlHelper.glAttachShader(manager.getProgram(), this.shader);
    }
 
-   public void deleteShader(ShaderManager manager) {
+   public void deleteShader(ShaderManager var1) {
       --this.shaderAttachCount;
       if (this.shaderAttachCount <= 0) {
          OpenGlHelper.glDeleteShader(this.shader);
@@ -47,7 +47,7 @@ public class ShaderLoader {
       return this.shaderFilename;
    }
 
-   public static ShaderLoader loadShader(IResourceManager resourceManager, ShaderLoader.ShaderType type, String filename) throws IOException {
+   public static ShaderLoader loadShader(IResourceManager var0, ShaderLoader.ShaderType var1, String var2) throws IOException {
       ShaderLoader shaderloader = (ShaderLoader)type.getLoadedShaders().get(filename);
       if (shaderloader == null) {
          ResourceLocation resourcelocation = new ResourceLocation("shaders/program/" + filename + type.getShaderExtension());
@@ -88,7 +88,7 @@ public class ShaderLoader {
       private final int shaderMode;
       private final Map loadedShaders = Maps.newHashMap();
 
-      private ShaderType(String shaderNameIn, String shaderExtensionIn, int shaderModeIn) {
+      private ShaderType(String var3, String var4, int var5) {
          this.shaderName = shaderNameIn;
          this.shaderExtension = shaderExtensionIn;
          this.shaderMode = shaderModeIn;

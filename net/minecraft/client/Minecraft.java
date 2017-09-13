@@ -303,7 +303,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
    long prevFrameTime = -1L;
    private String debugProfilerName = "root";
 
-   public Minecraft(GameConfiguration gameConfig) {
+   public Minecraft(GameConfiguration var1) {
       theMinecraft = this;
       this.mcDataDir = gameConfig.folderInfo.mcDataDir;
       this.fileAssets = gameConfig.folderInfo.assetsDir;
@@ -423,7 +423,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       this.mcResourceManager.registerReloadListener(new GrassColorReloadListener());
       this.mcResourceManager.registerReloadListener(new FoliageColorReloadListener());
       AchievementList.OPEN_INVENTORY.setStatStringFormatter(new IStatStringFormat() {
-         public String formatString(String str) {
+         public String formatString(String var1) {
             try {
                return String.format(str, Minecraft.this.gameSettings.keyBindInventory.getDisplayName());
             } catch (Exception var3) {
@@ -612,12 +612,12 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       thread.start();
    }
 
-   public void crashed(CrashReport crash) {
+   public void crashed(CrashReport var1) {
       this.hasCrashed = true;
       this.crashReporter = crash;
    }
 
-   public void displayCrashReport(CrashReport crashReportIn) {
+   public void displayCrashReport(CrashReport var1) {
       File file1 = new File(getMinecraft().mcDataDir, "crash-reports");
       File file2 = new File(file1, "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-client.txt");
       Bootstrap.printToSYSOUT(crashReportIn.getCompleteReport());
@@ -674,7 +674,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
 
    }
 
-   private ByteBuffer readImageToBuffer(InputStream imageStream) throws IOException {
+   private ByteBuffer readImageToBuffer(InputStream var1) throws IOException {
       BufferedImage bufferedimage = ImageIO.read(imageStream);
       int[] aint = bufferedimage.getRGB(0, 0, bufferedimage.getWidth(), bufferedimage.getHeight(), (int[])null, 0, bufferedimage.getWidth());
       ByteBuffer bytebuffer = ByteBuffer.allocate(4 * aint.length);
@@ -728,7 +728,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       this.displayHeight = displaymode.getHeight();
    }
 
-   public void drawSplashScreen(TextureManager textureManagerInstance) throws LWJGLException {
+   public void drawSplashScreen(TextureManager var1) throws LWJGLException {
       ScaledResolution scaledresolution = new ScaledResolution(this);
       int i = scaledresolution.getScaleFactor();
       Framebuffer framebuffer = new Framebuffer(scaledresolution.getScaledWidth() * i, scaledresolution.getScaledHeight() * i, true);
@@ -776,7 +776,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       this.updateDisplay();
    }
 
-   public void draw(int posX, int posY, int texU, int texV, int width, int height, int red, int green, int blue, int alpha) {
+   public void draw(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10) {
       VertexBuffer vertexbuffer = Tessellator.getInstance().getBuffer();
       vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
       float f = 0.00390625F;
@@ -792,7 +792,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       return this.saveLoader;
    }
 
-   public void displayGuiScreen(@Nullable GuiScreen guiScreenIn) {
+   public void displayGuiScreen(@Nullable GuiScreen var1) {
       if (guiScreenIn == null && this.world == null) {
          guiScreenIn = new GuiMainMenu();
       } else if (guiScreenIn == null && this.player.getHealth() <= 0.0F) {
@@ -838,7 +838,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       }
    }
 
-   private void checkGLError(String message) {
+   private void checkGLError(String var1) {
       int i = GlStateManager.glGetError();
       if (i != 0) {
          String s = GLU.gluErrorString(i);
@@ -1029,7 +1029,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       System.gc();
    }
 
-   private void updateDebugProfilerName(int keyCount) {
+   private void updateDebugProfilerName(int var1) {
       List list = this.mcProfiler.getProfilingData(this.debugProfilerName);
       if (list != null && !list.isEmpty()) {
          Profiler.Result profiler$result = (Profiler.Result)list.remove(0);
@@ -1054,7 +1054,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
 
    }
 
-   private void displayDebugInfo(long elapsedTicksTime) {
+   private void displayDebugInfo(long var1) {
       if (this.mcProfiler.profilingEnabled) {
          List list = this.mcProfiler.getProfilingData(this.debugProfilerName);
          Profiler.Result profiler$result = (Profiler.Result)list.remove(0);
@@ -1189,7 +1189,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
 
    }
 
-   private void sendClickBlockToController(boolean leftClick) {
+   private void sendClickBlockToController(boolean var1) {
       if (!leftClick) {
          this.leftClickCounter = 0;
       }
@@ -1339,7 +1339,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
 
    }
 
-   public void resize(int width, int height) {
+   public void resize(int var1, int var2) {
       this.displayWidth = Math.max(1, width);
       this.displayHeight = Math.max(1, height);
       if (this.currentScreen != null) {
@@ -1592,7 +1592,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       this.processKeyBinds();
    }
 
-   private boolean processKeyF3(int p_184122_1_) {
+   private boolean processKeyF3(int var1) {
       if (p_184122_1_ == 30) {
          this.renderGlobal.loadRenderers();
          this.debugChatMessage("Reloading all chunks");
@@ -1803,11 +1803,11 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
 
    }
 
-   private void debugChatMessage(String p_184120_1_, Object... p_184120_2_) {
+   private void debugChatMessage(String var1, Object... var2) {
       this.ingameGUI.getChatGUI().printChatMessage((new TextComponentString("")).appendSibling((new TextComponentString("[Debug]: ")).setStyle((new Style()).setColor(TextFormatting.YELLOW).setBold(Boolean.valueOf(true)))).appendText(MessageFormat.format(p_184120_1_, p_184120_2_)));
    }
 
-   public void launchIntegratedServer(String folderName, String worldName, @Nullable WorldSettings worldSettingsIn) {
+   public void launchIntegratedServer(String var1, String var2, @Nullable WorldSettings var3) {
       FMLClientHandler.instance().startIntegratedServer(folderName, worldName, worldSettingsIn);
       this.loadWorld((WorldClient)null);
       System.gc();
@@ -1879,11 +1879,11 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       this.myNetworkManager = networkmanager;
    }
 
-   public void loadWorld(WorldClient worldClientIn) {
+   public void loadWorld(WorldClient var1) {
       this.loadWorld(worldClientIn, "");
    }
 
-   public void loadWorld(@Nullable WorldClient worldClientIn, String loadingMessage) {
+   public void loadWorld(@Nullable WorldClient var1, String var2) {
       if (this.world != null) {
          MinecraftForge.EVENT_BUS.post(new Unload(this.world));
       }
@@ -1971,7 +1971,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       this.systemTime = 0L;
    }
 
-   public void setDimensionAndSpawnPlayer(int dimension) {
+   public void setDimensionAndSpawnPlayer(int var1) {
       this.world.setInitialSpawnLocation();
       this.world.removeAllEntities();
       int i = 0;
@@ -2030,7 +2030,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
 
    }
 
-   public ItemStack storeTEInStack(ItemStack stack, TileEntity te) {
+   public ItemStack storeTEInStack(ItemStack var1, TileEntity var2) {
       NBTTagCompound nbttagcompound = te.writeToNBT(new NBTTagCompound());
       if (stack.getItem() == Items.SKULL && nbttagcompound.hasKey("Owner")) {
          NBTTagCompound nbttagcompound2 = nbttagcompound.getCompoundTag("Owner");
@@ -2049,7 +2049,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       }
    }
 
-   public CrashReport addGraphicsAndWorldToCrashReport(CrashReport theCrash) {
+   public CrashReport addGraphicsAndWorldToCrashReport(CrashReport var1) {
       theCrash.getCategory().setDetail("Launched Version", new ICrashReportDetail() {
          public String call() throws Exception {
             return Minecraft.this.launchedVersion;
@@ -2138,7 +2138,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       });
    }
 
-   public void addServerStatsToSnooper(Snooper playerSnooper) {
+   public void addServerStatsToSnooper(Snooper var1) {
       playerSnooper.addClientStat("fps", Integer.valueOf(debugFPS));
       playerSnooper.addClientStat("vsync_enabled", Boolean.valueOf(this.gameSettings.enableVsync));
       playerSnooper.addClientStat("display_frequency", Integer.valueOf(Display.getDisplayMode().getFrequency()));
@@ -2166,7 +2166,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       return this.theIntegratedServer != null ? (this.theIntegratedServer.getPublic() ? "hosting_lan" : "singleplayer") : (this.currentServerData != null ? (this.currentServerData.isOnLAN() ? "playing_lan" : "multiplayer") : "out_of_game");
    }
 
-   public void addServerTypeToSnooper(Snooper playerSnooper) {
+   public void addServerTypeToSnooper(Snooper var1) {
       playerSnooper.addStatToSnooper("opengl_version", GlStateManager.glGetString(7938));
       playerSnooper.addStatToSnooper("opengl_vendor", GlStateManager.glGetString(7936));
       playerSnooper.addStatToSnooper("client_brand", ClientBrandRetriever.getClientModName());
@@ -2291,7 +2291,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       return this.gameSettings.snooperEnabled;
    }
 
-   public void setServerData(ServerData serverDataIn) {
+   public void setServerData(ServerData var1) {
       this.currentServerData = serverDataIn;
    }
 
@@ -2417,12 +2417,12 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       return this.renderViewEntity;
    }
 
-   public void setRenderViewEntity(Entity viewingEntity) {
+   public void setRenderViewEntity(Entity var1) {
       this.renderViewEntity = viewingEntity;
       this.entityRenderer.loadEntityShader(viewingEntity);
    }
 
-   public ListenableFuture addScheduledTask(Callable callableToSchedule) {
+   public ListenableFuture addScheduledTask(Callable var1) {
       Validate.notNull(callableToSchedule);
       if (this.isCallingFromMinecraftThread()) {
          try {
@@ -2439,7 +2439,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       }
    }
 
-   public ListenableFuture addScheduledTask(Runnable runnableToSchedule) {
+   public ListenableFuture addScheduledTask(Runnable var1) {
       Validate.notNull(runnableToSchedule);
       return this.addScheduledTask(Executors.callable(runnableToSchedule));
    }
@@ -2476,7 +2476,7 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
       return this.connectedToRealms;
    }
 
-   public void setConnectedToRealms(boolean isConnected) {
+   public void setConnectedToRealms(boolean var1) {
       this.connectedToRealms = isConnected;
    }
 

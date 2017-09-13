@@ -44,7 +44,7 @@ public class GuiCreateWorld extends GuiScreen {
    public String chunkProviderSettingsJson = "";
    private static final String[] DISALLOWED_FILENAMES = new String[]{"CON", "COM", "PRN", "AUX", "CLOCK$", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
 
-   public GuiCreateWorld(GuiScreen p_i46320_1_) {
+   public GuiCreateWorld(GuiScreen var1) {
       this.parentScreen = p_i46320_1_;
       this.worldSeed = "";
       this.worldName = I18n.format("selectWorld.newWorld");
@@ -124,7 +124,7 @@ public class GuiCreateWorld extends GuiScreen {
 
    }
 
-   public static String getUncollidingSaveDirName(ISaveFormat saveLoader, String name) {
+   public static String getUncollidingSaveDirName(ISaveFormat var0, String var1) {
       name = name.replaceAll("[\\./\"]", "_");
 
       for(String s : DISALLOWED_FILENAMES) {
@@ -144,7 +144,7 @@ public class GuiCreateWorld extends GuiScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 1) {
             this.mc.displayGuiScreen(this.parentScreen);
@@ -260,7 +260,7 @@ public class GuiCreateWorld extends GuiScreen {
       this.showMoreWorldOptions(!this.inMoreWorldOptionsDisplay);
    }
 
-   private void showMoreWorldOptions(boolean toggle) {
+   private void showMoreWorldOptions(boolean var1) {
       this.inMoreWorldOptionsDisplay = toggle;
       if (WorldType.WORLD_TYPES[this.selectedIndex] == WorldType.DEBUG_WORLD) {
          this.btnGameMode.visible = !this.inMoreWorldOptionsDisplay;
@@ -299,7 +299,7 @@ public class GuiCreateWorld extends GuiScreen {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (this.worldNameField.isFocused() && !this.inMoreWorldOptionsDisplay) {
          this.worldNameField.textboxKeyTyped(typedChar, keyCode);
          this.worldName = this.worldNameField.getText();
@@ -316,7 +316,7 @@ public class GuiCreateWorld extends GuiScreen {
       this.calcSaveDirName();
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       if (this.inMoreWorldOptionsDisplay) {
          this.worldSeedField.mouseClicked(mouseX, mouseY, mouseButton);
@@ -326,7 +326,7 @@ public class GuiCreateWorld extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, I18n.format("selectWorld.create"), this.width / 2, 20, -1);
       if (this.inMoreWorldOptionsDisplay) {
@@ -355,7 +355,7 @@ public class GuiCreateWorld extends GuiScreen {
       super.drawScreen(mouseX, mouseY, partialTicks);
    }
 
-   public void recreateFromExistingWorld(WorldInfo original) {
+   public void recreateFromExistingWorld(WorldInfo var1) {
       this.worldName = I18n.format("selectWorld.newWorld.copyOf", original.getWorldName());
       this.worldSeed = original.getSeed() + "";
       this.selectedIndex = original.getTerrainType().getWorldTypeID();

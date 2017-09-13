@@ -10,11 +10,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderBlaze extends RenderLiving {
    private static final ResourceLocation BLAZE_TEXTURES = new ResourceLocation("textures/entity/blaze.png");
 
-   public RenderBlaze(RenderManager renderManagerIn) {
+   public RenderBlaze(RenderManager var1) {
       super(renderManagerIn, new ModelBlaze(), 0.5F);
    }
 
-   protected ResourceLocation getEntityTexture(EntityBlaze entity) {
+   protected ResourceLocation getEntityTexture(EntityBlaze var1) {
       return BLAZE_TEXTURES;
    }
 }

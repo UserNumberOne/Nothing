@@ -13,12 +13,12 @@ public class LocalBlockIntercommunication implements IInteractionObject {
    private final String guiID;
    private final ITextComponent displayName;
 
-   public LocalBlockIntercommunication(String guiIdIn, ITextComponent displayNameIn) {
+   public LocalBlockIntercommunication(String var1, ITextComponent var2) {
       this.guiID = guiIdIn;
       this.displayName = displayNameIn;
    }
 
-   public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn) {
+   public Container createContainer(InventoryPlayer var1, EntityPlayer var2) {
       throw new UnsupportedOperationException();
    }
 

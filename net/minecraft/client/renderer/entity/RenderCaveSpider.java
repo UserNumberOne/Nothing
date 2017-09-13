@@ -10,16 +10,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderCaveSpider extends RenderSpider {
    private static final ResourceLocation CAVE_SPIDER_TEXTURES = new ResourceLocation("textures/entity/spider/cave_spider.png");
 
-   public RenderCaveSpider(RenderManager renderManagerIn) {
+   public RenderCaveSpider(RenderManager var1) {
       super(renderManagerIn);
       this.shadowSize *= 0.7F;
    }
 
-   protected void preRenderCallback(EntityCaveSpider entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityCaveSpider var1, float var2) {
       GlStateManager.scale(0.7F, 0.7F, 0.7F);
    }
 
-   protected ResourceLocation getEntityTexture(EntityCaveSpider entity) {
+   protected ResourceLocation getEntityTexture(EntityCaveSpider var1) {
       return CAVE_SPIDER_TEXTURES;
    }
 }

@@ -7,8 +7,8 @@ public class EntityAITargetNonTamed extends EntityAINearestAttackableTarget {
    private final EntityTameable theTameable;
 
    public EntityAITargetNonTamed(EntityTameable var1, Class var2, boolean var3, Predicate var4) {
-      super(var1, var2, 10, var3, false, var4);
-      this.theTameable = var1;
+      super(entityIn, classTarget, 10, checkSight, false, targetSelector);
+      this.theTameable = entityIn;
    }
 
    public boolean shouldExecute() {

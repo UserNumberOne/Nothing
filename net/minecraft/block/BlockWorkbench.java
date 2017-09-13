@@ -26,11 +26,11 @@ public class BlockWorkbench extends Block {
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
-      if (var1.isRemote) {
+      if (worldIn.isRemote) {
          return true;
       } else {
-         var4.displayGui(new BlockWorkbench.InterfaceCraftingTable(var1, var2));
-         var4.addStat(StatList.CRAFTING_TABLE_INTERACTION);
+         playerIn.displayGui(new BlockWorkbench.InterfaceCraftingTable(worldIn, pos));
+         playerIn.addStat(StatList.CRAFTING_TABLE_INTERACTION);
          return true;
       }
    }
@@ -40,8 +40,8 @@ public class BlockWorkbench extends Block {
       private final BlockPos position;
 
       public InterfaceCraftingTable(World var1, BlockPos var2) {
-         this.world = var1;
-         this.position = var2;
+         this.world = worldIn;
+         this.position = pos;
       }
 
       public String getName() {
@@ -57,7 +57,7 @@ public class BlockWorkbench extends Block {
       }
 
       public Container createContainer(InventoryPlayer var1, EntityPlayer var2) {
-         return new ContainerWorkbench(var1, this.world, this.position);
+         return new ContainerWorkbench(playerInventory, this.world, this.position);
       }
 
       public String getGuiID() {

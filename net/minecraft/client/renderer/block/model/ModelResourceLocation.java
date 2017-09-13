@@ -6,24 +6,24 @@ import org.apache.commons.lang3.StringUtils;
 public class ModelResourceLocation extends ResourceLocation {
    private final String variant;
 
-   protected ModelResourceLocation(int unused, String... resourceName) {
+   protected ModelResourceLocation(int var1, String... var2) {
       super(0, resourceName[0], resourceName[1]);
       this.variant = StringUtils.isEmpty(resourceName[2]) ? "normal" : resourceName[2].toLowerCase();
    }
 
-   public ModelResourceLocation(String pathIn) {
+   public ModelResourceLocation(String var1) {
       this(0, parsePathString(pathIn));
    }
 
-   public ModelResourceLocation(ResourceLocation location, String variantIn) {
+   public ModelResourceLocation(ResourceLocation var1, String var2) {
       this(location.toString(), variantIn);
    }
 
-   public ModelResourceLocation(String location, String variantIn) {
+   public ModelResourceLocation(String var1, String var2) {
       this(0, parsePathString(location + '#' + (variantIn == null ? "normal" : variantIn)));
    }
 
-   protected static String[] parsePathString(String pathIn) {
+   protected static String[] parsePathString(String var0) {
       String[] astring = new String[]{null, pathIn, null};
       int i = pathIn.indexOf(35);
       String s = pathIn;
@@ -42,7 +42,7 @@ public class ModelResourceLocation extends ResourceLocation {
       return this.variant;
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else if (p_equals_1_ instanceof ModelResourceLocation && super.equals(p_equals_1_)) {

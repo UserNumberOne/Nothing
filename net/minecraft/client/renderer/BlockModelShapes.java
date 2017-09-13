@@ -64,7 +64,7 @@ public class BlockModelShapes {
    private final BlockStateMapper blockStateMapper = new BlockStateMapper();
    private final ModelManager modelManager;
 
-   public BlockModelShapes(ModelManager manager) {
+   public BlockModelShapes(ModelManager var1) {
       this.modelManager = manager;
       this.registerAllBlocks();
    }
@@ -73,7 +73,7 @@ public class BlockModelShapes {
       return this.blockStateMapper;
    }
 
-   public TextureAtlasSprite getTexture(IBlockState state) {
+   public TextureAtlasSprite getTexture(IBlockState var1) {
       Block block = state.getBlock();
       IBakedModel ibakedmodel = this.getModelForState(state);
       if (ibakedmodel == null || ibakedmodel == this.modelManager.getMissingModel()) {
@@ -109,7 +109,7 @@ public class BlockModelShapes {
       return ibakedmodel.getParticleTexture();
    }
 
-   public IBakedModel getModelForState(IBlockState state) {
+   public IBakedModel getModelForState(IBlockState var1) {
       IBakedModel ibakedmodel = (IBakedModel)this.bakedModelStore.get(state);
       if (ibakedmodel == null) {
          ibakedmodel = this.modelManager.getMissingModel();
@@ -131,11 +131,11 @@ public class BlockModelShapes {
 
    }
 
-   public void registerBlockWithStateMapper(Block assoc, IStateMapper stateMapper) {
+   public void registerBlockWithStateMapper(Block var1, IStateMapper var2) {
       this.blockStateMapper.registerBlockStateMapper(assoc, stateMapper);
    }
 
-   public void registerBuiltInBlocks(Block... builtIns) {
+   public void registerBuiltInBlocks(Block... var1) {
       this.blockStateMapper.registerBuiltInBlocks(builtIns);
    }
 
@@ -194,7 +194,7 @@ public class BlockModelShapes {
       this.registerBlockWithStateMapper(Blocks.HOPPER, (new StateMap.Builder()).ignore(BlockHopper.ENABLED).build());
       this.registerBlockWithStateMapper(Blocks.FLOWER_POT, (new StateMap.Builder()).ignore(BlockFlowerPot.LEGACY_DATA).build());
       this.registerBlockWithStateMapper(Blocks.QUARTZ_BLOCK, new StateMapperBase() {
-         protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+         protected ModelResourceLocation getModelResourceLocation(IBlockState var1) {
             BlockQuartz.EnumType blockquartz$enumtype = (BlockQuartz.EnumType)state.getValue(BlockQuartz.VARIANT);
             switch(blockquartz$enumtype) {
             case DEFAULT:
@@ -212,12 +212,12 @@ public class BlockModelShapes {
          }
       });
       this.registerBlockWithStateMapper(Blocks.DEADBUSH, new StateMapperBase() {
-         protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+         protected ModelResourceLocation getModelResourceLocation(IBlockState var1) {
             return new ModelResourceLocation("dead_bush", "normal");
          }
       });
       this.registerBlockWithStateMapper(Blocks.PUMPKIN_STEM, new StateMapperBase() {
-         protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+         protected ModelResourceLocation getModelResourceLocation(IBlockState var1) {
             Map map = Maps.newLinkedHashMap(state.getProperties());
             if (state.getValue(BlockStem.FACING) != EnumFacing.UP) {
                map.remove(BlockStem.AGE);
@@ -227,7 +227,7 @@ public class BlockModelShapes {
          }
       });
       this.registerBlockWithStateMapper(Blocks.MELON_STEM, new StateMapperBase() {
-         protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+         protected ModelResourceLocation getModelResourceLocation(IBlockState var1) {
             Map map = Maps.newLinkedHashMap(state.getProperties());
             if (state.getValue(BlockStem.FACING) != EnumFacing.UP) {
                map.remove(BlockStem.AGE);
@@ -237,7 +237,7 @@ public class BlockModelShapes {
          }
       });
       this.registerBlockWithStateMapper(Blocks.DIRT, new StateMapperBase() {
-         protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+         protected ModelResourceLocation getModelResourceLocation(IBlockState var1) {
             Map map = Maps.newLinkedHashMap(state.getProperties());
             String s = BlockDirt.VARIANT.getName((BlockDirt.DirtType)map.remove(BlockDirt.VARIANT));
             if (BlockDirt.DirtType.PODZOL != state.getValue(BlockDirt.VARIANT)) {
@@ -248,7 +248,7 @@ public class BlockModelShapes {
          }
       });
       this.registerBlockWithStateMapper(Blocks.DOUBLE_STONE_SLAB, new StateMapperBase() {
-         protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+         protected ModelResourceLocation getModelResourceLocation(IBlockState var1) {
             Map map = Maps.newLinkedHashMap(state.getProperties());
             String s = BlockStoneSlab.VARIANT.getName((BlockStoneSlab.EnumType)map.remove(BlockStoneSlab.VARIANT));
             map.remove(BlockStoneSlab.SEAMLESS);
@@ -257,7 +257,7 @@ public class BlockModelShapes {
          }
       });
       this.registerBlockWithStateMapper(Blocks.DOUBLE_STONE_SLAB2, new StateMapperBase() {
-         protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+         protected ModelResourceLocation getModelResourceLocation(IBlockState var1) {
             Map map = Maps.newLinkedHashMap(state.getProperties());
             String s = BlockStoneSlabNew.VARIANT.getName((BlockStoneSlabNew.EnumType)map.remove(BlockStoneSlabNew.VARIANT));
             map.remove(BlockStoneSlab.SEAMLESS);

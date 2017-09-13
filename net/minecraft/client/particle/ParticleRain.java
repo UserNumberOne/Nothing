@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ParticleRain extends Particle {
-   protected ParticleRain(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn) {
+   protected ParticleRain(World var1, double var2, double var4, double var6) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0D, 0.0D, 0.0D);
       this.motionX *= 0.30000001192092896D;
       this.motionY = Math.random() * 0.20000000298023224D + 0.10000000149011612D;
@@ -68,7 +68,7 @@ public class ParticleRain extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleRain(worldIn, xCoordIn, yCoordIn, zCoordIn);
       }
    }

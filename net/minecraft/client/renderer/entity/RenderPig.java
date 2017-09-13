@@ -11,12 +11,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderPig extends RenderLiving {
    private static final ResourceLocation PIG_TEXTURES = new ResourceLocation("textures/entity/pig/pig.png");
 
-   public RenderPig(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn) {
+   public RenderPig(RenderManager var1, ModelBase var2, float var3) {
       super(renderManagerIn, modelBaseIn, shadowSizeIn);
       this.addLayer(new LayerSaddle(this));
    }
 
-   protected ResourceLocation getEntityTexture(EntityPig entity) {
+   protected ResourceLocation getEntityTexture(EntityPig var1) {
       return PIG_TEXTURES;
    }
 }

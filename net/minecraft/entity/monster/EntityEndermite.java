@@ -28,7 +28,7 @@ public class EntityEndermite extends EntityMob {
    private boolean playerSpawned;
 
    public EntityEndermite(World var1) {
-      super(var1);
+      super(worldIn);
       this.experienceValue = 3;
       this.setSize(0.4F, 0.3F);
    }
@@ -80,19 +80,19 @@ public class EntityEndermite extends EntityMob {
    }
 
    public static void registerFixesEndermite(DataFixer var0) {
-      EntityLiving.registerFixesMob(var0, "Endermite");
+      EntityLiving.registerFixesMob(fixer, "Endermite");
    }
 
    public void readEntityFromNBT(NBTTagCompound var1) {
-      super.readEntityFromNBT(var1);
-      this.lifetime = var1.getInteger("Lifetime");
-      this.playerSpawned = var1.getBoolean("PlayerSpawned");
+      super.readEntityFromNBT(compound);
+      this.lifetime = compound.getInteger("Lifetime");
+      this.playerSpawned = compound.getBoolean("PlayerSpawned");
    }
 
    public void writeEntityToNBT(NBTTagCompound var1) {
-      super.writeEntityToNBT(var1);
-      var1.setInteger("Lifetime", this.lifetime);
-      var1.setBoolean("PlayerSpawned", this.playerSpawned);
+      super.writeEntityToNBT(compound);
+      compound.setInteger("Lifetime", this.lifetime);
+      compound.setBoolean("PlayerSpawned", this.playerSpawned);
    }
 
    public void onUpdate() {
@@ -109,13 +109,13 @@ public class EntityEndermite extends EntityMob {
    }
 
    public void setSpawnedByPlayer(boolean var1) {
-      this.playerSpawned = var1;
+      this.playerSpawned = spawnedByPlayer;
    }
 
    public void onLivingUpdate() {
       super.onLivingUpdate();
       if (this.world.isRemote) {
-         for(int var1 = 0; var1 < 2; ++var1) {
+         for(int i = 0; i < 2; ++i) {
             this.world.spawnParticle(EnumParticleTypes.PORTAL, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, (this.rand.nextDouble() - 0.5D) * 2.0D, -this.rand.nextDouble(), (this.rand.nextDouble() - 0.5D) * 2.0D);
          }
       } else {
@@ -136,8 +136,8 @@ public class EntityEndermite extends EntityMob {
 
    public boolean getCanSpawnHere() {
       if (super.getCanSpawnHere()) {
-         EntityPlayer var1 = this.world.getClosestPlayerToEntity(this, 5.0D);
-         return var1 == null;
+         EntityPlayer entityplayer = this.world.getClosestPlayerToEntity(this, 5.0D);
+         return entityplayer == null;
       } else {
          return false;
       }

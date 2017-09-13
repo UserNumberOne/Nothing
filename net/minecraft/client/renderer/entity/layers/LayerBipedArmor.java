@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class LayerBipedArmor extends LayerArmorBase {
-   public LayerBipedArmor(RenderLivingBase rendererIn) {
+   public LayerBipedArmor(RenderLivingBase var1) {
       super(rendererIn);
    }
 
@@ -20,7 +20,7 @@ public class LayerBipedArmor extends LayerArmorBase {
       this.modelArmor = new ModelBiped(1.0F);
    }
 
-   protected void setModelSlotVisible(ModelBiped p_188359_1_, EntityEquipmentSlot slotIn) {
+   protected void setModelSlotVisible(ModelBiped var1, EntityEquipmentSlot var2) {
       this.setModelVisible(p_188359_1_);
       switch(slotIn) {
       case HEAD:
@@ -44,11 +44,11 @@ public class LayerBipedArmor extends LayerArmorBase {
 
    }
 
-   protected void setModelVisible(ModelBiped model) {
+   protected void setModelVisible(ModelBiped var1) {
       model.setInvisible(false);
    }
 
-   protected ModelBiped getArmorModelHook(EntityLivingBase entity, ItemStack itemStack, EntityEquipmentSlot slot, ModelBiped model) {
+   protected ModelBiped getArmorModelHook(EntityLivingBase var1, ItemStack var2, EntityEquipmentSlot var3, ModelBiped var4) {
       return ForgeHooksClient.getArmorModel(entity, itemStack, slot, model);
    }
 }

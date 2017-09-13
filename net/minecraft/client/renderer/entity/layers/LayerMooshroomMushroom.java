@@ -15,11 +15,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LayerMooshroomMushroom implements LayerRenderer {
    private final RenderMooshroom mooshroomRenderer;
 
-   public LayerMooshroomMushroom(RenderMooshroom mooshroomRendererIn) {
+   public LayerMooshroomMushroom(RenderMooshroom var1) {
       this.mooshroomRenderer = mooshroomRendererIn;
    }
 
-   public void doRenderLayer(EntityMooshroom entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityMooshroom var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (!entitylivingbaseIn.isChild() && !entitylivingbaseIn.isInvisible()) {
          BlockRendererDispatcher blockrendererdispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
          this.mooshroomRenderer.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);

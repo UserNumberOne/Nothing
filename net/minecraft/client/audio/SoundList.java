@@ -11,7 +11,7 @@ public class SoundList {
    private final boolean replaceExisting;
    private final String subtitle;
 
-   public SoundList(List soundsIn, boolean replceIn, String subtitleIn) {
+   public SoundList(List var1, boolean var2, String var3) {
       this.sounds = soundsIn;
       this.replaceExisting = replceIn;
       this.subtitle = subtitleIn;

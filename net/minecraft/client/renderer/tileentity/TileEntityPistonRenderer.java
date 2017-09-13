@@ -24,7 +24,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class TileEntityPistonRenderer extends TileEntitySpecialRenderer {
    private BlockRendererDispatcher blockRenderer;
 
-   public void renderTileEntityAt(TileEntityPiston te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntityPiston var1, double var2, double var4, double var6, float var8, int var9) {
       if (this.blockRenderer == null) {
          this.blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
       }
@@ -71,7 +71,7 @@ public class TileEntityPistonRenderer extends TileEntitySpecialRenderer {
 
    }
 
-   private boolean renderStateModel(BlockPos p_188186_1_, IBlockState p_188186_2_, VertexBuffer p_188186_3_, World p_188186_4_, boolean p_188186_5_) {
+   private boolean renderStateModel(BlockPos var1, IBlockState var2, VertexBuffer var3, World var4, boolean var5) {
       return this.blockRenderer.getBlockModelRenderer().renderModel(p_188186_4_, this.blockRenderer.getModelForState(p_188186_2_), p_188186_2_, p_188186_1_, p_188186_3_, p_188186_5_);
    }
 }

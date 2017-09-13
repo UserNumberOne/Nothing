@@ -16,7 +16,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public abstract class InventoryEffectRenderer extends GuiContainer {
    private boolean hasActivePotionEffects;
 
-   public InventoryEffectRenderer(Container inventorySlotsIn) {
+   public InventoryEffectRenderer(Container var1) {
       super(inventorySlotsIn);
    }
 
@@ -51,7 +51,7 @@ public abstract class InventoryEffectRenderer extends GuiContainer {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       super.drawScreen(mouseX, mouseY, partialTicks);
       if (this.hasActivePotionEffects) {
          this.drawActivePotionEffects();

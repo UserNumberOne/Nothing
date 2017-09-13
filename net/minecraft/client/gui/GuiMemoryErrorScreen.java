@@ -13,7 +13,7 @@ public class GuiMemoryErrorScreen extends GuiScreen {
       this.buttonList.add(new GuiOptionButton(1, this.width / 2 - 155 + 160, this.height / 4 + 120 + 12, I18n.format("menu.quit")));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 0) {
          this.mc.displayGuiScreen(new GuiMainMenu());
       } else if (button.id == 1) {
@@ -22,10 +22,10 @@ public class GuiMemoryErrorScreen extends GuiScreen {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, "Out of memory!", this.width / 2, this.height / 4 - 60 + 20, 16777215);
       this.drawString(this.fontRendererObj, "Minecraft has run out of memory.", this.width / 2 - 140, this.height / 4 - 60 + 60 + 0, 10526880);

@@ -7,8 +7,8 @@ public class EntityAIZombieAttack extends EntityAIAttackMelee {
    private int raiseArmTicks;
 
    public EntityAIZombieAttack(EntityZombie var1, double var2, boolean var4) {
-      super(var1, var2, var4);
-      this.zombie = var1;
+      super(zombieIn, speedIn, longMemoryIn);
+      this.zombie = zombieIn;
    }
 
    public void startExecuting() {

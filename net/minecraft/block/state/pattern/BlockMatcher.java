@@ -9,19 +9,14 @@ public class BlockMatcher implements Predicate {
    private final Block block;
 
    private BlockMatcher(Block var1) {
-      this.block = var1;
+      this.block = blockType;
    }
 
    public static BlockMatcher forBlock(Block var0) {
-      return new BlockMatcher(var0);
+      return new BlockMatcher(blockType);
    }
 
    public boolean apply(@Nullable IBlockState var1) {
-      return var1 != null && var1.getBlock() == this.block;
-   }
-
-   // $FF: synthetic method
-   public boolean apply(Object var1) {
-      return this.apply((IBlockState)var1);
+      return p_apply_1_ != null && p_apply_1_.getBlock() == this.block;
    }
 }

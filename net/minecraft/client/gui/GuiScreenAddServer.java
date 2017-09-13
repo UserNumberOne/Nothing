@@ -19,7 +19,7 @@ public class GuiScreenAddServer extends GuiScreen {
    private GuiTextField serverNameField;
    private GuiButton serverResourcePacks;
    private final Predicate addressFilter = new Predicate() {
-      public boolean apply(@Nullable String p_apply_1_) {
+      public boolean apply(@Nullable String var1) {
          if (StringUtils.isNullOrEmpty(p_apply_1_)) {
             return true;
          } else {
@@ -30,7 +30,7 @@ public class GuiScreenAddServer extends GuiScreen {
                try {
                   String s = IDN.toASCII(astring[0]);
                   return true;
-               } catch (IllegalArgumentException var41) {
+               } catch (IllegalArgumentException var4) {
                   return false;
                }
             }
@@ -38,7 +38,7 @@ public class GuiScreenAddServer extends GuiScreen {
       }
    };
 
-   public GuiScreenAddServer(GuiScreen p_i1033_1_, ServerData p_i1033_2_) {
+   public GuiScreenAddServer(GuiScreen var1, ServerData var2) {
       this.parentScreen = p_i1033_1_;
       this.serverData = p_i1033_2_;
    }
@@ -68,7 +68,7 @@ public class GuiScreenAddServer extends GuiScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 2) {
             this.serverData.setResourceMode(ServerData.ServerResourceMode.values()[(this.serverData.getResourceMode().ordinal() + 1) % ServerData.ServerResourceMode.values().length]);
@@ -84,7 +84,7 @@ public class GuiScreenAddServer extends GuiScreen {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       this.serverNameField.textboxKeyTyped(typedChar, keyCode);
       this.serverIPField.textboxKeyTyped(typedChar, keyCode);
       if (keyCode == 15) {
@@ -99,13 +99,13 @@ public class GuiScreenAddServer extends GuiScreen {
       ((GuiButton)this.buttonList.get(0)).enabled = !this.serverIPField.getText().isEmpty() && this.serverIPField.getText().split(":").length > 0 && !this.serverNameField.getText().isEmpty();
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       this.serverIPField.mouseClicked(mouseX, mouseY, mouseButton);
       this.serverNameField.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, I18n.format("addServer.title"), this.width / 2, 17, 16777215);
       this.drawString(this.fontRendererObj, I18n.format("addServer.enterName"), this.width / 2 - 100, 53, 10526880);

@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class StitcherException extends RuntimeException {
    private final Stitcher.Holder holder;
 
-   public StitcherException(Stitcher.Holder holderIn, String message) {
+   public StitcherException(Stitcher.Holder var1, String var2) {
       super(message);
       this.holder = holderIn;
    }

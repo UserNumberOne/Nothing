@@ -17,6 +17,8 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public interface IBlockProperties {
    Material getMaterial();
@@ -25,9 +27,20 @@ public interface IBlockProperties {
 
    boolean canEntitySpawn(Entity var1);
 
+   /** @deprecated */
+   @Deprecated
    int getLightOpacity();
 
+   int getLightOpacity(IBlockAccess var1, BlockPos var2);
+
+   /** @deprecated */
+   @Deprecated
    int getLightValue();
+
+   int getLightValue(IBlockAccess var1, BlockPos var2);
+
+   @SideOnly(Side.CLIENT)
+   boolean isTranslucent();
 
    boolean useNeighborBrightness();
 
@@ -40,6 +53,12 @@ public interface IBlockProperties {
    boolean isFullCube();
 
    EnumBlockRenderType getRenderType();
+
+   @SideOnly(Side.CLIENT)
+   int getPackedLightmapCoords(IBlockAccess var1, BlockPos var2);
+
+   @SideOnly(Side.CLIENT)
+   float getAmbientOcclusionLightValue();
 
    boolean isBlockNormalCube();
 
@@ -63,6 +82,12 @@ public interface IBlockProperties {
 
    IBlockState getActualState(IBlockAccess var1, BlockPos var2);
 
+   @SideOnly(Side.CLIENT)
+   AxisAlignedBB getSelectedBoundingBox(World var1, BlockPos var2);
+
+   @SideOnly(Side.CLIENT)
+   boolean shouldSideBeRendered(IBlockAccess var1, BlockPos var2, EnumFacing var3);
+
    boolean isOpaqueCube();
 
    @Nullable
@@ -74,5 +99,11 @@ public interface IBlockProperties {
 
    RayTraceResult collisionRayTrace(World var1, BlockPos var2, Vec3d var3, Vec3d var4);
 
+   /** @deprecated */
+   @Deprecated
    boolean isFullyOpaque();
+
+   boolean doesSideBlockRendering(IBlockAccess var1, BlockPos var2, EnumFacing var3);
+
+   boolean isSideSolid(IBlockAccess var1, BlockPos var2, EnumFacing var3);
 }

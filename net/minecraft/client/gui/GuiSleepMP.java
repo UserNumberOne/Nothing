@@ -14,7 +14,7 @@ public class GuiSleepMP extends GuiChat {
       this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 40, I18n.format("multiplayer.stopSleeping")));
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (keyCode == 1) {
          this.wakeFromSleep();
       } else if (keyCode != 28 && keyCode != 156) {
@@ -31,7 +31,7 @@ public class GuiSleepMP extends GuiChat {
 
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 1) {
          this.wakeFromSleep();
       } else {

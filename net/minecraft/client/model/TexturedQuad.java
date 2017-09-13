@@ -12,12 +12,12 @@ public class TexturedQuad {
    public int nVertices;
    private boolean invertNormal;
 
-   public TexturedQuad(PositionTextureVertex[] vertices) {
+   public TexturedQuad(PositionTextureVertex[] var1) {
       this.vertexPositions = vertices;
       this.nVertices = vertices.length;
    }
 
-   public TexturedQuad(PositionTextureVertex[] vertices, int texcoordU1, int texcoordV1, int texcoordU2, int texcoordV2, float textureWidth, float textureHeight) {
+   public TexturedQuad(PositionTextureVertex[] var1, int var2, int var3, int var4, int var5, float var6, float var7) {
       this(vertices);
       float f = 0.0F / textureWidth;
       float f1 = 0.0F / textureHeight;
@@ -38,7 +38,7 @@ public class TexturedQuad {
    }
 
    @SideOnly(Side.CLIENT)
-   public void draw(VertexBuffer renderer, float scale) {
+   public void draw(VertexBuffer var1, float var2) {
       Vec3d vec3d = this.vertexPositions[1].vector3D.subtractReverse(this.vertexPositions[0].vector3D);
       Vec3d vec3d1 = this.vertexPositions[1].vector3D.subtractReverse(this.vertexPositions[2].vector3D);
       Vec3d vec3d2 = vec3d1.crossProduct(vec3d).normalize();

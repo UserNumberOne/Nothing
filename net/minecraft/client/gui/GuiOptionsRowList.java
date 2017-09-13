@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiOptionsRowList extends GuiListExtended {
    private final List options = Lists.newArrayList();
 
-   public GuiOptionsRowList(Minecraft mcIn, int p_i45015_2_, int p_i45015_3_, int p_i45015_4_, int p_i45015_5_, int p_i45015_6_, GameSettings.Options... p_i45015_7_) {
+   public GuiOptionsRowList(Minecraft var1, int var2, int var3, int var4, int var5, int var6, GameSettings.Options... var7) {
       super(mcIn, p_i45015_2_, p_i45015_3_, p_i45015_4_, p_i45015_5_, p_i45015_6_);
       this.centerListVertically = false;
 
@@ -25,7 +25,7 @@ public class GuiOptionsRowList extends GuiListExtended {
 
    }
 
-   private GuiButton createButton(Minecraft mcIn, int p_148182_2_, int p_148182_3_, GameSettings.Options options) {
+   private GuiButton createButton(Minecraft var1, int var2, int var3, GameSettings.Options var4) {
       if (options == null) {
          return null;
       } else {
@@ -34,7 +34,7 @@ public class GuiOptionsRowList extends GuiListExtended {
       }
    }
 
-   public GuiOptionsRowList.Row getListEntry(int index) {
+   public GuiOptionsRowList.Row getListEntry(int var1) {
       return (GuiOptionsRowList.Row)this.options.get(index);
    }
 
@@ -56,12 +56,12 @@ public class GuiOptionsRowList extends GuiListExtended {
       private final GuiButton buttonA;
       private final GuiButton buttonB;
 
-      public Row(GuiButton buttonAIn, GuiButton buttonBIn) {
+      public Row(GuiButton var1, GuiButton var2) {
          this.buttonA = buttonAIn;
          this.buttonB = buttonBIn;
       }
 
-      public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
+      public void drawEntry(int var1, int var2, int var3, int var4, int var5, int var6, int var7, boolean var8) {
          if (this.buttonA != null) {
             this.buttonA.yPosition = y;
             this.buttonA.drawButton(this.client, mouseX, mouseY);
@@ -74,7 +74,7 @@ public class GuiOptionsRowList extends GuiListExtended {
 
       }
 
-      public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
+      public boolean mousePressed(int var1, int var2, int var3, int var4, int var5, int var6) {
          if (this.buttonA.mousePressed(this.client, mouseX, mouseY)) {
             if (this.buttonA instanceof GuiOptionButton) {
                this.client.gameSettings.setOptionValue(((GuiOptionButton)this.buttonA).returnEnumOptions(), 1);
@@ -94,7 +94,7 @@ public class GuiOptionsRowList extends GuiListExtended {
          }
       }
 
-      public void mouseReleased(int slotIndex, int x, int y, int mouseEvent, int relativeX, int relativeY) {
+      public void mouseReleased(int var1, int var2, int var3, int var4, int var5, int var6) {
          if (this.buttonA != null) {
             this.buttonA.mouseReleased(x, y);
          }
@@ -105,7 +105,7 @@ public class GuiOptionsRowList extends GuiListExtended {
 
       }
 
-      public void setSelected(int p_178011_1_, int p_178011_2_, int p_178011_3_) {
+      public void setSelected(int var1, int var2, int var3) {
       }
    }
 }

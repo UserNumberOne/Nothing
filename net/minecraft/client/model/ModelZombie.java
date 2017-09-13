@@ -12,11 +12,11 @@ public class ModelZombie extends ModelBiped {
       this(0.0F, false);
    }
 
-   public ModelZombie(float modelSize, boolean p_i1168_2_) {
+   public ModelZombie(float var1, boolean var2) {
       super(modelSize, 0.0F, 64, p_i1168_2_ ? 32 : 64);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
       boolean flag = entityIn instanceof EntityZombie && ((EntityZombie)entityIn).isArmsRaised();
       float f = MathHelper.sin(this.swingProgress * 3.1415927F);

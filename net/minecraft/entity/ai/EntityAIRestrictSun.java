@@ -8,7 +8,7 @@ public class EntityAIRestrictSun extends EntityAIBase {
    private final EntityCreature theEntity;
 
    public EntityAIRestrictSun(EntityCreature var1) {
-      this.theEntity = var1;
+      this.theEntity = creature;
    }
 
    public boolean shouldExecute() {

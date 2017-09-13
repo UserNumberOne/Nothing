@@ -8,7 +8,7 @@ public class PhaseHover extends PhaseBase {
    private Vec3d targetLocation;
 
    public PhaseHover(EntityDragon var1) {
-      super(var1);
+      super(dragonIn);
    }
 
    public void doLocalUpdate() {

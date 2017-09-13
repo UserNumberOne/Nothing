@@ -24,7 +24,7 @@ public class Framebuffer {
    public int framebufferFilter;
    private boolean stencilEnabled = false;
 
-   public Framebuffer(int width, int height, boolean useDepthIn) {
+   public Framebuffer(int var1, int var2, boolean var3) {
       this.useDepth = useDepthIn;
       this.framebufferObject = -1;
       this.framebufferTexture = -1;
@@ -37,7 +37,7 @@ public class Framebuffer {
       this.createBindFramebuffer(width, height);
    }
 
-   public void createBindFramebuffer(int width, int height) {
+   public void createBindFramebuffer(int var1, int var2) {
       if (!OpenGlHelper.isFramebufferEnabled()) {
          this.framebufferWidth = width;
          this.framebufferHeight = height;
@@ -77,7 +77,7 @@ public class Framebuffer {
 
    }
 
-   public void createFramebuffer(int width, int height) {
+   public void createFramebuffer(int var1, int var2) {
       this.framebufferWidth = width;
       this.framebufferHeight = height;
       this.framebufferTextureWidth = width;
@@ -114,7 +114,7 @@ public class Framebuffer {
 
    }
 
-   public void setFramebufferFilter(int framebufferFilterIn) {
+   public void setFramebufferFilter(int var1) {
       if (OpenGlHelper.isFramebufferEnabled()) {
          this.framebufferFilter = framebufferFilterIn;
          GlStateManager.bindTexture(this.framebufferTexture);
@@ -158,7 +158,7 @@ public class Framebuffer {
 
    }
 
-   public void bindFramebuffer(boolean p_147610_1_) {
+   public void bindFramebuffer(boolean var1) {
       if (OpenGlHelper.isFramebufferEnabled()) {
          OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, this.framebufferObject);
          if (p_147610_1_) {
@@ -175,18 +175,18 @@ public class Framebuffer {
 
    }
 
-   public void setFramebufferColor(float red, float green, float blue, float alpha) {
+   public void setFramebufferColor(float var1, float var2, float var3, float var4) {
       this.framebufferColor[0] = red;
       this.framebufferColor[1] = green;
       this.framebufferColor[2] = blue;
       this.framebufferColor[3] = alpha;
    }
 
-   public void framebufferRender(int width, int height) {
+   public void framebufferRender(int var1, int var2) {
       this.framebufferRenderExt(width, height, true);
    }
 
-   public void framebufferRenderExt(int width, int height, boolean p_178038_3_) {
+   public void framebufferRenderExt(int var1, int var2, boolean var3) {
       if (OpenGlHelper.isFramebufferEnabled()) {
          GlStateManager.colorMask(true, true, true, false);
          GlStateManager.disableDepth();

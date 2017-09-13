@@ -7,20 +7,20 @@ import java.util.NoSuchElementException;
 
 public class MapPopulator {
    public static Map createMap(Iterable var0, Iterable var1) {
-      return populateMap(var0, var1, Maps.newLinkedHashMap());
+      return populateMap(keys, values, Maps.newLinkedHashMap());
    }
 
    public static Map populateMap(Iterable var0, Iterable var1, Map var2) {
-      Iterator var3 = var1.iterator();
+      Iterator iterator = values.iterator();
 
-      for(Object var5 : var0) {
-         var2.put(var5, var3.next());
+      for(Object k : keys) {
+         map.put(k, iterator.next());
       }
 
-      if (var3.hasNext()) {
+      if (iterator.hasNext()) {
          throw new NoSuchElementException();
       } else {
-         return var2;
+         return map;
       }
    }
 }

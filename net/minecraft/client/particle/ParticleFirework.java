@@ -18,7 +18,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ParticleFirework {
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          ParticleFirework.Spark particlefirework$spark = new ParticleFirework.Spark(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn, Minecraft.getMinecraft().effectRenderer);
          particlefirework$spark.setAlphaF(0.99F);
          return particlefirework$spark;
@@ -27,12 +27,12 @@ public class ParticleFirework {
 
    @SideOnly(Side.CLIENT)
    public static class Overlay extends Particle {
-      protected Overlay(World p_i46466_1_, double p_i46466_2_, double p_i46466_4_, double p_i46466_6_) {
+      protected Overlay(World var1, double var2, double var4, double var6) {
          super(p_i46466_1_, p_i46466_2_, p_i46466_4_, p_i46466_6_);
          this.particleMaxAge = 4;
       }
 
-      public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+      public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
          float f = 0.25F;
          float f1 = 0.5F;
          float f2 = 0.125F;
@@ -62,7 +62,7 @@ public class ParticleFirework {
       private float fadeColourBlue;
       private boolean hasFadeColour;
 
-      public Spark(World p_i46465_1_, double p_i46465_2_, double p_i46465_4_, double p_i46465_6_, double p_i46465_8_, double p_i46465_10_, double p_i46465_12_, ParticleManager p_i46465_14_) {
+      public Spark(World var1, double var2, double var4, double var6, double var8, double var10, double var12, ParticleManager var14) {
          super(p_i46465_1_, p_i46465_2_, p_i46465_4_, p_i46465_6_, 160, 8, -0.004F);
          this.motionX = p_i46465_8_;
          this.motionY = p_i46465_10_;
@@ -72,11 +72,11 @@ public class ParticleFirework {
          this.particleMaxAge = 48 + this.rand.nextInt(12);
       }
 
-      public void setTrail(boolean trailIn) {
+      public void setTrail(boolean var1) {
          this.trail = trailIn;
       }
 
-      public void setTwinkle(boolean twinkleIn) {
+      public void setTwinkle(boolean var1) {
          this.twinkle = twinkleIn;
       }
 
@@ -84,7 +84,7 @@ public class ParticleFirework {
          return true;
       }
 
-      public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+      public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
          if (!this.twinkle || this.particleAge < this.particleMaxAge / 3 || (this.particleAge + this.particleMaxAge) / 3 % 2 == 0) {
             super.renderParticle(buffer, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
          }
@@ -119,7 +119,7 @@ public class ParticleFirework {
       private NBTTagList fireworkExplosions;
       boolean twinkle;
 
-      public Starter(World p_i46464_1_, double p_i46464_2_, double p_i46464_4_, double p_i46464_6_, double p_i46464_8_, double p_i46464_10_, double p_i46464_12_, ParticleManager p_i46464_14_, NBTTagCompound p_i46464_15_) {
+      public Starter(World var1, double var2, double var4, double var6, double var8, double var10, double var12, ParticleManager var14, NBTTagCompound var15) {
          super(p_i46464_1_, p_i46464_2_, p_i46464_4_, p_i46464_6_, 0.0D, 0.0D, 0.0D);
          this.motionX = p_i46464_8_;
          this.motionY = p_i46464_10_;
@@ -146,7 +146,7 @@ public class ParticleFirework {
 
       }
 
-      public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+      public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       }
 
       public void onUpdate() {
@@ -226,7 +226,7 @@ public class ParticleFirework {
          return minecraft == null || minecraft.getRenderViewEntity() == null || minecraft.getRenderViewEntity().getDistanceSq(this.posX, this.posY, this.posZ) >= 256.0D;
       }
 
-      private void createParticle(double p_92034_1_, double p_92034_3_, double p_92034_5_, double p_92034_7_, double p_92034_9_, double p_92034_11_, int[] p_92034_13_, int[] p_92034_14_, boolean p_92034_15_, boolean p_92034_16_) {
+      private void createParticle(double var1, double var3, double var5, double var7, double var9, double var11, int[] var13, int[] var14, boolean var15, boolean var16) {
          ParticleFirework.Spark particlefirework$spark = new ParticleFirework.Spark(this.world, p_92034_1_, p_92034_3_, p_92034_5_, p_92034_7_, p_92034_9_, p_92034_11_, this.theEffectRenderer);
          particlefirework$spark.setAlphaF(0.99F);
          particlefirework$spark.setTrail(p_92034_15_);
@@ -240,7 +240,7 @@ public class ParticleFirework {
          this.theEffectRenderer.addEffect(particlefirework$spark);
       }
 
-      private void createBall(double speed, int size, int[] colours, int[] fadeColours, boolean trail, boolean twinkleIn) {
+      private void createBall(double var1, int var3, int[] var4, int[] var5, boolean var6, boolean var7) {
          double d0 = this.posX;
          double d1 = this.posY;
          double d2 = this.posZ;
@@ -262,7 +262,7 @@ public class ParticleFirework {
 
       }
 
-      private void createShaped(double speed, double[][] shape, int[] colours, int[] fadeColours, boolean trail, boolean twinkleIn, boolean p_92038_8_) {
+      private void createShaped(double var1, double[][] var3, int[] var4, int[] var5, boolean var6, boolean var7, boolean var8) {
          double d0 = shape[0][0];
          double d1 = shape[0][1];
          this.createParticle(this.posX, this.posY, this.posZ, d0 * speed, d1 * speed, 0.0D, colours, fadeColours, trail, twinkleIn);
@@ -296,7 +296,7 @@ public class ParticleFirework {
 
       }
 
-      private void createBurst(int[] colours, int[] fadeColours, boolean trail, boolean twinkleIn) {
+      private void createBurst(int[] var1, int[] var2, boolean var3, boolean var4) {
          double d0 = this.rand.nextGaussian() * 0.05D;
          double d1 = this.rand.nextGaussian() * 0.05D;
 

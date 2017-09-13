@@ -53,7 +53,7 @@ public class ModelBoat extends ModelBase implements IMultipassModel {
       this.noWater.rotateAngleX = 1.5707964F;
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       GlStateManager.rotate(90.0F, 0.0F, 1.0F, 0.0F);
       EntityBoat entityboat = (EntityBoat)entityIn;
       this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
@@ -66,17 +66,17 @@ public class ModelBoat extends ModelBase implements IMultipassModel {
       this.renderPaddle(entityboat, 1, scale, limbSwing);
    }
 
-   public void renderMultipass(Entity p_187054_1_, float p_187054_2_, float p_187054_3_, float p_187054_4_, float p_187054_5_, float p_187054_6_, float scale) {
+   public void renderMultipass(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       GlStateManager.rotate(90.0F, 0.0F, 1.0F, 0.0F);
       GlStateManager.colorMask(false, false, false, false);
       this.noWater.render(scale);
       GlStateManager.colorMask(true, true, true, true);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
    }
 
-   ModelRenderer makePaddle(boolean p_187056_1_) {
+   ModelRenderer makePaddle(boolean var1) {
       ModelRenderer modelrenderer = (new ModelRenderer(this, 62, p_187056_1_ ? 0 : 20)).setTextureSize(128, 64);
       int i = 20;
       int j = 7;
@@ -87,7 +87,7 @@ public class ModelBoat extends ModelBase implements IMultipassModel {
       return modelrenderer;
    }
 
-   void renderPaddle(EntityBoat boat, int paddle, float scale, float limbSwing) {
+   void renderPaddle(EntityBoat var1, int var2, float var3, float var4) {
       float f = 40.0F;
       float f1 = boat.getRowingTime(paddle, limbSwing) * 40.0F;
       ModelRenderer modelrenderer = this.paddles[paddle];

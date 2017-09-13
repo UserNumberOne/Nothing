@@ -22,7 +22,7 @@ public class MultipartBakedModel implements IBakedModel {
    protected final ItemCameraTransforms cameraTransforms;
    protected final ItemOverrideList overrides;
 
-   public MultipartBakedModel(Map selectorsIn) {
+   public MultipartBakedModel(Map var1) {
       this.selectors = selectorsIn;
       IBakedModel ibakedmodel = (IBakedModel)selectorsIn.values().iterator().next();
       this.ambientOcclusion = ibakedmodel.isAmbientOcclusion();
@@ -32,7 +32,7 @@ public class MultipartBakedModel implements IBakedModel {
       this.overrides = ibakedmodel.getOverrides();
    }
 
-   public List getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
+   public List getQuads(@Nullable IBlockState var1, @Nullable EnumFacing var2, long var3) {
       List list = Lists.newArrayList();
       if (state != null) {
          for(Entry entry : this.selectors.entrySet()) {
@@ -73,7 +73,7 @@ public class MultipartBakedModel implements IBakedModel {
    public static class Builder {
       private final Map builderSelectors = Maps.newLinkedHashMap();
 
-      public void putModel(Predicate predicate, IBakedModel model) {
+      public void putModel(Predicate var1, IBakedModel var2) {
          this.builderSelectors.put(predicate, model);
       }
 

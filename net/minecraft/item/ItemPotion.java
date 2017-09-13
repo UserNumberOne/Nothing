@@ -1,11 +1,13 @@
 package net.minecraft.item;
 
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
@@ -13,6 +15,8 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemPotion extends Item {
    public ItemPotion() {
@@ -22,32 +26,32 @@ public class ItemPotion extends Item {
 
    @Nullable
    public ItemStack onItemUseFinish(ItemStack var1, World var2, EntityLivingBase var3) {
-      EntityPlayer var4 = var3 instanceof EntityPlayer ? (EntityPlayer)var3 : null;
-      if (var4 == null || !var4.capabilities.isCreativeMode) {
-         --var1.stackSize;
+      EntityPlayer entityplayer = entityLiving instanceof EntityPlayer ? (EntityPlayer)entityLiving : null;
+      if (entityplayer == null || !entityplayer.capabilities.isCreativeMode) {
+         --stack.stackSize;
       }
 
-      if (!var2.isRemote) {
-         for(PotionEffect var7 : PotionUtils.getEffectsFromStack(var1)) {
-            var3.addPotionEffect(new PotionEffect(var7));
+      if (!worldIn.isRemote) {
+         for(PotionEffect potioneffect : PotionUtils.getEffectsFromStack(stack)) {
+            entityLiving.addPotionEffect(new PotionEffect(potioneffect));
          }
       }
 
-      if (var4 != null) {
-         var4.addStat(StatList.getObjectUseStats(this));
+      if (entityplayer != null) {
+         entityplayer.addStat(StatList.getObjectUseStats(this));
       }
 
-      if (var4 == null || !var4.capabilities.isCreativeMode) {
-         if (var1.stackSize <= 0) {
+      if (entityplayer == null || !entityplayer.capabilities.isCreativeMode) {
+         if (stack.stackSize <= 0) {
             return new ItemStack(Items.GLASS_BOTTLE);
          }
 
-         if (var4 != null) {
-            var4.inventory.addItemStackToInventory(new ItemStack(Items.GLASS_BOTTLE));
+         if (entityplayer != null) {
+            entityplayer.inventory.addItemStackToInventory(new ItemStack(Items.GLASS_BOTTLE));
          }
       }
 
-      return var1;
+      return stack;
    }
 
    public int getMaxItemUseDuration(ItemStack var1) {
@@ -59,11 +63,29 @@ public class ItemPotion extends Item {
    }
 
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      var3.setActiveHand(var4);
-      return new ActionResult(EnumActionResult.SUCCESS, var1);
+      playerIn.setActiveHand(hand);
+      return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
    }
 
    public String getItemStackDisplayName(ItemStack var1) {
-      return I18n.translateToLocal(PotionUtils.getPotionFromItem(var1).getNamePrefixed("potion.effect."));
+      return I18n.translateToLocal(PotionUtils.getPotionFromItem(stack).getNamePrefixed("potion.effect."));
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void addInformation(ItemStack var1, EntityPlayer var2, List var3, boolean var4) {
+      PotionUtils.addPotionTooltip(stack, tooltip, 1.0F);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public boolean hasEffect(ItemStack var1) {
+      return !PotionUtils.getEffectsFromStack(stack).isEmpty();
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void getSubItems(Item var1, CreativeTabs var2, List var3) {
+      for(PotionType potiontype : PotionType.REGISTRY) {
+         subItems.add(PotionUtils.addPotionToItemStack(new ItemStack(itemIn), potiontype));
+      }
+
    }
 }

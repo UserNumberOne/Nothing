@@ -54,7 +54,7 @@ public class RenderChunk {
    private boolean needsUpdateCustom;
    private ChunkCache region;
 
-   public RenderChunk(World p_i47120_1_, RenderGlobal p_i47120_2_, int p_i47120_3_) {
+   public RenderChunk(World var1, RenderGlobal var2, int var3) {
       for(int i = 0; i < this.mapEnumFacing.length; ++i) {
          this.mapEnumFacing[i] = new BlockPos.MutableBlockPos();
       }
@@ -70,7 +70,7 @@ public class RenderChunk {
 
    }
 
-   public boolean setFrameIndex(int frameIndexIn) {
+   public boolean setFrameIndex(int var1) {
       if (this.frameIndex == frameIndexIn) {
          return false;
       } else {
@@ -79,11 +79,11 @@ public class RenderChunk {
       }
    }
 
-   public VertexBuffer getVertexBufferByLayer(int layer) {
+   public VertexBuffer getVertexBufferByLayer(int var1) {
       return this.vertexBuffers[layer];
    }
 
-   public void setPosition(int p_189562_1_, int p_189562_2_, int p_189562_3_) {
+   public void setPosition(int var1, int var2, int var3) {
       if (p_189562_1_ != this.position.getX() || p_189562_2_ != this.position.getY() || p_189562_3_ != this.position.getZ()) {
          this.stopCompileTask();
          this.position.setPos(p_189562_1_, p_189562_2_, p_189562_3_);
@@ -98,7 +98,7 @@ public class RenderChunk {
 
    }
 
-   public void resortTransparency(float x, float y, float z, ChunkCompileTaskGenerator generator) {
+   public void resortTransparency(float var1, float var2, float var3, ChunkCompileTaskGenerator var4) {
       CompiledChunk compiledchunk = generator.getCompiledChunk();
       if (compiledchunk.getState() != null && !compiledchunk.isLayerEmpty(BlockRenderLayer.TRANSLUCENT)) {
          this.preRenderBlocks(generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(BlockRenderLayer.TRANSLUCENT), this.position);
@@ -108,7 +108,7 @@ public class RenderChunk {
 
    }
 
-   public void rebuildChunk(float x, float y, float z, ChunkCompileTaskGenerator generator) {
+   public void rebuildChunk(float var1, float var2, float var3, ChunkCompileTaskGenerator var4) {
       CompiledChunk compiledchunk = new CompiledChunk();
       int i = 1;
       BlockPos blockpos = this.position;
@@ -125,8 +125,8 @@ public class RenderChunk {
          generator.getLock().unlock();
       }
 
-      VisGraph lvt_9_1_ = new VisGraph();
-      HashSet lvt_10_1_ = Sets.newHashSet();
+      VisGraph var9 = new VisGraph();
+      HashSet var10 = Sets.newHashSet();
       if (!this.region.extendedLevelsInChunkCache()) {
          ++renderChunksUpdated;
          boolean[] aboolean = new boolean[BlockRenderLayer.values().length];
@@ -136,7 +136,7 @@ public class RenderChunk {
             IBlockState iblockstate = this.region.getBlockState(blockpos$mutableblockpos);
             Block block = iblockstate.getBlock();
             if (iblockstate.isOpaqueCube()) {
-               lvt_9_1_.setOpaqueCube(blockpos$mutableblockpos);
+               var9.setOpaqueCube(blockpos$mutableblockpos);
             }
 
             if (block.hasTileEntity(iblockstate)) {
@@ -146,7 +146,7 @@ public class RenderChunk {
                   if (tileentityspecialrenderer != null) {
                      compiledchunk.addTileEntity(tileentity);
                      if (tileentityspecialrenderer.isGlobalRenderer(tileentity)) {
-                        lvt_10_1_.add(tileentity);
+                        var10.add(tileentity);
                      }
                   }
                }
@@ -182,16 +182,16 @@ public class RenderChunk {
          }
       }
 
-      compiledchunk.setVisibility(lvt_9_1_.computeVisibility());
+      compiledchunk.setVisibility(var9.computeVisibility());
       this.lockCompileTask.lock();
 
       try {
-         Set set = Sets.newHashSet(lvt_10_1_);
+         Set set = Sets.newHashSet(var10);
          Set set1 = Sets.newHashSet(this.setTileEntities);
          set.removeAll(this.setTileEntities);
-         set1.removeAll(lvt_10_1_);
+         set1.removeAll(var10);
          this.setTileEntities.clear();
-         this.setTileEntities.addAll(lvt_10_1_);
+         this.setTileEntities.addAll(var10);
          this.renderGlobal.updateTileEntities(set1, set);
       } finally {
          this.lockCompileTask.unlock();
@@ -275,12 +275,12 @@ public class RenderChunk {
       return d0 * d0 + d1 * d1 + d2 * d2;
    }
 
-   private void preRenderBlocks(net.minecraft.client.renderer.VertexBuffer worldRendererIn, BlockPos pos) {
+   private void preRenderBlocks(net.minecraft.client.renderer.VertexBuffer var1, BlockPos var2) {
       worldRendererIn.begin(7, DefaultVertexFormats.BLOCK);
       worldRendererIn.setTranslation((double)(-pos.getX()), (double)(-pos.getY()), (double)(-pos.getZ()));
    }
 
-   private void postRenderBlocks(BlockRenderLayer layer, float x, float y, float z, net.minecraft.client.renderer.VertexBuffer worldRendererIn, CompiledChunk compiledChunkIn) {
+   private void postRenderBlocks(BlockRenderLayer var1, float var2, float var3, float var4, net.minecraft.client.renderer.VertexBuffer var5, CompiledChunk var6) {
       if (layer == BlockRenderLayer.TRANSLUCENT && !compiledChunkIn.isLayerEmpty(layer)) {
          worldRendererIn.sortVertexData(x, y, z);
          compiledChunkIn.setState(worldRendererIn.getVertexState());
@@ -308,7 +308,7 @@ public class RenderChunk {
       return this.compiledChunk;
    }
 
-   public void setCompiledChunk(CompiledChunk compiledChunkIn) {
+   public void setCompiledChunk(CompiledChunk var1) {
       this.lockCompiledChunk.lock();
 
       try {
@@ -340,7 +340,7 @@ public class RenderChunk {
       return this.position;
    }
 
-   public void setNeedsUpdate(boolean needsUpdateIn) {
+   public void setNeedsUpdate(boolean var1) {
       if (this.needsUpdate) {
          needsUpdateIn |= this.needsUpdateCustom;
       }
@@ -362,11 +362,11 @@ public class RenderChunk {
       return this.needsUpdate && this.needsUpdateCustom;
    }
 
-   protected ChunkCache createRegionRenderCache(World world, BlockPos from, BlockPos to, int subtract) {
+   protected ChunkCache createRegionRenderCache(World var1, BlockPos var2, BlockPos var3, int var4) {
       return new ChunkCache(world, from, to, subtract);
    }
 
-   public BlockPos getBlockPosOffset16(EnumFacing p_181701_1_) {
+   public BlockPos getBlockPosOffset16(EnumFacing var1) {
       return this.mapEnumFacing[p_181701_1_.ordinal()];
    }
 

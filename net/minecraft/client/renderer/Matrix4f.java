@@ -5,7 +5,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class Matrix4f extends org.lwjgl.util.vector.Matrix4f {
-   public Matrix4f(float[] matrix) {
+   public Matrix4f(float[] var1) {
       this.m00 = matrix[0];
       this.m01 = matrix[1];
       this.m02 = matrix[2];

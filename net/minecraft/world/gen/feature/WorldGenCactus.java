@@ -7,14 +7,14 @@ import net.minecraft.world.World;
 
 public class WorldGenCactus extends WorldGenerator {
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      for(int var4 = 0; var4 < 10; ++var4) {
-         BlockPos var5 = var3.add(var2.nextInt(8) - var2.nextInt(8), var2.nextInt(4) - var2.nextInt(4), var2.nextInt(8) - var2.nextInt(8));
-         if (var1.isAirBlock(var5)) {
-            int var6 = 1 + var2.nextInt(var2.nextInt(3) + 1);
+      for(int i = 0; i < 10; ++i) {
+         BlockPos blockpos = position.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
+         if (worldIn.isAirBlock(blockpos)) {
+            int j = 1 + rand.nextInt(rand.nextInt(3) + 1);
 
-            for(int var7 = 0; var7 < var6; ++var7) {
-               if (Blocks.CACTUS.canBlockStay(var1, var5)) {
-                  var1.setBlockState(var5.up(var7), Blocks.CACTUS.getDefaultState(), 2);
+            for(int k = 0; k < j; ++k) {
+               if (Blocks.CACTUS.canBlockStay(worldIn, blockpos)) {
+                  worldIn.setBlockState(blockpos.up(k), Blocks.CACTUS.getDefaultState(), 2);
                }
             }
          }

@@ -49,17 +49,17 @@ public class ItemRenderer {
    private final RenderManager renderManager;
    private final RenderItem itemRenderer;
 
-   public ItemRenderer(Minecraft mcIn) {
+   public ItemRenderer(Minecraft var1) {
       this.mc = mcIn;
       this.renderManager = mcIn.getRenderManager();
       this.itemRenderer = mcIn.getRenderItem();
    }
 
-   public void renderItem(EntityLivingBase entityIn, ItemStack heldStack, ItemCameraTransforms.TransformType transform) {
+   public void renderItem(EntityLivingBase var1, ItemStack var2, ItemCameraTransforms.TransformType var3) {
       this.renderItemSide(entityIn, heldStack, transform, false);
    }
 
-   public void renderItemSide(EntityLivingBase entitylivingbaseIn, ItemStack heldStack, ItemCameraTransforms.TransformType transform, boolean leftHanded) {
+   public void renderItemSide(EntityLivingBase var1, ItemStack var2, ItemCameraTransforms.TransformType var3, boolean var4) {
       if (heldStack != null) {
          Item item = heldStack.getItem();
          Block block = Block.getBlockFromItem(item);
@@ -79,11 +79,11 @@ public class ItemRenderer {
 
    }
 
-   private boolean isBlockTranslucent(@Nullable Block blockIn) {
+   private boolean isBlockTranslucent(@Nullable Block var1) {
       return blockIn != null && blockIn.getBlockLayer() == BlockRenderLayer.TRANSLUCENT;
    }
 
-   private void rotateArroundXAndY(float angle, float angleY) {
+   private void rotateArroundXAndY(float var1, float var2) {
       GlStateManager.pushMatrix();
       GlStateManager.rotate(angle, 1.0F, 0.0F, 0.0F);
       GlStateManager.rotate(angleY, 0.0F, 1.0F, 0.0F);
@@ -99,7 +99,7 @@ public class ItemRenderer {
       OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, f, f1);
    }
 
-   private void rotateArm(float p_187458_1_) {
+   private void rotateArm(float var1) {
       EntityPlayerSP entityplayersp = this.mc.player;
       float f = entityplayersp.prevRenderArmPitch + (entityplayersp.renderArmPitch - entityplayersp.prevRenderArmPitch) * p_187458_1_;
       float f1 = entityplayersp.prevRenderArmYaw + (entityplayersp.renderArmYaw - entityplayersp.prevRenderArmYaw) * p_187458_1_;
@@ -107,7 +107,7 @@ public class ItemRenderer {
       GlStateManager.rotate((entityplayersp.rotationYaw - f1) * 0.1F, 0.0F, 1.0F, 0.0F);
    }
 
-   private float getMapAngleFromPitch(float pitch) {
+   private float getMapAngleFromPitch(float var1) {
       float f = 1.0F - pitch / 45.0F + 0.1F;
       f = MathHelper.clamp(f, 0.0F, 1.0F);
       f = -MathHelper.cos(f * 3.1415927F) * 0.5F + 0.5F;
@@ -127,7 +127,7 @@ public class ItemRenderer {
 
    }
 
-   private void renderArm(EnumHandSide p_187455_1_) {
+   private void renderArm(EnumHandSide var1) {
       this.mc.getTextureManager().bindTexture(this.mc.player.getLocationSkin());
       Render render = this.renderManager.getEntityRenderObject(this.mc.player);
       RenderPlayer renderplayer = (RenderPlayer)render;
@@ -146,7 +146,7 @@ public class ItemRenderer {
       GlStateManager.popMatrix();
    }
 
-   private void renderMapFirstPersonSide(float p_187465_1_, EnumHandSide p_187465_2_, float p_187465_3_, ItemStack p_187465_4_) {
+   private void renderMapFirstPersonSide(float var1, EnumHandSide var2, float var3, ItemStack var4) {
       float f = p_187465_2_ == EnumHandSide.RIGHT ? 1.0F : -1.0F;
       GlStateManager.translate(f * 0.125F, -0.125F, 0.0F);
       if (!this.mc.player.isInvisible()) {
@@ -170,7 +170,7 @@ public class ItemRenderer {
       GlStateManager.popMatrix();
    }
 
-   private void renderMapFirstPerson(float p_187463_1_, float p_187463_2_, float p_187463_3_) {
+   private void renderMapFirstPerson(float var1, float var2, float var3) {
       float f = MathHelper.sqrt(p_187463_3_);
       float f1 = -0.2F * MathHelper.sin(p_187463_3_ * 3.1415927F);
       float f2 = -0.4F * MathHelper.sin(f * 3.1415927F);
@@ -185,7 +185,7 @@ public class ItemRenderer {
       this.renderMapFirstPerson(this.itemStackMainHand);
    }
 
-   private void renderMapFirstPerson(ItemStack stack) {
+   private void renderMapFirstPerson(ItemStack var1) {
       GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
       GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
       GlStateManager.scale(0.38F, 0.38F, 0.38F);
@@ -209,7 +209,7 @@ public class ItemRenderer {
       GlStateManager.enableLighting();
    }
 
-   private void renderArmFirstPerson(float p_187456_1_, float p_187456_2_, EnumHandSide p_187456_3_) {
+   private void renderArmFirstPerson(float var1, float var2, EnumHandSide var3) {
       boolean flag = p_187456_3_ != EnumHandSide.LEFT;
       float f = flag ? 1.0F : -1.0F;
       float f1 = MathHelper.sqrt(p_187456_2_);
@@ -240,7 +240,7 @@ public class ItemRenderer {
       GlStateManager.enableCull();
    }
 
-   private void transformEatFirstPerson(float p_187454_1_, EnumHandSide p_187454_2_, ItemStack p_187454_3_) {
+   private void transformEatFirstPerson(float var1, EnumHandSide var2, ItemStack var3) {
       float f = (float)this.mc.player.getItemInUseCount() - p_187454_1_ + 1.0F;
       float f1 = f / (float)p_187454_3_.getMaxItemUseDuration();
       if (f1 < 0.8F) {
@@ -256,7 +256,7 @@ public class ItemRenderer {
       GlStateManager.rotate((float)i * f3 * 30.0F, 0.0F, 0.0F, 1.0F);
    }
 
-   private void transformFirstPerson(EnumHandSide p_187453_1_, float p_187453_2_) {
+   private void transformFirstPerson(EnumHandSide var1, float var2) {
       int i = p_187453_1_ == EnumHandSide.RIGHT ? 1 : -1;
       float f = MathHelper.sin(p_187453_2_ * p_187453_2_ * 3.1415927F);
       GlStateManager.rotate((float)i * (45.0F + f * -20.0F), 0.0F, 1.0F, 0.0F);
@@ -266,12 +266,12 @@ public class ItemRenderer {
       GlStateManager.rotate((float)i * -45.0F, 0.0F, 1.0F, 0.0F);
    }
 
-   private void transformSideFirstPerson(EnumHandSide p_187459_1_, float p_187459_2_) {
+   private void transformSideFirstPerson(EnumHandSide var1, float var2) {
       int i = p_187459_1_ == EnumHandSide.RIGHT ? 1 : -1;
       GlStateManager.translate((float)i * 0.56F, -0.52F + p_187459_2_ * -0.6F, -0.72F);
    }
 
-   public void renderItemInFirstPerson(float partialTicks) {
+   public void renderItemInFirstPerson(float var1) {
       AbstractClientPlayer abstractclientplayer = this.mc.player;
       float f = abstractclientplayer.getSwingProgress(partialTicks);
       EnumHand enumhand = (EnumHand)Objects.firstNonNull(abstractclientplayer.swingingHand, EnumHand.MAIN_HAND);
@@ -312,7 +312,7 @@ public class ItemRenderer {
       RenderHelper.disableStandardItemLighting();
    }
 
-   public void renderItemInFirstPerson(AbstractClientPlayer p_187457_1_, float p_187457_2_, float p_187457_3_, EnumHand p_187457_4_, float p_187457_5_, @Nullable ItemStack p_187457_6_, float p_187457_7_) {
+   public void renderItemInFirstPerson(AbstractClientPlayer var1, float var2, float var3, EnumHand var4, float var5, @Nullable ItemStack var6, float var7) {
       boolean flag = p_187457_4_ == EnumHand.MAIN_HAND;
       EnumHandSide enumhandside = flag ? p_187457_1_.getPrimaryHand() : p_187457_1_.getPrimaryHand().opposite();
       GlStateManager.pushMatrix();
@@ -382,7 +382,7 @@ public class ItemRenderer {
       GlStateManager.popMatrix();
    }
 
-   public void renderOverlays(float partialTicks) {
+   public void renderOverlays(float var1) {
       GlStateManager.disableAlpha();
       if (this.mc.player.isEntityInsideOpaqueBlock()) {
          IBlockState iblockstate = this.mc.world.getBlockState(new BlockPos(this.mc.player));
@@ -419,7 +419,7 @@ public class ItemRenderer {
       GlStateManager.enableAlpha();
    }
 
-   private void renderBlockInHand(float partialTicks, TextureAtlasSprite atlas) {
+   private void renderBlockInHand(float var1, TextureAtlasSprite var2) {
       this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
@@ -445,7 +445,7 @@ public class ItemRenderer {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
-   private void renderWaterOverlayTexture(float partialTicks) {
+   private void renderWaterOverlayTexture(float var1) {
       this.mc.getTextureManager().bindTexture(RES_UNDERWATER_OVERLAY);
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
@@ -473,7 +473,7 @@ public class ItemRenderer {
       GlStateManager.disableBlend();
    }
 
-   private void renderFireInFirstPerson(float partialTicks) {
+   private void renderFireInFirstPerson(float var1) {
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
       GlStateManager.color(1.0F, 1.0F, 1.0F, 0.9F);
@@ -538,7 +538,7 @@ public class ItemRenderer {
 
    }
 
-   public void resetEquippedProgress(EnumHand hand) {
+   public void resetEquippedProgress(EnumHand var1) {
       if (hand == EnumHand.MAIN_HAND) {
          this.equippedProgressMainHand = 0.0F;
       } else {

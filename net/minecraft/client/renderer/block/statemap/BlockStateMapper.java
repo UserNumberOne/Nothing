@@ -18,11 +18,11 @@ public class BlockStateMapper {
    private final Map blockStateMap = Maps.newIdentityHashMap();
    private final Set setBuiltInBlocks = Sets.newIdentityHashSet();
 
-   public void registerBlockStateMapper(Block blockIn, IStateMapper stateMapper) {
+   public void registerBlockStateMapper(Block var1, IStateMapper var2) {
       this.blockStateMap.put(blockIn, stateMapper);
    }
 
-   public void registerBuiltInBlocks(Block... blockIn) {
+   public void registerBuiltInBlocks(Block... var1) {
       Collections.addAll(this.setBuiltInBlocks, blockIn);
    }
 
@@ -36,7 +36,7 @@ public class BlockStateMapper {
       return map;
    }
 
-   public Set getBlockstateLocations(Block blockIn) {
+   public Set getBlockstateLocations(Block var1) {
       if (this.setBuiltInBlocks.contains(blockIn)) {
          return Collections.emptySet();
       } else {
@@ -55,7 +55,7 @@ public class BlockStateMapper {
       }
    }
 
-   public Map getVariants(Block blockIn) {
+   public Map getVariants(Block var1) {
       return this.setBuiltInBlocks.contains(blockIn) ? Collections.emptyMap() : ((IStateMapper)Objects.firstNonNull(this.blockStateMap.get(blockIn), new DefaultStateMapper())).putStateModelLocations(blockIn);
    }
 }

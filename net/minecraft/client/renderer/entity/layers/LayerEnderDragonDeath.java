@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class LayerEnderDragonDeath implements LayerRenderer {
-   public void doRenderLayer(EntityDragon entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityDragon var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (entitylivingbaseIn.deathTicks > 0) {
          Tessellator tessellator = Tessellator.getInstance();
          VertexBuffer vertexbuffer = tessellator.getBuffer();

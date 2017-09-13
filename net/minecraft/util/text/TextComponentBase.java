@@ -11,9 +11,9 @@ public abstract class TextComponentBase implements ITextComponent {
    protected List siblings = Lists.newArrayList();
    private Style style;
 
-   public ITextComponent appendSibling(ITextComponent ichatbasecomponent) {
-      ichatbasecomponent.getStyle().setParentStyle(this.getStyle());
-      this.siblings.add(ichatbasecomponent);
+   public ITextComponent appendSibling(ITextComponent var1) {
+      component.getStyle().setParentStyle(this.getStyle());
+      this.siblings.add(component);
       return this;
    }
 
@@ -21,15 +21,15 @@ public abstract class TextComponentBase implements ITextComponent {
       return this.siblings;
    }
 
-   public ITextComponent appendText(String s) {
-      return this.appendSibling(new TextComponentString(s));
+   public ITextComponent appendText(String var1) {
+      return this.appendSibling(new TextComponentString(text));
    }
 
-   public ITextComponent setStyle(Style chatmodifier) {
-      this.style = chatmodifier;
+   public ITextComponent setStyle(Style var1) {
+      this.style = style;
 
-      for(ITextComponent ichatbasecomponent : this.siblings) {
-         ichatbasecomponent.getStyle().setParentStyle(this.getStyle());
+      for(ITextComponent itextcomponent : this.siblings) {
+         itextcomponent.getStyle().setParentStyle(this.getStyle());
       }
 
       return this;
@@ -39,8 +39,8 @@ public abstract class TextComponentBase implements ITextComponent {
       if (this.style == null) {
          this.style = new Style();
 
-         for(ITextComponent ichatbasecomponent : this.siblings) {
-            ichatbasecomponent.getStyle().setParentStyle(this.style);
+         for(ITextComponent itextcomponent : this.siblings) {
+            itextcomponent.getStyle().setParentStyle(this.style);
          }
       }
 
@@ -54,50 +54,54 @@ public abstract class TextComponentBase implements ITextComponent {
    public final String getUnformattedText() {
       StringBuilder stringbuilder = new StringBuilder();
 
-      for(ITextComponent ichatbasecomponent : this) {
-         stringbuilder.append(ichatbasecomponent.getUnformattedComponentText());
+      for(ITextComponent itextcomponent : this) {
+         stringbuilder.append(itextcomponent.getUnformattedComponentText());
       }
 
       return stringbuilder.toString();
    }
 
-   public static Iterator createDeepCopyIterator(Iterable iterable) {
-      Iterator iterator = Iterators.concat(Iterators.transform(iterable.iterator(), new Function() {
-         public Iterator apply(@Nullable ITextComponent ichatbasecomponent) {
-            return ichatbasecomponent.iterator();
-         }
+   public final String getFormattedText() {
+      StringBuilder stringbuilder = new StringBuilder();
 
-         public Object apply(Object object) {
-            return this.apply((ITextComponent)object);
+      for(ITextComponent itextcomponent : this) {
+         stringbuilder.append(itextcomponent.getStyle().getFormattingCode());
+         stringbuilder.append(itextcomponent.getUnformattedComponentText());
+         stringbuilder.append(TextFormatting.RESET);
+      }
+
+      return stringbuilder.toString();
+   }
+
+   public static Iterator createDeepCopyIterator(Iterable var0) {
+      Iterator iterator = Iterators.concat(Iterators.transform(components.iterator(), new Function() {
+         public Iterator apply(@Nullable ITextComponent var1) {
+            return p_apply_1_.iterator();
          }
       }));
       iterator = Iterators.transform(iterator, new Function() {
-         public ITextComponent apply(@Nullable ITextComponent ichatbasecomponent) {
-            ITextComponent ichatbasecomponent1 = ichatbasecomponent.createCopy();
-            ichatbasecomponent1.setStyle(ichatbasecomponent1.getStyle().createDeepCopy());
-            return ichatbasecomponent1;
-         }
-
-         public Object apply(Object object) {
-            return this.apply((ITextComponent)object);
+         public ITextComponent apply(@Nullable ITextComponent var1) {
+            ITextComponent itextcomponent = p_apply_1_.createCopy();
+            itextcomponent.setStyle(itextcomponent.getStyle().createDeepCopy());
+            return itextcomponent;
          }
       });
       return iterator;
    }
 
-   public boolean equals(Object object) {
-      if (this == object) {
+   public boolean equals(Object var1) {
+      if (this == p_equals_1_) {
          return true;
-      } else if (!(object instanceof TextComponentBase)) {
+      } else if (!(p_equals_1_ instanceof TextComponentBase)) {
          return false;
       } else {
-         TextComponentBase chatbasecomponent = (TextComponentBase)object;
-         return this.siblings.equals(chatbasecomponent.siblings) && this.getStyle().equals(chatbasecomponent.getStyle());
+         TextComponentBase textcomponentbase = (TextComponentBase)p_equals_1_;
+         return this.siblings.equals(textcomponentbase.siblings) && this.getStyle().equals(textcomponentbase.getStyle());
       }
    }
 
    public int hashCode() {
-      return 31 * this.getStyle().hashCode() + this.siblings.hashCode();
+      return 31 * this.style.hashCode() + this.siblings.hashCode();
    }
 
    public String toString() {

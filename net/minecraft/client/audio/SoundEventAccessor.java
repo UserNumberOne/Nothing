@@ -17,7 +17,7 @@ public class SoundEventAccessor implements ISoundEventAccessor {
    private final ResourceLocation location;
    private final ITextComponent subtitle;
 
-   public SoundEventAccessor(ResourceLocation locationIn, @Nullable String subtitleIn) {
+   public SoundEventAccessor(ResourceLocation var1, @Nullable String var2) {
       this.location = locationIn;
       this.subtitle = subtitleIn == null ? null : new TextComponentTranslation(subtitleIn, new Object[0]);
    }
@@ -50,7 +50,7 @@ public class SoundEventAccessor implements ISoundEventAccessor {
       }
    }
 
-   public void addSound(ISoundEventAccessor p_188715_1_) {
+   public void addSound(ISoundEventAccessor var1) {
       this.accessorList.add(p_188715_1_);
    }
 

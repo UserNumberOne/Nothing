@@ -12,7 +12,7 @@ public class BlockPartRotation {
    public final float angle;
    public final boolean rescale;
 
-   public BlockPartRotation(Vector3f originIn, EnumFacing.Axis axisIn, float angleIn, boolean rescaleIn) {
+   public BlockPartRotation(Vector3f var1, EnumFacing.Axis var2, float var3, boolean var4) {
       this.origin = originIn;
       this.axis = axisIn;
       this.angle = angleIn;

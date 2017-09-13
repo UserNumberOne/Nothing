@@ -11,16 +11,16 @@ import net.minecraft.util.math.MathHelper;
 
 public class BlockSeaLantern extends Block {
    public BlockSeaLantern(Material var1) {
-      super(var1);
+      super(materialIn);
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
    public int quantityDropped(Random var1) {
-      return 2 + var1.nextInt(2);
+      return 2 + random.nextInt(2);
    }
 
    public int quantityDroppedWithBonus(int var1, Random var2) {
-      return MathHelper.clamp(this.quantityDropped(var2) + var2.nextInt(var1 + 1), 1, 5);
+      return MathHelper.clamp(this.quantityDropped(random) + random.nextInt(fortune + 1), 1, 5);
    }
 
    public Item getItemDropped(IBlockState var1, Random var2, int var3) {

@@ -12,7 +12,7 @@ import org.apache.commons.lang3.Validate;
 
 @SideOnly(Side.CLIENT)
 public class FontMetadataSectionSerializer extends BaseMetadataSectionSerializer {
-   public FontMetadataSection deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+   public FontMetadataSection deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
       JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
       float[] afloat = new float[256];
       float[] afloat1 = new float[256];

@@ -7,49 +7,45 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.stats.AchievementList;
-import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.math.MathHelper;
-import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.FurnaceExtractEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class SlotFurnaceOutput extends Slot {
    private final EntityPlayer player;
    private int removeCount;
 
-   public SlotFurnaceOutput(EntityPlayer entityhuman, IInventory iinventory, int i, int j, int k) {
-      super(iinventory, i, j, k);
-      this.player = entityhuman;
+   public SlotFurnaceOutput(EntityPlayer var1, IInventory var2, int var3, int var4, int var5) {
+      super(inventoryIn, slotIndex, xPosition, yPosition);
+      this.player = player;
    }
 
-   public boolean isItemValid(@Nullable ItemStack itemstack) {
+   public boolean isItemValid(@Nullable ItemStack var1) {
       return false;
    }
 
-   public ItemStack decrStackSize(int i) {
+   public ItemStack decrStackSize(int var1) {
       if (this.getHasStack()) {
-         this.removeCount += Math.min(i, this.getStack().stackSize);
+         this.removeCount += Math.min(amount, this.getStack().stackSize);
       }
 
-      return super.decrStackSize(i);
+      return super.decrStackSize(amount);
    }
 
-   public void onPickupFromSlot(EntityPlayer entityhuman, ItemStack itemstack) {
-      this.onCrafting(itemstack);
-      super.onPickupFromSlot(entityhuman, itemstack);
+   public void onPickupFromSlot(EntityPlayer var1, ItemStack var2) {
+      this.onCrafting(stack);
+      super.onPickupFromSlot(playerIn, stack);
    }
 
-   protected void onCrafting(ItemStack itemstack, int i) {
-      this.removeCount += i;
-      this.onCrafting(itemstack);
+   protected void onCrafting(ItemStack var1, int var2) {
+      this.removeCount += amount;
+      this.onCrafting(stack);
    }
 
-   protected void onCrafting(ItemStack itemstack) {
-      itemstack.onCrafting(this.player.world, this.player, this.removeCount);
+   protected void onCrafting(ItemStack var1) {
+      stack.onCrafting(this.player.world, this.player, this.removeCount);
       if (!this.player.world.isRemote) {
          int i = this.removeCount;
-         float f = FurnaceRecipes.instance().getSmeltingExperience(itemstack);
+         float f = FurnaceRecipes.instance().getSmeltingExperience(stack);
          if (f == 0.0F) {
             i = 0;
          } else if (f < 1.0F) {
@@ -61,28 +57,20 @@ public class SlotFurnaceOutput extends Slot {
             i = j;
          }
 
-         Player player = (Player)this.player.getBukkitEntity();
-         TileEntityFurnace furnace = (TileEntityFurnace)this.inventory;
-         Block block = this.player.world.getWorld().getBlockAt(furnace.pos.getX(), furnace.pos.getY(), furnace.pos.getZ());
-         if (this.removeCount != 0) {
-            FurnaceExtractEvent event = new FurnaceExtractEvent(player, block, CraftMagicNumbers.getMaterial(itemstack.getItem()), this.removeCount, i);
-            this.player.world.getServer().getPluginManager().callEvent(event);
-            i = event.getExpToDrop();
-         }
-
          while(i > 0) {
-            int j = EntityXPOrb.getXPSplit(i);
-            i -= j;
-            this.player.world.spawnEntity(new EntityXPOrb(this.player.world, this.player.posX, this.player.posY + 0.5D, this.player.posZ + 0.5D, j));
+            int k = EntityXPOrb.getXPSplit(i);
+            i -= k;
+            this.player.world.spawnEntity(new EntityXPOrb(this.player.world, this.player.posX, this.player.posY + 0.5D, this.player.posZ + 0.5D, k));
          }
       }
 
       this.removeCount = 0;
-      if (itemstack.getItem() == Items.IRON_INGOT) {
+      FMLCommonHandler.instance().firePlayerSmeltedEvent(this.player, stack);
+      if (stack.getItem() == Items.IRON_INGOT) {
          this.player.addStat(AchievementList.ACQUIRE_IRON);
       }
 
-      if (itemstack.getItem() == Items.COOKED_FISH) {
+      if (stack.getItem() == Items.COOKED_FISH) {
          this.player.addStat(AchievementList.COOK_FISH);
       }
 

@@ -23,12 +23,12 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
    protected final Minecraft mc;
    protected final GuiScreenResourcePacks resourcePacksGUI;
 
-   public ResourcePackListEntry(GuiScreenResourcePacks resourcePacksGUIIn) {
+   public ResourcePackListEntry(GuiScreenResourcePacks var1) {
       this.resourcePacksGUI = resourcePacksGUIIn;
       this.mc = Minecraft.getMinecraft();
    }
 
-   public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
+   public void drawEntry(int var1, int var2, int var3, int var4, int var5, int var6, int var7, boolean var8) {
       int i = this.getResourcePackFormat();
       if (i != 2) {
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -133,7 +133,7 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
       return i >= 0 && i < list.size() - 1 && ((ResourcePackListEntry)list.get(i + 1)).showHoverOverlay();
    }
 
-   public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
+   public boolean mousePressed(int var1, int var2, int var3, int var4, int var5, int var6) {
       if (this.showHoverOverlay() && relativeX <= 32) {
          if (this.canMoveRight()) {
             this.resourcePacksGUI.markChanged();
@@ -146,7 +146,7 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
                String s = I18n.format("resourcePack.incompatible.confirm.title");
                String s1 = I18n.format("resourcePack.incompatible.confirm." + (l > 2 ? "new" : "old"));
                this.mc.displayGuiScreen(new GuiYesNo(new GuiYesNoCallback() {
-                  public void confirmClicked(boolean result, int id) {
+                  public void confirmClicked(boolean var1, int var2) {
                      List list2 = ResourcePackListEntry.this.resourcePacksGUI.getListContaining(ResourcePackListEntry.this);
                      ResourcePackListEntry.this.mc.displayGuiScreen(ResourcePackListEntry.this.resourcePacksGUI);
                      if (result) {
@@ -190,10 +190,10 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
       return false;
    }
 
-   public void setSelected(int p_178011_1_, int p_178011_2_, int p_178011_3_) {
+   public void setSelected(int var1, int var2, int var3) {
    }
 
-   public void mouseReleased(int slotIndex, int x, int y, int mouseEvent, int relativeX, int relativeY) {
+   public void mouseReleased(int var1, int var2, int var3, int var4, int var5, int var6) {
    }
 
    public boolean isServerPack() {

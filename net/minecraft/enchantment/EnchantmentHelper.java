@@ -2,9 +2,7 @@ package net.minecraft.enchantment;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -33,18 +31,18 @@ public class EnchantmentHelper {
    private static final EnchantmentHelper.DamageIterator ENCHANTMENT_ITERATOR_DAMAGE = new EnchantmentHelper.DamageIterator();
 
    public static int getEnchantmentLevel(Enchantment var0, @Nullable ItemStack var1) {
-      if (var1 == null) {
+      if (stack == null) {
          return 0;
       } else {
-         NBTTagList var2 = var1.getEnchantmentTagList();
-         if (var2 == null) {
+         NBTTagList nbttaglist = stack.getEnchantmentTagList();
+         if (nbttaglist == null) {
             return 0;
          } else {
-            for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
-               Enchantment var4 = Enchantment.getEnchantmentByID(var2.getCompoundTagAt(var3).getShort("id"));
-               short var5 = var2.getCompoundTagAt(var3).getShort("lvl");
-               if (var4 == var0) {
-                  return var5;
+            for(int i = 0; i < nbttaglist.tagCount(); ++i) {
+               Enchantment enchantment = Enchantment.getEnchantmentByID(nbttaglist.getCompoundTagAt(i).getShort("id"));
+               int j = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+               if (enchantment == enchID) {
+                  return j;
                }
             }
 
@@ -54,279 +52,276 @@ public class EnchantmentHelper {
    }
 
    public static Map getEnchantments(ItemStack var0) {
-      LinkedHashMap var1 = Maps.newLinkedHashMap();
-      NBTTagList var2 = var0.getItem() == Items.ENCHANTED_BOOK ? Items.ENCHANTED_BOOK.getEnchantments(var0) : var0.getEnchantmentTagList();
-      if (var2 != null) {
-         for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
-            Enchantment var4 = Enchantment.getEnchantmentByID(var2.getCompoundTagAt(var3).getShort("id"));
-            short var5 = var2.getCompoundTagAt(var3).getShort("lvl");
-            var1.put(var4, Integer.valueOf(var5));
+      Map map = Maps.newLinkedHashMap();
+      NBTTagList nbttaglist = stack.getItem() == Items.ENCHANTED_BOOK ? Items.ENCHANTED_BOOK.getEnchantments(stack) : stack.getEnchantmentTagList();
+      if (nbttaglist != null) {
+         for(int i = 0; i < nbttaglist.tagCount(); ++i) {
+            Enchantment enchantment = Enchantment.getEnchantmentByID(nbttaglist.getCompoundTagAt(i).getShort("id"));
+            int j = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+            map.put(enchantment, Integer.valueOf(j));
          }
       }
 
-      return var1;
+      return map;
    }
 
    public static void setEnchantments(Map var0, ItemStack var1) {
-      NBTTagList var2 = new NBTTagList();
+      NBTTagList nbttaglist = new NBTTagList();
 
-      for(Entry var4 : var0.entrySet()) {
-         Enchantment var5 = (Enchantment)var4.getKey();
-         if (var5 != null) {
-            int var6 = ((Integer)var4.getValue()).intValue();
-            NBTTagCompound var7 = new NBTTagCompound();
-            var7.setShort("id", (short)Enchantment.getEnchantmentID(var5));
-            var7.setShort("lvl", (short)var6);
-            var2.appendTag(var7);
-            if (var1.getItem() == Items.ENCHANTED_BOOK) {
-               Items.ENCHANTED_BOOK.addEnchantment(var1, new EnchantmentData(var5, var6));
+      for(Entry entry : enchMap.entrySet()) {
+         Enchantment enchantment = (Enchantment)entry.getKey();
+         if (enchantment != null) {
+            int i = ((Integer)entry.getValue()).intValue();
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            nbttagcompound.setShort("id", (short)Enchantment.getEnchantmentID(enchantment));
+            nbttagcompound.setShort("lvl", (short)i);
+            nbttaglist.appendTag(nbttagcompound);
+            if (stack.getItem() == Items.ENCHANTED_BOOK) {
+               Items.ENCHANTED_BOOK.addEnchantment(stack, new EnchantmentData(enchantment, i));
             }
          }
       }
 
-      if (var2.hasNoTags()) {
-         if (var1.hasTagCompound()) {
-            var1.getTagCompound().removeTag("ench");
+      if (nbttaglist.hasNoTags()) {
+         if (stack.hasTagCompound()) {
+            stack.getTagCompound().removeTag("ench");
          }
-      } else if (var1.getItem() != Items.ENCHANTED_BOOK) {
-         var1.setTagInfo("ench", var2);
+      } else if (stack.getItem() != Items.ENCHANTED_BOOK) {
+         stack.setTagInfo("ench", nbttaglist);
       }
 
    }
 
    private static void applyEnchantmentModifier(EnchantmentHelper.IModifier var0, ItemStack var1) {
-      if (var1 != null) {
-         NBTTagList var2 = var1.getEnchantmentTagList();
-         if (var2 != null) {
-            for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
-               short var4 = var2.getCompoundTagAt(var3).getShort("id");
-               short var5 = var2.getCompoundTagAt(var3).getShort("lvl");
-               if (Enchantment.getEnchantmentByID(var4) != null) {
-                  var0.calculateModifier(Enchantment.getEnchantmentByID(var4), var5);
+      if (stack != null) {
+         NBTTagList nbttaglist = stack.getEnchantmentTagList();
+         if (nbttaglist != null) {
+            for(int i = 0; i < nbttaglist.tagCount(); ++i) {
+               int j = nbttaglist.getCompoundTagAt(i).getShort("id");
+               int k = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+               if (Enchantment.getEnchantmentByID(j) != null) {
+                  modifier.calculateModifier(Enchantment.getEnchantmentByID(j), k);
                }
             }
-
          }
       }
+
    }
 
    private static void applyEnchantmentModifierArray(EnchantmentHelper.IModifier var0, Iterable var1) {
-      for(ItemStack var3 : var1) {
-         applyEnchantmentModifier(var0, var3);
+      for(ItemStack itemstack : stacks) {
+         applyEnchantmentModifier(modifier, itemstack);
       }
 
    }
 
    public static int getEnchantmentModifierDamage(Iterable var0, DamageSource var1) {
       ENCHANTMENT_MODIFIER_DAMAGE.damageModifier = 0;
-      ENCHANTMENT_MODIFIER_DAMAGE.source = var1;
-      applyEnchantmentModifierArray(ENCHANTMENT_MODIFIER_DAMAGE, var0);
+      ENCHANTMENT_MODIFIER_DAMAGE.source = source;
+      applyEnchantmentModifierArray(ENCHANTMENT_MODIFIER_DAMAGE, stacks);
       return ENCHANTMENT_MODIFIER_DAMAGE.damageModifier;
    }
 
    public static float getModifierForCreature(ItemStack var0, EnumCreatureAttribute var1) {
       ENCHANTMENT_MODIFIER_LIVING.livingModifier = 0.0F;
-      ENCHANTMENT_MODIFIER_LIVING.entityLiving = var1;
-      applyEnchantmentModifier(ENCHANTMENT_MODIFIER_LIVING, var0);
+      ENCHANTMENT_MODIFIER_LIVING.entityLiving = creatureAttribute;
+      applyEnchantmentModifier(ENCHANTMENT_MODIFIER_LIVING, stack);
       return ENCHANTMENT_MODIFIER_LIVING.livingModifier;
    }
 
    public static void applyThornEnchantments(EntityLivingBase var0, Entity var1) {
-      ENCHANTMENT_ITERATOR_HURT.attacker = var1;
-      ENCHANTMENT_ITERATOR_HURT.user = var0;
-      if (var0 != null) {
-         applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_HURT, var0.getEquipmentAndArmor());
+      ENCHANTMENT_ITERATOR_HURT.attacker = p_151384_1_;
+      ENCHANTMENT_ITERATOR_HURT.user = p_151384_0_;
+      if (p_151384_0_ != null) {
+         applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.getEquipmentAndArmor());
       }
 
-      if (var1 instanceof EntityPlayer) {
-         applyEnchantmentModifier(ENCHANTMENT_ITERATOR_HURT, var0.getHeldItemMainhand());
+      if (p_151384_1_ instanceof EntityPlayer) {
+         applyEnchantmentModifier(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.getHeldItemMainhand());
       }
 
    }
 
    public static void applyArthropodEnchantments(EntityLivingBase var0, Entity var1) {
-      ENCHANTMENT_ITERATOR_DAMAGE.user = var0;
-      ENCHANTMENT_ITERATOR_DAMAGE.target = var1;
-      if (var0 != null) {
-         applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_DAMAGE, var0.getEquipmentAndArmor());
+      ENCHANTMENT_ITERATOR_DAMAGE.user = p_151385_0_;
+      ENCHANTMENT_ITERATOR_DAMAGE.target = p_151385_1_;
+      if (p_151385_0_ != null) {
+         applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.getEquipmentAndArmor());
       }
 
-      if (var0 instanceof EntityPlayer) {
-         applyEnchantmentModifier(ENCHANTMENT_ITERATOR_DAMAGE, var0.getHeldItemMainhand());
+      if (p_151385_0_ instanceof EntityPlayer) {
+         applyEnchantmentModifier(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.getHeldItemMainhand());
       }
 
    }
 
    public static int getMaxEnchantmentLevel(Enchantment var0, EntityLivingBase var1) {
-      Iterable var2 = var0.getEntityEquipment(var1);
-      if (var2 == null) {
+      Iterable iterable = p_185284_0_.getEntityEquipment(p_185284_1_);
+      if (iterable == null) {
          return 0;
       } else {
-         int var3 = 0;
+         int i = 0;
 
-         for(ItemStack var5 : var2) {
-            int var6 = getEnchantmentLevel(var0, var5);
-            if (var6 > var3) {
-               var3 = var6;
+         for(ItemStack itemstack : iterable) {
+            int j = getEnchantmentLevel(p_185284_0_, itemstack);
+            if (j > i) {
+               i = j;
             }
          }
 
-         return var3;
+         return i;
       }
    }
 
    public static int getKnockbackModifier(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.KNOCKBACK, var0);
+      return getMaxEnchantmentLevel(Enchantments.KNOCKBACK, player);
    }
 
    public static int getFireAspectModifier(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.FIRE_ASPECT, var0);
+      return getMaxEnchantmentLevel(Enchantments.FIRE_ASPECT, player);
    }
 
    public static int getRespirationModifier(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.RESPIRATION, var0);
+      return getMaxEnchantmentLevel(Enchantments.RESPIRATION, p_185292_0_);
    }
 
    public static int getDepthStriderModifier(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.DEPTH_STRIDER, var0);
+      return getMaxEnchantmentLevel(Enchantments.DEPTH_STRIDER, p_185294_0_);
    }
 
    public static int getEfficiencyModifier(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.EFFICIENCY, var0);
+      return getMaxEnchantmentLevel(Enchantments.EFFICIENCY, p_185293_0_);
    }
 
    public static int getLuckOfSeaModifier(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.LUCK_OF_THE_SEA, var0);
+      return getMaxEnchantmentLevel(Enchantments.LUCK_OF_THE_SEA, player);
    }
 
    public static int getLureModifier(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.LURE, var0);
+      return getMaxEnchantmentLevel(Enchantments.LURE, player);
    }
 
    public static int getLootingModifier(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.LOOTING, var0);
+      return getMaxEnchantmentLevel(Enchantments.LOOTING, p_185283_0_);
    }
 
    public static boolean getAquaAffinityModifier(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.AQUA_AFFINITY, var0) > 0;
+      return getMaxEnchantmentLevel(Enchantments.AQUA_AFFINITY, p_185287_0_) > 0;
    }
 
    public static boolean hasFrostWalkerEnchantment(EntityLivingBase var0) {
-      return getMaxEnchantmentLevel(Enchantments.FROST_WALKER, var0) > 0;
+      return getMaxEnchantmentLevel(Enchantments.FROST_WALKER, player) > 0;
    }
 
    @Nullable
    public static ItemStack getEnchantedItem(Enchantment var0, EntityLivingBase var1) {
-      Iterable var2 = var0.getEntityEquipment(var1);
-      if (var2 == null) {
+      Iterable iterable = p_92099_0_.getEntityEquipment(p_92099_1_);
+      if (iterable == null) {
          return null;
       } else {
-         ArrayList var3 = Lists.newArrayList();
+         List list = Lists.newArrayList();
 
-         for(ItemStack var5 : var2) {
-            if (var5 != null && getEnchantmentLevel(var0, var5) > 0) {
-               var3.add(var5);
+         for(ItemStack itemstack : iterable) {
+            if (itemstack != null && getEnchantmentLevel(p_92099_0_, itemstack) > 0) {
+               list.add(itemstack);
             }
          }
 
-         return var3.isEmpty() ? null : (ItemStack)var3.get(var1.getRNG().nextInt(var3.size()));
+         return list.isEmpty() ? null : (ItemStack)list.get(p_92099_1_.getRNG().nextInt(list.size()));
       }
    }
 
    public static int calcItemStackEnchantability(Random var0, int var1, int var2, ItemStack var3) {
-      Item var4 = var3.getItem();
-      int var5 = var4.getItemEnchantability();
-      if (var5 <= 0) {
+      Item item = stack.getItem();
+      int i = item.getItemEnchantability(stack);
+      if (i <= 0) {
          return 0;
       } else {
-         if (var2 > 15) {
-            var2 = 15;
+         if (power > 15) {
+            power = 15;
          }
 
-         int var6 = var0.nextInt(8) + 1 + (var2 >> 1) + var0.nextInt(var2 + 1);
-         if (var1 == 0) {
-            return Math.max(var6 / 3, 1);
-         } else {
-            return var1 == 1 ? var6 * 2 / 3 + 1 : Math.max(var6, var2 * 2);
-         }
+         int j = rand.nextInt(8) + 1 + (power >> 1) + rand.nextInt(power + 1);
+         return enchantNum == 0 ? Math.max(j / 3, 1) : (enchantNum == 1 ? j * 2 / 3 + 1 : Math.max(j, power * 2));
       }
    }
 
    public static ItemStack addRandomEnchantment(Random var0, ItemStack var1, int var2, boolean var3) {
-      boolean var4 = var1.getItem() == Items.BOOK;
-      List var5 = buildEnchantmentList(var0, var1, var2, var3);
-      if (var4) {
-         var1.setItem(Items.ENCHANTED_BOOK);
+      boolean flag = p_77504_1_.getItem() == Items.BOOK;
+      List list = buildEnchantmentList(random, p_77504_1_, p_77504_2_, allowTreasure);
+      if (flag) {
+         p_77504_1_.setItem(Items.ENCHANTED_BOOK);
       }
 
-      for(EnchantmentData var7 : var5) {
-         if (var4) {
-            Items.ENCHANTED_BOOK.addEnchantment(var1, var7);
+      for(EnchantmentData enchantmentdata : list) {
+         if (flag) {
+            Items.ENCHANTED_BOOK.addEnchantment(p_77504_1_, enchantmentdata);
          } else {
-            var1.addEnchantment(var7.enchantmentobj, var7.enchantmentLevel);
+            p_77504_1_.addEnchantment(enchantmentdata.enchantmentobj, enchantmentdata.enchantmentLevel);
          }
       }
 
-      return var1;
+      return p_77504_1_;
    }
 
    public static List buildEnchantmentList(Random var0, ItemStack var1, int var2, boolean var3) {
-      ArrayList var4 = Lists.newArrayList();
-      Item var5 = var1.getItem();
-      int var6 = var5.getItemEnchantability();
-      if (var6 <= 0) {
-         return var4;
+      List list = Lists.newArrayList();
+      Item item = itemStackIn.getItem();
+      int i = item.getItemEnchantability(itemStackIn);
+      if (i <= 0) {
+         return list;
       } else {
-         var2 = var2 + 1 + var0.nextInt(var6 / 4 + 1) + var0.nextInt(var6 / 4 + 1);
-         float var7 = (var0.nextFloat() + var0.nextFloat() - 1.0F) * 0.15F;
-         var2 = MathHelper.clamp(Math.round((float)var2 + (float)var2 * var7), 1, Integer.MAX_VALUE);
-         List var8 = getEnchantmentDatas(var2, var1, var3);
-         if (!var8.isEmpty()) {
-            var4.add(WeightedRandom.getRandomItem(var0, var8));
+         p_77513_2_ = p_77513_2_ + 1 + randomIn.nextInt(i / 4 + 1) + randomIn.nextInt(i / 4 + 1);
+         float f = (randomIn.nextFloat() + randomIn.nextFloat() - 1.0F) * 0.15F;
+         p_77513_2_ = MathHelper.clamp(Math.round((float)p_77513_2_ + (float)p_77513_2_ * f), 1, Integer.MAX_VALUE);
+         List list1 = getEnchantmentDatas(p_77513_2_, itemStackIn, allowTreasure);
+         if (!list1.isEmpty()) {
+            list.add(WeightedRandom.getRandomItem(randomIn, list1));
 
-            while(var0.nextInt(50) <= var2) {
-               removeIncompatible(var8, (EnchantmentData)Util.getLastElement(var4));
-               if (var8.isEmpty()) {
+            while(randomIn.nextInt(50) <= p_77513_2_) {
+               removeIncompatible(list1, (EnchantmentData)Util.getLastElement(list));
+               if (list1.isEmpty()) {
                   break;
                }
 
-               var4.add(WeightedRandom.getRandomItem(var0, var8));
-               var2 /= 2;
+               list.add(WeightedRandom.getRandomItem(randomIn, list1));
+               p_77513_2_ /= 2;
             }
          }
 
-         return var4;
+         return list;
       }
    }
 
    public static void removeIncompatible(List var0, EnchantmentData var1) {
-      Iterator var2 = var0.iterator();
+      Iterator iterator = p_185282_0_.iterator();
 
-      while(var2.hasNext()) {
-         if (!var1.enchantmentobj.canApplyTogether(((EnchantmentData)var2.next()).enchantmentobj)) {
-            var2.remove();
+      while(iterator.hasNext()) {
+         Enchantment e2 = ((EnchantmentData)iterator.next()).enchantmentobj;
+         if (!p_185282_1_.enchantmentobj.canApplyTogether(e2) || !e2.canApplyTogether(p_185282_1_.enchantmentobj)) {
+            iterator.remove();
          }
       }
 
    }
 
    public static List getEnchantmentDatas(int var0, ItemStack var1, boolean var2) {
-      ArrayList var3 = Lists.newArrayList();
-      Item var4 = var1.getItem();
-      boolean var5 = var1.getItem() == Items.BOOK;
+      List list = Lists.newArrayList();
+      Item item = p_185291_1_.getItem();
+      boolean flag = p_185291_1_.getItem() == Items.BOOK;
 
-      for(Enchantment var7 : Enchantment.REGISTRY) {
-         if ((!var7.isTreasureEnchantment() || var2) && (var7.type.canEnchantItem(var4) || var5)) {
-            for(int var8 = var7.getMaxLevel(); var8 > var7.getMinLevel() - 1; --var8) {
-               if (var0 >= var7.getMinEnchantability(var8) && var0 <= var7.getMaxEnchantability(var8)) {
-                  var3.add(new EnchantmentData(var7, var8));
+      for(Enchantment enchantment : Enchantment.REGISTRY) {
+         if ((!enchantment.isTreasureEnchantment() || allowTreasure) && (enchantment.canApplyAtEnchantingTable(p_185291_1_) || flag && enchantment.isAllowedOnBooks())) {
+            for(int i = enchantment.getMaxLevel(); i > enchantment.getMinLevel() - 1; --i) {
+               if (p_185291_0_ >= enchantment.getMinEnchantability(i) && p_185291_0_ <= enchantment.getMaxEnchantability(i)) {
+                  list.add(new EnchantmentData(enchantment, i));
                   break;
                }
             }
          }
       }
 
-      return var3;
+      return list;
    }
 
    static final class DamageIterator implements EnchantmentHelper.IModifier {
@@ -337,7 +332,7 @@ public class EnchantmentHelper {
       }
 
       public void calculateModifier(Enchantment var1, int var2) {
-         var1.onEntityDamaged(this.user, this.target, var2);
+         enchantmentIn.onEntityDamaged(this.user, this.target, enchantmentLevel);
       }
    }
 
@@ -349,7 +344,7 @@ public class EnchantmentHelper {
       }
 
       public void calculateModifier(Enchantment var1, int var2) {
-         var1.onUserHurt(this.user, this.attacker, var2);
+         enchantmentIn.onUserHurt(this.user, this.attacker, enchantmentLevel);
       }
    }
 
@@ -365,7 +360,7 @@ public class EnchantmentHelper {
       }
 
       public void calculateModifier(Enchantment var1, int var2) {
-         this.damageModifier += var1.calcModifierDamage(var2, this.source);
+         this.damageModifier += enchantmentIn.calcModifierDamage(enchantmentLevel, this.source);
       }
    }
 
@@ -377,7 +372,7 @@ public class EnchantmentHelper {
       }
 
       public void calculateModifier(Enchantment var1, int var2) {
-         this.livingModifier += var1.calcDamageByCreature(var2, this.entityLiving);
+         this.livingModifier += enchantmentIn.calcDamageByCreature(enchantmentLevel, this.entityLiving);
       }
    }
 }

@@ -31,9 +31,8 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
-import org.bukkit.event.entity.CreeperPowerEvent.PowerCause;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityCreeper extends EntityMob {
    private static final DataParameter STATE = EntityDataManager.createKey(EntityCreeper.class, DataSerializers.VARINT);
@@ -45,8 +44,8 @@ public class EntityCreeper extends EntityMob {
    private int explosionRadius = 3;
    private int droppedSkulls;
 
-   public EntityCreeper(World world) {
-      super(world);
+   public EntityCreeper(World var1) {
+      super(worldIn);
       this.setSize(0.6F, 1.7F);
    }
 
@@ -71,9 +70,9 @@ public class EntityCreeper extends EntityMob {
       return this.getAttackTarget() == null ? 3 : 3 + (int)(this.getHealth() - 1.0F);
    }
 
-   public void fall(float f, float f1) {
-      super.fall(f, f1);
-      this.timeSinceIgnited = (int)((float)this.timeSinceIgnited + f * 1.5F);
+   public void fall(float var1, float var2) {
+      super.fall(distance, damageMultiplier);
+      this.timeSinceIgnited = (int)((float)this.timeSinceIgnited + distance * 1.5F);
       if (this.timeSinceIgnited > this.fuseTime - 5) {
          this.timeSinceIgnited = this.fuseTime - 5;
       }
@@ -87,33 +86,33 @@ public class EntityCreeper extends EntityMob {
       this.dataManager.register(IGNITED, Boolean.valueOf(false));
    }
 
-   public static void registerFixesCreeper(DataFixer dataconvertermanager) {
-      EntityLiving.registerFixesMob(dataconvertermanager, "Creeper");
+   public static void registerFixesCreeper(DataFixer var0) {
+      EntityLiving.registerFixesMob(fixer, "Creeper");
    }
 
-   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-      super.writeEntityToNBT(nbttagcompound);
+   public void writeEntityToNBT(NBTTagCompound var1) {
+      super.writeEntityToNBT(compound);
       if (((Boolean)this.dataManager.get(POWERED)).booleanValue()) {
-         nbttagcompound.setBoolean("powered", true);
+         compound.setBoolean("powered", true);
       }
 
-      nbttagcompound.setShort("Fuse", (short)this.fuseTime);
-      nbttagcompound.setByte("ExplosionRadius", (byte)this.explosionRadius);
-      nbttagcompound.setBoolean("ignited", this.hasIgnited());
+      compound.setShort("Fuse", (short)this.fuseTime);
+      compound.setByte("ExplosionRadius", (byte)this.explosionRadius);
+      compound.setBoolean("ignited", this.hasIgnited());
    }
 
-   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-      super.readEntityFromNBT(nbttagcompound);
-      this.dataManager.set(POWERED, Boolean.valueOf(nbttagcompound.getBoolean("powered")));
-      if (nbttagcompound.hasKey("Fuse", 99)) {
-         this.fuseTime = nbttagcompound.getShort("Fuse");
+   public void readEntityFromNBT(NBTTagCompound var1) {
+      super.readEntityFromNBT(compound);
+      this.dataManager.set(POWERED, Boolean.valueOf(compound.getBoolean("powered")));
+      if (compound.hasKey("Fuse", 99)) {
+         this.fuseTime = compound.getShort("Fuse");
       }
 
-      if (nbttagcompound.hasKey("ExplosionRadius", 99)) {
-         this.explosionRadius = nbttagcompound.getByte("ExplosionRadius");
+      if (compound.hasKey("ExplosionRadius", 99)) {
+         this.explosionRadius = compound.getByte("ExplosionRadius");
       }
 
-      if (nbttagcompound.getBoolean("ignited")) {
+      if (compound.getBoolean("ignited")) {
          this.ignite();
       }
 
@@ -153,28 +152,33 @@ public class EntityCreeper extends EntityMob {
       return SoundEvents.ENTITY_CREEPER_DEATH;
    }
 
-   public void onDeath(DamageSource damagesource) {
+   public void onDeath(DamageSource var1) {
+      super.onDeath(cause);
       if (this.world.getGameRules().getBoolean("doMobLoot")) {
-         if (damagesource.getEntity() instanceof EntitySkeleton) {
+         if (cause.getEntity() instanceof EntitySkeleton) {
             int i = Item.getIdFromItem(Items.RECORD_13);
             int j = Item.getIdFromItem(Items.RECORD_WAIT);
             int k = i + this.rand.nextInt(j - i + 1);
             this.dropItem(Item.getItemById(k), 1);
-         } else if (damagesource.getEntity() instanceof EntityCreeper && damagesource.getEntity() != this && ((EntityCreeper)damagesource.getEntity()).getPowered() && ((EntityCreeper)damagesource.getEntity()).isAIEnabled()) {
-            ((EntityCreeper)damagesource.getEntity()).incrementDroppedSkulls();
+         } else if (cause.getEntity() instanceof EntityCreeper && cause.getEntity() != this && ((EntityCreeper)cause.getEntity()).getPowered() && ((EntityCreeper)cause.getEntity()).isAIEnabled()) {
+            ((EntityCreeper)cause.getEntity()).incrementDroppedSkulls();
             this.entityDropItem(new ItemStack(Items.SKULL, 1, 4), 0.0F);
          }
       }
 
-      super.onDeath(damagesource);
    }
 
-   public boolean attackEntityAsMob(Entity entity) {
+   public boolean attackEntityAsMob(Entity var1) {
       return true;
    }
 
    public boolean getPowered() {
       return ((Boolean)this.dataManager.get(POWERED)).booleanValue();
+   }
+
+   @SideOnly(Side.CLIENT)
+   public float getCreeperFlashIntensity(float var1) {
+      return ((float)this.lastActiveTime + (float)(this.timeSinceIgnited - this.lastActiveTime) * p_70831_1_) / (float)(this.fuseTime - 2);
    }
 
    @Nullable
@@ -186,48 +190,36 @@ public class EntityCreeper extends EntityMob {
       return ((Integer)this.dataManager.get(STATE)).intValue();
    }
 
-   public void setCreeperState(int i) {
-      this.dataManager.set(STATE, Integer.valueOf(i));
+   public void setCreeperState(int var1) {
+      this.dataManager.set(STATE, Integer.valueOf(state));
    }
 
-   public void onStruckByLightning(EntityLightningBolt entitylightning) {
-      super.onStruckByLightning(entitylightning);
-      if (!CraftEventFactory.callCreeperPowerEvent(this, entitylightning, PowerCause.LIGHTNING).isCancelled()) {
-         this.setPowered(true);
-      }
+   public void onStruckByLightning(EntityLightningBolt var1) {
+      super.onStruckByLightning(lightningBolt);
+      this.dataManager.set(POWERED, Boolean.valueOf(true));
    }
 
-   public void setPowered(boolean powered) {
-      this.dataManager.set(POWERED, Boolean.valueOf(powered));
-   }
-
-   protected boolean processInteract(EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack) {
-      if (itemstack != null && itemstack.getItem() == Items.FLINT_AND_STEEL) {
-         this.world.playSound(entityhuman, this.posX, this.posY, this.posZ, SoundEvents.ITEM_FLINTANDSTEEL_USE, this.getSoundCategory(), 1.0F, this.rand.nextFloat() * 0.4F + 0.8F);
-         entityhuman.swingArm(enumhand);
+   protected boolean processInteract(EntityPlayer var1, EnumHand var2, @Nullable ItemStack var3) {
+      if (stack != null && stack.getItem() == Items.FLINT_AND_STEEL) {
+         this.world.playSound(player, this.posX, this.posY, this.posZ, SoundEvents.ITEM_FLINTANDSTEEL_USE, this.getSoundCategory(), 1.0F, this.rand.nextFloat() * 0.4F + 0.8F);
+         player.swingArm(hand);
          if (!this.world.isRemote) {
             this.ignite();
-            itemstack.damageItem(1, entityhuman);
+            stack.damageItem(1, player);
             return true;
          }
       }
 
-      return super.processInteract(entityhuman, enumhand, itemstack);
+      return super.processInteract(player, hand, stack);
    }
 
    private void explode() {
       if (!this.world.isRemote) {
          boolean flag = this.world.getGameRules().getBoolean("mobGriefing");
          float f = this.getPowered() ? 2.0F : 1.0F;
-         ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), (float)this.explosionRadius * f, false);
-         this.world.getServer().getPluginManager().callEvent(event);
-         if (!event.isCancelled()) {
-            this.dead = true;
-            this.world.newExplosion(this, this.posX, this.posY, this.posZ, event.getRadius(), event.getFire(), flag);
-            this.setDead();
-         } else {
-            this.timeSinceIgnited = 0;
-         }
+         this.dead = true;
+         this.world.createExplosion(this, this.posX, this.posY, this.posZ, (float)this.explosionRadius * f, flag);
+         this.setDead();
       }
 
    }

@@ -26,7 +26,7 @@ public class BlockPart {
    public final BlockPartRotation partRotation;
    public final boolean shade;
 
-   public BlockPart(Vector3f positionFromIn, Vector3f positionToIn, Map mapFacesIn, @Nullable BlockPartRotation partRotationIn, boolean shadeIn) {
+   public BlockPart(Vector3f var1, Vector3f var2, Map var3, @Nullable BlockPartRotation var4, boolean var5) {
       this.positionFrom = positionFromIn;
       this.positionTo = positionToIn;
       this.mapFaces = mapFacesIn;
@@ -43,7 +43,7 @@ public class BlockPart {
 
    }
 
-   private float[] getFaceUvs(EnumFacing facing) {
+   private float[] getFaceUvs(EnumFacing var1) {
       switch(facing) {
       case DOWN:
          return new float[]{this.positionFrom.x, 16.0F - this.positionTo.z, this.positionTo.x, 16.0F - this.positionFrom.z};
@@ -63,7 +63,7 @@ public class BlockPart {
 
    @SideOnly(Side.CLIENT)
    static class Deserializer implements JsonDeserializer {
-      public BlockPart deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public BlockPart deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          Vector3f vector3f = this.parsePositionFrom(jsonobject);
          Vector3f vector3f1 = this.parsePositionTo(jsonobject);
@@ -78,7 +78,7 @@ public class BlockPart {
       }
 
       @Nullable
-      private BlockPartRotation parseRotation(JsonObject object) {
+      private BlockPartRotation parseRotation(JsonObject var1) {
          BlockPartRotation blockpartrotation = null;
          if (object.has("rotation")) {
             JsonObject jsonobject = JsonUtils.getJsonObject(object, "rotation");
@@ -93,7 +93,7 @@ public class BlockPart {
          return blockpartrotation;
       }
 
-      private float parseAngle(JsonObject object) {
+      private float parseAngle(JsonObject var1) {
          float f = JsonUtils.getFloat(object, "angle");
          if (f != 0.0F && MathHelper.abs(f) != 22.5F && MathHelper.abs(f) != 45.0F) {
             throw new JsonParseException("Invalid rotation " + f + " found, only -45/-22.5/0/22.5/45 allowed");
@@ -102,7 +102,7 @@ public class BlockPart {
          }
       }
 
-      private EnumFacing.Axis parseAxis(JsonObject object) {
+      private EnumFacing.Axis parseAxis(JsonObject var1) {
          String s = JsonUtils.getString(object, "axis");
          EnumFacing.Axis enumfacing$axis = EnumFacing.Axis.byName(s.toLowerCase());
          if (enumfacing$axis == null) {
@@ -112,7 +112,7 @@ public class BlockPart {
          }
       }
 
-      private Map parseFacesCheck(JsonDeserializationContext deserializationContext, JsonObject object) {
+      private Map parseFacesCheck(JsonDeserializationContext var1, JsonObject var2) {
          Map map = this.parseFaces(deserializationContext, object);
          if (map.isEmpty()) {
             throw new JsonParseException("Expected between 1 and 6 unique faces, got 0");
@@ -121,7 +121,7 @@ public class BlockPart {
          }
       }
 
-      private Map parseFaces(JsonDeserializationContext deserializationContext, JsonObject object) {
+      private Map parseFaces(JsonDeserializationContext var1, JsonObject var2) {
          Map map = Maps.newEnumMap(EnumFacing.class);
          JsonObject jsonobject = JsonUtils.getJsonObject(object, "faces");
 
@@ -133,7 +133,7 @@ public class BlockPart {
          return map;
       }
 
-      private EnumFacing parseEnumFacing(String name) {
+      private EnumFacing parseEnumFacing(String var1) {
          EnumFacing enumfacing = EnumFacing.byName(name);
          if (enumfacing == null) {
             throw new JsonParseException("Unknown facing: " + name);
@@ -142,7 +142,7 @@ public class BlockPart {
          }
       }
 
-      private Vector3f parsePositionTo(JsonObject object) {
+      private Vector3f parsePositionTo(JsonObject var1) {
          Vector3f vector3f = this.parsePosition(object, "to");
          if (vector3f.x >= -16.0F && vector3f.y >= -16.0F && vector3f.z >= -16.0F && vector3f.x <= 32.0F && vector3f.y <= 32.0F && vector3f.z <= 32.0F) {
             return vector3f;
@@ -151,7 +151,7 @@ public class BlockPart {
          }
       }
 
-      private Vector3f parsePositionFrom(JsonObject object) {
+      private Vector3f parsePositionFrom(JsonObject var1) {
          Vector3f vector3f = this.parsePosition(object, "from");
          if (vector3f.x >= -16.0F && vector3f.y >= -16.0F && vector3f.z >= -16.0F && vector3f.x <= 32.0F && vector3f.y <= 32.0F && vector3f.z <= 32.0F) {
             return vector3f;
@@ -160,7 +160,7 @@ public class BlockPart {
          }
       }
 
-      private Vector3f parsePosition(JsonObject object, String memberName) {
+      private Vector3f parsePosition(JsonObject var1, String var2) {
          JsonArray jsonarray = JsonUtils.getJsonArray(object, memberName);
          if (jsonarray.size() != 3) {
             throw new JsonParseException("Expected 3 " + memberName + " values, found: " + jsonarray.size());

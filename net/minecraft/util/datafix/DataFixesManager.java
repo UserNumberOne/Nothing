@@ -96,122 +96,122 @@ import net.minecraft.world.storage.WorldInfo;
 
 public class DataFixesManager {
    private static void registerFixes(DataFixer var0) {
-      var0.registerFix(FixTypes.ENTITY, new EntityArmorAndHeld());
-      var0.registerFix(FixTypes.BLOCK_ENTITY, new SignStrictJSON());
-      var0.registerFix(FixTypes.ITEM_INSTANCE, new ItemIntIDToString());
-      var0.registerFix(FixTypes.ITEM_INSTANCE, new PotionItems());
-      var0.registerFix(FixTypes.ITEM_INSTANCE, new SpawnEggNames());
-      var0.registerFix(FixTypes.ENTITY, new MinecartEntityTypes());
-      var0.registerFix(FixTypes.BLOCK_ENTITY, new SpawnerEntityTypes());
-      var0.registerFix(FixTypes.ENTITY, new StringToUUID());
-      var0.registerFix(FixTypes.ENTITY, new EntityHealth());
-      var0.registerFix(FixTypes.ENTITY, new HorseSaddle());
-      var0.registerFix(FixTypes.ENTITY, new PaintingDirection());
-      var0.registerFix(FixTypes.ENTITY, new RedundantChanceTags());
-      var0.registerFix(FixTypes.ENTITY, new RidingToPassengers());
-      var0.registerFix(FixTypes.ENTITY, new ArmorStandSilent());
-      var0.registerFix(FixTypes.ITEM_INSTANCE, new BookPagesStrictJSON());
-      var0.registerFix(FixTypes.ITEM_INSTANCE, new CookedFishIDTypo());
-      var0.registerFix(FixTypes.ENTITY, new ZombieProfToType());
-      var0.registerFix(FixTypes.OPTIONS, new ForceVBOOn());
+      fixer.registerFix(FixTypes.ENTITY, new EntityArmorAndHeld());
+      fixer.registerFix(FixTypes.BLOCK_ENTITY, new SignStrictJSON());
+      fixer.registerFix(FixTypes.ITEM_INSTANCE, new ItemIntIDToString());
+      fixer.registerFix(FixTypes.ITEM_INSTANCE, new PotionItems());
+      fixer.registerFix(FixTypes.ITEM_INSTANCE, new SpawnEggNames());
+      fixer.registerFix(FixTypes.ENTITY, new MinecartEntityTypes());
+      fixer.registerFix(FixTypes.BLOCK_ENTITY, new SpawnerEntityTypes());
+      fixer.registerFix(FixTypes.ENTITY, new StringToUUID());
+      fixer.registerFix(FixTypes.ENTITY, new EntityHealth());
+      fixer.registerFix(FixTypes.ENTITY, new HorseSaddle());
+      fixer.registerFix(FixTypes.ENTITY, new PaintingDirection());
+      fixer.registerFix(FixTypes.ENTITY, new RedundantChanceTags());
+      fixer.registerFix(FixTypes.ENTITY, new RidingToPassengers());
+      fixer.registerFix(FixTypes.ENTITY, new ArmorStandSilent());
+      fixer.registerFix(FixTypes.ITEM_INSTANCE, new BookPagesStrictJSON());
+      fixer.registerFix(FixTypes.ITEM_INSTANCE, new CookedFishIDTypo());
+      fixer.registerFix(FixTypes.ENTITY, new ZombieProfToType());
+      fixer.registerFix(FixTypes.OPTIONS, new ForceVBOOn());
    }
 
    public static DataFixer createFixer() {
-      DataFixer var0 = new DataFixer(512);
-      WorldInfo.registerFixes(var0);
-      EntityPlayer.registerFixesPlayer(var0);
-      AnvilChunkLoader.registerFixes(var0);
-      ItemStack.registerFixes(var0);
-      EntityArmorStand.registerFixesArmorStand(var0);
-      EntityArrow.registerFixesArrow(var0);
-      EntityBat.registerFixesBat(var0);
-      EntityBlaze.registerFixesBlaze(var0);
-      EntityCaveSpider.registerFixesCaveSpider(var0);
-      EntityChicken.registerFixesChicken(var0);
-      EntityCow.registerFixesCow(var0);
-      EntityCreeper.registerFixesCreeper(var0);
-      EntityDragonFireball.registerFixesDragonFireball(var0);
-      EntityDragon.registerFixesDragon(var0);
-      EntityEnderman.registerFixesEnderman(var0);
-      EntityEndermite.registerFixesEndermite(var0);
-      EntityFallingBlock.registerFixesFallingBlock(var0);
-      EntityLargeFireball.registerFixesLargeFireball(var0);
-      EntityFireworkRocket.registerFixesFireworkRocket(var0);
-      EntityGhast.registerFixesGhast(var0);
-      EntityGiantZombie.registerFixesGiantZombie(var0);
-      EntityGuardian.registerFixesGuardian(var0);
-      EntityHorse.registerFixesHorse(var0);
-      EntityItem.registerFixesItem(var0);
-      EntityItemFrame.registerFixesItemFrame(var0);
-      EntityMagmaCube.registerFixesMagmaCube(var0);
-      EntityMinecartChest.registerFixesMinecartChest(var0);
-      EntityMinecartCommandBlock.registerFixesMinecartCommand(var0);
-      EntityMinecartFurnace.registerFixesMinecartFurnace(var0);
-      EntityMinecartHopper.registerFixesMinecartHopper(var0);
-      EntityMinecartEmpty.registerFixesMinecartEmpty(var0);
-      EntityMinecartMobSpawner.registerFixesMinecartMobSpawner(var0);
-      EntityMinecartTNT.registerFixesMinecartTNT(var0);
-      EntityLiving.registerFixesMob(var0);
-      EntityMob.registerFixesMonster(var0);
-      EntityMooshroom.registerFixesMooshroom(var0);
-      EntityOcelot.registerFixesOcelot(var0);
-      EntityPig.registerFixesPig(var0);
-      EntityPigZombie.registerFixesPigZombie(var0);
-      EntityRabbit.registerFixesRabbit(var0);
-      EntitySheep.registerFixesSheep(var0);
-      EntityShulker.registerFixesShulker(var0);
-      EntitySilverfish.registerFixesSilverfish(var0);
-      EntitySkeleton.registerFixesSkeleton(var0);
-      EntitySlime.registerFixesSlime(var0);
-      EntitySmallFireball.registerFixesSmallFireball(var0);
-      EntitySnowman.registerFixesSnowman(var0);
-      EntitySnowball.registerFixesSnowball(var0);
-      EntitySpectralArrow.registerFixesSpectralArrow(var0);
-      EntitySpider.registerFixesSpider(var0);
-      EntitySquid.registerFixesSquid(var0);
-      EntityEgg.registerFixesEgg(var0);
-      EntityEnderPearl.registerFixesEnderPearl(var0);
-      EntityExpBottle.registerFixesExpBottle(var0);
-      EntityPotion.registerFixesPotion(var0);
-      EntityTippedArrow.registerFixesTippedArrow(var0);
-      EntityVillager.registerFixesVillager(var0);
-      EntityIronGolem.registerFixesIronGolem(var0);
-      EntityWitch.registerFixesWitch(var0);
-      EntityWither.registerFixesWither(var0);
-      EntityWitherSkull.registerFixesWitherSkull(var0);
-      EntityWolf.registerFixesWolf(var0);
-      EntityZombie.registerFixesZombie(var0);
-      TileEntityPiston.registerFixesPiston(var0);
-      TileEntityFlowerPot.registerFixesFlowerPot(var0);
-      TileEntityFurnace.registerFixesFurnace(var0);
-      TileEntityChest.registerFixesChest(var0);
-      TileEntityDispenser.registerFixes(var0);
-      TileEntityDropper.registerFixesDropper(var0);
-      TileEntityBrewingStand.registerFixesBrewingStand(var0);
-      TileEntityHopper.registerFixesHopper(var0);
-      BlockJukebox.registerFixesJukebox(var0);
-      TileEntityMobSpawner.registerFixesMobSpawner(var0);
-      registerFixes(var0);
-      return var0;
+      DataFixer datafixer = new DataFixer(512);
+      WorldInfo.registerFixes(datafixer);
+      EntityPlayer.registerFixesPlayer(datafixer);
+      AnvilChunkLoader.registerFixes(datafixer);
+      ItemStack.registerFixes(datafixer);
+      EntityArmorStand.registerFixesArmorStand(datafixer);
+      EntityArrow.registerFixesArrow(datafixer);
+      EntityBat.registerFixesBat(datafixer);
+      EntityBlaze.registerFixesBlaze(datafixer);
+      EntityCaveSpider.registerFixesCaveSpider(datafixer);
+      EntityChicken.registerFixesChicken(datafixer);
+      EntityCow.registerFixesCow(datafixer);
+      EntityCreeper.registerFixesCreeper(datafixer);
+      EntityDragonFireball.registerFixesDragonFireball(datafixer);
+      EntityDragon.registerFixesDragon(datafixer);
+      EntityEnderman.registerFixesEnderman(datafixer);
+      EntityEndermite.registerFixesEndermite(datafixer);
+      EntityFallingBlock.registerFixesFallingBlock(datafixer);
+      EntityLargeFireball.registerFixesLargeFireball(datafixer);
+      EntityFireworkRocket.registerFixesFireworkRocket(datafixer);
+      EntityGhast.registerFixesGhast(datafixer);
+      EntityGiantZombie.registerFixesGiantZombie(datafixer);
+      EntityGuardian.registerFixesGuardian(datafixer);
+      EntityHorse.registerFixesHorse(datafixer);
+      EntityItem.registerFixesItem(datafixer);
+      EntityItemFrame.registerFixesItemFrame(datafixer);
+      EntityMagmaCube.registerFixesMagmaCube(datafixer);
+      EntityMinecartChest.registerFixesMinecartChest(datafixer);
+      EntityMinecartCommandBlock.registerFixesMinecartCommand(datafixer);
+      EntityMinecartFurnace.registerFixesMinecartFurnace(datafixer);
+      EntityMinecartHopper.registerFixesMinecartHopper(datafixer);
+      EntityMinecartEmpty.registerFixesMinecartEmpty(datafixer);
+      EntityMinecartMobSpawner.registerFixesMinecartMobSpawner(datafixer);
+      EntityMinecartTNT.registerFixesMinecartTNT(datafixer);
+      EntityLiving.registerFixesMob(datafixer);
+      EntityMob.registerFixesMonster(datafixer);
+      EntityMooshroom.registerFixesMooshroom(datafixer);
+      EntityOcelot.registerFixesOcelot(datafixer);
+      EntityPig.registerFixesPig(datafixer);
+      EntityPigZombie.registerFixesPigZombie(datafixer);
+      EntityRabbit.registerFixesRabbit(datafixer);
+      EntitySheep.registerFixesSheep(datafixer);
+      EntityShulker.registerFixesShulker(datafixer);
+      EntitySilverfish.registerFixesSilverfish(datafixer);
+      EntitySkeleton.registerFixesSkeleton(datafixer);
+      EntitySlime.registerFixesSlime(datafixer);
+      EntitySmallFireball.registerFixesSmallFireball(datafixer);
+      EntitySnowman.registerFixesSnowman(datafixer);
+      EntitySnowball.registerFixesSnowball(datafixer);
+      EntitySpectralArrow.registerFixesSpectralArrow(datafixer);
+      EntitySpider.registerFixesSpider(datafixer);
+      EntitySquid.registerFixesSquid(datafixer);
+      EntityEgg.registerFixesEgg(datafixer);
+      EntityEnderPearl.registerFixesEnderPearl(datafixer);
+      EntityExpBottle.registerFixesExpBottle(datafixer);
+      EntityPotion.registerFixesPotion(datafixer);
+      EntityTippedArrow.registerFixesTippedArrow(datafixer);
+      EntityVillager.registerFixesVillager(datafixer);
+      EntityIronGolem.registerFixesIronGolem(datafixer);
+      EntityWitch.registerFixesWitch(datafixer);
+      EntityWither.registerFixesWither(datafixer);
+      EntityWitherSkull.registerFixesWitherSkull(datafixer);
+      EntityWolf.registerFixesWolf(datafixer);
+      EntityZombie.registerFixesZombie(datafixer);
+      TileEntityPiston.registerFixesPiston(datafixer);
+      TileEntityFlowerPot.registerFixesFlowerPot(datafixer);
+      TileEntityFurnace.registerFixesFurnace(datafixer);
+      TileEntityChest.registerFixesChest(datafixer);
+      TileEntityDispenser.registerFixes(datafixer);
+      TileEntityDropper.registerFixesDropper(datafixer);
+      TileEntityBrewingStand.registerFixesBrewingStand(datafixer);
+      TileEntityHopper.registerFixesHopper(datafixer);
+      BlockJukebox.registerFixesJukebox(datafixer);
+      TileEntityMobSpawner.registerFixesMobSpawner(datafixer);
+      registerFixes(datafixer);
+      return datafixer;
    }
 
    public static NBTTagCompound processItemStack(IDataFixer var0, NBTTagCompound var1, int var2, String var3) {
-      if (var1.hasKey(var3, 10)) {
-         var1.setTag(var3, var0.process(FixTypes.ITEM_INSTANCE, var1.getCompoundTag(var3), var2));
+      if (compound.hasKey(key, 10)) {
+         compound.setTag(key, fixer.process(FixTypes.ITEM_INSTANCE, compound.getCompoundTag(key), version));
       }
 
-      return var1;
+      return compound;
    }
 
    public static NBTTagCompound processInventory(IDataFixer var0, NBTTagCompound var1, int var2, String var3) {
-      if (var1.hasKey(var3, 9)) {
-         NBTTagList var4 = var1.getTagList(var3, 10);
+      if (compound.hasKey(key, 9)) {
+         NBTTagList nbttaglist = compound.getTagList(key, 10);
 
-         for(int var5 = 0; var5 < var4.tagCount(); ++var5) {
-            var4.set(var5, var0.process(FixTypes.ITEM_INSTANCE, var4.getCompoundTagAt(var5), var2));
+         for(int i = 0; i < nbttaglist.tagCount(); ++i) {
+            nbttaglist.set(i, fixer.process(FixTypes.ITEM_INSTANCE, nbttaglist.getCompoundTagAt(i), version));
          }
       }
 
-      return var1;
+      return compound;
    }
 }

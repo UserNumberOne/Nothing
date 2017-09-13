@@ -46,7 +46,7 @@ import org.apache.logging.log4j.Logger;
 public class ResourcePackRepository {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final FileFilter RESOURCE_PACK_FILTER = new FileFilter() {
-      public boolean accept(File p_accept_1_) {
+      public boolean accept(File var1) {
          boolean flag = p_accept_1_.isFile() && p_accept_1_.getName().endsWith(".zip");
          boolean flag1 = p_accept_1_.isDirectory() && (new File(p_accept_1_, "pack.mcmeta")).isFile();
          return flag || flag1;
@@ -63,7 +63,7 @@ public class ResourcePackRepository {
    private List repositoryEntriesAll = Lists.newArrayList();
    private final List repositoryEntries = Lists.newArrayList();
 
-   public ResourcePackRepository(File dirResourcepacksIn, File dirServerResourcepacksIn, IResourcePack rprDefaultResourcePackIn, MetadataSerializer rprMetadataSerializerIn, GameSettings settings) {
+   public ResourcePackRepository(File var1, File var2, IResourcePack var3, MetadataSerializer var4, GameSettings var5) {
       this.dirResourcepacks = dirResourcepacksIn;
       this.dirServerResourcepacks = dirServerResourcepacksIn;
       this.rprDefaultResourcePack = rprDefaultResourcePackIn;
@@ -127,7 +127,7 @@ public class ResourcePackRepository {
             try {
                resourcepackrepository$entry.updateResourcePack();
                list.add(resourcepackrepository$entry);
-            } catch (Exception var61) {
+            } catch (Exception var6) {
                list.remove(resourcepackrepository$entry);
             }
          }
@@ -166,7 +166,7 @@ public class ResourcePackRepository {
       return ImmutableList.copyOf(this.repositoryEntries);
    }
 
-   public void setRepositories(List repositories) {
+   public void setRepositories(List var1) {
       this.repositoryEntries.clear();
       this.repositoryEntries.addAll(repositories);
    }
@@ -175,7 +175,7 @@ public class ResourcePackRepository {
       return this.dirResourcepacks;
    }
 
-   public ListenableFuture downloadResourcePack(String url, String hash) {
+   public ListenableFuture downloadResourcePack(String var1, String var2) {
       String s = DigestUtils.sha1Hex(url);
       final String s1 = SHA1.matcher(hash).matches() ? hash : "";
       final File file1 = new File(this.dirServerResourcepacks, s);
@@ -206,7 +206,7 @@ public class ResourcePackRepository {
          final SettableFuture settablefuture = SettableFuture.create();
          this.downloadingPacks = HttpUtil.downloadResourcePack(file1, url, map, 52428800, guiscreenworking, minecraft.getProxy());
          Futures.addCallback(this.downloadingPacks, new FutureCallback() {
-            public void onSuccess(@Nullable Object p_onSuccess_1_) {
+            public void onSuccess(@Nullable Object var1) {
                if (ResourcePackRepository.this.checkHash(s1, file1)) {
                   ResourcePackRepository.this.setResourcePackInstance(file1);
                   settablefuture.set((Object)null);
@@ -217,7 +217,7 @@ public class ResourcePackRepository {
 
             }
 
-            public void onFailure(Throwable p_onFailure_1_) {
+            public void onFailure(Throwable var1) {
                FileUtils.deleteQuietly(file1);
                settablefuture.setException(p_onFailure_1_);
             }
@@ -230,7 +230,7 @@ public class ResourcePackRepository {
       }
    }
 
-   private boolean checkHash(String p_190113_1_, File p_190113_2_) {
+   private boolean checkHash(String var1, File var2) {
       try {
          String s = DigestUtils.sha1Hex(new FileInputStream(p_190113_2_));
          if (p_190113_1_.isEmpty()) {
@@ -251,7 +251,7 @@ public class ResourcePackRepository {
       return false;
    }
 
-   private boolean validatePack(File p_190112_1_) {
+   private boolean validatePack(File var1) {
       ResourcePackRepository.Entry resourcepackrepository$entry = new ResourcePackRepository.Entry(new FileResourcePack(p_190112_1_));
 
       try {
@@ -281,7 +281,7 @@ public class ResourcePackRepository {
 
    }
 
-   public ListenableFuture setResourcePackInstance(File resourceFile) {
+   public ListenableFuture setResourcePackInstance(File var1) {
       if (!this.validatePack(resourceFile)) {
          return Futures.immediateFailedFuture(new RuntimeException("Invalid resourcepack"));
       } else {
@@ -319,11 +319,11 @@ public class ResourcePackRepository {
       private PackMetadataSection rePackMetadataSection;
       private ResourceLocation locationTexturePackIcon;
 
-      private Entry(File resourcePackFileIn) {
+      private Entry(File var2) {
          this((IResourcePack)(resourcePackFileIn.isDirectory() ? new FolderResourcePack(resourcePackFileIn) : new FileResourcePack(resourcePackFileIn)));
       }
 
-      private Entry(IResourcePack reResourcePackIn) {
+      private Entry(IResourcePack var2) {
          this.reResourcePack = reResourcePackIn;
       }
 
@@ -332,7 +332,7 @@ public class ResourcePackRepository {
          this.closeResourcePack();
       }
 
-      public void bindTexturePackIcon(TextureManager textureManagerIn) {
+      public void bindTexturePackIcon(TextureManager var1) {
          BufferedImage bufferedimage = null;
 
          try {
@@ -379,7 +379,7 @@ public class ResourcePackRepository {
          return this.rePackMetadataSection == null ? 0 : this.rePackMetadataSection.getPackFormat();
       }
 
-      public boolean equals(Object p_equals_1_) {
+      public boolean equals(Object var1) {
          return this == p_equals_1_ ? true : (p_equals_1_ instanceof ResourcePackRepository.Entry ? this.toString().equals(p_equals_1_.toString()) : false);
       }
 

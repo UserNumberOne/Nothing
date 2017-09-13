@@ -7,8 +7,8 @@ public abstract class PropertyHelper implements IProperty {
    private final String name;
 
    protected PropertyHelper(String var1, Class var2) {
-      this.valueClass = var2;
-      this.name = var1;
+      this.valueClass = valueClass;
+      this.name = name;
    }
 
    public String getName() {
@@ -24,13 +24,13 @@ public abstract class PropertyHelper implements IProperty {
    }
 
    public boolean equals(Object var1) {
-      if (this == var1) {
+      if (this == p_equals_1_) {
          return true;
-      } else if (!(var1 instanceof PropertyHelper)) {
+      } else if (!(p_equals_1_ instanceof PropertyHelper)) {
          return false;
       } else {
-         PropertyHelper var2 = (PropertyHelper)var1;
-         return this.valueClass.equals(var2.valueClass) && this.name.equals(var2.name);
+         PropertyHelper propertyhelper = (PropertyHelper)p_equals_1_;
+         return this.valueClass.equals(propertyhelper.valueClass) && this.name.equals(propertyhelper.name);
       }
    }
 

@@ -15,9 +15,9 @@ public abstract class EntityAIMoveToBlock extends EntityAIBase {
    private final int searchLength;
 
    public EntityAIMoveToBlock(EntityCreature var1, double var2, int var4) {
-      this.theEntity = var1;
-      this.movementSpeed = var2;
-      this.searchLength = var4;
+      this.theEntity = creature;
+      this.movementSpeed = speedIn;
+      this.searchLength = length;
       this.setMutexBits(5);
    }
 
@@ -63,17 +63,17 @@ public abstract class EntityAIMoveToBlock extends EntityAIBase {
    }
 
    private boolean searchForDestination() {
-      int var1 = this.searchLength;
-      boolean var2 = true;
-      BlockPos var3 = new BlockPos(this.theEntity);
+      int i = this.searchLength;
+      int j = 1;
+      BlockPos blockpos = new BlockPos(this.theEntity);
 
-      for(int var4 = 0; var4 <= 1; var4 = var4 > 0 ? -var4 : 1 - var4) {
-         for(int var5 = 0; var5 < var1; ++var5) {
-            for(int var6 = 0; var6 <= var5; var6 = var6 > 0 ? -var6 : 1 - var6) {
-               for(int var7 = var6 < var5 && var6 > -var5 ? var5 : 0; var7 <= var5; var7 = var7 > 0 ? -var7 : 1 - var7) {
-                  BlockPos var8 = var3.add(var6, var4 - 1, var7);
-                  if (this.theEntity.isWithinHomeDistanceFromPosition(var8) && this.shouldMoveTo(this.theEntity.world, var8)) {
-                     this.destinationBlock = var8;
+      for(int k = 0; k <= 1; k = k > 0 ? -k : 1 - k) {
+         for(int l = 0; l < i; ++l) {
+            for(int i1 = 0; i1 <= l; i1 = i1 > 0 ? -i1 : 1 - i1) {
+               for(int j1 = i1 < l && i1 > -l ? l : 0; j1 <= l; j1 = j1 > 0 ? -j1 : 1 - j1) {
+                  BlockPos blockpos1 = blockpos.add(i1, k - 1, j1);
+                  if (this.theEntity.isWithinHomeDistanceFromPosition(blockpos1) && this.shouldMoveTo(this.theEntity.world, blockpos1)) {
+                     this.destinationBlock = blockpos1;
                      return true;
                   }
                }

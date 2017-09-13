@@ -29,11 +29,11 @@ public class GuiNewChat extends Gui {
    private int scrollPos;
    private boolean isScrolled;
 
-   public GuiNewChat(Minecraft mcIn) {
+   public GuiNewChat(Minecraft var1) {
       this.mc = mcIn;
    }
 
-   public void drawChat(int updateCounter) {
+   public void drawChat(int var1) {
       if (this.mc.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN) {
          int i = this.getLineCount();
          int j = this.drawnChatLines.size();
@@ -109,16 +109,16 @@ public class GuiNewChat extends Gui {
       this.sentMessages.clear();
    }
 
-   public void printChatMessage(ITextComponent chatComponent) {
+   public void printChatMessage(ITextComponent var1) {
       this.printChatMessageWithOptionalDeletion(chatComponent, 0);
    }
 
-   public void printChatMessageWithOptionalDeletion(ITextComponent chatComponent, int chatLineId) {
+   public void printChatMessageWithOptionalDeletion(ITextComponent var1, int var2) {
       this.setChatLine(chatComponent, chatLineId, this.mc.ingameGUI.getUpdateCounter(), false);
       LOGGER.info("[CHAT] {}", new Object[]{NEWLINE_STRING_JOINER.join(NEWLINE_SPLITTER.split(chatComponent.getUnformattedText()))});
    }
 
-   private void setChatLine(ITextComponent chatComponent, int chatLineId, int updateCounter, boolean displayOnly) {
+   private void setChatLine(ITextComponent var1, int var2, int var3, boolean var4) {
       if (chatLineId != 0) {
          this.deleteChatLine(chatLineId);
       }
@@ -165,7 +165,7 @@ public class GuiNewChat extends Gui {
       return this.sentMessages;
    }
 
-   public void addToSentMessages(String message) {
+   public void addToSentMessages(String var1) {
       if (this.sentMessages.isEmpty() || !((String)this.sentMessages.get(this.sentMessages.size() - 1)).equals(message)) {
          this.sentMessages.add(message);
       }
@@ -177,7 +177,7 @@ public class GuiNewChat extends Gui {
       this.isScrolled = false;
    }
 
-   public void scroll(int amount) {
+   public void scroll(int var1) {
       this.scrollPos += amount;
       int i = this.drawnChatLines.size();
       if (this.scrollPos > i - this.getLineCount()) {
@@ -192,7 +192,7 @@ public class GuiNewChat extends Gui {
    }
 
    @Nullable
-   public ITextComponent getChatComponent(int mouseX, int mouseY) {
+   public ITextComponent getChatComponent(int var1, int var2) {
       if (!this.getChatOpen()) {
          return null;
       } else {
@@ -235,7 +235,7 @@ public class GuiNewChat extends Gui {
       return this.mc.currentScreen instanceof GuiChat;
    }
 
-   public void deleteChatLine(int id) {
+   public void deleteChatLine(int var1) {
       Iterator iterator = this.drawnChatLines.iterator();
 
       while(iterator.hasNext()) {
@@ -269,13 +269,13 @@ public class GuiNewChat extends Gui {
       return this.mc.gameSettings.chatScale;
    }
 
-   public static int calculateChatboxWidth(float scale) {
+   public static int calculateChatboxWidth(float var0) {
       int i = 320;
       int j = 40;
       return MathHelper.floor(scale * 280.0F + 40.0F);
    }
 
-   public static int calculateChatboxHeight(float scale) {
+   public static int calculateChatboxHeight(float var0) {
       int i = 180;
       int j = 20;
       return MathHelper.floor(scale * 160.0F + 20.0F);

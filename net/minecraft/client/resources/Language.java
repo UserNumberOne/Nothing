@@ -10,7 +10,7 @@ public class Language implements Comparable {
    private final String name;
    private final boolean bidirectional;
 
-   public Language(String languageCodeIn, String regionIn, String nameIn, boolean bidirectionalIn) {
+   public Language(String var1, String var2, String var3, boolean var4) {
       this.languageCode = languageCodeIn;
       this.region = regionIn;
       this.name = nameIn;
@@ -29,7 +29,7 @@ public class Language implements Comparable {
       return String.format("%s (%s)", this.name, this.region);
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       return this == p_equals_1_ ? true : (!(p_equals_1_ instanceof Language) ? false : this.languageCode.equals(((Language)p_equals_1_).languageCode));
    }
 
@@ -37,7 +37,7 @@ public class Language implements Comparable {
       return this.languageCode.hashCode();
    }
 
-   public int compareTo(Language p_compareTo_1_) {
+   public int compareTo(Language var1) {
       return this.languageCode.compareTo(p_compareTo_1_.languageCode);
    }
 }

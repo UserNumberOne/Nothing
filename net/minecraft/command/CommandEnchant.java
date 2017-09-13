@@ -7,7 +7,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.src.MinecraftServer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandEnchant extends CommandBase {
@@ -24,65 +24,61 @@ public class CommandEnchant extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (var3.length < 2) {
+      if (args.length < 2) {
          throw new WrongUsageException("commands.enchant.usage", new Object[0]);
       } else {
-         EntityLivingBase var4 = (EntityLivingBase)a(var1, var2, var3[0], EntityLivingBase.class);
-         var2.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 0);
+         EntityLivingBase entitylivingbase = (EntityLivingBase)getEntity(server, sender, args[0], EntityLivingBase.class);
+         sender.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 0);
 
-         Enchantment var5;
+         Enchantment enchantment;
          try {
-            var5 = Enchantment.getEnchantmentByID(parseInt(var3[1], 0));
+            enchantment = Enchantment.getEnchantmentByID(parseInt(args[1], 0));
          } catch (NumberInvalidException var12) {
-            var5 = Enchantment.getEnchantmentByLocation(var3[1]);
+            enchantment = Enchantment.getEnchantmentByLocation(args[1]);
          }
 
-         if (var5 == null) {
-            throw new NumberInvalidException("commands.enchant.notFound", new Object[]{Enchantment.getEnchantmentID(var5)});
+         if (enchantment == null) {
+            throw new NumberInvalidException("commands.enchant.notFound", new Object[]{Enchantment.getEnchantmentID(enchantment)});
          } else {
-            int var6 = 1;
-            ItemStack var7 = var4.getHeldItemMainhand();
-            if (var7 == null) {
+            int i = 1;
+            ItemStack itemstack = entitylivingbase.getHeldItemMainhand();
+            if (itemstack == null) {
                throw new CommandException("commands.enchant.noItem", new Object[0]);
-            } else if (!var5.canApply(var7)) {
+            } else if (!enchantment.canApply(itemstack)) {
                throw new CommandException("commands.enchant.cantEnchant", new Object[0]);
             } else {
-               if (var3.length >= 3) {
-                  var6 = parseInt(var3[2], var5.getMinLevel(), var5.getMaxLevel());
+               if (args.length >= 3) {
+                  i = parseInt(args[2], enchantment.getMinLevel(), enchantment.getMaxLevel());
                }
 
-               if (var7.hasTagCompound()) {
-                  NBTTagList var8 = var7.getEnchantmentTagList();
-                  if (var8 != null) {
-                     for(int var9 = 0; var9 < var8.tagCount(); ++var9) {
-                        short var10 = var8.getCompoundTagAt(var9).getShort("id");
-                        if (Enchantment.getEnchantmentByID(var10) != null) {
-                           Enchantment var11 = Enchantment.getEnchantmentByID(var10);
-                           if (!var5.canApplyTogether(var11)) {
-                              throw new CommandException("commands.enchant.cantCombine", new Object[]{var5.getTranslatedName(var6), var11.getTranslatedName(var8.getCompoundTagAt(var9).getShort("lvl"))});
+               if (itemstack.hasTagCompound()) {
+                  NBTTagList nbttaglist = itemstack.getEnchantmentTagList();
+                  if (nbttaglist != null) {
+                     for(int j = 0; j < nbttaglist.tagCount(); ++j) {
+                        int k = nbttaglist.getCompoundTagAt(j).getShort("id");
+                        if (Enchantment.getEnchantmentByID(k) != null) {
+                           Enchantment enchantment1 = Enchantment.getEnchantmentByID(k);
+                           if (!enchantment.canApplyTogether(enchantment1) || !enchantment1.canApplyTogether(enchantment)) {
+                              throw new CommandException("commands.enchant.cantCombine", new Object[]{enchantment.getTranslatedName(i), enchantment1.getTranslatedName(nbttaglist.getCompoundTagAt(j).getShort("lvl"))});
                            }
                         }
                      }
                   }
                }
 
-               var7.addEnchantment(var5, var6);
-               notifyCommandListener(var2, this, "commands.enchant.success", new Object[0]);
-               var2.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 1);
+               itemstack.addEnchantment(enchantment, i);
+               notifyCommandListener(sender, this, "commands.enchant.success", new Object[0]);
+               sender.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, 1);
             }
          }
       }
    }
 
-   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      if (var3.length == 1) {
-         return getListOfStringsMatchingLastWord(var3, var1.getPlayers());
-      } else {
-         return var3.length == 2 ? getListOfStringsMatchingLastWord(var3, Enchantment.REGISTRY.getKeys()) : Collections.emptyList();
-      }
+   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : (args.length == 2 ? getListOfStringsMatchingLastWord(args, Enchantment.REGISTRY.getKeys()) : Collections.emptyList());
    }
 
    public boolean isUsernameIndex(String[] var1, int var2) {
-      return var2 == 0;
+      return index == 0;
    }
 }

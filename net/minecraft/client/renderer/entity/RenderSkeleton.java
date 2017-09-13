@@ -17,7 +17,7 @@ public class RenderSkeleton extends RenderBiped {
    private static final ResourceLocation WITHER_SKELETON_TEXTURES = new ResourceLocation("textures/entity/skeleton/wither_skeleton.png");
    private static final ResourceLocation STRAY_SKELETON_TEXTURES = new ResourceLocation("textures/entity/skeleton/stray.png");
 
-   public RenderSkeleton(RenderManager renderManagerIn) {
+   public RenderSkeleton(RenderManager var1) {
       super(renderManagerIn, new ModelSkeleton(), 0.5F);
       this.addLayer(new LayerHeldItem(this));
       this.addLayer(new LayerBipedArmor(this) {
@@ -29,7 +29,7 @@ public class RenderSkeleton extends RenderBiped {
       this.addLayer(new LayerSkeletonType(this));
    }
 
-   protected void preRenderCallback(EntitySkeleton entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntitySkeleton var1, float var2) {
       if (entitylivingbaseIn.getSkeletonType() == SkeletonType.WITHER) {
          GlStateManager.scale(1.2F, 1.2F, 1.2F);
       }
@@ -40,7 +40,7 @@ public class RenderSkeleton extends RenderBiped {
       GlStateManager.translate(0.09375F, 0.1875F, 0.0F);
    }
 
-   protected ResourceLocation getEntityTexture(EntitySkeleton entity) {
+   protected ResourceLocation getEntityTexture(EntitySkeleton var1) {
       SkeletonType skeletontype = entity.getSkeletonType();
       return skeletontype == SkeletonType.WITHER ? WITHER_SKELETON_TEXTURES : (skeletontype == SkeletonType.STRAY ? STRAY_SKELETON_TEXTURES : SKELETON_TEXTURES);
    }

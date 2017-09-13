@@ -20,33 +20,33 @@ public class LootFunctionManager {
    private static final Map CLASS_TO_SERIALIZER_MAP = Maps.newHashMap();
 
    public static void registerFunction(LootFunction.Serializer var0) {
-      ResourceLocation var1 = var0.getFunctionName();
-      Class var2 = var0.getFunctionClass();
-      if (NAME_TO_SERIALIZER_MAP.containsKey(var1)) {
-         throw new IllegalArgumentException("Can't re-register item function name " + var1);
-      } else if (CLASS_TO_SERIALIZER_MAP.containsKey(var2)) {
-         throw new IllegalArgumentException("Can't re-register item function class " + var2.getName());
+      ResourceLocation resourcelocation = p_186582_0_.getFunctionName();
+      Class oclass = p_186582_0_.getFunctionClass();
+      if (NAME_TO_SERIALIZER_MAP.containsKey(resourcelocation)) {
+         throw new IllegalArgumentException("Can't re-register item function name " + resourcelocation);
+      } else if (CLASS_TO_SERIALIZER_MAP.containsKey(oclass)) {
+         throw new IllegalArgumentException("Can't re-register item function class " + oclass.getName());
       } else {
-         NAME_TO_SERIALIZER_MAP.put(var1, var0);
-         CLASS_TO_SERIALIZER_MAP.put(var2, var0);
+         NAME_TO_SERIALIZER_MAP.put(resourcelocation, p_186582_0_);
+         CLASS_TO_SERIALIZER_MAP.put(oclass, p_186582_0_);
       }
    }
 
    public static LootFunction.Serializer getSerializerForName(ResourceLocation var0) {
-      LootFunction.Serializer var1 = (LootFunction.Serializer)NAME_TO_SERIALIZER_MAP.get(var0);
-      if (var1 == null) {
-         throw new IllegalArgumentException("Unknown loot item function '" + var0 + "'");
+      LootFunction.Serializer serializer = (LootFunction.Serializer)NAME_TO_SERIALIZER_MAP.get(location);
+      if (serializer == null) {
+         throw new IllegalArgumentException("Unknown loot item function '" + location + "'");
       } else {
-         return var1;
+         return serializer;
       }
    }
 
    public static LootFunction.Serializer getSerializerFor(LootFunction var0) {
-      LootFunction.Serializer var1 = (LootFunction.Serializer)CLASS_TO_SERIALIZER_MAP.get(var0.getClass());
-      if (var1 == null) {
-         throw new IllegalArgumentException("Unknown loot item function " + var0);
+      LootFunction.Serializer serializer = (LootFunction.Serializer)CLASS_TO_SERIALIZER_MAP.get(functionClass.getClass());
+      if (serializer == null) {
+         throw new IllegalArgumentException("Unknown loot item function " + functionClass);
       } else {
-         return var1;
+         return serializer;
       }
    }
 
@@ -64,39 +64,29 @@ public class LootFunctionManager {
 
    public static class Serializer implements JsonDeserializer, JsonSerializer {
       public LootFunction deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-         JsonObject var4 = JsonUtils.getJsonObject(var1, "function");
-         ResourceLocation var5 = new ResourceLocation(JsonUtils.getString(var4, "function"));
+         JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "function");
+         ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(jsonobject, "function"));
 
-         LootFunction.Serializer var6;
+         LootFunction.Serializer serializer;
          try {
-            var6 = LootFunctionManager.getSerializerForName(var5);
+            serializer = LootFunctionManager.getSerializerForName(resourcelocation);
          } catch (IllegalArgumentException var8) {
-            throw new JsonSyntaxException("Unknown function '" + var5 + "'");
+            throw new JsonSyntaxException("Unknown function '" + resourcelocation + "'");
          }
 
-         return var6.deserialize(var4, var3, (LootCondition[])JsonUtils.deserializeClass(var4, "conditions", new LootCondition[0], var3, LootCondition[].class));
+         return serializer.deserialize(jsonobject, p_deserialize_3_, (LootCondition[])JsonUtils.deserializeClass(jsonobject, "conditions", new LootCondition[0], p_deserialize_3_, LootCondition[].class));
       }
 
       public JsonElement serialize(LootFunction var1, Type var2, JsonSerializationContext var3) {
-         LootFunction.Serializer var4 = LootFunctionManager.getSerializerFor(var1);
-         JsonObject var5 = new JsonObject();
-         var4.serialize(var5, var1, var3);
-         var5.addProperty("function", var4.getFunctionName().toString());
-         if (var1.getConditions() != null && var1.getConditions().length > 0) {
-            var5.add("conditions", var3.serialize(var1.getConditions()));
+         LootFunction.Serializer serializer = LootFunctionManager.getSerializerFor(p_serialize_1_);
+         JsonObject jsonobject = new JsonObject();
+         serializer.serialize(jsonobject, p_serialize_1_, p_serialize_3_);
+         jsonobject.addProperty("function", serializer.getFunctionName().toString());
+         if (p_serialize_1_.getConditions() != null && p_serialize_1_.getConditions().length > 0) {
+            jsonobject.add("conditions", p_serialize_3_.serialize(p_serialize_1_.getConditions()));
          }
 
-         return var5;
-      }
-
-      // $FF: synthetic method
-      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
-         return this.serialize((LootFunction)var1, var2, var3);
-      }
-
-      // $FF: synthetic method
-      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-         return this.deserialize(var1, var2, var3);
+         return jsonobject;
       }
    }
 }

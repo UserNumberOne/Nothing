@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LanguageMetadataSection implements IMetadataSection {
    private final Collection languages;
 
-   public LanguageMetadataSection(Collection languagesIn) {
+   public LanguageMetadataSection(Collection var1) {
       this.languages = languagesIn;
    }
 

@@ -21,7 +21,7 @@ public class GuiInventory extends InventoryEffectRenderer {
    private float oldMouseX;
    private float oldMouseY;
 
-   public GuiInventory(EntityPlayer player) {
+   public GuiInventory(EntityPlayer var1) {
       super(player.inventoryContainer);
       this.allowUserInput = true;
    }
@@ -43,17 +43,17 @@ public class GuiInventory extends InventoryEffectRenderer {
 
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       this.fontRendererObj.drawString(I18n.format("container.crafting"), 97, 8, 4210752);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       super.drawScreen(mouseX, mouseY, partialTicks);
       this.oldMouseX = (float)mouseX;
       this.oldMouseY = (float)mouseY;
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(INVENTORY_BACKGROUND);
       int i = this.guiLeft;
@@ -62,7 +62,7 @@ public class GuiInventory extends InventoryEffectRenderer {
       drawEntityOnScreen(i + 51, j + 75, 30, (float)(i + 51) - this.oldMouseX, (float)(j + 75 - 50) - this.oldMouseY, this.mc.player);
    }
 
-   public static void drawEntityOnScreen(int posX, int posY, int scale, float mouseX, float mouseY, EntityLivingBase ent) {
+   public static void drawEntityOnScreen(int var0, int var1, int var2, float var3, float var4, EntityLivingBase var5) {
       GlStateManager.enableColorMaterial();
       GlStateManager.pushMatrix();
       GlStateManager.translate((float)posX, (float)posY, 50.0F);
@@ -101,7 +101,7 @@ public class GuiInventory extends InventoryEffectRenderer {
       GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 0) {
          this.mc.displayGuiScreen(new GuiAchievements(this, this.mc.player.getStatFileWriter()));
       }

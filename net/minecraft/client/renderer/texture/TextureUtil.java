@@ -27,7 +27,7 @@ public class TextureUtil {
    private static final float[] COLOR_GAMMAS;
    private static final int[] MIPMAP_BUFFER;
 
-   private static float getColorGamma(int p_188543_0_) {
+   private static float getColorGamma(int var0) {
       return COLOR_GAMMAS[p_188543_0_ & 255];
    }
 
@@ -35,20 +35,20 @@ public class TextureUtil {
       return GlStateManager.generateTexture();
    }
 
-   public static void deleteTexture(int textureId) {
+   public static void deleteTexture(int var0) {
       GlStateManager.deleteTexture(textureId);
    }
 
-   public static int uploadTextureImage(int textureId, BufferedImage texture) {
+   public static int uploadTextureImage(int var0, BufferedImage var1) {
       return uploadTextureImageAllocate(textureId, texture, false, false);
    }
 
-   public static void uploadTexture(int textureId, int[] p_110988_1_, int p_110988_2_, int p_110988_3_) {
+   public static void uploadTexture(int var0, int[] var1, int var2, int var3) {
       bindTexture(textureId);
       uploadTextureSub(0, p_110988_1_, p_110988_2_, p_110988_3_, 0, 0, false, false, false);
    }
 
-   public static int[][] generateMipmapData(int p_147949_0_, int p_147949_1_, int[][] p_147949_2_) {
+   public static int[][] generateMipmapData(int var0, int var1, int[][] var2) {
       int[][] aint = new int[p_147949_0_ + 1][];
       aint[0] = p_147949_2_[0];
       if (p_147949_0_ > 0) {
@@ -88,7 +88,7 @@ public class TextureUtil {
       return aint;
    }
 
-   private static int blendColors(int p_147943_0_, int p_147943_1_, int p_147943_2_, int p_147943_3_, boolean p_147943_4_) {
+   private static int blendColors(int var0, int var1, int var2, int var3, boolean var4) {
       if (p_147943_4_) {
          MIPMAP_BUFFER[0] = p_147943_0_;
          MIPMAP_BUFFER[1] = p_147943_1_;
@@ -130,7 +130,7 @@ public class TextureUtil {
       }
    }
 
-   private static int blendColorComponent(int p_147944_0_, int p_147944_1_, int p_147944_2_, int p_147944_3_, int p_147944_4_) {
+   private static int blendColorComponent(int var0, int var1, int var2, int var3, int var4) {
       float f = getColorGamma(p_147944_0_ >> p_147944_4_);
       float f1 = getColorGamma(p_147944_1_ >> p_147944_4_);
       float f2 = getColorGamma(p_147944_2_ >> p_147944_4_);
@@ -139,7 +139,7 @@ public class TextureUtil {
       return (int)((double)f4 * 255.0D);
    }
 
-   public static void uploadTextureMipmap(int[][] p_147955_0_, int p_147955_1_, int p_147955_2_, int p_147955_3_, int p_147955_4_, boolean p_147955_5_, boolean p_147955_6_) {
+   public static void uploadTextureMipmap(int[][] var0, int var1, int var2, int var3, int var4, boolean var5, boolean var6) {
       for(int i = 0; i < p_147955_0_.length; ++i) {
          int[] aint = p_147955_0_[i];
          if (p_147955_1_ >> i <= 0 || p_147955_2_ >> i <= 0) {
@@ -151,7 +151,7 @@ public class TextureUtil {
 
    }
 
-   private static void uploadTextureSub(int p_147947_0_, int[] p_147947_1_, int p_147947_2_, int p_147947_3_, int p_147947_4_, int p_147947_5_, boolean p_147947_6_, boolean p_147947_7_, boolean p_147947_8_) {
+   private static void uploadTextureSub(int var0, int[] var1, int var2, int var3, int var4, int var5, boolean var6, boolean var7, boolean var8) {
       int i = 4194304 / p_147947_2_;
       setTextureBlurMipmap(p_147947_6_, p_147947_8_);
       setTextureClamped(p_147947_7_);
@@ -167,16 +167,16 @@ public class TextureUtil {
 
    }
 
-   public static int uploadTextureImageAllocate(int textureId, BufferedImage texture, boolean blur, boolean clamp) {
+   public static int uploadTextureImageAllocate(int var0, BufferedImage var1, boolean var2, boolean var3) {
       allocateTexture(textureId, texture.getWidth(), texture.getHeight());
       return uploadTextureImageSub(textureId, texture, 0, 0, blur, clamp);
    }
 
-   public static void allocateTexture(int textureId, int width, int height) {
+   public static void allocateTexture(int var0, int var1, int var2) {
       allocateTextureImpl(textureId, 0, width, height);
    }
 
-   public static void allocateTextureImpl(int glTextureId, int mipmapLevels, int width, int height) {
+   public static void allocateTextureImpl(int var0, int var1, int var2, int var3) {
       synchronized(SplashProgress.class) {
          deleteTexture(glTextureId);
          bindTexture(glTextureId);
@@ -195,13 +195,13 @@ public class TextureUtil {
 
    }
 
-   public static int uploadTextureImageSub(int textureId, BufferedImage p_110995_1_, int p_110995_2_, int p_110995_3_, boolean p_110995_4_, boolean p_110995_5_) {
+   public static int uploadTextureImageSub(int var0, BufferedImage var1, int var2, int var3, boolean var4, boolean var5) {
       bindTexture(textureId);
       uploadTextureImageSubImpl(p_110995_1_, p_110995_2_, p_110995_3_, p_110995_4_, p_110995_5_);
       return textureId;
    }
 
-   private static void uploadTextureImageSubImpl(BufferedImage p_110993_0_, int p_110993_1_, int p_110993_2_, boolean p_110993_3_, boolean p_110993_4_) {
+   private static void uploadTextureImageSubImpl(BufferedImage var0, int var1, int var2, boolean var3, boolean var4) {
       int i = p_110993_0_.getWidth();
       int j = p_110993_0_.getHeight();
       int k = 4194304 / i;
@@ -220,7 +220,7 @@ public class TextureUtil {
 
    }
 
-   private static void setTextureClamped(boolean p_110997_0_) {
+   private static void setTextureClamped(boolean var0) {
       if (p_110997_0_) {
          GlStateManager.glTexParameteri(3553, 10242, 10496);
          GlStateManager.glTexParameteri(3553, 10243, 10496);
@@ -231,11 +231,11 @@ public class TextureUtil {
 
    }
 
-   private static void setTextureBlurred(boolean p_147951_0_) {
+   private static void setTextureBlurred(boolean var0) {
       setTextureBlurMipmap(p_147951_0_, false);
    }
 
-   private static void setTextureBlurMipmap(boolean p_147954_0_, boolean p_147954_1_) {
+   private static void setTextureBlurMipmap(boolean var0, boolean var1) {
       if (p_147954_0_) {
          GlStateManager.glTexParameteri(3553, 10241, p_147954_1_ ? 9987 : 9729);
          GlStateManager.glTexParameteri(3553, 10240, 9729);
@@ -246,11 +246,11 @@ public class TextureUtil {
 
    }
 
-   private static void copyToBuffer(int[] p_110990_0_, int p_110990_1_) {
+   private static void copyToBuffer(int[] var0, int var1) {
       copyToBufferPos(p_110990_0_, 0, p_110990_1_);
    }
 
-   private static void copyToBufferPos(int[] p_110994_0_, int p_110994_1_, int p_110994_2_) {
+   private static void copyToBufferPos(int[] var0, int var1, int var2) {
       int[] aint = p_110994_0_;
       if (Minecraft.getMinecraft().gameSettings.anaglyph) {
          aint = updateAnaglyph(p_110994_0_);
@@ -261,11 +261,11 @@ public class TextureUtil {
       DATA_BUFFER.position(0).limit(p_110994_2_);
    }
 
-   static void bindTexture(int p_94277_0_) {
+   static void bindTexture(int var0) {
       GlStateManager.bindTexture(p_94277_0_);
    }
 
-   public static int[] readImageData(IResourceManager resourceManager, ResourceLocation imageLocation) throws IOException {
+   public static int[] readImageData(IResourceManager var0, ResourceLocation var1) throws IOException {
       IResource iresource = null;
 
       int[] aint1;
@@ -284,7 +284,7 @@ public class TextureUtil {
       return aint1;
    }
 
-   public static BufferedImage readBufferedImage(InputStream imageStream) throws IOException {
+   public static BufferedImage readBufferedImage(InputStream var0) throws IOException {
       BufferedImage bufferedimage;
       try {
          bufferedimage = ImageIO.read(imageStream);
@@ -295,7 +295,7 @@ public class TextureUtil {
       return bufferedimage;
    }
 
-   public static int[] updateAnaglyph(int[] p_110985_0_) {
+   public static int[] updateAnaglyph(int[] var0) {
       int[] aint = new int[p_110985_0_.length];
 
       for(int i = 0; i < p_110985_0_.length; ++i) {
@@ -305,7 +305,7 @@ public class TextureUtil {
       return aint;
    }
 
-   public static int anaglyphColor(int p_177054_0_) {
+   public static int anaglyphColor(int var0) {
       int i = p_177054_0_ >> 24 & 255;
       int j = p_177054_0_ >> 16 & 255;
       int k = p_177054_0_ >> 8 & 255;
@@ -316,7 +316,7 @@ public class TextureUtil {
       return i << 24 | i1 << 16 | j1 << 8 | k1;
    }
 
-   public static void processPixelValues(int[] p_147953_0_, int p_147953_1_, int p_147953_2_) {
+   public static void processPixelValues(int[] var0, int var1, int var2) {
       int[] aint = new int[p_147953_1_];
       int i = p_147953_2_ / 2;
 

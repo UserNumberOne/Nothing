@@ -25,11 +25,11 @@ public class ModelBiped extends ModelBase {
       this(0.0F);
    }
 
-   public ModelBiped(float modelSize) {
+   public ModelBiped(float var1) {
       this(modelSize, 0.0F, 64, 32);
    }
 
-   public ModelBiped(float modelSize, float p_i1149_2_, int textureWidthIn, int textureHeightIn) {
+   public ModelBiped(float var1, float var2, int var3, int var4) {
       this.leftArmPose = ModelBiped.ArmPose.EMPTY;
       this.rightArmPose = ModelBiped.ArmPose.EMPTY;
       this.textureWidth = textureWidthIn;
@@ -59,7 +59,7 @@ public class ModelBiped extends ModelBase {
       this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F + p_i1149_2_, 0.0F);
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
       GlStateManager.pushMatrix();
       if (this.isChild) {
@@ -94,7 +94,7 @@ public class ModelBiped extends ModelBase {
       GlStateManager.popMatrix();
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       boolean flag = entityIn instanceof EntityLivingBase && ((EntityLivingBase)entityIn).getTicksElytraFlying() > 4;
       this.bipedHead.rotateAngleY = netHeadYaw * 0.017453292F;
       if (flag) {
@@ -232,7 +232,7 @@ public class ModelBiped extends ModelBase {
       copyModelAngles(this.bipedHead, this.bipedHeadwear);
    }
 
-   public void setModelAttributes(ModelBase model) {
+   public void setModelAttributes(ModelBase var1) {
       super.setModelAttributes(model);
       if (model instanceof ModelBiped) {
          ModelBiped modelbiped = (ModelBiped)model;
@@ -243,7 +243,7 @@ public class ModelBiped extends ModelBase {
 
    }
 
-   public void setInvisible(boolean invisible) {
+   public void setInvisible(boolean var1) {
       this.bipedHead.showModel = invisible;
       this.bipedHeadwear.showModel = invisible;
       this.bipedBody.showModel = invisible;
@@ -253,15 +253,15 @@ public class ModelBiped extends ModelBase {
       this.bipedLeftLeg.showModel = invisible;
    }
 
-   public void postRenderArm(float scale, EnumHandSide side) {
+   public void postRenderArm(float var1, EnumHandSide var2) {
       this.getArmForSide(side).postRender(scale);
    }
 
-   protected ModelRenderer getArmForSide(EnumHandSide side) {
+   protected ModelRenderer getArmForSide(EnumHandSide var1) {
       return side == EnumHandSide.LEFT ? this.bipedLeftArm : this.bipedRightArm;
    }
 
-   protected EnumHandSide getMainHand(Entity entityIn) {
+   protected EnumHandSide getMainHand(Entity var1) {
       return entityIn instanceof EntityLivingBase ? ((EntityLivingBase)entityIn).getPrimaryHand() : EnumHandSide.RIGHT;
    }
 

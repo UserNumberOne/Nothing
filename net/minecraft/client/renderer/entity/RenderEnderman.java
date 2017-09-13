@@ -17,14 +17,14 @@ public class RenderEnderman extends RenderLiving {
    private final ModelEnderman endermanModel;
    private final Random rnd = new Random();
 
-   public RenderEnderman(RenderManager renderManagerIn) {
+   public RenderEnderman(RenderManager var1) {
       super(renderManagerIn, new ModelEnderman(0.0F), 0.5F);
       this.endermanModel = (ModelEnderman)super.mainModel;
       this.addLayer(new LayerEndermanEyes(this));
       this.addLayer(new LayerHeldBlock(this));
    }
 
-   public void doRender(EntityEnderman entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityEnderman var1, double var2, double var4, double var6, float var8, float var9) {
       IBlockState iblockstate = entity.getHeldBlockState();
       this.endermanModel.isCarrying = iblockstate != null;
       this.endermanModel.isAttacking = entity.isScreaming();
@@ -37,7 +37,7 @@ public class RenderEnderman extends RenderLiving {
       super.doRender((EntityLiving)entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityEnderman entity) {
+   protected ResourceLocation getEntityTexture(EntityEnderman var1) {
       return ENDERMAN_TEXTURES;
    }
 }

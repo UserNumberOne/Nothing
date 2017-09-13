@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ResourcePackListEntryFound extends ResourcePackListEntry {
    private final ResourcePackRepository.Entry resourcePackEntry;
 
-   public ResourcePackListEntryFound(GuiScreenResourcePacks resourcePacksGUIIn, ResourcePackRepository.Entry entry) {
+   public ResourcePackListEntryFound(GuiScreenResourcePacks var1, ResourcePackRepository.Entry var2) {
       super(resourcePacksGUIIn);
       this.resourcePackEntry = entry;
    }

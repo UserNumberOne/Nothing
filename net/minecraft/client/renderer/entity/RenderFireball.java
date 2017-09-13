@@ -17,12 +17,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderFireball extends Render {
    private final float scale;
 
-   public RenderFireball(RenderManager renderManagerIn, float scaleIn) {
+   public RenderFireball(RenderManager var1, float var2) {
       super(renderManagerIn);
       this.scale = scaleIn;
    }
 
-   public void doRender(EntityFireball entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityFireball var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       this.bindEntityTexture(entity);
       GlStateManager.translate((float)x, (float)y, (float)z);
@@ -61,7 +61,7 @@ public class RenderFireball extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityFireball entity) {
+   protected ResourceLocation getEntityTexture(EntityFireball var1) {
       return TextureMap.LOCATION_BLOCKS_TEXTURE;
    }
 }

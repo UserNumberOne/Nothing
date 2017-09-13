@@ -12,18 +12,18 @@ public class SPacketPong implements Packet {
    }
 
    public SPacketPong(long var1) {
-      this.clientTime = var1;
+      this.clientTime = clientTimeIn;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.clientTime = var1.readLong();
+      this.clientTime = buf.readLong();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeLong(this.clientTime);
+      buf.writeLong(this.clientTime);
    }
 
    public void processPacket(INetHandlerStatusClient var1) {
-      var1.handlePong(this);
+      handler.handlePong(this);
    }
 }

@@ -33,7 +33,7 @@ public class GuiCommandBlock extends GuiScreen implements ITabCompleter {
    private boolean conditional;
    private boolean automatic;
 
-   public GuiCommandBlock(TileEntityCommandBlock commandBlockIn) {
+   public GuiCommandBlock(TileEntityCommandBlock var1) {
       this.commandBlock = commandBlockIn;
    }
 
@@ -93,7 +93,7 @@ public class GuiCommandBlock extends GuiScreen implements ITabCompleter {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          CommandBlockBaseLogic commandblockbaselogic = this.commandBlock.getCommandBlockLogic();
          if (button.id == 1) {
@@ -130,7 +130,7 @@ public class GuiCommandBlock extends GuiScreen implements ITabCompleter {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       this.tabCompleter.resetRequested();
       if (keyCode == 15) {
          this.tabCompleter.complete();
@@ -150,13 +150,13 @@ public class GuiCommandBlock extends GuiScreen implements ITabCompleter {
 
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       this.commandTextField.mouseClicked(mouseX, mouseY, mouseButton);
       this.previousOutputTextField.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, I18n.format("advMode.setCommand"), this.width / 2, 20, 16777215);
       this.drawString(this.fontRendererObj, I18n.format("advMode.command"), this.width / 2 - 150, 37, 10526880);
@@ -237,7 +237,7 @@ public class GuiCommandBlock extends GuiScreen implements ITabCompleter {
 
    }
 
-   public void setCompletions(String... newCompletions) {
+   public void setCompletions(String... var1) {
       this.tabCompleter.setCompletions(newCompletions);
    }
 }

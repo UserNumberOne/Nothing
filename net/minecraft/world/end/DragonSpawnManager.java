@@ -12,57 +12,57 @@ import net.minecraft.world.gen.feature.WorldGenSpikes;
 public enum DragonSpawnManager {
    START {
       public void process(WorldServer var1, DragonFightManager var2, List var3, int var4, BlockPos var5) {
-         BlockPos var6 = new BlockPos(0, 128, 0);
+         BlockPos blockpos = new BlockPos(0, 128, 0);
 
-         for(EntityEnderCrystal var8 : var3) {
-            var8.setBeamTarget(var6);
+         for(EntityEnderCrystal entityendercrystal : crystals) {
+            entityendercrystal.setBeamTarget(blockpos);
          }
 
-         var2.setRespawnState(PREPARING_TO_SUMMON_PILLARS);
+         manager.setRespawnState(PREPARING_TO_SUMMON_PILLARS);
       }
    },
    PREPARING_TO_SUMMON_PILLARS {
       public void process(WorldServer var1, DragonFightManager var2, List var3, int var4, BlockPos var5) {
-         if (var4 < 100) {
-            if (var4 == 0 || var4 == 50 || var4 == 51 || var4 == 52 || var4 >= 95) {
-               var1.playEvent(3001, new BlockPos(0, 128, 0), 0);
+         if (ticks < 100) {
+            if (ticks == 0 || ticks == 50 || ticks == 51 || ticks == 52 || ticks >= 95) {
+               worldIn.playEvent(3001, new BlockPos(0, 128, 0), 0);
             }
          } else {
-            var2.setRespawnState(SUMMONING_PILLARS);
+            manager.setRespawnState(SUMMONING_PILLARS);
          }
 
       }
    },
    SUMMONING_PILLARS {
       public void process(WorldServer var1, DragonFightManager var2, List var3, int var4, BlockPos var5) {
-         boolean var6 = true;
-         boolean var7 = var4 % 40 == 0;
-         boolean var8 = var4 % 40 == 39;
-         if (var7 || var8) {
-            WorldGenSpikes.EndSpike[] var9 = BiomeEndDecorator.getSpikesForWorld(var1);
-            int var10 = var4 / 40;
-            if (var10 < var9.length) {
-               WorldGenSpikes.EndSpike var11 = var9[var10];
-               if (var7) {
-                  for(EntityEnderCrystal var13 : var3) {
-                     var13.setBeamTarget(new BlockPos(var11.getCenterX(), var11.getHeight() + 1, var11.getCenterZ()));
+         int i = 40;
+         boolean flag = ticks % 40 == 0;
+         boolean flag1 = ticks % 40 == 39;
+         if (flag || flag1) {
+            WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.getSpikesForWorld(worldIn);
+            int j = ticks / 40;
+            if (j < aworldgenspikes$endspike.length) {
+               WorldGenSpikes.EndSpike worldgenspikes$endspike = aworldgenspikes$endspike[j];
+               if (flag) {
+                  for(EntityEnderCrystal entityendercrystal : crystals) {
+                     entityendercrystal.setBeamTarget(new BlockPos(worldgenspikes$endspike.getCenterX(), worldgenspikes$endspike.getHeight() + 1, worldgenspikes$endspike.getCenterZ()));
                   }
                } else {
-                  boolean var15 = true;
+                  int k = 10;
 
-                  for(BlockPos.MutableBlockPos var14 : BlockPos.getAllInBoxMutable(new BlockPos(var11.getCenterX() - 10, var11.getHeight() - 10, var11.getCenterZ() - 10), new BlockPos(var11.getCenterX() + 10, var11.getHeight() + 10, var11.getCenterZ() + 10))) {
-                     var1.setBlockToAir(var14);
+                  for(BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(new BlockPos(worldgenspikes$endspike.getCenterX() - 10, worldgenspikes$endspike.getHeight() - 10, worldgenspikes$endspike.getCenterZ() - 10), new BlockPos(worldgenspikes$endspike.getCenterX() + 10, worldgenspikes$endspike.getHeight() + 10, worldgenspikes$endspike.getCenterZ() + 10))) {
+                     worldIn.setBlockToAir(blockpos$mutableblockpos);
                   }
 
-                  var1.createExplosion((Entity)null, (double)((float)var11.getCenterX() + 0.5F), (double)var11.getHeight(), (double)((float)var11.getCenterZ() + 0.5F), 5.0F, true);
-                  WorldGenSpikes var17 = new WorldGenSpikes();
-                  var17.setSpike(var11);
-                  var17.setCrystalInvulnerable(true);
-                  var17.setBeamTarget(new BlockPos(0, 128, 0));
-                  var17.generate(var1, new Random(), new BlockPos(var11.getCenterX(), 45, var11.getCenterZ()));
+                  worldIn.createExplosion((Entity)null, (double)((float)worldgenspikes$endspike.getCenterX() + 0.5F), (double)worldgenspikes$endspike.getHeight(), (double)((float)worldgenspikes$endspike.getCenterZ() + 0.5F), 5.0F, true);
+                  WorldGenSpikes worldgenspikes = new WorldGenSpikes();
+                  worldgenspikes.setSpike(worldgenspikes$endspike);
+                  worldgenspikes.setCrystalInvulnerable(true);
+                  worldgenspikes.setBeamTarget(new BlockPos(0, 128, 0));
+                  worldgenspikes.generate(worldIn, new Random(), new BlockPos(worldgenspikes$endspike.getCenterX(), 45, worldgenspikes$endspike.getCenterZ()));
                }
-            } else if (var7) {
-               var2.setRespawnState(SUMMONING_DRAGON);
+            } else if (flag) {
+               manager.setRespawnState(SUMMONING_DRAGON);
             }
          }
 
@@ -70,23 +70,23 @@ public enum DragonSpawnManager {
    },
    SUMMONING_DRAGON {
       public void process(WorldServer var1, DragonFightManager var2, List var3, int var4, BlockPos var5) {
-         if (var4 >= 100) {
-            var2.setRespawnState(END);
-            var2.resetSpikeCrystals();
+         if (ticks >= 100) {
+            manager.setRespawnState(END);
+            manager.resetSpikeCrystals();
 
-            for(EntityEnderCrystal var7 : var3) {
-               var7.setBeamTarget((BlockPos)null);
-               var1.createExplosion(var7, var7.posX, var7.posY, var7.posZ, 6.0F, false);
-               var7.setDead();
+            for(EntityEnderCrystal entityendercrystal : crystals) {
+               entityendercrystal.setBeamTarget((BlockPos)null);
+               worldIn.createExplosion(entityendercrystal, entityendercrystal.posX, entityendercrystal.posY, entityendercrystal.posZ, 6.0F, false);
+               entityendercrystal.setDead();
             }
-         } else if (var4 >= 80) {
-            var1.playEvent(3001, new BlockPos(0, 128, 0), 0);
-         } else if (var4 == 0) {
-            for(EntityEnderCrystal var9 : var3) {
-               var9.setBeamTarget(new BlockPos(0, 128, 0));
+         } else if (ticks >= 80) {
+            worldIn.playEvent(3001, new BlockPos(0, 128, 0), 0);
+         } else if (ticks == 0) {
+            for(EntityEnderCrystal entityendercrystal1 : crystals) {
+               entityendercrystal1.setBeamTarget(new BlockPos(0, 128, 0));
             }
-         } else if (var4 < 5) {
-            var1.playEvent(3001, new BlockPos(0, 128, 0), 0);
+         } else if (ticks < 5) {
+            worldIn.playEvent(3001, new BlockPos(0, 128, 0), 0);
          }
 
       }

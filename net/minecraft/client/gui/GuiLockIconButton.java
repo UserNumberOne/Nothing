@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiLockIconButton extends GuiButton {
    private boolean locked;
 
-   public GuiLockIconButton(int p_i45538_1_, int p_i45538_2_, int p_i45538_3_) {
+   public GuiLockIconButton(int var1, int var2, int var3) {
       super(p_i45538_1_, p_i45538_2_, p_i45538_3_, 20, 20, "");
    }
 
@@ -17,11 +17,11 @@ public class GuiLockIconButton extends GuiButton {
       return this.locked;
    }
 
-   public void setLocked(boolean lockedIn) {
+   public void setLocked(boolean var1) {
       this.locked = lockedIn;
    }
 
-   public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+   public void drawButton(Minecraft var1, int var2, int var3) {
       if (this.visible) {
          mc.getTextureManager().bindTexture(GuiButton.BUTTON_TEXTURES);
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -60,7 +60,7 @@ public class GuiLockIconButton extends GuiButton {
       private final int x;
       private final int y;
 
-      private Icon(int p_i45537_3_, int p_i45537_4_) {
+      private Icon(int var3, int var4) {
          this.x = p_i45537_3_;
          this.y = p_i45537_4_;
       }

@@ -15,18 +15,18 @@ public class NetHandlerHandshakeMemory implements INetHandlerHandshakeServer {
    private final MinecraftServer mcServer;
    private final NetworkManager networkManager;
 
-   public NetHandlerHandshakeMemory(MinecraftServer mcServerIn, NetworkManager networkManagerIn) {
+   public NetHandlerHandshakeMemory(MinecraftServer var1, NetworkManager var2) {
       this.mcServer = mcServerIn;
       this.networkManager = networkManagerIn;
    }
 
-   public void processHandshake(C00Handshake packetIn) {
+   public void processHandshake(C00Handshake var1) {
       if (FMLCommonHandler.instance().handleServerHandshake(packetIn, this.networkManager)) {
          this.networkManager.setConnectionState(packetIn.getRequestedState());
          this.networkManager.setNetHandler(new NetHandlerLoginServer(this.mcServer, this.networkManager));
       }
    }
 
-   public void onDisconnect(ITextComponent reason) {
+   public void onDisconnect(ITextComponent var1) {
    }
 }

@@ -30,11 +30,11 @@ public class SimpleReloadableResourceManager implements IReloadableResourceManag
    private final Set setResourceDomains = Sets.newLinkedHashSet();
    private final MetadataSerializer rmMetadataSerializer;
 
-   public SimpleReloadableResourceManager(MetadataSerializer rmMetadataSerializerIn) {
+   public SimpleReloadableResourceManager(MetadataSerializer var1) {
       this.rmMetadataSerializer = rmMetadataSerializerIn;
    }
 
-   public void reloadResourcePack(IResourcePack resourcePack) {
+   public void reloadResourcePack(IResourcePack var1) {
       for(String s : resourcePack.getResourceDomains()) {
          this.setResourceDomains.add(s);
          FallbackResourceManager fallbackresourcemanager = (FallbackResourceManager)this.domainResourceManagers.get(s);
@@ -52,7 +52,7 @@ public class SimpleReloadableResourceManager implements IReloadableResourceManag
       return this.setResourceDomains;
    }
 
-   public IResource getResource(ResourceLocation location) throws IOException {
+   public IResource getResource(ResourceLocation var1) throws IOException {
       IResourceManager iresourcemanager = (IResourceManager)this.domainResourceManagers.get(location.getResourceDomain());
       if (iresourcemanager != null) {
          return iresourcemanager.getResource(location);
@@ -61,7 +61,7 @@ public class SimpleReloadableResourceManager implements IReloadableResourceManag
       }
    }
 
-   public List getAllResources(ResourceLocation location) throws IOException {
+   public List getAllResources(ResourceLocation var1) throws IOException {
       IResourceManager iresourcemanager = (IResourceManager)this.domainResourceManagers.get(location.getResourceDomain());
       if (iresourcemanager != null) {
          return iresourcemanager.getAllResources(location);
@@ -75,11 +75,11 @@ public class SimpleReloadableResourceManager implements IReloadableResourceManag
       this.setResourceDomains.clear();
    }
 
-   public void reloadResources(List resourcesPacksList) {
+   public void reloadResources(List var1) {
       ProgressBar resReload = ProgressManager.push("Loading Resources", resourcesPacksList.size() + 1, true);
       this.clearResources();
       LOGGER.info("Reloading ResourceManager: {}", new Object[]{JOINER_RESOURCE_PACKS.join(Iterables.transform(resourcesPacksList, new Function() {
-         public String apply(@Nullable IResourcePack p_apply_1_) {
+         public String apply(@Nullable IResourcePack var1) {
             return p_apply_1_ == null ? "<NULL>" : p_apply_1_.getPackName();
          }
       }))});
@@ -94,7 +94,7 @@ public class SimpleReloadableResourceManager implements IReloadableResourceManag
       ProgressManager.pop(resReload);
    }
 
-   public void registerReloadListener(IResourceManagerReloadListener reloadListener) {
+   public void registerReloadListener(IResourceManagerReloadListener var1) {
       ProgressBar resReload = ProgressManager.push("Loading Resource", 1);
       resReload.step(reloadListener.getClass(), new String[0]);
       this.reloadListeners.add(reloadListener);

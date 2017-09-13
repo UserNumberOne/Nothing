@@ -26,7 +26,7 @@ public class GuiLabel extends Gui {
    private final FontRenderer fontRenderer;
    private int border;
 
-   public GuiLabel(FontRenderer fontRendererObj, int p_i45540_2_, int p_i45540_3_, int p_i45540_4_, int p_i45540_5_, int p_i45540_6_, int p_i45540_7_) {
+   public GuiLabel(FontRenderer var1, int var2, int var3, int var4, int var5, int var6, int var7) {
       this.fontRenderer = fontRendererObj;
       this.id = p_i45540_2_;
       this.x = p_i45540_3_;
@@ -43,7 +43,7 @@ public class GuiLabel extends Gui {
       this.border = 0;
    }
 
-   public void addLine(String p_175202_1_) {
+   public void addLine(String var1) {
       this.labels.add(I18n.format(p_175202_1_));
    }
 
@@ -52,7 +52,7 @@ public class GuiLabel extends Gui {
       return this;
    }
 
-   public void drawLabel(Minecraft mc, int mouseX, int mouseY) {
+   public void drawLabel(Minecraft var1, int var2, int var3) {
       if (this.visible) {
          GlStateManager.enableBlend();
          GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -71,7 +71,7 @@ public class GuiLabel extends Gui {
 
    }
 
-   protected void drawLabelBackground(Minecraft mcIn, int p_146160_2_, int p_146160_3_) {
+   protected void drawLabelBackground(Minecraft var1, int var2, int var3) {
       if (this.labelBgEnabled) {
          int i = this.width + this.border * 2;
          int j = this.height + this.border * 2;

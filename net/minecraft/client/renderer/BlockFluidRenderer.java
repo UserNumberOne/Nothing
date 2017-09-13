@@ -23,7 +23,7 @@ public class BlockFluidRenderer {
    private final TextureAtlasSprite[] atlasSpritesWater = new TextureAtlasSprite[2];
    private TextureAtlasSprite atlasSpriteWaterOverlay;
 
-   public BlockFluidRenderer(BlockColors blockColorsIn) {
+   public BlockFluidRenderer(BlockColors var1) {
       this.blockColors = blockColorsIn;
       this.initAtlasSprites();
    }
@@ -37,7 +37,7 @@ public class BlockFluidRenderer {
       this.atlasSpriteWaterOverlay = texturemap.getAtlasSprite("minecraft:blocks/water_overlay");
    }
 
-   public boolean renderFluid(IBlockAccess blockAccess, IBlockState blockStateIn, BlockPos blockPosIn, VertexBuffer worldRendererIn) {
+   public boolean renderFluid(IBlockAccess var1, IBlockState var2, BlockPos var3, VertexBuffer var4) {
       BlockLiquid blockliquid = (BlockLiquid)blockStateIn.getBlock();
       boolean flag = blockStateIn.getMaterial() == Material.LAVA;
       TextureAtlasSprite[] atextureatlassprite = flag ? this.atlasSpritesLava : this.atlasSpritesWater;
@@ -232,7 +232,7 @@ public class BlockFluidRenderer {
       }
    }
 
-   private float getFluidHeight(IBlockAccess blockAccess, BlockPos blockPosIn, Material blockMaterial) {
+   private float getFluidHeight(IBlockAccess var1, BlockPos var2, Material var3) {
       int i = 0;
       float f = 0.0F;
 

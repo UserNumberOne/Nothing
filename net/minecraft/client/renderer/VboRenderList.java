@@ -7,7 +7,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class VboRenderList extends ChunkRenderContainer {
-   public void renderChunkLayer(BlockRenderLayer layer) {
+   public void renderChunkLayer(BlockRenderLayer var1) {
       if (this.initialized) {
          for(RenderChunk renderchunk : this.renderChunks) {
             net.minecraft.client.renderer.vertex.VertexBuffer vertexbuffer = renderchunk.getVertexBufferByLayer(layer.ordinal());

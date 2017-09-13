@@ -16,12 +16,12 @@ public class ServerSelectionList extends GuiListExtended {
    private final GuiListExtended.IGuiListEntry lanScanEntry = new ServerListEntryLanScan();
    private int selectedSlotIndex = -1;
 
-   public ServerSelectionList(GuiMultiplayer ownerIn, Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
+   public ServerSelectionList(GuiMultiplayer var1, Minecraft var2, int var3, int var4, int var5, int var6, int var7) {
       super(mcIn, widthIn, heightIn, topIn, bottomIn, slotHeightIn);
       this.owner = ownerIn;
    }
 
-   public GuiListExtended.IGuiListEntry getListEntry(int index) {
+   public GuiListExtended.IGuiListEntry getListEntry(int var1) {
       if (index < this.serverListInternet.size()) {
          return (GuiListExtended.IGuiListEntry)this.serverListInternet.get(index);
       } else {
@@ -39,11 +39,11 @@ public class ServerSelectionList extends GuiListExtended {
       return this.serverListInternet.size() + 1 + this.serverListLan.size();
    }
 
-   public void setSelectedSlotIndex(int selectedSlotIndexIn) {
+   public void setSelectedSlotIndex(int var1) {
       this.selectedSlotIndex = selectedSlotIndexIn;
    }
 
-   protected boolean isSelected(int slotIndex) {
+   protected boolean isSelected(int var1) {
       return slotIndex == this.selectedSlotIndex;
    }
 
@@ -51,7 +51,7 @@ public class ServerSelectionList extends GuiListExtended {
       return this.selectedSlotIndex;
    }
 
-   public void updateOnlineServers(ServerList p_148195_1_) {
+   public void updateOnlineServers(ServerList var1) {
       this.serverListInternet.clear();
 
       for(int i = 0; i < p_148195_1_.countServers(); ++i) {
@@ -60,7 +60,7 @@ public class ServerSelectionList extends GuiListExtended {
 
    }
 
-   public void updateNetworkServers(List p_148194_1_) {
+   public void updateNetworkServers(List var1) {
       this.serverListLan.clear();
 
       for(LanServerInfo lanserverinfo : p_148194_1_) {

@@ -12,7 +12,7 @@ public class MovingSoundMinecart extends MovingSound {
    private final EntityMinecart minecart;
    private float distance = 0.0F;
 
-   public MovingSoundMinecart(EntityMinecart minecartIn) {
+   public MovingSoundMinecart(EntityMinecart var1) {
       super(SoundEvents.ENTITY_MINECART_RIDING, SoundCategory.NEUTRAL);
       this.minecart = minecartIn;
       this.repeat = true;

@@ -29,7 +29,7 @@ public class GuiConnecting extends GuiScreen {
    private boolean cancel;
    private final GuiScreen previousGuiScreen;
 
-   public GuiConnecting(GuiScreen parent, Minecraft mcIn, ServerData serverDataIn) {
+   public GuiConnecting(GuiScreen var1, Minecraft var2, ServerData var3) {
       this.mc = mcIn;
       this.previousGuiScreen = parent;
       ServerAddress serveraddress = ServerAddress.fromString(serverDataIn.serverIP);
@@ -38,14 +38,14 @@ public class GuiConnecting extends GuiScreen {
       this.connect(serveraddress.getIP(), serveraddress.getPort());
    }
 
-   public GuiConnecting(GuiScreen parent, Minecraft mcIn, String hostName, int port) {
+   public GuiConnecting(GuiScreen var1, Minecraft var2, String var3, int var4) {
       this.mc = mcIn;
       this.previousGuiScreen = parent;
       mcIn.loadWorld((WorldClient)null);
       this.connect(hostName, port);
    }
 
-   private void connect(final String ip, final int port) {
+   private void connect(final String var1, final int var2) {
       LOGGER.info("Connecting to {}, {}", new Object[]{ip, port});
       (new Thread("Server Connector #" + CONNECTION_ID.incrementAndGet()) {
          public void run() {
@@ -98,7 +98,7 @@ public class GuiConnecting extends GuiScreen {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
    }
 
    public void initGui() {
@@ -106,7 +106,7 @@ public class GuiConnecting extends GuiScreen {
       this.buttonList.add(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 120 + 12, I18n.format("gui.cancel")));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 0) {
          this.cancel = true;
          if (this.networkManager != null) {
@@ -118,7 +118,7 @@ public class GuiConnecting extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       if (this.networkManager == null) {
          this.drawCenteredString(this.fontRendererObj, I18n.format("connect.connecting"), this.width / 2, this.height / 2 - 50, 16777215);

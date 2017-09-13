@@ -16,7 +16,7 @@ public class GuiHopper extends GuiContainer {
    private final IInventory playerInventory;
    private final IInventory hopperInventory;
 
-   public GuiHopper(InventoryPlayer playerInv, IInventory hopperInv) {
+   public GuiHopper(InventoryPlayer var1, IInventory var2) {
       super(new ContainerHopper(playerInv, hopperInv, Minecraft.getMinecraft().player));
       this.playerInventory = playerInv;
       this.hopperInventory = hopperInv;
@@ -24,12 +24,12 @@ public class GuiHopper extends GuiContainer {
       this.ySize = 133;
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       this.fontRendererObj.drawString(this.hopperInventory.getDisplayName().getUnformattedText(), 8, 6, 4210752);
       this.fontRendererObj.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(HOPPER_GUI_TEXTURE);
       int i = (this.width - this.xSize) / 2;

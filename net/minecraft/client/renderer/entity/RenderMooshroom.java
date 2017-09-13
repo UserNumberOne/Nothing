@@ -11,12 +11,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderMooshroom extends RenderLiving {
    private static final ResourceLocation MOOSHROOM_TEXTURES = new ResourceLocation("textures/entity/cow/mooshroom.png");
 
-   public RenderMooshroom(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn) {
+   public RenderMooshroom(RenderManager var1, ModelBase var2, float var3) {
       super(renderManagerIn, modelBaseIn, shadowSizeIn);
       this.addLayer(new LayerMooshroomMushroom(this));
    }
 
-   protected ResourceLocation getEntityTexture(EntityMooshroom entity) {
+   protected ResourceLocation getEntityTexture(EntityMooshroom var1) {
       return MOOSHROOM_TEXTURES;
    }
 }

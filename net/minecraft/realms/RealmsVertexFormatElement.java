@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RealmsVertexFormatElement {
    private final VertexFormatElement v;
 
-   public RealmsVertexFormatElement(VertexFormatElement vIn) {
+   public RealmsVertexFormatElement(VertexFormatElement var1) {
       this.v = vIn;
    }
 
@@ -36,7 +36,7 @@ public class RealmsVertexFormatElement {
       return this.v.hashCode();
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       return this.v.equals(p_equals_1_);
    }
 

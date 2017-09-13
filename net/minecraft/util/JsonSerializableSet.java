@@ -11,22 +11,22 @@ public class JsonSerializableSet extends ForwardingSet implements IJsonSerializa
    private final Set underlyingSet = Sets.newHashSet();
 
    public void fromJson(JsonElement var1) {
-      if (var1.isJsonArray()) {
-         for(JsonElement var3 : var1.getAsJsonArray()) {
-            this.add(var3.getAsString());
+      if (json.isJsonArray()) {
+         for(JsonElement jsonelement : json.getAsJsonArray()) {
+            this.add(jsonelement.getAsString());
          }
       }
 
    }
 
    public JsonElement getSerializableElement() {
-      JsonArray var1 = new JsonArray();
+      JsonArray jsonarray = new JsonArray();
 
-      for(String var3 : this) {
-         var1.add(new JsonPrimitive(var3));
+      for(String s : this) {
+         jsonarray.add(new JsonPrimitive(s));
       }
 
-      return var1;
+      return jsonarray;
    }
 
    protected Set delegate() {

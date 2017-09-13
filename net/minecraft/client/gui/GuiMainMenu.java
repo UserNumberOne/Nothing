@@ -131,7 +131,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
       return false;
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
    }
 
    public void initGui() {
@@ -183,14 +183,14 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
       this.modUpdateNotification = NotificationModUpdateScreen.init(this, this.modButton);
    }
 
-   private void addSingleplayerMultiplayerButtons(int p_73969_1_, int p_73969_2_) {
+   private void addSingleplayerMultiplayerButtons(int var1, int var2) {
       this.buttonList.add(new GuiButton(1, this.width / 2 - 100, p_73969_1_, I18n.format("menu.singleplayer")));
       this.buttonList.add(new GuiButton(2, this.width / 2 - 100, p_73969_1_ + p_73969_2_ * 1, I18n.format("menu.multiplayer")));
       this.realmsButton = this.addButton(new GuiButton(14, this.width / 2 + 2, p_73969_1_ + p_73969_2_ * 2, 98, 20, I18n.format("menu.online").replace("Minecraft", "").trim()));
       this.buttonList.add(this.modButton = new GuiButton(6, this.width / 2 - 100, p_73969_1_ + p_73969_2_ * 2, 98, 20, I18n.format("fml.menu.mods")));
    }
 
-   private void addDemoButtons(int p_73972_1_, int p_73972_2_) {
+   private void addDemoButtons(int var1, int var2) {
       this.buttonList.add(new GuiButton(11, this.width / 2 - 100, p_73972_1_, I18n.format("menu.playdemo")));
       this.buttonResetDemo = this.addButton(new GuiButton(12, this.width / 2 - 100, p_73972_1_ + p_73972_2_ * 1, I18n.format("menu.resetdemo")));
       ISaveFormat isaveformat = this.mc.getSaveLoader();
@@ -201,7 +201,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 0) {
          this.mc.displayGuiScreen(new GuiOptions(this, this.mc.gameSettings));
       }
@@ -249,7 +249,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
       realmsbridge.switchToRealms(this);
    }
 
-   public void confirmClicked(boolean result, int id) {
+   public void confirmClicked(boolean var1, int var2) {
       if (result && id == 12) {
          ISaveFormat isaveformat = this.mc.getSaveLoader();
          isaveformat.flushCache();
@@ -271,7 +271,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 
    }
 
-   private void drawPanorama(int mouseX, int mouseY, float partialTicks) {
+   private void drawPanorama(int var1, int var2, float var3) {
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
       GlStateManager.matrixMode(5889);
@@ -349,7 +349,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
       GlStateManager.enableDepth();
    }
 
-   private void rotateAndBlurSkybox(float partialTicks) {
+   private void rotateAndBlurSkybox(float var1) {
       this.mc.getTextureManager().bindTexture(this.backgroundTexture);
       GlStateManager.glTexParameteri(3553, 10241, 9729);
       GlStateManager.glTexParameteri(3553, 10240, 9729);
@@ -379,7 +379,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
       GlStateManager.colorMask(true, true, true, true);
    }
 
-   private void renderSkybox(int mouseX, int mouseY, float partialTicks) {
+   private void renderSkybox(int var1, int var2, float var3) {
       this.mc.getFramebuffer().unbindFramebuffer();
       GlStateManager.viewport(0, 0, 256, 256);
       this.drawPanorama(mouseX, mouseY, partialTicks);
@@ -407,7 +407,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
       tessellator.draw();
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       GlStateManager.disableAlpha();
       this.renderSkybox(mouseX, mouseY, partialTicks);
       GlStateManager.enableAlpha();
@@ -470,7 +470,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
       this.modUpdateNotification.drawScreen(mouseX, mouseY, partialTicks);
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       synchronized(this.threadLock) {
          if (!this.openGLWarning1.isEmpty() && mouseX >= this.openGLWarningX1 && mouseX <= this.openGLWarningX2 && mouseY >= this.openGLWarningY1 && mouseY <= this.openGLWarningY2) {

@@ -9,10 +9,10 @@ public abstract class BaseAttribute implements IAttribute {
    private boolean shouldWatch;
 
    protected BaseAttribute(@Nullable IAttribute var1, String var2, double var3) {
-      this.parent = var1;
-      this.unlocalizedName = var2;
-      this.defaultValue = var3;
-      if (var2 == null) {
+      this.parent = parentIn;
+      this.unlocalizedName = unlocalizedNameIn;
+      this.defaultValue = defaultValueIn;
+      if (unlocalizedNameIn == null) {
          throw new IllegalArgumentException("Name cannot be null!");
       }
    }
@@ -30,7 +30,7 @@ public abstract class BaseAttribute implements IAttribute {
    }
 
    public BaseAttribute setShouldWatch(boolean var1) {
-      this.shouldWatch = var1;
+      this.shouldWatch = shouldWatchIn;
       return this;
    }
 
@@ -44,6 +44,6 @@ public abstract class BaseAttribute implements IAttribute {
    }
 
    public boolean equals(Object var1) {
-      return var1 instanceof IAttribute && this.unlocalizedName.equals(((IAttribute)var1).getName());
+      return p_equals_1_ instanceof IAttribute && this.unlocalizedName.equals(((IAttribute)p_equals_1_).getName());
    }
 }

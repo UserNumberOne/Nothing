@@ -3,19 +3,21 @@ package net.minecraft.server.dedicated;
 import com.mojang.authlib.GameProfile;
 import java.io.IOException;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.src.MinecraftServer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+@SideOnly(Side.SERVER)
 public class DedicatedPlayerList extends PlayerList {
    private static final Logger LOGGER = LogManager.getLogger();
 
    public DedicatedPlayerList(DedicatedServer var1) {
-      super(var1);
-      this.setViewDistance(var1.getIntProperty("view-distance", 10));
-      this.maxPlayers = var1.getIntProperty("max-players", 20);
-      this.setWhiteListEnabled(var1.getBooleanProperty("white-list", false));
-      if (!var1.R()) {
+      super(server);
+      this.setViewDistance(server.getIntProperty("view-distance", 10));
+      this.maxPlayers = server.getIntProperty("max-players", 20);
+      this.setWhiteListEnabled(server.getBooleanProperty("white-list", false));
+      if (!server.isSinglePlayer()) {
          this.getBannedPlayers().setLanServer(true);
          this.getBannedIPs().setLanServer(true);
       }
@@ -34,28 +36,28 @@ public class DedicatedPlayerList extends PlayerList {
    }
 
    public void setWhiteListEnabled(boolean var1) {
-      super.setWhiteListEnabled(var1);
-      this.getServerInstance().setProperty("white-list", Boolean.valueOf(var1));
+      super.setWhiteListEnabled(whitelistEnabled);
+      this.getServerInstance().setProperty("white-list", Boolean.valueOf(whitelistEnabled));
       this.getServerInstance().saveProperties();
    }
 
    public void addOp(GameProfile var1) {
-      super.addOp(var1);
+      super.addOp(profile);
       this.saveOpsList();
    }
 
    public void removeOp(GameProfile var1) {
-      super.removeOp(var1);
+      super.removeOp(profile);
       this.saveOpsList();
    }
 
    public void removePlayerFromWhitelist(GameProfile var1) {
-      super.removePlayerFromWhitelist(var1);
+      super.removePlayerFromWhitelist(profile);
       this.saveWhiteList();
    }
 
    public void addWhitelistedPlayer(GameProfile var1) {
-      super.addWhitelistedPlayer(var1);
+      super.addWhitelistedPlayer(profile);
       this.saveWhiteList();
    }
 
@@ -136,19 +138,14 @@ public class DedicatedPlayerList extends PlayerList {
    }
 
    public boolean canJoin(GameProfile var1) {
-      return !this.isWhiteListEnabled() || this.canSendCommands(var1) || this.getWhitelistedPlayers().isWhitelisted(var1);
+      return !this.isWhiteListEnabled() || this.canSendCommands(profile) || this.getWhitelistedPlayers().isWhitelisted(profile);
    }
 
    public DedicatedServer getServerInstance() {
-      return (DedicatedServer)super.getServer();
+      return (DedicatedServer)super.getServerInstance();
    }
 
    public boolean bypassesPlayerLimit(GameProfile var1) {
-      return this.getOppedPlayers().bypassesPlayerLimit(var1);
-   }
-
-   // $FF: synthetic method
-   public MinecraftServer getServer() {
-      return this.getServerInstance();
+      return this.getOppedPlayers().bypassesPlayerLimit(profile);
    }
 }

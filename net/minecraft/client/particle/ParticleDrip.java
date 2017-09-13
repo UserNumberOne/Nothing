@@ -15,7 +15,7 @@ public class ParticleDrip extends Particle {
    private final Material materialType;
    private int bobTimer;
 
-   protected ParticleDrip(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, Material p_i1203_8_) {
+   protected ParticleDrip(World var1, double var2, double var4, double var6, Material var8) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0D, 0.0D, 0.0D);
       this.motionX = 0.0D;
       this.motionY = 0.0D;
@@ -41,7 +41,7 @@ public class ParticleDrip extends Particle {
       this.motionZ = 0.0D;
    }
 
-   public int getBrightnessForRender(float p_189214_1_) {
+   public int getBrightnessForRender(float var1) {
       return this.materialType == Material.WATER ? super.getBrightnessForRender(p_189214_1_) : 257;
    }
 
@@ -108,14 +108,14 @@ public class ParticleDrip extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class LavaFactory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleDrip(worldIn, xCoordIn, yCoordIn, zCoordIn, Material.LAVA);
       }
    }
 
    @SideOnly(Side.CLIENT)
    public static class WaterFactory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleDrip(worldIn, xCoordIn, yCoordIn, zCoordIn, Material.WATER);
       }
    }

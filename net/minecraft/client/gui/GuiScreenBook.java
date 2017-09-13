@@ -54,7 +54,7 @@ public class GuiScreenBook extends GuiScreen {
    private GuiButton buttonFinalize;
    private GuiButton buttonCancel;
 
-   public GuiScreenBook(EntityPlayer player, ItemStack book, boolean isUnsigned) {
+   public GuiScreenBook(EntityPlayer var1, ItemStack var2, boolean var3) {
       this.editingPlayer = player;
       this.bookObj = book;
       this.bookIsUnsigned = isUnsigned;
@@ -119,7 +119,7 @@ public class GuiScreenBook extends GuiScreen {
 
    }
 
-   private void sendBookToServer(boolean publish) throws IOException {
+   private void sendBookToServer(boolean var1) throws IOException {
       if (this.bookIsUnsigned && this.bookIsModified && this.bookPages != null) {
          while(this.bookPages.tagCount() > 1) {
             String s = this.bookPages.getStringTagAt(this.bookPages.tagCount() - 1);
@@ -151,7 +151,7 @@ public class GuiScreenBook extends GuiScreen {
 
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 0) {
             this.mc.displayGuiScreen((GuiScreen)null);
@@ -192,7 +192,7 @@ public class GuiScreenBook extends GuiScreen {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       super.keyTyped(typedChar, keyCode);
       if (this.bookIsUnsigned) {
          if (this.bookGettingSigned) {
@@ -204,7 +204,7 @@ public class GuiScreenBook extends GuiScreen {
 
    }
 
-   private void keyTypedInBook(char typedChar, int keyCode) {
+   private void keyTypedInBook(char var1, int var2) {
       if (GuiScreen.isKeyComboCtrlV(keyCode)) {
          this.pageInsertIntoCurrent(GuiScreen.getClipboardString());
       } else {
@@ -229,7 +229,7 @@ public class GuiScreenBook extends GuiScreen {
 
    }
 
-   private void keyTypedInTitle(char p_146460_1_, int p_146460_2_) throws IOException {
+   private void keyTypedInTitle(char var1, int var2) throws IOException {
       switch(p_146460_2_) {
       case 14:
          if (!this.bookTitle.isEmpty()) {
@@ -260,7 +260,7 @@ public class GuiScreenBook extends GuiScreen {
       return this.bookPages != null && this.currPage >= 0 && this.currPage < this.bookPages.tagCount() ? this.bookPages.getStringTagAt(this.currPage) : "";
    }
 
-   private void pageSetCurrent(String p_146457_1_) {
+   private void pageSetCurrent(String var1) {
       if (this.bookPages != null && this.currPage >= 0 && this.currPage < this.bookPages.tagCount()) {
          this.bookPages.set(this.currPage, new NBTTagString(p_146457_1_));
          this.bookIsModified = true;
@@ -268,7 +268,7 @@ public class GuiScreenBook extends GuiScreen {
 
    }
 
-   private void pageInsertIntoCurrent(String p_146459_1_) {
+   private void pageInsertIntoCurrent(String var1) {
       String s = this.pageGetCurrent();
       String s1 = s + p_146459_1_;
       int i = this.fontRendererObj.splitStringWidth(s1 + "" + TextFormatting.BLACK + "_", 118);
@@ -278,7 +278,7 @@ public class GuiScreenBook extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(BOOK_GUI_TEXTURES);
       int i = (this.width - 192) / 2;
@@ -357,7 +357,7 @@ public class GuiScreenBook extends GuiScreen {
       super.drawScreen(mouseX, mouseY, partialTicks);
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       if (mouseButton == 0) {
          ITextComponent itextcomponent = this.getClickedComponentAt(mouseX, mouseY);
          if (itextcomponent != null && this.handleComponentClick(itextcomponent)) {
@@ -368,7 +368,7 @@ public class GuiScreenBook extends GuiScreen {
       super.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   protected boolean handleComponentClick(ITextComponent component) {
+   protected boolean handleComponentClick(ITextComponent var1) {
       ClickEvent clickevent = component.getStyle().getClickEvent();
       if (clickevent == null) {
          return false;
@@ -398,7 +398,7 @@ public class GuiScreenBook extends GuiScreen {
    }
 
    @Nullable
-   public ITextComponent getClickedComponentAt(int p_175385_1_, int p_175385_2_) {
+   public ITextComponent getClickedComponentAt(int var1, int var2) {
       if (this.cachedComponents == null) {
          return null;
       } else {
@@ -436,12 +436,12 @@ public class GuiScreenBook extends GuiScreen {
    static class NextPageButton extends GuiButton {
       private final boolean isForward;
 
-      public NextPageButton(int p_i46316_1_, int p_i46316_2_, int p_i46316_3_, boolean p_i46316_4_) {
+      public NextPageButton(int var1, int var2, int var3, boolean var4) {
          super(p_i46316_1_, p_i46316_2_, p_i46316_3_, 23, 13, "");
          this.isForward = p_i46316_4_;
       }
 
-      public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+      public void drawButton(Minecraft var1, int var2, int var3) {
          if (this.visible) {
             boolean flag = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

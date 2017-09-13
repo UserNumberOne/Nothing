@@ -17,7 +17,7 @@ public class ModelPlayer extends ModelBiped {
    private final ModelRenderer bipedDeadmau5Head;
    private final boolean smallArms;
 
-   public ModelPlayer(float modelSize, boolean smallArmsIn) {
+   public ModelPlayer(float var1, boolean var2) {
       super(modelSize, 0.0F, 64, 64);
       this.smallArms = smallArmsIn;
       this.bipedDeadmau5Head = new ModelRenderer(this, 24, 0);
@@ -64,7 +64,7 @@ public class ModelPlayer extends ModelBiped {
       this.bipedBodyWear.setRotationPoint(0.0F, 0.0F, 0.0F);
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       super.render(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
       GlStateManager.pushMatrix();
       if (this.isChild) {
@@ -91,18 +91,18 @@ public class ModelPlayer extends ModelBiped {
       GlStateManager.popMatrix();
    }
 
-   public void renderDeadmau5Head(float scale) {
+   public void renderDeadmau5Head(float var1) {
       copyModelAngles(this.bipedHead, this.bipedDeadmau5Head);
       this.bipedDeadmau5Head.rotationPointX = 0.0F;
       this.bipedDeadmau5Head.rotationPointY = 0.0F;
       this.bipedDeadmau5Head.render(scale);
    }
 
-   public void renderCape(float scale) {
+   public void renderCape(float var1) {
       this.bipedCape.render(scale);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
       copyModelAngles(this.bipedLeftLeg, this.bipedLeftLegwear);
       copyModelAngles(this.bipedRightLeg, this.bipedRightLegwear);
@@ -117,7 +117,7 @@ public class ModelPlayer extends ModelBiped {
 
    }
 
-   public void setInvisible(boolean invisible) {
+   public void setInvisible(boolean var1) {
       super.setInvisible(invisible);
       this.bipedLeftArmwear.showModel = invisible;
       this.bipedRightArmwear.showModel = invisible;
@@ -128,7 +128,7 @@ public class ModelPlayer extends ModelBiped {
       this.bipedDeadmau5Head.showModel = invisible;
    }
 
-   public void postRenderArm(float scale, EnumHandSide side) {
+   public void postRenderArm(float var1, EnumHandSide var2) {
       ModelRenderer modelrenderer = this.getArmForSide(side);
       if (this.smallArms) {
          float f = 0.5F * (float)(side == EnumHandSide.RIGHT ? 1 : -1);

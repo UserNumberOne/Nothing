@@ -17,11 +17,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderPainting extends Render {
    private static final ResourceLocation KRISTOFFER_PAINTING_TEXTURE = new ResourceLocation("textures/painting/paintings_kristoffer_zetterstrand.png");
 
-   public RenderPainting(RenderManager renderManagerIn) {
+   public RenderPainting(RenderManager var1) {
       super(renderManagerIn);
    }
 
-   public void doRender(EntityPainting entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityPainting var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       GlStateManager.translate(x, y, z);
       GlStateManager.rotate(180.0F - entityYaw, 0.0F, 1.0F, 0.0F);
@@ -46,11 +46,11 @@ public class RenderPainting extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityPainting entity) {
+   protected ResourceLocation getEntityTexture(EntityPainting var1) {
       return KRISTOFFER_PAINTING_TEXTURE;
    }
 
-   private void renderPainting(EntityPainting painting, int width, int height, int textureU, int textureV) {
+   private void renderPainting(EntityPainting var1, int var2, int var3, int var4, int var5) {
       float f = (float)(-width) / 2.0F;
       float f1 = (float)(-height) / 2.0F;
       float f2 = 0.5F;
@@ -111,7 +111,7 @@ public class RenderPainting extends Render {
 
    }
 
-   private void setLightmap(EntityPainting painting, float p_77008_2_, float p_77008_3_) {
+   private void setLightmap(EntityPainting var1, float var2, float var3) {
       int i = MathHelper.floor(painting.posX);
       int j = MathHelper.floor(painting.posY + (double)(p_77008_3_ / 16.0F));
       int k = MathHelper.floor(painting.posZ);

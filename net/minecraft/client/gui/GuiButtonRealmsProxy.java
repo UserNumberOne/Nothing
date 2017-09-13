@@ -9,12 +9,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiButtonRealmsProxy extends GuiButton {
    private final RealmsButton realmsButton;
 
-   public GuiButtonRealmsProxy(RealmsButton realmsButtonIn, int buttonId, int x, int y, String text) {
+   public GuiButtonRealmsProxy(RealmsButton var1, int var2, int var3, int var4, String var5) {
       super(buttonId, x, y, text);
       this.realmsButton = realmsButtonIn;
    }
 
-   public GuiButtonRealmsProxy(RealmsButton realmsButtonIn, int buttonId, int x, int y, String text, int widthIn, int heightIn) {
+   public GuiButtonRealmsProxy(RealmsButton var1, int var2, int var3, int var4, String var5, int var6, int var7) {
       super(buttonId, x, y, widthIn, heightIn, text);
       this.realmsButton = realmsButtonIn;
    }
@@ -27,11 +27,11 @@ public class GuiButtonRealmsProxy extends GuiButton {
       return super.enabled;
    }
 
-   public void setEnabled(boolean isEnabled) {
+   public void setEnabled(boolean var1) {
       super.enabled = isEnabled;
    }
 
-   public void setText(String text) {
+   public void setText(String var1) {
       super.displayString = text;
    }
 
@@ -43,7 +43,7 @@ public class GuiButtonRealmsProxy extends GuiButton {
       return super.yPosition;
    }
 
-   public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+   public boolean mousePressed(Minecraft var1, int var2, int var3) {
       if (super.mousePressed(mc, mouseX, mouseY)) {
          this.realmsButton.clicked(mouseX, mouseY);
       }
@@ -51,11 +51,11 @@ public class GuiButtonRealmsProxy extends GuiButton {
       return super.mousePressed(mc, mouseX, mouseY);
    }
 
-   public void mouseReleased(int mouseX, int mouseY) {
+   public void mouseReleased(int var1, int var2) {
       this.realmsButton.released(mouseX, mouseY);
    }
 
-   public void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
+   public void mouseDragged(Minecraft var1, int var2, int var3) {
       this.realmsButton.renderBg(mouseX, mouseY);
    }
 
@@ -63,11 +63,11 @@ public class GuiButtonRealmsProxy extends GuiButton {
       return this.realmsButton;
    }
 
-   public int getHoverState(boolean mouseOver) {
+   public int getHoverState(boolean var1) {
       return this.realmsButton.getYImage(mouseOver);
    }
 
-   public int getYImage(boolean p_154312_1_) {
+   public int getYImage(boolean var1) {
       return super.getHoverState(p_154312_1_);
    }
 

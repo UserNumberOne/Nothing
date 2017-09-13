@@ -14,7 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiScreenRealmsProxy extends GuiScreen {
    private final RealmsScreen proxy;
 
-   public GuiScreenRealmsProxy(RealmsScreen proxyIn) {
+   public GuiScreenRealmsProxy(RealmsScreen var1) {
       this.proxy = proxyIn;
       super.buttonList = Collections.synchronizedList(Lists.newArrayList());
    }
@@ -28,11 +28,11 @@ public class GuiScreenRealmsProxy extends GuiScreen {
       super.initGui();
    }
 
-   public void drawCenteredString(String p_154325_1_, int p_154325_2_, int p_154325_3_, int p_154325_4_) {
+   public void drawCenteredString(String var1, int var2, int var3, int var4) {
       super.drawCenteredString(this.fontRendererObj, p_154325_1_, p_154325_2_, p_154325_3_, p_154325_4_);
    }
 
-   public void drawString(String p_154322_1_, int p_154322_2_, int p_154322_3_, int p_154322_4_, boolean p_154322_5_) {
+   public void drawString(String var1, int var2, int var3, int var4, boolean var5) {
       if (p_154322_5_) {
          super.drawString(this.fontRendererObj, p_154322_1_, p_154322_2_, p_154322_3_, p_154322_4_);
       } else {
@@ -41,12 +41,12 @@ public class GuiScreenRealmsProxy extends GuiScreen {
 
    }
 
-   public void drawTexturedModalRect(int x, int y, int textureX, int textureY, int width, int height) {
+   public void drawTexturedModalRect(int var1, int var2, int var3, int var4, int var5, int var6) {
       this.proxy.blit(x, y, textureX, textureY, width, height);
       super.drawTexturedModalRect(x, y, textureX, textureY, width, height);
    }
 
-   public void drawGradientRect(int left, int top, int right, int bottom, int startColor, int endColor) {
+   public void drawGradientRect(int var1, int var2, int var3, int var4, int var5, int var6) {
       super.drawGradientRect(left, top, right, bottom, startColor, endColor);
    }
 
@@ -58,23 +58,23 @@ public class GuiScreenRealmsProxy extends GuiScreen {
       return super.doesGuiPauseGame();
    }
 
-   public void drawWorldBackground(int tint) {
+   public void drawWorldBackground(int var1) {
       super.drawWorldBackground(tint);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.proxy.render(mouseX, mouseY, partialTicks);
    }
 
-   public void renderToolTip(ItemStack stack, int x, int y) {
+   public void renderToolTip(ItemStack var1, int var2, int var3) {
       super.renderToolTip(stack, x, y);
    }
 
-   public void drawCreativeTabHoveringText(String tabName, int mouseX, int mouseY) {
+   public void drawCreativeTabHoveringText(String var1, int var2, int var3) {
       super.drawCreativeTabHoveringText(tabName, mouseX, mouseY);
    }
 
-   public void drawHoveringText(List textLines, int x, int y) {
+   public void drawHoveringText(List var1, int var2, int var3) {
       super.drawHoveringText(textLines, x, y);
    }
 
@@ -87,19 +87,19 @@ public class GuiScreenRealmsProxy extends GuiScreen {
       return this.fontRendererObj.FONT_HEIGHT;
    }
 
-   public int getStringWidth(String p_154326_1_) {
+   public int getStringWidth(String var1) {
       return this.fontRendererObj.getStringWidth(p_154326_1_);
    }
 
-   public void fontDrawShadow(String p_154319_1_, int p_154319_2_, int p_154319_3_, int p_154319_4_) {
+   public void fontDrawShadow(String var1, int var2, int var3, int var4) {
       this.fontRendererObj.drawStringWithShadow(p_154319_1_, (float)p_154319_2_, (float)p_154319_3_, p_154319_4_);
    }
 
-   public List fontSplit(String p_154323_1_, int p_154323_2_) {
+   public List fontSplit(String var1, int var2) {
       return this.fontRendererObj.listFormattedStringToWidth(p_154323_1_, p_154323_2_);
    }
 
-   public final void actionPerformed(GuiButton button) throws IOException {
+   public final void actionPerformed(GuiButton var1) throws IOException {
       this.proxy.buttonClicked(((GuiButtonRealmsProxy)button).getRealmsButton());
    }
 
@@ -107,7 +107,7 @@ public class GuiScreenRealmsProxy extends GuiScreen {
       super.buttonList.clear();
    }
 
-   public void buttonsAdd(RealmsButton button) {
+   public void buttonsAdd(RealmsButton var1) {
       super.buttonList.add(button.getProxy());
    }
 
@@ -121,11 +121,11 @@ public class GuiScreenRealmsProxy extends GuiScreen {
       return list;
    }
 
-   public void buttonsRemove(RealmsButton button) {
+   public void buttonsRemove(RealmsButton var1) {
       super.buttonList.remove(button.getProxy());
    }
 
-   public void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   public void mouseClicked(int var1, int var2, int var3) throws IOException {
       this.proxy.mouseClicked(mouseX, mouseY, mouseButton);
       super.mouseClicked(mouseX, mouseY, mouseButton);
    }
@@ -140,19 +140,19 @@ public class GuiScreenRealmsProxy extends GuiScreen {
       super.handleKeyboardInput();
    }
 
-   public void mouseReleased(int mouseX, int mouseY, int state) {
+   public void mouseReleased(int var1, int var2, int var3) {
       this.proxy.mouseReleased(mouseX, mouseY, state);
    }
 
-   public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+   public void mouseClickMove(int var1, int var2, int var3, long var4) {
       this.proxy.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
    }
 
-   public void keyTyped(char typedChar, int keyCode) throws IOException {
+   public void keyTyped(char var1, int var2) throws IOException {
       this.proxy.keyPressed(typedChar, keyCode);
    }
 
-   public void confirmClicked(boolean result, int id) {
+   public void confirmClicked(boolean var1, int var2) {
       this.proxy.confirmResult(result, id);
    }
 

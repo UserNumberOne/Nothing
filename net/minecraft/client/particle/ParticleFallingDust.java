@@ -18,7 +18,7 @@ public class ParticleFallingDust extends Particle {
    float oSize;
    final float rotSpeed;
 
-   protected ParticleFallingDust(World p_i47135_1_, double p_i47135_2_, double p_i47135_4_, double p_i47135_6_, float p_i47135_8_, float p_i47135_9_, float p_i47135_10_) {
+   protected ParticleFallingDust(World var1, double var2, double var4, double var6, float var8, float var9, float var10) {
       super(p_i47135_1_, p_i47135_2_, p_i47135_4_, p_i47135_6_, 0.0D, 0.0D, 0.0D);
       this.motionX = 0.0D;
       this.motionY = 0.0D;
@@ -36,7 +36,7 @@ public class ParticleFallingDust extends Particle {
       this.particleAngle = (float)Math.random() * 6.2831855F;
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge * 32.0F;
       f = MathHelper.clamp(f, 0.0F, 1.0F);
       this.particleScale = this.oSize * f;
@@ -65,7 +65,7 @@ public class ParticleFallingDust extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          IBlockState iblockstate = Block.getStateById(p_178902_15_[0]);
          if (iblockstate.getBlock() != Blocks.AIR && iblockstate.getRenderType() == EnumBlockRenderType.INVISIBLE) {
             return null;

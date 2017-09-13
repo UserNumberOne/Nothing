@@ -9,11 +9,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ResourceIndexFolder extends ResourceIndex {
    private final File baseDir;
 
-   public ResourceIndexFolder(File folder) {
+   public ResourceIndexFolder(File var1) {
       this.baseDir = folder;
    }
 
-   public File getFile(ResourceLocation location) {
+   public File getFile(ResourceLocation var1) {
       return new File(this.baseDir, location.toString().replace(':', '/'));
    }
 

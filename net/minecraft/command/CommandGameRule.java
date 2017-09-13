@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketEntityStatus;
-import net.minecraft.src.MinecraftServer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.GameRules;
@@ -19,17 +19,17 @@ public class CommandGameRule extends CommandBase {
       return 2;
    }
 
-   public String getUsage(ICommandSender icommandlistener) {
+   public String getUsage(ICommandSender var1) {
       return "commands.gamerule.usage";
    }
 
-   public void execute(MinecraftServer minecraftserver, ICommandSender icommandlistener, String[] astring) throws CommandException {
-      GameRules gamerules = icommandlistener.getEntityWorld().getGameRules();
-      String s = astring.length > 0 ? astring[0] : "";
-      String s1 = astring.length > 1 ? buildString(astring, 1) : "";
-      switch(astring.length) {
+   public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
+      GameRules gamerules = this.getOverWorldGameRules(server);
+      String s = args.length > 0 ? args[0] : "";
+      String s1 = args.length > 1 ? buildString(args, 1) : "";
+      switch(args.length) {
       case 0:
-         icommandlistener.sendMessage(new TextComponentString(joinNiceString(gamerules.getRules())));
+         sender.sendMessage(new TextComponentString(joinNiceString(gamerules.getRules())));
          break;
       case 1:
          if (!gamerules.hasRule(s)) {
@@ -37,8 +37,8 @@ public class CommandGameRule extends CommandBase {
          }
 
          String s2 = gamerules.getString(s);
-         icommandlistener.sendMessage((new TextComponentString(s)).appendText(" = ").appendText(s2));
-         icommandlistener.setCommandStat(CommandResultStats.Type.QUERY_RESULT, gamerules.getInt(s));
+         sender.sendMessage((new TextComponentString(s)).appendText(" = ").appendText(s2));
+         sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, gamerules.getInt(s));
          break;
       default:
          if (gamerules.areSameType(s, GameRules.ValueType.BOOLEAN_VALUE) && !"true".equals(s1) && !"false".equals(s1)) {
@@ -46,31 +46,31 @@ public class CommandGameRule extends CommandBase {
          }
 
          gamerules.setOrCreateGameRule(s, s1);
-         a(gamerules, s, minecraftserver);
-         notifyCommandListener(icommandlistener, this, "commands.gamerule.success", new Object[]{s, s1});
+         notifyGameRuleChange(gamerules, s, server);
+         notifyCommandListener(sender, this, "commands.gamerule.success", new Object[]{s, s1});
       }
 
    }
 
-   public static void a(GameRules gamerules, String s, MinecraftServer minecraftserver) {
-      if ("reducedDebugInfo".equals(s)) {
-         int i = gamerules.getBoolean(s) ? 22 : 23;
+   public static void notifyGameRuleChange(GameRules var0, String var1, MinecraftServer var2) {
+      if ("reducedDebugInfo".equals(p_184898_1_)) {
+         byte b0 = (byte)(rules.getBoolean(p_184898_1_) ? 22 : 23);
 
-         for(EntityPlayerMP entityplayer : minecraftserver.getPlayerList().getPlayers()) {
-            entityplayer.connection.sendPacket(new SPacketEntityStatus(entityplayer, (byte)i));
+         for(EntityPlayerMP entityplayermp : server.getPlayerList().getPlayers()) {
+            entityplayermp.connection.sendPacket(new SPacketEntityStatus(entityplayermp, b0));
          }
       }
 
    }
 
-   public List tabComplete(MinecraftServer minecraftserver, ICommandSender icommandlistener, String[] astring, @Nullable BlockPos blockposition) {
-      if (astring.length == 1) {
-         return getListOfStringsMatchingLastWord(astring, this.a(minecraftserver).getRules());
+   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      if (args.length == 1) {
+         return getListOfStringsMatchingLastWord(args, this.getOverWorldGameRules(server).getRules());
       } else {
-         if (astring.length == 2) {
-            GameRules gamerules = this.a(minecraftserver);
-            if (gamerules.areSameType(astring[0], GameRules.ValueType.BOOLEAN_VALUE)) {
-               return getListOfStringsMatchingLastWord(astring, new String[]{"true", "false"});
+         if (args.length == 2) {
+            GameRules gamerules = this.getOverWorldGameRules(server);
+            if (gamerules.areSameType(args[0], GameRules.ValueType.BOOLEAN_VALUE)) {
+               return getListOfStringsMatchingLastWord(args, new String[]{"true", "false"});
             }
          }
 
@@ -78,11 +78,7 @@ public class CommandGameRule extends CommandBase {
       }
    }
 
-   private GameRules a(MinecraftServer minecraftserver) {
-      return minecraftserver.getWorldServer(0).getGameRules();
-   }
-
-   public int compareTo(ICommand o) {
-      return this.compareTo(o);
+   private GameRules getOverWorldGameRules(MinecraftServer var1) {
+      return server.worldServerForDimension(0).getGameRules();
    }
 }

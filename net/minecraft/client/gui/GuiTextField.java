@@ -35,7 +35,7 @@ public class GuiTextField extends Gui {
    private GuiPageButtonList.GuiResponder guiResponder;
    private Predicate validator = Predicates.alwaysTrue();
 
-   public GuiTextField(int componentId, FontRenderer fontrendererObj, int x, int y, int par5Width, int par6Height) {
+   public GuiTextField(int var1, FontRenderer var2, int var3, int var4, int var5, int var6) {
       this.id = componentId;
       this.fontRendererInstance = fontrendererObj;
       this.xPosition = x;
@@ -44,7 +44,7 @@ public class GuiTextField extends Gui {
       this.height = par6Height;
    }
 
-   public void setGuiResponder(GuiPageButtonList.GuiResponder guiResponderIn) {
+   public void setGuiResponder(GuiPageButtonList.GuiResponder var1) {
       this.guiResponder = guiResponderIn;
    }
 
@@ -52,7 +52,7 @@ public class GuiTextField extends Gui {
       ++this.cursorCounter;
    }
 
-   public void setText(String textIn) {
+   public void setText(String var1) {
       if (this.validator.apply(textIn)) {
          if (textIn.length() > this.maxStringLength) {
             this.text = textIn.substring(0, this.maxStringLength);
@@ -75,11 +75,11 @@ public class GuiTextField extends Gui {
       return this.text.substring(i, j);
    }
 
-   public void setValidator(Predicate theValidator) {
+   public void setValidator(Predicate var1) {
       this.validator = theValidator;
    }
 
-   public void writeText(String textToWrite) {
+   public void writeText(String var1) {
       String s = "";
       String s1 = ChatAllowedCharacters.filterAllowedCharacters(textToWrite);
       int i = this.cursorPosition < this.selectionEnd ? this.cursorPosition : this.selectionEnd;
@@ -112,7 +112,7 @@ public class GuiTextField extends Gui {
 
    }
 
-   public void deleteWords(int num) {
+   public void deleteWords(int var1) {
       if (!this.text.isEmpty()) {
          if (this.selectionEnd != this.cursorPosition) {
             this.writeText("");
@@ -123,7 +123,7 @@ public class GuiTextField extends Gui {
 
    }
 
-   public void deleteFromCursor(int num) {
+   public void deleteFromCursor(int var1) {
       if (!this.text.isEmpty()) {
          if (this.selectionEnd != this.cursorPosition) {
             this.writeText("");
@@ -159,15 +159,15 @@ public class GuiTextField extends Gui {
       return this.id;
    }
 
-   public int getNthWordFromCursor(int numWords) {
+   public int getNthWordFromCursor(int var1) {
       return this.getNthWordFromPos(numWords, this.getCursorPosition());
    }
 
-   public int getNthWordFromPos(int n, int pos) {
+   public int getNthWordFromPos(int var1, int var2) {
       return this.getNthWordFromPosWS(n, pos, true);
    }
 
-   public int getNthWordFromPosWS(int n, int pos, boolean skipWs) {
+   public int getNthWordFromPosWS(int var1, int var2, boolean var3) {
       int i = pos;
       boolean flag = n < 0;
       int j = Math.abs(n);
@@ -197,11 +197,11 @@ public class GuiTextField extends Gui {
       return i;
    }
 
-   public void moveCursorBy(int num) {
+   public void moveCursorBy(int var1) {
       this.setCursorPosition(this.selectionEnd + num);
    }
 
-   public void setCursorPosition(int pos) {
+   public void setCursorPosition(int var1) {
       this.cursorPosition = pos;
       int i = this.text.length();
       this.cursorPosition = MathHelper.clamp(this.cursorPosition, 0, i);
@@ -216,7 +216,7 @@ public class GuiTextField extends Gui {
       this.setCursorPosition(this.text.length());
    }
 
-   public boolean textboxKeyTyped(char typedChar, int keyCode) {
+   public boolean textboxKeyTyped(char var1, int var2) {
       if (!this.isFocused) {
          return false;
       } else if (GuiScreen.isKeyComboCtrlA(keyCode)) {
@@ -319,7 +319,7 @@ public class GuiTextField extends Gui {
       }
    }
 
-   public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+   public void mouseClicked(int var1, int var2, int var3) {
       boolean flag = mouseX >= this.xPosition && mouseX < this.xPosition + this.width && mouseY >= this.yPosition && mouseY < this.yPosition + this.height;
       if (this.canLoseFocus) {
          this.setFocused(flag);
@@ -391,7 +391,7 @@ public class GuiTextField extends Gui {
 
    }
 
-   private void drawCursorVertical(int startX, int startY, int endX, int endY) {
+   private void drawCursorVertical(int var1, int var2, int var3, int var4) {
       if (startX < endX) {
          int i = startX;
          startX = endX;
@@ -428,7 +428,7 @@ public class GuiTextField extends Gui {
       GlStateManager.enableTexture2D();
    }
 
-   public void setMaxStringLength(int length) {
+   public void setMaxStringLength(int var1) {
       this.maxStringLength = length;
       if (this.text.length() > length) {
          this.text = this.text.substring(0, length);
@@ -448,19 +448,19 @@ public class GuiTextField extends Gui {
       return this.enableBackgroundDrawing;
    }
 
-   public void setEnableBackgroundDrawing(boolean enableBackgroundDrawingIn) {
+   public void setEnableBackgroundDrawing(boolean var1) {
       this.enableBackgroundDrawing = enableBackgroundDrawingIn;
    }
 
-   public void setTextColor(int color) {
+   public void setTextColor(int var1) {
       this.enabledColor = color;
    }
 
-   public void setDisabledTextColour(int color) {
+   public void setDisabledTextColour(int var1) {
       this.disabledColor = color;
    }
 
-   public void setFocused(boolean isFocusedIn) {
+   public void setFocused(boolean var1) {
       if (isFocusedIn && !this.isFocused) {
          this.cursorCounter = 0;
       }
@@ -472,7 +472,7 @@ public class GuiTextField extends Gui {
       return this.isFocused;
    }
 
-   public void setEnabled(boolean enabled) {
+   public void setEnabled(boolean var1) {
       this.isEnabled = enabled;
    }
 
@@ -484,7 +484,7 @@ public class GuiTextField extends Gui {
       return this.getEnableBackgroundDrawing() ? this.width - 8 : this.width;
    }
 
-   public void setSelectionPos(int position) {
+   public void setSelectionPos(int var1) {
       int i = this.text.length();
       if (position > i) {
          position = i;
@@ -518,7 +518,7 @@ public class GuiTextField extends Gui {
 
    }
 
-   public void setCanLoseFocus(boolean canLoseFocusIn) {
+   public void setCanLoseFocus(boolean var1) {
       this.canLoseFocus = canLoseFocusIn;
    }
 
@@ -526,7 +526,7 @@ public class GuiTextField extends Gui {
       return this.visible;
    }
 
-   public void setVisible(boolean isVisible) {
+   public void setVisible(boolean var1) {
       this.visible = isVisible;
    }
 }

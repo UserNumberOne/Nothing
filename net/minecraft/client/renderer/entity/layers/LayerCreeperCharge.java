@@ -14,11 +14,11 @@ public class LayerCreeperCharge implements LayerRenderer {
    private final RenderCreeper creeperRenderer;
    private final ModelCreeper creeperModel = new ModelCreeper(2.0F);
 
-   public LayerCreeperCharge(RenderCreeper creeperRendererIn) {
+   public LayerCreeperCharge(RenderCreeper var1) {
       this.creeperRenderer = creeperRendererIn;
    }
 
-   public void doRenderLayer(EntityCreeper entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityCreeper var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (entitylivingbaseIn.getPowered()) {
          boolean flag = entitylivingbaseIn.isInvisible();
          GlStateManager.depthMask(!flag);

@@ -4,76 +4,68 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.HorseArmorType;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventory;
-import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryHorse;
-import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftInventoryView;
-import org.bukkit.inventory.InventoryView;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ContainerHorseInventory extends Container {
    private final IInventory horseInventory;
    private final EntityHorse theHorse;
-   CraftInventoryView bukkitEntity;
-   InventoryPlayer player;
 
-   public InventoryView getBukkitView() {
-      if (this.bukkitEntity != null) {
-         return this.bukkitEntity;
-      } else {
-         CraftInventory inventory = new CraftInventoryHorse(this.horseInventory);
-         return this.bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
-      }
-   }
-
-   public ContainerHorseInventory(IInventory iinventory, IInventory iinventory1, final EntityHorse entityhorse, EntityPlayer entityhuman) {
-      this.player = (InventoryPlayer)iinventory;
-      this.horseInventory = iinventory1;
-      this.theHorse = entityhorse;
-      iinventory1.openInventory(entityhuman);
-      this.addSlotToContainer(new Slot(iinventory1, 0, 8, 18) {
-         public boolean isItemValid(@Nullable ItemStack itemstack) {
-            return super.isItemValid(itemstack) && itemstack.getItem() == Items.SADDLE && !this.getHasStack();
+   public ContainerHorseInventory(IInventory var1, IInventory var2, final EntityHorse var3, EntityPlayer var4) {
+      this.horseInventory = horseInventoryIn;
+      this.theHorse = horse;
+      int i = 3;
+      horseInventoryIn.openInventory(player);
+      int j = -18;
+      this.addSlotToContainer(new Slot(horseInventoryIn, 0, 8, 18) {
+         public boolean isItemValid(@Nullable ItemStack var1) {
+            return super.isItemValid(stack) && stack.getItem() == Items.SADDLE && !this.getHasStack();
          }
       });
-      this.addSlotToContainer(new Slot(iinventory1, 1, 8, 36) {
-         public boolean isItemValid(@Nullable ItemStack itemstack) {
-            return super.isItemValid(itemstack) && entityhorse.getType().isHorse() && HorseArmorType.isHorseArmor(itemstack.getItem());
+      this.addSlotToContainer(new Slot(horseInventoryIn, 1, 8, 36) {
+         public boolean isItemValid(@Nullable ItemStack var1) {
+            return super.isItemValid(stack) && horse.getType().isHorse() && HorseArmorType.isHorseArmor(stack.getItem());
+         }
+
+         @SideOnly(Side.CLIENT)
+         public boolean canBeHovered() {
+            return horse.getType().isHorse();
          }
       });
-      if (entityhorse.isChested()) {
-         for(int i = 0; i < 3; ++i) {
-            for(int j = 0; j < 5; ++j) {
-               this.addSlotToContainer(new Slot(iinventory1, 2 + j + i * 5, 80 + j * 18, 18 + i * 18));
+      if (horse.isChested()) {
+         for(int k = 0; k < 3; ++k) {
+            for(int l = 0; l < 5; ++l) {
+               this.addSlotToContainer(new Slot(horseInventoryIn, 2 + l + k * 5, 80 + l * 18, 18 + k * 18));
             }
          }
       }
 
-      for(int i = 0; i < 3; ++i) {
-         for(int j = 0; j < 9; ++j) {
-            this.addSlotToContainer(new Slot(iinventory, j + i * 9 + 9, 8 + j * 18, 102 + i * 18 + -18));
+      for(int i1 = 0; i1 < 3; ++i1) {
+         for(int k1 = 0; k1 < 9; ++k1) {
+            this.addSlotToContainer(new Slot(playerInventory, k1 + i1 * 9 + 9, 8 + k1 * 18, 102 + i1 * 18 + -18));
          }
       }
 
-      for(int var8 = 0; var8 < 9; ++var8) {
-         this.addSlotToContainer(new Slot(iinventory, var8, 8 + var8 * 18, 142));
+      for(int j1 = 0; j1 < 9; ++j1) {
+         this.addSlotToContainer(new Slot(playerInventory, j1, 8 + j1 * 18, 142));
       }
 
    }
 
-   public boolean canInteractWith(EntityPlayer entityhuman) {
-      return this.horseInventory.isUsableByPlayer(entityhuman) && this.theHorse.isEntityAlive() && this.theHorse.getDistanceToEntity(entityhuman) < 8.0F;
+   public boolean canInteractWith(EntityPlayer var1) {
+      return this.horseInventory.isUsableByPlayer(playerIn) && this.theHorse.isEntityAlive() && this.theHorse.getDistanceToEntity(playerIn) < 8.0F;
    }
 
    @Nullable
-   public ItemStack transferStackInSlot(EntityPlayer entityhuman, int i) {
+   public ItemStack transferStackInSlot(EntityPlayer var1, int var2) {
       ItemStack itemstack = null;
-      Slot slot = (Slot)this.inventorySlots.get(i);
+      Slot slot = (Slot)this.inventorySlots.get(index);
       if (slot != null && slot.getHasStack()) {
          ItemStack itemstack1 = slot.getStack();
          itemstack = itemstack1.copy();
-         if (i < this.horseInventory.getSizeInventory()) {
+         if (index < this.horseInventory.getSizeInventory()) {
             if (!this.mergeItemStack(itemstack1, this.horseInventory.getSizeInventory(), this.inventorySlots.size(), true)) {
                return null;
             }
@@ -99,8 +91,8 @@ public class ContainerHorseInventory extends Container {
       return itemstack;
    }
 
-   public void onContainerClosed(EntityPlayer entityhuman) {
-      super.onContainerClosed(entityhuman);
-      this.horseInventory.closeInventory(entityhuman);
+   public void onContainerClosed(EntityPlayer var1) {
+      super.onContainerClosed(playerIn);
+      this.horseInventory.closeInventory(playerIn);
    }
 }

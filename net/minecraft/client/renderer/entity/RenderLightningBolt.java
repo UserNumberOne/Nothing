@@ -12,11 +12,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderLightningBolt extends Render {
-   public RenderLightningBolt(RenderManager renderManagerIn) {
+   public RenderLightningBolt(RenderManager var1) {
       super(renderManagerIn);
    }
 
-   public void doRender(EntityLightningBolt entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityLightningBolt var1, double var2, double var4, double var6, float var8, float var9) {
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
       GlStateManager.disableTexture2D();
@@ -114,7 +114,7 @@ public class RenderLightningBolt extends Render {
       GlStateManager.enableTexture2D();
    }
 
-   protected ResourceLocation getEntityTexture(EntityLightningBolt entity) {
+   protected ResourceLocation getEntityTexture(EntityLightningBolt var1) {
       return null;
    }
 }

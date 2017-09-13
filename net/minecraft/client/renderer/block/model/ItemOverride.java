@@ -25,7 +25,7 @@ public class ItemOverride {
    private final ResourceLocation location;
    private final Map mapResourceValues;
 
-   public ItemOverride(ResourceLocation locationIn, Map propertyValues) {
+   public ItemOverride(ResourceLocation var1, Map var2) {
       this.location = locationIn;
       this.mapResourceValues = propertyValues;
    }
@@ -34,7 +34,7 @@ public class ItemOverride {
       return this.location;
    }
 
-   boolean matchesItemStack(ItemStack stack, @Nullable World worldIn, @Nullable EntityLivingBase livingEntity) {
+   boolean matchesItemStack(ItemStack var1, @Nullable World var2, @Nullable EntityLivingBase var3) {
       Item item = stack.getItem();
 
       for(Entry entry : this.mapResourceValues.entrySet()) {
@@ -49,14 +49,14 @@ public class ItemOverride {
 
    @SideOnly(Side.CLIENT)
    static class Deserializer implements JsonDeserializer {
-      public ItemOverride deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public ItemOverride deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          ResourceLocation resourcelocation = new ResourceLocation(JsonUtils.getString(jsonobject, "model"));
          Map map = this.makeMapResourceValues(jsonobject);
          return new ItemOverride(resourcelocation, map);
       }
 
-      protected Map makeMapResourceValues(JsonObject p_188025_1_) {
+      protected Map makeMapResourceValues(JsonObject var1) {
          Map map = Maps.newLinkedHashMap();
          JsonObject jsonobject = JsonUtils.getJsonObject(p_188025_1_, "predicate");
 

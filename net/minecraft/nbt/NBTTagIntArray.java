@@ -12,26 +12,26 @@ public class NBTTagIntArray extends NBTBase {
    }
 
    public NBTTagIntArray(int[] var1) {
-      this.intArray = var1;
+      this.intArray = p_i45132_1_;
    }
 
    void write(DataOutput var1) throws IOException {
-      var1.writeInt(this.intArray.length);
+      output.writeInt(this.intArray.length);
 
-      for(int var5 : this.intArray) {
-         var1.writeInt(var5);
+      for(int i : this.intArray) {
+         output.writeInt(i);
       }
 
    }
 
    void read(DataInput var1, int var2, NBTSizeTracker var3) throws IOException {
-      var3.read(192L);
-      int var4 = var1.readInt();
-      var3.read((long)(32 * var4));
-      this.intArray = new int[var4];
+      sizeTracker.read(192L);
+      int i = input.readInt();
+      sizeTracker.read((long)(32 * i));
+      this.intArray = new int[i];
 
-      for(int var5 = 0; var5 < var4; ++var5) {
-         this.intArray[var5] = var1.readInt();
+      for(int j = 0; j < i; ++j) {
+         this.intArray[j] = input.readInt();
       }
 
    }
@@ -41,23 +41,23 @@ public class NBTTagIntArray extends NBTBase {
    }
 
    public String toString() {
-      String var1 = "[";
+      String s = "[";
 
-      for(int var5 : this.intArray) {
-         var1 = var1 + var5 + ",";
+      for(int i : this.intArray) {
+         s = s + i + ",";
       }
 
-      return var1 + "]";
+      return s + "]";
    }
 
    public NBTTagIntArray copy() {
-      int[] var1 = new int[this.intArray.length];
-      System.arraycopy(this.intArray, 0, var1, 0, this.intArray.length);
-      return new NBTTagIntArray(var1);
+      int[] aint = new int[this.intArray.length];
+      System.arraycopy(this.intArray, 0, aint, 0, this.intArray.length);
+      return new NBTTagIntArray(aint);
    }
 
    public boolean equals(Object var1) {
-      return super.equals(var1) ? Arrays.equals(this.intArray, ((NBTTagIntArray)var1).intArray) : false;
+      return super.equals(p_equals_1_) ? Arrays.equals(this.intArray, ((NBTTagIntArray)p_equals_1_).intArray) : false;
    }
 
    public int hashCode() {
@@ -66,10 +66,5 @@ public class NBTTagIntArray extends NBTBase {
 
    public int[] getIntArray() {
       return this.intArray;
-   }
-
-   // $FF: synthetic method
-   public NBTBase copy() {
-      return this.copy();
    }
 }

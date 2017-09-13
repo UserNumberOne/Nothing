@@ -14,7 +14,7 @@ public class ImageBufferDownload implements IImageBuffer {
    private int imageWidth;
    private int imageHeight;
 
-   public BufferedImage parseUserSkin(BufferedImage image) {
+   public BufferedImage parseUserSkin(BufferedImage var1) {
       if (image == null) {
          return null;
       } else {
@@ -57,7 +57,7 @@ public class ImageBufferDownload implements IImageBuffer {
    public void skinAvailable() {
    }
 
-   private void doTransparencyHack(int p_189559_1_, int p_189559_2_, int p_189559_3_, int p_189559_4_) {
+   private void doTransparencyHack(int var1, int var2, int var3, int var4) {
       for(int i = p_189559_1_; i < p_189559_3_; ++i) {
          for(int j = p_189559_2_; j < p_189559_4_; ++j) {
             int k = this.imageData[i + j * this.imageWidth];
@@ -75,7 +75,7 @@ public class ImageBufferDownload implements IImageBuffer {
 
    }
 
-   private void setAreaOpaque(int x, int y, int width, int height) {
+   private void setAreaOpaque(int var1, int var2, int var3, int var4) {
       for(int i = x; i < width; ++i) {
          for(int j = y; j < height; ++j) {
             this.imageData[i + j * this.imageWidth] |= -16777216;

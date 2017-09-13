@@ -20,7 +20,7 @@ public class Multipart {
    private final List selectors;
    private BlockStateContainer stateContainer;
 
-   public Multipart(List selectorsIn) {
+   public Multipart(List var1) {
       this.selectors = selectorsIn;
    }
 
@@ -38,7 +38,7 @@ public class Multipart {
       return set;
    }
 
-   public void setStateContainer(BlockStateContainer stateContainerIn) {
+   public void setStateContainer(BlockStateContainer var1) {
       this.stateContainer = stateContainerIn;
    }
 
@@ -46,7 +46,7 @@ public class Multipart {
       return this.stateContainer;
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else {
@@ -71,11 +71,11 @@ public class Multipart {
 
    @SideOnly(Side.CLIENT)
    public static class Deserializer implements JsonDeserializer {
-      public Multipart deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public Multipart deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          return new Multipart(this.getSelectors(p_deserialize_3_, p_deserialize_1_.getAsJsonArray()));
       }
 
-      private List getSelectors(JsonDeserializationContext context, JsonArray elements) {
+      private List getSelectors(JsonDeserializationContext var1, JsonArray var2) {
          List list = Lists.newArrayList();
 
          for(JsonElement jsonelement : elements) {

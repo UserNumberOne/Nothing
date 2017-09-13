@@ -15,7 +15,7 @@ public class SoundRegistry extends RegistrySimple {
       return this.soundRegistry;
    }
 
-   public void add(SoundEventAccessor accessor) {
+   public void add(SoundEventAccessor var1) {
       this.putObject(accessor.getLocation(), accessor);
    }
 

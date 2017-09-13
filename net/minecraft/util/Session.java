@@ -22,7 +22,7 @@ public class Session {
    private final Session.Type sessionType;
    private PropertyMap properties;
 
-   public Session(String usernameIn, String playerIDIn, String tokenIn, String sessionTypeIn) {
+   public Session(String var1, String var2, String var3, String var4) {
       if (usernameIn == null || usernameIn.isEmpty()) {
          usernameIn = "MissingName";
          tokenIn = "NotValid";
@@ -73,7 +73,7 @@ public class Session {
       }
    }
 
-   public void setProperties(PropertyMap properties) {
+   public void setProperties(PropertyMap var1) {
       if (this.properties == null) {
          this.properties = properties;
       }
@@ -92,12 +92,12 @@ public class Session {
       private static final Map SESSION_TYPES = Maps.newHashMap();
       private final String sessionType;
 
-      private Type(String sessionTypeIn) {
+      private Type(String var3) {
          this.sessionType = sessionTypeIn;
       }
 
       @Nullable
-      public static Session.Type setSessionType(String sessionTypeIn) {
+      public static Session.Type setSessionType(String var0) {
          return (Session.Type)SESSION_TYPES.get(sessionTypeIn.toLowerCase());
       }
 

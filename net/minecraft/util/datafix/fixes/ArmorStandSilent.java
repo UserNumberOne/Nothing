@@ -9,10 +9,10 @@ public class ArmorStandSilent implements IFixableData {
    }
 
    public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
-      if ("ArmorStand".equals(var1.getString("id")) && var1.getBoolean("Silent") && !var1.getBoolean("Marker")) {
-         var1.removeTag("Silent");
+      if ("ArmorStand".equals(compound.getString("id")) && compound.getBoolean("Silent") && !compound.getBoolean("Marker")) {
+         compound.removeTag("Silent");
       }
 
-      return var1;
+      return compound;
    }
 }

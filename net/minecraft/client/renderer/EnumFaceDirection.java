@@ -16,15 +16,15 @@ public enum EnumFaceDirection {
    private static final EnumFaceDirection[] FACINGS = new EnumFaceDirection[6];
    private final EnumFaceDirection.VertexInformation[] vertexInfos;
 
-   public static EnumFaceDirection getFacing(EnumFacing facing) {
+   public static EnumFaceDirection getFacing(EnumFacing var0) {
       return FACINGS[facing.getIndex()];
    }
 
-   private EnumFaceDirection(EnumFaceDirection.VertexInformation[] vertexInfosIn) {
+   private EnumFaceDirection(EnumFaceDirection.VertexInformation[] var3) {
       this.vertexInfos = vertexInfosIn;
    }
 
-   public EnumFaceDirection.VertexInformation getVertexInformation(int index) {
+   public EnumFaceDirection.VertexInformation getVertexInformation(int var1) {
       return this.vertexInfos[index];
    }
 
@@ -53,7 +53,7 @@ public enum EnumFaceDirection {
       public final int yIndex;
       public final int zIndex;
 
-      private VertexInformation(int xIndexIn, int yIndexIn, int zIndexIn) {
+      private VertexInformation(int var1, int var2, int var3) {
          this.xIndex = xIndexIn;
          this.yIndex = yIndexIn;
          this.zIndex = zIndexIn;

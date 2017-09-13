@@ -17,12 +17,12 @@ public class BlockFaceUV {
    public float[] uvs;
    public final int rotation;
 
-   public BlockFaceUV(@Nullable float[] uvsIn, int rotationIn) {
+   public BlockFaceUV(@Nullable float[] var1, int var2) {
       this.uvs = uvsIn;
       this.rotation = rotationIn;
    }
 
-   public float getVertexU(int p_178348_1_) {
+   public float getVertexU(int var1) {
       if (this.uvs == null) {
          throw new NullPointerException("uvs");
       } else {
@@ -31,7 +31,7 @@ public class BlockFaceUV {
       }
    }
 
-   public float getVertexV(int p_178346_1_) {
+   public float getVertexV(int var1) {
       if (this.uvs == null) {
          throw new NullPointerException("uvs");
       } else {
@@ -40,15 +40,15 @@ public class BlockFaceUV {
       }
    }
 
-   private int getVertexRotated(int p_178347_1_) {
+   private int getVertexRotated(int var1) {
       return (p_178347_1_ + this.rotation / 90) % 4;
    }
 
-   public int getVertexRotatedRev(int p_178345_1_) {
+   public int getVertexRotatedRev(int var1) {
       return (p_178345_1_ + (4 - this.rotation / 90)) % 4;
    }
 
-   public void setUvs(float[] uvsIn) {
+   public void setUvs(float[] var1) {
       if (this.uvs == null) {
          this.uvs = uvsIn;
       }
@@ -57,14 +57,14 @@ public class BlockFaceUV {
 
    @SideOnly(Side.CLIENT)
    static class Deserializer implements JsonDeserializer {
-      public BlockFaceUV deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public BlockFaceUV deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          float[] afloat = this.parseUV(jsonobject);
          int i = this.parseRotation(jsonobject);
          return new BlockFaceUV(afloat, i);
       }
 
-      protected int parseRotation(JsonObject object) {
+      protected int parseRotation(JsonObject var1) {
          int i = JsonUtils.getInt(object, "rotation", 0);
          if (i >= 0 && i % 90 == 0 && i / 90 <= 3) {
             return i;
@@ -74,7 +74,7 @@ public class BlockFaceUV {
       }
 
       @Nullable
-      private float[] parseUV(JsonObject object) {
+      private float[] parseUV(JsonObject var1) {
          if (!object.has("uv")) {
             return null;
          } else {

@@ -32,7 +32,7 @@ public class TileEntityItemStackRenderer {
    private final TileEntitySkull skull = new TileEntitySkull();
    private final ModelShield modelShield = new ModelShield();
 
-   public void renderByItem(ItemStack itemStackIn) {
+   public void renderByItem(ItemStack var1) {
       if (itemStackIn.getItem() == Items.BANNER) {
          this.banner.setItemValues(itemStackIn);
          TileEntityRendererDispatcher.instance.renderTileEntityAt(this.banner, 0.0D, 0.0D, 0.0D, 0.0F);

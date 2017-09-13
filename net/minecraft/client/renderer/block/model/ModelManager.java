@@ -17,12 +17,12 @@ public class ModelManager implements IResourceManagerReloadListener {
    private final BlockModelShapes modelProvider;
    private IBakedModel defaultModel;
 
-   public ModelManager(TextureMap textures) {
+   public ModelManager(TextureMap var1) {
       this.texMap = textures;
       this.modelProvider = new BlockModelShapes(this);
    }
 
-   public void onResourceManagerReload(IResourceManager resourceManager) {
+   public void onResourceManagerReload(IResourceManager var1) {
       ModelLoader modelbakery = new ModelLoader(resourceManager, this.texMap, this.modelProvider);
       this.modelRegistry = modelbakery.setupModelRegistry();
       this.defaultModel = (IBakedModel)this.modelRegistry.getObject(ModelBakery.MODEL_MISSING);
@@ -30,7 +30,7 @@ public class ModelManager implements IResourceManagerReloadListener {
       this.modelProvider.reloadModels();
    }
 
-   public IBakedModel getModel(ModelResourceLocation modelLocation) {
+   public IBakedModel getModel(ModelResourceLocation var1) {
       if (modelLocation == null) {
          return this.defaultModel;
       } else {

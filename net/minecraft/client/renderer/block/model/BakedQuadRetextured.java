@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class BakedQuadRetextured extends BakedQuad {
    private final TextureAtlasSprite texture;
 
-   public BakedQuadRetextured(BakedQuad quad, TextureAtlasSprite textureIn) {
+   public BakedQuadRetextured(BakedQuad var1, TextureAtlasSprite var2) {
       super(Arrays.copyOf(quad.getVertexData(), quad.getVertexData().length), quad.tintIndex, FaceBakery.getFacingFromVertexData(quad.getVertexData()), quad.getSprite(), quad.applyDiffuseLighting, quad.format);
       this.texture = textureIn;
       this.remapQuad();

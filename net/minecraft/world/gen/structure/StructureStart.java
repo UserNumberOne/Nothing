@@ -19,8 +19,8 @@ public abstract class StructureStart {
    }
 
    public StructureStart(int var1, int var2) {
-      this.chunkPosX = var1;
-      this.chunkPosZ = var2;
+      this.chunkPosX = chunkX;
+      this.chunkPosZ = chunkZ;
    }
 
    public StructureBoundingBox getBoundingBox() {
@@ -32,12 +32,12 @@ public abstract class StructureStart {
    }
 
    public void generateStructure(World var1, Random var2, StructureBoundingBox var3) {
-      Iterator var4 = this.components.iterator();
+      Iterator iterator = this.components.iterator();
 
-      while(var4.hasNext()) {
-         StructureComponent var5 = (StructureComponent)var4.next();
-         if (var5.getBoundingBox().intersectsWith(var3) && !var5.addComponentParts(var1, var2, var3)) {
-            var4.remove();
+      while(iterator.hasNext()) {
+         StructureComponent structurecomponent = (StructureComponent)iterator.next();
+         if (structurecomponent.getBoundingBox().intersectsWith(structurebb) && !structurecomponent.addComponentParts(worldIn, rand, structurebb)) {
+            iterator.remove();
          }
       }
 
@@ -46,81 +46,88 @@ public abstract class StructureStart {
    protected void updateBoundingBox() {
       this.boundingBox = StructureBoundingBox.getNewBoundingBox();
 
-      for(StructureComponent var2 : this.components) {
-         this.boundingBox.expandTo(var2.getBoundingBox());
+      for(StructureComponent structurecomponent : this.components) {
+         this.boundingBox.expandTo(structurecomponent.getBoundingBox());
       }
 
    }
 
    public NBTTagCompound writeStructureComponentsToNBT(int var1, int var2) {
-      NBTTagCompound var3 = new NBTTagCompound();
-      var3.setString("id", MapGenStructureIO.getStructureStartName(this));
-      var3.setInteger("ChunkX", var1);
-      var3.setInteger("ChunkZ", var2);
-      var3.setTag("BB", this.boundingBox.toNBTTagIntArray());
-      NBTTagList var4 = new NBTTagList();
+      if (MapGenStructureIO.getStructureStartName(this) == null) {
+         throw new RuntimeException("StructureStart \"" + this.getClass().getName() + "\" missing ID Mapping, Modder see MapGenStructureIO");
+      } else {
+         NBTTagCompound nbttagcompound = new NBTTagCompound();
+         nbttagcompound.setString("id", MapGenStructureIO.getStructureStartName(this));
+         nbttagcompound.setInteger("ChunkX", chunkX);
+         nbttagcompound.setInteger("ChunkZ", chunkZ);
+         nbttagcompound.setTag("BB", this.boundingBox.toNBTTagIntArray());
+         NBTTagList nbttaglist = new NBTTagList();
 
-      for(StructureComponent var6 : this.components) {
-         var4.appendTag(var6.createStructureBaseNBT());
+         for(StructureComponent structurecomponent : this.components) {
+            nbttaglist.appendTag(structurecomponent.createStructureBaseNBT());
+         }
+
+         nbttagcompound.setTag("Children", nbttaglist);
+         this.writeToNBT(nbttagcompound);
+         return nbttagcompound;
       }
-
-      var3.setTag("Children", var4);
-      this.writeToNBT(var3);
-      return var3;
    }
 
    public void writeToNBT(NBTTagCompound var1) {
    }
 
    public void readStructureComponentsFromNBT(World var1, NBTTagCompound var2) {
-      this.chunkPosX = var2.getInteger("ChunkX");
-      this.chunkPosZ = var2.getInteger("ChunkZ");
-      if (var2.hasKey("BB")) {
-         this.boundingBox = new StructureBoundingBox(var2.getIntArray("BB"));
+      this.chunkPosX = tagCompound.getInteger("ChunkX");
+      this.chunkPosZ = tagCompound.getInteger("ChunkZ");
+      if (tagCompound.hasKey("BB")) {
+         this.boundingBox = new StructureBoundingBox(tagCompound.getIntArray("BB"));
       }
 
-      NBTTagList var3 = var2.getTagList("Children", 10);
+      NBTTagList nbttaglist = tagCompound.getTagList("Children", 10);
 
-      for(int var4 = 0; var4 < var3.tagCount(); ++var4) {
-         this.components.add(MapGenStructureIO.getStructureComponent(var3.getCompoundTagAt(var4), var1));
+      for(int i = 0; i < nbttaglist.tagCount(); ++i) {
+         StructureComponent tmp = MapGenStructureIO.getStructureComponent(nbttaglist.getCompoundTagAt(i), worldIn);
+         if (tmp != null) {
+            this.components.add(tmp);
+         }
       }
 
-      this.readFromNBT(var2);
+      this.readFromNBT(tagCompound);
    }
 
    public void readFromNBT(NBTTagCompound var1) {
    }
 
    protected void markAvailableHeight(World var1, Random var2, int var3) {
-      int var4 = var1.getSeaLevel() - var3;
-      int var5 = this.boundingBox.getYSize() + 1;
-      if (var5 < var4) {
-         var5 += var2.nextInt(var4 - var5);
+      int i = worldIn.getSeaLevel() - p_75067_3_;
+      int j = this.boundingBox.getYSize() + 1;
+      if (j < i) {
+         j += rand.nextInt(i - j);
       }
 
-      int var6 = var5 - this.boundingBox.maxY;
-      this.boundingBox.offset(0, var6, 0);
+      int k = j - this.boundingBox.maxY;
+      this.boundingBox.offset(0, k, 0);
 
-      for(StructureComponent var8 : this.components) {
-         var8.offset(0, var6, 0);
+      for(StructureComponent structurecomponent : this.components) {
+         structurecomponent.offset(0, k, 0);
       }
 
    }
 
    protected void setRandomHeight(World var1, Random var2, int var3, int var4) {
-      int var5 = var4 - var3 + 1 - this.boundingBox.getYSize();
-      int var6;
-      if (var5 > 1) {
-         var6 = var3 + var2.nextInt(var5);
+      int i = p_75070_4_ - p_75070_3_ + 1 - this.boundingBox.getYSize();
+      int j;
+      if (i > 1) {
+         j = p_75070_3_ + rand.nextInt(i);
       } else {
-         var6 = var3;
+         j = p_75070_3_;
       }
 
-      int var7 = var6 - this.boundingBox.minY;
-      this.boundingBox.offset(0, var7, 0);
+      int k = j - this.boundingBox.minY;
+      this.boundingBox.offset(0, k, 0);
 
-      for(StructureComponent var9 : this.components) {
-         var9.offset(0, var7, 0);
+      for(StructureComponent structurecomponent : this.components) {
+         structurecomponent.offset(0, k, 0);
       }
 
    }

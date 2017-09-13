@@ -33,18 +33,18 @@ public class TileEntitySkullRenderer extends TileEntitySpecialRenderer {
    private final ModelSkeletonHead skeletonHead = new ModelSkeletonHead(0, 0, 64, 32);
    private final ModelSkeletonHead humanoidHead = new ModelHumanoidHead();
 
-   public void renderTileEntityAt(TileEntitySkull te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntitySkull var1, double var2, double var4, double var6, float var8, int var9) {
       EnumFacing enumfacing = EnumFacing.getFront(te.getBlockMetadata() & 7);
       float f = te.getAnimationProgress(partialTicks);
       this.renderSkull((float)x, (float)y, (float)z, enumfacing, (float)(te.getSkullRotation() * 360) / 16.0F, te.getSkullType(), te.getPlayerProfile(), destroyStage, f);
    }
 
-   public void setRendererDispatcher(TileEntityRendererDispatcher rendererDispatcherIn) {
+   public void setRendererDispatcher(TileEntityRendererDispatcher var1) {
       super.setRendererDispatcher(rendererDispatcherIn);
       instance = this;
    }
 
-   public void renderSkull(float x, float y, float z, EnumFacing facing, float p_188190_5_, int skullType, @Nullable GameProfile profile, int destroyStage, float animateTicks) {
+   public void renderSkull(float var1, float var2, float var3, EnumFacing var4, float var5, int var6, @Nullable GameProfile var7, int var8, float var9) {
       ModelBase modelbase = this.skeletonHead;
       if (destroyStage >= 0) {
          this.bindTexture(DESTROY_STAGES[destroyStage]);

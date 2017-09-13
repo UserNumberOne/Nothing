@@ -18,14 +18,14 @@ public class SaveHandlerMP implements ISaveHandler {
    public void checkSessionLock() throws MinecraftException {
    }
 
-   public IChunkLoader getChunkLoader(WorldProvider provider) {
+   public IChunkLoader getChunkLoader(WorldProvider var1) {
       return null;
    }
 
-   public void saveWorldInfoWithPlayer(WorldInfo worldInformation, NBTTagCompound tagCompound) {
+   public void saveWorldInfoWithPlayer(WorldInfo var1, NBTTagCompound var2) {
    }
 
-   public void saveWorldInfo(WorldInfo worldInformation) {
+   public void saveWorldInfo(WorldInfo var1) {
    }
 
    public IPlayerFileData getPlayerNBTManager() {
@@ -35,7 +35,7 @@ public class SaveHandlerMP implements ISaveHandler {
    public void flush() {
    }
 
-   public File getMapFileFromName(String mapName) {
+   public File getMapFileFromName(String var1) {
       return null;
    }
 

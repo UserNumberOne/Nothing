@@ -50,7 +50,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
    private boolean underlineStyle;
    private boolean strikethroughStyle;
 
-   public FontRenderer(GameSettings gameSettingsIn, ResourceLocation location, TextureManager textureManagerIn, boolean unicode) {
+   public FontRenderer(GameSettings var1, ResourceLocation var2, TextureManager var3, boolean var4) {
       this.locationFontTexture = location;
       this.renderEngine = textureManagerIn;
       this.unicodeFlag = unicode;
@@ -86,7 +86,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       this.readGlyphSizes();
    }
 
-   public void onResourceManagerReload(IResourceManager resourceManager) {
+   public void onResourceManagerReload(IResourceManager var1) {
       this.readFontTexture();
       this.readGlyphSizes();
    }
@@ -104,30 +104,30 @@ public class FontRenderer implements IResourceManagerReloadListener {
          IOUtils.closeQuietly(iresource);
       }
 
-      int lvt_3_1_ = bufferedimage.getWidth();
-      int lvt_4_1_ = bufferedimage.getHeight();
-      int[] lvt_5_1_ = new int[lvt_3_1_ * lvt_4_1_];
-      bufferedimage.getRGB(0, 0, lvt_3_1_, lvt_4_1_, lvt_5_1_, 0, lvt_3_1_);
-      int lvt_6_1_ = lvt_4_1_ / 16;
-      int lvt_7_1_ = lvt_3_1_ / 16;
-      boolean lvt_8_1_ = true;
-      float lvt_9_1_ = 8.0F / (float)lvt_7_1_;
+      int var3 = bufferedimage.getWidth();
+      int var4 = bufferedimage.getHeight();
+      int[] var5 = new int[var3 * var4];
+      bufferedimage.getRGB(0, 0, var3, var4, var5, 0, var3);
+      int var6 = var4 / 16;
+      int var7 = var3 / 16;
+      boolean var8 = true;
+      float var9 = 8.0F / (float)var7;
 
-      for(int lvt_10_1_ = 0; lvt_10_1_ < 256; ++lvt_10_1_) {
-         int j1 = lvt_10_1_ % 16;
-         int k1 = lvt_10_1_ / 16;
-         if (lvt_10_1_ == 32) {
-            this.charWidth[lvt_10_1_] = 4;
+      for(int var10 = 0; var10 < 256; ++var10) {
+         int j1 = var10 % 16;
+         int k1 = var10 / 16;
+         if (var10 == 32) {
+            this.charWidth[var10] = 4;
          }
 
          int l1;
-         for(l1 = lvt_7_1_ - 1; l1 >= 0; --l1) {
-            int i2 = j1 * lvt_7_1_ + l1;
+         for(l1 = var7 - 1; l1 >= 0; --l1) {
+            int i2 = j1 * var7 + l1;
             boolean flag1 = true;
 
-            for(int j2 = 0; j2 < lvt_6_1_ && flag1; ++j2) {
-               int k2 = (k1 * lvt_7_1_ + j2) * lvt_3_1_;
-               if ((lvt_5_1_[i2 + k2] >> 24 & 255) != 0) {
+            for(int j2 = 0; j2 < var6 && flag1; ++j2) {
+               int k2 = (k1 * var7 + j2) * var3;
+               if ((var5[i2 + k2] >> 24 & 255) != 0) {
                   flag1 = false;
                }
             }
@@ -138,7 +138,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
          }
 
          ++l1;
-         this.charWidth[lvt_10_1_] = (int)(0.5D + (double)((float)l1 * lvt_9_1_)) + 1;
+         this.charWidth[var10] = (int)(0.5D + (double)((float)l1 * var9)) + 1;
       }
 
    }
@@ -157,7 +157,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
 
    }
 
-   private float renderChar(char ch, boolean italic) {
+   private float renderChar(char var1, boolean var2) {
       if (ch == ' ') {
          return 4.0F;
       } else {
@@ -166,7 +166,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       }
    }
 
-   protected float renderDefaultChar(int ch, boolean italic) {
+   protected float renderDefaultChar(int var1, boolean var2) {
       int i = ch % 16 * 8;
       int j = ch / 16 * 8;
       int k = italic ? 1 : 0;
@@ -186,7 +186,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       return (float)l;
    }
 
-   private ResourceLocation getUnicodePageLocation(int page) {
+   private ResourceLocation getUnicodePageLocation(int var1) {
       if (UNICODE_PAGE_LOCATIONS[page] == null) {
          UNICODE_PAGE_LOCATIONS[page] = new ResourceLocation(String.format("textures/font/unicode_page_%02x.png", page));
       }
@@ -194,11 +194,11 @@ public class FontRenderer implements IResourceManagerReloadListener {
       return UNICODE_PAGE_LOCATIONS[page];
    }
 
-   private void loadGlyphTexture(int page) {
+   private void loadGlyphTexture(int var1) {
       this.bindTexture(this.getUnicodePageLocation(page));
    }
 
-   protected float renderUnicodeChar(char ch, boolean italic) {
+   protected float renderUnicodeChar(char var1, boolean var2) {
       int i = this.glyphWidth[ch] & 255;
       if (i == 0) {
          return 0.0F;
@@ -227,15 +227,15 @@ public class FontRenderer implements IResourceManagerReloadListener {
       }
    }
 
-   public int drawStringWithShadow(String text, float x, float y, int color) {
+   public int drawStringWithShadow(String var1, float var2, float var3, int var4) {
       return this.drawString(text, x, y, color, true);
    }
 
-   public int drawString(String text, int x, int y, int color) {
+   public int drawString(String var1, int var2, int var3, int var4) {
       return this.drawString(text, (float)x, (float)y, color, false);
    }
 
-   public int drawString(String text, float x, float y, int color, boolean dropShadow) {
+   public int drawString(String var1, float var2, float var3, int var4, boolean var5) {
       this.enableAlpha();
       this.resetStyles();
       int i;
@@ -249,12 +249,12 @@ public class FontRenderer implements IResourceManagerReloadListener {
       return i;
    }
 
-   private String bidiReorder(String text) {
+   private String bidiReorder(String var1) {
       try {
          Bidi bidi = new Bidi((new ArabicShaping(8)).shape(text), 127);
          bidi.setReorderingMode(0);
          return bidi.writeReordered(2);
-      } catch (ArabicShapingException var31) {
+      } catch (ArabicShapingException var3) {
          return text;
       }
    }
@@ -267,7 +267,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       this.strikethroughStyle = false;
    }
 
-   private void renderStringAtPos(String text, boolean shadow) {
+   private void renderStringAtPos(String var1, boolean var2) {
       for(int i = 0; i < text.length(); ++i) {
          char c0 = text.charAt(i);
          if (c0 == 167 && i + 1 < text.length()) {
@@ -362,7 +362,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
 
    }
 
-   protected void doDraw(float f) {
+   protected void doDraw(float var1) {
       if (this.strikethroughStyle) {
          Tessellator tessellator = Tessellator.getInstance();
          VertexBuffer vertexbuffer = tessellator.getBuffer();
@@ -393,7 +393,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       this.posX += (float)((int)f);
    }
 
-   private int renderStringAligned(String text, int x, int y, int width, int color, boolean dropShadow) {
+   private int renderStringAligned(String var1, int var2, int var3, int var4, int var5, boolean var6) {
       if (this.bidiFlag) {
          int i = this.getStringWidth(this.bidiReorder(text));
          x = x + width - i;
@@ -402,7 +402,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       return this.renderString(text, (float)x, (float)y, color, dropShadow);
    }
 
-   private int renderString(String text, float x, float y, int color, boolean dropShadow) {
+   private int renderString(String var1, float var2, float var3, int var4, boolean var5) {
       if (text == null) {
          return 0;
       } else {
@@ -430,7 +430,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       }
    }
 
-   public int getStringWidth(String text) {
+   public int getStringWidth(String var1) {
       if (text == null) {
          return 0;
       } else {
@@ -464,7 +464,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       }
    }
 
-   public int getCharWidth(char character) {
+   public int getCharWidth(char var1) {
       if (character == 167) {
          return -1;
       } else if (character == ' ') {
@@ -485,11 +485,11 @@ public class FontRenderer implements IResourceManagerReloadListener {
       }
    }
 
-   public String trimStringToWidth(String text, int width) {
+   public String trimStringToWidth(String var1, int var2) {
       return this.trimStringToWidth(text, width, false);
    }
 
-   public String trimStringToWidth(String text, int width, boolean reverse) {
+   public String trimStringToWidth(String var1, int var2, boolean var3) {
       StringBuilder stringbuilder = new StringBuilder();
       int i = 0;
       int j = reverse ? text.length() - 1 : 0;
@@ -532,7 +532,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       return stringbuilder.toString();
    }
 
-   private String trimStringNewline(String text) {
+   private String trimStringNewline(String var1) {
       while(text != null && text.endsWith("\n")) {
          text = text.substring(0, text.length() - 1);
       }
@@ -540,14 +540,14 @@ public class FontRenderer implements IResourceManagerReloadListener {
       return text;
    }
 
-   public void drawSplitString(String str, int x, int y, int wrapWidth, int textColor) {
+   public void drawSplitString(String var1, int var2, int var3, int var4, int var5) {
       this.resetStyles();
       this.textColor = textColor;
       str = this.trimStringNewline(str);
       this.renderSplitString(str, x, y, wrapWidth, false);
    }
 
-   private void renderSplitString(String str, int x, int y, int wrapWidth, boolean addShadow) {
+   private void renderSplitString(String var1, int var2, int var3, int var4, boolean var5) {
       for(String s : this.listFormattedStringToWidth(str, wrapWidth)) {
          this.renderStringAligned(s, x, y, wrapWidth, this.textColor, addShadow);
          y += this.FONT_HEIGHT;
@@ -555,11 +555,11 @@ public class FontRenderer implements IResourceManagerReloadListener {
 
    }
 
-   public int splitStringWidth(String str, int maxLength) {
+   public int splitStringWidth(String var1, int var2) {
       return this.FONT_HEIGHT * this.listFormattedStringToWidth(str, maxLength).size();
    }
 
-   public void setUnicodeFlag(boolean unicodeFlagIn) {
+   public void setUnicodeFlag(boolean var1) {
       this.unicodeFlag = unicodeFlagIn;
    }
 
@@ -567,15 +567,15 @@ public class FontRenderer implements IResourceManagerReloadListener {
       return this.unicodeFlag;
    }
 
-   public void setBidiFlag(boolean bidiFlagIn) {
+   public void setBidiFlag(boolean var1) {
       this.bidiFlag = bidiFlagIn;
    }
 
-   public List listFormattedStringToWidth(String str, int wrapWidth) {
+   public List listFormattedStringToWidth(String var1, int var2) {
       return Arrays.asList(this.wrapFormattedStringToWidth(str, wrapWidth).split("\n"));
    }
 
-   String wrapFormattedStringToWidth(String str, int wrapWidth) {
+   String wrapFormattedStringToWidth(String var1, int var2) {
       int i = this.sizeStringToWidth(str, wrapWidth);
       if (str.length() <= i) {
          return str;
@@ -588,7 +588,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       }
    }
 
-   private int sizeStringToWidth(String str, int wrapWidth) {
+   private int sizeStringToWidth(String var1, int var2) {
       int i = str.length();
       int j = 0;
       int k = 0;
@@ -636,15 +636,15 @@ public class FontRenderer implements IResourceManagerReloadListener {
       return k != i && l != -1 && l < k ? l : k;
    }
 
-   private static boolean isFormatColor(char colorChar) {
+   private static boolean isFormatColor(char var0) {
       return colorChar >= '0' && colorChar <= '9' || colorChar >= 'a' && colorChar <= 'f' || colorChar >= 'A' && colorChar <= 'F';
    }
 
-   private static boolean isFormatSpecial(char formatChar) {
+   private static boolean isFormatSpecial(char var0) {
       return formatChar >= 'k' && formatChar <= 'o' || formatChar >= 'K' && formatChar <= 'O' || formatChar == 'r' || formatChar == 'R';
    }
 
-   public static String getFormatFromString(String text) {
+   public static String getFormatFromString(String var0) {
       String s = "";
       int i = -1;
       int j = text.length();
@@ -667,7 +667,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
       return this.bidiFlag;
    }
 
-   protected void setColor(float r, float g, float b, float a) {
+   protected void setColor(float var1, float var2, float var3, float var4) {
       GlStateManager.color(r, g, b, a);
    }
 
@@ -675,15 +675,15 @@ public class FontRenderer implements IResourceManagerReloadListener {
       GlStateManager.enableAlpha();
    }
 
-   protected void bindTexture(ResourceLocation location) {
+   protected void bindTexture(ResourceLocation var1) {
       this.renderEngine.bindTexture(location);
    }
 
-   protected IResource getResource(ResourceLocation location) throws IOException {
+   protected IResource getResource(ResourceLocation var1) throws IOException {
       return Minecraft.getMinecraft().getResourceManager().getResource(location);
    }
 
-   public int getColorCode(char character) {
+   public int getColorCode(char var1) {
       int i = "0123456789abcdef".indexOf(character);
       return i >= 0 && i < this.colorCode.length ? this.colorCode[i] : -1;
    }

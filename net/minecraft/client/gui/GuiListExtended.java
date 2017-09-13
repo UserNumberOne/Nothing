@@ -6,29 +6,29 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public abstract class GuiListExtended extends GuiSlot {
-   public GuiListExtended(Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
+   public GuiListExtended(Minecraft var1, int var2, int var3, int var4, int var5, int var6) {
       super(mcIn, widthIn, heightIn, topIn, bottomIn, slotHeightIn);
    }
 
-   protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY) {
+   protected void elementClicked(int var1, boolean var2, int var3, int var4) {
    }
 
-   protected boolean isSelected(int slotIndex) {
+   protected boolean isSelected(int var1) {
       return false;
    }
 
    protected void drawBackground() {
    }
 
-   protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn) {
+   protected void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6) {
       this.getListEntry(entryID).drawEntry(entryID, insideLeft, yPos, this.getListWidth(), insideSlotHeight, mouseXIn, mouseYIn, this.isMouseYWithinSlotBounds(mouseYIn) && this.getSlotIndexFromScreenCoords(mouseXIn, mouseYIn) == entryID);
    }
 
-   protected void updateItemPos(int entryID, int insideLeft, int yPos) {
+   protected void updateItemPos(int var1, int var2, int var3) {
       this.getListEntry(entryID).setSelected(entryID, insideLeft, yPos);
    }
 
-   public boolean mouseClicked(int mouseX, int mouseY, int mouseEvent) {
+   public boolean mouseClicked(int var1, int var2, int var3) {
       if (this.isMouseYWithinSlotBounds(mouseY)) {
          int i = this.getSlotIndexFromScreenCoords(mouseX, mouseY);
          if (i >= 0) {
@@ -46,7 +46,7 @@ public abstract class GuiListExtended extends GuiSlot {
       return false;
    }
 
-   public boolean mouseReleased(int p_148181_1_, int p_148181_2_, int p_148181_3_) {
+   public boolean mouseReleased(int var1, int var2, int var3) {
       for(int i = 0; i < this.getSize(); ++i) {
          int j = this.left + this.width / 2 - this.getListWidth() / 2 + 2;
          int k = this.top + 4 - this.getAmountScrolled() + i * this.slotHeight + this.headerPadding;

@@ -18,7 +18,7 @@ public class GuiScreenHorseInventory extends GuiContainer {
    private float mousePosx;
    private float mousePosY;
 
-   public GuiScreenHorseInventory(IInventory playerInv, IInventory horseInv, EntityHorse horse) {
+   public GuiScreenHorseInventory(IInventory var1, IInventory var2, EntityHorse var3) {
       super(new ContainerHorseInventory(playerInv, horseInv, horse, Minecraft.getMinecraft().player));
       this.playerInventory = playerInv;
       this.horseInventory = horseInv;
@@ -26,12 +26,12 @@ public class GuiScreenHorseInventory extends GuiContainer {
       this.allowUserInput = false;
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       this.fontRendererObj.drawString(this.horseInventory.getDisplayName().getUnformattedText(), 8, 6, 4210752);
       this.fontRendererObj.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(HORSE_GUI_TEXTURES);
       int i = (this.width - this.xSize) / 2;
@@ -48,7 +48,7 @@ public class GuiScreenHorseInventory extends GuiContainer {
       GuiInventory.drawEntityOnScreen(i + 51, j + 60, 17, (float)(i + 51) - this.mousePosx, (float)(j + 75 - 50) - this.mousePosY, this.horseEntity);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.mousePosx = (float)mouseX;
       this.mousePosY = (float)mouseY;
       super.drawScreen(mouseX, mouseY, partialTicks);

@@ -46,7 +46,7 @@ public class ParticleManager {
    private final Map particleTypes = Maps.newHashMap();
    private final Queue queueEntityFX = Queues.newArrayDeque();
 
-   public ParticleManager(World worldIn, TextureManager rendererIn) {
+   public ParticleManager(World var1, TextureManager var2) {
       this.world = worldIn;
       this.renderer = rendererIn;
 
@@ -110,16 +110,16 @@ public class ParticleManager {
       this.registerParticle(EnumParticleTypes.SWEEP_ATTACK.getParticleID(), new ParticleSweepAttack.Factory());
    }
 
-   public void registerParticle(int id, IParticleFactory particleFactory) {
+   public void registerParticle(int var1, IParticleFactory var2) {
       this.particleTypes.put(Integer.valueOf(id), particleFactory);
    }
 
-   public void emitParticleAtEntity(Entity entityIn, EnumParticleTypes particleTypes) {
+   public void emitParticleAtEntity(Entity var1, EnumParticleTypes var2) {
       this.particleEmitters.add(new ParticleEmitter(this.world, entityIn, particleTypes));
    }
 
    @Nullable
-   public Particle spawnEffectParticle(int particleId, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... parameters) {
+   public Particle spawnEffectParticle(int var1, double var2, double var4, double var6, double var8, double var10, double var12, int... var14) {
       IParticleFactory iparticlefactory = (IParticleFactory)this.particleTypes.get(Integer.valueOf(particleId));
       if (iparticlefactory != null) {
          Particle particle = iparticlefactory.createParticle(particleId, this.world, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
@@ -132,7 +132,7 @@ public class ParticleManager {
       return null;
    }
 
-   public void addEffect(Particle effect) {
+   public void addEffect(Particle var1) {
       if (effect != null) {
          this.queueEntityFX.add(effect);
       }
@@ -170,7 +170,7 @@ public class ParticleManager {
 
    }
 
-   private void updateEffectLayer(int layer) {
+   private void updateEffectLayer(int var1) {
       this.world.theProfiler.startSection(layer + "");
 
       for(int i = 0; i < 2; ++i) {
@@ -182,7 +182,7 @@ public class ParticleManager {
       this.world.theProfiler.endSection();
    }
 
-   private void tickParticleList(Queue p_187240_1_) {
+   private void tickParticleList(Queue var1) {
       if (!p_187240_1_.isEmpty()) {
          Iterator iterator = p_187240_1_.iterator();
 
@@ -197,7 +197,7 @@ public class ParticleManager {
 
    }
 
-   private void tickParticle(final Particle particle) {
+   private void tickParticle(final Particle var1) {
       try {
          particle.onUpdate();
       } catch (Throwable var6) {
@@ -218,7 +218,7 @@ public class ParticleManager {
       }
    }
 
-   public void renderParticles(Entity entityIn, float partialTicks) {
+   public void renderParticles(Entity var1, float var2) {
       float f = ActiveRenderInfo.getRotationX();
       float f1 = ActiveRenderInfo.getRotationZ();
       float f2 = ActiveRenderInfo.getRotationYZ();
@@ -289,7 +289,7 @@ public class ParticleManager {
       GlStateManager.alphaFunc(516, 0.1F);
    }
 
-   public void renderLitParticles(Entity entityIn, float partialTick) {
+   public void renderLitParticles(Entity var1, float var2) {
       float f = 0.017453292F;
       float f1 = MathHelper.cos(entityIn.rotationYaw * 0.017453292F);
       float f2 = MathHelper.sin(entityIn.rotationYaw * 0.017453292F);
@@ -311,7 +311,7 @@ public class ParticleManager {
 
    }
 
-   public void clearEffects(@Nullable World worldIn) {
+   public void clearEffects(@Nullable World var1) {
       this.world = worldIn;
 
       for(int i = 0; i < 4; ++i) {
@@ -323,7 +323,7 @@ public class ParticleManager {
       this.particleEmitters.clear();
    }
 
-   public void addBlockDestroyEffects(BlockPos pos, IBlockState state) {
+   public void addBlockDestroyEffects(BlockPos var1, IBlockState var2) {
       if (!state.getBlock().isAir(state, this.world, pos) && !state.getBlock().addDestroyEffects(this.world, pos, this)) {
          state = state.getActualState(this.world, pos);
          int i = 4;
@@ -342,7 +342,7 @@ public class ParticleManager {
 
    }
 
-   public void addBlockHitEffects(BlockPos pos, EnumFacing side) {
+   public void addBlockHitEffects(BlockPos var1, EnumFacing var2) {
       IBlockState iblockstate = this.world.getBlockState(pos);
       if (iblockstate.getRenderType() != EnumBlockRenderType.INVISIBLE) {
          int i = pos.getX();
@@ -394,7 +394,7 @@ public class ParticleManager {
       return "" + i;
    }
 
-   public void addBlockHitEffects(BlockPos pos, RayTraceResult target) {
+   public void addBlockHitEffects(BlockPos var1, RayTraceResult var2) {
       IBlockState state = this.world.getBlockState(pos);
       if (state != null && !state.getBlock().addHitEffects(state, this.world, target, this)) {
          this.addBlockHitEffects(pos, target.sideHit);

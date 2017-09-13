@@ -10,40 +10,40 @@ public class BitArray {
    private final int arraySize;
 
    public BitArray(int var1, int var2) {
-      Validate.inclusiveBetween(1L, 32L, (long)var1);
-      this.arraySize = var2;
-      this.bitsPerEntry = var1;
-      this.maxEntryValue = (1L << var1) - 1L;
-      this.longArray = new long[MathHelper.roundUp(var2 * var1, 64) / 64];
+      Validate.inclusiveBetween(1L, 32L, (long)bitsPerEntryIn);
+      this.arraySize = arraySizeIn;
+      this.bitsPerEntry = bitsPerEntryIn;
+      this.maxEntryValue = (1L << bitsPerEntryIn) - 1L;
+      this.longArray = new long[MathHelper.roundUp(arraySizeIn * bitsPerEntryIn, 64) / 64];
    }
 
    public void setAt(int var1, int var2) {
-      Validate.inclusiveBetween(0L, (long)(this.arraySize - 1), (long)var1);
-      Validate.inclusiveBetween(0L, this.maxEntryValue, (long)var2);
-      int var3 = var1 * this.bitsPerEntry;
-      int var4 = var3 / 64;
-      int var5 = ((var1 + 1) * this.bitsPerEntry - 1) / 64;
-      int var6 = var3 % 64;
-      this.longArray[var4] = this.longArray[var4] & ~(this.maxEntryValue << var6) | ((long)var2 & this.maxEntryValue) << var6;
-      if (var4 != var5) {
-         int var7 = 64 - var6;
-         int var8 = this.bitsPerEntry - var7;
-         this.longArray[var5] = this.longArray[var5] >>> var8 << var8 | ((long)var2 & this.maxEntryValue) >> var7;
+      Validate.inclusiveBetween(0L, (long)(this.arraySize - 1), (long)index);
+      Validate.inclusiveBetween(0L, this.maxEntryValue, (long)value);
+      int i = index * this.bitsPerEntry;
+      int j = i / 64;
+      int k = ((index + 1) * this.bitsPerEntry - 1) / 64;
+      int l = i % 64;
+      this.longArray[j] = this.longArray[j] & ~(this.maxEntryValue << l) | ((long)value & this.maxEntryValue) << l;
+      if (j != k) {
+         int i1 = 64 - l;
+         int j1 = this.bitsPerEntry - i1;
+         this.longArray[k] = this.longArray[k] >>> j1 << j1 | ((long)value & this.maxEntryValue) >> i1;
       }
 
    }
 
    public int getAt(int var1) {
-      Validate.inclusiveBetween(0L, (long)(this.arraySize - 1), (long)var1);
-      int var2 = var1 * this.bitsPerEntry;
-      int var3 = var2 / 64;
-      int var4 = ((var1 + 1) * this.bitsPerEntry - 1) / 64;
-      int var5 = var2 % 64;
-      if (var3 == var4) {
-         return (int)(this.longArray[var3] >>> var5 & this.maxEntryValue);
+      Validate.inclusiveBetween(0L, (long)(this.arraySize - 1), (long)index);
+      int i = index * this.bitsPerEntry;
+      int j = i / 64;
+      int k = ((index + 1) * this.bitsPerEntry - 1) / 64;
+      int l = i % 64;
+      if (j == k) {
+         return (int)(this.longArray[j] >>> l & this.maxEntryValue);
       } else {
-         int var6 = 64 - var5;
-         return (int)((this.longArray[var3] >>> var5 | this.longArray[var4] << var6) & this.maxEntryValue);
+         int i1 = 64 - l;
+         return (int)((this.longArray[j] >>> l | this.longArray[k] << i1) & this.maxEntryValue);
       }
    }
 

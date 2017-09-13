@@ -19,14 +19,14 @@ public class RenderShulker extends RenderLiving {
    private static final ResourceLocation SHULKER_ENDERGOLEM_TEXTURE = new ResourceLocation("textures/entity/shulker/endergolem.png");
    private int modelVersion;
 
-   public RenderShulker(RenderManager manager, ModelShulker p_i46550_2_) {
+   public RenderShulker(RenderManager var1, ModelShulker var2) {
       super(manager, p_i46550_2_, 0.0F);
       this.addLayer(new RenderShulker.HeadLayer());
       this.modelVersion = p_i46550_2_.getModelVersion();
       this.shadowSize = 0.0F;
    }
 
-   public void doRender(EntityShulker entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityShulker var1, double var2, double var4, double var6, float var8, float var9) {
       if (this.modelVersion != ((ModelShulker)this.mainModel).getModelVersion()) {
          this.mainModel = new ModelShulker();
          this.modelVersion = ((ModelShulker)this.mainModel).getModelVersion();
@@ -48,7 +48,7 @@ public class RenderShulker extends RenderLiving {
 
    }
 
-   public boolean shouldRender(EntityShulker livingEntity, ICamera camera, double camX, double camY, double camZ) {
+   public boolean shouldRender(EntityShulker var1, ICamera var2, double var3, double var5, double var7) {
       if (super.shouldRender((EntityLiving)livingEntity, camera, camX, camY, camZ)) {
          return true;
       } else {
@@ -66,11 +66,11 @@ public class RenderShulker extends RenderLiving {
       }
    }
 
-   protected ResourceLocation getEntityTexture(EntityShulker entity) {
+   protected ResourceLocation getEntityTexture(EntityShulker var1) {
       return SHULKER_ENDERGOLEM_TEXTURE;
    }
 
-   protected void applyRotations(EntityShulker entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
+   protected void applyRotations(EntityShulker var1, float var2, float var3, float var4) {
       super.applyRotations(entityLiving, p_77043_2_, p_77043_3_, partialTicks);
       switch(entityLiving.getAttachmentFacing()) {
       case DOWN:
@@ -102,7 +102,7 @@ public class RenderShulker extends RenderLiving {
 
    }
 
-   protected void preRenderCallback(EntityShulker entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityShulker var1, float var2) {
       float f = 0.999F;
       GlStateManager.scale(0.999F, 0.999F, 0.999F);
    }
@@ -112,7 +112,7 @@ public class RenderShulker extends RenderLiving {
       private HeadLayer() {
       }
 
-      public void doRenderLayer(EntityShulker entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+      public void doRenderLayer(EntityShulker var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
          GlStateManager.pushMatrix();
          switch(entitylivingbaseIn.getAttachmentFacing()) {
          case DOWN:

@@ -1,5 +1,8 @@
 package net.minecraft.block.material;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 public class MapColor {
    public static final MapColor[] COLORS = new MapColor[64];
    public static final MapColor AIR = new MapColor(0, 0);
@@ -42,12 +45,37 @@ public class MapColor {
    public final int colorIndex;
 
    private MapColor(int var1, int var2) {
-      if (var1 >= 0 && var1 <= 63) {
-         this.colorIndex = var1;
-         this.colorValue = var2;
-         COLORS[var1] = this;
+      if (index >= 0 && index <= 63) {
+         this.colorIndex = index;
+         this.colorValue = color;
+         COLORS[index] = this;
       } else {
          throw new IndexOutOfBoundsException("Map colour ID must be between 0 and 63 (inclusive)");
       }
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getMapColor(int var1) {
+      int i = 220;
+      if (p_151643_1_ == 3) {
+         i = 135;
+      }
+
+      if (p_151643_1_ == 2) {
+         i = 255;
+      }
+
+      if (p_151643_1_ == 1) {
+         i = 220;
+      }
+
+      if (p_151643_1_ == 0) {
+         i = 180;
+      }
+
+      int j = (this.colorValue >> 16 & 255) * i / 255;
+      int k = (this.colorValue >> 8 & 255) * i / 255;
+      int l = (this.colorValue & 255) * i / 255;
+      return -16777216 | j << 16 | k << 8 | l;
    }
 }

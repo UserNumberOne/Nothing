@@ -20,12 +20,15 @@ import net.minecraft.tileentity.TileEntityEnderChest;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockEnderChest extends BlockContainer {
    public static final PropertyDirection FACING = BlockHorizontal.FACING;
@@ -67,25 +70,25 @@ public class BlockEnderChest extends BlockContainer {
    }
 
    public IBlockState getStateForPlacement(World var1, BlockPos var2, EnumFacing var3, float var4, float var5, float var6, int var7, EntityLivingBase var8) {
-      return this.getDefaultState().withProperty(FACING, var8.getHorizontalFacing().getOpposite());
+      return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
    }
 
    public void onBlockPlacedBy(World var1, BlockPos var2, IBlockState var3, EntityLivingBase var4, ItemStack var5) {
-      var1.setBlockState(var2, var3.withProperty(FACING, var4.getHorizontalFacing().getOpposite()), 2);
+      worldIn.setBlockState(pos, state.withProperty(FACING, placer.getHorizontalFacing().getOpposite()), 2);
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
-      InventoryEnderChest var11 = var4.getInventoryEnderChest();
-      TileEntity var12 = var1.getTileEntity(var2);
-      if (var11 != null && var12 instanceof TileEntityEnderChest) {
-         if (var1.getBlockState(var2.up()).isNormalCube()) {
+      InventoryEnderChest inventoryenderchest = playerIn.getInventoryEnderChest();
+      TileEntity tileentity = worldIn.getTileEntity(pos);
+      if (inventoryenderchest != null && tileentity instanceof TileEntityEnderChest) {
+         if (worldIn.getBlockState(pos.up()).isNormalCube()) {
             return true;
-         } else if (var1.isRemote) {
+         } else if (worldIn.isRemote) {
             return true;
          } else {
-            var11.setChestTileEntity((TileEntityEnderChest)var12);
-            var4.displayGUIChest(var11);
-            var4.addStat(StatList.ENDERCHEST_OPENED);
+            inventoryenderchest.setChestTileEntity((TileEntityEnderChest)tileentity);
+            playerIn.displayGUIChest(inventoryenderchest);
+            playerIn.addStat(StatList.ENDERCHEST_OPENED);
             return true;
          }
       } else {
@@ -97,25 +100,41 @@ public class BlockEnderChest extends BlockContainer {
       return new TileEntityEnderChest();
    }
 
-   public IBlockState getStateFromMeta(int var1) {
-      EnumFacing var2 = EnumFacing.getFront(var1);
-      if (var2.getAxis() == EnumFacing.Axis.Y) {
-         var2 = EnumFacing.NORTH;
+   @SideOnly(Side.CLIENT)
+   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
+      for(int i = 0; i < 3; ++i) {
+         int j = rand.nextInt(2) * 2 - 1;
+         int k = rand.nextInt(2) * 2 - 1;
+         double d0 = (double)pos.getX() + 0.5D + 0.25D * (double)j;
+         double d1 = (double)((float)pos.getY() + rand.nextFloat());
+         double d2 = (double)pos.getZ() + 0.5D + 0.25D * (double)k;
+         double d3 = (double)(rand.nextFloat() * (float)j);
+         double d4 = ((double)rand.nextFloat() - 0.5D) * 0.125D;
+         double d5 = (double)(rand.nextFloat() * (float)k);
+         worldIn.spawnParticle(EnumParticleTypes.PORTAL, d0, d1, d2, d3, d4, d5);
       }
 
-      return this.getDefaultState().withProperty(FACING, var2);
+   }
+
+   public IBlockState getStateFromMeta(int var1) {
+      EnumFacing enumfacing = EnumFacing.getFront(meta);
+      if (enumfacing.getAxis() == EnumFacing.Axis.Y) {
+         enumfacing = EnumFacing.NORTH;
+      }
+
+      return this.getDefaultState().withProperty(FACING, enumfacing);
    }
 
    public int getMetaFromState(IBlockState var1) {
-      return ((EnumFacing)var1.getValue(FACING)).getIndex();
+      return ((EnumFacing)state.getValue(FACING)).getIndex();
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      return var1.withProperty(FACING, var2.rotate((EnumFacing)var1.getValue(FACING)));
+      return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
    }
 
    public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      return var1.withRotation(var2.toRotation((EnumFacing)var1.getValue(FACING)));
+      return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
    }
 
    protected BlockStateContainer createBlockState() {

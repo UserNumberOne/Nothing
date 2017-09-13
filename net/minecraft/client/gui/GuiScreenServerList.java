@@ -13,7 +13,7 @@ public class GuiScreenServerList extends GuiScreen {
    private final ServerData serverData;
    private GuiTextField ipEdit;
 
-   public GuiScreenServerList(GuiScreen p_i1031_1_, ServerData p_i1031_2_) {
+   public GuiScreenServerList(GuiScreen var1, ServerData var2) {
       this.lastScreen = p_i1031_1_;
       this.serverData = p_i1031_2_;
    }
@@ -40,7 +40,7 @@ public class GuiScreenServerList extends GuiScreen {
       this.mc.gameSettings.saveOptions();
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 1) {
             this.lastScreen.confirmClicked(false, 0);
@@ -52,7 +52,7 @@ public class GuiScreenServerList extends GuiScreen {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (this.ipEdit.textboxKeyTyped(typedChar, keyCode)) {
          ((GuiButton)this.buttonList.get(0)).enabled = !this.ipEdit.getText().isEmpty() && this.ipEdit.getText().split(":").length > 0;
       } else if (keyCode == 28 || keyCode == 156) {
@@ -61,12 +61,12 @@ public class GuiScreenServerList extends GuiScreen {
 
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       this.ipEdit.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, I18n.format("selectServer.direct"), this.width / 2, 20, 16777215);
       this.drawString(this.fontRendererObj, I18n.format("addServer.enterIp"), this.width / 2 - 100, 100, 10526880);

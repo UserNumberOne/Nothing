@@ -6,7 +6,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ParticleSuspendedTown extends Particle {
-   protected ParticleSuspendedTown(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double speedIn) {
+   protected ParticleSuspendedTown(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, speedIn);
       float f = this.rand.nextFloat() * 0.1F + 0.2F;
       this.particleRed = f;
@@ -21,7 +21,7 @@ public class ParticleSuspendedTown extends Particle {
       this.particleMaxAge = (int)(20.0D / (Math.random() * 0.8D + 0.2D));
    }
 
-   public void move(double x, double y, double z) {
+   public void move(double var1, double var3, double var5) {
       this.setBoundingBox(this.getBoundingBox().offset(x, y, z));
       this.resetPositionToBB();
    }
@@ -42,14 +42,14 @@ public class ParticleSuspendedTown extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleSuspendedTown(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
       }
    }
 
    @SideOnly(Side.CLIENT)
    public static class HappyVillagerFactory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          Particle particle = new ParticleSuspendedTown(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
          particle.setParticleTextureIndex(82);
          particle.setRBGColorF(1.0F, 1.0F, 1.0F);

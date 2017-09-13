@@ -8,8 +8,8 @@ public class ClickEvent {
    private final String value;
 
    public ClickEvent(ClickEvent.Action var1, String var2) {
-      this.action = var1;
-      this.value = var2;
+      this.action = theAction;
+      this.value = theValue;
    }
 
    public ClickEvent.Action getAction() {
@@ -21,18 +21,18 @@ public class ClickEvent {
    }
 
    public boolean equals(Object var1) {
-      if (this == var1) {
+      if (this == p_equals_1_) {
          return true;
-      } else if (var1 != null && this.getClass() == var1.getClass()) {
-         ClickEvent var2 = (ClickEvent)var1;
-         if (this.action != var2.action) {
+      } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
+         ClickEvent clickevent = (ClickEvent)p_equals_1_;
+         if (this.action != clickevent.action) {
             return false;
          } else {
             if (this.value != null) {
-               if (!this.value.equals(var2.value)) {
+               if (!this.value.equals(clickevent.value)) {
                   return false;
                }
-            } else if (var2.value != null) {
+            } else if (clickevent.value != null) {
                return false;
             }
 
@@ -48,9 +48,9 @@ public class ClickEvent {
    }
 
    public int hashCode() {
-      int var1 = this.action.hashCode();
-      var1 = 31 * var1 + (this.value != null ? this.value.hashCode() : 0);
-      return var1;
+      int i = this.action.hashCode();
+      i = 31 * i + (this.value != null ? this.value.hashCode() : 0);
+      return i;
    }
 
    public static enum Action {
@@ -65,8 +65,8 @@ public class ClickEvent {
       private final String canonicalName;
 
       private Action(String var3, boolean var4) {
-         this.canonicalName = var3;
-         this.allowedInChat = var4;
+         this.canonicalName = canonicalNameIn;
+         this.allowedInChat = allowedInChatIn;
       }
 
       public boolean shouldAllowInChat() {
@@ -78,12 +78,12 @@ public class ClickEvent {
       }
 
       public static ClickEvent.Action getValueByCanonicalName(String var0) {
-         return (ClickEvent.Action)NAME_MAPPING.get(var0);
+         return (ClickEvent.Action)NAME_MAPPING.get(canonicalNameIn);
       }
 
       static {
-         for(ClickEvent.Action var3 : values()) {
-            NAME_MAPPING.put(var3.getCanonicalName(), var3);
+         for(ClickEvent.Action clickevent$action : values()) {
+            NAME_MAPPING.put(clickevent$action.getCanonicalName(), clickevent$action);
          }
 
       }

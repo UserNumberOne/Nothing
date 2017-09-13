@@ -15,19 +15,19 @@ import net.minecraft.world.World;
 
 public class EntityMinecartChest extends EntityMinecartContainer {
    public EntityMinecartChest(World var1) {
-      super(var1);
+      super(worldIn);
    }
 
    public EntityMinecartChest(World var1, double var2, double var4, double var6) {
-      super(var1, var2, var4, var6);
+      super(worldIn, x, y, z);
    }
 
    public static void registerFixesMinecartChest(DataFixer var0) {
-      EntityMinecartContainer.registerFixesMinecartContainer(var0, "MinecartChest");
+      EntityMinecartContainer.registerFixesMinecartContainer(fixer, "MinecartChest");
    }
 
    public void killMinecart(DamageSource var1) {
-      super.killMinecart(var1);
+      super.killMinecart(source);
       if (this.world.getGameRules().getBoolean("doEntityDrops")) {
          this.dropItemWithOffset(Item.getItemFromBlock(Blocks.CHEST), 1, 0.0F);
       }
@@ -55,7 +55,7 @@ public class EntityMinecartChest extends EntityMinecartContainer {
    }
 
    public Container createContainer(InventoryPlayer var1, EntityPlayer var2) {
-      this.addLoot(var2);
-      return new ContainerChest(var1, this, var2);
+      this.addLoot(playerIn);
+      return new ContainerChest(playerInventory, this, playerIn);
    }
 }

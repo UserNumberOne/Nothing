@@ -25,7 +25,7 @@ public class GuiScreenCustomizePresets extends GuiScreen {
    private String shareText;
    private String listText;
 
-   public GuiScreenCustomizePresets(GuiCustomizeWorldScreen p_i45524_1_) {
+   public GuiScreenCustomizePresets(GuiCustomizeWorldScreen var1) {
       this.parent = p_i45524_1_;
    }
 
@@ -53,19 +53,19 @@ public class GuiScreenCustomizePresets extends GuiScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       this.export.mouseClicked(mouseX, mouseY, mouseButton);
       super.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (!this.export.textboxKeyTyped(typedChar, keyCode)) {
          super.keyTyped(typedChar, keyCode);
       }
 
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       switch(button.id) {
       case 0:
          this.parent.loadValues(this.export.getText());
@@ -77,7 +77,7 @@ public class GuiScreenCustomizePresets extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.list.drawScreen(mouseX, mouseY, partialTicks);
       this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 8, 16777215);
@@ -130,7 +130,7 @@ public class GuiScreenCustomizePresets extends GuiScreen {
       public ResourceLocation texture;
       public ChunkProviderSettings.Factory settings;
 
-      public Info(String nameIn, ResourceLocation textureIn, ChunkProviderSettings.Factory settingsIn) {
+      public Info(String var1, ResourceLocation var2, ChunkProviderSettings.Factory var3) {
          this.name = nameIn;
          this.texture = textureIn;
          this.settings = settingsIn;
@@ -149,20 +149,20 @@ public class GuiScreenCustomizePresets extends GuiScreen {
          return GuiScreenCustomizePresets.PRESETS.size();
       }
 
-      protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY) {
+      protected void elementClicked(int var1, boolean var2, int var3, int var4) {
          this.selected = slotIndex;
          GuiScreenCustomizePresets.this.updateButtonValidity();
          GuiScreenCustomizePresets.this.export.setText(((GuiScreenCustomizePresets.Info)GuiScreenCustomizePresets.PRESETS.get(GuiScreenCustomizePresets.this.list.selected)).settings.toString());
       }
 
-      protected boolean isSelected(int slotIndex) {
+      protected boolean isSelected(int var1) {
          return slotIndex == this.selected;
       }
 
       protected void drawBackground() {
       }
 
-      private void blitIcon(int p_178051_1_, int p_178051_2_, ResourceLocation p_178051_3_) {
+      private void blitIcon(int var1, int var2, ResourceLocation var3) {
          int i = p_178051_1_ + 5;
          GuiScreenCustomizePresets.this.drawHorizontalLine(i - 1, i + 32, p_178051_2_ - 1, -2039584);
          GuiScreenCustomizePresets.this.drawHorizontalLine(i - 1, i + 32, p_178051_2_ + 32, -6250336);
@@ -182,7 +182,7 @@ public class GuiScreenCustomizePresets extends GuiScreen {
          tessellator.draw();
       }
 
-      protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn) {
+      protected void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6) {
          GuiScreenCustomizePresets.Info guiscreencustomizepresets$info = (GuiScreenCustomizePresets.Info)GuiScreenCustomizePresets.PRESETS.get(entryID);
          this.blitIcon(insideLeft, yPos, guiscreencustomizepresets$info.texture);
          GuiScreenCustomizePresets.this.fontRendererObj.drawString(guiscreencustomizepresets$info.name, insideLeft + 32 + 10, yPos + 14, 16777215);

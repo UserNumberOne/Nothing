@@ -14,223 +14,247 @@ import java.io.Reader;
 import java.io.StringReader;
 import javax.annotation.Nullable;
 import net.minecraft.item.Item;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class JsonUtils {
    public static boolean isString(JsonObject var0, String var1) {
-      return !isJsonPrimitive(var0, var1) ? false : var0.getAsJsonPrimitive(var1).isString();
+      return !isJsonPrimitive(json, memberName) ? false : json.getAsJsonPrimitive(memberName).isString();
+   }
+
+   @SideOnly(Side.CLIENT)
+   public static boolean isString(JsonElement var0) {
+      return !json.isJsonPrimitive() ? false : json.getAsJsonPrimitive().isString();
    }
 
    public static boolean isNumber(JsonElement var0) {
-      return !var0.isJsonPrimitive() ? false : var0.getAsJsonPrimitive().isNumber();
+      return !json.isJsonPrimitive() ? false : json.getAsJsonPrimitive().isNumber();
+   }
+
+   @SideOnly(Side.CLIENT)
+   public static boolean isBoolean(JsonObject var0, String var1) {
+      return !isJsonPrimitive(json, memberName) ? false : json.getAsJsonPrimitive(memberName).isBoolean();
    }
 
    public static boolean isJsonArray(JsonObject var0, String var1) {
-      if (!hasField(var0, var1)) {
-         return false;
-      } else {
-         return var0.get(var1).isJsonArray();
-      }
+      return !hasField(json, memberName) ? false : json.get(memberName).isJsonArray();
    }
 
    public static boolean isJsonPrimitive(JsonObject var0, String var1) {
-      if (!hasField(var0, var1)) {
-         return false;
-      } else {
-         return var0.get(var1).isJsonPrimitive();
-      }
+      return !hasField(json, memberName) ? false : json.get(memberName).isJsonPrimitive();
    }
 
    public static boolean hasField(JsonObject var0, String var1) {
-      if (var0 == null) {
-         return false;
-      } else {
-         return var0.get(var1) != null;
-      }
+      return json == null ? false : json.get(memberName) != null;
    }
 
    public static String getString(JsonElement var0, String var1) {
-      if (var0.isJsonPrimitive()) {
-         return var0.getAsString();
+      if (json.isJsonPrimitive()) {
+         return json.getAsString();
       } else {
-         throw new JsonSyntaxException("Expected " + var1 + " to be a string, was " + toString(var0));
+         throw new JsonSyntaxException("Expected " + memberName + " to be a string, was " + toString(json));
       }
    }
 
    public static String getString(JsonObject var0, String var1) {
-      if (var0.has(var1)) {
-         return getString(var0.get(var1), var1);
+      if (json.has(memberName)) {
+         return getString(json.get(memberName), memberName);
       } else {
-         throw new JsonSyntaxException("Missing " + var1 + ", expected to find a string");
+         throw new JsonSyntaxException("Missing " + memberName + ", expected to find a string");
       }
    }
 
+   @SideOnly(Side.CLIENT)
+   public static String getString(JsonObject var0, String var1, String var2) {
+      return json.has(memberName) ? getString(json.get(memberName), memberName) : fallback;
+   }
+
    public static Item getItem(JsonElement var0, String var1) {
-      if (var0.isJsonPrimitive()) {
-         String var2 = var0.getAsString();
-         Item var3 = Item.getByNameOrId(var2);
-         if (var3 == null) {
-            throw new JsonSyntaxException("Expected " + var1 + " to be an item, was unknown string '" + var2 + "'");
+      if (json.isJsonPrimitive()) {
+         String s = json.getAsString();
+         Item item = Item.getByNameOrId(s);
+         if (item == null) {
+            throw new JsonSyntaxException("Expected " + memberName + " to be an item, was unknown string '" + s + "'");
          } else {
-            return var3;
+            return item;
          }
       } else {
-         throw new JsonSyntaxException("Expected " + var1 + " to be an item, was " + toString(var0));
+         throw new JsonSyntaxException("Expected " + memberName + " to be an item, was " + toString(json));
       }
    }
 
    public static Item getItem(JsonObject var0, String var1) {
-      if (var0.has(var1)) {
-         return getItem(var0.get(var1), var1);
+      if (json.has(memberName)) {
+         return getItem(json.get(memberName), memberName);
       } else {
-         throw new JsonSyntaxException("Missing " + var1 + ", expected to find an item");
+         throw new JsonSyntaxException("Missing " + memberName + ", expected to find an item");
       }
    }
 
    public static boolean getBoolean(JsonElement var0, String var1) {
-      if (var0.isJsonPrimitive()) {
-         return var0.getAsBoolean();
+      if (json.isJsonPrimitive()) {
+         return json.getAsBoolean();
       } else {
-         throw new JsonSyntaxException("Expected " + var1 + " to be a Boolean, was " + toString(var0));
+         throw new JsonSyntaxException("Expected " + memberName + " to be a Boolean, was " + toString(json));
+      }
+   }
+
+   @SideOnly(Side.CLIENT)
+   public static boolean getBoolean(JsonObject var0, String var1) {
+      if (json.has(memberName)) {
+         return getBoolean(json.get(memberName), memberName);
+      } else {
+         throw new JsonSyntaxException("Missing " + memberName + ", expected to find a Boolean");
       }
    }
 
    public static boolean getBoolean(JsonObject var0, String var1, boolean var2) {
-      return var0.has(var1) ? getBoolean(var0.get(var1), var1) : var2;
+      return json.has(memberName) ? getBoolean(json.get(memberName), memberName) : fallback;
    }
 
    public static float getFloat(JsonElement var0, String var1) {
-      if (var0.isJsonPrimitive() && var0.getAsJsonPrimitive().isNumber()) {
-         return var0.getAsFloat();
+      if (json.isJsonPrimitive() && json.getAsJsonPrimitive().isNumber()) {
+         return json.getAsFloat();
       } else {
-         throw new JsonSyntaxException("Expected " + var1 + " to be a Float, was " + toString(var0));
+         throw new JsonSyntaxException("Expected " + memberName + " to be a Float, was " + toString(json));
       }
    }
 
    public static float getFloat(JsonObject var0, String var1) {
-      if (var0.has(var1)) {
-         return getFloat(var0.get(var1), var1);
+      if (json.has(memberName)) {
+         return getFloat(json.get(memberName), memberName);
       } else {
-         throw new JsonSyntaxException("Missing " + var1 + ", expected to find a Float");
+         throw new JsonSyntaxException("Missing " + memberName + ", expected to find a Float");
       }
    }
 
    public static float getFloat(JsonObject var0, String var1, float var2) {
-      return var0.has(var1) ? getFloat(var0.get(var1), var1) : var2;
+      return json.has(memberName) ? getFloat(json.get(memberName), memberName) : fallback;
    }
 
    public static int getInt(JsonElement var0, String var1) {
-      if (var0.isJsonPrimitive() && var0.getAsJsonPrimitive().isNumber()) {
-         return var0.getAsInt();
+      if (json.isJsonPrimitive() && json.getAsJsonPrimitive().isNumber()) {
+         return json.getAsInt();
       } else {
-         throw new JsonSyntaxException("Expected " + var1 + " to be a Int, was " + toString(var0));
+         throw new JsonSyntaxException("Expected " + memberName + " to be a Int, was " + toString(json));
       }
    }
 
    public static int getInt(JsonObject var0, String var1) {
-      if (var0.has(var1)) {
-         return getInt(var0.get(var1), var1);
+      if (json.has(memberName)) {
+         return getInt(json.get(memberName), memberName);
       } else {
-         throw new JsonSyntaxException("Missing " + var1 + ", expected to find a Int");
+         throw new JsonSyntaxException("Missing " + memberName + ", expected to find a Int");
       }
    }
 
    public static int getInt(JsonObject var0, String var1, int var2) {
-      return var0.has(var1) ? getInt(var0.get(var1), var1) : var2;
+      return json.has(memberName) ? getInt(json.get(memberName), memberName) : fallback;
    }
 
    public static JsonObject getJsonObject(JsonElement var0, String var1) {
-      if (var0.isJsonObject()) {
-         return var0.getAsJsonObject();
+      if (json.isJsonObject()) {
+         return json.getAsJsonObject();
       } else {
-         throw new JsonSyntaxException("Expected " + var1 + " to be a JsonObject, was " + toString(var0));
+         throw new JsonSyntaxException("Expected " + memberName + " to be a JsonObject, was " + toString(json));
       }
    }
 
    public static JsonObject getJsonObject(JsonObject var0, String var1) {
-      if (var0.has(var1)) {
-         return getJsonObject(var0.get(var1), var1);
+      if (json.has(memberName)) {
+         return getJsonObject(json.get(memberName), memberName);
       } else {
-         throw new JsonSyntaxException("Missing " + var1 + ", expected to find a JsonObject");
+         throw new JsonSyntaxException("Missing " + memberName + ", expected to find a JsonObject");
       }
    }
 
+   @SideOnly(Side.CLIENT)
+   public static JsonObject getJsonObject(JsonObject var0, String var1, JsonObject var2) {
+      return json.has(memberName) ? getJsonObject(json.get(memberName), memberName) : fallback;
+   }
+
    public static JsonArray getJsonArray(JsonElement var0, String var1) {
-      if (var0.isJsonArray()) {
-         return var0.getAsJsonArray();
+      if (json.isJsonArray()) {
+         return json.getAsJsonArray();
       } else {
-         throw new JsonSyntaxException("Expected " + var1 + " to be a JsonArray, was " + toString(var0));
+         throw new JsonSyntaxException("Expected " + memberName + " to be a JsonArray, was " + toString(json));
       }
    }
 
    public static JsonArray getJsonArray(JsonObject var0, String var1) {
-      if (var0.has(var1)) {
-         return getJsonArray(var0.get(var1), var1);
+      if (json.has(memberName)) {
+         return getJsonArray(json.get(memberName), memberName);
       } else {
-         throw new JsonSyntaxException("Missing " + var1 + ", expected to find a JsonArray");
+         throw new JsonSyntaxException("Missing " + memberName + ", expected to find a JsonArray");
       }
    }
 
+   @SideOnly(Side.CLIENT)
+   public static JsonArray getJsonArray(JsonObject var0, String var1, @Nullable JsonArray var2) {
+      return json.has(memberName) ? getJsonArray(json.get(memberName), memberName) : fallback;
+   }
+
    public static Object deserializeClass(@Nullable JsonElement var0, String var1, JsonDeserializationContext var2, Class var3) {
-      if (var0 != null) {
-         return var2.deserialize(var0, var3);
+      if (json != null) {
+         return context.deserialize(json, adapter);
       } else {
-         throw new JsonSyntaxException("Missing " + var1);
+         throw new JsonSyntaxException("Missing " + memberName);
       }
    }
 
    public static Object deserializeClass(JsonObject var0, String var1, JsonDeserializationContext var2, Class var3) {
-      if (var0.has(var1)) {
-         return deserializeClass(var0.get(var1), var1, var2, var3);
+      if (json.has(memberName)) {
+         return deserializeClass(json.get(memberName), memberName, context, adapter);
       } else {
-         throw new JsonSyntaxException("Missing " + var1);
+         throw new JsonSyntaxException("Missing " + memberName);
       }
    }
 
    public static Object deserializeClass(JsonObject var0, String var1, Object var2, JsonDeserializationContext var3, Class var4) {
-      return var0.has(var1) ? deserializeClass(var0.get(var1), var1, var3, var4) : var2;
+      return json.has(memberName) ? deserializeClass(json.get(memberName), memberName, context, adapter) : fallback;
    }
 
    public static String toString(JsonElement var0) {
-      String var1 = org.apache.commons.lang3.StringUtils.abbreviateMiddle(String.valueOf(var0), "...", 10);
-      if (var0 == null) {
+      String s = org.apache.commons.lang3.StringUtils.abbreviateMiddle(String.valueOf(json), "...", 10);
+      if (json == null) {
          return "null (missing)";
-      } else if (var0.isJsonNull()) {
+      } else if (json.isJsonNull()) {
          return "null (json)";
-      } else if (var0.isJsonArray()) {
-         return "an array (" + var1 + ")";
-      } else if (var0.isJsonObject()) {
-         return "an object (" + var1 + ")";
+      } else if (json.isJsonArray()) {
+         return "an array (" + s + ")";
+      } else if (json.isJsonObject()) {
+         return "an object (" + s + ")";
       } else {
-         if (var0.isJsonPrimitive()) {
-            JsonPrimitive var2 = var0.getAsJsonPrimitive();
-            if (var2.isNumber()) {
-               return "a number (" + var1 + ")";
+         if (json.isJsonPrimitive()) {
+            JsonPrimitive jsonprimitive = json.getAsJsonPrimitive();
+            if (jsonprimitive.isNumber()) {
+               return "a number (" + s + ")";
             }
 
-            if (var2.isBoolean()) {
-               return "a boolean (" + var1 + ")";
+            if (jsonprimitive.isBoolean()) {
+               return "a boolean (" + s + ")";
             }
          }
 
-         return var1;
+         return s;
       }
    }
 
    public static Object gsonDeserialize(Gson var0, Reader var1, Class var2, boolean var3) {
       try {
-         JsonReader var4 = new JsonReader(var1);
-         var4.setLenient(var3);
-         return var0.getAdapter(var2).read(var4);
+         JsonReader jsonreader = new JsonReader(readerIn);
+         jsonreader.setLenient(lenient);
+         return gsonIn.getAdapter(adapter).read(jsonreader);
       } catch (IOException var5) {
          throw new JsonParseException(var5);
       }
    }
 
    public static Object gsonDeserialize(Gson var0, String var1, Class var2) {
-      return gsonDeserialize(var0, var1, var2, false);
+      return gsonDeserialize(gsonIn, json, adapter, false);
    }
 
    public static Object gsonDeserialize(Gson var0, String var1, Class var2, boolean var3) {
-      return gsonDeserialize(var0, new StringReader(var1), var2, var3);
+      return gsonDeserialize(gsonIn, new StringReader(json), adapter, lenient);
    }
 }

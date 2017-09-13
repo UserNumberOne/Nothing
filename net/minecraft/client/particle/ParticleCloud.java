@@ -13,7 +13,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ParticleCloud extends Particle {
    float oSize;
 
-   protected ParticleCloud(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double p_i1221_8_, double p_i1221_10_, double p_i1221_12_) {
+   protected ParticleCloud(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0D, 0.0D, 0.0D);
       float f = 2.5F;
       this.motionX *= 0.10000000149011612D;
@@ -33,7 +33,7 @@ public class ParticleCloud extends Particle {
       this.particleMaxAge = (int)((float)this.particleMaxAge * 2.5F);
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge * 32.0F;
       f = MathHelper.clamp(f, 0.0F, 1.0F);
       this.particleScale = this.oSize * f;
@@ -72,7 +72,7 @@ public class ParticleCloud extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleCloud(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
       }
    }

@@ -11,27 +11,21 @@ public class ItemPickaxe extends ItemTool {
    private static final Set EFFECTIVE_ON = Sets.newHashSet(new Block[]{Blocks.ACTIVATOR_RAIL, Blocks.COAL_ORE, Blocks.COBBLESTONE, Blocks.DETECTOR_RAIL, Blocks.DIAMOND_BLOCK, Blocks.DIAMOND_ORE, Blocks.DOUBLE_STONE_SLAB, Blocks.GOLDEN_RAIL, Blocks.GOLD_BLOCK, Blocks.GOLD_ORE, Blocks.ICE, Blocks.IRON_BLOCK, Blocks.IRON_ORE, Blocks.LAPIS_BLOCK, Blocks.LAPIS_ORE, Blocks.LIT_REDSTONE_ORE, Blocks.MOSSY_COBBLESTONE, Blocks.NETHERRACK, Blocks.PACKED_ICE, Blocks.RAIL, Blocks.REDSTONE_ORE, Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.STONE, Blocks.STONE_SLAB, Blocks.STONE_BUTTON, Blocks.STONE_PRESSURE_PLATE});
 
    protected ItemPickaxe(Item.ToolMaterial var1) {
-      super(1.0F, -2.8F, var1, EFFECTIVE_ON);
+      super(1.0F, -2.8F, material, EFFECTIVE_ON);
    }
 
    public boolean canHarvestBlock(IBlockState var1) {
-      Block var2 = var1.getBlock();
-      if (var2 == Blocks.OBSIDIAN) {
+      Block block = blockIn.getBlock();
+      if (block == Blocks.OBSIDIAN) {
          return this.toolMaterial.getHarvestLevel() == 3;
-      } else if (var2 != Blocks.DIAMOND_BLOCK && var2 != Blocks.DIAMOND_ORE) {
-         if (var2 != Blocks.EMERALD_ORE && var2 != Blocks.EMERALD_BLOCK) {
-            if (var2 != Blocks.GOLD_BLOCK && var2 != Blocks.GOLD_ORE) {
-               if (var2 != Blocks.IRON_BLOCK && var2 != Blocks.IRON_ORE) {
-                  if (var2 != Blocks.LAPIS_BLOCK && var2 != Blocks.LAPIS_ORE) {
-                     if (var2 != Blocks.REDSTONE_ORE && var2 != Blocks.LIT_REDSTONE_ORE) {
-                        Material var3 = var1.getMaterial();
-                        if (var3 == Material.ROCK) {
-                           return true;
-                        } else if (var3 == Material.IRON) {
-                           return true;
-                        } else {
-                           return var3 == Material.ANVIL;
-                        }
+      } else if (block != Blocks.DIAMOND_BLOCK && block != Blocks.DIAMOND_ORE) {
+         if (block != Blocks.EMERALD_ORE && block != Blocks.EMERALD_BLOCK) {
+            if (block != Blocks.GOLD_BLOCK && block != Blocks.GOLD_ORE) {
+               if (block != Blocks.IRON_BLOCK && block != Blocks.IRON_ORE) {
+                  if (block != Blocks.LAPIS_BLOCK && block != Blocks.LAPIS_ORE) {
+                     if (block != Blocks.REDSTONE_ORE && block != Blocks.LIT_REDSTONE_ORE) {
+                        Material material = blockIn.getMaterial();
+                        return material == Material.ROCK ? true : (material == Material.IRON ? true : material == Material.ANVIL);
                      } else {
                         return this.toolMaterial.getHarvestLevel() >= 2;
                      }
@@ -53,7 +47,7 @@ public class ItemPickaxe extends ItemTool {
    }
 
    public float getStrVsBlock(ItemStack var1, IBlockState var2) {
-      Material var3 = var2.getMaterial();
-      return var3 != Material.IRON && var3 != Material.ANVIL && var3 != Material.ROCK ? super.getStrVsBlock(var1, var2) : this.efficiencyOnProperMaterial;
+      Material material = state.getMaterial();
+      return material != Material.IRON && material != Material.ANVIL && material != Material.ROCK ? super.getStrVsBlock(stack, state) : this.efficiencyOnProperMaterial;
    }
 }

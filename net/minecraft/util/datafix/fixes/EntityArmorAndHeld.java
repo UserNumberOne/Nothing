@@ -11,45 +11,45 @@ public class EntityArmorAndHeld implements IFixableData {
    }
 
    public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
-      NBTTagList var2 = var1.getTagList("Equipment", 10);
-      if (var2.tagCount() > 0 && !var1.hasKey("HandItems", 10)) {
-         NBTTagList var3 = new NBTTagList();
-         var3.appendTag(var2.get(0));
-         var3.appendTag(new NBTTagCompound());
-         var1.setTag("HandItems", var3);
+      NBTTagList nbttaglist = compound.getTagList("Equipment", 10);
+      if (nbttaglist.tagCount() > 0 && !compound.hasKey("HandItems", 10)) {
+         NBTTagList nbttaglist1 = new NBTTagList();
+         nbttaglist1.appendTag(nbttaglist.get(0));
+         nbttaglist1.appendTag(new NBTTagCompound());
+         compound.setTag("HandItems", nbttaglist1);
       }
 
-      if (var2.tagCount() > 1 && !var1.hasKey("ArmorItem", 10)) {
-         NBTTagList var5 = new NBTTagList();
-         var5.appendTag(var2.getCompoundTagAt(1));
-         var5.appendTag(var2.getCompoundTagAt(2));
-         var5.appendTag(var2.getCompoundTagAt(3));
-         var5.appendTag(var2.getCompoundTagAt(4));
-         var1.setTag("ArmorItems", var5);
+      if (nbttaglist.tagCount() > 1 && !compound.hasKey("ArmorItem", 10)) {
+         NBTTagList nbttaglist3 = new NBTTagList();
+         nbttaglist3.appendTag(nbttaglist.getCompoundTagAt(1));
+         nbttaglist3.appendTag(nbttaglist.getCompoundTagAt(2));
+         nbttaglist3.appendTag(nbttaglist.getCompoundTagAt(3));
+         nbttaglist3.appendTag(nbttaglist.getCompoundTagAt(4));
+         compound.setTag("ArmorItems", nbttaglist3);
       }
 
-      var1.removeTag("Equipment");
-      if (var1.hasKey("DropChances", 9)) {
-         NBTTagList var6 = var1.getTagList("DropChances", 5);
-         if (!var1.hasKey("HandDropChances", 10)) {
-            NBTTagList var4 = new NBTTagList();
-            var4.appendTag(new NBTTagFloat(var6.getFloatAt(0)));
-            var4.appendTag(new NBTTagFloat(0.0F));
-            var1.setTag("HandDropChances", var4);
+      compound.removeTag("Equipment");
+      if (compound.hasKey("DropChances", 9)) {
+         NBTTagList nbttaglist4 = compound.getTagList("DropChances", 5);
+         if (!compound.hasKey("HandDropChances", 10)) {
+            NBTTagList nbttaglist2 = new NBTTagList();
+            nbttaglist2.appendTag(new NBTTagFloat(nbttaglist4.getFloatAt(0)));
+            nbttaglist2.appendTag(new NBTTagFloat(0.0F));
+            compound.setTag("HandDropChances", nbttaglist2);
          }
 
-         if (!var1.hasKey("ArmorDropChances", 10)) {
-            NBTTagList var7 = new NBTTagList();
-            var7.appendTag(new NBTTagFloat(var6.getFloatAt(1)));
-            var7.appendTag(new NBTTagFloat(var6.getFloatAt(2)));
-            var7.appendTag(new NBTTagFloat(var6.getFloatAt(3)));
-            var7.appendTag(new NBTTagFloat(var6.getFloatAt(4)));
-            var1.setTag("ArmorDropChances", var7);
+         if (!compound.hasKey("ArmorDropChances", 10)) {
+            NBTTagList nbttaglist5 = new NBTTagList();
+            nbttaglist5.appendTag(new NBTTagFloat(nbttaglist4.getFloatAt(1)));
+            nbttaglist5.appendTag(new NBTTagFloat(nbttaglist4.getFloatAt(2)));
+            nbttaglist5.appendTag(new NBTTagFloat(nbttaglist4.getFloatAt(3)));
+            nbttaglist5.appendTag(new NBTTagFloat(nbttaglist4.getFloatAt(4)));
+            compound.setTag("ArmorDropChances", nbttaglist5);
          }
 
-         var1.removeTag("DropChances");
+         compound.removeTag("DropChances");
       }
 
-      return var1;
+      return compound;
    }
 }

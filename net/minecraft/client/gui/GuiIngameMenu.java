@@ -34,7 +34,7 @@ public class GuiIngameMenu extends GuiScreen {
       this.buttonList.add(new GuiButton(6, this.width / 2 + 2, this.height / 4 + 48 + -16, 98, 20, I18n.format("gui.stats")));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       switch(button.id) {
       case 0:
          this.mc.displayGuiScreen(new GuiOptions(this, this.mc.gameSettings));
@@ -89,7 +89,7 @@ public class GuiIngameMenu extends GuiScreen {
       ++this.visibleTime;
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, I18n.format("menu.game"), this.width / 2, 40, 16777215);
       super.drawScreen(mouseX, mouseY, partialTicks);

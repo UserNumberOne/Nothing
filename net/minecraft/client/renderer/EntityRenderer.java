@@ -140,7 +140,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
    private boolean useShader;
    private int frameCount;
 
-   public EntityRenderer(Minecraft mcIn, IResourceManager resourceManagerIn) {
+   public EntityRenderer(Minecraft var1, IResourceManager var2) {
       this.shaderIndex = SHADER_COUNT;
       this.mc = mcIn;
       this.resourceManager = resourceManagerIn;
@@ -180,7 +180,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       this.useShader = !this.useShader;
    }
 
-   public void loadEntityShader(Entity entityIn) {
+   public void loadEntityShader(Entity var1) {
       if (OpenGlHelper.shadersSupported) {
          if (this.theShaderGroup != null) {
             this.theShaderGroup.deleteShaderGroup();
@@ -200,7 +200,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   public void loadShader(ResourceLocation resourceLocationIn) {
+   public void loadShader(ResourceLocation var1) {
       try {
          this.theShaderGroup = new ShaderGroup(this.mc.getTextureManager(), this.resourceManager, this.mc.getFramebuffer(), resourceLocationIn);
          this.theShaderGroup.createBindFramebuffers(this.mc.displayWidth, this.mc.displayHeight);
@@ -217,7 +217,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   public void onResourceManagerReload(IResourceManager resourceManager) {
+   public void onResourceManagerReload(IResourceManager var1) {
       if (this.theShaderGroup != null) {
          this.theShaderGroup.deleteShaderGroup();
       }
@@ -282,7 +282,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       return this.theShaderGroup;
    }
 
-   public void updateShaderGroupSize(int width, int height) {
+   public void updateShaderGroupSize(int var1, int var2) {
       if (OpenGlHelper.shadersSupported) {
          if (this.theShaderGroup != null) {
             this.theShaderGroup.createBindFramebuffers(width, height);
@@ -293,7 +293,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   public void getMouseOver(float partialTicks) {
+   public void getMouseOver(float var1) {
       Entity entity = this.mc.getRenderViewEntity();
       if (entity != null && this.mc.world != null) {
          this.mc.mcProfiler.startSection("pick");
@@ -321,7 +321,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
          Vec3d vec3d3 = null;
          float f = 1.0F;
          List list = this.mc.world.getEntitiesInAABBexcluding(entity, entity.getEntityBoundingBox().addCoord(vec3d1.xCoord * d0, vec3d1.yCoord * d0, vec3d1.zCoord * d0).expand(1.0D, 1.0D, 1.0D), Predicates.and(EntitySelectors.NOT_SPECTATING, new Predicate() {
-            public boolean apply(@Nullable Entity p_apply_1_) {
+            public boolean apply(@Nullable Entity var1) {
                return p_apply_1_ != null && p_apply_1_.canBeCollidedWith();
             }
          }));
@@ -390,7 +390,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   private float getFOVModifier(float partialTicks, boolean useFOVSetting) {
+   private float getFOVModifier(float var1, boolean var2) {
       if (this.debugView) {
          return 90.0F;
       } else {
@@ -415,7 +415,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       }
    }
 
-   private void hurtCameraEffect(float partialTicks) {
+   private void hurtCameraEffect(float var1) {
       if (this.mc.getRenderViewEntity() instanceof EntityLivingBase) {
          EntityLivingBase entitylivingbase = (EntityLivingBase)this.mc.getRenderViewEntity();
          float f = (float)entitylivingbase.hurtTime - partialTicks;
@@ -438,7 +438,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   private void applyBobbing(float partialTicks) {
+   private void applyBobbing(float var1) {
       if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
          EntityPlayer entityplayer = (EntityPlayer)this.mc.getRenderViewEntity();
          float f = entityplayer.distanceWalkedModified - entityplayer.prevDistanceWalkedModified;
@@ -453,7 +453,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   private void orientCamera(float partialTicks) {
+   private void orientCamera(float var1) {
       Entity entity = this.mc.getRenderViewEntity();
       float f = entity.getEyeHeight();
       double d0 = entity.prevPosX + (entity.posX - entity.prevPosX) * (double)partialTicks;
@@ -538,7 +538,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       this.cloudFog = this.mc.renderGlobal.hasCloudFog(d0, d1, d2, partialTicks);
    }
 
-   private void setupCameraTransform(float partialTicks, int pass) {
+   private void setupCameraTransform(float var1, int var2) {
       this.farPlaneDistance = (float)(this.mc.gameSettings.renderDistanceChunks * 16);
       GlStateManager.matrixMode(5889);
       GlStateManager.loadIdentity();
@@ -600,7 +600,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   private void renderHand(float partialTicks, int pass) {
+   private void renderHand(float var1, int var2) {
       if (!this.debugView) {
          GlStateManager.matrixMode(5889);
          GlStateManager.loadIdentity();
@@ -673,7 +673,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       this.lightmapUpdateNeeded = true;
    }
 
-   private void updateLightmap(float partialTicks) {
+   private void updateLightmap(float var1) {
       if (this.lightmapUpdateNeeded) {
          this.mc.mcProfiler.startSection("lightTex");
          World world = this.mc.world;
@@ -791,12 +791,12 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   private float getNightVisionBrightness(EntityLivingBase entitylivingbaseIn, float partialTicks) {
+   private float getNightVisionBrightness(EntityLivingBase var1, float var2) {
       int i = entitylivingbaseIn.getActivePotionEffect(MobEffects.NIGHT_VISION).getDuration();
       return i > 200 ? 1.0F : 0.7F + MathHelper.sin(((float)i - partialTicks) * 3.1415927F * 0.2F) * 0.3F;
    }
 
-   public void updateCameraAndRender(float partialTicks, long nanoTime) {
+   public void updateCameraAndRender(float var1, long var2) {
       boolean flag = Display.isActive();
       if (!flag && this.mc.gameSettings.pauseOnLostFocus && (!this.mc.gameSettings.touchscreen || !Mouse.isButtonDown(1))) {
          if (Minecraft.getSystemTime() - this.prevFrameTime > 500L) {
@@ -950,7 +950,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   public void renderStreamIndicator(float partialTicks) {
+   public void renderStreamIndicator(float var1) {
       this.setupOverlayRendering();
    }
 
@@ -977,7 +977,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       }
    }
 
-   public void renderWorld(float partialTicks, long finishTimeNano) {
+   public void renderWorld(float var1, long var2) {
       this.updateLightmap(partialTicks);
       if (this.mc.getRenderViewEntity() == null) {
          this.mc.setRenderViewEntity(this.mc.player);
@@ -1003,7 +1003,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       this.mc.mcProfiler.endSection();
    }
 
-   private void renderWorldPass(int pass, float partialTicks, long finishTimeNano) {
+   private void renderWorldPass(int var1, float var2, long var3) {
       RenderGlobal renderglobal = this.mc.renderGlobal;
       ParticleManager particlemanager = this.mc.effectRenderer;
       boolean flag = this.isDrawBlockOutline();
@@ -1162,7 +1162,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   private void renderCloudsCheck(RenderGlobal renderGlobalIn, float partialTicks, int pass) {
+   private void renderCloudsCheck(RenderGlobal var1, float var2, int var3) {
       if (this.mc.gameSettings.shouldRenderClouds() != 0) {
          this.mc.mcProfiler.endStartSection("clouds");
          GlStateManager.matrixMode(5889);
@@ -1243,7 +1243,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
    }
 
-   protected void renderRainSnow(float partialTicks) {
+   protected void renderRainSnow(float var1) {
       IRenderHandler renderer = this.mc.world.provider.getWeatherRenderer();
       if (renderer != null) {
          renderer.render(partialTicks, this.mc.world, this.mc);
@@ -1387,7 +1387,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       GlStateManager.translate(0.0F, 0.0F, -2000.0F);
    }
 
-   private void updateFogColor(float partialTicks) {
+   private void updateFogColor(float var1) {
       World world = this.mc.world;
       Entity entity = this.mc.getRenderViewEntity();
       float f = 0.25F + 0.75F * (float)this.mc.gameSettings.renderDistanceChunks / 32.0F;
@@ -1528,7 +1528,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       GlStateManager.clearColor(this.fogColorRed, this.fogColorGreen, this.fogColorBlue, 0.0F);
    }
 
-   private void setupFog(int startCoords, float partialTicks) {
+   private void setupFog(int var1, float var2) {
       Entity entity = this.mc.getRenderViewEntity();
       GlStateManager.glFog(2918, this.setFogColorBuffer(this.fogColorRed, this.fogColorGreen, this.fogColorBlue, 1.0F));
       GlStateManager.glNormal3f(0.0F, -1.0F, 0.0F);
@@ -1601,7 +1601,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       GlStateManager.colorMaterial(1028, 4608);
    }
 
-   private FloatBuffer setFogColorBuffer(float red, float green, float blue, float alpha) {
+   private FloatBuffer setFogColorBuffer(float var1, float var2, float var3, float var4) {
       this.fogColorBuffer.clear();
       this.fogColorBuffer.put(red).put(green).put(blue).put(alpha);
       this.fogColorBuffer.flip();
@@ -1612,7 +1612,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
       return this.theMapItemRenderer;
    }
 
-   public static void drawNameplate(FontRenderer fontRendererIn, String str, float x, float y, float z, int verticalShift, float viewerYaw, float viewerPitch, boolean isThirdPersonFrontal, boolean isSneaking) {
+   public static void drawNameplate(FontRenderer var0, String var1, float var2, float var3, float var4, int var5, float var6, float var7, boolean var8, boolean var9) {
       GlStateManager.pushMatrix();
       GlStateManager.translate(x, y, z);
       GlStateManager.glNormal3f(0.0F, 1.0F, 0.0F);

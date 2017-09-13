@@ -21,19 +21,19 @@ public class MapItemRenderer {
    private final TextureManager textureManager;
    private final Map loadedMaps = Maps.newHashMap();
 
-   public MapItemRenderer(TextureManager textureManagerIn) {
+   public MapItemRenderer(TextureManager var1) {
       this.textureManager = textureManagerIn;
    }
 
-   public void updateMapTexture(MapData mapdataIn) {
+   public void updateMapTexture(MapData var1) {
       this.getMapRendererInstance(mapdataIn).updateMapTexture();
    }
 
-   public void renderMap(MapData mapdataIn, boolean p_148250_2_) {
+   public void renderMap(MapData var1, boolean var2) {
       this.getMapRendererInstance(mapdataIn).render(p_148250_2_);
    }
 
-   private MapItemRenderer.Instance getMapRendererInstance(MapData mapdataIn) {
+   private MapItemRenderer.Instance getMapRendererInstance(MapData var1) {
       MapItemRenderer.Instance mapitemrenderer$instance = (MapItemRenderer.Instance)this.loadedMaps.get(mapdataIn.mapName);
       if (mapitemrenderer$instance == null) {
          mapitemrenderer$instance = new MapItemRenderer.Instance(mapdataIn);
@@ -58,7 +58,7 @@ public class MapItemRenderer {
       private final ResourceLocation location;
       private final int[] mapTextureData;
 
-      private Instance(MapData mapdataIn) {
+      private Instance(MapData var2) {
          this.mapData = mapdataIn;
          this.mapTexture = new DynamicTexture(128, 128);
          this.mapTextureData = this.mapTexture.getTextureData();
@@ -83,7 +83,7 @@ public class MapItemRenderer {
          this.mapTexture.updateDynamicTexture();
       }
 
-      private void render(boolean noOverlayRendering) {
+      private void render(boolean var1) {
          int i = 0;
          int j = 0;
          Tessellator tessellator = Tessellator.getInstance();

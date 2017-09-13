@@ -16,7 +16,7 @@ public class GuiSlider extends GuiButton {
    private final GuiPageButtonList.GuiResponder responder;
    private GuiSlider.FormatHelper formatHelper;
 
-   public GuiSlider(GuiPageButtonList.GuiResponder guiResponder, int idIn, int x, int y, String name, float min, float max, float defaultValue, GuiSlider.FormatHelper formatter) {
+   public GuiSlider(GuiPageButtonList.GuiResponder var1, int var2, int var3, int var4, String var5, float var6, float var7, float var8, GuiSlider.FormatHelper var9) {
       super(idIn, x, y, 150, 20, "");
       this.name = name;
       this.min = min;
@@ -31,7 +31,7 @@ public class GuiSlider extends GuiButton {
       return this.min + (this.max - this.min) * this.sliderPosition;
    }
 
-   public void setSliderValue(float p_175218_1_, boolean p_175218_2_) {
+   public void setSliderValue(float var1, boolean var2) {
       this.sliderPosition = (p_175218_1_ - this.min) / (this.max - this.min);
       this.displayString = this.getDisplayString();
       if (p_175218_2_) {
@@ -48,11 +48,11 @@ public class GuiSlider extends GuiButton {
       return this.formatHelper == null ? I18n.format(this.name) + ": " + this.getSliderValue() : this.formatHelper.getText(this.id, I18n.format(this.name), this.getSliderValue());
    }
 
-   protected int getHoverState(boolean mouseOver) {
+   protected int getHoverState(boolean var1) {
       return 0;
    }
 
-   protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
+   protected void mouseDragged(Minecraft var1, int var2, int var3) {
       if (this.visible) {
          if (this.isMouseDown) {
             this.sliderPosition = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
@@ -75,13 +75,13 @@ public class GuiSlider extends GuiButton {
 
    }
 
-   public void setSliderPosition(float p_175219_1_) {
+   public void setSliderPosition(float var1) {
       this.sliderPosition = p_175219_1_;
       this.displayString = this.getDisplayString();
       this.responder.setEntryValue(this.id, this.getSliderValue());
    }
 
-   public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+   public boolean mousePressed(Minecraft var1, int var2, int var3) {
       if (super.mousePressed(mc, mouseX, mouseY)) {
          this.sliderPosition = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
          if (this.sliderPosition < 0.0F) {
@@ -101,7 +101,7 @@ public class GuiSlider extends GuiButton {
       }
    }
 
-   public void mouseReleased(int mouseX, int mouseY) {
+   public void mouseReleased(int var1, int var2) {
       this.isMouseDown = false;
    }
 

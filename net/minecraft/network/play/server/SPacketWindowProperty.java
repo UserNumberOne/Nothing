@@ -4,6 +4,8 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketWindowProperty implements Packet {
    private int windowId;
@@ -14,24 +16,39 @@ public class SPacketWindowProperty implements Packet {
    }
 
    public SPacketWindowProperty(int var1, int var2, int var3) {
-      this.windowId = var1;
-      this.property = var2;
-      this.value = var3;
+      this.windowId = windowIdIn;
+      this.property = propertyIn;
+      this.value = valueIn;
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      var1.handleWindowProperty(this);
+      handler.handleWindowProperty(this);
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.windowId = var1.readUnsignedByte();
-      this.property = var1.readShort();
-      this.value = var1.readShort();
+      this.windowId = buf.readUnsignedByte();
+      this.property = buf.readShort();
+      this.value = buf.readShort();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeByte(this.windowId);
-      var1.writeShort(this.property);
-      var1.writeShort(this.value);
+      buf.writeByte(this.windowId);
+      buf.writeShort(this.property);
+      buf.writeShort(this.value);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getWindowId() {
+      return this.windowId;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getProperty() {
+      return this.property;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getValue() {
+      return this.value;
    }
 }

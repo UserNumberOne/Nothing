@@ -6,50 +6,45 @@ import java.io.File;
 
 public class UserListOps extends UserList {
    public UserListOps(File var1) {
-      super(var1);
+      super(saveFile);
    }
 
    protected UserListEntry createEntry(JsonObject var1) {
-      return new UserListOpsEntry(var1);
+      return new UserListOpsEntry(entryData);
    }
 
    public String[] getKeys() {
-      String[] var1 = new String[this.getValues().size()];
-      int var2 = 0;
+      String[] astring = new String[this.getValues().size()];
+      int i = 0;
 
-      for(UserListOpsEntry var4 : this.getValues().values()) {
-         var1[var2++] = ((GameProfile)var4.getValue()).getName();
+      for(UserListOpsEntry userlistopsentry : this.getValues().values()) {
+         astring[i++] = ((GameProfile)userlistopsentry.getValue()).getName();
       }
 
-      return var1;
+      return astring;
    }
 
    public int getPermissionLevel(GameProfile var1) {
-      UserListOpsEntry var2 = (UserListOpsEntry)this.getEntry(var1);
-      return var2 != null ? var2.getPermissionLevel() : 0;
+      UserListOpsEntry userlistopsentry = (UserListOpsEntry)this.getEntry(profile);
+      return userlistopsentry != null ? userlistopsentry.getPermissionLevel() : 0;
    }
 
    public boolean bypassesPlayerLimit(GameProfile var1) {
-      UserListOpsEntry var2 = (UserListOpsEntry)this.getEntry(var1);
-      return var2 != null ? var2.bypassesPlayerLimit() : false;
+      UserListOpsEntry userlistopsentry = (UserListOpsEntry)this.getEntry(profile);
+      return userlistopsentry != null ? userlistopsentry.bypassesPlayerLimit() : false;
    }
 
    protected String getObjectKey(GameProfile var1) {
-      return var1.getId().toString();
+      return obj.getId().toString();
    }
 
    public GameProfile getGameProfileFromName(String var1) {
-      for(UserListOpsEntry var3 : this.getValues().values()) {
-         if (var1.equalsIgnoreCase(((GameProfile)var3.getValue()).getName())) {
-            return (GameProfile)var3.getValue();
+      for(UserListOpsEntry userlistopsentry : this.getValues().values()) {
+         if (username.equalsIgnoreCase(((GameProfile)userlistopsentry.getValue()).getName())) {
+            return (GameProfile)userlistopsentry.getValue();
          }
       }
 
       return null;
-   }
-
-   // $FF: synthetic method
-   protected String getObjectKey(Object var1) {
-      return this.getObjectKey((GameProfile)var1);
    }
 }

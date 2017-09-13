@@ -28,11 +28,11 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
    private final Map mapTextureCounters = Maps.newHashMap();
    private final IResourceManager theResourceManager;
 
-   public TextureManager(IResourceManager resourceManager) {
+   public TextureManager(IResourceManager var1) {
       this.theResourceManager = resourceManager;
    }
 
-   public void bindTexture(ResourceLocation resource) {
+   public void bindTexture(ResourceLocation var1) {
       ITextureObject itextureobject = (ITextureObject)this.mapTextureObjects.get(resource);
       if (itextureobject == null) {
          itextureobject = new SimpleTexture(resource);
@@ -42,7 +42,7 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
       TextureUtil.bindTexture(itextureobject.getGlTextureId());
    }
 
-   public boolean loadTickableTexture(ResourceLocation textureLocation, ITickableTextureObject textureObj) {
+   public boolean loadTickableTexture(ResourceLocation var1, ITickableTextureObject var2) {
       if (this.loadTexture(textureLocation, textureObj)) {
          this.listTickables.add(textureObj);
          return true;
@@ -51,7 +51,7 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
       }
    }
 
-   public boolean loadTexture(ResourceLocation textureLocation, final ITextureObject textureObj) {
+   public boolean loadTexture(ResourceLocation var1, final ITextureObject var2) {
       boolean flag = true;
 
       try {
@@ -77,11 +77,11 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
       return flag;
    }
 
-   public ITextureObject getTexture(ResourceLocation textureLocation) {
+   public ITextureObject getTexture(ResourceLocation var1) {
       return (ITextureObject)this.mapTextureObjects.get(textureLocation);
    }
 
-   public ResourceLocation getDynamicTextureLocation(String name, DynamicTexture texture) {
+   public ResourceLocation getDynamicTextureLocation(String var1, DynamicTexture var2) {
       Integer integer = (Integer)this.mapTextureCounters.get(name);
       if (integer == null) {
          integer = Integer.valueOf(1);
@@ -102,7 +102,7 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
 
    }
 
-   public void deleteTexture(ResourceLocation textureLocation) {
+   public void deleteTexture(ResourceLocation var1) {
       ITextureObject itextureobject = this.getTexture(textureLocation);
       if (itextureobject != null) {
          TextureUtil.deleteTexture(itextureobject.getGlTextureId());
@@ -110,7 +110,7 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
 
    }
 
-   public void onResourceManagerReload(IResourceManager resourceManager) {
+   public void onResourceManagerReload(IResourceManager var1) {
       ProgressBar bar = ProgressManager.push("Reloading Texture Manager", this.mapTextureObjects.keySet().size(), true);
 
       for(Entry entry : this.mapTextureObjects.entrySet()) {

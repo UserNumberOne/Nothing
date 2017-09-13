@@ -24,7 +24,7 @@ public class Stitcher {
    private final int maxHeight;
    private final int maxTileDimension;
 
-   public Stitcher(int maxWidthIn, int maxHeightIn, int maxTileDimensionIn, int mipmapLevelStitcherIn) {
+   public Stitcher(int var1, int var2, int var3, int var4) {
       this.mipmapLevelStitcher = mipmapLevelStitcherIn;
       this.maxWidth = maxWidthIn;
       this.maxHeight = maxHeightIn;
@@ -39,7 +39,7 @@ public class Stitcher {
       return this.currentHeight;
    }
 
-   public void addSprite(TextureAtlasSprite textureAtlas) {
+   public void addSprite(TextureAtlasSprite var1) {
       Stitcher.Holder stitcher$holder = new Stitcher.Holder(textureAtlas, this.mipmapLevelStitcher);
       if (this.maxTileDimension > 0) {
          stitcher$holder.setNewDimension(this.maxTileDimension);
@@ -91,11 +91,11 @@ public class Stitcher {
       return list1;
    }
 
-   private static int getMipmapDimension(int p_147969_0_, int p_147969_1_) {
+   private static int getMipmapDimension(int var0, int var1) {
       return (p_147969_0_ >> p_147969_1_) + ((p_147969_0_ & (1 << p_147969_1_) - 1) == 0 ? 0 : 1) << p_147969_1_;
    }
 
-   private boolean allocateSlot(Stitcher.Holder p_94310_1_) {
+   private boolean allocateSlot(Stitcher.Holder var1) {
       TextureAtlasSprite textureatlassprite = p_94310_1_.getAtlasSprite();
       boolean flag = textureatlassprite.getIconWidth() != textureatlassprite.getIconHeight();
 
@@ -117,7 +117,7 @@ public class Stitcher {
       return this.expandAndAllocateSlot(p_94310_1_);
    }
 
-   private boolean expandAndAllocateSlot(Stitcher.Holder p_94311_1_) {
+   private boolean expandAndAllocateSlot(Stitcher.Holder var1) {
       int i = Math.min(p_94311_1_.getWidth(), p_94311_1_.getHeight());
       int j = Math.max(p_94311_1_.getWidth(), p_94311_1_.getHeight());
       int k = MathHelper.smallestEncompassingPowerOfTwo(this.currentWidth);
@@ -170,7 +170,7 @@ public class Stitcher {
       private boolean rotated;
       private float scaleFactor = 1.0F;
 
-      public Holder(TextureAtlasSprite theTextureIn, int mipmapLevelHolderIn) {
+      public Holder(TextureAtlasSprite var1, int var2) {
          this.theTexture = theTextureIn;
          this.width = theTextureIn.getIconWidth();
          this.height = theTextureIn.getIconHeight();
@@ -200,7 +200,7 @@ public class Stitcher {
          return this.rotated;
       }
 
-      public void setNewDimension(int p_94196_1_) {
+      public void setNewDimension(int var1) {
          if (this.width > p_94196_1_ && this.height > p_94196_1_) {
             this.scaleFactor = (float)p_94196_1_ / (float)Math.min(this.width, this.height);
          }
@@ -211,7 +211,7 @@ public class Stitcher {
          return "Holder{width=" + this.width + ", height=" + this.height + ", name=" + this.theTexture.getIconName() + '}';
       }
 
-      public int compareTo(Stitcher.Holder p_compareTo_1_) {
+      public int compareTo(Stitcher.Holder var1) {
          int i;
          if (this.getHeight() == p_compareTo_1_.getHeight()) {
             if (this.getWidth() == p_compareTo_1_.getWidth()) {
@@ -240,7 +240,7 @@ public class Stitcher {
       private List subSlots;
       private Stitcher.Holder holder;
 
-      public Slot(int originXIn, int originYIn, int widthIn, int heightIn) {
+      public Slot(int var1, int var2, int var3, int var4) {
          this.originX = originXIn;
          this.originY = originYIn;
          this.width = widthIn;
@@ -259,7 +259,7 @@ public class Stitcher {
          return this.originY;
       }
 
-      public boolean addSlot(Stitcher.Holder holderIn) {
+      public boolean addSlot(Stitcher.Holder var1) {
          if (this.holder != null) {
             return false;
          } else {
@@ -306,7 +306,7 @@ public class Stitcher {
          }
       }
 
-      public void getAllStitchSlots(List p_94184_1_) {
+      public void getAllStitchSlots(List var1) {
          if (this.holder != null) {
             p_94184_1_.add(this);
          } else if (this.subSlots != null) {

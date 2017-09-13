@@ -27,11 +27,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LayerCustomHead implements LayerRenderer {
    private final ModelRenderer modelRenderer;
 
-   public LayerCustomHead(ModelRenderer p_i46120_1_) {
+   public LayerCustomHead(ModelRenderer var1) {
       this.modelRenderer = p_i46120_1_;
    }
 
-   public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityLivingBase var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
       if (itemstack != null && itemstack.getItem() != null) {
          Item item = itemstack.getItem();

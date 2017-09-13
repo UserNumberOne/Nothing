@@ -20,7 +20,7 @@ public class GuiControls extends GuiScreen {
    private GuiKeyBindingList keyBindingList;
    private GuiButton buttonReset;
 
-   public GuiControls(GuiScreen screen, GameSettings settings) {
+   public GuiControls(GuiScreen var1, GameSettings var2) {
       this.parentScreen = screen;
       this.options = settings;
    }
@@ -49,7 +49,7 @@ public class GuiControls extends GuiScreen {
       this.keyBindingList.handleMouseInput();
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 200) {
          this.mc.displayGuiScreen(this.parentScreen);
       } else if (button.id == 201) {
@@ -65,7 +65,7 @@ public class GuiControls extends GuiScreen {
 
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       if (this.buttonId != null) {
          this.buttonId.setKeyModifierAndCode(KeyModifier.getActiveModifier(), -100 + mouseButton);
          this.options.setOptionKeyBinding(this.buttonId, -100 + mouseButton);
@@ -77,14 +77,14 @@ public class GuiControls extends GuiScreen {
 
    }
 
-   protected void mouseReleased(int mouseX, int mouseY, int state) {
+   protected void mouseReleased(int var1, int var2, int var3) {
       if (state != 0 || !this.keyBindingList.mouseReleased(mouseX, mouseY, state)) {
          super.mouseReleased(mouseX, mouseY, state);
       }
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (this.buttonId != null) {
          if (keyCode == 1) {
             this.buttonId.setKeyModifierAndCode(KeyModifier.NONE, 0);
@@ -109,7 +109,7 @@ public class GuiControls extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.keyBindingList.drawScreen(mouseX, mouseY, partialTicks);
       this.drawCenteredString(this.fontRendererObj, this.screenTitle, this.width / 2, 8, 16777215);

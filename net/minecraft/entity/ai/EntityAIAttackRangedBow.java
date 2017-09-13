@@ -18,15 +18,15 @@ public class EntityAIAttackRangedBow extends EntityAIBase {
    private int strafingTime = -1;
 
    public EntityAIAttackRangedBow(EntitySkeleton var1, double var2, int var4, float var5) {
-      this.entity = var1;
-      this.moveSpeedAmp = var2;
-      this.attackCooldown = var4;
-      this.maxAttackDistance = var5 * var5;
+      this.entity = skeleton;
+      this.moveSpeedAmp = speedAmplifier;
+      this.attackCooldown = delay;
+      this.maxAttackDistance = maxDistance * maxDistance;
       this.setMutexBits(3);
    }
 
    public void setAttackCooldown(int var1) {
-      this.attackCooldown = var1;
+      this.attackCooldown = p_189428_1_;
    }
 
    public boolean shouldExecute() {
@@ -55,26 +55,26 @@ public class EntityAIAttackRangedBow extends EntityAIBase {
    }
 
    public void updateTask() {
-      EntityLivingBase var1 = this.entity.getAttackTarget();
-      if (var1 != null) {
-         double var2 = this.entity.getDistanceSq(var1.posX, var1.getEntityBoundingBox().minY, var1.posZ);
-         boolean var4 = this.entity.getEntitySenses().canSee(var1);
-         boolean var5 = this.seeTime > 0;
-         if (var4 != var5) {
+      EntityLivingBase entitylivingbase = this.entity.getAttackTarget();
+      if (entitylivingbase != null) {
+         double d0 = this.entity.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
+         boolean flag = this.entity.getEntitySenses().canSee(entitylivingbase);
+         boolean flag1 = this.seeTime > 0;
+         if (flag != flag1) {
             this.seeTime = 0;
          }
 
-         if (var4) {
+         if (flag) {
             ++this.seeTime;
          } else {
             --this.seeTime;
          }
 
-         if (var2 <= (double)this.maxAttackDistance && this.seeTime >= 20) {
+         if (d0 <= (double)this.maxAttackDistance && this.seeTime >= 20) {
             this.entity.getNavigator().clearPathEntity();
             ++this.strafingTime;
          } else {
-            this.entity.getNavigator().tryMoveToEntityLiving(var1, this.moveSpeedAmp);
+            this.entity.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.moveSpeedAmp);
             this.strafingTime = -1;
          }
 
@@ -91,33 +91,33 @@ public class EntityAIAttackRangedBow extends EntityAIBase {
          }
 
          if (this.strafingTime > -1) {
-            if (var2 > (double)(this.maxAttackDistance * 0.75F)) {
+            if (d0 > (double)(this.maxAttackDistance * 0.75F)) {
                this.strafingBackwards = false;
-            } else if (var2 < (double)(this.maxAttackDistance * 0.25F)) {
+            } else if (d0 < (double)(this.maxAttackDistance * 0.25F)) {
                this.strafingBackwards = true;
             }
 
             this.entity.getMoveHelper().strafe(this.strafingBackwards ? -0.5F : 0.5F, this.strafingClockwise ? 0.5F : -0.5F);
-            this.entity.faceEntity(var1, 30.0F, 30.0F);
+            this.entity.faceEntity(entitylivingbase, 30.0F, 30.0F);
          } else {
-            this.entity.getLookHelper().setLookPositionWithEntity(var1, 30.0F, 30.0F);
+            this.entity.getLookHelper().setLookPositionWithEntity(entitylivingbase, 30.0F, 30.0F);
          }
 
          if (this.entity.isHandActive()) {
-            if (!var4 && this.seeTime < -60) {
+            if (!flag && this.seeTime < -60) {
                this.entity.resetActiveHand();
-            } else if (var4) {
-               int var6 = this.entity.getItemInUseMaxCount();
-               if (var6 >= 20) {
+            } else if (flag) {
+               int i = this.entity.getItemInUseMaxCount();
+               if (i >= 20) {
                   this.entity.resetActiveHand();
-                  this.entity.attackEntityWithRangedAttack(var1, ItemBow.getArrowVelocity(var6));
+                  this.entity.attackEntityWithRangedAttack(entitylivingbase, ItemBow.getArrowVelocity(i));
                   this.attackTime = this.attackCooldown;
                }
             }
          } else if (--this.attackTime <= 0 && this.seeTime >= -60) {
             this.entity.setActiveHand(EnumHand.MAIN_HAND);
          }
-
       }
+
    }
 }

@@ -19,14 +19,14 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer {
    private double otherPlayerMPYaw;
    private double otherPlayerMPPitch;
 
-   public EntityOtherPlayerMP(World worldIn, GameProfile gameProfileIn) {
+   public EntityOtherPlayerMP(World var1, GameProfile var2) {
       super(worldIn, gameProfileIn);
       this.stepHeight = 0.0F;
       this.noClip = true;
       this.renderOffsetY = 0.25F;
    }
 
-   public boolean isInRangeToRenderDist(double distance) {
+   public boolean isInRangeToRenderDist(double var1) {
       double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 10.0D;
       if (Double.isNaN(d0)) {
          d0 = 1.0D;
@@ -36,11 +36,11 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer {
       return distance < d0 * d0;
    }
 
-   public boolean attackEntityFrom(DamageSource source, float amount) {
+   public boolean attackEntityFrom(DamageSource var1, float var2) {
       return true;
    }
 
-   public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+   public void setPositionAndRotationDirect(double var1, double var3, double var5, float var7, float var8, int var9, boolean var10) {
       this.otherPlayerMPX = x;
       this.otherPlayerMPY = y;
       this.otherPlayerMPZ = z;
@@ -109,11 +109,11 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer {
       this.world.theProfiler.endSection();
    }
 
-   public void sendMessage(ITextComponent component) {
+   public void sendMessage(ITextComponent var1) {
       Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(component);
    }
 
-   public boolean canUseCommand(int permLevel, String commandName) {
+   public boolean canUseCommand(int var1, String var2) {
       return false;
    }
 

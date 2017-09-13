@@ -11,21 +11,21 @@ public class GuiScreenWorking extends GuiScreen implements IProgressUpdate {
    private int progress;
    private boolean doneWorking;
 
-   public void displaySavingString(String message) {
+   public void displaySavingString(String var1) {
       this.resetProgressAndMessage(message);
    }
 
-   public void resetProgressAndMessage(String message) {
+   public void resetProgressAndMessage(String var1) {
       this.title = message;
       this.displayLoadingString("Working...");
    }
 
-   public void displayLoadingString(String message) {
+   public void displayLoadingString(String var1) {
       this.stage = message;
       this.setLoadingProgress(0);
    }
 
-   public void setLoadingProgress(int progress) {
+   public void setLoadingProgress(int var1) {
       this.progress = progress;
    }
 
@@ -33,7 +33,7 @@ public class GuiScreenWorking extends GuiScreen implements IProgressUpdate {
       this.doneWorking = true;
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       if (this.doneWorking) {
          if (!this.mc.isConnectedToRealms()) {
             this.mc.displayGuiScreen((GuiScreen)null);

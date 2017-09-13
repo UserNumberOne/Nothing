@@ -12,7 +12,7 @@ public class VertexBuffer {
    private final VertexFormat vertexFormat;
    private int count;
 
-   public VertexBuffer(VertexFormat vertexFormatIn) {
+   public VertexBuffer(VertexFormat var1) {
       this.vertexFormat = vertexFormatIn;
       this.glBufferId = OpenGlHelper.glGenBuffers();
    }
@@ -21,14 +21,14 @@ public class VertexBuffer {
       OpenGlHelper.glBindBuffer(OpenGlHelper.GL_ARRAY_BUFFER, this.glBufferId);
    }
 
-   public void bufferData(ByteBuffer data) {
+   public void bufferData(ByteBuffer var1) {
       this.bindBuffer();
       OpenGlHelper.glBufferData(OpenGlHelper.GL_ARRAY_BUFFER, data, 35044);
       this.unbindBuffer();
       this.count = data.limit() / this.vertexFormat.getNextOffset();
    }
 
-   public void drawArrays(int mode) {
+   public void drawArrays(int var1) {
       GlStateManager.glDrawArrays(mode, 0, this.count);
    }
 

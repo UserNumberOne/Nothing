@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiSlotRealmsProxy extends GuiSlot {
    private final RealmsScrolledSelectionList selectionList;
 
-   public GuiSlotRealmsProxy(RealmsScrolledSelectionList selectionListIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
+   public GuiSlotRealmsProxy(RealmsScrolledSelectionList var1, int var2, int var3, int var4, int var5, int var6) {
       super(Minecraft.getMinecraft(), widthIn, heightIn, topIn, bottomIn, slotHeightIn);
       this.selectionList = selectionListIn;
    }
@@ -18,11 +18,11 @@ public class GuiSlotRealmsProxy extends GuiSlot {
       return this.selectionList.getItemCount();
    }
 
-   protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY) {
+   protected void elementClicked(int var1, boolean var2, int var3, int var4) {
       this.selectionList.selectItem(slotIndex, isDoubleClick, mouseX, mouseY);
    }
 
-   protected boolean isSelected(int slotIndex) {
+   protected boolean isSelected(int var1) {
       return this.selectionList.isSelectedItem(slotIndex);
    }
 
@@ -30,7 +30,7 @@ public class GuiSlotRealmsProxy extends GuiSlot {
       this.selectionList.renderBackground();
    }
 
-   protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn) {
+   protected void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6) {
       this.selectionList.renderItem(entryID, insideLeft, yPos, insideSlotHeight, mouseXIn, mouseYIn);
    }
 

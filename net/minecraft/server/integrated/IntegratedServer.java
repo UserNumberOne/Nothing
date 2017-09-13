@@ -50,7 +50,7 @@ public class IntegratedServer extends MinecraftServer {
    private boolean isPublic;
    private ThreadLanServerPing lanServerPing;
 
-   public IntegratedServer(Minecraft clientIn, String folderNameIn, String worldNameIn, WorldSettings worldSettingsIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn) {
+   public IntegratedServer(Minecraft var1, String var2, String var3, WorldSettings var4, YggdrasilAuthenticationService var5, MinecraftSessionService var6, GameProfileRepository var7, PlayerProfileCache var8) {
       super(new File(clientIn.mcDataDir, "saves"), clientIn.getProxy(), clientIn.getDataFixer(), authServiceIn, sessionServiceIn, profileRepoIn, profileCacheIn);
       this.setServerOwner(clientIn.getSession().getUsername());
       this.setFolderName(folderNameIn);
@@ -67,7 +67,7 @@ public class IntegratedServer extends MinecraftServer {
       return new IntegratedServerCommandManager(this);
    }
 
-   public void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, String generatorOptions) {
+   public void loadAllWorlds(String var1, String var2, long var3, WorldType var5, String var6) {
       this.convertMapIfNeeded(saveName);
       ISaveHandler isavehandler = this.getActiveAnvilConverter().getSaveLoader(saveName, true);
       this.setResourcePackFromWorld(this.getFolderName(), isavehandler);
@@ -186,7 +186,7 @@ public class IntegratedServer extends MinecraftServer {
       return true;
    }
 
-   public void saveAllWorlds(boolean isSilent) {
+   public void saveAllWorlds(boolean var1) {
       super.saveAllWorlds(isSilent);
    }
 
@@ -202,11 +202,11 @@ public class IntegratedServer extends MinecraftServer {
       return false;
    }
 
-   public void finalTick(CrashReport report) {
+   public void finalTick(CrashReport var1) {
       this.mc.crashed(report);
    }
 
-   public CrashReport addServerInfoToCrashReport(CrashReport report) {
+   public CrashReport addServerInfoToCrashReport(CrashReport var1) {
       report = super.addServerInfoToCrashReport(report);
       report.getCategory().setDetail("Type", new ICrashReportDetail() {
          public String call() throws Exception {
@@ -227,7 +227,7 @@ public class IntegratedServer extends MinecraftServer {
       return report;
    }
 
-   public void setDifficultyForAllWorlds(EnumDifficulty difficulty) {
+   public void setDifficultyForAllWorlds(EnumDifficulty var1) {
       super.setDifficultyForAllWorlds(difficulty);
       if (this.mc.world != null) {
          this.mc.world.getWorldInfo().setDifficulty(difficulty);
@@ -235,7 +235,7 @@ public class IntegratedServer extends MinecraftServer {
 
    }
 
-   public void addServerStatsToSnooper(Snooper playerSnooper) {
+   public void addServerStatsToSnooper(Snooper var1) {
       super.addServerStatsToSnooper(playerSnooper);
       playerSnooper.addClientStat("snooper_partner", this.mc.getPlayerUsageSnooper().getUniqueID());
    }
@@ -244,7 +244,7 @@ public class IntegratedServer extends MinecraftServer {
       return Minecraft.getMinecraft().isSnooperEnabled();
    }
 
-   public String shareToLAN(GameType type, boolean allowCheats) {
+   public String shareToLAN(GameType var1, boolean var2) {
       try {
          int i = -1;
 
@@ -267,7 +267,7 @@ public class IntegratedServer extends MinecraftServer {
          this.getPlayerList().setCommandsAllowedForAll(allowCheats);
          this.mc.player.setPermissionLevel(allowCheats ? 4 : 0);
          return i + "";
-      } catch (IOException var61) {
+      } catch (IOException var6) {
          return null;
       }
    }
@@ -305,7 +305,7 @@ public class IntegratedServer extends MinecraftServer {
       return this.isPublic;
    }
 
-   public void setGameType(GameType gameMode) {
+   public void setGameType(GameType var1) {
       super.setGameType(gameMode);
       this.getPlayerList().setGameType(gameMode);
    }

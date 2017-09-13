@@ -38,7 +38,7 @@ public class ModelMinecart extends ModelBase {
       this.sideModels[5].rotateAngleX = -1.5707964F;
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       this.sideModels[5].rotationPointY = 4.0F - ageInTicks;
 
       for(int i = 0; i < 6; ++i) {

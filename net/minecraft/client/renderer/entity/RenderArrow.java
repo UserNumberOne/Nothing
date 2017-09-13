@@ -11,11 +11,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public abstract class RenderArrow extends Render {
-   public RenderArrow(RenderManager renderManagerIn) {
+   public RenderArrow(RenderManager var1) {
       super(renderManagerIn);
    }
 
-   public void doRender(EntityArrow entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityArrow var1, double var2, double var4, double var6, float var8, float var9) {
       this.bindEntityTexture(entity);
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       GlStateManager.pushMatrix();

@@ -6,10 +6,8 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,70 +34,72 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
 
 public class EntitySelector {
-   private static final Pattern TOKEN_PATTERN = Pattern.compile("^@([pare])(?:\\[([\\w=,!-]*)\\])?$");
+   private static final Pattern TOKEN_PATTERN = Pattern.compile("^@([pare])(?:\\[([\\w\\.:=,!-]*)\\])?$");
    private static final Pattern INT_LIST_PATTERN = Pattern.compile("\\G([-!]?[\\w-]*)(?:$|,)");
-   private static final Pattern KEY_VALUE_LIST_PATTERN = Pattern.compile("\\G(\\w+)=([-!]?[\\w-]*)(?:$|,)");
+   private static final Pattern KEY_VALUE_LIST_PATTERN = Pattern.compile("\\G([\\w:]+)=([-!]?[\\w\\.-]*)(?:$|,)");
    private static final Set WORLD_BINDING_ARGS = Sets.newHashSet(new String[]{"x", "y", "z", "dx", "dy", "dz", "rm", "r"});
 
    @Nullable
    public static EntityPlayerMP matchOnePlayer(ICommandSender var0, String var1) {
-      return (EntityPlayerMP)matchOneEntity(var0, var1, EntityPlayerMP.class);
+      return (EntityPlayerMP)matchOneEntity(sender, token, EntityPlayerMP.class);
    }
 
    @Nullable
    public static Entity matchOneEntity(ICommandSender var0, String var1, Class var2) {
-      List var3 = matchEntities(var0, var1, var2);
-      return var3.size() == 1 ? (Entity)var3.get(0) : null;
+      List list = matchEntities(sender, token, targetClass);
+      return list.size() == 1 ? (Entity)list.get(0) : null;
    }
 
    @Nullable
    public static ITextComponent matchEntitiesToTextComponent(ICommandSender var0, String var1) {
-      List var2 = matchEntities(var0, var1, Entity.class);
-      if (var2.isEmpty()) {
+      List list = matchEntities(sender, token, Entity.class);
+      if (list.isEmpty()) {
          return null;
       } else {
-         ArrayList var3 = Lists.newArrayList();
+         List list1 = Lists.newArrayList();
 
-         for(Entity var5 : var2) {
-            var3.add(var5.getDisplayName());
+         for(Entity entity : list) {
+            list1.add(entity.getDisplayName());
          }
 
-         return CommandBase.join(var3);
+         return CommandBase.join(list1);
       }
    }
 
    public static List matchEntities(ICommandSender var0, String var1, Class var2) {
-      Matcher var3 = TOKEN_PATTERN.matcher(var1);
-      if (var3.matches() && var0.canUseCommand(1, "@")) {
-         Map var4 = getArgumentMap(var3.group(2));
-         if (!isEntityTypeValid(var0, var4)) {
+      Matcher matcher = TOKEN_PATTERN.matcher(token);
+      if (matcher.matches() && sender.canUseCommand(1, "@")) {
+         Map map = getArgumentMap(matcher.group(2));
+         if (!isEntityTypeValid(sender, map)) {
             return Collections.emptyList();
          } else {
-            String var5 = var3.group(1);
-            BlockPos var6 = getBlockPosFromArguments(var4, var0.getPosition());
-            Vec3d var7 = getPosFromArguments(var4, var0.getPositionVector());
-            List var8 = getWorlds(var0, var4);
-            ArrayList var9 = Lists.newArrayList();
+            String s = matcher.group(1);
+            BlockPos blockpos = getBlockPosFromArguments(map, sender.getPosition());
+            Vec3d vec3d = getPosFromArguments(map, sender.getPositionVector());
+            List list = getWorlds(sender, map);
+            List list1 = Lists.newArrayList();
 
-            for(World var11 : var8) {
-               if (var11 != null) {
-                  ArrayList var12 = Lists.newArrayList();
-                  var12.addAll(getTypePredicates(var4, var5));
-                  var12.addAll(getXpLevelPredicates(var4));
-                  var12.addAll(getGamemodePredicates(var4));
-                  var12.addAll(getTeamPredicates(var4));
-                  var12.addAll(getScorePredicates(var0, var4));
-                  var12.addAll(getNamePredicates(var4));
-                  var12.addAll(getTagPredicates(var4));
-                  var12.addAll(getRadiusPredicates(var4, var7));
-                  var12.addAll(getRotationsPredicates(var4));
-                  var9.addAll(filterResults(var4, var2, var12, var5, var11, var6));
+            for(World world : list) {
+               if (world != null) {
+                  List list2 = Lists.newArrayList();
+                  list2.addAll(getTypePredicates(map, s));
+                  list2.addAll(getXpLevelPredicates(map));
+                  list2.addAll(getGamemodePredicates(map));
+                  list2.addAll(getTeamPredicates(map));
+                  list2.addAll(getScorePredicates(sender, map));
+                  list2.addAll(getNamePredicates(map));
+                  list2.addAll(getTagPredicates(map));
+                  list2.addAll(getRadiusPredicates(map, vec3d));
+                  list2.addAll(getRotationsPredicates(map));
+                  list2.addAll(ForgeEventFactory.gatherEntitySelectors(map, s, sender, vec3d));
+                  list1.addAll(filterResults(map, targetClass, list2, s, world, blockpos));
                }
             }
 
-            return getEntitiesFromPredicates(var9, var4, var0, var2, var5, var7);
+            return getEntitiesFromPredicates(list1, map, sender, targetClass, s, vec3d);
          }
       } else {
          return Collections.emptyList();
@@ -107,23 +107,23 @@ public class EntitySelector {
    }
 
    private static List getWorlds(ICommandSender var0, Map var1) {
-      ArrayList var2 = Lists.newArrayList();
-      if (hasArgument(var1)) {
-         var2.add(var0.getEntityWorld());
+      List list = Lists.newArrayList();
+      if (hasArgument(argumentMap)) {
+         list.add(sender.getEntityWorld());
       } else {
-         Collections.addAll(var2, var0.h().worldServer);
+         Collections.addAll(list, sender.getServer().worlds);
       }
 
-      return var2;
+      return list;
    }
 
    private static boolean isEntityTypeValid(ICommandSender var0, Map var1) {
-      String var2 = getArgument(var1, "type");
-      var2 = var2 != null && var2.startsWith("!") ? var2.substring(1) : var2;
-      if (var2 != null && !EntityList.isStringValidEntityName(var2)) {
-         TextComponentTranslation var3 = new TextComponentTranslation("commands.generic.entity.invalidType", new Object[]{var2});
-         var3.getStyle().setColor(TextFormatting.RED);
-         var0.sendMessage(var3);
+      String s = getArgument(params, "type");
+      s = s != null && s.startsWith("!") ? s.substring(1) : s;
+      if (s != null && !EntityList.isStringValidEntityName(s)) {
+         TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("commands.generic.entity.invalidType", new Object[]{s});
+         textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
+         commandSender.sendMessage(textcomponenttranslation);
          return false;
       } else {
          return true;
@@ -131,173 +131,148 @@ public class EntitySelector {
    }
 
    private static List getTypePredicates(Map var0, String var1) {
-      ArrayList var2 = Lists.newArrayList();
-      final String var3 = getArgument(var0, "type");
-      final boolean var4 = var3 != null && var3.startsWith("!");
-      if (var4) {
-         var3 = var3.substring(1);
+      List list = Lists.newArrayList();
+      final String s = getArgument(params, "type");
+      final boolean flag = s != null && s.startsWith("!");
+      if (flag) {
+         s = s.substring(1);
       }
 
-      boolean var6 = !var1.equals("e");
-      boolean var7 = var1.equals("r") && var3 != null;
-      if ((var3 == null || !var1.equals("e")) && !var7) {
-         if (var6) {
-            var2.add(new Predicate() {
+      boolean flag1 = !type.equals("e");
+      boolean flag2 = type.equals("r") && s != null;
+      if ((s == null || !type.equals("e")) && !flag2) {
+         if (flag1) {
+            list.add(new Predicate() {
                public boolean apply(@Nullable Entity var1) {
-                  return var1 instanceof EntityPlayer;
-               }
-
-               // $FF: synthetic method
-               public boolean apply(Object var1) {
-                  return this.apply((Entity)var1);
+                  return p_apply_1_ instanceof EntityPlayer;
                }
             });
          }
       } else {
-         var2.add(new Predicate() {
+         list.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
-               return EntityList.isStringEntityName(var1, var3) != var4;
-            }
-
-            // $FF: synthetic method
-            public boolean apply(Object var1) {
-               return this.apply((Entity)var1);
+               return EntityList.isStringEntityName(p_apply_1_, s) != flag;
             }
          });
       }
 
-      return var2;
+      return list;
    }
 
    private static List getXpLevelPredicates(Map var0) {
-      ArrayList var1 = Lists.newArrayList();
-      final int var2 = getInt(var0, "lm", -1);
-      final int var3 = getInt(var0, "l", -1);
-      if (var2 > -1 || var3 > -1) {
-         var1.add(new Predicate() {
+      List list = Lists.newArrayList();
+      final int i = getInt(params, "lm", -1);
+      final int j = getInt(params, "l", -1);
+      if (i > -1 || j > -1) {
+         list.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
-               if (!(var1 instanceof EntityPlayerMP)) {
+               if (!(p_apply_1_ instanceof EntityPlayerMP)) {
                   return false;
                } else {
-                  EntityPlayerMP var2x = (EntityPlayerMP)var1;
-                  return (var2 <= -1 || var2x.experienceLevel >= var2) && (var3 <= -1 || var2x.experienceLevel <= var3);
+                  EntityPlayerMP entityplayermp = (EntityPlayerMP)p_apply_1_;
+                  return (i <= -1 || entityplayermp.experienceLevel >= i) && (j <= -1 || entityplayermp.experienceLevel <= j);
                }
-            }
-
-            // $FF: synthetic method
-            public boolean apply(Object var1) {
-               return this.apply((Entity)var1);
             }
          });
       }
 
-      return var1;
+      return list;
    }
 
    private static List getGamemodePredicates(Map var0) {
-      ArrayList var1 = Lists.newArrayList();
-      String var2 = getArgument(var0, "m");
-      if (var2 == null) {
-         return var1;
+      List list = Lists.newArrayList();
+      String s = getArgument(params, "m");
+      if (s == null) {
+         return list;
       } else {
-         final boolean var3 = var2.startsWith("!");
-         if (var3) {
-            var2 = var2.substring(1);
+         final boolean flag = s.startsWith("!");
+         if (flag) {
+            s = s.substring(1);
          }
 
-         final GameType var5;
+         final GameType gametype;
          try {
-            int var4 = Integer.parseInt(var2);
-            var5 = GameType.parseGameTypeWithDefault(var4, GameType.NOT_SET);
+            int i = Integer.parseInt(s);
+            gametype = GameType.parseGameTypeWithDefault(i, GameType.NOT_SET);
          } catch (Throwable var6) {
-            var5 = GameType.parseGameTypeWithDefault(var2, GameType.NOT_SET);
+            gametype = GameType.parseGameTypeWithDefault(s, GameType.NOT_SET);
          }
 
-         var1.add(new Predicate() {
+         list.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
-               if (!(var1 instanceof EntityPlayerMP)) {
+               if (!(p_apply_1_ instanceof EntityPlayerMP)) {
                   return false;
                } else {
-                  EntityPlayerMP var2 = (EntityPlayerMP)var1;
-                  GameType var3x = var2.interactionManager.getGameType();
-                  return var3 ? var3x != var5 : var3x == var5;
+                  EntityPlayerMP entityplayermp = (EntityPlayerMP)p_apply_1_;
+                  GameType gametype1 = entityplayermp.interactionManager.getGameType();
+                  return flag ? gametype1 != gametype : gametype1 == gametype;
                }
             }
-
-            // $FF: synthetic method
-            public boolean apply(Object var1) {
-               return this.apply((Entity)var1);
-            }
          });
-         return var1;
+         return list;
       }
    }
 
    private static List getTeamPredicates(Map var0) {
-      ArrayList var1 = Lists.newArrayList();
-      final String var2 = getArgument(var0, "team");
-      final boolean var3 = var2 != null && var2.startsWith("!");
-      if (var3) {
-         var2 = var2.substring(1);
+      List list = Lists.newArrayList();
+      final String s = getArgument(params, "team");
+      final boolean flag = s != null && s.startsWith("!");
+      if (flag) {
+         s = s.substring(1);
       }
 
-      if (var2 != null) {
-         var1.add(new Predicate() {
+      if (s != null) {
+         list.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
-               if (!(var1 instanceof EntityLivingBase)) {
+               if (!(p_apply_1_ instanceof EntityLivingBase)) {
                   return false;
                } else {
-                  EntityLivingBase var2x = (EntityLivingBase)var1;
-                  Team var3x = var2x.getTeam();
-                  String var4 = var3x == null ? "" : var3x.getRegisteredName();
-                  return var4.equals(var2) != var3;
+                  EntityLivingBase entitylivingbase = (EntityLivingBase)p_apply_1_;
+                  Team team = entitylivingbase.getTeam();
+                  String s1 = team == null ? "" : team.getRegisteredName();
+                  return s1.equals(s) != flag;
                }
-            }
-
-            // $FF: synthetic method
-            public boolean apply(Object var1) {
-               return this.apply((Entity)var1);
             }
          });
       }
 
-      return var1;
+      return list;
    }
 
    private static List getScorePredicates(final ICommandSender var0, Map var1) {
-      final Map var2 = getScoreMap(var1);
-      return (List)(var2.isEmpty() ? Collections.emptyList() : Lists.newArrayList(new Predicate[]{new Predicate() {
+      final Map map = getScoreMap(params);
+      return (List)(map.isEmpty() ? Collections.emptyList() : Lists.newArrayList(new Predicate[]{new Predicate() {
          public boolean apply(@Nullable Entity var1) {
-            if (var1 == null) {
+            if (p_apply_1_ == null) {
                return false;
             } else {
-               Scoreboard var2x = var0.h().getWorldServer(0).getScoreboard();
+               Scoreboard scoreboard = sender.getServer().worldServerForDimension(0).getScoreboard();
 
-               for(Entry var4 : var2.entrySet()) {
-                  String var5 = (String)var4.getKey();
-                  boolean var6 = false;
-                  if (var5.endsWith("_min") && var5.length() > 4) {
-                     var6 = true;
-                     var5 = var5.substring(0, var5.length() - 4);
+               for(Entry entry : map.entrySet()) {
+                  String s = (String)entry.getKey();
+                  boolean flag = false;
+                  if (s.endsWith("_min") && s.length() > 4) {
+                     flag = true;
+                     s = s.substring(0, s.length() - 4);
                   }
 
-                  ScoreObjective var7 = var2x.getObjective(var5);
-                  if (var7 == null) {
+                  ScoreObjective scoreobjective = scoreboard.getObjective(s);
+                  if (scoreobjective == null) {
                      return false;
                   }
 
-                  String var8 = var1 instanceof EntityPlayerMP ? var1.getName() : var1.getCachedUniqueIdString();
-                  if (!var2x.entityHasObjective(var8, var7)) {
+                  String s1 = p_apply_1_ instanceof EntityPlayerMP ? p_apply_1_.getName() : p_apply_1_.getCachedUniqueIdString();
+                  if (!scoreboard.entityHasObjective(s1, scoreobjective)) {
                      return false;
                   }
 
-                  Score var9 = var2x.getOrCreateScore(var8, var7);
-                  int var10 = var9.getScorePoints();
-                  if (var10 < ((Integer)var4.getValue()).intValue() && var6) {
+                  Score score = scoreboard.getOrCreateScore(s1, scoreobjective);
+                  int i = score.getScorePoints();
+                  if (i < ((Integer)entry.getValue()).intValue() && flag) {
                      return false;
                   }
 
-                  if (var10 > ((Integer)var4.getValue()).intValue() && !var6) {
+                  if (i > ((Integer)entry.getValue()).intValue() && !flag) {
                      return false;
                   }
                }
@@ -305,266 +280,212 @@ public class EntitySelector {
                return true;
             }
          }
-
-         // $FF: synthetic method
-         public boolean apply(Object var1) {
-            return this.apply((Entity)var1);
-         }
       }}));
    }
 
    private static List getNamePredicates(Map var0) {
-      ArrayList var1 = Lists.newArrayList();
-      final String var2 = getArgument(var0, "name");
-      final boolean var3 = var2 != null && var2.startsWith("!");
-      if (var3) {
-         var2 = var2.substring(1);
+      List list = Lists.newArrayList();
+      final String s = getArgument(params, "name");
+      final boolean flag = s != null && s.startsWith("!");
+      if (flag) {
+         s = s.substring(1);
       }
 
-      if (var2 != null) {
-         var1.add(new Predicate() {
+      if (s != null) {
+         list.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
-               return var1 != null && var1.getName().equals(var2) != var3;
-            }
-
-            // $FF: synthetic method
-            public boolean apply(Object var1) {
-               return this.apply((Entity)var1);
+               return p_apply_1_ != null && p_apply_1_.getName().equals(s) != flag;
             }
          });
       }
 
-      return var1;
+      return list;
    }
 
    private static List getTagPredicates(Map var0) {
-      ArrayList var1 = Lists.newArrayList();
-      final String var2 = getArgument(var0, "tag");
-      final boolean var3 = var2 != null && var2.startsWith("!");
-      if (var3) {
-         var2 = var2.substring(1);
+      List list = Lists.newArrayList();
+      final String s = getArgument(params, "tag");
+      final boolean flag = s != null && s.startsWith("!");
+      if (flag) {
+         s = s.substring(1);
       }
 
-      if (var2 != null) {
-         var1.add(new Predicate() {
+      if (s != null) {
+         list.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
-               if (var1 == null) {
-                  return false;
-               } else if ("".equals(var2)) {
-                  return var1.getTags().isEmpty() != var3;
-               } else {
-                  return var1.getTags().contains(var2) != var3;
-               }
-            }
-
-            // $FF: synthetic method
-            public boolean apply(Object var1) {
-               return this.apply((Entity)var1);
+               return p_apply_1_ == null ? false : ("".equals(s) ? p_apply_1_.getTags().isEmpty() != flag : p_apply_1_.getTags().contains(s) != flag);
             }
          });
       }
 
-      return var1;
+      return list;
    }
 
    private static List getRadiusPredicates(Map var0, final Vec3d var1) {
-      double var2 = (double)getInt(var0, "rm", -1);
-      double var4 = (double)getInt(var0, "r", -1);
-      final boolean var6 = var2 < -0.5D;
-      final boolean var7 = var4 < -0.5D;
-      if (var6 && var7) {
+      double d0 = (double)getInt(params, "rm", -1);
+      double d1 = (double)getInt(params, "r", -1);
+      final boolean flag = d0 < -0.5D;
+      final boolean flag1 = d1 < -0.5D;
+      if (flag && flag1) {
          return Collections.emptyList();
       } else {
-         double var8 = Math.max(var2, 1.0E-4D);
-         final double var10 = var8 * var8;
-         double var12 = Math.max(var4, 1.0E-4D);
-         final double var14 = var12 * var12;
+         double d2 = Math.max(d0, 1.0E-4D);
+         final double d3 = d2 * d2;
+         double d4 = Math.max(d1, 1.0E-4D);
+         final double d5 = d4 * d4;
          return Lists.newArrayList(new Predicate[]{new Predicate() {
             public boolean apply(@Nullable Entity var1x) {
-               if (var1x == null) {
+               if (p_apply_1_ == null) {
                   return false;
                } else {
-                  double var2 = var1.squareDistanceTo(var1x.posX, var1x.posY, var1x.posZ);
-                  return (var6 || var2 >= var10) && (var7 || var2 <= var14);
+                  double d6 = pos.squareDistanceTo(p_apply_1_.posX, p_apply_1_.posY, p_apply_1_.posZ);
+                  return (flag || d6 >= d3) && (flag1 || d6 <= d5);
                }
-            }
-
-            // $FF: synthetic method
-            public boolean apply(Object var1x) {
-               return this.apply((Entity)var1x);
             }
          }});
       }
    }
 
    private static List getRotationsPredicates(Map var0) {
-      ArrayList var1 = Lists.newArrayList();
-      if (var0.containsKey("rym") || var0.containsKey("ry")) {
-         final int var2 = MathHelper.clampAngle(getInt(var0, "rym", 0));
-         final int var3 = MathHelper.clampAngle(getInt(var0, "ry", 359));
-         var1.add(new Predicate() {
+      List list = Lists.newArrayList();
+      if (params.containsKey("rym") || params.containsKey("ry")) {
+         final int i = MathHelper.clampAngle(getInt(params, "rym", 0));
+         final int j = MathHelper.clampAngle(getInt(params, "ry", 359));
+         list.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
-               if (var1 == null) {
+               if (p_apply_1_ == null) {
                   return false;
                } else {
-                  int var2x = MathHelper.clampAngle(MathHelper.floor(var1.rotationYaw));
-                  if (var2 > var3) {
-                     return var2x >= var2 || var2x <= var3;
-                  } else {
-                     return var2x >= var2 && var2x <= var3;
-                  }
+                  int i1 = MathHelper.clampAngle(MathHelper.floor(p_apply_1_.rotationYaw));
+                  return i > j ? i1 >= i || i1 <= j : i1 >= i && i1 <= j;
                }
-            }
-
-            // $FF: synthetic method
-            public boolean apply(Object var1) {
-               return this.apply((Entity)var1);
             }
          });
       }
 
-      if (var0.containsKey("rxm") || var0.containsKey("rx")) {
-         final int var4 = MathHelper.clampAngle(getInt(var0, "rxm", 0));
-         final int var5 = MathHelper.clampAngle(getInt(var0, "rx", 359));
-         var1.add(new Predicate() {
+      if (params.containsKey("rxm") || params.containsKey("rx")) {
+         final int k = MathHelper.clampAngle(getInt(params, "rxm", 0));
+         final int l = MathHelper.clampAngle(getInt(params, "rx", 359));
+         list.add(new Predicate() {
             public boolean apply(@Nullable Entity var1) {
-               if (var1 == null) {
+               if (p_apply_1_ == null) {
                   return false;
                } else {
-                  int var2 = MathHelper.clampAngle(MathHelper.floor(var1.rotationPitch));
-                  if (var4 > var5) {
-                     return var2 >= var4 || var2 <= var5;
-                  } else {
-                     return var2 >= var4 && var2 <= var5;
-                  }
+                  int i1 = MathHelper.clampAngle(MathHelper.floor(p_apply_1_.rotationPitch));
+                  return k > l ? i1 >= k || i1 <= l : i1 >= k && i1 <= l;
                }
-            }
-
-            // $FF: synthetic method
-            public boolean apply(Object var1) {
-               return this.apply((Entity)var1);
             }
          });
       }
 
-      return var1;
+      return list;
    }
 
    private static List filterResults(Map var0, Class var1, List var2, String var3, World var4, BlockPos var5) {
-      ArrayList var6 = Lists.newArrayList();
-      String var7 = getArgument(var0, "type");
-      var7 = var7 != null && var7.startsWith("!") ? var7.substring(1) : var7;
-      boolean var8 = !var3.equals("e");
-      boolean var9 = var3.equals("r") && var7 != null;
-      int var10 = getInt(var0, "dx", 0);
-      int var11 = getInt(var0, "dy", 0);
-      int var12 = getInt(var0, "dz", 0);
-      int var13 = getInt(var0, "r", -1);
-      Predicate var14 = Predicates.and(var2);
-      Predicate var15 = Predicates.and(EntitySelectors.IS_ALIVE, var14);
-      int var16 = var4.playerEntities.size();
-      int var17 = var4.loadedEntityList.size();
-      boolean var18 = var16 < var17 / 16;
-      if (!var0.containsKey("dx") && !var0.containsKey("dy") && !var0.containsKey("dz")) {
-         if (var13 >= 0) {
-            AxisAlignedBB var22 = new AxisAlignedBB((double)(var5.getX() - var13), (double)(var5.getY() - var13), (double)(var5.getZ() - var13), (double)(var5.getX() + var13 + 1), (double)(var5.getY() + var13 + 1), (double)(var5.getZ() + var13 + 1));
-            if (var8 && var18 && !var9) {
-               var6.addAll(var4.getPlayers(var1, var15));
+      List list = Lists.newArrayList();
+      String s = getArgument(params, "type");
+      s = s != null && s.startsWith("!") ? s.substring(1) : s;
+      boolean flag = !type.equals("e");
+      boolean flag1 = type.equals("r") && s != null;
+      int i = getInt(params, "dx", 0);
+      int j = getInt(params, "dy", 0);
+      int k = getInt(params, "dz", 0);
+      int l = getInt(params, "r", -1);
+      Predicate predicate = Predicates.and(inputList);
+      Predicate predicate1 = Predicates.and(EntitySelectors.IS_ALIVE, predicate);
+      int i1 = worldIn.playerEntities.size();
+      int j1 = worldIn.loadedEntityList.size();
+      boolean flag2 = i1 < j1 / 16;
+      if (!params.containsKey("dx") && !params.containsKey("dy") && !params.containsKey("dz")) {
+         if (l >= 0) {
+            AxisAlignedBB axisalignedbb1 = new AxisAlignedBB((double)(position.getX() - l), (double)(position.getY() - l), (double)(position.getZ() - l), (double)(position.getX() + l + 1), (double)(position.getY() + l + 1), (double)(position.getZ() + l + 1));
+            if (flag && flag2 && !flag1) {
+               list.addAll(worldIn.getPlayers(entityClass, predicate1));
             } else {
-               var6.addAll(var4.getEntitiesWithinAABB(var1, var22, var15));
+               list.addAll(worldIn.getEntitiesWithinAABB(entityClass, axisalignedbb1, predicate1));
             }
-         } else if (var3.equals("a")) {
-            var6.addAll(var4.getPlayers(var1, var14));
-         } else if (!var3.equals("p") && (!var3.equals("r") || var9)) {
-            var6.addAll(var4.getEntities(var1, var15));
+         } else if (type.equals("a")) {
+            list.addAll(worldIn.getPlayers(entityClass, predicate));
+         } else if (type.equals("p") || type.equals("r") && !flag1) {
+            list.addAll(worldIn.getPlayers(entityClass, predicate1));
          } else {
-            var6.addAll(var4.getPlayers(var1, var15));
+            list.addAll(worldIn.getEntities(entityClass, predicate1));
          }
       } else {
-         final AxisAlignedBB var19 = getAABB(var5, var10, var11, var12);
-         if (var8 && var18 && !var9) {
-            Predicate var20 = new Predicate() {
+         final AxisAlignedBB axisalignedbb = getAABB(position, i, j, k);
+         if (flag && flag2 && !flag1) {
+            Predicate predicate2 = new Predicate() {
                public boolean apply(@Nullable Entity var1) {
-                  return var1 != null && var19.intersectsWith(var1.getEntityBoundingBox());
-               }
-
-               // $FF: synthetic method
-               public boolean apply(Object var1) {
-                  return this.apply((Entity)var1);
+                  return p_apply_1_ != null && axisalignedbb.intersectsWith(p_apply_1_.getEntityBoundingBox());
                }
             };
-            var6.addAll(var4.getPlayers(var1, Predicates.and(var15, var20)));
+            list.addAll(worldIn.getPlayers(entityClass, Predicates.and(predicate1, predicate2)));
          } else {
-            var6.addAll(var4.getEntitiesWithinAABB(var1, var19, var15));
+            list.addAll(worldIn.getEntitiesWithinAABB(entityClass, axisalignedbb, predicate1));
          }
       }
 
-      return var6;
+      return list;
    }
 
    private static List getEntitiesFromPredicates(List var0, Map var1, ICommandSender var2, Class var3, String var4, final Vec3d var5) {
-      int var6 = getInt(var1, "c", !var4.equals("a") && !var4.equals("e") ? 1 : 0);
-      if (!var4.equals("p") && !var4.equals("a") && !var4.equals("e")) {
-         if (var4.equals("r")) {
-            Collections.shuffle((List)var0);
+      int i = getInt(params, "c", !type.equals("a") && !type.equals("e") ? 1 : 0);
+      if (!type.equals("p") && !type.equals("a") && !type.equals("e")) {
+         if (type.equals("r")) {
+            Collections.shuffle(matchingEntities);
          }
       } else {
-         Collections.sort((List)var0, new Comparator() {
+         Collections.sort(matchingEntities, new Comparator() {
             public int compare(Entity var1, Entity var2) {
-               return ComparisonChain.start().compare(var1.getDistanceSq(var5.xCoord, var5.yCoord, var5.zCoord), var2.getDistanceSq(var5.xCoord, var5.yCoord, var5.zCoord)).result();
-            }
-
-            // $FF: synthetic method
-            public int compare(Object var1, Object var2) {
-               return this.compare((Entity)var1, (Entity)var2);
+               return ComparisonChain.start().compare(p_compare_1_.getDistanceSq(pos.xCoord, pos.yCoord, pos.zCoord), p_compare_2_.getDistanceSq(pos.xCoord, pos.yCoord, pos.zCoord)).result();
             }
          });
       }
 
-      Entity var7 = var2.getCommandSenderEntity();
-      if (var7 != null && var3.isAssignableFrom(var7.getClass()) && var6 == 1 && ((List)var0).contains(var7) && !"r".equals(var4)) {
-         var0 = Lists.newArrayList(new Entity[]{var7});
+      Entity entity = sender.getCommandSenderEntity();
+      if (entity != null && targetClass.isAssignableFrom(entity.getClass()) && i == 1 && matchingEntities.contains(entity) && !"r".equals(type)) {
+         matchingEntities = Lists.newArrayList(new Entity[]{entity});
       }
 
-      if (var6 != 0) {
-         if (var6 < 0) {
-            Collections.reverse((List)var0);
+      if (i != 0) {
+         if (i < 0) {
+            Collections.reverse(matchingEntities);
          }
 
-         var0 = ((List)var0).subList(0, Math.min(Math.abs(var6), ((List)var0).size()));
+         matchingEntities = matchingEntities.subList(0, Math.min(Math.abs(i), matchingEntities.size()));
       }
 
-      return (List)var0;
+      return matchingEntities;
    }
 
    private static AxisAlignedBB getAABB(BlockPos var0, int var1, int var2, int var3) {
-      boolean var4 = var1 < 0;
-      boolean var5 = var2 < 0;
-      boolean var6 = var3 < 0;
-      int var7 = var0.getX() + (var4 ? var1 : 0);
-      int var8 = var0.getY() + (var5 ? var2 : 0);
-      int var9 = var0.getZ() + (var6 ? var3 : 0);
-      int var10 = var0.getX() + (var4 ? 0 : var1) + 1;
-      int var11 = var0.getY() + (var5 ? 0 : var2) + 1;
-      int var12 = var0.getZ() + (var6 ? 0 : var3) + 1;
-      return new AxisAlignedBB((double)var7, (double)var8, (double)var9, (double)var10, (double)var11, (double)var12);
+      boolean flag = x < 0;
+      boolean flag1 = y < 0;
+      boolean flag2 = z < 0;
+      int i = pos.getX() + (flag ? x : 0);
+      int j = pos.getY() + (flag1 ? y : 0);
+      int k = pos.getZ() + (flag2 ? z : 0);
+      int l = pos.getX() + (flag ? 0 : x) + 1;
+      int i1 = pos.getY() + (flag1 ? 0 : y) + 1;
+      int j1 = pos.getZ() + (flag2 ? 0 : z) + 1;
+      return new AxisAlignedBB((double)i, (double)j, (double)k, (double)l, (double)i1, (double)j1);
    }
 
    private static BlockPos getBlockPosFromArguments(Map var0, BlockPos var1) {
-      return new BlockPos(getInt(var0, "x", var1.getX()), getInt(var0, "y", var1.getY()), getInt(var0, "z", var1.getZ()));
+      return new BlockPos(getInt(params, "x", pos.getX()), getInt(params, "y", pos.getY()), getInt(params, "z", pos.getZ()));
    }
 
    private static Vec3d getPosFromArguments(Map var0, Vec3d var1) {
-      return new Vec3d(getCoordinate(var0, "x", var1.xCoord, true), getCoordinate(var0, "y", var1.yCoord, false), getCoordinate(var0, "z", var1.zCoord, true));
+      return new Vec3d(getCoordinate(params, "x", pos.xCoord, true), getCoordinate(params, "y", pos.yCoord, false), getCoordinate(params, "z", pos.zCoord, true));
    }
 
    private static double getCoordinate(Map var0, String var1, double var2, boolean var4) {
-      return var0.containsKey(var1) ? (double)MathHelper.getInt((String)var0.get(var1), MathHelper.floor(var2)) + (var4 ? 0.5D : 0.0D) : var2;
+      return params.containsKey(key) ? (double)MathHelper.getInt((String)params.get(key), MathHelper.floor(defaultD)) + (offset ? 0.5D : 0.0D) : defaultD;
    }
 
    private static boolean hasArgument(Map var0) {
-      for(String var2 : WORLD_BINDING_ARGS) {
-         if (var0.containsKey(var2)) {
+      for(String s : WORLD_BINDING_ARGS) {
+         if (params.containsKey(s)) {
             return true;
          }
       }
@@ -573,80 +494,80 @@ public class EntitySelector {
    }
 
    private static int getInt(Map var0, String var1, int var2) {
-      return var0.containsKey(var1) ? MathHelper.getInt((String)var0.get(var1), var2) : var2;
+      return params.containsKey(key) ? MathHelper.getInt((String)params.get(key), defaultI) : defaultI;
    }
 
    @Nullable
    private static String getArgument(Map var0, String var1) {
-      return (String)var0.get(var1);
+      return (String)params.get(key);
    }
 
    public static Map getScoreMap(Map var0) {
-      HashMap var1 = Maps.newHashMap();
+      Map map = Maps.newHashMap();
 
-      for(String var3 : var0.keySet()) {
-         if (var3.startsWith("score_") && var3.length() > "score_".length()) {
-            var1.put(var3.substring("score_".length()), Integer.valueOf(MathHelper.getInt((String)var0.get(var3), 1)));
+      for(String s : params.keySet()) {
+         if (s.startsWith("score_") && s.length() > "score_".length()) {
+            map.put(s.substring("score_".length()), Integer.valueOf(MathHelper.getInt((String)params.get(s), 1)));
          }
       }
 
-      return var1;
+      return map;
    }
 
    public static boolean matchesMultiplePlayers(String var0) {
-      Matcher var1 = TOKEN_PATTERN.matcher(var0);
-      if (!var1.matches()) {
+      Matcher matcher = TOKEN_PATTERN.matcher(selectorStr);
+      if (!matcher.matches()) {
          return false;
       } else {
-         Map var2 = getArgumentMap(var1.group(2));
-         String var3 = var1.group(1);
-         int var4 = !"a".equals(var3) && !"e".equals(var3) ? 1 : 0;
-         return getInt(var2, "c", var4) != 1;
+         Map map = getArgumentMap(matcher.group(2));
+         String s = matcher.group(1);
+         int i = !"a".equals(s) && !"e".equals(s) ? 1 : 0;
+         return getInt(map, "c", i) != 1;
       }
    }
 
    public static boolean hasArguments(String var0) {
-      return TOKEN_PATTERN.matcher(var0).matches();
+      return TOKEN_PATTERN.matcher(selectorStr).matches();
    }
 
    private static Map getArgumentMap(@Nullable String var0) {
-      HashMap var1 = Maps.newHashMap();
-      if (var0 == null) {
-         return var1;
+      Map map = Maps.newHashMap();
+      if (argumentString == null) {
+         return map;
       } else {
-         int var2 = 0;
-         int var3 = -1;
+         int i = 0;
+         int j = -1;
 
-         for(Matcher var4 = INT_LIST_PATTERN.matcher(var0); var4.find(); var3 = var4.end()) {
-            String var5 = null;
-            switch(var2++) {
+         for(Matcher matcher = INT_LIST_PATTERN.matcher(argumentString); matcher.find(); j = matcher.end()) {
+            String s = null;
+            switch(i++) {
             case 0:
-               var5 = "x";
+               s = "x";
                break;
             case 1:
-               var5 = "y";
+               s = "y";
                break;
             case 2:
-               var5 = "z";
+               s = "z";
                break;
             case 3:
-               var5 = "r";
+               s = "r";
             }
 
-            if (var5 != null && !var4.group(1).isEmpty()) {
-               var1.put(var5, var4.group(1));
-            }
-         }
-
-         if (var3 < var0.length()) {
-            Matcher var6 = KEY_VALUE_LIST_PATTERN.matcher(var3 == -1 ? var0 : var0.substring(var3));
-
-            while(var6.find()) {
-               var1.put(var6.group(1), var6.group(2));
+            if (s != null && !matcher.group(1).isEmpty()) {
+               map.put(s, matcher.group(1));
             }
          }
 
-         return var1;
+         if (j < argumentString.length()) {
+            Matcher matcher1 = KEY_VALUE_LIST_PATTERN.matcher(j == -1 ? argumentString : argumentString.substring(j));
+
+            while(matcher1.find()) {
+               map.put(matcher1.group(1), matcher1.group(2));
+            }
+         }
+
+         return map;
       }
    }
 }

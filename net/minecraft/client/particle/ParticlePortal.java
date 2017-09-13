@@ -13,7 +13,7 @@ public class ParticlePortal extends Particle {
    private final double portalPosY;
    private final double portalPosZ;
 
-   protected ParticlePortal(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn) {
+   protected ParticlePortal(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
       this.motionX = xSpeedIn;
       this.motionY = ySpeedIn;
@@ -34,12 +34,12 @@ public class ParticlePortal extends Particle {
       this.setParticleTextureIndex((int)(Math.random() * 8.0D));
    }
 
-   public void move(double x, double y, double z) {
+   public void move(double var1, double var3, double var5) {
       this.setBoundingBox(this.getBoundingBox().offset(x, y, z));
       this.resetPositionToBB();
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge;
       f = 1.0F - f;
       f = f * f;
@@ -48,7 +48,7 @@ public class ParticlePortal extends Particle {
       super.renderParticle(buffer, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
    }
 
-   public int getBrightnessForRender(float p_189214_1_) {
+   public int getBrightnessForRender(float var1) {
       int i = super.getBrightnessForRender(p_189214_1_);
       float f = (float)this.particleAge / (float)this.particleMaxAge;
       f = f * f;
@@ -81,7 +81,7 @@ public class ParticlePortal extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticlePortal(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
       }
    }

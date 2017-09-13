@@ -10,34 +10,34 @@ public class EntityAIFollowParent extends EntityAIBase {
    private int delayCounter;
 
    public EntityAIFollowParent(EntityAnimal var1, double var2) {
-      this.childAnimal = var1;
-      this.moveSpeed = var2;
+      this.childAnimal = animal;
+      this.moveSpeed = speed;
    }
 
    public boolean shouldExecute() {
       if (this.childAnimal.getGrowingAge() >= 0) {
          return false;
       } else {
-         List var1 = this.childAnimal.world.getEntitiesWithinAABB(this.childAnimal.getClass(), this.childAnimal.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D));
-         EntityAnimal var2 = null;
-         double var3 = Double.MAX_VALUE;
+         List list = this.childAnimal.world.getEntitiesWithinAABB(this.childAnimal.getClass(), this.childAnimal.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D));
+         EntityAnimal entityanimal = null;
+         double d0 = Double.MAX_VALUE;
 
-         for(EntityAnimal var6 : var1) {
-            if (var6.getGrowingAge() >= 0) {
-               double var7 = this.childAnimal.getDistanceSqToEntity(var6);
-               if (var7 <= var3) {
-                  var3 = var7;
-                  var2 = var6;
+         for(EntityAnimal entityanimal1 : list) {
+            if (entityanimal1.getGrowingAge() >= 0) {
+               double d1 = this.childAnimal.getDistanceSqToEntity(entityanimal1);
+               if (d1 <= d0) {
+                  d0 = d1;
+                  entityanimal = entityanimal1;
                }
             }
          }
 
-         if (var2 == null) {
+         if (entityanimal == null) {
             return false;
-         } else if (var3 < 9.0D) {
+         } else if (d0 < 9.0D) {
             return false;
          } else {
-            this.parentAnimal = var2;
+            this.parentAnimal = entityanimal;
             return true;
          }
       }
@@ -49,8 +49,8 @@ public class EntityAIFollowParent extends EntityAIBase {
       } else if (!this.parentAnimal.isEntityAlive()) {
          return false;
       } else {
-         double var1 = this.childAnimal.getDistanceSqToEntity(this.parentAnimal);
-         return var1 >= 9.0D && var1 <= 256.0D;
+         double d0 = this.childAnimal.getDistanceSqToEntity(this.parentAnimal);
+         return d0 >= 9.0D && d0 <= 256.0D;
       }
    }
 
@@ -67,5 +67,6 @@ public class EntityAIFollowParent extends EntityAIBase {
          this.delayCounter = 10;
          this.childAnimal.getNavigator().tryMoveToEntityLiving(this.parentAnimal, this.moveSpeed);
       }
+
    }
 }

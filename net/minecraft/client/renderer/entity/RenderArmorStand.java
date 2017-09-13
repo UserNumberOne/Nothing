@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderArmorStand extends RenderLivingBase {
    public static final ResourceLocation TEXTURE_ARMOR_STAND = new ResourceLocation("textures/entity/armorstand/wood.png");
 
-   public RenderArmorStand(RenderManager manager) {
+   public RenderArmorStand(RenderManager var1) {
       super(manager, new ModelArmorStand(), 0.0F);
       LayerBipedArmor layerbipedarmor = new LayerBipedArmor(this) {
          protected void initArmor() {
@@ -30,7 +30,7 @@ public class RenderArmorStand extends RenderLivingBase {
       this.addLayer(new LayerCustomHead(this.getMainModel().bipedHead));
    }
 
-   protected ResourceLocation getEntityTexture(EntityArmorStand entity) {
+   protected ResourceLocation getEntityTexture(EntityArmorStand var1) {
       return TEXTURE_ARMOR_STAND;
    }
 
@@ -38,7 +38,7 @@ public class RenderArmorStand extends RenderLivingBase {
       return (ModelArmorStand)super.getMainModel();
    }
 
-   protected void applyRotations(EntityArmorStand entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
+   protected void applyRotations(EntityArmorStand var1, float var2, float var3, float var4) {
       GlStateManager.rotate(180.0F - p_77043_3_, 0.0F, 1.0F, 0.0F);
       float f = (float)(entityLiving.world.getTotalWorldTime() - entityLiving.punchCooldown) + partialTicks;
       if (f < 5.0F) {
@@ -47,11 +47,11 @@ public class RenderArmorStand extends RenderLivingBase {
 
    }
 
-   protected boolean canRenderName(EntityArmorStand entity) {
+   protected boolean canRenderName(EntityArmorStand var1) {
       return entity.getAlwaysRenderNameTag();
    }
 
-   public void doRender(EntityArmorStand entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityArmorStand var1, double var2, double var4, double var6, float var8, float var9) {
       if (entity.hasMarker()) {
          this.renderMarker = true;
       }

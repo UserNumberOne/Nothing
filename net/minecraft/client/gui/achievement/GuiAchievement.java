@@ -25,12 +25,12 @@ public class GuiAchievement extends Gui {
    private final RenderItem renderItem;
    private boolean permanentNotification;
 
-   public GuiAchievement(Minecraft mc) {
+   public GuiAchievement(Minecraft var1) {
       this.mc = mc;
       this.renderItem = mc.getRenderItem();
    }
 
-   public void displayAchievement(Achievement ach) {
+   public void displayAchievement(Achievement var1) {
       this.achievementTitle = I18n.format("achievement.get");
       this.achievementDescription = ach.getStatName().getUnformattedText();
       this.notificationTime = Minecraft.getSystemTime();
@@ -38,7 +38,7 @@ public class GuiAchievement extends Gui {
       this.permanentNotification = false;
    }
 
-   public void displayUnformattedAchievement(Achievement achievementIn) {
+   public void displayUnformattedAchievement(Achievement var1) {
       this.achievementTitle = achievementIn.getStatName().getUnformattedText();
       this.achievementDescription = achievementIn.getDescription();
       this.notificationTime = Minecraft.getSystemTime() + 2500L;

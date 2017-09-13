@@ -16,7 +16,7 @@ public class GuiKeyBindingList extends GuiListExtended {
    private final GuiListExtended.IGuiListEntry[] listEntries;
    private int maxListLabelWidth;
 
-   public GuiKeyBindingList(GuiControls controls, Minecraft mcIn) {
+   public GuiKeyBindingList(GuiControls var1, Minecraft var2) {
       super(mcIn, controls.width + 45, controls.height, 63, controls.height - 32, 20);
       this.controlsScreen = controls;
       this.mc = mcIn;
@@ -47,7 +47,7 @@ public class GuiKeyBindingList extends GuiListExtended {
       return this.listEntries.length;
    }
 
-   public GuiListExtended.IGuiListEntry getListEntry(int index) {
+   public GuiListExtended.IGuiListEntry getListEntry(int var1) {
       return this.listEntries[index];
    }
 
@@ -64,23 +64,23 @@ public class GuiKeyBindingList extends GuiListExtended {
       private final String labelText;
       private final int labelWidth;
 
-      public CategoryEntry(String name) {
+      public CategoryEntry(String var2) {
          this.labelText = I18n.format(name);
          this.labelWidth = GuiKeyBindingList.this.mc.fontRendererObj.getStringWidth(this.labelText);
       }
 
-      public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
+      public void drawEntry(int var1, int var2, int var3, int var4, int var5, int var6, int var7, boolean var8) {
          GuiKeyBindingList.this.mc.fontRendererObj.drawString(this.labelText, GuiKeyBindingList.this.mc.currentScreen.width / 2 - this.labelWidth / 2, y + slotHeight - GuiKeyBindingList.this.mc.fontRendererObj.FONT_HEIGHT - 1, 16777215);
       }
 
-      public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
+      public boolean mousePressed(int var1, int var2, int var3, int var4, int var5, int var6) {
          return false;
       }
 
-      public void mouseReleased(int slotIndex, int x, int y, int mouseEvent, int relativeX, int relativeY) {
+      public void mouseReleased(int var1, int var2, int var3, int var4, int var5, int var6) {
       }
 
-      public void setSelected(int p_178011_1_, int p_178011_2_, int p_178011_3_) {
+      public void setSelected(int var1, int var2, int var3) {
       }
    }
 
@@ -91,14 +91,14 @@ public class GuiKeyBindingList extends GuiListExtended {
       private final GuiButton btnChangeKeyBinding;
       private final GuiButton btnReset;
 
-      private KeyEntry(KeyBinding name) {
+      private KeyEntry(KeyBinding var2) {
          this.keybinding = name;
          this.keyDesc = I18n.format(name.getKeyDescription());
          this.btnChangeKeyBinding = new GuiButton(0, 0, 0, 95, 20, I18n.format(name.getKeyDescription()));
          this.btnReset = new GuiButton(0, 0, 0, 50, 20, I18n.format("controls.reset"));
       }
 
-      public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
+      public void drawEntry(int var1, int var2, int var3, int var4, int var5, int var6, int var7, boolean var8) {
          boolean flag = GuiKeyBindingList.this.controlsScreen.buttonId == this.keybinding;
          GuiKeyBindingList.this.mc.fontRendererObj.drawString(this.keyDesc, x + 90 - GuiKeyBindingList.this.maxListLabelWidth, y + slotHeight / 2 - GuiKeyBindingList.this.mc.fontRendererObj.FONT_HEIGHT / 2, 16777215);
          this.btnReset.xPosition = x + 210;
@@ -128,7 +128,7 @@ public class GuiKeyBindingList extends GuiListExtended {
          this.btnChangeKeyBinding.drawButton(GuiKeyBindingList.this.mc, mouseX, mouseY);
       }
 
-      public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
+      public boolean mousePressed(int var1, int var2, int var3, int var4, int var5, int var6) {
          if (this.btnChangeKeyBinding.mousePressed(GuiKeyBindingList.this.mc, mouseX, mouseY)) {
             GuiKeyBindingList.this.controlsScreen.buttonId = this.keybinding;
             return true;
@@ -142,12 +142,12 @@ public class GuiKeyBindingList extends GuiListExtended {
          }
       }
 
-      public void mouseReleased(int slotIndex, int x, int y, int mouseEvent, int relativeX, int relativeY) {
+      public void mouseReleased(int var1, int var2, int var3, int var4, int var5, int var6) {
          this.btnChangeKeyBinding.mouseReleased(x, y);
          this.btnReset.mouseReleased(x, y);
       }
 
-      public void setSelected(int p_178011_1_, int p_178011_2_, int p_178011_3_) {
+      public void setSelected(int var1, int var2, int var3) {
       }
    }
 }

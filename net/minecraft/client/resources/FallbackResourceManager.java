@@ -21,11 +21,11 @@ public class FallbackResourceManager implements IResourceManager {
    protected final List resourcePacks = Lists.newArrayList();
    private final MetadataSerializer frmMetadataSerializer;
 
-   public FallbackResourceManager(MetadataSerializer frmMetadataSerializerIn) {
+   public FallbackResourceManager(MetadataSerializer var1) {
       this.frmMetadataSerializer = frmMetadataSerializerIn;
    }
 
-   public void addResourcePack(IResourcePack resourcePack) {
+   public void addResourcePack(IResourcePack var1) {
       this.resourcePacks.add(resourcePack);
    }
 
@@ -33,7 +33,7 @@ public class FallbackResourceManager implements IResourceManager {
       return null;
    }
 
-   public IResource getResource(ResourceLocation location) throws IOException {
+   public IResource getResource(ResourceLocation var1) throws IOException {
       this.checkResourcePath(location);
       IResourcePack iresourcepack = null;
       ResourceLocation resourcelocation = getLocationMcmeta(location);
@@ -57,18 +57,18 @@ public class FallbackResourceManager implements IResourceManager {
       throw new FileNotFoundException(location.toString());
    }
 
-   protected InputStream getInputStream(ResourceLocation location, IResourcePack resourcePack) throws IOException {
+   protected InputStream getInputStream(ResourceLocation var1, IResourcePack var2) throws IOException {
       InputStream inputstream = resourcePack.getInputStream(location);
       return (InputStream)(LOGGER.isDebugEnabled() ? new FallbackResourceManager.InputStreamLeakedResourceLogger(inputstream, location, resourcePack.getPackName()) : inputstream);
    }
 
-   private void checkResourcePath(ResourceLocation p_188552_1_) throws IOException {
+   private void checkResourcePath(ResourceLocation var1) throws IOException {
       if (p_188552_1_.getResourcePath().contains("..")) {
          throw new IOException("Invalid relative path to resource: " + p_188552_1_);
       }
    }
 
-   public List getAllResources(ResourceLocation location) throws IOException {
+   public List getAllResources(ResourceLocation var1) throws IOException {
       this.checkResourcePath(location);
       List list = Lists.newArrayList();
       ResourceLocation resourcelocation = getLocationMcmeta(location);
@@ -87,7 +87,7 @@ public class FallbackResourceManager implements IResourceManager {
       }
    }
 
-   static ResourceLocation getLocationMcmeta(ResourceLocation location) {
+   static ResourceLocation getLocationMcmeta(ResourceLocation var0) {
       return new ResourceLocation(location.getResourceDomain(), location.getResourcePath() + ".mcmeta");
    }
 
@@ -97,7 +97,7 @@ public class FallbackResourceManager implements IResourceManager {
       private final String message;
       private boolean isClosed;
 
-      public InputStreamLeakedResourceLogger(InputStream p_i46093_1_, ResourceLocation location, String resourcePack) {
+      public InputStreamLeakedResourceLogger(InputStream var1, ResourceLocation var2, String var3) {
          this.inputStream = p_i46093_1_;
          ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
          (new Exception()).printStackTrace(new PrintStream(bytearrayoutputstream));

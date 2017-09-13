@@ -10,18 +10,18 @@ public class MapGenBase {
    protected World world;
 
    public void generate(World var1, int var2, int var3, ChunkPrimer var4) {
-      int var5 = this.range;
-      this.world = var1;
-      this.rand.setSeed(var1.getSeed());
-      long var6 = this.rand.nextLong();
-      long var8 = this.rand.nextLong();
+      int i = this.range;
+      this.world = worldIn;
+      this.rand.setSeed(worldIn.getSeed());
+      long j = this.rand.nextLong();
+      long k = this.rand.nextLong();
 
-      for(int var10 = var2 - var5; var10 <= var2 + var5; ++var10) {
-         for(int var11 = var3 - var5; var11 <= var3 + var5; ++var11) {
-            long var12 = (long)var10 * var6;
-            long var14 = (long)var11 * var8;
-            this.rand.setSeed(var12 ^ var14 ^ var1.getSeed());
-            this.recursiveGenerate(var1, var10, var11, var2, var3, var4);
+      for(int l = x - i; l <= x + i; ++l) {
+         for(int i1 = z - i; i1 <= z + i; ++i1) {
+            long j1 = (long)l * j;
+            long k1 = (long)i1 * k;
+            this.rand.setSeed(j1 ^ k1 ^ worldIn.getSeed());
+            this.recursiveGenerate(worldIn, l, i1, x, z, primer);
          }
       }
 

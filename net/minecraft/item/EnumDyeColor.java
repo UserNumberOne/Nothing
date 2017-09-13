@@ -32,12 +32,12 @@ public enum EnumDyeColor implements IStringSerializable {
    private final TextFormatting chatColor;
 
    private EnumDyeColor(int var3, int var4, String var5, String var6, MapColor var7, TextFormatting var8) {
-      this.meta = var3;
-      this.dyeDamage = var4;
-      this.name = var5;
-      this.unlocalizedName = var6;
-      this.mapColor = var7;
-      this.chatColor = var8;
+      this.meta = meta;
+      this.dyeDamage = dyeDamage;
+      this.name = name;
+      this.unlocalizedName = unlocalizedName;
+      this.mapColor = mapColorIn;
+      this.chatColor = chatColor;
    }
 
    public int getMetadata() {
@@ -57,19 +57,19 @@ public enum EnumDyeColor implements IStringSerializable {
    }
 
    public static EnumDyeColor byDyeDamage(int var0) {
-      if (var0 < 0 || var0 >= DYE_DMG_LOOKUP.length) {
-         var0 = 0;
+      if (damage < 0 || damage >= DYE_DMG_LOOKUP.length) {
+         damage = 0;
       }
 
-      return DYE_DMG_LOOKUP[var0];
+      return DYE_DMG_LOOKUP[damage];
    }
 
    public static EnumDyeColor byMetadata(int var0) {
-      if (var0 < 0 || var0 >= META_LOOKUP.length) {
-         var0 = 0;
+      if (meta < 0 || meta >= META_LOOKUP.length) {
+         meta = 0;
       }
 
-      return META_LOOKUP[var0];
+      return META_LOOKUP[meta];
    }
 
    public String toString() {
@@ -81,9 +81,9 @@ public enum EnumDyeColor implements IStringSerializable {
    }
 
    static {
-      for(EnumDyeColor var3 : values()) {
-         META_LOOKUP[var3.getMetadata()] = var3;
-         DYE_DMG_LOOKUP[var3.getDyeDamage()] = var3;
+      for(EnumDyeColor enumdyecolor : values()) {
+         META_LOOKUP[enumdyecolor.getMetadata()] = enumdyecolor;
+         DYE_DMG_LOOKUP[enumdyecolor.getDyeDamage()] = enumdyecolor;
       }
 
    }

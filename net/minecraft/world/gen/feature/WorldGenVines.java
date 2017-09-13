@@ -10,17 +10,17 @@ import net.minecraft.world.World;
 
 public class WorldGenVines extends WorldGenerator {
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      for(; var3.getY() < 128; var3 = var3.up()) {
-         if (var1.isAirBlock(var3)) {
-            for(EnumFacing var7 : EnumFacing.Plane.HORIZONTAL.facings()) {
-               if (Blocks.VINE.canPlaceBlockOnSide(var1, var3, var7)) {
-                  IBlockState var8 = Blocks.VINE.getDefaultState().withProperty(BlockVine.NORTH, Boolean.valueOf(var7 == EnumFacing.NORTH)).withProperty(BlockVine.EAST, Boolean.valueOf(var7 == EnumFacing.EAST)).withProperty(BlockVine.SOUTH, Boolean.valueOf(var7 == EnumFacing.SOUTH)).withProperty(BlockVine.WEST, Boolean.valueOf(var7 == EnumFacing.WEST));
-                  var1.setBlockState(var3, var8, 2);
+      for(; position.getY() < 128; position = position.up()) {
+         if (worldIn.isAirBlock(position)) {
+            for(EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL.facings()) {
+               if (Blocks.VINE.canPlaceBlockOnSide(worldIn, position, enumfacing)) {
+                  IBlockState iblockstate = Blocks.VINE.getDefaultState().withProperty(BlockVine.NORTH, Boolean.valueOf(enumfacing == EnumFacing.NORTH)).withProperty(BlockVine.EAST, Boolean.valueOf(enumfacing == EnumFacing.EAST)).withProperty(BlockVine.SOUTH, Boolean.valueOf(enumfacing == EnumFacing.SOUTH)).withProperty(BlockVine.WEST, Boolean.valueOf(enumfacing == EnumFacing.WEST));
+                  worldIn.setBlockState(position, iblockstate, 2);
                   break;
                }
             }
          } else {
-            var3 = var3.add(var2.nextInt(4) - var2.nextInt(4), 0, var2.nextInt(4) - var2.nextInt(4));
+            position = position.add(rand.nextInt(4) - rand.nextInt(4), 0, rand.nextInt(4) - rand.nextInt(4));
          }
       }
 

@@ -17,7 +17,7 @@ public class ParticleDigging extends Particle {
    private final IBlockState sourceState;
    private BlockPos sourcePos;
 
-   protected ParticleDigging(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, IBlockState state) {
+   protected ParticleDigging(World var1, double var2, double var4, double var6, double var8, double var10, double var12, IBlockState var14) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
       this.sourceState = state;
       this.setParticleTexture(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(state));
@@ -28,7 +28,7 @@ public class ParticleDigging extends Particle {
       this.particleScale /= 2.0F;
    }
 
-   public ParticleDigging setBlockPos(BlockPos pos) {
+   public ParticleDigging setBlockPos(BlockPos var1) {
       this.sourcePos = pos;
       if (this.sourceState.getBlock() == Blocks.GRASS) {
          return this;
@@ -49,7 +49,7 @@ public class ParticleDigging extends Particle {
       }
    }
 
-   protected void multiplyColor(@Nullable BlockPos p_187154_1_) {
+   protected void multiplyColor(@Nullable BlockPos var1) {
       int i = Minecraft.getMinecraft().getBlockColors().colorMultiplier(this.sourceState, this.world, p_187154_1_, 0);
       this.particleRed *= (float)(i >> 16 & 255) / 255.0F;
       this.particleGreen *= (float)(i >> 8 & 255) / 255.0F;
@@ -60,7 +60,7 @@ public class ParticleDigging extends Particle {
       return 1;
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = ((float)this.particleTextureIndexX + this.particleTextureJitterX / 4.0F) / 16.0F;
       float f1 = f + 0.015609375F;
       float f2 = ((float)this.particleTextureIndexY + this.particleTextureJitterY / 4.0F) / 16.0F;
@@ -85,7 +85,7 @@ public class ParticleDigging extends Particle {
       buffer.pos((double)(f5 + rotationX * f4 - rotationXY * f4), (double)(f6 - rotationZ * f4), (double)(f7 + rotationYZ * f4 - rotationXZ * f4)).tex((double)f1, (double)f3).color(this.particleRed, this.particleGreen, this.particleBlue, 1.0F).lightmap(j, k).endVertex();
    }
 
-   public int getBrightnessForRender(float p_189214_1_) {
+   public int getBrightnessForRender(float var1) {
       int i = super.getBrightnessForRender(p_189214_1_);
       int j = 0;
       if (this.world.isBlockLoaded(this.sourcePos)) {
@@ -97,7 +97,7 @@ public class ParticleDigging extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return (new ParticleDigging(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn, Block.getStateById(p_178902_15_[0]))).init();
       }
    }

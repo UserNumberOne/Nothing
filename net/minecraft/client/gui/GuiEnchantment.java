@@ -42,14 +42,14 @@ public class GuiEnchantment extends GuiContainer {
    ItemStack last;
    private final IWorldNameable nameable;
 
-   public GuiEnchantment(InventoryPlayer inventory, World worldIn, IWorldNameable nameable) {
+   public GuiEnchantment(InventoryPlayer var1, World var2, IWorldNameable var3) {
       super(new ContainerEnchantment(inventory, worldIn));
       this.playerInventory = inventory;
       this.container = (ContainerEnchantment)this.inventorySlots;
       this.nameable = nameable;
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       this.fontRendererObj.drawString(this.nameable.getDisplayName().getUnformattedText(), 12, 5, 4210752);
       this.fontRendererObj.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
    }
@@ -59,7 +59,7 @@ public class GuiEnchantment extends GuiContainer {
       this.tickBook();
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       int i = (this.width - this.xSize) / 2;
       int j = (this.height - this.ySize) / 2;
@@ -74,7 +74,7 @@ public class GuiEnchantment extends GuiContainer {
 
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(ENCHANTMENT_TABLE_GUI_TEXTURE);
       int i = (this.width - this.xSize) / 2;
@@ -179,7 +179,7 @@ public class GuiEnchantment extends GuiContainer {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       super.drawScreen(mouseX, mouseY, partialTicks);
       boolean flag = this.mc.player.capabilities.isCreativeMode;
       int i = this.container.getLapisAmount();

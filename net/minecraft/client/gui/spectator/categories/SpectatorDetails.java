@@ -14,13 +14,13 @@ public class SpectatorDetails {
    private final List items;
    private final int selectedSlot;
 
-   public SpectatorDetails(ISpectatorMenuView p_i45494_1_, List p_i45494_2_, int p_i45494_3_) {
+   public SpectatorDetails(ISpectatorMenuView var1, List var2, int var3) {
       this.category = p_i45494_1_;
       this.items = p_i45494_2_;
       this.selectedSlot = p_i45494_3_;
    }
 
-   public ISpectatorMenuObject getObject(int p_178680_1_) {
+   public ISpectatorMenuObject getObject(int var1) {
       return p_178680_1_ >= 0 && p_178680_1_ < this.items.size() ? (ISpectatorMenuObject)Objects.firstNonNull(this.items.get(p_178680_1_), SpectatorMenu.EMPTY_SLOT) : SpectatorMenu.EMPTY_SLOT;
    }
 

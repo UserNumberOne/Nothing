@@ -22,21 +22,21 @@ public class ItemModelMesher {
    private final Map shapers = Maps.newHashMap();
    private final ModelManager modelManager;
 
-   public ItemModelMesher(ModelManager modelManager) {
+   public ItemModelMesher(ModelManager var1) {
       this.modelManager = modelManager;
    }
 
-   public TextureAtlasSprite getParticleIcon(Item item) {
+   public TextureAtlasSprite getParticleIcon(Item var1) {
       return this.getParticleIcon(item, 0);
    }
 
-   public TextureAtlasSprite getParticleIcon(Item item, int meta) {
+   public TextureAtlasSprite getParticleIcon(Item var1, int var2) {
       ItemStack stack = new ItemStack(item, 1, meta);
       IBakedModel model = this.getItemModel(stack);
       return model.getOverrides().handleItemState(model, stack, (World)null, (EntityLivingBase)null).getParticleTexture();
    }
 
-   public IBakedModel getItemModel(ItemStack stack) {
+   public IBakedModel getItemModel(ItemStack var1) {
       Item item = stack.getItem();
       IBakedModel ibakedmodel = this.getItemModel(item, this.getMetadata(stack));
       if (ibakedmodel == null) {
@@ -53,25 +53,25 @@ public class ItemModelMesher {
       return ibakedmodel;
    }
 
-   protected int getMetadata(ItemStack stack) {
+   protected int getMetadata(ItemStack var1) {
       return stack.getMaxDamage() > 0 ? 0 : stack.getMetadata();
    }
 
    @Nullable
-   protected IBakedModel getItemModel(Item item, int meta) {
+   protected IBakedModel getItemModel(Item var1, int var2) {
       return (IBakedModel)this.simpleShapesCache.get(Integer.valueOf(this.getIndex(item, meta)));
    }
 
-   private int getIndex(Item item, int meta) {
+   private int getIndex(Item var1, int var2) {
       return Item.getIdFromItem(item) << 16 | meta;
    }
 
-   public void register(Item item, int meta, ModelResourceLocation location) {
+   public void register(Item var1, int var2, ModelResourceLocation var3) {
       this.simpleShapes.put(Integer.valueOf(this.getIndex(item, meta)), location);
       this.simpleShapesCache.put(Integer.valueOf(this.getIndex(item, meta)), this.modelManager.getModel(location));
    }
 
-   public void register(Item item, ItemMeshDefinition definition) {
+   public void register(Item var1, ItemMeshDefinition var2) {
       this.shapers.put(item, definition);
    }
 

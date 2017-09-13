@@ -15,9 +15,9 @@ public abstract class TileEntityLockableLoot extends TileEntityLockable implemen
    protected long lootTableSeed;
 
    protected boolean checkLootAndRead(NBTTagCompound var1) {
-      if (var1.hasKey("LootTable", 8)) {
-         this.lootTable = new ResourceLocation(var1.getString("LootTable"));
-         this.lootTableSeed = var1.getLong("LootTableSeed");
+      if (compound.hasKey("LootTable", 8)) {
+         this.lootTable = new ResourceLocation(compound.getString("LootTable"));
+         this.lootTableSeed = compound.getLong("LootTableSeed");
          return true;
       } else {
          return false;
@@ -26,9 +26,9 @@ public abstract class TileEntityLockableLoot extends TileEntityLockable implemen
 
    protected boolean checkLootAndWrite(NBTTagCompound var1) {
       if (this.lootTable != null) {
-         var1.setString("LootTable", this.lootTable.toString());
+         compound.setString("LootTable", this.lootTable.toString());
          if (this.lootTableSeed != 0L) {
-            var1.setLong("LootTableSeed", this.lootTableSeed);
+            compound.setLong("LootTableSeed", this.lootTableSeed);
          }
 
          return true;
@@ -39,21 +39,21 @@ public abstract class TileEntityLockableLoot extends TileEntityLockable implemen
 
    protected void fillWithLoot(@Nullable EntityPlayer var1) {
       if (this.lootTable != null) {
-         LootTable var2 = this.world.getLootTableManager().getLootTableFromLocation(this.lootTable);
+         LootTable loottable = this.world.getLootTableManager().getLootTableFromLocation(this.lootTable);
          this.lootTable = null;
-         Random var3;
+         Random random;
          if (this.lootTableSeed == 0L) {
-            var3 = new Random();
+            random = new Random();
          } else {
-            var3 = new Random(this.lootTableSeed);
+            random = new Random(this.lootTableSeed);
          }
 
-         LootContext.Builder var4 = new LootContext.Builder((WorldServer)this.world);
-         if (var1 != null) {
-            var4.withLuck(var1.getLuck());
+         LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.world);
+         if (player != null) {
+            lootcontext$builder.withLuck(player.getLuck());
          }
 
-         var2.fillInventory(this, var3, var4.build());
+         loottable.fillInventory(this, random, lootcontext$builder.build());
       }
 
    }
@@ -63,7 +63,7 @@ public abstract class TileEntityLockableLoot extends TileEntityLockable implemen
    }
 
    public void setLootTable(ResourceLocation var1, long var2) {
-      this.lootTable = var1;
-      this.lootTableSeed = var2;
+      this.lootTable = p_189404_1_;
+      this.lootTableSeed = p_189404_2_;
    }
 }

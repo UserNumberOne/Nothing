@@ -14,19 +14,19 @@ public class GuiDispenser extends GuiContainer {
    private final InventoryPlayer playerInventory;
    public IInventory dispenserInventory;
 
-   public GuiDispenser(InventoryPlayer playerInv, IInventory dispenserInv) {
+   public GuiDispenser(InventoryPlayer var1, IInventory var2) {
       super(new ContainerDispenser(playerInv, dispenserInv));
       this.playerInventory = playerInv;
       this.dispenserInventory = dispenserInv;
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       String s = this.dispenserInventory.getDisplayName().getUnformattedText();
       this.fontRendererObj.drawString(s, this.xSize / 2 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);
       this.fontRendererObj.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(DISPENSER_GUI_TEXTURES);
       int i = (this.width - this.xSize) / 2;

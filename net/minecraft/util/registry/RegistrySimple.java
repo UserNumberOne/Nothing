@@ -23,18 +23,18 @@ public class RegistrySimple implements IRegistry {
 
    @Nullable
    public Object getObject(@Nullable Object var1) {
-      return this.registryObjects.get(var1);
+      return this.registryObjects.get(name);
    }
 
    public void putObject(Object var1, Object var2) {
-      Validate.notNull(var1);
-      Validate.notNull(var2);
+      Validate.notNull(key);
+      Validate.notNull(value);
       this.values = null;
-      if (this.registryObjects.containsKey(var1)) {
-         LOGGER.debug("Adding duplicate key '{}' to registry", new Object[]{var1});
+      if (this.registryObjects.containsKey(key)) {
+         LOGGER.debug("Adding duplicate key '{}' to registry", new Object[]{key});
       }
 
-      this.registryObjects.put(var1, var2);
+      this.registryObjects.put(key, value);
    }
 
    public Set getKeys() {
@@ -44,19 +44,19 @@ public class RegistrySimple implements IRegistry {
    @Nullable
    public Object getRandomObject(Random var1) {
       if (this.values == null) {
-         Collection var2 = this.registryObjects.values();
-         if (var2.isEmpty()) {
+         Collection collection = this.registryObjects.values();
+         if (collection.isEmpty()) {
             return null;
          }
 
-         this.values = var2.toArray(new Object[var2.size()]);
+         this.values = collection.toArray(new Object[collection.size()]);
       }
 
-      return this.values[var1.nextInt(this.values.length)];
+      return this.values[random.nextInt(this.values.length)];
    }
 
    public boolean containsKey(Object var1) {
-      return this.registryObjects.containsKey(var1);
+      return this.registryObjects.containsKey(key);
    }
 
    public Iterator iterator() {

@@ -14,15 +14,15 @@ public class DefaultPlayerSkin {
       return TEXTURE_STEVE;
    }
 
-   public static ResourceLocation getDefaultSkin(UUID playerUUID) {
+   public static ResourceLocation getDefaultSkin(UUID var0) {
       return isSlimSkin(playerUUID) ? TEXTURE_ALEX : TEXTURE_STEVE;
    }
 
-   public static String getSkinType(UUID playerUUID) {
+   public static String getSkinType(UUID var0) {
       return isSlimSkin(playerUUID) ? "slim" : "default";
    }
 
-   private static boolean isSlimSkin(UUID playerUUID) {
+   private static boolean isSlimSkin(UUID var0) {
       return (playerUUID.hashCode() & 1) == 1;
    }
 }

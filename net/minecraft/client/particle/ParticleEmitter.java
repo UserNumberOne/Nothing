@@ -14,7 +14,7 @@ public class ParticleEmitter extends Particle {
    private final int lifetime;
    private final EnumParticleTypes particleTypes;
 
-   public ParticleEmitter(World worldIn, Entity p_i46279_2_, EnumParticleTypes particleTypesIn) {
+   public ParticleEmitter(World var1, Entity var2, EnumParticleTypes var3) {
       super(worldIn, p_i46279_2_.posX, p_i46279_2_.getEntityBoundingBox().minY + (double)(p_i46279_2_.height / 2.0F), p_i46279_2_.posZ, p_i46279_2_.motionX, p_i46279_2_.motionY, p_i46279_2_.motionZ);
       this.attachedEntity = p_i46279_2_;
       this.lifetime = 3;
@@ -22,7 +22,7 @@ public class ParticleEmitter extends Particle {
       this.onUpdate();
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
    }
 
    public void onUpdate() {

@@ -7,6 +7,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityEquipment implements Packet {
    private int entityID;
@@ -17,24 +19,39 @@ public class SPacketEntityEquipment implements Packet {
    }
 
    public SPacketEntityEquipment(int var1, EntityEquipmentSlot var2, @Nullable ItemStack var3) {
-      this.entityID = var1;
-      this.equipmentSlot = var2;
-      this.itemStack = var3 == null ? null : var3.copy();
+      this.entityID = entityIdIn;
+      this.equipmentSlot = equipmentSlotIn;
+      this.itemStack = itemStackIn == null ? null : itemStackIn.copy();
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.entityID = var1.readVarInt();
-      this.equipmentSlot = (EntityEquipmentSlot)var1.readEnumValue(EntityEquipmentSlot.class);
-      this.itemStack = var1.readItemStack();
+      this.entityID = buf.readVarInt();
+      this.equipmentSlot = (EntityEquipmentSlot)buf.readEnumValue(EntityEquipmentSlot.class);
+      this.itemStack = buf.readItemStack();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeVarInt(this.entityID);
-      var1.writeEnumValue(this.equipmentSlot);
-      var1.writeItemStack(this.itemStack);
+      buf.writeVarInt(this.entityID);
+      buf.writeEnumValue(this.equipmentSlot);
+      buf.writeItemStack(this.itemStack);
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      var1.handleEntityEquipment(this);
+      handler.handleEntityEquipment(this);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public ItemStack getItemStack() {
+      return this.itemStack;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getEntityID() {
+      return this.entityID;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public EntityEquipmentSlot getEquipmentSlot() {
+      return this.equipmentSlot;
    }
 }

@@ -6,6 +6,8 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
 
 public class CPacketTabComplete implements Packet {
@@ -14,29 +16,39 @@ public class CPacketTabComplete implements Packet {
    @Nullable
    private BlockPos targetBlock;
 
+   public CPacketTabComplete() {
+   }
+
+   @SideOnly(Side.CLIENT)
+   public CPacketTabComplete(String var1, @Nullable BlockPos var2, boolean var3) {
+      this.message = messageIn;
+      this.targetBlock = targetBlockIn;
+      this.hasTargetBlock = hasTargetBlockIn;
+   }
+
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.message = var1.readString(32767);
-      this.hasTargetBlock = var1.readBoolean();
-      boolean var2 = var1.readBoolean();
-      if (var2) {
-         this.targetBlock = var1.readBlockPos();
+      this.message = buf.readString(32767);
+      this.hasTargetBlock = buf.readBoolean();
+      boolean flag = buf.readBoolean();
+      if (flag) {
+         this.targetBlock = buf.readBlockPos();
       }
 
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeString(StringUtils.substring(this.message, 0, 32767));
-      var1.writeBoolean(this.hasTargetBlock);
-      boolean var2 = this.targetBlock != null;
-      var1.writeBoolean(var2);
-      if (var2) {
-         var1.writeBlockPos(this.targetBlock);
+      buf.writeString(StringUtils.substring(this.message, 0, 32767));
+      buf.writeBoolean(this.hasTargetBlock);
+      boolean flag = this.targetBlock != null;
+      buf.writeBoolean(flag);
+      if (flag) {
+         buf.writeBlockPos(this.targetBlock);
       }
 
    }
 
    public void processPacket(INetHandlerPlayServer var1) {
-      var1.processTabComplete(this);
+      handler.processTabComplete(this);
    }
 
    public String getMessage() {

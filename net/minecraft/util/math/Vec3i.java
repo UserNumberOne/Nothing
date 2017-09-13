@@ -11,29 +11,23 @@ public class Vec3i implements Comparable {
    private final int z;
 
    public Vec3i(int var1, int var2, int var3) {
-      this.x = var1;
-      this.y = var2;
-      this.z = var3;
+      this.x = xIn;
+      this.y = yIn;
+      this.z = zIn;
    }
 
    public Vec3i(double var1, double var3, double var5) {
-      this(MathHelper.floor(var1), MathHelper.floor(var3), MathHelper.floor(var5));
+      this(MathHelper.floor(xIn), MathHelper.floor(yIn), MathHelper.floor(zIn));
    }
 
    public boolean equals(Object var1) {
-      if (this == var1) {
+      if (this == p_equals_1_) {
          return true;
-      } else if (!(var1 instanceof Vec3i)) {
+      } else if (!(p_equals_1_ instanceof Vec3i)) {
          return false;
       } else {
-         Vec3i var2 = (Vec3i)var1;
-         if (this.getX() != var2.getX()) {
-            return false;
-         } else if (this.getY() != var2.getY()) {
-            return false;
-         } else {
-            return this.getZ() == var2.getZ();
-         }
+         Vec3i vec3i = (Vec3i)p_equals_1_;
+         return this.getX() != vec3i.getX() ? false : (this.getY() != vec3i.getY() ? false : this.getZ() == vec3i.getZ());
       }
    }
 
@@ -42,11 +36,7 @@ public class Vec3i implements Comparable {
    }
 
    public int compareTo(Vec3i var1) {
-      if (this.getY() == var1.getY()) {
-         return this.getZ() == var1.getZ() ? this.getX() - var1.getX() : this.getZ() - var1.getZ();
-      } else {
-         return this.getY() - var1.getY();
-      }
+      return this.getY() == p_compareTo_1_.getY() ? (this.getZ() == p_compareTo_1_.getZ() ? this.getX() - p_compareTo_1_.getX() : this.getZ() - p_compareTo_1_.getZ()) : this.getY() - p_compareTo_1_.getY();
    }
 
    public int getX() {
@@ -62,40 +52,35 @@ public class Vec3i implements Comparable {
    }
 
    public Vec3i crossProduct(Vec3i var1) {
-      return new Vec3i(this.getY() * var1.getZ() - this.getZ() * var1.getY(), this.getZ() * var1.getX() - this.getX() * var1.getZ(), this.getX() * var1.getY() - this.getY() * var1.getX());
+      return new Vec3i(this.getY() * vec.getZ() - this.getZ() * vec.getY(), this.getZ() * vec.getX() - this.getX() * vec.getZ(), this.getX() * vec.getY() - this.getY() * vec.getX());
    }
 
    public double getDistance(int var1, int var2, int var3) {
-      double var4 = (double)(this.getX() - var1);
-      double var6 = (double)(this.getY() - var2);
-      double var8 = (double)(this.getZ() - var3);
-      return Math.sqrt(var4 * var4 + var6 * var6 + var8 * var8);
+      double d0 = (double)(this.getX() - xIn);
+      double d1 = (double)(this.getY() - yIn);
+      double d2 = (double)(this.getZ() - zIn);
+      return Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
    }
 
    public double distanceSq(double var1, double var3, double var5) {
-      double var7 = (double)this.getX() - var1;
-      double var9 = (double)this.getY() - var3;
-      double var11 = (double)this.getZ() - var5;
-      return var7 * var7 + var9 * var9 + var11 * var11;
+      double d0 = (double)this.getX() - toX;
+      double d1 = (double)this.getY() - toY;
+      double d2 = (double)this.getZ() - toZ;
+      return d0 * d0 + d1 * d1 + d2 * d2;
    }
 
    public double distanceSqToCenter(double var1, double var3, double var5) {
-      double var7 = (double)this.getX() + 0.5D - var1;
-      double var9 = (double)this.getY() + 0.5D - var3;
-      double var11 = (double)this.getZ() + 0.5D - var5;
-      return var7 * var7 + var9 * var9 + var11 * var11;
+      double d0 = (double)this.getX() + 0.5D - xIn;
+      double d1 = (double)this.getY() + 0.5D - yIn;
+      double d2 = (double)this.getZ() + 0.5D - zIn;
+      return d0 * d0 + d1 * d1 + d2 * d2;
    }
 
    public double distanceSq(Vec3i var1) {
-      return this.distanceSq((double)var1.getX(), (double)var1.getY(), (double)var1.getZ());
+      return this.distanceSq((double)to.getX(), (double)to.getY(), (double)to.getZ());
    }
 
    public String toString() {
       return Objects.toStringHelper(this).add("x", this.getX()).add("y", this.getY()).add("z", this.getZ()).toString();
-   }
-
-   // $FF: synthetic method
-   public int compareTo(Object var1) {
-      return this.compareTo((Vec3i)var1);
    }
 }

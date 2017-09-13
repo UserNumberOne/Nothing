@@ -13,11 +13,11 @@ public class LayerEnderDragonEyes implements LayerRenderer {
    private static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/enderdragon/dragon_eyes.png");
    private final RenderDragon dragonRenderer;
 
-   public LayerEnderDragonEyes(RenderDragon dragonRendererIn) {
+   public LayerEnderDragonEyes(RenderDragon var1) {
       this.dragonRenderer = dragonRendererIn;
    }
 
-   public void doRenderLayer(EntityDragon entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityDragon var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       this.dragonRenderer.bindTexture(TEXTURE);
       GlStateManager.enableBlend();
       GlStateManager.disableAlpha();

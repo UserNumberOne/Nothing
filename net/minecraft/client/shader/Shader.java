@@ -25,7 +25,7 @@ public class Shader {
    private final List listAuxHeights = Lists.newArrayList();
    private Matrix4f projectionMatrix;
 
-   public Shader(IResourceManager resourceManager, String programName, Framebuffer framebufferInIn, Framebuffer framebufferOutIn) throws JsonException, IOException {
+   public Shader(IResourceManager var1, String var2, Framebuffer var3, Framebuffer var4) throws JsonException, IOException {
       this.manager = new ShaderManager(resourceManager, programName);
       this.framebufferIn = framebufferInIn;
       this.framebufferOut = framebufferOutIn;
@@ -35,7 +35,7 @@ public class Shader {
       this.manager.deleteShader();
    }
 
-   public void addAuxFramebuffer(String auxName, Object auxFramebufferIn, int width, int height) {
+   public void addAuxFramebuffer(String var1, Object var2, int var3, int var4) {
       this.listAuxNames.add(this.listAuxNames.size(), auxName);
       this.listAuxFramebuffers.add(this.listAuxFramebuffers.size(), auxFramebufferIn);
       this.listAuxWidths.add(this.listAuxWidths.size(), Integer.valueOf(width));
@@ -54,11 +54,11 @@ public class Shader {
       GlStateManager.bindTexture(0);
    }
 
-   public void setProjectionMatrix(Matrix4f projectionMatrixIn) {
+   public void setProjectionMatrix(Matrix4f var1) {
       this.projectionMatrix = projectionMatrixIn;
    }
 
-   public void loadShader(float p_148042_1_) {
+   public void loadShader(float var1) {
       this.preLoadShader();
       this.framebufferIn.unbindFramebuffer();
       float f = (float)this.framebufferOut.framebufferTextureWidth;

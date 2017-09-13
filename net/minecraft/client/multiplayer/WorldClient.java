@@ -59,7 +59,7 @@ public class WorldClient extends World {
    private int ambienceTicks;
    protected Set viewableChunks;
 
-   public WorldClient(NetHandlerPlayClient netHandler, WorldSettings settings, int dimension, EnumDifficulty difficulty, Profiler profilerIn) {
+   public WorldClient(NetHandlerPlayClient var1, WorldSettings var2, int var3, EnumDifficulty var4, Profiler var5) {
       super(new SaveHandlerMP(), new WorldInfo(settings, "MpServer"), DimensionManager.createProviderFor(dimension), profilerIn, true);
       this.ambienceTicks = this.rand.nextInt(12000);
       this.viewableChunks = Sets.newHashSet();
@@ -99,7 +99,7 @@ public class WorldClient extends World {
       this.theProfiler.endSection();
    }
 
-   public void invalidateBlockReceiveRegion(int x1, int y1, int z1, int x2, int y2, int z2) {
+   public void invalidateBlockReceiveRegion(int var1, int var2, int var3, int var4, int var5, int var6) {
    }
 
    protected IChunkProvider createChunkProvider() {
@@ -107,7 +107,7 @@ public class WorldClient extends World {
       return this.clientChunkProvider;
    }
 
-   protected boolean isChunkLoaded(int x, int z, boolean allowEmpty) {
+   protected boolean isChunkLoaded(int var1, int var2, boolean var3) {
       return allowEmpty || !this.getChunkProvider().provideChunk(x, z).isEmpty();
    }
 
@@ -158,7 +158,7 @@ public class WorldClient extends World {
 
    }
 
-   public void doPreChunk(int chunkX, int chunkZ, boolean loadChunk) {
+   public void doPreChunk(int var1, int var2, boolean var3) {
       if (loadChunk) {
          this.clientChunkProvider.loadChunk(chunkX, chunkZ);
       } else {
@@ -168,7 +168,7 @@ public class WorldClient extends World {
 
    }
 
-   public boolean spawnEntity(Entity entityIn) {
+   public boolean spawnEntity(Entity var1) {
       boolean flag = super.spawnEntity(entityIn);
       this.entityList.add(entityIn);
       if (flag) {
@@ -182,12 +182,12 @@ public class WorldClient extends World {
       return flag;
    }
 
-   public void removeEntity(Entity entityIn) {
+   public void removeEntity(Entity var1) {
       super.removeEntity(entityIn);
       this.entityList.remove(entityIn);
    }
 
-   public void onEntityAdded(Entity entityIn) {
+   public void onEntityAdded(Entity var1) {
       super.onEntityAdded(entityIn);
       if (this.entitySpawnQueue.contains(entityIn)) {
          this.entitySpawnQueue.remove(entityIn);
@@ -195,7 +195,7 @@ public class WorldClient extends World {
 
    }
 
-   public void onEntityRemoved(Entity entityIn) {
+   public void onEntityRemoved(Entity var1) {
       super.onEntityRemoved(entityIn);
       if (this.entityList.contains(entityIn)) {
          if (entityIn.isEntityAlive()) {
@@ -207,7 +207,7 @@ public class WorldClient extends World {
 
    }
 
-   public void addEntityToWorld(int entityID, Entity entityToSpawn) {
+   public void addEntityToWorld(int var1, Entity var2) {
       Entity entity = this.getEntityByID(entityID);
       if (entity != null) {
          this.removeEntity(entity);
@@ -223,11 +223,11 @@ public class WorldClient extends World {
    }
 
    @Nullable
-   public Entity getEntityByID(int id) {
+   public Entity getEntityByID(int var1) {
       return (Entity)(id == this.mc.player.getEntityId() ? this.mc.player : super.getEntityByID(id));
    }
 
-   public Entity removeEntityFromWorld(int entityID) {
+   public Entity removeEntityFromWorld(int var1) {
       Entity entity = (Entity)this.entitiesById.removeObject(entityID);
       if (entity != null) {
          this.entityList.remove(entity);
@@ -239,7 +239,7 @@ public class WorldClient extends World {
 
    /** @deprecated */
    @Deprecated
-   public boolean invalidateRegionAndSetBlock(BlockPos pos, IBlockState state) {
+   public boolean invalidateRegionAndSetBlock(BlockPos var1, IBlockState var2) {
       int i = pos.getX();
       int j = pos.getY();
       int k = pos.getZ();
@@ -254,7 +254,7 @@ public class WorldClient extends World {
    protected void updateWeather() {
    }
 
-   protected void playMoodSoundAndCheckLight(int p_147467_1_, int p_147467_2_, Chunk chunkIn) {
+   protected void playMoodSoundAndCheckLight(int var1, int var2, Chunk var3) {
       super.playMoodSoundAndCheckLight(p_147467_1_, p_147467_2_, chunkIn);
       if (this.ambienceTicks == 0) {
          this.updateLCG = this.updateLCG * 3 + 1013904223;
@@ -274,7 +274,7 @@ public class WorldClient extends World {
 
    }
 
-   public void doVoidFogParticles(int posX, int posY, int posZ) {
+   public void doVoidFogParticles(int var1, int var2, int var3) {
       int i = 32;
       Random random = new Random();
       ItemStack itemstack = this.mc.player.getHeldItemMainhand();
@@ -288,7 +288,7 @@ public class WorldClient extends World {
 
    }
 
-   public void showBarrierParticles(int p_184153_1_, int p_184153_2_, int p_184153_3_, int p_184153_4_, Random random, boolean p_184153_6_, BlockPos.MutableBlockPos pos) {
+   public void showBarrierParticles(int var1, int var2, int var3, int var4, Random var5, boolean var6, BlockPos.MutableBlockPos var7) {
       int i = p_184153_1_ + this.rand.nextInt(p_184153_4_) - this.rand.nextInt(p_184153_4_);
       int j = p_184153_2_ + this.rand.nextInt(p_184153_4_) - this.rand.nextInt(p_184153_4_);
       int k = p_184153_3_ + this.rand.nextInt(p_184153_4_) - this.rand.nextInt(p_184153_4_);
@@ -344,7 +344,7 @@ public class WorldClient extends World {
 
    }
 
-   public CrashReportCategory addWorldInfoToCrashReport(CrashReport report) {
+   public CrashReportCategory addWorldInfoToCrashReport(CrashReport var1) {
       CrashReportCategory crashreportcategory = super.addWorldInfoToCrashReport(report);
       crashreportcategory.setDetail("Forced entities", new ICrashReportDetail() {
          public String call() {
@@ -369,18 +369,18 @@ public class WorldClient extends World {
       return crashreportcategory;
    }
 
-   public void playSound(@Nullable EntityPlayer player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch) {
+   public void playSound(@Nullable EntityPlayer var1, double var2, double var4, double var6, SoundEvent var8, SoundCategory var9, float var10, float var11) {
       if (player == this.mc.player) {
          this.playSound(x, y, z, soundIn, category, volume, pitch, false);
       }
 
    }
 
-   public void playSound(BlockPos pos, SoundEvent soundIn, SoundCategory category, float volume, float pitch, boolean distanceDelay) {
+   public void playSound(BlockPos var1, SoundEvent var2, SoundCategory var3, float var4, float var5, boolean var6) {
       this.playSound((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, soundIn, category, volume, pitch, distanceDelay);
    }
 
-   public void playSound(double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch, boolean distanceDelay) {
+   public void playSound(double var1, double var3, double var5, SoundEvent var7, SoundCategory var8, float var9, float var10, boolean var11) {
       double d0 = this.mc.getRenderViewEntity().getDistanceSq(x, y, z);
       PositionedSoundRecord positionedsoundrecord = new PositionedSoundRecord(soundIn, category, volume, pitch, (float)x, (float)y, (float)z);
       if (distanceDelay && d0 > 100.0D) {
@@ -392,19 +392,19 @@ public class WorldClient extends World {
 
    }
 
-   public void makeFireworks(double x, double y, double z, double motionX, double motionY, double motionZ, @Nullable NBTTagCompound compund) {
+   public void makeFireworks(double var1, double var3, double var5, double var7, double var9, double var11, @Nullable NBTTagCompound var13) {
       this.mc.effectRenderer.addEffect(new ParticleFirework.Starter(this, x, y, z, motionX, motionY, motionZ, this.mc.effectRenderer, compund));
    }
 
-   public void sendPacketToServer(Packet packetIn) {
+   public void sendPacketToServer(Packet var1) {
       this.connection.sendPacket(packetIn);
    }
 
-   public void setWorldScoreboard(Scoreboard scoreboardIn) {
+   public void setWorldScoreboard(Scoreboard var1) {
       this.worldScoreboard = scoreboardIn;
    }
 
-   public void setWorldTime(long time) {
+   public void setWorldTime(long var1) {
       if (time < 0L) {
          time = -time;
          this.getGameRules().setOrCreateGameRule("doDaylightCycle", "false");

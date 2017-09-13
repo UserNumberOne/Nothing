@@ -35,22 +35,22 @@ public class SkinManager {
    private final MinecraftSessionService sessionService;
    private final LoadingCache skinCacheLoader;
 
-   public SkinManager(TextureManager textureManagerInstance, File skinCacheDirectory, MinecraftSessionService sessionService) {
+   public SkinManager(TextureManager var1, File var2, MinecraftSessionService var3) {
       this.textureManager = textureManagerInstance;
       this.skinCacheDir = skinCacheDirectory;
       this.sessionService = sessionService;
       this.skinCacheLoader = CacheBuilder.newBuilder().expireAfterAccess(15L, TimeUnit.SECONDS).build(new CacheLoader() {
-         public Map load(GameProfile p_load_1_) throws Exception {
+         public Map load(GameProfile var1) throws Exception {
             return Minecraft.getMinecraft().getSessionService().getTextures(p_load_1_, false);
          }
       });
    }
 
-   public ResourceLocation loadSkin(MinecraftProfileTexture profileTexture, Type textureType) {
+   public ResourceLocation loadSkin(MinecraftProfileTexture var1, Type var2) {
       return this.loadSkin(profileTexture, textureType, (SkinManager.SkinAvailableCallback)null);
    }
 
-   public ResourceLocation loadSkin(final MinecraftProfileTexture profileTexture, final Type textureType, @Nullable final SkinManager.SkinAvailableCallback skinAvailableCallback) {
+   public ResourceLocation loadSkin(final MinecraftProfileTexture var1, final Type var2, @Nullable final SkinManager.SkinAvailableCallback var3) {
       final ResourceLocation resourcelocation = new ResourceLocation("skins/" + profileTexture.getHash());
       ITextureObject itextureobject = this.textureManager.getTexture(resourcelocation);
       if (itextureobject != null) {
@@ -62,7 +62,7 @@ public class SkinManager {
          File file2 = new File(file1, profileTexture.getHash());
          final IImageBuffer iimagebuffer = textureType == Type.SKIN ? new ImageBufferDownload() : null;
          ThreadDownloadImageData threaddownloadimagedata = new ThreadDownloadImageData(file2, profileTexture.getUrl(), DefaultPlayerSkin.getDefaultSkinLegacy(), new IImageBuffer() {
-            public BufferedImage parseUserSkin(BufferedImage image) {
+            public BufferedImage parseUserSkin(BufferedImage var1x) {
                if (iimagebuffer != null) {
                   image = iimagebuffer.parseUserSkin(image);
                }
@@ -87,14 +87,14 @@ public class SkinManager {
       return resourcelocation;
    }
 
-   public void loadProfileTextures(final GameProfile profile, final SkinManager.SkinAvailableCallback skinAvailableCallback, final boolean requireSecure) {
+   public void loadProfileTextures(final GameProfile var1, final SkinManager.SkinAvailableCallback var2, final boolean var3) {
       THREAD_POOL.submit(new Runnable() {
          public void run() {
             final Map map = Maps.newHashMap();
 
             try {
                map.putAll(SkinManager.this.sessionService.getTextures(profile, requireSecure));
-            } catch (InsecureTextureException var3) {
+            } catch (InsecureTextureException var3x) {
                ;
             }
 
@@ -120,7 +120,7 @@ public class SkinManager {
       });
    }
 
-   public Map loadSkinFromCache(GameProfile profile) {
+   public Map loadSkinFromCache(GameProfile var1) {
       return (Map)this.skinCacheLoader.getUnchecked(profile);
    }
 

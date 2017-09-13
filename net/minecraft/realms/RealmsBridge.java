@@ -14,7 +14,7 @@ public class RealmsBridge extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private GuiScreen previousScreen;
 
-   public void switchToRealms(GuiScreen p_switchToRealms_1_) {
+   public void switchToRealms(GuiScreen var1) {
       this.previousScreen = p_switchToRealms_1_;
 
       try {
@@ -31,7 +31,7 @@ public class RealmsBridge extends RealmsScreen {
 
    }
 
-   public GuiScreenRealmsProxy getNotificationScreen(GuiScreen p_getNotificationScreen_1_) {
+   public GuiScreenRealmsProxy getNotificationScreen(GuiScreen var1) {
       try {
          this.previousScreen = p_getNotificationScreen_1_;
          Class oclass = Class.forName("com.mojang.realmsclient.gui.screens.RealmsNotificationsScreen");

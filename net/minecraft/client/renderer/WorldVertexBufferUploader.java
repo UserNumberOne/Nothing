@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class WorldVertexBufferUploader {
-   public void draw(VertexBuffer vertexBufferIn) {
+   public void draw(VertexBuffer var1) {
       if (vertexBufferIn.getVertexCount() > 0) {
          VertexFormat vertexformat = vertexBufferIn.getVertexFormat();
          int i = vertexformat.getNextOffset();

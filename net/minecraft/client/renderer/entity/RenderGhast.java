@@ -12,15 +12,15 @@ public class RenderGhast extends RenderLiving {
    private static final ResourceLocation GHAST_TEXTURES = new ResourceLocation("textures/entity/ghast/ghast.png");
    private static final ResourceLocation GHAST_SHOOTING_TEXTURES = new ResourceLocation("textures/entity/ghast/ghast_shooting.png");
 
-   public RenderGhast(RenderManager renderManagerIn) {
+   public RenderGhast(RenderManager var1) {
       super(renderManagerIn, new ModelGhast(), 0.5F);
    }
 
-   protected ResourceLocation getEntityTexture(EntityGhast entity) {
+   protected ResourceLocation getEntityTexture(EntityGhast var1) {
       return entity.isAttacking() ? GHAST_SHOOTING_TEXTURES : GHAST_TEXTURES;
    }
 
-   protected void preRenderCallback(EntityGhast entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityGhast var1, float var2) {
       float f = 1.0F;
       float f1 = 4.5F;
       float f2 = 4.5F;

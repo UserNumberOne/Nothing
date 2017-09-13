@@ -26,17 +26,17 @@ public class ItemTransformVec3f implements IModelState {
    public final Vector3f translation;
    public final Vector3f scale;
 
-   public Optional apply(Optional part) {
+   public Optional apply(Optional var1) {
       return ForgeHooksClient.applyTransform(this, part);
    }
 
-   public ItemTransformVec3f(Vector3f rotation, Vector3f translation, Vector3f scale) {
+   public ItemTransformVec3f(Vector3f var1, Vector3f var2, Vector3f var3) {
       this.rotation = new Vector3f(rotation);
       this.translation = new Vector3f(translation);
       this.scale = new Vector3f(scale);
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else if (this.getClass() != p_equals_1_.getClass()) {
@@ -60,7 +60,7 @@ public class ItemTransformVec3f implements IModelState {
       private static final Vector3f TRANSLATION_DEFAULT = new Vector3f(0.0F, 0.0F, 0.0F);
       private static final Vector3f SCALE_DEFAULT = new Vector3f(1.0F, 1.0F, 1.0F);
 
-      public ItemTransformVec3f deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public ItemTransformVec3f deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          Vector3f vector3f = this.parseVector3f(jsonobject, "rotation", ROTATION_DEFAULT);
          Vector3f vector3f1 = this.parseVector3f(jsonobject, "translation", TRANSLATION_DEFAULT);
@@ -75,7 +75,7 @@ public class ItemTransformVec3f implements IModelState {
          return new ItemTransformVec3f(vector3f, vector3f1, vector3f2);
       }
 
-      private Vector3f parseVector3f(JsonObject jsonObject, String key, Vector3f defaultValue) {
+      private Vector3f parseVector3f(JsonObject var1, String var2, Vector3f var3) {
          if (!jsonObject.has(key)) {
             return defaultValue;
          } else {

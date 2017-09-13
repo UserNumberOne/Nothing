@@ -33,11 +33,11 @@ public class StructureOceanMonument extends MapGenStructure {
    public StructureOceanMonument(Map var1) {
       this();
 
-      for(Entry var3 : var1.entrySet()) {
-         if (((String)var3.getKey()).equals("spacing")) {
-            this.spacing = MathHelper.getInt((String)var3.getValue(), this.spacing, 1);
-         } else if (((String)var3.getKey()).equals("separation")) {
-            this.separation = MathHelper.getInt((String)var3.getValue(), this.separation, 1);
+      for(Entry entry : p_i45608_1_.entrySet()) {
+         if (((String)entry.getKey()).equals("spacing")) {
+            this.spacing = MathHelper.getInt((String)entry.getValue(), this.spacing, 1);
+         } else if (((String)entry.getKey()).equals("separation")) {
+            this.separation = MathHelper.getInt((String)entry.getValue(), this.separation, 1);
          }
       }
 
@@ -48,30 +48,30 @@ public class StructureOceanMonument extends MapGenStructure {
    }
 
    protected boolean canSpawnStructureAtCoords(int var1, int var2) {
-      int var3 = var1;
-      int var4 = var2;
-      if (var1 < 0) {
-         var1 -= this.spacing - 1;
+      int i = chunkX;
+      int j = chunkZ;
+      if (chunkX < 0) {
+         chunkX -= this.spacing - 1;
       }
 
-      if (var2 < 0) {
-         var2 -= this.spacing - 1;
+      if (chunkZ < 0) {
+         chunkZ -= this.spacing - 1;
       }
 
-      int var5 = var1 / this.spacing;
-      int var6 = var2 / this.spacing;
-      Random var7 = this.world.setRandomSeed(var5, var6, 10387313);
-      var5 = var5 * this.spacing;
-      var6 = var6 * this.spacing;
-      var5 = var5 + (var7.nextInt(this.spacing - this.separation) + var7.nextInt(this.spacing - this.separation)) / 2;
-      var6 = var6 + (var7.nextInt(this.spacing - this.separation) + var7.nextInt(this.spacing - this.separation)) / 2;
-      if (var3 == var5 && var4 == var6) {
-         if (!this.world.getBiomeProvider().areBiomesViable(var3 * 16 + 8, var4 * 16 + 8, 16, SPAWN_BIOMES)) {
+      int k = chunkX / this.spacing;
+      int l = chunkZ / this.spacing;
+      Random random = this.world.setRandomSeed(k, l, 10387313);
+      k = k * this.spacing;
+      l = l * this.spacing;
+      k = k + (random.nextInt(this.spacing - this.separation) + random.nextInt(this.spacing - this.separation)) / 2;
+      l = l + (random.nextInt(this.spacing - this.separation) + random.nextInt(this.spacing - this.separation)) / 2;
+      if (i == k && j == l) {
+         if (!this.world.getBiomeProvider().areBiomesViable(i * 16 + 8, j * 16 + 8, 16, SPAWN_BIOMES)) {
             return false;
          }
 
-         boolean var8 = this.world.getBiomeProvider().areBiomesViable(var3 * 16 + 8, var4 * 16 + 8, 29, WATER_BIOMES);
-         if (var8) {
+         boolean flag = this.world.getBiomeProvider().areBiomesViable(i * 16 + 8, j * 16 + 8, 29, WATER_BIOMES);
+         if (flag) {
             return true;
          }
       }
@@ -80,7 +80,7 @@ public class StructureOceanMonument extends MapGenStructure {
    }
 
    protected StructureStart getStructureStart(int var1, int var2) {
-      return new StructureOceanMonument.StartMonument(this.world, this.rand, var1, var2);
+      return new StructureOceanMonument.StartMonument(this.world, this.rand, chunkX, chunkZ);
    }
 
    public List getScatteredFeatureSpawnList() {
@@ -99,21 +99,21 @@ public class StructureOceanMonument extends MapGenStructure {
       }
 
       public StartMonument(World var1, Random var2, int var3, int var4) {
-         super(var3, var4);
-         this.create(var1, var2, var3, var4);
+         super(chunkX, chunkZ);
+         this.create(worldIn, random, chunkX, chunkZ);
       }
 
       private void create(World var1, Random var2, int var3, int var4) {
-         var2.setSeed(var1.getSeed());
-         long var5 = var2.nextLong();
-         long var7 = var2.nextLong();
-         long var9 = (long)var3 * var5;
-         long var11 = (long)var4 * var7;
-         var2.setSeed(var9 ^ var11 ^ var1.getSeed());
-         int var13 = var3 * 16 + 8 - 29;
-         int var14 = var4 * 16 + 8 - 29;
-         EnumFacing var15 = EnumFacing.Plane.HORIZONTAL.random(var2);
-         this.components.add(new StructureOceanMonumentPieces.MonumentBuilding(var2, var13, var14, var15));
+         random.setSeed(worldIn.getSeed());
+         long i = random.nextLong();
+         long j = random.nextLong();
+         long k = (long)chunkX * i;
+         long l = (long)chunkZ * j;
+         random.setSeed(k ^ l ^ worldIn.getSeed());
+         int i1 = chunkX * 16 + 8 - 29;
+         int j1 = chunkZ * 16 + 8 - 29;
+         EnumFacing enumfacing = EnumFacing.Plane.HORIZONTAL.random(random);
+         this.components.add(new StructureOceanMonumentPieces.MonumentBuilding(random, i1, j1, enumfacing));
          this.updateBoundingBox();
          this.wasCreated = true;
       }
@@ -121,43 +121,43 @@ public class StructureOceanMonument extends MapGenStructure {
       public void generateStructure(World var1, Random var2, StructureBoundingBox var3) {
          if (!this.wasCreated) {
             this.components.clear();
-            this.create(var1, var2, this.getChunkPosX(), this.getChunkPosZ());
+            this.create(worldIn, rand, this.getChunkPosX(), this.getChunkPosZ());
          }
 
-         super.generateStructure(var1, var2, var3);
+         super.generateStructure(worldIn, rand, structurebb);
       }
 
       public boolean isValidForPostProcess(ChunkPos var1) {
-         return this.processed.contains(var1) ? false : super.isValidForPostProcess(var1);
+         return this.processed.contains(pair) ? false : super.isValidForPostProcess(pair);
       }
 
       public void notifyPostProcessAt(ChunkPos var1) {
-         super.notifyPostProcessAt(var1);
-         this.processed.add(var1);
+         super.notifyPostProcessAt(pair);
+         this.processed.add(pair);
       }
 
       public void writeToNBT(NBTTagCompound var1) {
-         super.writeToNBT(var1);
-         NBTTagList var2 = new NBTTagList();
+         super.writeToNBT(tagCompound);
+         NBTTagList nbttaglist = new NBTTagList();
 
-         for(ChunkPos var4 : this.processed) {
-            NBTTagCompound var5 = new NBTTagCompound();
-            var5.setInteger("X", var4.chunkXPos);
-            var5.setInteger("Z", var4.chunkZPos);
-            var2.appendTag(var5);
+         for(ChunkPos chunkpos : this.processed) {
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            nbttagcompound.setInteger("X", chunkpos.chunkXPos);
+            nbttagcompound.setInteger("Z", chunkpos.chunkZPos);
+            nbttaglist.appendTag(nbttagcompound);
          }
 
-         var1.setTag("Processed", var2);
+         tagCompound.setTag("Processed", nbttaglist);
       }
 
       public void readFromNBT(NBTTagCompound var1) {
-         super.readFromNBT(var1);
-         if (var1.hasKey("Processed", 9)) {
-            NBTTagList var2 = var1.getTagList("Processed", 10);
+         super.readFromNBT(tagCompound);
+         if (tagCompound.hasKey("Processed", 9)) {
+            NBTTagList nbttaglist = tagCompound.getTagList("Processed", 10);
 
-            for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
-               NBTTagCompound var4 = var2.getCompoundTagAt(var3);
-               this.processed.add(new ChunkPos(var4.getInteger("X"), var4.getInteger("Z")));
+            for(int i = 0; i < nbttaglist.tagCount(); ++i) {
+               NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
+               this.processed.add(new ChunkPos(nbttagcompound.getInteger("X"), nbttagcompound.getInteger("Z")));
             }
          }
 

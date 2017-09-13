@@ -20,14 +20,14 @@ public class ModelElytra extends ModelBase {
       this.rightWing.addBox(0.0F, 0.0F, 0.0F, 10, 20, 2, 1.0F);
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       GlStateManager.disableRescaleNormal();
       GlStateManager.disableCull();
       this.leftWing.render(scale);
       this.rightWing.render(scale);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
       float f = 0.2617994F;
       float f1 = -0.2617994F;
@@ -72,7 +72,7 @@ public class ModelElytra extends ModelBase {
       this.rightWing.rotateAngleZ = -this.leftWing.rotateAngleZ;
    }
 
-   public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
+   public void setLivingAnimations(EntityLivingBase var1, float var2, float var3, float var4) {
       super.setLivingAnimations(entitylivingbaseIn, p_78086_2_, p_78086_3_, partialTickTime);
    }
 }

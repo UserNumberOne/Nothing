@@ -39,11 +39,11 @@ public enum ModelRotation implements IModelState, ITransformation {
    private final int quartersX;
    private final int quartersY;
 
-   private static int combineXY(int p_177521_0_, int p_177521_1_) {
+   private static int combineXY(int var0, int var1) {
       return p_177521_0_ * 360 + p_177521_1_;
    }
 
-   private ModelRotation(int x, int y) {
+   private ModelRotation(int var3, int var4) {
       this.combinedXY = combineXY(x, y);
       this.matrix4d = new Matrix4f();
       Matrix4f matrix4f = new Matrix4f();
@@ -61,7 +61,7 @@ public enum ModelRotation implements IModelState, ITransformation {
       return this.matrix4d;
    }
 
-   public EnumFacing rotateFace(EnumFacing facing) {
+   public EnumFacing rotateFace(EnumFacing var1) {
       EnumFacing enumfacing = facing;
 
       for(int i = 0; i < this.quartersX; ++i) {
@@ -77,7 +77,7 @@ public enum ModelRotation implements IModelState, ITransformation {
       return enumfacing;
    }
 
-   public int rotateVertex(EnumFacing facing, int vertexIndex) {
+   public int rotateVertex(EnumFacing var1, int var2) {
       int i = vertexIndex;
       if (facing.getAxis() == EnumFacing.Axis.X) {
          i = (vertexIndex + this.quartersX) % 4;
@@ -96,11 +96,11 @@ public enum ModelRotation implements IModelState, ITransformation {
       return i;
    }
 
-   public static ModelRotation getModelRotation(int x, int y) {
+   public static ModelRotation getModelRotation(int var0, int var1) {
       return (ModelRotation)MAP_ROTATIONS.get(Integer.valueOf(combineXY(MathHelper.normalizeAngle(x, 360), MathHelper.normalizeAngle(y, 360))));
    }
 
-   public Optional apply(Optional part) {
+   public Optional apply(Optional var1) {
       return ForgeHooksClient.applyTransform(this.getMatrix(), part);
    }
 
@@ -108,11 +108,11 @@ public enum ModelRotation implements IModelState, ITransformation {
       return ForgeHooksClient.getMatrix(this);
    }
 
-   public EnumFacing rotate(EnumFacing facing) {
+   public EnumFacing rotate(EnumFacing var1) {
       return this.rotateFace(facing);
    }
 
-   public int rotate(EnumFacing facing, int vertexIndex) {
+   public int rotate(EnumFacing var1, int var2) {
       return this.rotateVertex(facing, vertexIndex);
    }
 

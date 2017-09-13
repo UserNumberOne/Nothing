@@ -13,7 +13,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RealmsAnvilLevelStorageSource {
    private final ISaveFormat levelStorageSource;
 
-   public RealmsAnvilLevelStorageSource(ISaveFormat levelStorageSourceIn) {
+   public RealmsAnvilLevelStorageSource(ISaveFormat var1) {
       this.levelStorageSource = levelStorageSourceIn;
    }
 
@@ -21,31 +21,31 @@ public class RealmsAnvilLevelStorageSource {
       return this.levelStorageSource.getName();
    }
 
-   public boolean levelExists(String p_levelExists_1_) {
+   public boolean levelExists(String var1) {
       return this.levelStorageSource.canLoadWorld(p_levelExists_1_);
    }
 
-   public boolean convertLevel(String p_convertLevel_1_, IProgressUpdate p_convertLevel_2_) {
+   public boolean convertLevel(String var1, IProgressUpdate var2) {
       return this.levelStorageSource.convertMapFormat(p_convertLevel_1_, p_convertLevel_2_);
    }
 
-   public boolean requiresConversion(String p_requiresConversion_1_) {
+   public boolean requiresConversion(String var1) {
       return this.levelStorageSource.isOldMapFormat(p_requiresConversion_1_);
    }
 
-   public boolean isNewLevelIdAcceptable(String p_isNewLevelIdAcceptable_1_) {
+   public boolean isNewLevelIdAcceptable(String var1) {
       return this.levelStorageSource.isNewLevelIdAcceptable(p_isNewLevelIdAcceptable_1_);
    }
 
-   public boolean deleteLevel(String p_deleteLevel_1_) {
+   public boolean deleteLevel(String var1) {
       return this.levelStorageSource.deleteWorldDirectory(p_deleteLevel_1_);
    }
 
-   public boolean isConvertible(String p_isConvertible_1_) {
+   public boolean isConvertible(String var1) {
       return this.levelStorageSource.isConvertible(p_isConvertible_1_);
    }
 
-   public void renameLevel(String p_renameLevel_1_, String p_renameLevel_2_) {
+   public void renameLevel(String var1, String var2) {
       this.levelStorageSource.renameWorld(p_renameLevel_1_, p_renameLevel_2_);
    }
 

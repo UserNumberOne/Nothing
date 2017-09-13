@@ -9,6 +9,8 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemCarrotOnAStick extends Item {
    public ItemCarrotOnAStick() {
@@ -17,22 +19,32 @@ public class ItemCarrotOnAStick extends Item {
       this.setMaxDamage(25);
    }
 
+   @SideOnly(Side.CLIENT)
+   public boolean isFull3D() {
+      return true;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public boolean shouldRotateAroundWhenRendering() {
+      return true;
+   }
+
    public ActionResult onItemRightClick(ItemStack var1, World var2, EntityPlayer var3, EnumHand var4) {
-      if (var3.isRiding() && var3.getRidingEntity() instanceof EntityPig) {
-         EntityPig var5 = (EntityPig)var3.getRidingEntity();
-         if (var1.getMaxDamage() - var1.getMetadata() >= 7 && var5.boost()) {
-            var1.damageItem(7, var3);
-            if (var1.stackSize == 0) {
-               ItemStack var6 = new ItemStack(Items.FISHING_ROD);
-               var6.setTagCompound(var1.getTagCompound());
-               return new ActionResult(EnumActionResult.SUCCESS, var6);
+      if (playerIn.isRiding() && playerIn.getRidingEntity() instanceof EntityPig) {
+         EntityPig entitypig = (EntityPig)playerIn.getRidingEntity();
+         if (itemStackIn.getMaxDamage() - itemStackIn.getMetadata() >= 7 && entitypig.boost()) {
+            itemStackIn.damageItem(7, playerIn);
+            if (itemStackIn.stackSize == 0) {
+               ItemStack itemstack = new ItemStack(Items.FISHING_ROD);
+               itemstack.setTagCompound(itemStackIn.getTagCompound());
+               return new ActionResult(EnumActionResult.SUCCESS, itemstack);
             }
 
-            return new ActionResult(EnumActionResult.SUCCESS, var1);
+            return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
          }
       }
 
-      var3.addStat(StatList.getObjectUseStats(this));
-      return new ActionResult(EnumActionResult.PASS, var1);
+      playerIn.addStat(StatList.getObjectUseStats(this));
+      return new ActionResult(EnumActionResult.PASS, itemStackIn);
    }
 }

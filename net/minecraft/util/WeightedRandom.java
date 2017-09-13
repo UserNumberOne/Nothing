@@ -5,49 +5,49 @@ import java.util.Random;
 
 public class WeightedRandom {
    public static int getTotalWeight(List var0) {
-      int var1 = 0;
-      int var2 = 0;
+      int i = 0;
+      int j = 0;
 
-      for(int var3 = var0.size(); var2 < var3; ++var2) {
-         WeightedRandom.Item var4 = (WeightedRandom.Item)var0.get(var2);
-         var1 += var4.itemWeight;
+      for(int k = collection.size(); j < k; ++j) {
+         WeightedRandom.Item weightedrandom$item = (WeightedRandom.Item)collection.get(j);
+         i += weightedrandom$item.itemWeight;
       }
 
-      return var1;
+      return i;
    }
 
    public static WeightedRandom.Item getRandomItem(Random var0, List var1, int var2) {
-      if (var2 <= 0) {
+      if (totalWeight <= 0) {
          throw new IllegalArgumentException();
       } else {
-         int var3 = var0.nextInt(var2);
-         return getRandomItem(var1, var3);
+         int i = random.nextInt(totalWeight);
+         return getRandomItem(collection, i);
       }
    }
 
    public static WeightedRandom.Item getRandomItem(List var0, int var1) {
-      int var2 = 0;
+      int i = 0;
 
-      for(int var3 = var0.size(); var2 < var3; ++var2) {
-         WeightedRandom.Item var4 = (WeightedRandom.Item)var0.get(var2);
-         var1 -= var4.itemWeight;
-         if (var1 < 0) {
-            return var4;
+      for(int j = collection.size(); i < j; ++i) {
+         WeightedRandom.Item t = (T)((WeightedRandom.Item)collection.get(i));
+         weight -= t.itemWeight;
+         if (weight < 0) {
+            return t;
          }
       }
 
-      return null;
+      return (WeightedRandom.Item)null;
    }
 
    public static WeightedRandom.Item getRandomItem(Random var0, List var1) {
-      return getRandomItem(var0, var1, getTotalWeight(var1));
+      return getRandomItem(random, collection, getTotalWeight(collection));
    }
 
    public static class Item {
-      protected int itemWeight;
+      public int itemWeight;
 
       public Item(int var1) {
-         this.itemWeight = var1;
+         this.itemWeight = itemWeightIn;
       }
    }
 }

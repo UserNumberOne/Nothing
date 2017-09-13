@@ -2,16 +2,15 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIOwnerHurtByTarget extends EntityAITarget {
    EntityTameable theDefendingTameable;
    EntityLivingBase theOwnerAttacker;
    private int timestamp;
 
-   public EntityAIOwnerHurtByTarget(EntityTameable entitytameableanimal) {
-      super(entitytameableanimal, false);
-      this.theDefendingTameable = entitytameableanimal;
+   public EntityAIOwnerHurtByTarget(EntityTameable var1) {
+      super(theDefendingTameableIn, false);
+      this.theDefendingTameable = theDefendingTameableIn;
       this.setMutexBits(1);
    }
 
@@ -19,22 +18,22 @@ public class EntityAIOwnerHurtByTarget extends EntityAITarget {
       if (!this.theDefendingTameable.isTamed()) {
          return false;
       } else {
-         EntityLivingBase entityliving = this.theDefendingTameable.getOwner();
-         if (entityliving == null) {
+         EntityLivingBase entitylivingbase = this.theDefendingTameable.getOwner();
+         if (entitylivingbase == null) {
             return false;
          } else {
-            this.theOwnerAttacker = entityliving.getAITarget();
-            int i = entityliving.getRevengeTimer();
-            return i != this.timestamp && this.isSuitableTarget(this.theOwnerAttacker, false) && this.theDefendingTameable.shouldAttackEntity(this.theOwnerAttacker, entityliving);
+            this.theOwnerAttacker = entitylivingbase.getAITarget();
+            int i = entitylivingbase.getRevengeTimer();
+            return i != this.timestamp && this.isSuitableTarget(this.theOwnerAttacker, false) && this.theDefendingTameable.shouldAttackEntity(this.theOwnerAttacker, entitylivingbase);
          }
       }
    }
 
    public void startExecuting() {
-      this.taskOwner.setGoalTarget(this.theOwnerAttacker, TargetReason.TARGET_ATTACKED_OWNER, true);
-      EntityLivingBase entityliving = this.theDefendingTameable.getOwner();
-      if (entityliving != null) {
-         this.timestamp = entityliving.getRevengeTimer();
+      this.taskOwner.setAttackTarget(this.theOwnerAttacker);
+      EntityLivingBase entitylivingbase = this.theDefendingTameable.getOwner();
+      if (entitylivingbase != null) {
+         this.timestamp = entitylivingbase.getRevengeTimer();
       }
 
       super.startExecuting();

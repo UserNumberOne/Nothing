@@ -4,15 +4,14 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.village.Village;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIDefendVillage extends EntityAITarget {
    EntityIronGolem irongolem;
    EntityLivingBase villageAgressorTarget;
 
-   public EntityAIDefendVillage(EntityIronGolem entityirongolem) {
-      super(entityirongolem, false, true);
-      this.irongolem = entityirongolem;
+   public EntityAIDefendVillage(EntityIronGolem var1) {
+      super(ironGolemIn, false, true);
+      this.irongolem = ironGolemIn;
       this.setMutexBits(1);
    }
 
@@ -36,7 +35,7 @@ public class EntityAIDefendVillage extends EntityAITarget {
    }
 
    public void startExecuting() {
-      this.irongolem.setGoalTarget(this.villageAgressorTarget, TargetReason.DEFEND_VILLAGE, true);
+      this.irongolem.setAttackTarget(this.villageAgressorTarget);
       super.startExecuting();
    }
 }

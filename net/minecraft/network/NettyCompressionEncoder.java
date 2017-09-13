@@ -11,26 +11,26 @@ public class NettyCompressionEncoder extends MessageToByteEncoder {
    private int threshold;
 
    public NettyCompressionEncoder(int var1) {
-      this.threshold = var1;
+      this.threshold = thresholdIn;
       this.deflater = new Deflater();
    }
 
    protected void encode(ChannelHandlerContext var1, ByteBuf var2, ByteBuf var3) throws Exception {
-      int var4 = var2.readableBytes();
-      PacketBuffer var5 = new PacketBuffer(var3);
-      if (var4 < this.threshold) {
-         var5.writeVarInt(0);
-         var5.writeBytes(var2);
+      int i = p_encode_2_.readableBytes();
+      PacketBuffer packetbuffer = new PacketBuffer(p_encode_3_);
+      if (i < this.threshold) {
+         packetbuffer.writeVarInt(0);
+         packetbuffer.writeBytes(p_encode_2_);
       } else {
-         byte[] var6 = new byte[var4];
-         var2.readBytes(var6);
-         var5.writeVarInt(var6.length);
-         this.deflater.setInput(var6, 0, var4);
+         byte[] abyte = new byte[i];
+         p_encode_2_.readBytes(abyte);
+         packetbuffer.writeVarInt(abyte.length);
+         this.deflater.setInput(abyte, 0, i);
          this.deflater.finish();
 
          while(!this.deflater.finished()) {
-            int var7 = this.deflater.deflate(this.buffer);
-            var5.writeBytes(this.buffer, 0, var7);
+            int j = this.deflater.deflate(this.buffer);
+            packetbuffer.writeBytes(this.buffer, 0, j);
          }
 
          this.deflater.reset();
@@ -39,11 +39,6 @@ public class NettyCompressionEncoder extends MessageToByteEncoder {
    }
 
    public void setCompressionThreshold(int var1) {
-      this.threshold = var1;
-   }
-
-   // $FF: synthetic method
-   protected void encode(ChannelHandlerContext var1, Object var2, ByteBuf var3) throws Exception {
-      this.encode(var1, (ByteBuf)var2, var3);
+      this.threshold = thresholdIn;
    }
 }

@@ -16,7 +16,7 @@ public class GuiWorldEdit extends GuiScreen {
    private GuiTextField nameEdit;
    private final String worldId;
 
-   public GuiWorldEdit(GuiScreen p_i46593_1_, String p_i46593_2_) {
+   public GuiWorldEdit(GuiScreen var1, String var2) {
       this.lastScreen = p_i46593_1_;
       this.worldId = p_i46593_2_;
    }
@@ -45,7 +45,7 @@ public class GuiWorldEdit extends GuiScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 1) {
             this.mc.displayGuiScreen(this.lastScreen);
@@ -65,7 +65,7 @@ public class GuiWorldEdit extends GuiScreen {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       this.nameEdit.textboxKeyTyped(typedChar, keyCode);
       ((GuiButton)this.buttonList.get(2)).enabled = !this.nameEdit.getText().trim().isEmpty();
       if (keyCode == 28 || keyCode == 156) {
@@ -74,12 +74,12 @@ public class GuiWorldEdit extends GuiScreen {
 
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       this.nameEdit.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, I18n.format("selectWorld.edit.title"), this.width / 2, 20, 16777215);
       this.drawString(this.fontRendererObj, I18n.format("selectWorld.enterName"), this.width / 2 - 100, 47, 10526880);

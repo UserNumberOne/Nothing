@@ -5,53 +5,43 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.craftbukkit.libs.joptsimple.OptionSet;
 
+@SideOnly(Side.SERVER)
 public class PropertyManager {
    private static final Logger LOGGER = LogManager.getLogger();
-   public final Properties serverProperties;
+   private final Properties serverProperties = new Properties();
    private final File serverPropertiesFile;
-   private OptionSet options;
 
-   public PropertyManager(File file) {
-      this.serverProperties = new Properties();
-      this.options = null;
-      this.serverPropertiesFile = file;
-      if (file.exists()) {
+   public PropertyManager(File var1) {
+      this.serverPropertiesFile = propertiesFile;
+      if (propertiesFile.exists()) {
          FileInputStream fileinputstream = null;
 
          try {
-            fileinputstream = new FileInputStream(file);
+            fileinputstream = new FileInputStream(propertiesFile);
             this.serverProperties.load(fileinputstream);
-         } catch (Exception var11) {
-            LOGGER.warn("Failed to load {}", new Object[]{file, var11});
+         } catch (Exception var12) {
+            LOGGER.warn("Failed to load {}", new Object[]{propertiesFile, var12});
             this.generateNewProperties();
          } finally {
             if (fileinputstream != null) {
                try {
                   fileinputstream.close();
-               } catch (IOException var10) {
+               } catch (IOException var11) {
                   ;
                }
             }
 
          }
       } else {
-         LOGGER.warn("{} does not exist", new Object[]{file});
+         LOGGER.warn("{} does not exist", new Object[]{propertiesFile});
          this.generateNewProperties();
       }
 
-   }
-
-   public PropertyManager(OptionSet options) {
-      this((File)options.valueOf("config"));
-      this.options = options;
-   }
-
-   private Object getOverride(String name, Object value) {
-      return this.options != null && this.options.has(name) ? this.options.valueOf(name) : value;
    }
 
    public void generateNewProperties() {
@@ -63,15 +53,11 @@ public class PropertyManager {
       FileOutputStream fileoutputstream = null;
 
       try {
-         if (!this.serverPropertiesFile.exists() || this.serverPropertiesFile.canWrite()) {
-            fileoutputstream = new FileOutputStream(this.serverPropertiesFile);
-            this.serverProperties.store(fileoutputstream, "Minecraft server properties");
-            return;
-         }
+         fileoutputstream = new FileOutputStream(this.serverPropertiesFile);
+         this.serverProperties.store(fileoutputstream, "Minecraft server properties");
       } catch (Exception var11) {
          LOGGER.warn("Failed to save {}", new Object[]{this.serverPropertiesFile, var11});
          this.generateNewProperties();
-         return;
       } finally {
          if (fileoutputstream != null) {
             try {
@@ -89,55 +75,55 @@ public class PropertyManager {
       return this.serverPropertiesFile;
    }
 
-   public String getStringProperty(String s, String s1) {
-      if (!this.serverProperties.containsKey(s)) {
-         this.serverProperties.setProperty(s, s1);
+   public String getStringProperty(String var1, String var2) {
+      if (!this.serverProperties.containsKey(key)) {
+         this.serverProperties.setProperty(key, defaultValue);
          this.saveProperties();
          this.saveProperties();
       }
 
-      return (String)this.getOverride(s, this.serverProperties.getProperty(s, s1));
+      return this.serverProperties.getProperty(key, defaultValue);
    }
 
-   public int getIntProperty(String s, int i) {
+   public int getIntProperty(String var1, int var2) {
       try {
-         return ((Integer)this.getOverride(s, Integer.valueOf(Integer.parseInt(this.getStringProperty(s, "" + i))))).intValue();
-      } catch (Exception var3) {
-         this.serverProperties.setProperty(s, "" + i);
-         this.saveProperties();
-         return ((Integer)this.getOverride(s, Integer.valueOf(i))).intValue();
-      }
-   }
-
-   public long getLongProperty(String s, long i) {
-      try {
-         return ((Long)this.getOverride(s, Long.valueOf(Long.parseLong(this.getStringProperty(s, "" + i))))).longValue();
+         return Integer.parseInt(this.getStringProperty(key, "" + defaultValue));
       } catch (Exception var4) {
-         this.serverProperties.setProperty(s, "" + i);
+         this.serverProperties.setProperty(key, "" + defaultValue);
          this.saveProperties();
-         return ((Long)this.getOverride(s, Long.valueOf(i))).longValue();
+         return defaultValue;
       }
    }
 
-   public boolean getBooleanProperty(String s, boolean flag) {
+   public long getLongProperty(String var1, long var2) {
       try {
-         return ((Boolean)this.getOverride(s, Boolean.valueOf(Boolean.parseBoolean(this.getStringProperty(s, "" + flag))))).booleanValue();
-      } catch (Exception var3) {
-         this.serverProperties.setProperty(s, "" + flag);
+         return Long.parseLong(this.getStringProperty(key, "" + defaultValue));
+      } catch (Exception var5) {
+         this.serverProperties.setProperty(key, "" + defaultValue);
          this.saveProperties();
-         return ((Boolean)this.getOverride(s, Boolean.valueOf(flag))).booleanValue();
+         return defaultValue;
       }
    }
 
-   public void setProperty(String s, Object object) {
-      this.serverProperties.setProperty(s, "" + object);
+   public boolean getBooleanProperty(String var1, boolean var2) {
+      try {
+         return Boolean.parseBoolean(this.getStringProperty(key, "" + defaultValue));
+      } catch (Exception var4) {
+         this.serverProperties.setProperty(key, "" + defaultValue);
+         this.saveProperties();
+         return defaultValue;
+      }
    }
 
-   public boolean hasProperty(String s) {
-      return this.serverProperties.containsKey(s);
+   public void setProperty(String var1, Object var2) {
+      this.serverProperties.setProperty(key, "" + value);
    }
 
-   public void removeProperty(String s) {
-      this.serverProperties.remove(s);
+   public boolean hasProperty(String var1) {
+      return this.serverProperties.containsKey(key);
+   }
+
+   public void removeProperty(String var1) {
+      this.serverProperties.remove(key);
    }
 }

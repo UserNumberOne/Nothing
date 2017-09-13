@@ -3,6 +3,8 @@ package net.minecraft.entity.ai.attributes;
 import java.util.Collection;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public interface IAttributeInstance {
    IAttribute getAttribute();
@@ -25,6 +27,9 @@ public interface IAttributeInstance {
    void removeModifier(AttributeModifier var1);
 
    void removeModifier(UUID var1);
+
+   @SideOnly(Side.CLIENT)
+   void removeAllModifiers();
 
    double getAttributeValue();
 }

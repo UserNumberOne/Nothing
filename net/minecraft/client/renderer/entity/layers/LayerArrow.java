@@ -17,11 +17,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LayerArrow implements LayerRenderer {
    private final RenderLivingBase renderer;
 
-   public LayerArrow(RenderLivingBase rendererIn) {
+   public LayerArrow(RenderLivingBase var1) {
       this.renderer = rendererIn;
    }
 
-   public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityLivingBase var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       int i = entitylivingbaseIn.getArrowCountInEntity();
       if (i > 0) {
          Entity entity = new EntityTippedArrow(entitylivingbaseIn.world, entitylivingbaseIn.posX, entitylivingbaseIn.posY, entitylivingbaseIn.posZ);

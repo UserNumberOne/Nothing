@@ -13,7 +13,7 @@ public class Sound implements ISoundEventAccessor {
    private final Sound.Type type;
    private final boolean streaming;
 
-   public Sound(String nameIn, float volumeIn, float pitchIn, int weightIn, Sound.Type typeIn, boolean p_i46526_6_) {
+   public Sound(String var1, float var2, float var3, int var4, Sound.Type var5, boolean var6) {
       this.name = new ResourceLocation(nameIn);
       this.volume = volumeIn;
       this.pitch = pitchIn;
@@ -61,11 +61,11 @@ public class Sound implements ISoundEventAccessor {
 
       private final String name;
 
-      private Type(String nameIn) {
+      private Type(String var3) {
          this.name = nameIn;
       }
 
-      public static Sound.Type getByName(String nameIn) {
+      public static Sound.Type getByName(String var0) {
          for(Sound.Type sound$type : values()) {
             if (sound$type.name.equals(nameIn)) {
                return sound$type;

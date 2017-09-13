@@ -16,13 +16,13 @@ public class RenderSnowball extends Render {
    protected final Item item;
    private final RenderItem itemRenderer;
 
-   public RenderSnowball(RenderManager renderManagerIn, Item itemIn, RenderItem itemRendererIn) {
+   public RenderSnowball(RenderManager var1, Item var2, RenderItem var3) {
       super(renderManagerIn);
       this.item = itemIn;
       this.itemRenderer = itemRendererIn;
    }
 
-   public void doRender(Entity entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(Entity var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       GlStateManager.translate((float)x, (float)y, (float)z);
       GlStateManager.enableRescaleNormal();
@@ -46,11 +46,11 @@ public class RenderSnowball extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   public ItemStack getStackToRender(Entity entityIn) {
+   public ItemStack getStackToRender(Entity var1) {
       return new ItemStack(this.item);
    }
 
-   protected ResourceLocation getEntityTexture(Entity entity) {
+   protected ResourceLocation getEntityTexture(Entity var1) {
       return TextureMap.LOCATION_BLOCKS_TEXTURE;
    }
 }

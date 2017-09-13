@@ -23,7 +23,7 @@ public class GuiScreenDemo extends GuiScreen {
       this.buttonList.add(new GuiButton(2, this.width / 2 + 2, this.height / 2 + 62 + -16, 114, 20, I18n.format("demo.help.later")));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       switch(button.id) {
       case 1:
          button.enabled = false;
@@ -56,7 +56,7 @@ public class GuiScreenDemo extends GuiScreen {
       this.drawTexturedModalRect(i, j, 0, 0, 248, 166);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       int i = (this.width - 248) / 2 + 10;
       int j = (this.height - 166) / 2 + 8;

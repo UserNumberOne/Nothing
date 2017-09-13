@@ -1,6 +1,6 @@
 package net.minecraft.nbt;
 
-abstract class NBTPrimitive extends NBTBase {
+public abstract class NBTPrimitive extends NBTBase {
    public abstract long getLong();
 
    public abstract int getInt();

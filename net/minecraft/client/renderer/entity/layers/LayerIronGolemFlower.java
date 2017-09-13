@@ -16,11 +16,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LayerIronGolemFlower implements LayerRenderer {
    private final RenderIronGolem ironGolemRenderer;
 
-   public LayerIronGolemFlower(RenderIronGolem ironGolemRendererIn) {
+   public LayerIronGolemFlower(RenderIronGolem var1) {
       this.ironGolemRenderer = ironGolemRendererIn;
    }
 
-   public void doRenderLayer(EntityIronGolem entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityIronGolem var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (entitylivingbaseIn.getHoldRoseTick() != 0) {
          BlockRendererDispatcher blockrendererdispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
          GlStateManager.enableRescaleNormal();

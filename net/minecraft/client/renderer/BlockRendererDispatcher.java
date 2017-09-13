@@ -26,7 +26,7 @@ public class BlockRendererDispatcher implements IResourceManagerReloadListener {
    private final ChestRenderer chestRenderer = new ChestRenderer();
    private final BlockFluidRenderer fluidRenderer;
 
-   public BlockRendererDispatcher(BlockModelShapes p_i46577_1_, BlockColors p_i46577_2_) {
+   public BlockRendererDispatcher(BlockModelShapes var1, BlockColors var2) {
       this.blockModelShapes = p_i46577_1_;
       this.blockModelRenderer = new ForgeBlockModelRenderer(p_i46577_2_);
       this.fluidRenderer = new BlockFluidRenderer(p_i46577_2_);
@@ -36,7 +36,7 @@ public class BlockRendererDispatcher implements IResourceManagerReloadListener {
       return this.blockModelShapes;
    }
 
-   public void renderBlockDamage(IBlockState state, BlockPos pos, TextureAtlasSprite texture, IBlockAccess blockAccess) {
+   public void renderBlockDamage(IBlockState var1, BlockPos var2, TextureAtlasSprite var3, IBlockAccess var4) {
       if (state.getRenderType() == EnumBlockRenderType.MODEL) {
          state = state.getActualState(blockAccess, pos);
          IBakedModel ibakedmodel = this.blockModelShapes.getModelForState(state);
@@ -46,7 +46,7 @@ public class BlockRendererDispatcher implements IResourceManagerReloadListener {
 
    }
 
-   public boolean renderBlock(IBlockState state, BlockPos pos, IBlockAccess blockAccess, VertexBuffer worldRendererIn) {
+   public boolean renderBlock(IBlockState var1, BlockPos var2, IBlockAccess var3, VertexBuffer var4) {
       try {
          EnumBlockRenderType enumblockrendertype = state.getRenderType();
          if (enumblockrendertype == EnumBlockRenderType.INVISIBLE) {
@@ -85,11 +85,11 @@ public class BlockRendererDispatcher implements IResourceManagerReloadListener {
       return this.blockModelRenderer;
    }
 
-   public IBakedModel getModelForState(IBlockState state) {
+   public IBakedModel getModelForState(IBlockState var1) {
       return this.blockModelShapes.getModelForState(state);
    }
 
-   public void renderBlockBrightness(IBlockState state, float brightness) {
+   public void renderBlockBrightness(IBlockState var1, float var2) {
       EnumBlockRenderType enumblockrendertype = state.getRenderType();
       if (enumblockrendertype != EnumBlockRenderType.INVISIBLE) {
          switch(enumblockrendertype) {
@@ -105,7 +105,7 @@ public class BlockRendererDispatcher implements IResourceManagerReloadListener {
 
    }
 
-   public boolean isEntityBlockAnimated(Block blockIn) {
+   public boolean isEntityBlockAnimated(Block var1) {
       if (blockIn == null) {
          return false;
       } else {
@@ -114,7 +114,7 @@ public class BlockRendererDispatcher implements IResourceManagerReloadListener {
       }
    }
 
-   public void onResourceManagerReload(IResourceManager resourceManager) {
+   public void onResourceManagerReload(IResourceManager var1) {
       this.fluidRenderer.initAtlasSprites();
    }
 }

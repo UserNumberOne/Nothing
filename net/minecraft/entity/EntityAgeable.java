@@ -12,7 +12,6 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public abstract class EntityAgeable extends EntityCreature {
    private static final DataParameter BABY = EntityDataManager.createKey(EntityAgeable.class, DataSerializers.BOOLEAN);
@@ -21,33 +20,29 @@ public abstract class EntityAgeable extends EntityCreature {
    protected int forcedAgeTimer;
    private float ageWidth = -1.0F;
    private float ageHeight;
-   public boolean ageLocked;
 
-   public EntityAgeable(World world) {
-      super(world);
+   public EntityAgeable(World var1) {
+      super(worldIn);
    }
 
    public abstract EntityAgeable createChild(EntityAgeable var1);
 
-   public boolean processInteract(EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack) {
-      if (itemstack != null && itemstack.getItem() == Items.SPAWN_EGG) {
+   public boolean processInteract(EntityPlayer var1, EnumHand var2, @Nullable ItemStack var3) {
+      if (stack != null && stack.getItem() == Items.SPAWN_EGG) {
          if (!this.world.isRemote) {
-            Class oclass = EntityList.getClassFromID(EntityList.getIDFromString(ItemMonsterPlacer.getEntityIdFromItem(itemstack)));
+            Class oclass = (Class)EntityList.NAME_TO_CLASS.get(ItemMonsterPlacer.getEntityIdFromItem(stack));
             if (oclass != null && this.getClass() == oclass) {
                EntityAgeable entityageable = this.createChild(this);
                if (entityageable != null) {
                   entityageable.setGrowingAge(-24000);
                   entityageable.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
-                  this.world.addEntity(entityageable, SpawnReason.SPAWNER_EGG);
-                  if (itemstack.hasDisplayName()) {
-                     entityageable.setCustomNameTag(itemstack.getDisplayName());
+                  this.world.spawnEntity(entityageable);
+                  if (stack.hasDisplayName()) {
+                     entityageable.setCustomNameTag(stack.getDisplayName());
                   }
 
-                  if (!entityhuman.capabilities.isCreativeMode) {
-                     --itemstack.stackSize;
-                     if (itemstack.stackSize == 0) {
-                        entityhuman.inventory.setInventorySlotContents(entityhuman.inventory.currentItem, (ItemStack)null);
-                     }
+                  if (!player.capabilities.isCreativeMode) {
+                     --stack.stackSize;
                   }
                }
             }
@@ -68,21 +63,21 @@ public abstract class EntityAgeable extends EntityCreature {
       return this.world.isRemote ? (((Boolean)this.dataManager.get(BABY)).booleanValue() ? -1 : 1) : this.growingAge;
    }
 
-   public void ageUp(int i, boolean flag) {
-      int j = this.getGrowingAge();
-      int k = j;
-      j = j + i * 20;
-      if (j > 0) {
-         j = 0;
-         if (k < 0) {
+   public void ageUp(int var1, boolean var2) {
+      int i = this.getGrowingAge();
+      int j = i;
+      i = i + p_175501_1_ * 20;
+      if (i > 0) {
+         i = 0;
+         if (j < 0) {
             this.onGrowingAdult();
          }
       }
 
-      int l = j - k;
-      this.setGrowingAge(j);
-      if (flag) {
-         this.forcedAge += l;
+      int k = i - j;
+      this.setGrowingAge(i);
+      if (p_175501_2_) {
+         this.forcedAge += k;
          if (this.forcedAgeTimer == 0) {
             this.forcedAgeTimer = 40;
          }
@@ -94,41 +89,47 @@ public abstract class EntityAgeable extends EntityCreature {
 
    }
 
-   public void addGrowth(int i) {
-      this.ageUp(i, false);
+   public void addGrowth(int var1) {
+      this.ageUp(growth, false);
    }
 
-   public void setGrowingAge(int i) {
-      this.dataManager.set(BABY, Boolean.valueOf(i < 0));
-      this.growingAge = i;
+   public void setGrowingAge(int var1) {
+      this.dataManager.set(BABY, Boolean.valueOf(age < 0));
+      this.growingAge = age;
       this.setScaleForAge(this.isChild());
    }
 
-   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-      super.writeEntityToNBT(nbttagcompound);
-      nbttagcompound.setInteger("Age", this.getGrowingAge());
-      nbttagcompound.setInteger("ForcedAge", this.forcedAge);
-      nbttagcompound.setBoolean("AgeLocked", this.ageLocked);
+   public void writeEntityToNBT(NBTTagCompound var1) {
+      super.writeEntityToNBT(compound);
+      compound.setInteger("Age", this.getGrowingAge());
+      compound.setInteger("ForcedAge", this.forcedAge);
    }
 
-   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-      super.readEntityFromNBT(nbttagcompound);
-      this.setGrowingAge(nbttagcompound.getInteger("Age"));
-      this.forcedAge = nbttagcompound.getInteger("ForcedAge");
-      this.ageLocked = nbttagcompound.getBoolean("AgeLocked");
+   public void readEntityFromNBT(NBTTagCompound var1) {
+      super.readEntityFromNBT(compound);
+      this.setGrowingAge(compound.getInteger("Age"));
+      this.forcedAge = compound.getInteger("ForcedAge");
    }
 
-   public void notifyDataManagerChange(DataParameter datawatcherobject) {
-      if (BABY.equals(datawatcherobject)) {
+   public void notifyDataManagerChange(DataParameter var1) {
+      if (BABY.equals(key)) {
          this.setScaleForAge(this.isChild());
       }
 
-      super.notifyDataManagerChange(datawatcherobject);
+      super.notifyDataManagerChange(key);
    }
 
    public void onLivingUpdate() {
       super.onLivingUpdate();
-      if (!this.world.isRemote && !this.ageLocked) {
+      if (this.world.isRemote) {
+         if (this.forcedAgeTimer > 0) {
+            if (this.forcedAgeTimer % 4 == 0) {
+               this.world.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, 0.0D, 0.0D, 0.0D);
+            }
+
+            --this.forcedAgeTimer;
+         }
+      } else {
          int i = this.getGrowingAge();
          if (i < 0) {
             ++i;
@@ -140,12 +141,6 @@ public abstract class EntityAgeable extends EntityCreature {
             --i;
             this.setGrowingAge(i);
          }
-      } else if (this.forcedAgeTimer > 0) {
-         if (this.forcedAgeTimer % 4 == 0) {
-            this.world.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, 0.0D, 0.0D, 0.0D);
-         }
-
-         --this.forcedAgeTimer;
       }
 
    }
@@ -157,21 +152,21 @@ public abstract class EntityAgeable extends EntityCreature {
       return this.getGrowingAge() < 0;
    }
 
-   public void setScaleForAge(boolean flag) {
-      this.setScale(flag ? 0.5F : 1.0F);
+   public void setScaleForAge(boolean var1) {
+      this.setScale(child ? 0.5F : 1.0F);
    }
 
-   public final void setSize(float f, float f1) {
+   protected final void setSize(float var1, float var2) {
       boolean flag = this.ageWidth > 0.0F;
-      this.ageWidth = f;
-      this.ageHeight = f1;
+      this.ageWidth = width;
+      this.ageHeight = height;
       if (!flag) {
          this.setScale(1.0F);
       }
 
    }
 
-   protected final void setScale(float f) {
-      super.setSize(this.ageWidth * f, this.ageHeight * f);
+   protected final void setScale(float var1) {
+      super.setSize(this.ageWidth * scale, this.ageHeight * scale);
    }
 }

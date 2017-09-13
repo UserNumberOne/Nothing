@@ -3,7 +3,6 @@ package net.minecraft.entity.item;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.SoundEvents;
@@ -14,10 +13,10 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import org.bukkit.craftbukkit.v1_10_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityXPOrb extends Entity {
    public int xpColor;
@@ -28,32 +27,46 @@ public class EntityXPOrb extends Entity {
    private EntityPlayer closestPlayer;
    private int xpTargetColor;
 
-   public EntityXPOrb(World world, double d0, double d1, double d2, int i) {
-      super(world);
+   public EntityXPOrb(World var1, double var2, double var4, double var6, int var8) {
+      super(worldIn);
       this.setSize(0.5F, 0.5F);
-      this.setPosition(d0, d1, d2);
+      this.setPosition(x, y, z);
       this.rotationYaw = (float)(Math.random() * 360.0D);
       this.motionX = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D) * 2.0F);
       this.motionY = (double)((float)(Math.random() * 0.2D) * 2.0F);
       this.motionZ = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D) * 2.0F);
-      this.xpValue = i;
+      this.xpValue = expValue;
    }
 
    protected boolean canTriggerWalking() {
       return false;
    }
 
-   public EntityXPOrb(World world) {
-      super(world);
+   public EntityXPOrb(World var1) {
+      super(worldIn);
       this.setSize(0.25F, 0.25F);
    }
 
    protected void entityInit() {
    }
 
+   @SideOnly(Side.CLIENT)
+   public int getBrightnessForRender(float var1) {
+      float f = 0.5F;
+      f = MathHelper.clamp(f, 0.0F, 1.0F);
+      int i = super.getBrightnessForRender(partialTicks);
+      int j = i & 255;
+      int k = i >> 16 & 255;
+      j = j + (int)(f * 15.0F * 16.0F);
+      if (j > 240) {
+         j = 240;
+      }
+
+      return j | k << 16;
+   }
+
    public void onUpdate() {
       super.onUpdate();
-      EntityPlayer prevTarget = this.closestPlayer;
       if (this.delayBeforeCanPickup > 0) {
          --this.delayBeforeCanPickup;
       }
@@ -73,6 +86,7 @@ public class EntityXPOrb extends Entity {
       }
 
       this.pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
+      double d0 = 8.0D;
       if (this.xpTargetColor < this.xpColor - 20 + this.getEntityId() % 100) {
          if (this.closestPlayer == null || this.closestPlayer.getDistanceSqToEntity(this) > 64.0D) {
             this.closestPlayer = this.world.getClosestPlayerToEntity(this, 8.0D);
@@ -86,26 +100,16 @@ public class EntityXPOrb extends Entity {
       }
 
       if (this.closestPlayer != null) {
-         boolean cancelled = false;
-         if (this.closestPlayer != prevTarget) {
-            EntityTargetLivingEntityEvent event = CraftEventFactory.callEntityTargetLivingEvent(this, this.closestPlayer, TargetReason.CLOSEST_PLAYER);
-            EntityLivingBase target = event.getTarget() == null ? null : ((CraftLivingEntity)event.getTarget()).getHandle();
-            this.closestPlayer = target instanceof EntityPlayer ? (EntityPlayer)target : null;
-            cancelled = event.isCancelled();
-         }
-
-         if (!cancelled && this.closestPlayer != null) {
-            double d1 = (this.closestPlayer.posX - this.posX) / 8.0D;
-            double d2 = (this.closestPlayer.posY + (double)this.closestPlayer.getEyeHeight() / 2.0D - this.posY) / 8.0D;
-            double d3 = (this.closestPlayer.posZ - this.posZ) / 8.0D;
-            double d4 = Math.sqrt(d1 * d1 + d2 * d2 + d3 * d3);
-            double d5 = 1.0D - d4;
-            if (d5 > 0.0D) {
-               d5 = d5 * d5;
-               this.motionX += d1 / d4 * d5 * 0.1D;
-               this.motionY += d2 / d4 * d5 * 0.1D;
-               this.motionZ += d3 / d4 * d5 * 0.1D;
-            }
+         double d1 = (this.closestPlayer.posX - this.posX) / 8.0D;
+         double d2 = (this.closestPlayer.posY + (double)this.closestPlayer.getEyeHeight() / 2.0D - this.posY) / 8.0D;
+         double d3 = (this.closestPlayer.posZ - this.posZ) / 8.0D;
+         double d4 = Math.sqrt(d1 * d1 + d2 * d2 + d3 * d3);
+         double d5 = 1.0D - d4;
+         if (d5 > 0.0D) {
+            d5 = d5 * d5;
+            this.motionX += d1 / d4 * d5 * 0.1D;
+            this.motionY += d2 / d4 * d5 * 0.1D;
+            this.motionZ += d3 / d4 * d5 * 0.1D;
          }
       }
 
@@ -134,16 +138,16 @@ public class EntityXPOrb extends Entity {
       return this.world.handleMaterialAcceleration(this.getEntityBoundingBox(), Material.WATER, this);
    }
 
-   protected void dealFireDamage(int i) {
-      this.attackEntityFrom(DamageSource.inFire, (float)i);
+   protected void dealFireDamage(int var1) {
+      this.attackEntityFrom(DamageSource.inFire, (float)amount);
    }
 
-   public boolean attackEntityFrom(DamageSource damagesource, float f) {
-      if (this.isEntityInvulnerable(damagesource)) {
+   public boolean attackEntityFrom(DamageSource var1, float var2) {
+      if (this.isEntityInvulnerable(source)) {
          return false;
       } else {
          this.setBeenAttacked();
-         this.xpOrbHealth = (int)((float)this.xpOrbHealth - f);
+         this.xpOrbHealth = (int)((float)this.xpOrbHealth - amount);
          if (this.xpOrbHealth <= 0) {
             this.setDead();
          }
@@ -152,24 +156,28 @@ public class EntityXPOrb extends Entity {
       }
    }
 
-   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-      nbttagcompound.setShort("Health", (short)this.xpOrbHealth);
-      nbttagcompound.setShort("Age", (short)this.xpOrbAge);
-      nbttagcompound.setShort("Value", (short)this.xpValue);
+   public void writeEntityToNBT(NBTTagCompound var1) {
+      compound.setShort("Health", (short)this.xpOrbHealth);
+      compound.setShort("Age", (short)this.xpOrbAge);
+      compound.setShort("Value", (short)this.xpValue);
    }
 
-   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-      this.xpOrbHealth = nbttagcompound.getShort("Health");
-      this.xpOrbAge = nbttagcompound.getShort("Age");
-      this.xpValue = nbttagcompound.getShort("Value");
+   public void readEntityFromNBT(NBTTagCompound var1) {
+      this.xpOrbHealth = compound.getShort("Health");
+      this.xpOrbAge = compound.getShort("Age");
+      this.xpValue = compound.getShort("Value");
    }
 
-   public void onCollideWithPlayer(EntityPlayer entityhuman) {
-      if (!this.world.isRemote && this.delayBeforeCanPickup == 0 && entityhuman.xpCooldown == 0) {
-         entityhuman.xpCooldown = 2;
-         this.world.playSound((EntityPlayer)null, entityhuman.posX, entityhuman.posY, entityhuman.posZ, SoundEvents.ENTITY_EXPERIENCE_ORB_TOUCH, SoundCategory.PLAYERS, 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
-         entityhuman.onItemPickup(this, 1);
-         ItemStack itemstack = EnchantmentHelper.getEnchantedItem(Enchantments.MENDING, entityhuman);
+   public void onCollideWithPlayer(EntityPlayer var1) {
+      if (!this.world.isRemote && this.delayBeforeCanPickup == 0 && entityIn.xpCooldown == 0) {
+         if (MinecraftForge.EVENT_BUS.post(new PlayerPickupXpEvent(entityIn, this))) {
+            return;
+         }
+
+         entityIn.xpCooldown = 2;
+         this.world.playSound((EntityPlayer)null, entityIn.posX, entityIn.posY, entityIn.posZ, SoundEvents.ENTITY_EXPERIENCE_ORB_TOUCH, SoundCategory.PLAYERS, 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
+         entityIn.onItemPickup(this, 1);
+         ItemStack itemstack = EnchantmentHelper.getEnchantedItem(Enchantments.MENDING, entityIn);
          if (itemstack != null && itemstack.isItemDamaged()) {
             int i = Math.min(this.xpToDurability(this.xpValue), itemstack.getItemDamage());
             this.xpValue -= this.durabilityToXp(i);
@@ -177,7 +185,7 @@ public class EntityXPOrb extends Entity {
          }
 
          if (this.xpValue > 0) {
-            entityhuman.addExperience(CraftEventFactory.callPlayerExpChangeEvent(entityhuman, this.xpValue).getAmount());
+            entityIn.addExperience(this.xpValue);
          }
 
          this.setDead();
@@ -185,54 +193,25 @@ public class EntityXPOrb extends Entity {
 
    }
 
-   private int durabilityToXp(int i) {
-      return i / 2;
+   private int durabilityToXp(int var1) {
+      return durability / 2;
    }
 
-   private int xpToDurability(int i) {
-      return i * 2;
+   private int xpToDurability(int var1) {
+      return xp * 2;
    }
 
    public int getXpValue() {
       return this.xpValue;
    }
 
-   public static int getXPSplit(int i) {
-      if (i > 162670129) {
-         return i - 100000;
-      } else if (i > 81335063) {
-         return 81335063;
-      } else if (i > 40667527) {
-         return 40667527;
-      } else if (i > 20333759) {
-         return 20333759;
-      } else if (i > 10166857) {
-         return 10166857;
-      } else if (i > 5083423) {
-         return 5083423;
-      } else if (i > 2541701) {
-         return 2541701;
-      } else if (i > 1270849) {
-         return 1270849;
-      } else if (i > 635413) {
-         return 635413;
-      } else if (i > 317701) {
-         return 317701;
-      } else if (i > 158849) {
-         return 158849;
-      } else if (i > 79423) {
-         return 79423;
-      } else if (i > 39709) {
-         return 39709;
-      } else if (i > 19853) {
-         return 19853;
-      } else if (i > 9923) {
-         return 9923;
-      } else if (i > 4957) {
-         return 4957;
-      } else {
-         return i >= 2477 ? 2477 : (i >= 1237 ? 1237 : (i >= 617 ? 617 : (i >= 307 ? 307 : (i >= 149 ? 149 : (i >= 73 ? 73 : (i >= 37 ? 37 : (i >= 17 ? 17 : (i >= 7 ? 7 : (i >= 3 ? 3 : 1)))))))));
-      }
+   @SideOnly(Side.CLIENT)
+   public int getTextureByXP() {
+      return this.xpValue >= 2477 ? 10 : (this.xpValue >= 1237 ? 9 : (this.xpValue >= 617 ? 8 : (this.xpValue >= 307 ? 7 : (this.xpValue >= 149 ? 6 : (this.xpValue >= 73 ? 5 : (this.xpValue >= 37 ? 4 : (this.xpValue >= 17 ? 3 : (this.xpValue >= 7 ? 2 : (this.xpValue >= 3 ? 1 : 0)))))))));
+   }
+
+   public static int getXPSplit(int var0) {
+      return expValue >= 2477 ? 2477 : (expValue >= 1237 ? 1237 : (expValue >= 617 ? 617 : (expValue >= 307 ? 307 : (expValue >= 149 ? 149 : (expValue >= 73 ? 73 : (expValue >= 37 ? 37 : (expValue >= 17 ? 17 : (expValue >= 7 ? 7 : (expValue >= 3 ? 3 : 1)))))))));
    }
 
    public boolean canBeAttackedWithItem() {

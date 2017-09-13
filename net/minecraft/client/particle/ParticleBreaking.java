@@ -12,11 +12,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ParticleBreaking extends Particle {
-   protected ParticleBreaking(World worldIn, double posXIn, double posYIn, double posZIn, Item itemIn) {
+   protected ParticleBreaking(World var1, double var2, double var4, double var6, Item var8) {
       this(worldIn, posXIn, posYIn, posZIn, itemIn, 0);
    }
 
-   protected ParticleBreaking(World worldIn, double posXIn, double posYIn, double posZIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, Item itemIn, int meta) {
+   protected ParticleBreaking(World var1, double var2, double var4, double var6, double var8, double var10, double var12, Item var14, int var15) {
       this(worldIn, posXIn, posYIn, posZIn, itemIn, meta);
       this.motionX *= 0.10000000149011612D;
       this.motionY *= 0.10000000149011612D;
@@ -26,7 +26,7 @@ public class ParticleBreaking extends Particle {
       this.motionZ += zSpeedIn;
    }
 
-   protected ParticleBreaking(World worldIn, double posXIn, double posYIn, double posZIn, Item itemIn, int meta) {
+   protected ParticleBreaking(World var1, double var2, double var4, double var6, Item var8, int var9) {
       super(worldIn, posXIn, posYIn, posZIn, 0.0D, 0.0D, 0.0D);
       this.setParticleTexture(Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getParticleIcon(itemIn, meta));
       this.particleRed = 1.0F;
@@ -40,7 +40,7 @@ public class ParticleBreaking extends Particle {
       return 1;
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = ((float)this.particleTextureIndexX + this.particleTextureJitterX / 4.0F) / 16.0F;
       float f1 = f + 0.015609375F;
       float f2 = ((float)this.particleTextureIndexY + this.particleTextureJitterY / 4.0F) / 16.0F;
@@ -67,7 +67,7 @@ public class ParticleBreaking extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          int i = p_178902_15_.length > 1 ? p_178902_15_[1] : 0;
          return new ParticleBreaking(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn, Item.getItemById(p_178902_15_[0]), i);
       }
@@ -75,14 +75,14 @@ public class ParticleBreaking extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class SlimeFactory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleBreaking(worldIn, xCoordIn, yCoordIn, zCoordIn, Items.SLIME_BALL);
       }
    }
 
    @SideOnly(Side.CLIENT)
    public static class SnowballFactory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleBreaking(worldIn, xCoordIn, yCoordIn, zCoordIn, Items.SNOWBALL);
       }
    }

@@ -28,11 +28,11 @@ public class ChunkRenderWorker implements Runnable {
    private final RegionRenderCacheBuilder regionRenderCacheBuilder;
    private boolean shouldRun;
 
-   public ChunkRenderWorker(ChunkRenderDispatcher p_i46201_1_) {
+   public ChunkRenderWorker(ChunkRenderDispatcher var1) {
       this(p_i46201_1_, (RegionRenderCacheBuilder)null);
    }
 
-   public ChunkRenderWorker(ChunkRenderDispatcher chunkRenderDispatcherIn, @Nullable RegionRenderCacheBuilder regionRenderCacheBuilderIn) {
+   public ChunkRenderWorker(ChunkRenderDispatcher var1, @Nullable RegionRenderCacheBuilder var2) {
       this.shouldRun = true;
       this.chunkRenderDispatcher = chunkRenderDispatcherIn;
       this.regionRenderCacheBuilder = regionRenderCacheBuilderIn;
@@ -54,7 +54,7 @@ public class ChunkRenderWorker implements Runnable {
 
    }
 
-   protected void processTask(final ChunkCompileTaskGenerator generator) throws InterruptedException {
+   protected void processTask(final ChunkCompileTaskGenerator var1) throws InterruptedException {
       generator.getLock().lock();
 
       try {
@@ -135,7 +135,7 @@ public class ChunkRenderWorker implements Runnable {
             }
          });
          Futures.addCallback(listenablefuture, new FutureCallback() {
-            public void onSuccess(@Nullable List p_onSuccess_1_) {
+            public void onSuccess(@Nullable List var1x) {
                ChunkRenderWorker.this.freeRenderBuilder(generator);
                generator.getLock().lock();
 
@@ -156,7 +156,7 @@ public class ChunkRenderWorker implements Runnable {
                generator.getRenderChunk().setCompiledChunk(var24);
             }
 
-            public void onFailure(Throwable p_onFailure_1_) {
+            public void onFailure(Throwable var1x) {
                ChunkRenderWorker.this.freeRenderBuilder(generator);
                if (!(p_onFailure_1_ instanceof CancellationException) && !(p_onFailure_1_ instanceof InterruptedException)) {
                   Minecraft.getMinecraft().crashed(CrashReport.makeCrashReport(p_onFailure_1_, "Rendering chunk"));
@@ -167,7 +167,7 @@ public class ChunkRenderWorker implements Runnable {
       }
    }
 
-   private boolean isChunkExisting(BlockPos p_188263_1_, World p_188263_2_) {
+   private boolean isChunkExisting(BlockPos var1, World var2) {
       return !p_188263_2_.getChunkFromChunkCoords(p_188263_1_.getX() >> 4, p_188263_1_.getZ() >> 4).isEmpty();
    }
 
@@ -175,7 +175,7 @@ public class ChunkRenderWorker implements Runnable {
       return this.regionRenderCacheBuilder != null ? this.regionRenderCacheBuilder : this.chunkRenderDispatcher.allocateRenderBuilder();
    }
 
-   private void freeRenderBuilder(ChunkCompileTaskGenerator taskGenerator) {
+   private void freeRenderBuilder(ChunkCompileTaskGenerator var1) {
       if (this.regionRenderCacheBuilder == null) {
          this.chunkRenderDispatcher.freeRenderBuilder(taskGenerator.getRegionRenderCacheBuilder());
       }

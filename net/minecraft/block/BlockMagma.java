@@ -15,9 +15,11 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockMagma extends Block {
    public BlockMagma() {
@@ -27,34 +29,37 @@ public class BlockMagma extends Block {
       this.setTickRandomly(true);
    }
 
-   public MapColor getMapColor(IBlockState iblockdata) {
+   public MapColor getMapColor(IBlockState var1) {
       return MapColor.NETHERRACK;
    }
 
-   public void onEntityWalk(World world, BlockPos blockposition, Entity entity) {
-      if (!entity.isImmuneToFire() && entity instanceof EntityLivingBase && !EnchantmentHelper.hasFrostWalkerEnchantment((EntityLivingBase)entity)) {
-         CraftEventFactory.blockDamage = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
-         entity.attackEntityFrom(DamageSource.hotFloor, 1.0F);
-         CraftEventFactory.blockDamage = null;
+   public void onEntityWalk(World var1, BlockPos var2, Entity var3) {
+      if (!entityIn.isImmuneToFire() && entityIn instanceof EntityLivingBase && !EnchantmentHelper.hasFrostWalkerEnchantment((EntityLivingBase)entityIn)) {
+         entityIn.attackEntityFrom(DamageSource.hotFloor, 1.0F);
       }
 
-      super.onEntityWalk(world, blockposition, entity);
+      super.onEntityWalk(worldIn, pos, entityIn);
    }
 
-   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
-      BlockPos blockposition1 = blockposition.up();
-      IBlockState iblockdata1 = world.getBlockState(blockposition1);
-      if (iblockdata1.getBlock() == Blocks.WATER || iblockdata1.getBlock() == Blocks.FLOWING_WATER) {
-         world.setBlockToAir(blockposition1);
-         world.playSound((EntityPlayer)null, blockposition, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
-         if (world instanceof WorldServer) {
-            ((WorldServer)world).spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)blockposition1.getX() + 0.5D, (double)blockposition1.getY() + 0.25D, (double)blockposition1.getZ() + 0.5D, 8, 0.5D, 0.25D, 0.5D, 0.0D);
+   @SideOnly(Side.CLIENT)
+   public int getPackedLightmapCoords(IBlockState var1, IBlockAccess var2, BlockPos var3) {
+      return 15728880;
+   }
+
+   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
+      BlockPos blockpos = pos.up();
+      IBlockState iblockstate = worldIn.getBlockState(blockpos);
+      if (iblockstate.getBlock() == Blocks.WATER || iblockstate.getBlock() == Blocks.FLOWING_WATER) {
+         worldIn.setBlockToAir(blockpos);
+         worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
+         if (worldIn instanceof WorldServer) {
+            ((WorldServer)worldIn).spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.25D, (double)blockpos.getZ() + 0.5D, 8, 0.5D, 0.25D, 0.5D, 0.0D);
          }
       }
 
    }
 
-   public boolean canEntitySpawn(IBlockState iblockdata, Entity entity) {
-      return entity.isImmuneToFire();
+   public boolean canEntitySpawn(IBlockState var1, Entity var2) {
+      return entityIn.isImmuneToFire();
    }
 }

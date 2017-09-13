@@ -12,7 +12,7 @@ public class GuiConfirmOpenLink extends GuiYesNo {
    private final String linkText;
    private boolean showSecurityWarning = true;
 
-   public GuiConfirmOpenLink(GuiYesNoCallback p_i1084_1_, String linkTextIn, int p_i1084_3_, boolean p_i1084_4_) {
+   public GuiConfirmOpenLink(GuiYesNoCallback var1, String var2, int var3, boolean var4) {
       super(p_i1084_1_, I18n.format(p_i1084_4_ ? "chat.link.confirmTrusted" : "chat.link.confirm"), linkTextIn, p_i1084_3_);
       this.confirmButtonText = I18n.format(p_i1084_4_ ? "chat.link.open" : "gui.yes");
       this.cancelButtonText = I18n.format(p_i1084_4_ ? "gui.cancel" : "gui.no");
@@ -29,7 +29,7 @@ public class GuiConfirmOpenLink extends GuiYesNo {
       this.buttonList.add(new GuiButton(1, this.width / 2 - 50 + 105, this.height / 6 + 96, 100, 20, this.cancelButtonText));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 2) {
          this.copyLinkToClipboard();
       }
@@ -41,7 +41,7 @@ public class GuiConfirmOpenLink extends GuiYesNo {
       setClipboardString(this.linkText);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       super.drawScreen(mouseX, mouseY, partialTicks);
       if (this.showSecurityWarning) {
          this.drawCenteredString(this.fontRendererObj, this.openLinkWarning, this.width / 2, 110, 16764108);

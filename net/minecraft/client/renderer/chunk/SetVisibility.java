@@ -15,7 +15,7 @@ public class SetVisibility {
       this.bitSet = new BitSet(COUNT_FACES * COUNT_FACES);
    }
 
-   public void setManyVisible(Set facing) {
+   public void setManyVisible(Set var1) {
       for(EnumFacing enumfacing : facing) {
          for(EnumFacing enumfacing1 : facing) {
             this.setVisible(enumfacing, enumfacing1, true);
@@ -24,16 +24,16 @@ public class SetVisibility {
 
    }
 
-   public void setVisible(EnumFacing facing, EnumFacing facing2, boolean p_178619_3_) {
+   public void setVisible(EnumFacing var1, EnumFacing var2, boolean var3) {
       this.bitSet.set(facing.ordinal() + facing2.ordinal() * COUNT_FACES, p_178619_3_);
       this.bitSet.set(facing2.ordinal() + facing.ordinal() * COUNT_FACES, p_178619_3_);
    }
 
-   public void setAllVisible(boolean visible) {
+   public void setAllVisible(boolean var1) {
       this.bitSet.set(0, this.bitSet.size(), visible);
    }
 
-   public boolean isVisible(EnumFacing facing, EnumFacing facing2) {
+   public boolean isVisible(EnumFacing var1, EnumFacing var2) {
       return this.bitSet.get(facing.ordinal() + facing2.ordinal() * COUNT_FACES);
    }
 

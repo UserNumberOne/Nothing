@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -16,6 +15,8 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ReportedException;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,103 +30,103 @@ public class EntityDataManager {
    private boolean empty = true;
    private boolean dirty;
 
-   public EntityDataManager(Entity entity) {
-      this.entity = entity;
+   public EntityDataManager(Entity var1) {
+      this.entity = entityIn;
    }
 
-   public static DataParameter createKey(Class oclass, DataSerializer datawatcherserializer) {
+   public static DataParameter createKey(Class var0, DataSerializer var1) {
       if (LOGGER.isDebugEnabled()) {
          try {
-            Class oclass1 = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
-            if (!oclass1.equals(oclass)) {
-               LOGGER.debug("defineId called for: {} from {}", new Object[]{oclass, oclass1, new RuntimeException()});
+            Class oclass = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
+            if (!oclass.equals(clazz)) {
+               LOGGER.debug("defineId called for: {} from {}", new Object[]{clazz, oclass, new RuntimeException()});
             }
          } catch (ClassNotFoundException var5) {
             ;
          }
       }
 
-      int i;
-      if (NEXT_ID_MAP.containsKey(oclass)) {
-         i = ((Integer)NEXT_ID_MAP.get(oclass)).intValue() + 1;
+      int j;
+      if (NEXT_ID_MAP.containsKey(clazz)) {
+         j = ((Integer)NEXT_ID_MAP.get(clazz)).intValue() + 1;
       } else {
-         int j = 0;
-         Class oclass2 = oclass;
+         int i = 0;
+         Class oclass1 = clazz;
 
-         while(oclass2 != Entity.class) {
-            oclass2 = oclass2.getSuperclass();
-            if (NEXT_ID_MAP.containsKey(oclass2)) {
-               j = ((Integer)NEXT_ID_MAP.get(oclass2)).intValue() + 1;
+         while(oclass1 != Entity.class) {
+            oclass1 = oclass1.getSuperclass();
+            if (NEXT_ID_MAP.containsKey(oclass1)) {
+               i = ((Integer)NEXT_ID_MAP.get(oclass1)).intValue() + 1;
                break;
             }
          }
 
-         i = j;
+         j = i;
       }
 
-      if (i > 254) {
-         throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
+      if (j > 254) {
+         throw new IllegalArgumentException("Data value id is too big with " + j + "! (Max is " + 254 + ")");
       } else {
-         NEXT_ID_MAP.put(oclass, Integer.valueOf(i));
-         return datawatcherserializer.createKey(i);
+         NEXT_ID_MAP.put(clazz, Integer.valueOf(j));
+         return serializer.createKey(j);
       }
    }
 
-   public void register(DataParameter datawatcherobject, Object t0) {
-      int i = datawatcherobject.getId();
+   public void register(DataParameter var1, Object var2) {
+      int i = key.getId();
       if (i > 254) {
          throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
       } else if (this.entries.containsKey(Integer.valueOf(i))) {
          throw new IllegalArgumentException("Duplicate id value for " + i + "!");
-      } else if (DataSerializers.getSerializerId(datawatcherobject.getSerializer()) < 0) {
-         throw new IllegalArgumentException("Unregistered serializer " + datawatcherobject.getSerializer() + " for " + i + "!");
+      } else if (DataSerializers.getSerializerId(key.getSerializer()) < 0) {
+         throw new IllegalArgumentException("Unregistered serializer " + key.getSerializer() + " for " + i + "!");
       } else {
-         this.setEntry(datawatcherobject, t0);
+         this.setEntry(key, value);
       }
    }
 
-   private void setEntry(DataParameter datawatcherobject, Object t0) {
-      EntityDataManager.DataEntry datawatcher_item = new EntityDataManager.DataEntry(datawatcherobject, t0);
+   private void setEntry(DataParameter var1, Object var2) {
+      EntityDataManager.DataEntry dataentry = new EntityDataManager.DataEntry(key, value);
       this.lock.writeLock().lock();
-      this.entries.put(Integer.valueOf(datawatcherobject.getId()), datawatcher_item);
+      this.entries.put(Integer.valueOf(key.getId()), dataentry);
       this.empty = false;
       this.lock.writeLock().unlock();
    }
 
-   private EntityDataManager.DataEntry getEntry(DataParameter datawatcherobject) {
+   private EntityDataManager.DataEntry getEntry(DataParameter var1) {
       this.lock.readLock().lock();
 
-      EntityDataManager.DataEntry datawatcher_item;
+      EntityDataManager.DataEntry dataentry;
       try {
-         datawatcher_item = (EntityDataManager.DataEntry)this.entries.get(Integer.valueOf(datawatcherobject.getId()));
+         dataentry = (EntityDataManager.DataEntry)this.entries.get(Integer.valueOf(key.getId()));
       } catch (Throwable var6) {
          CrashReport crashreport = CrashReport.makeCrashReport(var6, "Getting synched entity data");
-         CrashReportCategory crashreportsystemdetails = crashreport.makeCategory("Synched entity data");
-         crashreportsystemdetails.addCrashSection("Data ID", datawatcherobject);
+         CrashReportCategory crashreportcategory = crashreport.makeCategory("Synched entity data");
+         crashreportcategory.addCrashSection("Data ID", key);
          throw new ReportedException(crashreport);
       }
 
       this.lock.readLock().unlock();
-      return datawatcher_item;
+      return dataentry;
    }
 
-   public Object get(DataParameter datawatcherobject) {
-      return this.getEntry(datawatcherobject).getValue();
+   public Object get(DataParameter var1) {
+      return this.getEntry(key).getValue();
    }
 
-   public void set(DataParameter datawatcherobject, Object t0) {
-      EntityDataManager.DataEntry datawatcher_item = this.getEntry(datawatcherobject);
-      if (ObjectUtils.notEqual(t0, datawatcher_item.getValue())) {
-         datawatcher_item.setValue(t0);
-         this.entity.notifyDataManagerChange(datawatcherobject);
-         datawatcher_item.setDirty(true);
+   public void set(DataParameter var1, Object var2) {
+      EntityDataManager.DataEntry dataentry = this.getEntry(key);
+      if (ObjectUtils.notEqual(value, dataentry.getValue())) {
+         dataentry.setValue(value);
+         this.entity.notifyDataManagerChange(key);
+         dataentry.setDirty(true);
          this.dirty = true;
       }
 
    }
 
-   public void setDirty(DataParameter datawatcherobject) {
-      this.getEntry(datawatcherobject).dirty = true;
+   public void setDirty(DataParameter var1) {
+      this.getEntry(key).dirty = true;
       this.dirty = true;
    }
 
@@ -133,33 +134,33 @@ public class EntityDataManager {
       return this.dirty;
    }
 
-   public static void writeEntries(List list, PacketBuffer packetdataserializer) throws IOException {
-      if (list != null) {
+   public static void writeEntries(List var0, PacketBuffer var1) throws IOException {
+      if (entriesIn != null) {
          int i = 0;
 
-         for(int j = list.size(); i < j; ++i) {
-            EntityDataManager.DataEntry datawatcher_item = (EntityDataManager.DataEntry)list.get(i);
-            writeEntry(packetdataserializer, datawatcher_item);
+         for(int j = entriesIn.size(); i < j; ++i) {
+            EntityDataManager.DataEntry dataentry = (EntityDataManager.DataEntry)entriesIn.get(i);
+            writeEntry(buf, dataentry);
          }
       }
 
-      packetdataserializer.writeByte(255);
+      buf.writeByte(255);
    }
 
    @Nullable
    public List getDirty() {
-      ArrayList arraylist = null;
+      List list = null;
       if (this.dirty) {
          this.lock.readLock().lock();
 
-         for(EntityDataManager.DataEntry datawatcher_item : this.entries.values()) {
-            if (datawatcher_item.isDirty()) {
-               datawatcher_item.setDirty(false);
-               if (arraylist == null) {
-                  arraylist = Lists.newArrayList();
+         for(EntityDataManager.DataEntry dataentry : this.entries.values()) {
+            if (dataentry.isDirty()) {
+               dataentry.setDirty(false);
+               if (list == null) {
+                  list = Lists.newArrayList();
                }
 
-               arraylist.add(datawatcher_item);
+               list.add(dataentry);
             }
          }
 
@@ -167,69 +168,90 @@ public class EntityDataManager {
       }
 
       this.dirty = false;
-      return arraylist;
+      return list;
    }
 
-   public void writeEntries(PacketBuffer packetdataserializer) throws IOException {
+   public void writeEntries(PacketBuffer var1) throws IOException {
       this.lock.readLock().lock();
 
-      for(EntityDataManager.DataEntry datawatcher_item : this.entries.values()) {
-         writeEntry(packetdataserializer, datawatcher_item);
+      for(EntityDataManager.DataEntry dataentry : this.entries.values()) {
+         writeEntry(buf, dataentry);
       }
 
       this.lock.readLock().unlock();
-      packetdataserializer.writeByte(255);
+      buf.writeByte(255);
    }
 
    @Nullable
    public List getAll() {
-      ArrayList arraylist = null;
+      List list = null;
       this.lock.readLock().lock();
 
-      for(EntityDataManager.DataEntry datawatcher_item : this.entries.values()) {
-         if (arraylist == null) {
-            arraylist = Lists.newArrayList();
+      for(EntityDataManager.DataEntry dataentry : this.entries.values()) {
+         if (list == null) {
+            list = Lists.newArrayList();
          }
 
-         arraylist.add(datawatcher_item);
+         list.add(dataentry);
       }
 
       this.lock.readLock().unlock();
-      return arraylist;
+      return list;
    }
 
-   private static void writeEntry(PacketBuffer packetdataserializer, EntityDataManager.DataEntry datawatcher_item) throws IOException {
-      DataParameter datawatcherobject = datawatcher_item.getKey();
-      int i = DataSerializers.getSerializerId(datawatcherobject.getSerializer());
+   private static void writeEntry(PacketBuffer var0, EntityDataManager.DataEntry var1) throws IOException {
+      DataParameter dataparameter = entry.getKey();
+      int i = DataSerializers.getSerializerId(dataparameter.getSerializer());
       if (i < 0) {
-         throw new EncoderException("Unknown serializer type " + datawatcherobject.getSerializer());
+         throw new EncoderException("Unknown serializer type " + dataparameter.getSerializer());
       } else {
-         packetdataserializer.writeByte(datawatcherobject.getId());
-         packetdataserializer.writeVarInt(i);
-         datawatcherobject.getSerializer().write(packetdataserializer, datawatcher_item.getValue());
+         buf.writeByte(dataparameter.getId());
+         buf.writeVarInt(i);
+         dataparameter.getSerializer().write(buf, entry.getValue());
       }
    }
 
    @Nullable
-   public static List readEntries(PacketBuffer packetdataserializer) throws IOException {
-      ArrayList arraylist = null;
+   public static List readEntries(PacketBuffer var0) throws IOException {
+      List list = null;
 
-      short short0;
-      while((short0 = packetdataserializer.readUnsignedByte()) != 255) {
-         if (arraylist == null) {
-            arraylist = Lists.newArrayList();
+      int i;
+      while((i = buf.readUnsignedByte()) != 255) {
+         if (list == null) {
+            list = Lists.newArrayList();
          }
 
-         int i = packetdataserializer.readVarInt();
-         DataSerializer datawatcherserializer = DataSerializers.getSerializer(i);
-         if (datawatcherserializer == null) {
-            throw new DecoderException("Unknown serializer type " + i);
+         int j = buf.readVarInt();
+         DataSerializer dataserializer = DataSerializers.getSerializer(j);
+         if (dataserializer == null) {
+            throw new DecoderException("Unknown serializer type " + j);
          }
 
-         arraylist.add(new EntityDataManager.DataEntry(datawatcherserializer.createKey(short0), datawatcherserializer.read(packetdataserializer)));
+         list.add(new EntityDataManager.DataEntry(dataserializer.createKey(i), dataserializer.read(buf)));
       }
 
-      return arraylist;
+      return list;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void setEntryValues(List var1) {
+      this.lock.writeLock().lock();
+
+      for(EntityDataManager.DataEntry dataentry : entriesIn) {
+         EntityDataManager.DataEntry dataentry1 = (EntityDataManager.DataEntry)this.entries.get(Integer.valueOf(dataentry.getKey().getId()));
+         if (dataentry1 != null) {
+            this.setEntryValue(dataentry1, dataentry);
+            this.entity.notifyDataManagerChange(dataentry.getKey());
+         }
+      }
+
+      this.lock.writeLock().unlock();
+      this.dirty = true;
+   }
+
+   @SideOnly(Side.CLIENT)
+   protected void setEntryValue(EntityDataManager.DataEntry var1, EntityDataManager.DataEntry var2) {
+      target.setValue(source.getValue());
    }
 
    public boolean isEmpty() {
@@ -245,9 +267,9 @@ public class EntityDataManager {
       private Object value;
       private boolean dirty;
 
-      public DataEntry(DataParameter datawatcherobject, Object t0) {
-         this.key = datawatcherobject;
-         this.value = t0;
+      public DataEntry(DataParameter var1, Object var2) {
+         this.key = keyIn;
+         this.value = valueIn;
          this.dirty = true;
       }
 
@@ -255,8 +277,8 @@ public class EntityDataManager {
          return this.key;
       }
 
-      public void setValue(Object t0) {
-         this.value = t0;
+      public void setValue(Object var1) {
+         this.value = valueIn;
       }
 
       public Object getValue() {
@@ -267,8 +289,8 @@ public class EntityDataManager {
          return this.dirty;
       }
 
-      public void setDirty(boolean flag) {
-         this.dirty = flag;
+      public void setDirty(boolean var1) {
+         this.dirty = dirtyIn;
       }
    }
 }

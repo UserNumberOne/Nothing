@@ -5,19 +5,19 @@ import net.minecraft.util.text.ITextComponent;
 
 public abstract class BossInfo {
    private final UUID uniqueId;
-   public ITextComponent name;
+   protected ITextComponent name;
    protected float percent;
-   public BossInfo.Color color;
-   public BossInfo.Overlay overlay;
+   protected BossInfo.Color color;
+   protected BossInfo.Overlay overlay;
    protected boolean darkenSky;
    protected boolean playEndBossMusic;
    protected boolean createFog;
 
    public BossInfo(UUID var1, ITextComponent var2, BossInfo.Color var3, BossInfo.Overlay var4) {
-      this.uniqueId = var1;
-      this.name = var2;
-      this.color = var3;
-      this.overlay = var4;
+      this.uniqueId = uniqueIdIn;
+      this.name = nameIn;
+      this.color = colorIn;
+      this.overlay = overlayIn;
       this.percent = 1.0F;
    }
 
@@ -29,20 +29,32 @@ public abstract class BossInfo {
       return this.name;
    }
 
+   public void setName(ITextComponent var1) {
+      this.name = nameIn;
+   }
+
    public float getPercent() {
       return this.percent;
    }
 
    public void setPercent(float var1) {
-      this.percent = var1;
+      this.percent = percentIn;
    }
 
    public BossInfo.Color getColor() {
       return this.color;
    }
 
+   public void setColor(BossInfo.Color var1) {
+      this.color = colorIn;
+   }
+
    public BossInfo.Overlay getOverlay() {
       return this.overlay;
+   }
+
+   public void setOverlay(BossInfo.Overlay var1) {
+      this.overlay = overlayIn;
    }
 
    public boolean shouldDarkenSky() {
@@ -50,7 +62,7 @@ public abstract class BossInfo {
    }
 
    public BossInfo setDarkenSky(boolean var1) {
-      this.darkenSky = var1;
+      this.darkenSky = darkenSkyIn;
       return this;
    }
 
@@ -59,12 +71,12 @@ public abstract class BossInfo {
    }
 
    public BossInfo setPlayEndBossMusic(boolean var1) {
-      this.playEndBossMusic = var1;
+      this.playEndBossMusic = playEndBossMusicIn;
       return this;
    }
 
    public BossInfo setCreateFog(boolean var1) {
-      this.createFog = var1;
+      this.createFog = createFogIn;
       return this;
    }
 

@@ -52,7 +52,7 @@ public class ServerPinger {
    private static final Logger LOGGER = LogManager.getLogger();
    private final List pingDestinations = Collections.synchronizedList(Lists.newArrayList());
 
-   public void ping(final ServerData server) throws UnknownHostException {
+   public void ping(final ServerData var1) throws UnknownHostException {
       ServerAddress serveraddress = ServerAddress.fromString(server.serverIP);
       final NetworkManager networkmanager = NetworkManager.createNetworkManagerAndConnect(InetAddress.getByName(serveraddress.getIP()), serveraddress.getPort(), false);
       this.pingDestinations.add(networkmanager);
@@ -64,7 +64,7 @@ public class ServerPinger {
          private boolean receivedStatus;
          private long pingSentAt;
 
-         public void handleServerInfo(SPacketServerInfo packetIn) {
+         public void handleServerInfo(SPacketServerInfo var1x) {
             if (this.receivedStatus) {
                networkmanager.closeChannel(new TextComponentString("Received unrequested status"));
             } else {
@@ -130,14 +130,14 @@ public class ServerPinger {
 
          }
 
-         public void handlePong(SPacketPong packetIn) {
+         public void handlePong(SPacketPong var1x) {
             long i = this.pingSentAt;
             long j = Minecraft.getSystemTime();
             server.pingToServer = j - i;
             networkmanager.closeChannel(new TextComponentString("Finished"));
          }
 
-         public void onDisconnect(ITextComponent reason) {
+         public void onDisconnect(ITextComponent var1x) {
             if (!this.successful) {
                ServerPinger.LOGGER.error("Can't ping {}: {}", new Object[]{server.serverIP, reason.getUnformattedText()});
                server.serverMOTD = TextFormatting.DARK_RED + "Can't connect to server.";
@@ -157,10 +157,10 @@ public class ServerPinger {
 
    }
 
-   private void tryCompatibilityPing(final ServerData server) {
+   private void tryCompatibilityPing(final ServerData var1) {
       final ServerAddress serveraddress = ServerAddress.fromString(server.serverIP);
       ((Bootstrap)((Bootstrap)((Bootstrap)(new Bootstrap()).group((EventLoopGroup)NetworkManager.CLIENT_NIO_EVENTLOOP.getValue())).handler(new ChannelInitializer() {
-         protected void initChannel(Channel p_initChannel_1_) throws Exception {
+         protected void initChannel(Channel var1x) throws Exception {
             try {
                p_initChannel_1_.config().setOption(ChannelOption.TCP_NODELAY, Boolean.valueOf(true));
             } catch (ChannelException var3) {
@@ -168,7 +168,7 @@ public class ServerPinger {
             }
 
             p_initChannel_1_.pipeline().addLast(new ChannelHandler[]{new SimpleChannelInboundHandler() {
-               public void channelActive(ChannelHandlerContext p_channelActive_1_) throws Exception {
+               public void channelActive(ChannelHandlerContext var1x) throws Exception {
                   super.channelActive(p_channelActive_1_);
                   ByteBuf bytebuf = Unpooled.buffer();
 
@@ -200,7 +200,7 @@ public class ServerPinger {
 
                }
 
-               protected void channelRead0(ChannelHandlerContext p_channelRead0_1_, ByteBuf p_channelRead0_2_) throws Exception {
+               protected void channelRead0(ChannelHandlerContext var1x, ByteBuf var2x) throws Exception {
                   short short1 = p_channelRead0_2_.readUnsignedByte();
                   if (short1 == 255) {
                      String s = new String(p_channelRead0_2_.readBytes(p_channelRead0_2_.readShort() * 2).array(), Charsets.UTF_16BE);
@@ -221,7 +221,7 @@ public class ServerPinger {
                   p_channelRead0_1_.close();
                }
 
-               public void exceptionCaught(ChannelHandlerContext p_exceptionCaught_1_, Throwable p_exceptionCaught_2_) throws Exception {
+               public void exceptionCaught(ChannelHandlerContext var1x, Throwable var2x) throws Exception {
                   p_exceptionCaught_1_.close();
                }
             }});

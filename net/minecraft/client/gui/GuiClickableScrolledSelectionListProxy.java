@@ -11,7 +11,7 @@ import org.lwjgl.input.Mouse;
 public class GuiClickableScrolledSelectionListProxy extends GuiSlot {
    private final RealmsClickableScrolledSelectionList proxy;
 
-   public GuiClickableScrolledSelectionListProxy(RealmsClickableScrolledSelectionList selectionList, int p_i45526_2_, int p_i45526_3_, int p_i45526_4_, int p_i45526_5_, int p_i45526_6_) {
+   public GuiClickableScrolledSelectionListProxy(RealmsClickableScrolledSelectionList var1, int var2, int var3, int var4, int var5, int var6) {
       super(Minecraft.getMinecraft(), p_i45526_2_, p_i45526_3_, p_i45526_4_, p_i45526_5_, p_i45526_6_);
       this.proxy = selectionList;
    }
@@ -20,11 +20,11 @@ public class GuiClickableScrolledSelectionListProxy extends GuiSlot {
       return this.proxy.getItemCount();
    }
 
-   protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY) {
+   protected void elementClicked(int var1, boolean var2, int var3, int var4) {
       this.proxy.selectItem(slotIndex, isDoubleClick, mouseX, mouseY);
    }
 
-   protected boolean isSelected(int slotIndex) {
+   protected boolean isSelected(int var1) {
       return this.proxy.isSelectedItem(slotIndex);
    }
 
@@ -32,7 +32,7 @@ public class GuiClickableScrolledSelectionListProxy extends GuiSlot {
       this.proxy.renderBackground();
    }
 
-   protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn) {
+   protected void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6) {
       this.proxy.renderItem(entryID, insideLeft, yPos, insideSlotHeight, mouseXIn, mouseYIn);
    }
 
@@ -64,11 +64,11 @@ public class GuiClickableScrolledSelectionListProxy extends GuiSlot {
 
    }
 
-   public void renderSelected(int p_178043_1_, int p_178043_2_, int p_178043_3_, Tezzelator p_178043_4_) {
+   public void renderSelected(int var1, int var2, int var3, Tezzelator var4) {
       this.proxy.renderSelected(p_178043_1_, p_178043_2_, p_178043_3_, p_178043_4_);
    }
 
-   protected void drawSelectionBox(int insideLeft, int insideTop, int mouseXIn, int mouseYIn) {
+   protected void drawSelectionBox(int var1, int var2, int var3, int var4) {
       int i = this.getSize();
 
       for(int j = 0; j < i; ++j) {

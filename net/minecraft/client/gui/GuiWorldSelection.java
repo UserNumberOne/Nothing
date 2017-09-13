@@ -22,7 +22,7 @@ public class GuiWorldSelection extends GuiScreen implements GuiYesNoCallback {
    private GuiButton copyButton;
    private GuiListWorldSelection selectionList;
 
-   public GuiWorldSelection(GuiScreen screenIn) {
+   public GuiWorldSelection(GuiScreen var1) {
       this.prevScreen = screenIn;
    }
 
@@ -50,7 +50,7 @@ public class GuiWorldSelection extends GuiScreen implements GuiYesNoCallback {
       this.copyButton.enabled = false;
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          GuiListWorldSelectionEntry guilistworldselectionentry = this.selectionList.getSelectedWorld();
          if (button.id == 2) {
@@ -76,7 +76,7 @@ public class GuiWorldSelection extends GuiScreen implements GuiYesNoCallback {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.worldVersTooltip = null;
       this.selectionList.drawScreen(mouseX, mouseY, partialTicks);
       this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 20, 16777215);
@@ -87,21 +87,21 @@ public class GuiWorldSelection extends GuiScreen implements GuiYesNoCallback {
 
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       this.selectionList.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   protected void mouseReleased(int mouseX, int mouseY, int state) {
+   protected void mouseReleased(int var1, int var2, int var3) {
       super.mouseReleased(mouseX, mouseY, state);
       this.selectionList.mouseReleased(mouseX, mouseY, state);
    }
 
-   public void setVersionTooltip(String p_184861_1_) {
+   public void setVersionTooltip(String var1) {
       this.worldVersTooltip = p_184861_1_;
    }
 
-   public void selectWorld(@Nullable GuiListWorldSelectionEntry entry) {
+   public void selectWorld(@Nullable GuiListWorldSelectionEntry var1) {
       boolean flag = entry != null;
       this.selectButton.enabled = flag;
       this.deleteButton.enabled = flag;

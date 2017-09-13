@@ -5,6 +5,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketMoveVehicle implements Packet {
    private double x;
@@ -17,30 +19,55 @@ public class SPacketMoveVehicle implements Packet {
    }
 
    public SPacketMoveVehicle(Entity var1) {
-      this.x = var1.posX;
-      this.y = var1.posY;
-      this.z = var1.posZ;
-      this.yaw = var1.rotationYaw;
-      this.pitch = var1.rotationPitch;
+      this.x = entityIn.posX;
+      this.y = entityIn.posY;
+      this.z = entityIn.posZ;
+      this.yaw = entityIn.rotationYaw;
+      this.pitch = entityIn.rotationPitch;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.x = var1.readDouble();
-      this.y = var1.readDouble();
-      this.z = var1.readDouble();
-      this.yaw = var1.readFloat();
-      this.pitch = var1.readFloat();
+      this.x = buf.readDouble();
+      this.y = buf.readDouble();
+      this.z = buf.readDouble();
+      this.yaw = buf.readFloat();
+      this.pitch = buf.readFloat();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeDouble(this.x);
-      var1.writeDouble(this.y);
-      var1.writeDouble(this.z);
-      var1.writeFloat(this.yaw);
-      var1.writeFloat(this.pitch);
+      buf.writeDouble(this.x);
+      buf.writeDouble(this.y);
+      buf.writeDouble(this.z);
+      buf.writeFloat(this.yaw);
+      buf.writeFloat(this.pitch);
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      var1.handleMoveVehicle(this);
+      handler.handleMoveVehicle(this);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public double getX() {
+      return this.x;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public double getY() {
+      return this.y;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public double getZ() {
+      return this.z;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public float getYaw() {
+      return this.yaw;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public float getPitch() {
+      return this.pitch;
    }
 }

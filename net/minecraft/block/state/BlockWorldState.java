@@ -15,9 +15,9 @@ public class BlockWorldState {
    private boolean tileEntityInitialized;
 
    public BlockWorldState(World var1, BlockPos var2, boolean var3) {
-      this.world = var1;
-      this.pos = var2;
-      this.forceLoad = var3;
+      this.world = worldIn;
+      this.pos = posIn;
+      this.forceLoad = forceLoadIn;
    }
 
    public IBlockState getBlockState() {
@@ -45,12 +45,7 @@ public class BlockWorldState {
    public static Predicate hasState(final Predicate var0) {
       return new Predicate() {
          public boolean apply(@Nullable BlockWorldState var1) {
-            return var1 != null && var0.apply(var1.getBlockState());
-         }
-
-         // $FF: synthetic method
-         public boolean apply(Object var1) {
-            return this.apply((BlockWorldState)var1);
+            return p_apply_1_ != null && predicatesIn.apply(p_apply_1_.getBlockState());
          }
       };
    }

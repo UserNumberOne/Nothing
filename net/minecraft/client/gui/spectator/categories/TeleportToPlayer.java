@@ -23,7 +23,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class TeleportToPlayer implements ISpectatorMenuView, ISpectatorMenuObject {
    private static final Ordering PROFILE_ORDER = Ordering.from(new Comparator() {
-      public int compare(NetworkPlayerInfo p_compare_1_, NetworkPlayerInfo p_compare_2_) {
+      public int compare(NetworkPlayerInfo var1, NetworkPlayerInfo var2) {
          return ComparisonChain.start().compare(p_compare_1_.getGameProfile().getId(), p_compare_2_.getGameProfile().getId()).result();
       }
    });
@@ -33,7 +33,7 @@ public class TeleportToPlayer implements ISpectatorMenuView, ISpectatorMenuObjec
       this(PROFILE_ORDER.sortedCopy(Minecraft.getMinecraft().getConnection().getPlayerInfoMap()));
    }
 
-   public TeleportToPlayer(Collection p_i45493_1_) {
+   public TeleportToPlayer(Collection var1) {
       this.items = Lists.newArrayList();
 
       for(NetworkPlayerInfo networkplayerinfo : PROFILE_ORDER.sortedCopy(p_i45493_1_)) {
@@ -52,7 +52,7 @@ public class TeleportToPlayer implements ISpectatorMenuView, ISpectatorMenuObjec
       return new TextComponentString("Select a player to teleport to");
    }
 
-   public void selectItem(SpectatorMenu menu) {
+   public void selectItem(SpectatorMenu var1) {
       menu.selectCategory(this);
    }
 
@@ -60,7 +60,7 @@ public class TeleportToPlayer implements ISpectatorMenuView, ISpectatorMenuObjec
       return new TextComponentString("Teleport to player");
    }
 
-   public void renderIcon(float p_178663_1_, int alpha) {
+   public void renderIcon(float var1, int var2) {
       Minecraft.getMinecraft().getTextureManager().bindTexture(GuiSpectator.SPECTATOR_WIDGETS);
       Gui.drawModalRectWithCustomSizedTexture(0, 0, 0.0F, 0.0F, 16, 16, 256.0F, 256.0F);
    }

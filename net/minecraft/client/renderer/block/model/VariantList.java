@@ -15,7 +15,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class VariantList {
    private final List variantList;
 
-   public VariantList(List variantListIn) {
+   public VariantList(List var1) {
       this.variantList = variantListIn;
    }
 
@@ -23,7 +23,7 @@ public class VariantList {
       return this.variantList;
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else if (p_equals_1_ instanceof VariantList) {
@@ -40,7 +40,7 @@ public class VariantList {
 
    @SideOnly(Side.CLIENT)
    public static class Deserializer implements JsonDeserializer {
-      public VariantList deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public VariantList deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          List list = Lists.newArrayList();
          if (p_deserialize_1_.isJsonArray()) {
             JsonArray jsonarray = p_deserialize_1_.getAsJsonArray();

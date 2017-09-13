@@ -32,16 +32,16 @@ public class ModelBlockDefinition {
    private final Map mapVariants = Maps.newHashMap();
    private Multipart multipart;
 
-   public static ModelBlockDefinition parseFromReader(Reader reader) {
+   public static ModelBlockDefinition parseFromReader(Reader var0) {
       return BlockStateLoader.load(reader, GSON);
    }
 
-   public ModelBlockDefinition(Map variants, Multipart multipartIn) {
+   public ModelBlockDefinition(Map var1, Multipart var2) {
       this.multipart = multipartIn;
       this.mapVariants.putAll(variants);
    }
 
-   public ModelBlockDefinition(List p_i46222_1_) {
+   public ModelBlockDefinition(List var1) {
       ModelBlockDefinition modelblockdefinition = null;
 
       for(ModelBlockDefinition modelblockdefinition1 : p_i46222_1_) {
@@ -59,11 +59,11 @@ public class ModelBlockDefinition {
 
    }
 
-   public boolean hasVariant(String p_188000_1_) {
+   public boolean hasVariant(String var1) {
       return this.mapVariants.get(p_188000_1_) != null;
    }
 
-   public VariantList getVariant(String p_188004_1_) {
+   public VariantList getVariant(String var1) {
       VariantList variantlist = (VariantList)this.mapVariants.get(p_188004_1_);
       if (variantlist == null) {
          throw new ModelBlockDefinition.MissingVariantException();
@@ -72,7 +72,7 @@ public class ModelBlockDefinition {
       }
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else {
@@ -110,7 +110,7 @@ public class ModelBlockDefinition {
 
    @SideOnly(Side.CLIENT)
    public static class Deserializer implements JsonDeserializer {
-      public ModelBlockDefinition deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public ModelBlockDefinition deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          Map map = this.parseMapVariants(p_deserialize_3_, jsonobject);
          Multipart multipart = this.parseMultipart(p_deserialize_3_, jsonobject);
@@ -121,7 +121,7 @@ public class ModelBlockDefinition {
          }
       }
 
-      protected Map parseMapVariants(JsonDeserializationContext deserializationContext, JsonObject object) {
+      protected Map parseMapVariants(JsonDeserializationContext var1, JsonObject var2) {
          Map map = Maps.newHashMap();
          if (object.has("variants")) {
             JsonObject jsonobject = JsonUtils.getJsonObject(object, "variants");
@@ -135,7 +135,7 @@ public class ModelBlockDefinition {
       }
 
       @Nullable
-      protected Multipart parseMultipart(JsonDeserializationContext deserializationContext, JsonObject object) {
+      protected Multipart parseMultipart(JsonDeserializationContext var1, JsonObject var2) {
          if (!object.has("multipart")) {
             return null;
          } else {

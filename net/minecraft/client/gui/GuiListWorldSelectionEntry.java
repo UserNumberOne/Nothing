@@ -41,7 +41,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
    private DynamicTexture icon;
    private long lastClickTime;
 
-   public GuiListWorldSelectionEntry(GuiListWorldSelection listWorldSelIn, WorldSummary p_i46591_2_, ISaveFormat p_i46591_3_) {
+   public GuiListWorldSelectionEntry(GuiListWorldSelection var1, WorldSummary var2, ISaveFormat var3) {
       this.containingListSel = listWorldSelIn;
       this.worldSelScreen = listWorldSelIn.getGuiWorldSelection();
       this.worldSummary = p_i46591_2_;
@@ -55,7 +55,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
       this.loadServerIcon();
    }
 
-   public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
+   public void drawEntry(int var1, int var2, int var3, int var4, int var5, int var6, int var7, boolean var8) {
       String s = this.worldSummary.getDisplayName();
       String s1 = this.worldSummary.getFileName() + " (" + DATE_FORMAT.format(new Date(this.worldSummary.getLastTimePlayed())) + ")";
       String s2 = "";
@@ -121,7 +121,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
 
    }
 
-   public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
+   public boolean mousePressed(int var1, int var2, int var3, int var4, int var5, int var6) {
       this.containingListSel.selectWorld(slotIndex);
       if (relativeX <= 32 && relativeX < 32) {
          this.joinWorld();
@@ -138,7 +138,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
    public void joinWorld() {
       if (this.worldSummary.askToOpenWorld()) {
          this.client.displayGuiScreen(new GuiYesNo(new GuiYesNoCallback() {
-            public void confirmClicked(boolean result, int id) {
+            public void confirmClicked(boolean var1, int var2) {
                if (result) {
                   GuiListWorldSelectionEntry.this.loadWorld();
                } else {
@@ -155,7 +155,7 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
 
    public void deleteWorld() {
       this.client.displayGuiScreen(new GuiYesNo(new GuiYesNoCallback() {
-         public void confirmClicked(boolean result, int id) {
+         public void confirmClicked(boolean var1, int var2) {
             if (result) {
                GuiListWorldSelectionEntry.this.client.displayGuiScreen(new GuiScreenWorking());
                ISaveFormat isaveformat = GuiListWorldSelectionEntry.this.client.getSaveLoader();
@@ -219,9 +219,9 @@ public class GuiListWorldSelectionEntry implements GuiListExtended.IGuiListEntry
 
    }
 
-   public void mouseReleased(int slotIndex, int x, int y, int mouseEvent, int relativeX, int relativeY) {
+   public void mouseReleased(int var1, int var2, int var3, int var4, int var5, int var6) {
    }
 
-   public void setSelected(int p_178011_1_, int p_178011_2_, int p_178011_3_) {
+   public void setSelected(int var1, int var2, int var3) {
    }
 }

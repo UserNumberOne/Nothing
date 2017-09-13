@@ -15,19 +15,19 @@ public class RenderBiped extends RenderLiving {
    public ModelBiped modelBipedMain;
    protected float scale;
 
-   public RenderBiped(RenderManager renderManagerIn, ModelBiped modelBipedIn, float shadowSize) {
+   public RenderBiped(RenderManager var1, ModelBiped var2, float var3) {
       this(renderManagerIn, modelBipedIn, shadowSize, 1.0F);
       this.addLayer(new LayerHeldItem(this));
    }
 
-   public RenderBiped(RenderManager renderManagerIn, ModelBiped modelBipedIn, float shadowSize, float p_i46169_4_) {
+   public RenderBiped(RenderManager var1, ModelBiped var2, float var3, float var4) {
       super(renderManagerIn, modelBipedIn, shadowSize);
       this.modelBipedMain = modelBipedIn;
       this.scale = p_i46169_4_;
       this.addLayer(new LayerCustomHead(modelBipedIn.bipedHead));
    }
 
-   protected ResourceLocation getEntityTexture(EntityLiving entity) {
+   protected ResourceLocation getEntityTexture(EntityLiving var1) {
       return DEFAULT_RES_LOC;
    }
 

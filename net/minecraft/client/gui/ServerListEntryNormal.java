@@ -39,7 +39,7 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry {
    private DynamicTexture icon;
    private long lastClickTime;
 
-   protected ServerListEntryNormal(GuiMultiplayer p_i45048_1_, ServerData serverIn) {
+   protected ServerListEntryNormal(GuiMultiplayer var1, ServerData var2) {
       this.owner = p_i45048_1_;
       this.server = serverIn;
       this.mc = Minecraft.getMinecraft();
@@ -47,7 +47,7 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry {
       this.icon = (DynamicTexture)this.mc.getTextureManager().getTexture(this.serverIcon);
    }
 
-   public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
+   public void drawEntry(int var1, int var2, int var3, int var4, int var5, int var6, int var7, boolean var8) {
       if (!this.server.pinged) {
          this.server.pinged = true;
          this.server.pingToServer = -2L;
@@ -180,7 +180,7 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry {
 
    }
 
-   protected void drawTextureAt(int p_178012_1_, int p_178012_2_, ResourceLocation p_178012_3_) {
+   protected void drawTextureAt(int var1, int var2, ResourceLocation var3) {
       this.mc.getTextureManager().bindTexture(p_178012_3_);
       GlStateManager.enableBlend();
       Gui.drawModalRectWithCustomSizedTexture(p_178012_1_, p_178012_2_, 0.0F, 0.0F, 32, 32, 32.0F, 32.0F);
@@ -228,7 +228,7 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry {
 
    }
 
-   public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
+   public boolean mousePressed(int var1, int var2, int var3, int var4, int var5, int var6) {
       if (relativeX <= 32) {
          if (relativeX < 32 && relativeX > 16 && this.canJoin()) {
             this.owner.selectServer(slotIndex);
@@ -256,10 +256,10 @@ public class ServerListEntryNormal implements GuiListExtended.IGuiListEntry {
       return false;
    }
 
-   public void setSelected(int p_178011_1_, int p_178011_2_, int p_178011_3_) {
+   public void setSelected(int var1, int var2, int var3) {
    }
 
-   public void mouseReleased(int slotIndex, int x, int y, int mouseEvent, int relativeX, int relativeY) {
+   public void mouseReleased(int var1, int var2, int var3, int var4, int var5, int var6) {
    }
 
    public ServerData getServerData() {

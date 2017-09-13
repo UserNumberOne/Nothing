@@ -84,7 +84,7 @@ public class GuiIngame extends Gui {
    protected long lastSystemTime;
    protected long healthUpdateCounter;
 
-   public GuiIngame(Minecraft mcIn) {
+   public GuiIngame(Minecraft var1) {
       this.mc = mcIn;
       this.itemRenderer = mcIn.getRenderItem();
       this.overlayDebug = new GuiOverlayDebug(mcIn);
@@ -102,7 +102,7 @@ public class GuiIngame extends Gui {
       this.titleFadeOut = 20;
    }
 
-   public void renderGameOverlay(float partialTicks) {
+   public void renderGameOverlay(float var1) {
       ScaledResolution scaledresolution = new ScaledResolution(this.mc);
       int i = scaledresolution.getScaledWidth();
       int j = scaledresolution.getScaledHeight();
@@ -289,7 +289,7 @@ public class GuiIngame extends Gui {
       GlStateManager.enableAlpha();
    }
 
-   protected void renderAttackIndicator(float p_184045_1_, ScaledResolution p_184045_2_) {
+   protected void renderAttackIndicator(float var1, ScaledResolution var2) {
       GameSettings gamesettings = this.mc.gameSettings;
       if (gamesettings.thirdPersonView == 0) {
          if (this.mc.playerController.isSpectator() && this.mc.pointedEntity == null) {
@@ -335,7 +335,7 @@ public class GuiIngame extends Gui {
 
    }
 
-   protected void renderPotionEffects(ScaledResolution resolution) {
+   protected void renderPotionEffects(ScaledResolution var1) {
       Collection collection = this.mc.player.getActivePotionEffects();
       if (!collection.isEmpty()) {
          this.mc.getTextureManager().bindTexture(GuiContainer.INVENTORY_BACKGROUND);
@@ -385,7 +385,7 @@ public class GuiIngame extends Gui {
 
    }
 
-   protected void renderHotbar(ScaledResolution sr, float partialTicks) {
+   protected void renderHotbar(ScaledResolution var1, float var2) {
       if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          this.mc.getTextureManager().bindTexture(WIDGETS_TEX_PATH);
@@ -452,7 +452,7 @@ public class GuiIngame extends Gui {
 
    }
 
-   public void renderHorseJumpBar(ScaledResolution scaledRes, int x) {
+   public void renderHorseJumpBar(ScaledResolution var1, int var2) {
       this.mc.mcProfiler.startSection("jumpBar");
       this.mc.getTextureManager().bindTexture(Gui.ICONS);
       float f = this.mc.player.getHorseJumpPower();
@@ -467,7 +467,7 @@ public class GuiIngame extends Gui {
       this.mc.mcProfiler.endSection();
    }
 
-   public void renderExpBar(ScaledResolution scaledRes, int x) {
+   public void renderExpBar(ScaledResolution var1, int var2) {
       this.mc.mcProfiler.startSection("expBar");
       this.mc.getTextureManager().bindTexture(Gui.ICONS);
       int i = this.mc.player.xpBarCap();
@@ -497,7 +497,7 @@ public class GuiIngame extends Gui {
 
    }
 
-   public void renderSelectedItem(ScaledResolution scaledRes) {
+   public void renderSelectedItem(ScaledResolution var1) {
       this.mc.mcProfiler.startSection("selectedItemName");
       if (this.remainingHighlightTicks > 0 && this.highlightingItemStack != null) {
          String s = this.highlightingItemStack.getDisplayName();
@@ -529,7 +529,7 @@ public class GuiIngame extends Gui {
       this.mc.mcProfiler.endSection();
    }
 
-   public void renderDemo(ScaledResolution scaledRes) {
+   public void renderDemo(ScaledResolution var1) {
       this.mc.mcProfiler.startSection("demo");
       String s;
       if (this.mc.world.getTotalWorldTime() >= 120500L) {
@@ -543,11 +543,11 @@ public class GuiIngame extends Gui {
       this.mc.mcProfiler.endSection();
    }
 
-   protected void renderScoreboard(ScoreObjective objective, ScaledResolution scaledRes) {
+   protected void renderScoreboard(ScoreObjective var1, ScaledResolution var2) {
       Scoreboard scoreboard = objective.getScoreboard();
       Collection collection = scoreboard.getSortedScores(objective);
       List list = Lists.newArrayList(Iterables.filter(collection, new Predicate() {
-         public boolean apply(@Nullable Score p_apply_1_) {
+         public boolean apply(@Nullable Score var1) {
             return p_apply_1_.getPlayerName() != null && !p_apply_1_.getPlayerName().startsWith("#");
          }
       }));
@@ -591,7 +591,7 @@ public class GuiIngame extends Gui {
 
    }
 
-   protected void renderPlayerStats(ScaledResolution scaledRes) {
+   protected void renderPlayerStats(ScaledResolution var1) {
       if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
          EntityPlayer entityplayer = (EntityPlayer)this.mc.getRenderViewEntity();
          int i = MathHelper.ceil(entityplayer.getHealth());
@@ -761,7 +761,7 @@ public class GuiIngame extends Gui {
 
    }
 
-   protected void renderMountHealth(ScaledResolution p_184047_1_) {
+   protected void renderMountHealth(ScaledResolution var1) {
       if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
          EntityPlayer entityplayer = (EntityPlayer)this.mc.getRenderViewEntity();
          Entity entity = entityplayer.getRidingEntity();
@@ -805,7 +805,7 @@ public class GuiIngame extends Gui {
 
    }
 
-   protected void renderPumpkinOverlay(ScaledResolution scaledRes) {
+   protected void renderPumpkinOverlay(ScaledResolution var1) {
       GlStateManager.disableDepth();
       GlStateManager.depthMask(false);
       GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -826,7 +826,7 @@ public class GuiIngame extends Gui {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
-   protected void renderVignette(float lightLevel, ScaledResolution scaledRes) {
+   protected void renderVignette(float var1, ScaledResolution var2) {
       lightLevel = 1.0F - lightLevel;
       lightLevel = MathHelper.clamp(lightLevel, 0.0F, 1.0F);
       WorldBorder worldborder = this.mc.world.getWorldBorder();
@@ -864,7 +864,7 @@ public class GuiIngame extends Gui {
       GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
    }
 
-   protected void renderPortal(float timeInPortal, ScaledResolution scaledRes) {
+   protected void renderPortal(float var1, ScaledResolution var2) {
       if (timeInPortal < 1.0F) {
          timeInPortal = timeInPortal * timeInPortal;
          timeInPortal = timeInPortal * timeInPortal;
@@ -896,7 +896,7 @@ public class GuiIngame extends Gui {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
-   protected void renderHotbarItem(int p_184044_1_, int p_184044_2_, float p_184044_3_, EntityPlayer player, @Nullable ItemStack stack) {
+   protected void renderHotbarItem(int var1, int var2, float var3, EntityPlayer var4, @Nullable ItemStack var5) {
       if (stack != null) {
          float f = (float)stack.animationsToGo - p_184044_3_;
          if (f > 0.0F) {
@@ -948,17 +948,17 @@ public class GuiIngame extends Gui {
 
    }
 
-   public void setRecordPlayingMessage(String recordName) {
+   public void setRecordPlayingMessage(String var1) {
       this.setOverlayMessage(I18n.format("record.nowPlaying", recordName), true);
    }
 
-   public void setOverlayMessage(String message, boolean animateColor) {
+   public void setOverlayMessage(String var1, boolean var2) {
       this.overlayMessage = message;
       this.overlayMessageTime = 60;
       this.animateOverlayMessageColor = animateColor;
    }
 
-   public void displayTitle(String title, String subTitle, int timeFadeIn, int displayTime, int timeFadeOut) {
+   public void displayTitle(String var1, String var2, int var3, int var4, int var5) {
       if (title == null && subTitle == null && timeFadeIn < 0 && displayTime < 0 && timeFadeOut < 0) {
          this.displayedTitle = "";
          this.displayedSubTitle = "";
@@ -988,7 +988,7 @@ public class GuiIngame extends Gui {
 
    }
 
-   public void setOverlayMessage(ITextComponent component, boolean animateColor) {
+   public void setOverlayMessage(ITextComponent var1, boolean var2) {
       this.setOverlayMessage(component.getUnformattedText(), animateColor);
    }
 

@@ -13,13 +13,19 @@ public class ItemAxe extends ItemTool {
    private static final float[] ATTACK_SPEEDS = new float[]{-3.2F, -3.2F, -3.1F, -3.0F, -3.0F};
 
    protected ItemAxe(Item.ToolMaterial var1) {
-      super(var1, EFFECTIVE_ON);
-      this.damageVsEntity = ATTACK_DAMAGES[var1.ordinal()];
-      this.attackSpeed = ATTACK_SPEEDS[var1.ordinal()];
+      super(material, EFFECTIVE_ON);
+      this.damageVsEntity = ATTACK_DAMAGES[material.ordinal()];
+      this.attackSpeed = ATTACK_SPEEDS[material.ordinal()];
+   }
+
+   protected ItemAxe(Item.ToolMaterial var1, float var2, float var3) {
+      super(material, EFFECTIVE_ON);
+      this.damageVsEntity = damage;
+      this.attackSpeed = speed;
    }
 
    public float getStrVsBlock(ItemStack var1, IBlockState var2) {
-      Material var3 = var2.getMaterial();
-      return var3 != Material.WOOD && var3 != Material.PLANTS && var3 != Material.VINE ? super.getStrVsBlock(var1, var2) : this.efficiencyOnProperMaterial;
+      Material material = state.getMaterial();
+      return material != Material.WOOD && material != Material.PLANTS && material != Material.VINE ? super.getStrVsBlock(stack, state) : this.efficiencyOnProperMaterial;
    }
 }

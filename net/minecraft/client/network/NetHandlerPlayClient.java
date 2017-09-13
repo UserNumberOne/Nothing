@@ -256,7 +256,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
    private boolean hasStatistics;
    private final Random avRandomizer = new Random();
 
-   public NetHandlerPlayClient(Minecraft mcIn, GuiScreen p_i46300_2_, NetworkManager networkManagerIn, GameProfile profileIn) {
+   public NetHandlerPlayClient(Minecraft var1, GuiScreen var2, NetworkManager var3, GameProfile var4) {
       this.gameController = mcIn;
       this.guiScreenServer = p_i46300_2_;
       this.netManager = networkManagerIn;
@@ -267,7 +267,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       this.clientWorldController = null;
    }
 
-   public void handleJoinGame(SPacketJoinGame packetIn) {
+   public void handleJoinGame(SPacketJoinGame var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.playerController = new PlayerControllerMP(this.gameController, this);
       this.clientWorldController = new WorldClient(this, new WorldSettings(0L, packetIn.getGameType(), false, packetIn.isHardcoreMode(), packetIn.getWorldType()), NetworkDispatcher.get(this.getNetworkManager()).getOverrideDimension(packetIn), packetIn.getDifficulty(), this.gameController.mcProfiler);
@@ -283,7 +283,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       this.netManager.sendPacket(new CPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(ClientBrandRetriever.getClientModName())));
    }
 
-   public void handleSpawnObject(SPacketSpawnObject packetIn) {
+   public void handleSpawnObject(SPacketSpawnObject var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       double d0 = packetIn.getX();
       double d1 = packetIn.getY();
@@ -386,7 +386,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleSpawnExperienceOrb(SPacketSpawnExperienceOrb packetIn) {
+   public void handleSpawnExperienceOrb(SPacketSpawnExperienceOrb var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       double d0 = packetIn.getX();
       double d1 = packetIn.getY();
@@ -399,7 +399,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       this.clientWorldController.addEntityToWorld(packetIn.getEntityID(), entity);
    }
 
-   public void handleSpawnGlobalEntity(SPacketSpawnGlobalEntity packetIn) {
+   public void handleSpawnGlobalEntity(SPacketSpawnGlobalEntity var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       double d0 = packetIn.getX();
       double d1 = packetIn.getY();
@@ -419,14 +419,14 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleSpawnPainting(SPacketSpawnPainting packetIn) {
+   public void handleSpawnPainting(SPacketSpawnPainting var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       EntityPainting entitypainting = new EntityPainting(this.clientWorldController, packetIn.getPosition(), packetIn.getFacing(), packetIn.getTitle());
       entitypainting.setUniqueId(packetIn.getUniqueId());
       this.clientWorldController.addEntityToWorld(packetIn.getEntityID(), entitypainting);
    }
 
-   public void handleEntityVelocity(SPacketEntityVelocity packetIn) {
+   public void handleEntityVelocity(SPacketEntityVelocity var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityID());
       if (entity != null) {
@@ -435,7 +435,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleEntityMetadata(SPacketEntityMetadata packetIn) {
+   public void handleEntityMetadata(SPacketEntityMetadata var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
       if (entity != null && packetIn.getDataManagerEntries() != null) {
@@ -444,7 +444,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleSpawnPlayer(SPacketSpawnPlayer packetIn) {
+   public void handleSpawnPlayer(SPacketSpawnPlayer var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       double d0 = packetIn.getX();
       double d1 = packetIn.getY();
@@ -468,7 +468,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleEntityTeleport(SPacketEntityTeleport packetIn) {
+   public void handleEntityTeleport(SPacketEntityTeleport var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
       if (entity != null) {
@@ -491,7 +491,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleHeldItemChange(SPacketHeldItemChange packetIn) {
+   public void handleHeldItemChange(SPacketHeldItemChange var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       if (InventoryPlayer.isHotbar(packetIn.getHeldItemHotbarIndex())) {
          this.gameController.player.inventory.currentItem = packetIn.getHeldItemHotbarIndex();
@@ -499,7 +499,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleEntityMovement(SPacketEntity packetIn) {
+   public void handleEntityMovement(SPacketEntity var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = packetIn.getEntity(this.clientWorldController);
       if (entity != null) {
@@ -519,7 +519,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleEntityHeadLook(SPacketEntityHeadLook packetIn) {
+   public void handleEntityHeadLook(SPacketEntityHeadLook var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = packetIn.getEntity(this.clientWorldController);
       if (entity != null) {
@@ -529,7 +529,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleDestroyEntities(SPacketDestroyEntities packetIn) {
+   public void handleDestroyEntities(SPacketDestroyEntities var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
 
       for(int i = 0; i < packetIn.getEntityIDs().length; ++i) {
@@ -538,7 +538,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handlePlayerPosLook(SPacketPlayerPosLook packetIn) {
+   public void handlePlayerPosLook(SPacketPlayerPosLook var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       EntityPlayer entityplayer = this.gameController.player;
       double d0 = packetIn.getX();
@@ -585,7 +585,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleMultiBlockChange(SPacketMultiBlockChange packetIn) {
+   public void handleMultiBlockChange(SPacketMultiBlockChange var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
 
       for(SPacketMultiBlockChange.BlockUpdateData spacketmultiblockchange$blockupdatedata : packetIn.getChangedBlocks()) {
@@ -594,7 +594,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleChunkData(SPacketChunkData packetIn) {
+   public void handleChunkData(SPacketChunkData var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       if (packetIn.doChunkLoad()) {
          this.clientWorldController.doPreChunk(packetIn.getChunkX(), packetIn.getChunkZ(), true);
@@ -618,21 +618,21 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void processChunkUnload(SPacketUnloadChunk packetIn) {
+   public void processChunkUnload(SPacketUnloadChunk var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.clientWorldController.doPreChunk(packetIn.getX(), packetIn.getZ(), false);
    }
 
-   public void handleBlockChange(SPacketBlockChange packetIn) {
+   public void handleBlockChange(SPacketBlockChange var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.clientWorldController.invalidateRegionAndSetBlock(packetIn.getBlockPosition(), packetIn.getBlockState());
    }
 
-   public void handleDisconnect(SPacketDisconnect packetIn) {
+   public void handleDisconnect(SPacketDisconnect var1) {
       this.netManager.closeChannel(packetIn.getReason());
    }
 
-   public void onDisconnect(ITextComponent reason) {
+   public void onDisconnect(ITextComponent var1) {
       this.gameController.loadWorld((WorldClient)null);
       if (this.guiScreenServer != null) {
          if (this.guiScreenServer instanceof GuiScreenRealmsProxy) {
@@ -646,11 +646,11 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void sendPacket(Packet packetIn) {
+   public void sendPacket(Packet var1) {
       this.netManager.sendPacket(packetIn);
    }
 
-   public void handleCollectItem(SPacketCollectItem packetIn) {
+   public void handleCollectItem(SPacketCollectItem var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getCollectedItemEntityID());
       EntityLivingBase entitylivingbase = (EntityLivingBase)this.clientWorldController.getEntityByID(packetIn.getEntityID());
@@ -671,7 +671,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleChat(SPacketChat packetIn) {
+   public void handleChat(SPacketChat var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       ITextComponent message = ForgeEventFactory.onClientChat(packetIn.getType(), packetIn.getChatComponent());
       if (message != null) {
@@ -684,7 +684,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       }
    }
 
-   public void handleAnimation(SPacketAnimation packetIn) {
+   public void handleAnimation(SPacketAnimation var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityID());
       if (entity != null) {
@@ -708,12 +708,12 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleUseBed(SPacketUseBed packetIn) {
+   public void handleUseBed(SPacketUseBed var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       packetIn.getPlayer(this.clientWorldController).trySleep(packetIn.getBedPosition());
    }
 
-   public void handleSpawnMob(SPacketSpawnMob packetIn) {
+   public void handleSpawnMob(SPacketSpawnMob var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       double d0 = packetIn.getX();
       double d1 = packetIn.getY();
@@ -751,19 +751,19 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       }
    }
 
-   public void handleTimeUpdate(SPacketTimeUpdate packetIn) {
+   public void handleTimeUpdate(SPacketTimeUpdate var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.world.setTotalWorldTime(packetIn.getTotalWorldTime());
       this.gameController.world.setWorldTime(packetIn.getWorldTime());
    }
 
-   public void handleSpawnPosition(SPacketSpawnPosition packetIn) {
+   public void handleSpawnPosition(SPacketSpawnPosition var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.player.setSpawnPoint(packetIn.getSpawnPos(), true);
       this.gameController.world.getWorldInfo().setSpawn(packetIn.getSpawnPos());
    }
 
-   public void handleSetPassengers(SPacketSetPassengers packetIn) {
+   public void handleSetPassengers(SPacketSetPassengers var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
       if (entity == null) {
@@ -787,7 +787,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleEntityAttach(SPacketEntityAttach packetIn) {
+   public void handleEntityAttach(SPacketEntityAttach var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
       Entity entity1 = this.clientWorldController.getEntityByID(packetIn.getVehicleEntityId());
@@ -801,7 +801,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleEntityStatus(SPacketEntityStatus packetIn) {
+   public void handleEntityStatus(SPacketEntityStatus var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = packetIn.getEntity(this.clientWorldController);
       if (entity != null) {
@@ -814,19 +814,19 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleUpdateHealth(SPacketUpdateHealth packetIn) {
+   public void handleUpdateHealth(SPacketUpdateHealth var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.player.setPlayerSPHealth(packetIn.getHealth());
       this.gameController.player.getFoodStats().setFoodLevel(packetIn.getFoodLevel());
       this.gameController.player.getFoodStats().setFoodSaturationLevel(packetIn.getSaturationLevel());
    }
 
-   public void handleSetExperience(SPacketSetExperience packetIn) {
+   public void handleSetExperience(SPacketSetExperience var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.player.setXPStats(packetIn.getExperienceBar(), packetIn.getTotalExperience(), packetIn.getLevel());
    }
 
-   public void handleRespawn(SPacketRespawn packetIn) {
+   public void handleRespawn(SPacketRespawn var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       if (packetIn.getDimensionID() != this.gameController.player.dimension) {
          this.doneLoadingTerrain = false;
@@ -842,7 +842,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       this.gameController.playerController.setGameType(packetIn.getGameType());
    }
 
-   public void handleExplosion(SPacketExplosion packetIn) {
+   public void handleExplosion(SPacketExplosion var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Explosion explosion = new Explosion(this.gameController.world, (Entity)null, packetIn.getX(), packetIn.getY(), packetIn.getZ(), packetIn.getStrength(), packetIn.getAffectedBlockPositions());
       explosion.doExplosionB(true);
@@ -851,7 +851,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       this.gameController.player.motionZ += (double)packetIn.getMotionZ();
    }
 
-   public void handleOpenWindow(SPacketOpenWindow packetIn) {
+   public void handleOpenWindow(SPacketOpenWindow var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       EntityPlayerSP entityplayersp = this.gameController.player;
       if ("minecraft:container".equals(packetIn.getGuiId())) {
@@ -877,7 +877,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleSetSlot(SPacketSetSlot packetIn) {
+   public void handleSetSlot(SPacketSetSlot var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       EntityPlayer entityplayer = this.gameController.player;
       if (packetIn.getWindowId() == -1) {
@@ -905,7 +905,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleConfirmTransaction(SPacketConfirmTransaction packetIn) {
+   public void handleConfirmTransaction(SPacketConfirmTransaction var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Container container = null;
       EntityPlayer entityplayer = this.gameController.player;
@@ -921,7 +921,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleWindowItems(SPacketWindowItems packetIn) {
+   public void handleWindowItems(SPacketWindowItems var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       EntityPlayer entityplayer = this.gameController.player;
       if (packetIn.getWindowId() == 0) {
@@ -932,7 +932,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleSignEditorOpen(SPacketSignEditorOpen packetIn) {
+   public void handleSignEditorOpen(SPacketSignEditorOpen var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       TileEntity tileentity = this.clientWorldController.getTileEntity(packetIn.getSignPosition());
       if (!(tileentity instanceof TileEntitySign)) {
@@ -944,7 +944,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       this.gameController.player.openEditSign((TileEntitySign)tileentity);
    }
 
-   public void handleUpdateTileEntity(SPacketUpdateTileEntity packetIn) {
+   public void handleUpdateTileEntity(SPacketUpdateTileEntity var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       if (this.gameController.world.isBlockLoaded(packetIn.getPos())) {
          TileEntity tileentity = this.gameController.world.getTileEntity(packetIn.getPos());
@@ -968,7 +968,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleWindowProperty(SPacketWindowProperty packetIn) {
+   public void handleWindowProperty(SPacketWindowProperty var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       EntityPlayer entityplayer = this.gameController.player;
       if (entityplayer.openContainer != null && entityplayer.openContainer.windowId == packetIn.getWindowId()) {
@@ -977,7 +977,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleEntityEquipment(SPacketEntityEquipment packetIn) {
+   public void handleEntityEquipment(SPacketEntityEquipment var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityID());
       if (entity != null) {
@@ -986,22 +986,22 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleCloseWindow(SPacketCloseWindow packetIn) {
+   public void handleCloseWindow(SPacketCloseWindow var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.player.closeScreenAndDropStack();
    }
 
-   public void handleBlockAction(SPacketBlockAction packetIn) {
+   public void handleBlockAction(SPacketBlockAction var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.world.addBlockEvent(packetIn.getBlockPosition(), packetIn.getBlockType(), packetIn.getData1(), packetIn.getData2());
    }
 
-   public void handleBlockBreakAnim(SPacketBlockBreakAnim packetIn) {
+   public void handleBlockBreakAnim(SPacketBlockBreakAnim var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.world.sendBlockBreakProgress(packetIn.getBreakerId(), packetIn.getPosition(), packetIn.getProgress());
    }
 
-   public void handleChangeGameState(SPacketChangeGameState packetIn) {
+   public void handleChangeGameState(SPacketChangeGameState var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       EntityPlayer entityplayer = this.gameController.player;
       int i = packetIn.getGameState();
@@ -1050,14 +1050,14 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleMaps(SPacketMaps packetIn) {
+   public void handleMaps(SPacketMaps var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       MapData mapdata = ItemMap.loadMapData(packetIn.getMapId(), this.gameController.world);
       packetIn.setMapdataTo(mapdata);
       this.gameController.entityRenderer.getMapItemRenderer().updateMapTexture(mapdata);
    }
 
-   public void handleEffect(SPacketEffect packetIn) {
+   public void handleEffect(SPacketEffect var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       if (packetIn.isSoundServerwide()) {
          this.gameController.world.playBroadcastSound(packetIn.getSoundType(), packetIn.getSoundPos(), packetIn.getSoundData());
@@ -1067,7 +1067,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleStatistics(SPacketStatistics packetIn) {
+   public void handleStatistics(SPacketStatistics var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       boolean flag = false;
 
@@ -1101,7 +1101,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleEntityEffect(SPacketEntityEffect packetIn) {
+   public void handleEntityEffect(SPacketEntityEffect var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
       if (entity instanceof EntityLivingBase) {
@@ -1115,7 +1115,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleCombatEvent(SPacketCombatEvent packetIn) {
+   public void handleCombatEvent(SPacketCombatEvent var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       if (packetIn.eventType == SPacketCombatEvent.Event.ENTITY_DIED) {
          Entity entity = this.clientWorldController.getEntityByID(packetIn.playerId);
@@ -1126,13 +1126,13 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleServerDifficulty(SPacketServerDifficulty packetIn) {
+   public void handleServerDifficulty(SPacketServerDifficulty var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.world.getWorldInfo().setDifficulty(packetIn.getDifficulty());
       this.gameController.world.getWorldInfo().setDifficultyLocked(packetIn.isDifficultyLocked());
    }
 
-   public void handleCamera(SPacketCamera packetIn) {
+   public void handleCamera(SPacketCamera var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = packetIn.getEntity(this.clientWorldController);
       if (entity != null) {
@@ -1141,12 +1141,12 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleWorldBorder(SPacketWorldBorder packetIn) {
+   public void handleWorldBorder(SPacketWorldBorder var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       packetIn.apply(this.clientWorldController.getWorldBorder());
    }
 
-   public void handleTitle(SPacketTitle packetIn) {
+   public void handleTitle(SPacketTitle var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       SPacketTitle.Type spackettitle$type = packetIn.getType();
       String s = null;
@@ -1168,12 +1168,12 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       this.gameController.ingameGUI.displayTitle(s, s1, packetIn.getFadeInTime(), packetIn.getDisplayTime(), packetIn.getFadeOutTime());
    }
 
-   public void handlePlayerListHeaderFooter(SPacketPlayerListHeaderFooter packetIn) {
+   public void handlePlayerListHeaderFooter(SPacketPlayerListHeaderFooter var1) {
       this.gameController.ingameGUI.getTabList().setHeader(packetIn.getHeader().getFormattedText().isEmpty() ? null : packetIn.getHeader());
       this.gameController.ingameGUI.getTabList().setFooter(packetIn.getFooter().getFormattedText().isEmpty() ? null : packetIn.getFooter());
    }
 
-   public void handleRemoveEntityEffect(SPacketRemoveEntityEffect packetIn) {
+   public void handleRemoveEntityEffect(SPacketRemoveEntityEffect var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = packetIn.getEntity(this.clientWorldController);
       if (entity instanceof EntityLivingBase) {
@@ -1182,7 +1182,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handlePlayerListItem(SPacketPlayerListItem packetIn) {
+   public void handlePlayerListItem(SPacketPlayerListItem var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
 
       for(SPacketPlayerListItem.AddPlayerData spacketplayerlistitem$addplayerdata : packetIn.getEntries()) {
@@ -1216,11 +1216,11 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleKeepAlive(SPacketKeepAlive packetIn) {
+   public void handleKeepAlive(SPacketKeepAlive var1) {
       this.sendPacket(new CPacketKeepAlive(packetIn.getId()));
    }
 
-   public void handlePlayerAbilities(SPacketPlayerAbilities packetIn) {
+   public void handlePlayerAbilities(SPacketPlayerAbilities var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       EntityPlayer entityplayer = this.gameController.player;
       entityplayer.capabilities.isFlying = packetIn.isFlying();
@@ -1231,7 +1231,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       entityplayer.capabilities.setPlayerWalkSpeed(packetIn.getWalkSpeed());
    }
 
-   public void handleTabComplete(SPacketTabComplete packetIn) {
+   public void handleTabComplete(SPacketTabComplete var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       String[] astring = packetIn.getMatches();
       if (this.gameController.currentScreen instanceof ITabCompleter) {
@@ -1240,17 +1240,17 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleSoundEffect(SPacketSoundEffect packetIn) {
+   public void handleSoundEffect(SPacketSoundEffect var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.world.playSound(this.gameController.player, packetIn.getX(), packetIn.getY(), packetIn.getZ(), packetIn.getSound(), packetIn.getCategory(), packetIn.getVolume(), packetIn.getPitch());
    }
 
-   public void handleCustomSound(SPacketCustomSound packetIn) {
+   public void handleCustomSound(SPacketCustomSound var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.getSoundHandler().playSound(new PositionedSoundRecord(new ResourceLocation(packetIn.getSoundName()), packetIn.getCategory(), packetIn.getVolume(), packetIn.getPitch(), false, 0, ISound.AttenuationType.LINEAR, (float)packetIn.getX(), (float)packetIn.getY(), (float)packetIn.getZ()));
    }
 
-   public void handleResourcePack(SPacketResourcePackSend packetIn) {
+   public void handleResourcePack(SPacketResourcePackSend var1) {
       final String s = packetIn.getURL();
       final String s1 = packetIn.getHash();
       if (this.validateResourcePackUrl(s)) {
@@ -1275,7 +1275,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
                this.gameController.addScheduledTask(new Runnable() {
                   public void run() {
                      NetHandlerPlayClient.this.gameController.displayGuiScreen(new GuiYesNo(new GuiYesNoCallback() {
-                        public void confirmClicked(boolean result, int id) {
+                        public void confirmClicked(boolean var1, int var2x) {
                            NetHandlerPlayClient.this.gameController = Minecraft.getMinecraft();
                            ServerData serverdata1 = NetHandlerPlayClient.this.gameController.getCurrentServerData();
                            if (result) {
@@ -1305,7 +1305,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   private boolean validateResourcePackUrl(String p_189688_1_) {
+   private boolean validateResourcePackUrl(String var1) {
       try {
          URI uri = new URI(p_189688_1_.replace(' ', '+'));
          String s = uri.getScheme();
@@ -1317,7 +1317,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
          } else {
             return true;
          }
-      } catch (URISyntaxException var51) {
+      } catch (URISyntaxException var5) {
          this.netManager.sendPacket(new CPacketResourcePackStatus(CPacketResourcePackStatus.Action.FAILED_DOWNLOAD));
          return false;
       }
@@ -1325,22 +1325,22 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    private FutureCallback createDownloadCallback() {
       return new FutureCallback() {
-         public void onSuccess(@Nullable Object p_onSuccess_1_) {
+         public void onSuccess(@Nullable Object var1) {
             NetHandlerPlayClient.this.netManager.sendPacket(new CPacketResourcePackStatus(CPacketResourcePackStatus.Action.SUCCESSFULLY_LOADED));
          }
 
-         public void onFailure(Throwable p_onFailure_1_) {
+         public void onFailure(Throwable var1) {
             NetHandlerPlayClient.this.netManager.sendPacket(new CPacketResourcePackStatus(CPacketResourcePackStatus.Action.FAILED_DOWNLOAD));
          }
       };
    }
 
-   public void handleUpdateBossInfo(SPacketUpdateBossInfo packetIn) {
+   public void handleUpdateBossInfo(SPacketUpdateBossInfo var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       this.gameController.ingameGUI.getBossOverlay().read(packetIn);
    }
 
-   public void handleCooldown(SPacketCooldown packetIn) {
+   public void handleCooldown(SPacketCooldown var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       if (packetIn.getTicks() == 0) {
          this.gameController.player.getCooldownTracker().removeCooldown(packetIn.getItem());
@@ -1350,7 +1350,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleMoveVehicle(SPacketMoveVehicle packetIn) {
+   public void handleMoveVehicle(SPacketMoveVehicle var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.gameController.player.getLowestRidingEntity();
       if (entity != this.gameController.player && entity.canPassengerSteer()) {
@@ -1360,7 +1360,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleCustomPayload(SPacketCustomPayload packetIn) {
+   public void handleCustomPayload(SPacketCustomPayload var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       if ("MC|TrList".equals(packetIn.getChannelName())) {
          PacketBuffer packetbuffer = packetIn.getBufferData();
@@ -1401,7 +1401,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleScoreboardObjective(SPacketScoreboardObjective packetIn) {
+   public void handleScoreboardObjective(SPacketScoreboardObjective var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Scoreboard scoreboard = this.clientWorldController.getScoreboard();
       if (packetIn.getAction() == 0) {
@@ -1420,7 +1420,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleUpdateScore(SPacketUpdateScore packetIn) {
+   public void handleUpdateScore(SPacketUpdateScore var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Scoreboard scoreboard = this.clientWorldController.getScoreboard();
       ScoreObjective scoreobjective = scoreboard.getObjective(packetIn.getObjectiveName());
@@ -1437,7 +1437,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleDisplayObjective(SPacketDisplayObjective packetIn) {
+   public void handleDisplayObjective(SPacketDisplayObjective var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Scoreboard scoreboard = this.clientWorldController.getScoreboard();
       if (packetIn.getName().isEmpty()) {
@@ -1449,7 +1449,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleTeams(SPacketTeams packetIn) {
+   public void handleTeams(SPacketTeams var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Scoreboard scoreboard = this.clientWorldController.getScoreboard();
       ScorePlayerTeam scoreplayerteam;
@@ -1494,7 +1494,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleParticles(SPacketParticles packetIn) {
+   public void handleParticles(SPacketParticles var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       if (packetIn.getParticleCount() == 0) {
          double d0 = (double)(packetIn.getParticleSpeed() * packetIn.getXOffset());
@@ -1526,7 +1526,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
    }
 
-   public void handleEntityProperties(SPacketEntityProperties packetIn) {
+   public void handleEntityProperties(SPacketEntityProperties var1) {
       PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
       Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
       if (entity != null) {
@@ -1561,12 +1561,12 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
       return this.playerInfoMap.values();
    }
 
-   public NetworkPlayerInfo getPlayerInfo(UUID uniqueId) {
+   public NetworkPlayerInfo getPlayerInfo(UUID var1) {
       return (NetworkPlayerInfo)this.playerInfoMap.get(uniqueId);
    }
 
    @Nullable
-   public NetworkPlayerInfo getPlayerInfo(String name) {
+   public NetworkPlayerInfo getPlayerInfo(String var1) {
       for(NetworkPlayerInfo networkplayerinfo : this.playerInfoMap.values()) {
          if (networkplayerinfo.getGameProfile().getName().equals(name)) {
             return networkplayerinfo;

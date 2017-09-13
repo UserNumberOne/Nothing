@@ -16,7 +16,7 @@ public class MusicTicker implements ITickable {
    private ISound currentMusic;
    private int timeUntilNextMusic = 100;
 
-   public MusicTicker(Minecraft mcIn) {
+   public MusicTicker(Minecraft var1) {
       this.mc = mcIn;
    }
 
@@ -41,7 +41,7 @@ public class MusicTicker implements ITickable {
 
    }
 
-   public void playMusic(MusicTicker.MusicType requestedMusicType) {
+   public void playMusic(MusicTicker.MusicType var1) {
       this.currentMusic = PositionedSoundRecord.getMusicRecord(requestedMusicType.getMusicLocation());
       this.mc.getSoundHandler().playSound(this.currentMusic);
       this.timeUntilNextMusic = Integer.MAX_VALUE;
@@ -70,7 +70,7 @@ public class MusicTicker implements ITickable {
       private final int minDelay;
       private final int maxDelay;
 
-      private MusicType(SoundEvent musicLocationIn, int minDelayIn, int maxDelayIn) {
+      private MusicType(SoundEvent var3, int var4, int var5) {
          this.musicLocation = musicLocationIn;
          this.minDelay = minDelayIn;
          this.maxDelay = maxDelayIn;

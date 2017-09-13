@@ -1,5 +1,6 @@
 package net.minecraft.block;
 
+import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -8,10 +9,15 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockStainedGlassPane extends BlockPane {
    public static final PropertyEnum COLOR = PropertyEnum.create("color", EnumDyeColor.class);
@@ -23,42 +29,55 @@ public class BlockStainedGlassPane extends BlockPane {
    }
 
    public int damageDropped(IBlockState var1) {
-      return ((EnumDyeColor)var1.getValue(COLOR)).getMetadata();
+      return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
+      for(int i = 0; i < EnumDyeColor.values().length; ++i) {
+         list.add(new ItemStack(itemIn, 1, i));
+      }
+
    }
 
    public MapColor getMapColor(IBlockState var1) {
-      return ((EnumDyeColor)var1.getValue(COLOR)).getMapColor();
+      return ((EnumDyeColor)state.getValue(COLOR)).getMapColor();
+   }
+
+   @SideOnly(Side.CLIENT)
+   public BlockRenderLayer getBlockLayer() {
+      return BlockRenderLayer.TRANSLUCENT;
    }
 
    public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(COLOR, EnumDyeColor.byMetadata(var1));
+      return this.getDefaultState().withProperty(COLOR, EnumDyeColor.byMetadata(meta));
    }
 
    public int getMetaFromState(IBlockState var1) {
-      return ((EnumDyeColor)var1.getValue(COLOR)).getMetadata();
+      return ((EnumDyeColor)state.getValue(COLOR)).getMetadata();
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      switch(var2) {
+      switch(rot) {
       case CLOCKWISE_180:
-         return var1.withProperty(NORTH, var1.getValue(SOUTH)).withProperty(EAST, var1.getValue(WEST)).withProperty(SOUTH, var1.getValue(NORTH)).withProperty(WEST, var1.getValue(EAST));
+         return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(EAST, state.getValue(WEST)).withProperty(SOUTH, state.getValue(NORTH)).withProperty(WEST, state.getValue(EAST));
       case COUNTERCLOCKWISE_90:
-         return var1.withProperty(NORTH, var1.getValue(EAST)).withProperty(EAST, var1.getValue(SOUTH)).withProperty(SOUTH, var1.getValue(WEST)).withProperty(WEST, var1.getValue(NORTH));
+         return state.withProperty(NORTH, state.getValue(EAST)).withProperty(EAST, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(WEST)).withProperty(WEST, state.getValue(NORTH));
       case CLOCKWISE_90:
-         return var1.withProperty(NORTH, var1.getValue(WEST)).withProperty(EAST, var1.getValue(NORTH)).withProperty(SOUTH, var1.getValue(EAST)).withProperty(WEST, var1.getValue(SOUTH));
+         return state.withProperty(NORTH, state.getValue(WEST)).withProperty(EAST, state.getValue(NORTH)).withProperty(SOUTH, state.getValue(EAST)).withProperty(WEST, state.getValue(SOUTH));
       default:
-         return var1;
+         return state;
       }
    }
 
    public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      switch(var2) {
+      switch(mirrorIn) {
       case LEFT_RIGHT:
-         return var1.withProperty(NORTH, var1.getValue(SOUTH)).withProperty(SOUTH, var1.getValue(NORTH));
+         return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(NORTH));
       case FRONT_BACK:
-         return var1.withProperty(EAST, var1.getValue(WEST)).withProperty(WEST, var1.getValue(EAST));
+         return state.withProperty(EAST, state.getValue(WEST)).withProperty(WEST, state.getValue(EAST));
       default:
-         return super.withMirror(var1, var2);
+         return super.withMirror(state, mirrorIn);
       }
    }
 
@@ -67,15 +86,15 @@ public class BlockStainedGlassPane extends BlockPane {
    }
 
    public void onBlockAdded(World var1, BlockPos var2, IBlockState var3) {
-      if (!var1.isRemote) {
-         BlockBeacon.updateColorAsync(var1, var2);
+      if (!worldIn.isRemote) {
+         BlockBeacon.updateColorAsync(worldIn, pos);
       }
 
    }
 
    public void breakBlock(World var1, BlockPos var2, IBlockState var3) {
-      if (!var1.isRemote) {
-         BlockBeacon.updateColorAsync(var1, var2);
+      if (!worldIn.isRemote) {
+         BlockBeacon.updateColorAsync(worldIn, pos);
       }
 
    }

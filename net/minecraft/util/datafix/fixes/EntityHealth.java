@@ -13,22 +13,22 @@ public class EntityHealth implements IFixableData {
    }
 
    public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
-      if (ENTITY_LIST.contains(var1.getString("id"))) {
-         float var2;
-         if (var1.hasKey("HealF", 99)) {
-            var2 = var1.getFloat("HealF");
-            var1.removeTag("HealF");
+      if (ENTITY_LIST.contains(compound.getString("id"))) {
+         float f;
+         if (compound.hasKey("HealF", 99)) {
+            f = compound.getFloat("HealF");
+            compound.removeTag("HealF");
          } else {
-            if (!var1.hasKey("Health", 99)) {
-               return var1;
+            if (!compound.hasKey("Health", 99)) {
+               return compound;
             }
 
-            var2 = var1.getFloat("Health");
+            f = compound.getFloat("Health");
          }
 
-         var1.setFloat("Health", var2);
+         compound.setFloat("Health", f);
       }
 
-      return var1;
+      return compound;
    }
 }

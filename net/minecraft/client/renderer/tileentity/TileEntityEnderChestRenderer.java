@@ -12,7 +12,7 @@ public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer {
    private static final ResourceLocation ENDER_CHEST_TEXTURE = new ResourceLocation("textures/entity/chest/ender.png");
    private final ModelChest modelChest = new ModelChest();
 
-   public void renderTileEntityAt(TileEntityEnderChest te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntityEnderChest var1, double var2, double var4, double var6, float var8, int var9) {
       int i = 0;
       if (te.hasWorld()) {
          i = te.getBlockMetadata();

@@ -10,15 +10,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderSilverfish extends RenderLiving {
    private static final ResourceLocation SILVERFISH_TEXTURES = new ResourceLocation("textures/entity/silverfish.png");
 
-   public RenderSilverfish(RenderManager renderManagerIn) {
+   public RenderSilverfish(RenderManager var1) {
       super(renderManagerIn, new ModelSilverfish(), 0.3F);
    }
 
-   protected float getDeathMaxRotation(EntitySilverfish entityLivingBaseIn) {
+   protected float getDeathMaxRotation(EntitySilverfish var1) {
       return 180.0F;
    }
 
-   protected ResourceLocation getEntityTexture(EntitySilverfish entity) {
+   protected ResourceLocation getEntityTexture(EntitySilverfish var1) {
       return SILVERFISH_TEXTURES;
    }
 }

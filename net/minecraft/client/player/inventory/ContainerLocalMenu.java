@@ -17,16 +17,16 @@ public class ContainerLocalMenu extends InventoryBasic implements ILockableConta
    private final String guiID;
    private final Map dataValues = Maps.newHashMap();
 
-   public ContainerLocalMenu(String id, ITextComponent title, int slotCount) {
+   public ContainerLocalMenu(String var1, ITextComponent var2, int var3) {
       super(title, slotCount);
       this.guiID = id;
    }
 
-   public int getField(int id) {
+   public int getField(int var1) {
       return this.dataValues.containsKey(Integer.valueOf(id)) ? ((Integer)this.dataValues.get(Integer.valueOf(id))).intValue() : 0;
    }
 
-   public void setField(int id, int value) {
+   public void setField(int var1, int var2) {
       this.dataValues.put(Integer.valueOf(id), Integer.valueOf(value));
    }
 
@@ -38,7 +38,7 @@ public class ContainerLocalMenu extends InventoryBasic implements ILockableConta
       return false;
    }
 
-   public void setLockCode(LockCode code) {
+   public void setLockCode(LockCode var1) {
    }
 
    public LockCode getLockCode() {
@@ -49,7 +49,7 @@ public class ContainerLocalMenu extends InventoryBasic implements ILockableConta
       return this.guiID;
    }
 
-   public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn) {
+   public Container createContainer(InventoryPlayer var1, EntityPlayer var2) {
       throw new UnsupportedOperationException();
    }
 }

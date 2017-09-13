@@ -14,12 +14,12 @@ public class LayerSkeletonType implements LayerRenderer {
    private final RenderLivingBase renderer;
    private ModelSkeleton layerModel;
 
-   public LayerSkeletonType(RenderLivingBase p_i47131_1_) {
+   public LayerSkeletonType(RenderLivingBase var1) {
       this.renderer = p_i47131_1_;
       this.layerModel = new ModelSkeleton(0.25F, true);
    }
 
-   public void doRenderLayer(EntitySkeleton entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntitySkeleton var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (entitylivingbaseIn.getSkeletonType() == SkeletonType.STRAY) {
          this.layerModel.setModelAttributes(this.renderer.getMainModel());
          this.layerModel.setLivingAnimations(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks);

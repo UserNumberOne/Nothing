@@ -15,13 +15,13 @@ public class GuiDisconnected extends GuiScreen {
    private final GuiScreen parentScreen;
    private int textHeight;
 
-   public GuiDisconnected(GuiScreen screen, String reasonLocalizationKey, ITextComponent chatComp) {
+   public GuiDisconnected(GuiScreen var1, String var2, ITextComponent var3) {
       this.parentScreen = screen;
       this.reason = I18n.format(reasonLocalizationKey);
       this.message = chatComp;
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
    }
 
    public void initGui() {
@@ -31,14 +31,14 @@ public class GuiDisconnected extends GuiScreen {
       this.buttonList.add(new GuiButton(0, this.width / 2 - 100, this.height / 2 + this.textHeight / 2 + this.fontRendererObj.FONT_HEIGHT, I18n.format("gui.toMenu")));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 0) {
          this.mc.displayGuiScreen(this.parentScreen);
       }
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, this.reason, this.width / 2, this.height / 2 - this.textHeight / 2 - this.fontRendererObj.FONT_HEIGHT * 2, 11184810);
       int i = this.height / 2 - this.textHeight / 2;

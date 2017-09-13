@@ -15,7 +15,7 @@ import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.src.MinecraftServer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
@@ -36,63 +36,62 @@ public class CommandSummon extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (var3.length < 1) {
+      if (args.length < 1) {
          throw new WrongUsageException("commands.summon.usage", new Object[0]);
       } else {
-         String var4 = var3[0];
-         BlockPos var5 = var2.getPosition();
-         Vec3d var6 = var2.getPositionVector();
-         double var7 = var6.xCoord;
-         double var9 = var6.yCoord;
-         double var11 = var6.zCoord;
-         if (var3.length >= 4) {
-            var7 = parseDouble(var7, var3[1], true);
-            var9 = parseDouble(var9, var3[2], false);
-            var11 = parseDouble(var11, var3[3], true);
-            var5 = new BlockPos(var7, var9, var11);
+         String s = args[0];
+         BlockPos blockpos = sender.getPosition();
+         Vec3d vec3d = sender.getPositionVector();
+         double d0 = vec3d.xCoord;
+         double d1 = vec3d.yCoord;
+         double d2 = vec3d.zCoord;
+         if (args.length >= 4) {
+            d0 = parseDouble(d0, args[1], true);
+            d1 = parseDouble(d1, args[2], false);
+            d2 = parseDouble(d2, args[3], true);
+            blockpos = new BlockPos(d0, d1, d2);
          }
 
-         World var13 = var2.getEntityWorld();
-         if (!var13.isBlockLoaded(var5)) {
+         World world = sender.getEntityWorld();
+         if (!world.isBlockLoaded(blockpos)) {
             throw new CommandException("commands.summon.outOfWorld", new Object[0]);
-         } else if ("LightningBolt".equals(var4)) {
-            var13.addWeatherEffect(new EntityLightningBolt(var13, var7, var9, var11, false));
-            notifyCommandListener(var2, this, "commands.summon.success", new Object[0]);
          } else {
-            NBTTagCompound var14 = new NBTTagCompound();
-            boolean var15 = false;
-            if (var3.length >= 5) {
-               ITextComponent var16 = getChatComponentFromNthArg(var2, var3, 4);
-
-               try {
-                  var14 = JsonToNBT.getTagFromJson(var16.getUnformattedText());
-                  var15 = true;
-               } catch (NBTException var18) {
-                  throw new CommandException("commands.summon.tagError", new Object[]{var18.getMessage()});
-               }
-            }
-
-            var14.setString("id", var4);
-            Entity var19 = AnvilChunkLoader.readWorldEntityPos(var14, var13, var7, var9, var11, true);
-            if (var19 == null) {
-               throw new CommandException("commands.summon.failed", new Object[0]);
+            if ("LightningBolt".equals(s)) {
+               world.addWeatherEffect(new EntityLightningBolt(world, d0, d1, d2, false));
+               notifyCommandListener(sender, this, "commands.summon.success", new Object[0]);
             } else {
-               var19.setLocationAndAngles(var7, var9, var11, var19.rotationYaw, var19.rotationPitch);
-               if (!var15 && var19 instanceof EntityLiving) {
-                  ((EntityLiving)var19).onInitialSpawn(var13.getDifficultyForLocation(new BlockPos(var19)), (IEntityLivingData)null);
+               NBTTagCompound nbttagcompound = new NBTTagCompound();
+               boolean flag = false;
+               if (args.length >= 5) {
+                  ITextComponent itextcomponent = getChatComponentFromNthArg(sender, args, 4);
+
+                  try {
+                     nbttagcompound = JsonToNBT.getTagFromJson(itextcomponent.getUnformattedText());
+                     flag = true;
+                  } catch (NBTException var18) {
+                     throw new CommandException("commands.summon.tagError", new Object[]{var18.getMessage()});
+                  }
                }
 
-               notifyCommandListener(var2, this, "commands.summon.success", new Object[0]);
+               nbttagcompound.setString("id", s);
+               Entity entity = AnvilChunkLoader.readWorldEntityPos(nbttagcompound, world, d0, d1, d2, true);
+               if (entity == null) {
+                  throw new CommandException("commands.summon.failed", new Object[0]);
+               }
+
+               entity.setLocationAndAngles(d0, d1, d2, entity.rotationYaw, entity.rotationPitch);
+               if (!flag && entity instanceof EntityLiving) {
+                  ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(entity)), (IEntityLivingData)null);
+               }
+
+               notifyCommandListener(sender, this, "commands.summon.success", new Object[0]);
             }
+
          }
       }
    }
 
-   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      if (var3.length == 1) {
-         return getListOfStringsMatchingLastWord(var3, EntityList.getEntityNameList());
-      } else {
-         return var3.length > 1 && var3.length <= 4 ? getTabCompletionCoordinate(var3, 1, var4) : Collections.emptyList();
-      }
+   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return args.length == 1 ? getListOfStringsMatchingLastWord(args, EntityList.getEntityNameList()) : (args.length > 1 && args.length <= 4 ? getTabCompletionCoordinate(args, 1, pos) : Collections.emptyList());
    }
 }

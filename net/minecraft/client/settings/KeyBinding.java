@@ -28,7 +28,7 @@ public class KeyBinding implements Comparable {
    private KeyModifier keyModifier;
    private IKeyConflictContext keyConflictContext;
 
-   public static void onTick(int keyCode) {
+   public static void onTick(int var0) {
       if (keyCode != 0) {
          KeyBinding keybinding = HASH.lookupActive(keyCode);
          if (keybinding != null) {
@@ -38,7 +38,7 @@ public class KeyBinding implements Comparable {
 
    }
 
-   public static void setKeyBindState(int keyCode, boolean pressed) {
+   public static void setKeyBindState(int var0, boolean var1) {
       if (keyCode != 0) {
          for(KeyBinding keybinding : HASH.lookupAll(keyCode)) {
             if (keybinding != null) {
@@ -80,7 +80,7 @@ public class KeyBinding implements Comparable {
       return KEYBIND_SET;
    }
 
-   public KeyBinding(String description, int keyCode, String category) {
+   public KeyBinding(String var1, int var2, String var3) {
       this.keyModifierDefault = KeyModifier.NONE;
       this.keyModifier = KeyModifier.NONE;
       this.keyConflictContext = KeyConflictContext.UNIVERSAL;
@@ -127,11 +127,11 @@ public class KeyBinding implements Comparable {
       return this.keyCode;
    }
 
-   public void setKeyCode(int keyCode) {
+   public void setKeyCode(int var1) {
       this.keyCode = keyCode;
    }
 
-   public int compareTo(KeyBinding p_compareTo_1_) {
+   public int compareTo(KeyBinding var1) {
       int i = I18n.format(this.keyCategory).compareTo(I18n.format(p_compareTo_1_.keyCategory));
       if (i == 0) {
          i = I18n.format(this.keyDescription).compareTo(I18n.format(p_compareTo_1_.keyDescription));
@@ -140,11 +140,11 @@ public class KeyBinding implements Comparable {
       return i;
    }
 
-   public KeyBinding(String description, IKeyConflictContext keyConflictContext, int keyCode, String category) {
+   public KeyBinding(String var1, IKeyConflictContext var2, int var3, String var4) {
       this(description, keyConflictContext, KeyModifier.NONE, keyCode, category);
    }
 
-   public KeyBinding(String description, IKeyConflictContext keyConflictContext, KeyModifier keyModifier, int keyCode, String category) {
+   public KeyBinding(String var1, IKeyConflictContext var2, KeyModifier var3, int var4, String var5) {
       this.keyModifierDefault = KeyModifier.NONE;
       this.keyModifier = KeyModifier.NONE;
       this.keyConflictContext = KeyConflictContext.UNIVERSAL;
@@ -164,11 +164,11 @@ public class KeyBinding implements Comparable {
       KEYBIND_SET.add(category);
    }
 
-   public boolean isActiveAndMatches(int keyCode) {
+   public boolean isActiveAndMatches(int var1) {
       return keyCode != 0 && keyCode == this.getKeyCode() && this.getKeyConflictContext().isActive() && this.getKeyModifier().isActive(this.getKeyConflictContext());
    }
 
-   public void setKeyConflictContext(IKeyConflictContext keyConflictContext) {
+   public void setKeyConflictContext(IKeyConflictContext var1) {
       this.keyConflictContext = keyConflictContext;
    }
 
@@ -184,7 +184,7 @@ public class KeyBinding implements Comparable {
       return this.keyModifier;
    }
 
-   public void setKeyModifierAndCode(KeyModifier keyModifier, int keyCode) {
+   public void setKeyModifierAndCode(KeyModifier var1, int var2) {
       this.keyCode = keyCode;
       if (keyModifier.matches(keyCode)) {
          keyModifier = KeyModifier.NONE;
@@ -203,7 +203,7 @@ public class KeyBinding implements Comparable {
       return this.getKeyCode() == this.getKeyCodeDefault() && this.getKeyModifier() == this.getKeyModifierDefault();
    }
 
-   public boolean conflicts(KeyBinding other) {
+   public boolean conflicts(KeyBinding var1) {
       if (this.getKeyConflictContext().conflicts(other.getKeyConflictContext()) || other.getKeyConflictContext().conflicts(this.getKeyConflictContext())) {
          KeyModifier keyModifier = this.getKeyModifier();
          KeyModifier otherKeyModifier = other.getKeyModifier();
@@ -219,7 +219,7 @@ public class KeyBinding implements Comparable {
       return false;
    }
 
-   public boolean hasKeyCodeModifierConflict(KeyBinding other) {
+   public boolean hasKeyCodeModifierConflict(KeyBinding var1) {
       return (this.getKeyConflictContext().conflicts(other.getKeyConflictContext()) || other.getKeyConflictContext().conflicts(this.getKeyConflictContext())) && (this.getKeyModifier().matches(other.getKeyCode()) || other.getKeyModifier().matches(this.getKeyCode()));
    }
 

@@ -33,16 +33,16 @@ public class GuiPlayerTabOverlay extends Gui {
    private long lastTimeOpened;
    private boolean isBeingRendered;
 
-   public GuiPlayerTabOverlay(Minecraft mcIn, GuiIngame guiIngameIn) {
+   public GuiPlayerTabOverlay(Minecraft var1, GuiIngame var2) {
       this.mc = mcIn;
       this.guiIngame = guiIngameIn;
    }
 
-   public String getPlayerName(NetworkPlayerInfo networkPlayerInfoIn) {
+   public String getPlayerName(NetworkPlayerInfo var1) {
       return networkPlayerInfoIn.getDisplayName() != null ? networkPlayerInfoIn.getDisplayName().getFormattedText() : ScorePlayerTeam.formatPlayerName(networkPlayerInfoIn.getPlayerTeam(), networkPlayerInfoIn.getGameProfile().getName());
    }
 
-   public void updatePlayerList(boolean willBeRendered) {
+   public void updatePlayerList(boolean var1) {
       if (willBeRendered && !this.isBeingRendered) {
          this.lastTimeOpened = Minecraft.getSystemTime();
       }
@@ -50,7 +50,7 @@ public class GuiPlayerTabOverlay extends Gui {
       this.isBeingRendered = willBeRendered;
    }
 
-   public void renderPlayerlist(int width, Scoreboard scoreboardIn, @Nullable ScoreObjective scoreObjectiveIn) {
+   public void renderPlayerlist(int var1, Scoreboard var2, @Nullable ScoreObjective var3) {
       NetHandlerPlayClient nethandlerplayclient = this.mc.player.connection;
       List list = ENTRY_ORDERING.sortedCopy(nethandlerplayclient.getPlayerInfoMap());
       int i = 0;
@@ -183,7 +183,7 @@ public class GuiPlayerTabOverlay extends Gui {
 
    }
 
-   protected void drawPing(int p_175245_1_, int p_175245_2_, int p_175245_3_, NetworkPlayerInfo networkPlayerInfoIn) {
+   protected void drawPing(int var1, int var2, int var3, NetworkPlayerInfo var4) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(ICONS);
       int i = 0;
@@ -207,7 +207,7 @@ public class GuiPlayerTabOverlay extends Gui {
       this.zLevel -= 100.0F;
    }
 
-   private void drawScoreboardValues(ScoreObjective objective, int p_175247_2_, String name, int p_175247_4_, int p_175247_5_, NetworkPlayerInfo info) {
+   private void drawScoreboardValues(ScoreObjective var1, int var2, String var3, int var4, int var5, NetworkPlayerInfo var6) {
       int i = objective.getScoreboard().getOrCreateScore(name, objective).getScorePoints();
       if (objective.getRenderType() == IScoreCriteria.EnumRenderType.HEARTS) {
          this.mc.getTextureManager().bindTexture(ICONS);
@@ -277,11 +277,11 @@ public class GuiPlayerTabOverlay extends Gui {
 
    }
 
-   public void setFooter(@Nullable ITextComponent footerIn) {
+   public void setFooter(@Nullable ITextComponent var1) {
       this.footer = footerIn;
    }
 
-   public void setHeader(@Nullable ITextComponent headerIn) {
+   public void setHeader(@Nullable ITextComponent var1) {
       this.header = headerIn;
    }
 
@@ -295,7 +295,7 @@ public class GuiPlayerTabOverlay extends Gui {
       private PlayerComparator() {
       }
 
-      public int compare(NetworkPlayerInfo p_compare_1_, NetworkPlayerInfo p_compare_2_) {
+      public int compare(NetworkPlayerInfo var1, NetworkPlayerInfo var2) {
          ScorePlayerTeam scoreplayerteam = p_compare_1_.getPlayerTeam();
          ScorePlayerTeam scoreplayerteam1 = p_compare_2_.getPlayerTeam();
          return ComparisonChain.start().compareTrueFirst(p_compare_1_.getGameType() != GameType.SPECTATOR, p_compare_2_.getGameType() != GameType.SPECTATOR).compare(scoreplayerteam != null ? scoreplayerteam.getRegisteredName() : "", scoreplayerteam1 != null ? scoreplayerteam1.getRegisteredName() : "").compare(p_compare_1_.getGameProfile().getName(), p_compare_2_.getGameProfile().getName()).result();

@@ -16,19 +16,19 @@ public class GuiBrewingStand extends GuiContainer {
    private final InventoryPlayer playerInventory;
    private final IInventory tileBrewingStand;
 
-   public GuiBrewingStand(InventoryPlayer playerInv, IInventory p_i45506_2_) {
+   public GuiBrewingStand(InventoryPlayer var1, IInventory var2) {
       super(new ContainerBrewingStand(playerInv, p_i45506_2_));
       this.playerInventory = playerInv;
       this.tileBrewingStand = p_i45506_2_;
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       String s = this.tileBrewingStand.getDisplayName().getUnformattedText();
       this.fontRendererObj.drawString(s, this.xSize / 2 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);
       this.fontRendererObj.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(BREWING_STAND_GUI_TEXTURES);
       int i = (this.width - this.xSize) / 2;

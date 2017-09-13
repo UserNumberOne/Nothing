@@ -8,7 +8,7 @@ public enum BlockRenderLayer {
 
    private final String layerName;
 
-   private BlockRenderLayer(String layerNameIn) {
+   private BlockRenderLayer(String var3) {
       this.layerName = layerNameIn;
    }
 

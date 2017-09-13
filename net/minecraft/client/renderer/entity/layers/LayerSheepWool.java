@@ -15,11 +15,11 @@ public class LayerSheepWool implements LayerRenderer {
    private final RenderSheep sheepRenderer;
    private final ModelSheep1 sheepModel = new ModelSheep1();
 
-   public LayerSheepWool(RenderSheep sheepRendererIn) {
+   public LayerSheepWool(RenderSheep var1) {
       this.sheepRenderer = sheepRendererIn;
    }
 
-   public void doRenderLayer(EntitySheep entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntitySheep var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (!entitylivingbaseIn.getSheared() && !entitylivingbaseIn.isInvisible()) {
          this.sheepRenderer.bindTexture(TEXTURE);
          if (entitylivingbaseIn.hasCustomName() && "jeb_".equals(entitylivingbaseIn.getCustomNameTag())) {

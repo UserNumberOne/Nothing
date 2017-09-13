@@ -18,14 +18,14 @@ public class ViewFrustum {
    protected int countChunksZ;
    public RenderChunk[] renderChunks;
 
-   public ViewFrustum(World worldIn, int renderDistanceChunks, RenderGlobal renderGlobalIn, IRenderChunkFactory renderChunkFactory) {
+   public ViewFrustum(World var1, int var2, RenderGlobal var3, IRenderChunkFactory var4) {
       this.renderGlobal = renderGlobalIn;
       this.world = worldIn;
       this.setCountChunksXYZ(renderDistanceChunks);
       this.createRenderChunks(renderChunkFactory);
    }
 
-   protected void createRenderChunks(IRenderChunkFactory renderChunkFactory) {
+   protected void createRenderChunks(IRenderChunkFactory var1) {
       int i = this.countChunksX * this.countChunksY * this.countChunksZ;
       this.renderChunks = new RenderChunk[i];
       int j = 0;
@@ -49,14 +49,14 @@ public class ViewFrustum {
 
    }
 
-   protected void setCountChunksXYZ(int renderDistanceChunks) {
+   protected void setCountChunksXYZ(int var1) {
       int i = renderDistanceChunks * 2 + 1;
       this.countChunksX = i;
       this.countChunksY = 16;
       this.countChunksZ = i;
    }
 
-   public void updateChunkPositions(double viewEntityX, double viewEntityZ) {
+   public void updateChunkPositions(double var1, double var3) {
       int i = MathHelper.floor(viewEntityX) - 8;
       int j = MathHelper.floor(viewEntityZ) - 8;
       int k = this.countChunksX * 16;
@@ -77,7 +77,7 @@ public class ViewFrustum {
 
    }
 
-   private int getBaseCoordinate(int p_178157_1_, int p_178157_2_, int p_178157_3_) {
+   private int getBaseCoordinate(int var1, int var2, int var3) {
       int i = p_178157_3_ * 16;
       int j = i - p_178157_1_ + p_178157_2_ / 2;
       if (j < 0) {
@@ -87,7 +87,7 @@ public class ViewFrustum {
       return i - j / p_178157_2_ * p_178157_2_;
    }
 
-   public void markBlocksForUpdate(int p_187474_1_, int p_187474_2_, int p_187474_3_, int p_187474_4_, int p_187474_5_, int p_187474_6_, boolean p_187474_7_) {
+   public void markBlocksForUpdate(int var1, int var2, int var3, int var4, int var5, int var6, boolean var7) {
       int i = MathHelper.intFloorDiv(p_187474_1_, 16);
       int j = MathHelper.intFloorDiv(p_187474_2_, 16);
       int k = MathHelper.intFloorDiv(p_187474_3_, 16);
@@ -123,7 +123,7 @@ public class ViewFrustum {
    }
 
    @Nullable
-   protected RenderChunk getRenderChunk(BlockPos pos) {
+   protected RenderChunk getRenderChunk(BlockPos var1) {
       int i = MathHelper.intFloorDiv(pos.getX(), 16);
       int j = MathHelper.intFloorDiv(pos.getY(), 16);
       int k = MathHelper.intFloorDiv(pos.getZ(), 16);

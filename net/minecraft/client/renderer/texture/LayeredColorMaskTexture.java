@@ -24,13 +24,13 @@ public class LayeredColorMaskTexture extends AbstractTexture {
    private final List listTextures;
    private final List listDyeColors;
 
-   public LayeredColorMaskTexture(ResourceLocation textureLocationIn, List p_i46101_2_, List p_i46101_3_) {
+   public LayeredColorMaskTexture(ResourceLocation var1, List var2, List var3) {
       this.textureLocation = textureLocationIn;
       this.listTextures = p_i46101_2_;
       this.listDyeColors = p_i46101_3_;
    }
 
-   public void loadTexture(IResourceManager resourceManager) throws IOException {
+   public void loadTexture(IResourceManager var1) throws IOException {
       this.deleteGlTexture();
       IResource iresource = null;
 

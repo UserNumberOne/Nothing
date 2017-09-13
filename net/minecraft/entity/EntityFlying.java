@@ -7,7 +7,7 @@ import net.minecraft.world.World;
 
 public abstract class EntityFlying extends EntityLiving {
    public EntityFlying(World var1) {
-      super(var1);
+      super(worldIn);
    }
 
    public void fall(float var1, float var2) {
@@ -18,45 +18,45 @@ public abstract class EntityFlying extends EntityLiving {
 
    public void moveEntityWithHeading(float var1, float var2) {
       if (this.isInWater()) {
-         this.moveRelative(var1, var2, 0.02F);
+         this.moveRelative(strafe, forward, 0.02F);
          this.move(this.motionX, this.motionY, this.motionZ);
          this.motionX *= 0.800000011920929D;
          this.motionY *= 0.800000011920929D;
          this.motionZ *= 0.800000011920929D;
       } else if (this.isInLava()) {
-         this.moveRelative(var1, var2, 0.02F);
+         this.moveRelative(strafe, forward, 0.02F);
          this.move(this.motionX, this.motionY, this.motionZ);
          this.motionX *= 0.5D;
          this.motionY *= 0.5D;
          this.motionZ *= 0.5D;
       } else {
-         float var3 = 0.91F;
+         float f = 0.91F;
          if (this.onGround) {
-            var3 = this.world.getBlockState(new BlockPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ))).getBlock().slipperiness * 0.91F;
+            f = this.world.getBlockState(new BlockPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ))).getBlock().slipperiness * 0.91F;
          }
 
-         float var4 = 0.16277136F / (var3 * var3 * var3);
-         this.moveRelative(var1, var2, this.onGround ? 0.1F * var4 : 0.02F);
-         var3 = 0.91F;
+         float f1 = 0.16277136F / (f * f * f);
+         this.moveRelative(strafe, forward, this.onGround ? 0.1F * f1 : 0.02F);
+         f = 0.91F;
          if (this.onGround) {
-            var3 = this.world.getBlockState(new BlockPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ))).getBlock().slipperiness * 0.91F;
+            f = this.world.getBlockState(new BlockPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ))).getBlock().slipperiness * 0.91F;
          }
 
          this.move(this.motionX, this.motionY, this.motionZ);
-         this.motionX *= (double)var3;
-         this.motionY *= (double)var3;
-         this.motionZ *= (double)var3;
+         this.motionX *= (double)f;
+         this.motionY *= (double)f;
+         this.motionZ *= (double)f;
       }
 
       this.prevLimbSwingAmount = this.limbSwingAmount;
-      double var5 = this.posX - this.prevPosX;
-      double var7 = this.posZ - this.prevPosZ;
-      float var9 = MathHelper.sqrt(var5 * var5 + var7 * var7) * 4.0F;
-      if (var9 > 1.0F) {
-         var9 = 1.0F;
+      double d1 = this.posX - this.prevPosX;
+      double d0 = this.posZ - this.prevPosZ;
+      float f2 = MathHelper.sqrt(d1 * d1 + d0 * d0) * 4.0F;
+      if (f2 > 1.0F) {
+         f2 = 1.0F;
       }
 
-      this.limbSwingAmount += (var9 - this.limbSwingAmount) * 0.4F;
+      this.limbSwingAmount += (f2 - this.limbSwingAmount) * 0.4F;
       this.limbSwing += this.limbSwingAmount;
    }
 

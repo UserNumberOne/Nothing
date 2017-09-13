@@ -9,59 +9,59 @@ public enum Mirror {
    private static final String[] mirrorNames = new String[values().length];
 
    private Mirror(String var3) {
-      this.name = var3;
+      this.name = nameIn;
    }
 
    public int mirrorRotation(int var1, int var2) {
-      int var3 = var2 / 2;
-      int var4 = var1 > var3 ? var1 - var2 : var1;
+      int i = rotationCount / 2;
+      int j = rotationIn > i ? rotationIn - rotationCount : rotationIn;
       switch(this) {
       case FRONT_BACK:
-         return (var2 - var4) % var2;
+         return (rotationCount - j) % rotationCount;
       case LEFT_RIGHT:
-         return (var3 - var4 + var2) % var2;
+         return (i - j + rotationCount) % rotationCount;
       default:
-         return var1;
+         return rotationIn;
       }
    }
 
    public Rotation toRotation(EnumFacing var1) {
-      EnumFacing.Axis var2 = var1.getAxis();
-      return (this != LEFT_RIGHT || var2 != EnumFacing.Axis.Z) && (this != FRONT_BACK || var2 != EnumFacing.Axis.X) ? Rotation.NONE : Rotation.CLOCKWISE_180;
+      EnumFacing.Axis enumfacing$axis = facing.getAxis();
+      return this == LEFT_RIGHT && enumfacing$axis == EnumFacing.Axis.Z || this == FRONT_BACK && enumfacing$axis == EnumFacing.Axis.X ? Rotation.CLOCKWISE_180 : Rotation.NONE;
    }
 
    public EnumFacing mirror(EnumFacing var1) {
       switch(this) {
       case FRONT_BACK:
-         if (var1 == EnumFacing.WEST) {
+         if (facing == EnumFacing.WEST) {
             return EnumFacing.EAST;
          } else {
-            if (var1 == EnumFacing.EAST) {
+            if (facing == EnumFacing.EAST) {
                return EnumFacing.WEST;
             }
 
-            return var1;
+            return facing;
          }
       case LEFT_RIGHT:
-         if (var1 == EnumFacing.NORTH) {
+         if (facing == EnumFacing.NORTH) {
             return EnumFacing.SOUTH;
          } else {
-            if (var1 == EnumFacing.SOUTH) {
+            if (facing == EnumFacing.SOUTH) {
                return EnumFacing.NORTH;
             }
 
-            return var1;
+            return facing;
          }
       default:
-         return var1;
+         return facing;
       }
    }
 
    static {
-      int var0 = 0;
+      int i = 0;
 
-      for(Mirror var4 : values()) {
-         mirrorNames[var0++] = var4.name;
+      for(Mirror mirror : values()) {
+         mirrorNames[i++] = mirror.name;
       }
 
    }

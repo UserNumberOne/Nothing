@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.src.MinecraftServer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -32,108 +32,110 @@ public class CommandDebug extends CommandBase {
    }
 
    public void execute(MinecraftServer var1, ICommandSender var2, String[] var3) throws CommandException {
-      if (var3.length < 1) {
+      if (args.length < 1) {
          throw new WrongUsageException("commands.debug.usage", new Object[0]);
       } else {
-         if ("start".equals(var3[0])) {
-            if (var3.length != 1) {
+         if ("start".equals(args[0])) {
+            if (args.length != 1) {
                throw new WrongUsageException("commands.debug.usage", new Object[0]);
             }
 
-            notifyCommandListener(var2, this, "commands.debug.start", new Object[0]);
-            var1.aq();
-            this.profileStartTime = MinecraftServer.av();
-            this.profileStartTick = var1.ap();
+            notifyCommandListener(sender, this, "commands.debug.start", new Object[0]);
+            server.enableProfiling();
+            this.profileStartTime = MinecraftServer.getCurrentTimeMillis();
+            this.profileStartTick = server.getTickCounter();
          } else {
-            if (!"stop".equals(var3[0])) {
+            if (!"stop".equals(args[0])) {
                throw new WrongUsageException("commands.debug.usage", new Object[0]);
             }
 
-            if (var3.length != 1) {
+            if (args.length != 1) {
                throw new WrongUsageException("commands.debug.usage", new Object[0]);
             }
 
-            if (!var1.methodProfiler.profilingEnabled) {
+            if (!server.theProfiler.profilingEnabled) {
                throw new CommandException("commands.debug.notStarted", new Object[0]);
             }
 
-            long var4 = MinecraftServer.av();
-            int var6 = var1.ap();
-            long var7 = var4 - this.profileStartTime;
-            int var9 = var6 - this.profileStartTick;
-            this.a(var7, var9, var1);
-            var1.methodProfiler.profilingEnabled = false;
-            notifyCommandListener(var2, this, "commands.debug.stop", new Object[]{(float)var7 / 1000.0F, var9});
+            long i = MinecraftServer.getCurrentTimeMillis();
+            int j = server.getTickCounter();
+            long k = i - this.profileStartTime;
+            int l = j - this.profileStartTick;
+            this.saveProfilerResults(k, l, server);
+            server.theProfiler.profilingEnabled = false;
+            notifyCommandListener(sender, this, "commands.debug.stop", new Object[]{(float)k / 1000.0F, l});
          }
 
       }
    }
 
-   private void a(long var1, int var3, MinecraftServer var4) {
-      File var5 = new File(var4.d("debug"), "profile-results-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + ".txt");
-      var5.getParentFile().mkdirs();
-      FileWriter var6 = null;
+   private void saveProfilerResults(long var1, int var3, MinecraftServer var4) {
+      File file1 = new File(server.getFile("debug"), "profile-results-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + ".txt");
+      file1.getParentFile().mkdirs();
+      FileWriter filewriter = null;
 
       try {
-         var6 = new FileWriter(var5);
-         var6.write(this.b(var1, var3, var4));
-      } catch (Throwable var8) {
-         IOUtils.closeQuietly(var6);
-         LOGGER.error("Could not save profiler results to {}", new Object[]{var5, var8});
+         filewriter = new FileWriter(file1);
+         filewriter.write(this.getProfilerResults(timeSpan, tickSpan, server));
+      } catch (Throwable var11) {
+         IOUtils.closeQuietly(filewriter);
+         LOGGER.error("Could not save profiler results to {}", new Object[]{file1, var11});
+      } finally {
+         IOUtils.closeQuietly(filewriter);
       }
 
    }
 
-   private String b(long var1, int var3, MinecraftServer var4) {
-      StringBuilder var5 = new StringBuilder();
-      var5.append("---- Minecraft Profiler Results ----\n");
-      var5.append("// ");
-      var5.append(getWittyComment());
-      var5.append("\n\n");
-      var5.append("Time span: ").append(var1).append(" ms\n");
-      var5.append("Tick span: ").append(var3).append(" ticks\n");
-      var5.append("// This is approximately ").append(String.format("%.2f", (float)var3 / ((float)var1 / 1000.0F))).append(" ticks per second. It should be ").append(20).append(" ticks per second\n\n");
-      var5.append("--- BEGIN PROFILE DUMP ---\n\n");
-      this.a(0, "root", var5, var4);
-      var5.append("--- END PROFILE DUMP ---\n\n");
-      return var5.toString();
+   private String getProfilerResults(long var1, int var3, MinecraftServer var4) {
+      StringBuilder stringbuilder = new StringBuilder();
+      stringbuilder.append("---- Minecraft Profiler Results ----\n");
+      stringbuilder.append("// ");
+      stringbuilder.append(getWittyComment());
+      stringbuilder.append("\n\n");
+      stringbuilder.append("Time span: ").append(timeSpan).append(" ms\n");
+      stringbuilder.append("Tick span: ").append(tickSpan).append(" ticks\n");
+      stringbuilder.append("// This is approximately ").append(String.format("%.2f", (float)tickSpan / ((float)timeSpan / 1000.0F))).append(" ticks per second. It should be ").append(20).append(" ticks per second\n\n");
+      stringbuilder.append("--- BEGIN PROFILE DUMP ---\n\n");
+      this.appendProfilerResults(0, "root", stringbuilder, server);
+      stringbuilder.append("--- END PROFILE DUMP ---\n\n");
+      return stringbuilder.toString();
    }
 
-   private void a(int var1, String var2, StringBuilder var3, MinecraftServer var4) {
-      List var5 = var4.methodProfiler.getProfilingData(var2);
-      if (var5 != null && var5.size() >= 3) {
-         for(int var6 = 1; var6 < var5.size(); ++var6) {
-            Profiler.Result var7 = (Profiler.Result)var5.get(var6);
-            var3.append(String.format("[%02d] ", var1));
+   private void appendProfilerResults(int var1, String var2, StringBuilder var3, MinecraftServer var4) {
+      List list = server.theProfiler.getProfilingData(sectionName);
+      if (list != null && list.size() >= 3) {
+         for(int i = 1; i < list.size(); ++i) {
+            Profiler.Result profiler$result = (Profiler.Result)list.get(i);
+            builder.append(String.format("[%02d] ", p_184895_1_));
 
-            for(int var8 = 0; var8 < var1; ++var8) {
-               var3.append("|   ");
+            for(int j = 0; j < p_184895_1_; ++j) {
+               builder.append("|   ");
             }
 
-            var3.append(var7.profilerName).append(" - ").append(String.format("%.2f", var7.usePercentage)).append("%/").append(String.format("%.2f", var7.totalUsePercentage)).append("%\n");
-            if (!"unspecified".equals(var7.profilerName)) {
+            builder.append(profiler$result.profilerName).append(" - ").append(String.format("%.2f", profiler$result.usePercentage)).append("%/").append(String.format("%.2f", profiler$result.totalUsePercentage)).append("%\n");
+            if (!"unspecified".equals(profiler$result.profilerName)) {
                try {
-                  this.a(var1 + 1, var2 + "." + var7.profilerName, var3, var4);
+                  this.appendProfilerResults(p_184895_1_ + 1, sectionName + "." + profiler$result.profilerName, builder, server);
                } catch (Exception var9) {
-                  var3.append("[[ EXCEPTION ").append(var9).append(" ]]");
+                  builder.append("[[ EXCEPTION ").append(var9).append(" ]]");
                }
             }
          }
-
       }
+
    }
 
    private static String getWittyComment() {
-      String[] var0 = new String[]{"Shiny numbers!", "Am I not running fast enough? :(", "I'm working as hard as I can!", "Will I ever be good enough for you? :(", "Speedy. Zoooooom!", "Hello world", "40% better than a crash report.", "Now with extra numbers", "Now with less numbers", "Now with the same numbers", "You should add flames to things, it makes them go faster!", "Do you feel the need for... optimization?", "*cracks redstone whip*", "Maybe if you treated it better then it'll have more motivation to work faster! Poor server."};
+      String[] astring = new String[]{"Shiny numbers!", "Am I not running fast enough? :(", "I'm working as hard as I can!", "Will I ever be good enough for you? :(", "Speedy. Zoooooom!", "Hello world", "40% better than a crash report.", "Now with extra numbers", "Now with less numbers", "Now with the same numbers", "You should add flames to things, it makes them go faster!", "Do you feel the need for... optimization?", "*cracks redstone whip*", "Maybe if you treated it better then it'll have more motivation to work faster! Poor server."};
 
       try {
-         return var0[(int)(System.nanoTime() % (long)var0.length)];
+         return astring[(int)(System.nanoTime() % (long)astring.length)];
       } catch (Throwable var2) {
          return "Witty comment unavailable :(";
       }
    }
 
-   public List tabComplete(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
-      return var3.length == 1 ? getListOfStringsMatchingLastWord(var3, new String[]{"start", "stop"}) : Collections.emptyList();
+   public List getTabCompletions(MinecraftServer var1, ICommandSender var2, String[] var3, @Nullable BlockPos var4) {
+      return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[]{"start", "stop"}) : Collections.emptyList();
    }
 }

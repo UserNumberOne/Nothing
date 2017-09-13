@@ -9,19 +9,19 @@ public class ChatAllowedCharacters {
    public static final char[] ILLEGAL_FILE_CHARACTERS = new char[]{'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"', ':'};
 
    public static boolean isAllowedCharacter(char var0) {
-      return var0 != 167 && var0 >= ' ' && var0 != 127;
+      return character != 167 && character >= ' ' && character != 127;
    }
 
    public static String filterAllowedCharacters(String var0) {
-      StringBuilder var1 = new StringBuilder();
+      StringBuilder stringbuilder = new StringBuilder();
 
-      for(char var5 : var0.toCharArray()) {
-         if (isAllowedCharacter(var5)) {
-            var1.append(var5);
+      for(char c0 : input.toCharArray()) {
+         if (isAllowedCharacter(c0)) {
+            stringbuilder.append(c0);
          }
       }
 
-      return var1.toString();
+      return stringbuilder.toString();
    }
 
    static {

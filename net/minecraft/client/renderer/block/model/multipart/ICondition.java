@@ -10,18 +10,18 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public interface ICondition {
    ICondition TRUE = new ICondition() {
-      public Predicate getPredicate(BlockStateContainer blockState) {
+      public Predicate getPredicate(BlockStateContainer var1) {
          return new Predicate() {
-            public boolean apply(@Nullable IBlockState p_apply_1_) {
+            public boolean apply(@Nullable IBlockState var1) {
                return true;
             }
          };
       }
    };
    ICondition FALSE = new ICondition() {
-      public Predicate getPredicate(BlockStateContainer blockState) {
+      public Predicate getPredicate(BlockStateContainer var1) {
          return new Predicate() {
-            public boolean apply(@Nullable IBlockState p_apply_1_) {
+            public boolean apply(@Nullable IBlockState var1) {
                return false;
             }
          };

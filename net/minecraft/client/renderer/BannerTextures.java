@@ -28,14 +28,14 @@ public class BannerTextures {
       private final String cacheResourceBase;
       private final String cacheId;
 
-      public Cache(String id, ResourceLocation baseResource, String resourcePath) {
+      public Cache(String var1, ResourceLocation var2, String var3) {
          this.cacheId = id;
          this.cacheResourceLocation = baseResource;
          this.cacheResourceBase = resourcePath;
       }
 
       @Nullable
-      public ResourceLocation getResourceLocation(String id, List patternList, List colorList) {
+      public ResourceLocation getResourceLocation(String var1, List var2, List var3) {
          if (id.isEmpty()) {
             return null;
          } else {

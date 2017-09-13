@@ -11,16 +11,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderSpider extends RenderLiving {
    private static final ResourceLocation SPIDER_TEXTURES = new ResourceLocation("textures/entity/spider/spider.png");
 
-   public RenderSpider(RenderManager renderManagerIn) {
+   public RenderSpider(RenderManager var1) {
       super(renderManagerIn, new ModelSpider(), 1.0F);
       this.addLayer(new LayerSpiderEyes(this));
    }
 
-   protected float getDeathMaxRotation(EntitySpider entityLivingBaseIn) {
+   protected float getDeathMaxRotation(EntitySpider var1) {
       return 180.0F;
    }
 
-   protected ResourceLocation getEntityTexture(EntitySpider entity) {
+   protected ResourceLocation getEntityTexture(EntitySpider var1) {
       return SPIDER_TEXTURES;
    }
 }

@@ -16,7 +16,7 @@ public class EnchantmentNameParts {
       return INSTANCE;
    }
 
-   public String generateNewRandomName(FontRenderer p_148334_1_, int p_148334_2_) {
+   public String generateNewRandomName(FontRenderer var1, int var2) {
       int i = this.rand.nextInt(2) + 3;
       String s = "";
 
@@ -32,7 +32,7 @@ public class EnchantmentNameParts {
       return org.apache.commons.lang3.StringUtils.join(list.size() >= 2 ? list.subList(0, 2) : list, " ");
    }
 
-   public void reseedRandomGenerator(long seed) {
+   public void reseedRandomGenerator(long var1) {
       this.rand.setSeed(seed);
    }
 }

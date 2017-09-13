@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 
 public class BiomeHell extends Biome {
    public BiomeHell(Biome.BiomeProperties var1) {
-      super(var1);
+      super(properties);
       this.spawnableMonsterList.clear();
       this.spawnableCreatureList.clear();
       this.spawnableWaterCreatureList.clear();
@@ -23,6 +23,6 @@ public class BiomeHell extends Biome {
    }
 
    public void decorate(World var1, Random var2, BlockPos var3) {
-      super.decorate(var1, var2, var3);
+      super.decorate(worldIn, rand, pos);
    }
 }

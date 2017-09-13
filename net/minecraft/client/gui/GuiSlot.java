@@ -36,7 +36,7 @@ public abstract class GuiSlot {
    public int headerPadding;
    private boolean enabled = true;
 
-   public GuiSlot(Minecraft mcIn, int width, int height, int topIn, int bottomIn, int slotHeightIn) {
+   public GuiSlot(Minecraft var1, int var2, int var3, int var4, int var5, int var6) {
       this.mc = mcIn;
       this.width = width;
       this.height = height;
@@ -47,7 +47,7 @@ public abstract class GuiSlot {
       this.right = width;
    }
 
-   public void setDimensions(int widthIn, int heightIn, int topIn, int bottomIn) {
+   public void setDimensions(int var1, int var2, int var3, int var4) {
       this.width = widthIn;
       this.height = heightIn;
       this.top = topIn;
@@ -56,11 +56,11 @@ public abstract class GuiSlot {
       this.right = widthIn;
    }
 
-   public void setShowSelectionBox(boolean showSelectionBoxIn) {
+   public void setShowSelectionBox(boolean var1) {
       this.showSelectionBox = showSelectionBoxIn;
    }
 
-   protected void setHasListHeader(boolean hasListHeaderIn, int headerPaddingIn) {
+   protected void setHasListHeader(boolean var1, int var2) {
       this.hasListHeader = hasListHeaderIn;
       this.headerPadding = headerPaddingIn;
       if (!hasListHeaderIn) {
@@ -81,21 +81,21 @@ public abstract class GuiSlot {
 
    protected abstract void drawBackground();
 
-   protected void updateItemPos(int entryID, int insideLeft, int yPos) {
+   protected void updateItemPos(int var1, int var2, int var3) {
    }
 
    protected abstract void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6);
 
-   protected void drawListHeader(int insideLeft, int insideTop, Tessellator tessellatorIn) {
+   protected void drawListHeader(int var1, int var2, Tessellator var3) {
    }
 
-   protected void clickedHeader(int p_148132_1_, int p_148132_2_) {
+   protected void clickedHeader(int var1, int var2) {
    }
 
-   protected void renderDecorations(int mouseXIn, int mouseYIn) {
+   protected void renderDecorations(int var1, int var2) {
    }
 
-   public int getSlotIndexFromScreenCoords(int posX, int posY) {
+   public int getSlotIndexFromScreenCoords(int var1, int var2) {
       int i = this.left + this.width / 2 - this.getListWidth() / 2;
       int j = this.left + this.width / 2 + this.getListWidth() / 2;
       int k = posY - this.top - this.headerPadding + (int)this.amountScrolled - 4;
@@ -103,7 +103,7 @@ public abstract class GuiSlot {
       return posX < this.getScrollBarX() && posX >= i && posX <= j && l >= 0 && k >= 0 && l < this.getSize() ? l : -1;
    }
 
-   public void registerScrollButtons(int scrollUpButtonIDIn, int scrollDownButtonIDIn) {
+   public void registerScrollButtons(int var1, int var2) {
       this.scrollUpButtonID = scrollUpButtonIDIn;
       this.scrollDownButtonID = scrollDownButtonIDIn;
    }
@@ -120,17 +120,17 @@ public abstract class GuiSlot {
       return (int)this.amountScrolled;
    }
 
-   public boolean isMouseYWithinSlotBounds(int p_148141_1_) {
+   public boolean isMouseYWithinSlotBounds(int var1) {
       return p_148141_1_ >= this.top && p_148141_1_ <= this.bottom && this.mouseX >= this.left && this.mouseX <= this.right;
    }
 
-   public void scrollBy(int amount) {
+   public void scrollBy(int var1) {
       this.amountScrolled += (float)amount;
       this.bindAmountScrolled();
       this.initialClickY = -2;
    }
 
-   public void actionPerformed(GuiButton button) {
+   public void actionPerformed(GuiButton var1) {
       if (button.enabled) {
          if (button.id == this.scrollUpButtonID) {
             this.amountScrolled -= (float)(this.slotHeight * 2 / 3);
@@ -145,7 +145,7 @@ public abstract class GuiSlot {
 
    }
 
-   public void drawScreen(int mouseXIn, int mouseYIn, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       if (this.visible) {
          this.mouseX = mouseXIn;
          this.mouseY = mouseYIn;
@@ -305,7 +305,7 @@ public abstract class GuiSlot {
 
    }
 
-   public void setEnabled(boolean enabledIn) {
+   public void setEnabled(boolean var1) {
       this.enabled = enabledIn;
    }
 
@@ -317,7 +317,7 @@ public abstract class GuiSlot {
       return 220;
    }
 
-   protected void drawSelectionBox(int insideLeft, int insideTop, int mouseXIn, int mouseYIn) {
+   protected void drawSelectionBox(int var1, int var2, int var3, int var4) {
       int i = this.getSize();
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
@@ -356,7 +356,7 @@ public abstract class GuiSlot {
       return this.width / 2 + 124;
    }
 
-   protected void overlayBackground(int startY, int endY, int startAlpha, int endAlpha) {
+   protected void overlayBackground(int var1, int var2, int var3, int var4) {
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
       this.mc.getTextureManager().bindTexture(Gui.OPTIONS_BACKGROUND);
@@ -370,7 +370,7 @@ public abstract class GuiSlot {
       tessellator.draw();
    }
 
-   public void setSlotXBoundsFromLeft(int leftIn) {
+   public void setSlotXBoundsFromLeft(int var1) {
       this.left = leftIn;
       this.right = leftIn + this.width;
    }
@@ -379,7 +379,7 @@ public abstract class GuiSlot {
       return this.slotHeight;
    }
 
-   protected void drawContainerBackground(Tessellator tessellator) {
+   protected void drawContainerBackground(Tessellator var1) {
       VertexBuffer buffer = tessellator.getBuffer();
       this.mc.getTextureManager().bindTexture(Gui.OPTIONS_BACKGROUND);
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

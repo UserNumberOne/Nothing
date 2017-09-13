@@ -3,6 +3,7 @@ package net.minecraft.nbt;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import org.apache.commons.lang3.StringUtils;
 
 public class NBTTagString extends NBTBase {
    private String data;
@@ -12,20 +13,20 @@ public class NBTTagString extends NBTBase {
    }
 
    public NBTTagString(String var1) {
-      this.data = var1;
-      if (var1 == null) {
+      this.data = data;
+      if (data == null) {
          throw new IllegalArgumentException("Empty string not allowed");
       }
    }
 
    void write(DataOutput var1) throws IOException {
-      var1.writeUTF(this.data);
+      output.writeUTF(this.data);
    }
 
    void read(DataInput var1, int var2, NBTSizeTracker var3) throws IOException {
-      var3.read(288L);
-      this.data = var1.readUTF();
-      var3.read((long)(16 * this.data.length()));
+      sizeTracker.read(288L);
+      this.data = input.readUTF();
+      NBTSizeTracker.readUTF(sizeTracker, this.data);
    }
 
    public byte getId() {
@@ -33,7 +34,7 @@ public class NBTTagString extends NBTBase {
    }
 
    public String toString() {
-      return "\"" + this.data.replace("\"", "\\\"") + "\"";
+      return "\"" + StringUtils.replaceEach(this.data, new String[]{"\\", "\""}, new String[]{"\\\\", "\\\""}) + "\"";
    }
 
    public NBTTagString copy() {
@@ -45,11 +46,11 @@ public class NBTTagString extends NBTBase {
    }
 
    public boolean equals(Object var1) {
-      if (!super.equals(var1)) {
+      if (!super.equals(p_equals_1_)) {
          return false;
       } else {
-         NBTTagString var2 = (NBTTagString)var1;
-         return this.data == null && var2.data == null || this.data != null && this.data.equals(var2.data);
+         NBTTagString nbttagstring = (NBTTagString)p_equals_1_;
+         return this.data == null && nbttagstring.data == null || this.data != null && this.data.equals(nbttagstring.data);
       }
    }
 
@@ -59,10 +60,5 @@ public class NBTTagString extends NBTBase {
 
    public String getString() {
       return this.data;
-   }
-
-   // $FF: synthetic method
-   public NBTBase copy() {
-      return this.copy();
    }
 }

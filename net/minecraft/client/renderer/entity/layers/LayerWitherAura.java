@@ -15,11 +15,11 @@ public class LayerWitherAura implements LayerRenderer {
    private final RenderWither witherRenderer;
    private final ModelWither witherModel = new ModelWither(0.5F);
 
-   public LayerWitherAura(RenderWither witherRendererIn) {
+   public LayerWitherAura(RenderWither var1) {
       this.witherRenderer = witherRendererIn;
    }
 
-   public void doRenderLayer(EntityWither entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityWither var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (entitylivingbaseIn.isArmored()) {
          GlStateManager.depthMask(!entitylivingbaseIn.isInvisible());
          this.witherRenderer.bindTexture(WITHER_ARMOR);

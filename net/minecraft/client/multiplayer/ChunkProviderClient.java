@@ -22,7 +22,7 @@ public class ChunkProviderClient implements IChunkProvider {
    private static final Logger LOGGER = LogManager.getLogger();
    private final Chunk blankChunk;
    private final Long2ObjectMap chunkMapping = new Long2ObjectOpenHashMap(8192) {
-      protected void rehash(int p_rehash_1_) {
+      protected void rehash(int var1) {
          if (p_rehash_1_ > this.key.length) {
             super.rehash(p_rehash_1_);
          }
@@ -31,12 +31,12 @@ public class ChunkProviderClient implements IChunkProvider {
    };
    private final World world;
 
-   public ChunkProviderClient(World worldIn) {
+   public ChunkProviderClient(World var1) {
       this.blankChunk = new EmptyChunk(worldIn, 0, 0);
       this.world = worldIn;
    }
 
-   public void unloadChunk(int x, int z) {
+   public void unloadChunk(int var1, int var2) {
       Chunk chunk = this.provideChunk(x, z);
       if (!chunk.isEmpty()) {
          chunk.onChunkUnload();
@@ -46,11 +46,11 @@ public class ChunkProviderClient implements IChunkProvider {
    }
 
    @Nullable
-   public Chunk getLoadedChunk(int x, int z) {
+   public Chunk getLoadedChunk(int var1, int var2) {
       return (Chunk)this.chunkMapping.get(ChunkPos.asLong(x, z));
    }
 
-   public Chunk loadChunk(int chunkX, int chunkZ) {
+   public Chunk loadChunk(int var1, int var2) {
       Chunk chunk = new Chunk(this.world, chunkX, chunkZ);
       this.chunkMapping.put(ChunkPos.asLong(chunkX, chunkZ), chunk);
       MinecraftForge.EVENT_BUS.post(new Load(chunk));
@@ -58,7 +58,7 @@ public class ChunkProviderClient implements IChunkProvider {
       return chunk;
    }
 
-   public Chunk provideChunk(int x, int z) {
+   public Chunk provideChunk(int var1, int var2) {
       return (Chunk)Objects.firstNonNull(this.getLoadedChunk(x, z), this.blankChunk);
    }
 

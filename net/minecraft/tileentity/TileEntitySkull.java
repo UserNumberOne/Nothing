@@ -16,10 +16,12 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.StringUtils;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntitySkull extends TileEntity implements ITickable {
    private int skullType;
-   public int skullRotation;
+   private int skullRotation;
    private GameProfile playerProfile;
    private int dragonAnimatedTicks;
    private boolean dragonAnimated;
@@ -27,37 +29,37 @@ public class TileEntitySkull extends TileEntity implements ITickable {
    private static MinecraftSessionService sessionService;
 
    public static void setProfileCache(PlayerProfileCache var0) {
-      profileCache = var0;
+      profileCache = profileCacheIn;
    }
 
    public static void setSessionService(MinecraftSessionService var0) {
-      sessionService = var0;
+      sessionService = sessionServiceIn;
    }
 
    public NBTTagCompound writeToNBT(NBTTagCompound var1) {
-      super.writeToNBT(var1);
-      var1.setByte("SkullType", (byte)(this.skullType & 255));
-      var1.setByte("Rot", (byte)(this.skullRotation & 255));
+      super.writeToNBT(compound);
+      compound.setByte("SkullType", (byte)(this.skullType & 255));
+      compound.setByte("Rot", (byte)(this.skullRotation & 255));
       if (this.playerProfile != null) {
-         NBTTagCompound var2 = new NBTTagCompound();
-         NBTUtil.writeGameProfile(var2, this.playerProfile);
-         var1.setTag("Owner", var2);
+         NBTTagCompound nbttagcompound = new NBTTagCompound();
+         NBTUtil.writeGameProfile(nbttagcompound, this.playerProfile);
+         compound.setTag("Owner", nbttagcompound);
       }
 
-      return var1;
+      return compound;
    }
 
    public void readFromNBT(NBTTagCompound var1) {
-      super.readFromNBT(var1);
-      this.skullType = var1.getByte("SkullType");
-      this.skullRotation = var1.getByte("Rot");
+      super.readFromNBT(compound);
+      this.skullType = compound.getByte("SkullType");
+      this.skullRotation = compound.getByte("Rot");
       if (this.skullType == 3) {
-         if (var1.hasKey("Owner", 10)) {
-            this.playerProfile = NBTUtil.readGameProfileFromNBT(var1.getCompoundTag("Owner"));
-         } else if (var1.hasKey("ExtraType", 8)) {
-            String var2 = var1.getString("ExtraType");
-            if (!StringUtils.isNullOrEmpty(var2)) {
-               this.playerProfile = new GameProfile((UUID)null, var2);
+         if (compound.hasKey("Owner", 10)) {
+            this.playerProfile = NBTUtil.readGameProfileFromNBT(compound.getCompoundTag("Owner"));
+         } else if (compound.hasKey("ExtraType", 8)) {
+            String s = compound.getString("ExtraType");
+            if (!StringUtils.isNullOrEmpty(s)) {
+               this.playerProfile = new GameProfile((UUID)null, s);
                this.updatePlayerProfile();
             }
          }
@@ -77,6 +79,11 @@ public class TileEntitySkull extends TileEntity implements ITickable {
 
    }
 
+   @SideOnly(Side.CLIENT)
+   public float getAnimationProgress(float var1) {
+      return this.dragonAnimated ? (float)this.dragonAnimatedTicks + p_184295_1_ : (float)this.dragonAnimatedTicks;
+   }
+
    @Nullable
    public GameProfile getPlayerProfile() {
       return this.playerProfile;
@@ -92,13 +99,13 @@ public class TileEntitySkull extends TileEntity implements ITickable {
    }
 
    public void setType(int var1) {
-      this.skullType = var1;
+      this.skullType = type;
       this.playerProfile = null;
    }
 
    public void setPlayerProfile(@Nullable GameProfile var1) {
       this.skullType = 3;
-      this.playerProfile = var1;
+      this.playerProfile = playerProfile;
       this.updatePlayerProfile();
    }
 
@@ -108,26 +115,26 @@ public class TileEntitySkull extends TileEntity implements ITickable {
    }
 
    public static GameProfile updateGameprofile(GameProfile var0) {
-      if (var0 != null && !StringUtils.isNullOrEmpty(var0.getName())) {
-         if (var0.isComplete() && var0.getProperties().containsKey("textures")) {
-            return var0;
+      if (input != null && !StringUtils.isNullOrEmpty(input.getName())) {
+         if (input.isComplete() && input.getProperties().containsKey("textures")) {
+            return input;
          } else if (profileCache != null && sessionService != null) {
-            GameProfile var1 = profileCache.getGameProfileForUsername(var0.getName());
-            if (var1 == null) {
-               return var0;
+            GameProfile gameprofile = profileCache.getGameProfileForUsername(input.getName());
+            if (gameprofile == null) {
+               return input;
             } else {
-               Property var2 = (Property)Iterables.getFirst(var1.getProperties().get("textures"), (Object)null);
-               if (var2 == null) {
-                  var1 = sessionService.fillProfileProperties(var1, true);
+               Property property = (Property)Iterables.getFirst(gameprofile.getProperties().get("textures"), (Object)null);
+               if (property == null) {
+                  gameprofile = sessionService.fillProfileProperties(gameprofile, true);
                }
 
-               return var1;
+               return gameprofile;
             }
          } else {
-            return var0;
+            return input;
          }
       } else {
-         return var0;
+         return input;
       }
    }
 
@@ -135,20 +142,25 @@ public class TileEntitySkull extends TileEntity implements ITickable {
       return this.skullType;
    }
 
+   @SideOnly(Side.CLIENT)
+   public int getSkullRotation() {
+      return this.skullRotation;
+   }
+
    public void setSkullRotation(int var1) {
-      this.skullRotation = var1;
+      this.skullRotation = rotation;
    }
 
    public void mirror(Mirror var1) {
       if (this.world != null && this.world.getBlockState(this.getPos()).getValue(BlockSkull.FACING) == EnumFacing.UP) {
-         this.skullRotation = var1.mirrorRotation(this.skullRotation, 16);
+         this.skullRotation = p_189668_1_.mirrorRotation(this.skullRotation, 16);
       }
 
    }
 
    public void rotate(Rotation var1) {
       if (this.world != null && this.world.getBlockState(this.getPos()).getValue(BlockSkull.FACING) == EnumFacing.UP) {
-         this.skullRotation = var1.rotate(this.skullRotation, 16);
+         this.skullRotation = p_189667_1_.rotate(this.skullRotation, 16);
       }
 
    }

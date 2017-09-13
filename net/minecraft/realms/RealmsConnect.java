@@ -22,11 +22,11 @@ public class RealmsConnect {
    private volatile boolean aborted;
    private NetworkManager connection;
 
-   public RealmsConnect(RealmsScreen onlineScreenIn) {
+   public RealmsConnect(RealmsScreen var1) {
       this.onlineScreen = onlineScreenIn;
    }
 
-   public void connect(final String p_connect_1_, final int p_connect_2_) {
+   public void connect(final String var1, final int var2) {
       Realms.setConnectedToRealms(true);
       (new Thread("Realms-connect-task") {
          public void run() {

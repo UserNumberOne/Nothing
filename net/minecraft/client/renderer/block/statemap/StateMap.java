@@ -20,13 +20,13 @@ public class StateMap extends StateMapperBase {
    private final String suffix;
    private final List ignored;
 
-   private StateMap(@Nullable IProperty name, @Nullable String suffix, List ignored) {
+   private StateMap(@Nullable IProperty var1, @Nullable String var2, List var3) {
       this.name = name;
       this.suffix = suffix;
       this.ignored = ignored;
    }
 
-   protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+   protected ModelResourceLocation getModelResourceLocation(IBlockState var1) {
       Map map = Maps.newLinkedHashMap(state.getProperties());
       String s;
       if (this.name == null) {
@@ -46,7 +46,7 @@ public class StateMap extends StateMapperBase {
       return new ModelResourceLocation(s, this.getPropertyString(map));
    }
 
-   private String removeName(IProperty p_187490_1_, Map p_187490_2_) {
+   private String removeName(IProperty var1, Map var2) {
       return p_187490_1_.getName((Comparable)p_187490_2_.remove(this.name));
    }
 
@@ -56,17 +56,17 @@ public class StateMap extends StateMapperBase {
       private String suffix;
       private final List ignored = Lists.newArrayList();
 
-      public StateMap.Builder withName(IProperty builderPropertyIn) {
+      public StateMap.Builder withName(IProperty var1) {
          this.name = builderPropertyIn;
          return this;
       }
 
-      public StateMap.Builder withSuffix(String builderSuffixIn) {
+      public StateMap.Builder withSuffix(String var1) {
          this.suffix = builderSuffixIn;
          return this;
       }
 
-      public StateMap.Builder ignore(IProperty... p_178442_1_) {
+      public StateMap.Builder ignore(IProperty... var1) {
          Collections.addAll(this.ignored, p_178442_1_);
          return this;
       }

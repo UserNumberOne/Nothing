@@ -7,7 +7,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ResourcePackListEntryDefault extends ResourcePackListEntryServer {
-   public ResourcePackListEntryDefault(GuiScreenResourcePacks resourcePacksGUIIn) {
+   public ResourcePackListEntryDefault(GuiScreenResourcePacks var1) {
       super(resourcePacksGUIIn, Minecraft.getMinecraft().getResourcePackRepository().rprDefaultResourcePack);
    }
 

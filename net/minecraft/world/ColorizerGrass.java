@@ -7,11 +7,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ColorizerGrass {
    private static int[] grassBuffer = new int[65536];
 
-   public static void setGrassBiomeColorizer(int[] grassBufferIn) {
+   public static void setGrassBiomeColorizer(int[] var0) {
       grassBuffer = grassBufferIn;
    }
 
-   public static int getGrassColor(double temperature, double humidity) {
+   public static int getGrassColor(double var0, double var2) {
       humidity = humidity * temperature;
       int i = (int)((1.0D - temperature) * 255.0D);
       int j = (int)((1.0D - humidity) * 255.0D);

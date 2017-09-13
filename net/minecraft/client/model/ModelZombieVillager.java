@@ -12,7 +12,7 @@ public class ModelZombieVillager extends ModelBiped {
       this(0.0F, 0.0F, false);
    }
 
-   public ModelZombieVillager(float p_i1165_1_, float p_i1165_2_, boolean p_i1165_3_) {
+   public ModelZombieVillager(float var1, float var2, boolean var3) {
       super(p_i1165_1_, 0.0F, 64, p_i1165_3_ ? 32 : 64);
       if (p_i1165_3_) {
          this.bipedHead = new ModelRenderer(this, 0, 0);
@@ -55,7 +55,7 @@ public class ModelZombieVillager extends ModelBiped {
 
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
       EntityZombie entityzombie = (EntityZombie)entityIn;
       float f = MathHelper.sin(this.swingProgress * 3.1415927F);

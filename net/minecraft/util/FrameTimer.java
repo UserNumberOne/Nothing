@@ -10,7 +10,7 @@ public class FrameTimer {
    private int counter;
    private int index;
 
-   public void addFrame(long runningTime) {
+   public void addFrame(long var1) {
       this.frames[this.index] = runningTime;
       ++this.index;
       if (this.index == 240) {
@@ -26,7 +26,7 @@ public class FrameTimer {
 
    }
 
-   public int getLagometerValue(long time, int multiplier) {
+   public int getLagometerValue(long var1, int var3) {
       double d0 = (double)time / 1.6666666E7D;
       return (int)(d0 * (double)multiplier);
    }
@@ -39,7 +39,7 @@ public class FrameTimer {
       return this.index;
    }
 
-   public int parseIndex(int rawIndex) {
+   public int parseIndex(int var1) {
       return rawIndex % 240;
    }
 

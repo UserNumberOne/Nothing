@@ -68,7 +68,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
    private int touchValue;
    private URI clickedLinkURI;
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       for(int i = 0; i < this.buttonList.size(); ++i) {
          ((GuiButton)this.buttonList.get(i)).drawButton(this.mc, mouseX, mouseY);
       }
@@ -79,7 +79,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (keyCode == 1) {
          this.mc.displayGuiScreen((GuiScreen)null);
          if (this.mc.currentScreen == null) {
@@ -89,7 +89,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 
    }
 
-   protected GuiButton addButton(GuiButton p_189646_1_) {
+   protected GuiButton addButton(GuiButton var1) {
       this.buttonList.add(p_189646_1_);
       return p_189646_1_;
    }
@@ -107,7 +107,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
       return "";
    }
 
-   public static void setClipboardString(String copyText) {
+   public static void setClipboardString(String var0) {
       if (!StringUtils.isEmpty(copyText)) {
          try {
             StringSelection stringselection = new StringSelection(copyText);
@@ -119,7 +119,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 
    }
 
-   protected void renderToolTip(ItemStack stack, int x, int y) {
+   protected void renderToolTip(ItemStack var1, int var2, int var3) {
       List list = stack.getTooltip(this.mc.player, this.mc.gameSettings.advancedItemTooltips);
 
       for(int i = 0; i < list.size(); ++i) {
@@ -136,19 +136,19 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
       GuiUtils.postItemToolTip();
    }
 
-   protected void drawCreativeTabHoveringText(String tabName, int mouseX, int mouseY) {
+   protected void drawCreativeTabHoveringText(String var1, int var2, int var3) {
       this.drawHoveringText(Arrays.asList(tabName), mouseX, mouseY);
    }
 
-   protected void drawHoveringText(List textLines, int x, int y) {
+   protected void drawHoveringText(List var1, int var2, int var3) {
       this.drawHoveringText(textLines, x, y, this.fontRendererObj);
    }
 
-   protected void drawHoveringText(List textLines, int x, int y, FontRenderer font) {
+   protected void drawHoveringText(List var1, int var2, int var3, FontRenderer var4) {
       GuiUtils.drawHoveringText(textLines, x, y, this.width, this.height, -1, font);
    }
 
-   protected void handleComponentHover(ITextComponent component, int x, int y) {
+   protected void handleComponentHover(ITextComponent var1, int var2, int var3) {
       if (component != null && component.getStyle().getHoverEvent() != null) {
          HoverEvent hoverevent = component.getStyle().getHoverEvent();
          if (hoverevent.getAction() == HoverEvent.Action.SHOW_ITEM) {
@@ -215,10 +215,10 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 
    }
 
-   protected void setText(String newChatText, boolean shouldOverwrite) {
+   protected void setText(String var1, boolean var2) {
    }
 
-   protected boolean handleComponentClick(ITextComponent component) {
+   protected boolean handleComponentClick(ITextComponent var1) {
       if (component == null) {
          return false;
       } else {
@@ -271,11 +271,11 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
       }
    }
 
-   public void sendChatMessage(String msg) {
+   public void sendChatMessage(String var1) {
       this.sendChatMessage(msg, true);
    }
 
-   public void sendChatMessage(String msg, boolean addToChat) {
+   public void sendChatMessage(String var1, boolean var2) {
       if (addToChat) {
          this.mc.ingameGUI.getChatGUI().addToSentMessages(msg);
       }
@@ -285,7 +285,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
       }
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       if (mouseButton == 0) {
          for(int i = 0; i < this.buttonList.size(); ++i) {
             GuiButton guibutton = (GuiButton)this.buttonList.get(i);
@@ -308,7 +308,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 
    }
 
-   protected void mouseReleased(int mouseX, int mouseY, int state) {
+   protected void mouseReleased(int var1, int var2, int var3) {
       if (this.selectedButton != null && state == 0) {
          this.selectedButton.mouseReleased(mouseX, mouseY);
          this.selectedButton = null;
@@ -316,13 +316,13 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 
    }
 
-   protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+   protected void mouseClickMove(int var1, int var2, int var3, long var4) {
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
    }
 
-   public void setWorldAndResolution(Minecraft mc, int width, int height) {
+   public void setWorldAndResolution(Minecraft var1, int var2, int var3) {
       this.mc = mc;
       this.itemRender = mc.getRenderItem();
       this.fontRendererObj = mc.fontRendererObj;
@@ -336,7 +336,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
       MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent.Post(this, this.buttonList));
    }
 
-   public void setGuiSize(int w, int h) {
+   public void setGuiSize(int var1, int var2) {
       this.width = w;
       this.height = h;
    }
@@ -415,7 +415,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
       MinecraftForge.EVENT_BUS.post(new BackgroundDrawnEvent(this));
    }
 
-   public void drawWorldBackground(int tint) {
+   public void drawWorldBackground(int var1) {
       if (this.mc.world != null) {
          this.drawGradientRect(0, 0, this.width, this.height, -1072689136, -804253680);
       } else {
@@ -424,7 +424,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 
    }
 
-   public void drawBackground(int tint) {
+   public void drawBackground(int var1) {
       GlStateManager.disableLighting();
       GlStateManager.disableFog();
       Tessellator tessellator = Tessellator.getInstance();
@@ -444,7 +444,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
       return true;
    }
 
-   public void confirmClicked(boolean result, int id) {
+   public void confirmClicked(boolean var1, int var2) {
       if (id == 31102009) {
          if (result) {
             this.openWebLink(this.clickedLinkURI);
@@ -456,7 +456,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 
    }
 
-   private void openWebLink(URI url) {
+   private void openWebLink(URI var1) {
       try {
          Class oclass = Class.forName("java.awt.Desktop");
          Object object = oclass.getMethod("getDesktop").invoke((Object)null);
@@ -480,23 +480,23 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
       return Keyboard.isKeyDown(56) || Keyboard.isKeyDown(184);
    }
 
-   public static boolean isKeyComboCtrlX(int keyID) {
+   public static boolean isKeyComboCtrlX(int var0) {
       return keyID == 45 && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown();
    }
 
-   public static boolean isKeyComboCtrlV(int keyID) {
+   public static boolean isKeyComboCtrlV(int var0) {
       return keyID == 47 && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown();
    }
 
-   public static boolean isKeyComboCtrlC(int keyID) {
+   public static boolean isKeyComboCtrlC(int var0) {
       return keyID == 46 && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown();
    }
 
-   public static boolean isKeyComboCtrlA(int keyID) {
+   public static boolean isKeyComboCtrlA(int var0) {
       return keyID == 30 && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown();
    }
 
-   public void onResize(Minecraft mcIn, int w, int h) {
+   public void onResize(Minecraft var1, int var2, int var3) {
       this.setWorldAndResolution(mcIn, w, h);
    }
 }

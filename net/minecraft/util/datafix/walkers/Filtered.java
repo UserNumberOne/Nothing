@@ -9,16 +9,16 @@ public abstract class Filtered implements IDataWalker {
    private final String value;
 
    public Filtered(String var1, String var2) {
-      this.key = var1;
-      this.value = var2;
+      this.key = keyIn;
+      this.value = valueIn;
    }
 
    public NBTTagCompound process(IDataFixer var1, NBTTagCompound var2, int var3) {
-      if (var2.getString(this.key).equals(this.value)) {
-         var2 = this.filteredProcess(var1, var2, var3);
+      if (compound.getString(this.key).equals(this.value)) {
+         compound = this.filteredProcess(fixer, compound, versionIn);
       }
 
-      return var2;
+      return compound;
    }
 
    abstract NBTTagCompound filteredProcess(IDataFixer var1, NBTTagCompound var2, int var3);

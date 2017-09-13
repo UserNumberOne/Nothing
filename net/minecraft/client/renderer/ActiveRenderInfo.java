@@ -27,7 +27,7 @@ public class ActiveRenderInfo {
    private static float rotationYZ;
    private static float rotationXY;
 
-   public static void updateRenderInfo(EntityPlayer entityplayerIn, boolean p_74583_1_) {
+   public static void updateRenderInfo(EntityPlayer var0, boolean var1) {
       GlStateManager.getFloat(2982, MODELVIEW);
       GlStateManager.getFloat(2983, PROJECTION);
       GlStateManager.glGetInteger(2978, VIEWPORT);
@@ -45,7 +45,7 @@ public class ActiveRenderInfo {
       rotationXZ = MathHelper.cos(f2 * 0.017453292F);
    }
 
-   public static Vec3d projectViewFromEntity(Entity entityIn, double p_178806_1_) {
+   public static Vec3d projectViewFromEntity(Entity var0, double var1) {
       double d0 = entityIn.prevPosX + (entityIn.posX - entityIn.prevPosX) * p_178806_1_;
       double d1 = entityIn.prevPosY + (entityIn.posY - entityIn.prevPosY) * p_178806_1_;
       double d2 = entityIn.prevPosZ + (entityIn.posZ - entityIn.prevPosZ) * p_178806_1_;
@@ -55,7 +55,7 @@ public class ActiveRenderInfo {
       return new Vec3d(d3, d4, d5);
    }
 
-   public static IBlockState getBlockStateAtEntityViewpoint(World worldIn, Entity entityIn, float p_186703_2_) {
+   public static IBlockState getBlockStateAtEntityViewpoint(World var0, Entity var1, float var2) {
       Vec3d vec3d = projectViewFromEntity(entityIn, (double)p_186703_2_);
       BlockPos blockpos = new BlockPos(vec3d);
       IBlockState iblockstate = worldIn.getBlockState(blockpos);

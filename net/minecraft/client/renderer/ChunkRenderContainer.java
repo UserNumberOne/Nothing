@@ -16,7 +16,7 @@ public abstract class ChunkRenderContainer {
    protected List renderChunks = Lists.newArrayListWithCapacity(17424);
    protected boolean initialized;
 
-   public void initialize(double viewEntityXIn, double viewEntityYIn, double viewEntityZIn) {
+   public void initialize(double var1, double var3, double var5) {
       this.initialized = true;
       this.renderChunks.clear();
       this.viewEntityX = viewEntityXIn;
@@ -24,12 +24,12 @@ public abstract class ChunkRenderContainer {
       this.viewEntityZ = viewEntityZIn;
    }
 
-   public void preRenderChunk(RenderChunk renderChunkIn) {
+   public void preRenderChunk(RenderChunk var1) {
       BlockPos blockpos = renderChunkIn.getPosition();
       GlStateManager.translate((float)((double)blockpos.getX() - this.viewEntityX), (float)((double)blockpos.getY() - this.viewEntityY), (float)((double)blockpos.getZ() - this.viewEntityZ));
    }
 
-   public void addRenderChunk(RenderChunk renderChunkIn, BlockRenderLayer layer) {
+   public void addRenderChunk(RenderChunk var1, BlockRenderLayer var2) {
       this.renderChunks.add(renderChunkIn);
    }
 

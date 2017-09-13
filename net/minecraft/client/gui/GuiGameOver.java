@@ -15,7 +15,7 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback {
    private int enableButtonsTimer;
    private final ITextComponent causeOfDeath;
 
-   public GuiGameOver(@Nullable ITextComponent p_i46598_1_) {
+   public GuiGameOver(@Nullable ITextComponent var1) {
       this.causeOfDeath = p_i46598_1_;
    }
 
@@ -39,10 +39,10 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       switch(button.id) {
       case 0:
          this.mc.player.respawnPlayer();
@@ -60,7 +60,7 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback {
 
    }
 
-   public void confirmClicked(boolean result, int id) {
+   public void confirmClicked(boolean var1, int var2) {
       if (result) {
          if (this.mc.world != null) {
             this.mc.world.sendQuittingDisconnectingPacket();
@@ -75,7 +75,7 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       boolean flag = this.mc.world.getWorldInfo().isHardcoreModeEnabled();
       this.drawGradientRect(0, 0, this.width, this.height, 1615855616, -1602211792);
       GlStateManager.pushMatrix();
@@ -98,7 +98,7 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback {
    }
 
    @Nullable
-   public ITextComponent getClickedComponentAt(int p_184870_1_) {
+   public ITextComponent getClickedComponentAt(int var1) {
       if (this.causeOfDeath == null) {
          return null;
       } else {

@@ -17,11 +17,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class DebugRendererHeightMap implements DebugRenderer.IDebugRenderer {
    private final Minecraft minecraft;
 
-   public DebugRendererHeightMap(Minecraft minecraftIn) {
+   public DebugRendererHeightMap(Minecraft var1) {
       this.minecraft = minecraftIn;
    }
 
-   public void render(float p_190060_1_, long p_190060_2_) {
+   public void render(float var1, long var2) {
       EntityPlayer entityplayer = this.minecraft.player;
       World world = this.minecraft.world;
       double d0 = entityplayer.lastTickPosX + (entityplayer.posX - entityplayer.lastTickPosX) * (double)p_190060_1_;

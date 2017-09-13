@@ -2,7 +2,6 @@ package net.minecraft.world.gen.feature;
 
 import java.util.Random;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -12,57 +11,57 @@ public class WorldGenLiquids extends WorldGenerator {
    private final Block block;
 
    public WorldGenLiquids(Block var1) {
-      this.block = var1;
+      this.block = blockIn;
    }
 
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      if (var1.getBlockState(var3.up()).getBlock() != Blocks.STONE) {
+      if (worldIn.getBlockState(position.up()).getBlock() != Blocks.STONE) {
          return false;
-      } else if (var1.getBlockState(var3.down()).getBlock() != Blocks.STONE) {
+      } else if (worldIn.getBlockState(position.down()).getBlock() != Blocks.STONE) {
          return false;
       } else {
-         IBlockState var4 = var1.getBlockState(var3);
-         if (var4.getMaterial() != Material.AIR && var4.getBlock() != Blocks.STONE) {
+         IBlockState iblockstate = worldIn.getBlockState(position);
+         if (!iblockstate.getBlock().isAir(iblockstate, worldIn, position) && iblockstate.getBlock() != Blocks.STONE) {
             return false;
          } else {
-            int var5 = 0;
-            if (var1.getBlockState(var3.west()).getBlock() == Blocks.STONE) {
-               ++var5;
+            int i = 0;
+            if (worldIn.getBlockState(position.west()).getBlock() == Blocks.STONE) {
+               ++i;
             }
 
-            if (var1.getBlockState(var3.east()).getBlock() == Blocks.STONE) {
-               ++var5;
+            if (worldIn.getBlockState(position.east()).getBlock() == Blocks.STONE) {
+               ++i;
             }
 
-            if (var1.getBlockState(var3.north()).getBlock() == Blocks.STONE) {
-               ++var5;
+            if (worldIn.getBlockState(position.north()).getBlock() == Blocks.STONE) {
+               ++i;
             }
 
-            if (var1.getBlockState(var3.south()).getBlock() == Blocks.STONE) {
-               ++var5;
+            if (worldIn.getBlockState(position.south()).getBlock() == Blocks.STONE) {
+               ++i;
             }
 
-            int var6 = 0;
-            if (var1.isAirBlock(var3.west())) {
-               ++var6;
+            int j = 0;
+            if (worldIn.isAirBlock(position.west())) {
+               ++j;
             }
 
-            if (var1.isAirBlock(var3.east())) {
-               ++var6;
+            if (worldIn.isAirBlock(position.east())) {
+               ++j;
             }
 
-            if (var1.isAirBlock(var3.north())) {
-               ++var6;
+            if (worldIn.isAirBlock(position.north())) {
+               ++j;
             }
 
-            if (var1.isAirBlock(var3.south())) {
-               ++var6;
+            if (worldIn.isAirBlock(position.south())) {
+               ++j;
             }
 
-            if (var5 == 3 && var6 == 1) {
-               IBlockState var7 = this.block.getDefaultState();
-               var1.setBlockState(var3, var7, 2);
-               var1.immediateBlockTick(var3, var7, var2);
+            if (i == 3 && j == 1) {
+               IBlockState iblockstate1 = this.block.getDefaultState();
+               worldIn.setBlockState(position, iblockstate1, 2);
+               worldIn.immediateBlockTick(position, iblockstate1, rand);
             }
 
             return true;

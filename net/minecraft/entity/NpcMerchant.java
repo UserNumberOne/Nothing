@@ -17,7 +17,7 @@ public class NpcMerchant implements IMerchant {
    private MerchantRecipeList recipeList;
    private final ITextComponent name;
 
-   public NpcMerchant(EntityPlayer customerIn, ITextComponent nameIn) {
+   public NpcMerchant(EntityPlayer var1, ITextComponent var2) {
       this.customer = customerIn;
       this.name = nameIn;
       this.theMerchantInventory = new InventoryMerchant(customerIn, this);
@@ -27,22 +27,22 @@ public class NpcMerchant implements IMerchant {
       return this.customer;
    }
 
-   public void setCustomer(EntityPlayer player) {
+   public void setCustomer(EntityPlayer var1) {
    }
 
-   public MerchantRecipeList getRecipes(EntityPlayer player) {
+   public MerchantRecipeList getRecipes(EntityPlayer var1) {
       return this.recipeList;
    }
 
-   public void setRecipes(MerchantRecipeList recipeList) {
+   public void setRecipes(MerchantRecipeList var1) {
       this.recipeList = recipeList;
    }
 
-   public void useRecipe(MerchantRecipe recipe) {
+   public void useRecipe(MerchantRecipe var1) {
       recipe.incrementToolUses();
    }
 
-   public void verifySellingItem(ItemStack stack) {
+   public void verifySellingItem(ItemStack var1) {
    }
 
    public ITextComponent getDisplayName() {

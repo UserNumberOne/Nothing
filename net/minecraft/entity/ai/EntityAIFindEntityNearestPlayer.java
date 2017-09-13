@@ -15,7 +15,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.Team;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIFindEntityNearestPlayer extends EntityAIBase {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -24,26 +23,26 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase {
    private final EntityAINearestAttackableTarget.Sorter sorter;
    private EntityLivingBase entityTarget;
 
-   public EntityAIFindEntityNearestPlayer(EntityLiving entityinsentient) {
-      this.entityLiving = entityinsentient;
-      if (entityinsentient instanceof EntityCreature) {
+   public EntityAIFindEntityNearestPlayer(EntityLiving var1) {
+      this.entityLiving = entityLivingIn;
+      if (entityLivingIn instanceof EntityCreature) {
          LOGGER.warn("Use NearestAttackableTargetGoal.class for PathfinerMob mobs!");
       }
 
       this.predicate = new Predicate() {
-         public boolean apply(@Nullable Entity entity) {
-            if (!(entity instanceof EntityPlayer)) {
+         public boolean apply(@Nullable Entity var1) {
+            if (!(p_apply_1_ instanceof EntityPlayer)) {
                return false;
-            } else if (((EntityPlayer)entity).capabilities.disableDamage) {
+            } else if (((EntityPlayer)p_apply_1_).capabilities.disableDamage) {
                return false;
             } else {
                double d0 = EntityAIFindEntityNearestPlayer.this.maxTargetRange();
-               if (entity.isSneaking()) {
+               if (p_apply_1_.isSneaking()) {
                   d0 *= 0.800000011920929D;
                }
 
-               if (entity.isInvisible()) {
-                  float f = ((EntityPlayer)entity).getArmorVisibility();
+               if (p_apply_1_.isInvisible()) {
+                  float f = ((EntityPlayer)p_apply_1_).getArmorVisibility();
                   if (f < 0.1F) {
                      f = 0.1F;
                   }
@@ -51,15 +50,11 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase {
                   d0 *= (double)(0.7F * f);
                }
 
-               return (double)entity.getDistanceToEntity(EntityAIFindEntityNearestPlayer.this.entityLiving) > d0 ? false : EntityAITarget.isSuitableTarget(EntityAIFindEntityNearestPlayer.this.entityLiving, (EntityLivingBase)entity, false, true);
+               return (double)p_apply_1_.getDistanceToEntity(EntityAIFindEntityNearestPlayer.this.entityLiving) > d0 ? false : EntityAITarget.isSuitableTarget(EntityAIFindEntityNearestPlayer.this.entityLiving, (EntityLivingBase)p_apply_1_, false, true);
             }
          }
-
-         public boolean apply(Object object) {
-            return this.apply((Entity)object);
-         }
       };
-      this.sorter = new EntityAINearestAttackableTarget.Sorter(entityinsentient);
+      this.sorter = new EntityAINearestAttackableTarget.Sorter(entityLivingIn);
    }
 
    public boolean shouldExecute() {
@@ -75,27 +70,27 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase {
    }
 
    public boolean continueExecuting() {
-      EntityLivingBase entityliving = this.entityLiving.getAttackTarget();
-      if (entityliving == null) {
+      EntityLivingBase entitylivingbase = this.entityLiving.getAttackTarget();
+      if (entitylivingbase == null) {
          return false;
-      } else if (!entityliving.isEntityAlive()) {
+      } else if (!entitylivingbase.isEntityAlive()) {
          return false;
-      } else if (entityliving instanceof EntityPlayer && ((EntityPlayer)entityliving).capabilities.disableDamage) {
+      } else if (entitylivingbase instanceof EntityPlayer && ((EntityPlayer)entitylivingbase).capabilities.disableDamage) {
          return false;
       } else {
-         Team scoreboardteambase = this.entityLiving.getTeam();
-         Team scoreboardteambase1 = entityliving.getTeam();
-         if (scoreboardteambase != null && scoreboardteambase1 == scoreboardteambase) {
+         Team team = this.entityLiving.getTeam();
+         Team team1 = entitylivingbase.getTeam();
+         if (team != null && team1 == team) {
             return false;
          } else {
             double d0 = this.maxTargetRange();
-            return this.entityLiving.getDistanceSqToEntity(entityliving) > d0 * d0 ? false : !(entityliving instanceof EntityPlayerMP) || !((EntityPlayerMP)entityliving).interactionManager.isCreative();
+            return this.entityLiving.getDistanceSqToEntity(entitylivingbase) > d0 * d0 ? false : !(entitylivingbase instanceof EntityPlayerMP) || !((EntityPlayerMP)entitylivingbase).interactionManager.isCreative();
          }
       }
    }
 
    public void startExecuting() {
-      this.entityLiving.setGoalTarget(this.entityTarget, TargetReason.CLOSEST_PLAYER, true);
+      this.entityLiving.setAttackTarget(this.entityTarget);
       super.startExecuting();
    }
 
@@ -105,7 +100,7 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase {
    }
 
    protected double maxTargetRange() {
-      IAttributeInstance attributeinstance = this.entityLiving.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
-      return attributeinstance == null ? 16.0D : attributeinstance.getAttributeValue();
+      IAttributeInstance iattributeinstance = this.entityLiving.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
+      return iattributeinstance == null ? 16.0D : iattributeinstance.getAttributeValue();
    }
 }

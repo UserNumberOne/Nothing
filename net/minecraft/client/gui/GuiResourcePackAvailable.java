@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiResourcePackAvailable extends GuiResourcePackList {
-   public GuiResourcePackAvailable(Minecraft mcIn, int p_i45054_2_, int p_i45054_3_, List p_i45054_4_) {
+   public GuiResourcePackAvailable(Minecraft var1, int var2, int var3, List var4) {
       super(mcIn, p_i45054_2_, p_i45054_3_, p_i45054_4_);
    }
 

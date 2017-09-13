@@ -37,34 +37,34 @@ public class RealmsScreen {
    public void init() {
    }
 
-   public void init(Minecraft p_init_1_, int p_init_2_, int p_init_3_) {
+   public void init(Minecraft var1, int var2, int var3) {
    }
 
-   public void drawCenteredString(String p_drawCenteredString_1_, int p_drawCenteredString_2_, int p_drawCenteredString_3_, int p_drawCenteredString_4_) {
+   public void drawCenteredString(String var1, int var2, int var3, int var4) {
       this.proxy.drawCenteredString(p_drawCenteredString_1_, p_drawCenteredString_2_, p_drawCenteredString_3_, p_drawCenteredString_4_);
    }
 
-   public void drawString(String p_drawString_1_, int p_drawString_2_, int p_drawString_3_, int p_drawString_4_) {
+   public void drawString(String var1, int var2, int var3, int var4) {
       this.drawString(p_drawString_1_, p_drawString_2_, p_drawString_3_, p_drawString_4_, true);
    }
 
-   public void drawString(String p_drawString_1_, int p_drawString_2_, int p_drawString_3_, int p_drawString_4_, boolean p_drawString_5_) {
+   public void drawString(String var1, int var2, int var3, int var4, boolean var5) {
       this.proxy.drawString(p_drawString_1_, p_drawString_2_, p_drawString_3_, p_drawString_4_, false);
    }
 
-   public void blit(int p_blit_1_, int p_blit_2_, int p_blit_3_, int p_blit_4_, int p_blit_5_, int p_blit_6_) {
+   public void blit(int var1, int var2, int var3, int var4, int var5, int var6) {
       this.proxy.drawTexturedModalRect(p_blit_1_, p_blit_2_, p_blit_3_, p_blit_4_, p_blit_5_, p_blit_6_);
    }
 
-   public static void blit(int p_blit_0_, int p_blit_1_, float p_blit_2_, float p_blit_3_, int p_blit_4_, int p_blit_5_, int p_blit_6_, int p_blit_7_, float p_blit_8_, float p_blit_9_) {
+   public static void blit(int var0, int var1, float var2, float var3, int var4, int var5, int var6, int var7, float var8, float var9) {
       Gui.drawScaledCustomSizeModalRect(p_blit_0_, p_blit_1_, p_blit_2_, p_blit_3_, p_blit_4_, p_blit_5_, p_blit_6_, p_blit_7_, p_blit_8_, p_blit_9_);
    }
 
-   public static void blit(int p_blit_0_, int p_blit_1_, float p_blit_2_, float p_blit_3_, int p_blit_4_, int p_blit_5_, float p_blit_6_, float p_blit_7_) {
+   public static void blit(int var0, int var1, float var2, float var3, int var4, int var5, float var6, float var7) {
       Gui.drawModalRectWithCustomSizedTexture(p_blit_0_, p_blit_1_, p_blit_2_, p_blit_3_, p_blit_4_, p_blit_5_, p_blit_6_, p_blit_7_);
    }
 
-   public void fillGradient(int p_fillGradient_1_, int p_fillGradient_2_, int p_fillGradient_3_, int p_fillGradient_4_, int p_fillGradient_5_, int p_fillGradient_6_) {
+   public void fillGradient(int var1, int var2, int var3, int var4, int var5, int var6) {
       this.proxy.drawGradientRect(p_fillGradient_1_, p_fillGradient_2_, p_fillGradient_3_, p_fillGradient_4_, p_fillGradient_5_, p_fillGradient_6_);
    }
 
@@ -76,30 +76,30 @@ public class RealmsScreen {
       return this.proxy.doesGuiPauseGame();
    }
 
-   public void renderBackground(int p_renderBackground_1_) {
+   public void renderBackground(int var1) {
       this.proxy.drawWorldBackground(p_renderBackground_1_);
    }
 
-   public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
+   public void render(int var1, int var2, float var3) {
       for(int i = 0; i < this.proxy.buttons().size(); ++i) {
          ((RealmsButton)this.proxy.buttons().get(i)).render(p_render_1_, p_render_2_);
       }
 
    }
 
-   public void renderTooltip(ItemStack p_renderTooltip_1_, int p_renderTooltip_2_, int p_renderTooltip_3_) {
+   public void renderTooltip(ItemStack var1, int var2, int var3) {
       this.proxy.renderToolTip(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_);
    }
 
-   public void renderTooltip(String p_renderTooltip_1_, int p_renderTooltip_2_, int p_renderTooltip_3_) {
+   public void renderTooltip(String var1, int var2, int var3) {
       this.proxy.drawCreativeTabHoveringText(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_);
    }
 
-   public void renderTooltip(List p_renderTooltip_1_, int p_renderTooltip_2_, int p_renderTooltip_3_) {
+   public void renderTooltip(List var1, int var2, int var3) {
       this.proxy.drawHoveringText(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_);
    }
 
-   public static void bindFace(String p_bindFace_0_, String p_bindFace_1_) {
+   public static void bindFace(String var0, String var1) {
       ResourceLocation resourcelocation = AbstractClientPlayer.getLocationSkin(p_bindFace_1_);
       if (resourcelocation == null) {
          resourcelocation = DefaultPlayerSkin.getDefaultSkin(UUIDTypeAdapter.fromString(p_bindFace_0_));
@@ -109,7 +109,7 @@ public class RealmsScreen {
       Minecraft.getMinecraft().getTextureManager().bindTexture(resourcelocation);
    }
 
-   public static void bind(String p_bind_0_) {
+   public static void bind(String var0) {
       ResourceLocation resourcelocation = new ResourceLocation(p_bind_0_);
       Minecraft.getMinecraft().getTextureManager().bindTexture(resourcelocation);
    }
@@ -129,26 +129,26 @@ public class RealmsScreen {
       return this.proxy.getFontHeight();
    }
 
-   public int fontWidth(String p_fontWidth_1_) {
+   public int fontWidth(String var1) {
       return this.proxy.getStringWidth(p_fontWidth_1_);
    }
 
-   public void fontDrawShadow(String p_fontDrawShadow_1_, int p_fontDrawShadow_2_, int p_fontDrawShadow_3_, int p_fontDrawShadow_4_) {
+   public void fontDrawShadow(String var1, int var2, int var3, int var4) {
       this.proxy.fontDrawShadow(p_fontDrawShadow_1_, p_fontDrawShadow_2_, p_fontDrawShadow_3_, p_fontDrawShadow_4_);
    }
 
-   public List fontSplit(String p_fontSplit_1_, int p_fontSplit_2_) {
+   public List fontSplit(String var1, int var2) {
       return this.proxy.fontSplit(p_fontSplit_1_, p_fontSplit_2_);
    }
 
-   public void buttonClicked(RealmsButton p_buttonClicked_1_) {
+   public void buttonClicked(RealmsButton var1) {
    }
 
-   public static RealmsButton newButton(int p_newButton_0_, int p_newButton_1_, int p_newButton_2_, String p_newButton_3_) {
+   public static RealmsButton newButton(int var0, int var1, int var2, String var3) {
       return new RealmsButton(p_newButton_0_, p_newButton_1_, p_newButton_2_, p_newButton_3_);
    }
 
-   public static RealmsButton newButton(int p_newButton_0_, int p_newButton_1_, int p_newButton_2_, int p_newButton_3_, int p_newButton_4_, String p_newButton_5_) {
+   public static RealmsButton newButton(int var0, int var1, int var2, int var3, int var4, String var5) {
       return new RealmsButton(p_newButton_0_, p_newButton_1_, p_newButton_2_, p_newButton_3_, p_newButton_4_, p_newButton_5_);
    }
 
@@ -156,7 +156,7 @@ public class RealmsScreen {
       this.proxy.buttonsClear();
    }
 
-   public void buttonsAdd(RealmsButton p_buttonsAdd_1_) {
+   public void buttonsAdd(RealmsButton var1) {
       this.proxy.buttonsAdd(p_buttonsAdd_1_);
    }
 
@@ -164,15 +164,15 @@ public class RealmsScreen {
       return this.proxy.buttons();
    }
 
-   public void buttonsRemove(RealmsButton p_buttonsRemove_1_) {
+   public void buttonsRemove(RealmsButton var1) {
       this.proxy.buttonsRemove(p_buttonsRemove_1_);
    }
 
-   public RealmsEditBox newEditBox(int p_newEditBox_1_, int p_newEditBox_2_, int p_newEditBox_3_, int p_newEditBox_4_, int p_newEditBox_5_) {
+   public RealmsEditBox newEditBox(int var1, int var2, int var3, int var4, int var5) {
       return new RealmsEditBox(p_newEditBox_1_, p_newEditBox_2_, p_newEditBox_3_, p_newEditBox_4_, p_newEditBox_5_);
    }
 
-   public void mouseClicked(int p_mouseClicked_1_, int p_mouseClicked_2_, int p_mouseClicked_3_) {
+   public void mouseClicked(int var1, int var2, int var3) {
    }
 
    public void mouseEvent() {
@@ -181,23 +181,23 @@ public class RealmsScreen {
    public void keyboardEvent() {
    }
 
-   public void mouseReleased(int p_mouseReleased_1_, int p_mouseReleased_2_, int p_mouseReleased_3_) {
+   public void mouseReleased(int var1, int var2, int var3) {
    }
 
-   public void mouseDragged(int p_mouseDragged_1_, int p_mouseDragged_2_, int p_mouseDragged_3_, long p_mouseDragged_4_) {
+   public void mouseDragged(int var1, int var2, int var3, long var4) {
    }
 
-   public void keyPressed(char p_keyPressed_1_, int p_keyPressed_2_) {
+   public void keyPressed(char var1, int var2) {
    }
 
-   public void confirmResult(boolean p_confirmResult_1_, int p_confirmResult_2_) {
+   public void confirmResult(boolean var1, int var2) {
    }
 
-   public static String getLocalizedString(String p_getLocalizedString_0_) {
+   public static String getLocalizedString(String var0) {
       return I18n.format(p_getLocalizedString_0_);
    }
 
-   public static String getLocalizedString(String p_getLocalizedString_0_, Object... p_getLocalizedString_1_) {
+   public static String getLocalizedString(String var0, Object... var1) {
       return I18n.format(p_getLocalizedString_0_, p_getLocalizedString_1_);
    }
 

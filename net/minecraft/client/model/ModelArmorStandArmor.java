@@ -11,15 +11,15 @@ public class ModelArmorStandArmor extends ModelBiped {
       this(0.0F);
    }
 
-   public ModelArmorStandArmor(float modelSize) {
+   public ModelArmorStandArmor(float var1) {
       this(modelSize, 64, 32);
    }
 
-   protected ModelArmorStandArmor(float modelSize, int textureWidthIn, int textureHeightIn) {
+   protected ModelArmorStandArmor(float var1, int var2, int var3) {
       super(modelSize, 0.0F, textureWidthIn, textureHeightIn);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       if (entityIn instanceof EntityArmorStand) {
          EntityArmorStand entityarmorstand = (EntityArmorStand)entityIn;
          this.bipedHead.rotateAngleX = 0.017453292F * entityarmorstand.getHeadRotation().getX();

@@ -14,9 +14,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.projectiles.ProjectileSource;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityFireball extends Entity {
    private int xTile = -1;
@@ -30,49 +29,53 @@ public abstract class EntityFireball extends Entity {
    public double accelerationX;
    public double accelerationY;
    public double accelerationZ;
-   public float bukkitYield = 1.0F;
-   public boolean isIncendiary = true;
 
-   public EntityFireball(World world) {
-      super(world);
+   public EntityFireball(World var1) {
+      super(worldIn);
       this.setSize(1.0F, 1.0F);
    }
 
    protected void entityInit() {
    }
 
-   public EntityFireball(World world, double d0, double d1, double d2, double d3, double d4, double d5) {
-      super(world);
-      this.setSize(1.0F, 1.0F);
-      this.setLocationAndAngles(d0, d1, d2, this.rotationYaw, this.rotationPitch);
-      this.setPosition(d0, d1, d2);
-      double d6 = (double)MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
-      this.accelerationX = d3 / d6 * 0.1D;
-      this.accelerationY = d4 / d6 * 0.1D;
-      this.accelerationZ = d5 / d6 * 0.1D;
+   @SideOnly(Side.CLIENT)
+   public boolean isInRangeToRenderDist(double var1) {
+      double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
+      if (Double.isNaN(d0)) {
+         d0 = 4.0D;
+      }
+
+      d0 = d0 * 64.0D;
+      return distance < d0 * d0;
    }
 
-   public EntityFireball(World world, EntityLivingBase entityliving, double d0, double d1, double d2) {
-      super(world);
-      this.shootingEntity = entityliving;
-      this.projectileSource = (LivingEntity)entityliving.getBukkitEntity();
+   public EntityFireball(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
+      super(worldIn);
       this.setSize(1.0F, 1.0F);
-      this.setLocationAndAngles(entityliving.posX, entityliving.posY, entityliving.posZ, entityliving.rotationYaw, entityliving.rotationPitch);
+      this.setLocationAndAngles(x, y, z, this.rotationYaw, this.rotationPitch);
+      this.setPosition(x, y, z);
+      double d0 = (double)MathHelper.sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
+      this.accelerationX = accelX / d0 * 0.1D;
+      this.accelerationY = accelY / d0 * 0.1D;
+      this.accelerationZ = accelZ / d0 * 0.1D;
+   }
+
+   public EntityFireball(World var1, EntityLivingBase var2, double var3, double var5, double var7) {
+      super(worldIn);
+      this.shootingEntity = shooter;
+      this.setSize(1.0F, 1.0F);
+      this.setLocationAndAngles(shooter.posX, shooter.posY, shooter.posZ, shooter.rotationYaw, shooter.rotationPitch);
       this.setPosition(this.posX, this.posY, this.posZ);
       this.motionX = 0.0D;
       this.motionY = 0.0D;
       this.motionZ = 0.0D;
-      this.setDirection(d0, d1, d2);
-   }
-
-   public void setDirection(double d0, double d1, double d2) {
-      d0 = d0 + this.rand.nextGaussian() * 0.4D;
-      d1 = d1 + this.rand.nextGaussian() * 0.4D;
-      d2 = d2 + this.rand.nextGaussian() * 0.4D;
-      double d3 = (double)MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-      this.accelerationX = d0 / d3 * 0.1D;
-      this.accelerationY = d1 / d3 * 0.1D;
-      this.accelerationZ = d2 / d3 * 0.1D;
+      accelX = accelX + this.rand.nextGaussian() * 0.4D;
+      accelY = accelY + this.rand.nextGaussian() * 0.4D;
+      accelZ = accelZ + this.rand.nextGaussian() * 0.4D;
+      double d0 = (double)MathHelper.sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
+      this.accelerationX = accelX / d0 * 0.1D;
+      this.accelerationY = accelY / d0 * 0.1D;
+      this.accelerationZ = accelZ / d0 * 0.1D;
    }
 
    public void onUpdate() {
@@ -102,12 +105,9 @@ public abstract class EntityFireball extends Entity {
             ++this.ticksInAir;
          }
 
-         RayTraceResult movingobjectposition = ProjectileHelper.forwardsRaycast(this, true, this.ticksInAir >= 25, this.shootingEntity);
-         if (movingobjectposition != null) {
-            this.onImpact(movingobjectposition);
-            if (this.isDead) {
-               CraftEventFactory.callProjectileHitEvent(this);
-            }
+         RayTraceResult raytraceresult = ProjectileHelper.forwardsRaycast(this, true, this.ticksInAir >= 25, this.shootingEntity);
+         if (raytraceresult != null) {
+            this.onImpact(raytraceresult);
          }
 
          this.posX += this.motionX;
@@ -117,6 +117,7 @@ public abstract class EntityFireball extends Entity {
          float f = this.getMotionFactor();
          if (this.isInWater()) {
             for(int i = 0; i < 4; ++i) {
+               float f1 = 0.25F;
                this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
             }
 
@@ -151,34 +152,34 @@ public abstract class EntityFireball extends Entity {
 
    protected abstract void onImpact(RayTraceResult var1);
 
-   public static void registerFixesFireball(DataFixer dataconvertermanager, String s) {
+   public static void registerFixesFireball(DataFixer var0, String var1) {
    }
 
-   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-      nbttagcompound.setInteger("xTile", this.xTile);
-      nbttagcompound.setInteger("yTile", this.yTile);
-      nbttagcompound.setInteger("zTile", this.zTile);
-      ResourceLocation minecraftkey = (ResourceLocation)Block.REGISTRY.getNameForObject(this.inTile);
-      nbttagcompound.setString("inTile", minecraftkey == null ? "" : minecraftkey.toString());
-      nbttagcompound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
-      nbttagcompound.setTag("direction", this.newDoubleNBTList(new double[]{this.motionX, this.motionY, this.motionZ}));
-      nbttagcompound.setTag("power", this.newDoubleNBTList(new double[]{this.accelerationX, this.accelerationY, this.accelerationZ}));
-      nbttagcompound.setInteger("life", this.ticksAlive);
+   public void writeEntityToNBT(NBTTagCompound var1) {
+      compound.setInteger("xTile", this.xTile);
+      compound.setInteger("yTile", this.yTile);
+      compound.setInteger("zTile", this.zTile);
+      ResourceLocation resourcelocation = (ResourceLocation)Block.REGISTRY.getNameForObject(this.inTile);
+      compound.setString("inTile", resourcelocation == null ? "" : resourcelocation.toString());
+      compound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
+      compound.setTag("direction", this.newDoubleNBTList(new double[]{this.motionX, this.motionY, this.motionZ}));
+      compound.setTag("power", this.newDoubleNBTList(new double[]{this.accelerationX, this.accelerationY, this.accelerationZ}));
+      compound.setInteger("life", this.ticksAlive);
    }
 
-   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-      this.xTile = nbttagcompound.getInteger("xTile");
-      this.yTile = nbttagcompound.getInteger("yTile");
-      this.zTile = nbttagcompound.getInteger("zTile");
-      if (nbttagcompound.hasKey("inTile", 8)) {
-         this.inTile = Block.getBlockFromName(nbttagcompound.getString("inTile"));
+   public void readEntityFromNBT(NBTTagCompound var1) {
+      this.xTile = compound.getInteger("xTile");
+      this.yTile = compound.getInteger("yTile");
+      this.zTile = compound.getInteger("zTile");
+      if (compound.hasKey("inTile", 8)) {
+         this.inTile = Block.getBlockFromName(compound.getString("inTile"));
       } else {
-         this.inTile = Block.getBlockById(nbttagcompound.getByte("inTile") & 255);
+         this.inTile = Block.getBlockById(compound.getByte("inTile") & 255);
       }
 
-      this.inGround = nbttagcompound.getByte("inGround") == 1;
-      if (nbttagcompound.hasKey("power", 9)) {
-         NBTTagList nbttaglist = nbttagcompound.getTagList("power", 6);
+      this.inGround = compound.getByte("inGround") == 1;
+      if (compound.hasKey("power", 9)) {
+         NBTTagList nbttaglist = compound.getTagList("power", 6);
          if (nbttaglist.tagCount() == 3) {
             this.accelerationX = nbttaglist.getDoubleAt(0);
             this.accelerationY = nbttaglist.getDoubleAt(1);
@@ -186,12 +187,12 @@ public abstract class EntityFireball extends Entity {
          }
       }
 
-      this.ticksAlive = nbttagcompound.getInteger("life");
-      if (nbttagcompound.hasKey("direction", 9) && nbttagcompound.getTagList("direction", 6).tagCount() == 3) {
-         NBTTagList nbttaglist = nbttagcompound.getTagList("direction", 6);
-         this.motionX = nbttaglist.getDoubleAt(0);
-         this.motionY = nbttaglist.getDoubleAt(1);
-         this.motionZ = nbttaglist.getDoubleAt(2);
+      this.ticksAlive = compound.getInteger("life");
+      if (compound.hasKey("direction", 9) && compound.getTagList("direction", 6).tagCount() == 3) {
+         NBTTagList nbttaglist1 = compound.getTagList("direction", 6);
+         this.motionX = nbttaglist1.getDoubleAt(0);
+         this.motionY = nbttaglist1.getDoubleAt(1);
+         this.motionZ = nbttaglist1.getDoubleAt(2);
       } else {
          this.setDead();
       }
@@ -206,39 +207,39 @@ public abstract class EntityFireball extends Entity {
       return 1.0F;
    }
 
-   public boolean attackEntityFrom(DamageSource damagesource, float f) {
-      if (this.isEntityInvulnerable(damagesource)) {
+   public boolean attackEntityFrom(DamageSource var1, float var2) {
+      if (this.isEntityInvulnerable(source)) {
          return false;
       } else {
          this.setBeenAttacked();
-         if (damagesource.getEntity() != null) {
-            if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, damagesource, (double)f)) {
-               return false;
-            } else {
-               Vec3d vec3d = damagesource.getEntity().getLookVec();
-               if (vec3d != null) {
-                  this.motionX = vec3d.xCoord;
-                  this.motionY = vec3d.yCoord;
-                  this.motionZ = vec3d.zCoord;
-                  this.accelerationX = this.motionX * 0.1D;
-                  this.accelerationY = this.motionY * 0.1D;
-                  this.accelerationZ = this.motionZ * 0.1D;
-               }
-
-               if (damagesource.getEntity() instanceof EntityLivingBase) {
-                  this.shootingEntity = (EntityLivingBase)damagesource.getEntity();
-                  this.projectileSource = (ProjectileSource)this.shootingEntity.getBukkitEntity();
-               }
-
-               return true;
+         if (source.getEntity() != null) {
+            Vec3d vec3d = source.getEntity().getLookVec();
+            if (vec3d != null) {
+               this.motionX = vec3d.xCoord;
+               this.motionY = vec3d.yCoord;
+               this.motionZ = vec3d.zCoord;
+               this.accelerationX = this.motionX * 0.1D;
+               this.accelerationY = this.motionY * 0.1D;
+               this.accelerationZ = this.motionZ * 0.1D;
             }
+
+            if (source.getEntity() instanceof EntityLivingBase) {
+               this.shootingEntity = (EntityLivingBase)source.getEntity();
+            }
+
+            return true;
          } else {
             return false;
          }
       }
    }
 
-   public float getBrightness(float f) {
+   public float getBrightness(float var1) {
       return 1.0F;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getBrightnessForRender(float var1) {
+      return 15728880;
    }
 }

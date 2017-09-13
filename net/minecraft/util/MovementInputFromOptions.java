@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class MovementInputFromOptions extends MovementInput {
    private final GameSettings gameSettings;
 
-   public MovementInputFromOptions(GameSettings gameSettingsIn) {
+   public MovementInputFromOptions(GameSettings var1) {
       this.gameSettings = gameSettingsIn;
    }
 

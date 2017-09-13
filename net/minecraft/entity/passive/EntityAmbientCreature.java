@@ -6,7 +6,7 @@ import net.minecraft.world.World;
 
 public abstract class EntityAmbientCreature extends EntityLiving implements IAnimals {
    public EntityAmbientCreature(World var1) {
-      super(var1);
+      super(worldIn);
    }
 
    public boolean canBeLeashedTo(EntityPlayer var1) {

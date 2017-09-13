@@ -13,11 +13,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderDragonFireball extends Render {
    private static final ResourceLocation DRAGON_FIREBALL_TEXTURE = new ResourceLocation("textures/entity/enderdragon/dragon_fireball.png");
 
-   public RenderDragonFireball(RenderManager renderManagerIn) {
+   public RenderDragonFireball(RenderManager var1) {
       super(renderManagerIn);
    }
 
-   public void doRender(EntityDragonFireball entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityDragonFireball var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       this.bindEntityTexture(entity);
       GlStateManager.translate((float)x, (float)y, (float)z);
@@ -51,7 +51,7 @@ public class RenderDragonFireball extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityDragonFireball entity) {
+   protected ResourceLocation getEntityTexture(EntityDragonFireball var1) {
       return DRAGON_FIREBALL_TEXTURE;
    }
 }

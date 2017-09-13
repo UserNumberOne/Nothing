@@ -22,14 +22,14 @@ public class RenderEntityItem extends Render {
    private final RenderItem itemRenderer;
    private final Random random = new Random();
 
-   public RenderEntityItem(RenderManager renderManagerIn, RenderItem p_i46167_2_) {
+   public RenderEntityItem(RenderManager var1, RenderItem var2) {
       super(renderManagerIn);
       this.itemRenderer = p_i46167_2_;
       this.shadowSize = 0.15F;
       this.shadowOpaque = 0.75F;
    }
 
-   private int transformModelCount(EntityItem itemIn, double p_177077_2_, double p_177077_4_, double p_177077_6_, float p_177077_8_, IBakedModel p_177077_9_) {
+   private int transformModelCount(EntityItem var1, double var2, double var4, double var6, float var8, IBakedModel var9) {
       ItemStack itemstack = itemIn.getEntityItem();
       Item item = itemstack.getItem();
       if (item == null) {
@@ -51,7 +51,7 @@ public class RenderEntityItem extends Render {
       }
    }
 
-   protected int getModelCount(ItemStack stack) {
+   protected int getModelCount(ItemStack var1) {
       int i = 1;
       if (stack.stackSize > 48) {
          i = 5;
@@ -66,7 +66,7 @@ public class RenderEntityItem extends Render {
       return i;
    }
 
-   public void doRender(EntityItem entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityItem var1, double var2, double var4, double var6, float var8, float var9) {
       ItemStack itemstack = entity.getEntityItem();
       int i;
       if (itemstack != null && itemstack.getItem() != null) {
@@ -147,7 +147,7 @@ public class RenderEntityItem extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityItem entity) {
+   protected ResourceLocation getEntityTexture(EntityItem var1) {
       return TextureMap.LOCATION_BLOCKS_TEXTURE;
    }
 

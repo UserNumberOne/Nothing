@@ -16,7 +16,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class TileEntityBannerRenderer extends TileEntitySpecialRenderer {
    private final ModelBanner bannerModel = new ModelBanner();
 
-   public void renderTileEntityAt(TileEntityBanner te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntityBanner var1, double var2, double var4, double var6, float var8, int var9) {
       boolean flag = te.getWorld() != null;
       boolean flag1 = !flag || te.getBlockType() == Blocks.STANDING_BANNER;
       int i = flag ? te.getBlockMetadata() : 0;
@@ -66,7 +66,7 @@ public class TileEntityBannerRenderer extends TileEntitySpecialRenderer {
    }
 
    @Nullable
-   private ResourceLocation getBannerResourceLocation(TileEntityBanner bannerObj) {
+   private ResourceLocation getBannerResourceLocation(TileEntityBanner var1) {
       return BannerTextures.BANNER_DESIGNS.getResourceLocation(bannerObj.getPatternResourceLocation(), bannerObj.getPatternList(), bannerObj.getColorList());
    }
 }

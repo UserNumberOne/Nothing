@@ -17,28 +17,28 @@ public class BlockStandingSign extends BlockSign {
    }
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      if (!var2.getBlockState(var3.down()).getMaterial().isSolid()) {
-         this.dropBlockAsItem(var2, var3, var1, 0);
-         var2.setBlockToAir(var3);
+      if (!worldIn.getBlockState(pos.down()).getMaterial().isSolid()) {
+         this.dropBlockAsItem(worldIn, pos, state, 0);
+         worldIn.setBlockToAir(pos);
       }
 
-      super.neighborChanged(var1, var2, var3, var4);
+      super.neighborChanged(state, worldIn, pos, blockIn);
    }
 
    public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(ROTATION, Integer.valueOf(var1));
+      return this.getDefaultState().withProperty(ROTATION, Integer.valueOf(meta));
    }
 
    public int getMetaFromState(IBlockState var1) {
-      return ((Integer)var1.getValue(ROTATION)).intValue();
+      return ((Integer)state.getValue(ROTATION)).intValue();
    }
 
    public IBlockState withRotation(IBlockState var1, Rotation var2) {
-      return var1.withProperty(ROTATION, Integer.valueOf(var2.rotate(((Integer)var1.getValue(ROTATION)).intValue(), 16)));
+      return state.withProperty(ROTATION, Integer.valueOf(rot.rotate(((Integer)state.getValue(ROTATION)).intValue(), 16)));
    }
 
    public IBlockState withMirror(IBlockState var1, Mirror var2) {
-      return var1.withProperty(ROTATION, Integer.valueOf(var2.mirrorRotation(((Integer)var1.getValue(ROTATION)).intValue(), 16)));
+      return state.withProperty(ROTATION, Integer.valueOf(mirrorIn.mirrorRotation(((Integer)state.getValue(ROTATION)).intValue(), 16)));
    }
 
    protected BlockStateContainer createBlockState() {

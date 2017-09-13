@@ -12,7 +12,7 @@ public class ModelSlime extends ModelBase {
    ModelRenderer slimeLeftEye;
    ModelRenderer slimeMouth;
 
-   public ModelSlime(int p_i1157_1_) {
+   public ModelSlime(int var1) {
       if (p_i1157_1_ > 0) {
          this.slimeBodies = new ModelRenderer(this, 0, p_i1157_1_);
          this.slimeBodies.addBox(-3.0F, 17.0F, -3.0F, 6, 6, 6);
@@ -29,7 +29,7 @@ public class ModelSlime extends ModelBase {
 
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
       GlStateManager.translate(0.0F, 0.001F, 0.0F);
       this.slimeBodies.render(scale);

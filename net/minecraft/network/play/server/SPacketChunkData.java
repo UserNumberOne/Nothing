@@ -14,6 +14,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketChunkData implements Packet {
    private int chunkX;
@@ -27,120 +29,145 @@ public class SPacketChunkData implements Packet {
    }
 
    public SPacketChunkData(Chunk var1, int var2) {
-      this.chunkX = var1.xPosition;
-      this.chunkZ = var1.zPosition;
-      this.loadChunk = var2 == 65535;
-      boolean var3 = !var1.getWorld().provider.hasNoSky();
-      this.buffer = new byte[this.calculateChunkSize(var1, var3, var2)];
-      this.availableSections = this.extractChunkData(new PacketBuffer(this.getWriteBuffer()), var1, var3, var2);
+      this.chunkX = p_i47124_1_.xPosition;
+      this.chunkZ = p_i47124_1_.zPosition;
+      this.loadChunk = p_i47124_2_ == 65535;
+      boolean flag = !p_i47124_1_.getWorld().provider.hasNoSky();
+      this.buffer = new byte[this.calculateChunkSize(p_i47124_1_, flag, p_i47124_2_)];
+      this.availableSections = this.extractChunkData(new PacketBuffer(this.getWriteBuffer()), p_i47124_1_, flag, p_i47124_2_);
       this.tileEntityTags = Lists.newArrayList();
 
-      for(Entry var5 : var1.getTileEntityMap().entrySet()) {
-         BlockPos var6 = (BlockPos)var5.getKey();
-         TileEntity var7 = (TileEntity)var5.getValue();
-         int var8 = var6.getY() >> 4;
-         if (this.doChunkLoad() || (var2 & 1 << var8) != 0) {
-            NBTTagCompound var9 = var7.getUpdateTag();
-            this.tileEntityTags.add(var9);
+      for(Entry entry : p_i47124_1_.getTileEntityMap().entrySet()) {
+         BlockPos blockpos = (BlockPos)entry.getKey();
+         TileEntity tileentity = (TileEntity)entry.getValue();
+         int i = blockpos.getY() >> 4;
+         if (this.doChunkLoad() || (p_i47124_2_ & 1 << i) != 0) {
+            NBTTagCompound nbttagcompound = tileentity.getUpdateTag();
+            this.tileEntityTags.add(nbttagcompound);
          }
       }
 
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.chunkX = var1.readInt();
-      this.chunkZ = var1.readInt();
-      this.loadChunk = var1.readBoolean();
-      this.availableSections = var1.readVarInt();
-      int var2 = var1.readVarInt();
-      if (var2 > 2097152) {
+      this.chunkX = buf.readInt();
+      this.chunkZ = buf.readInt();
+      this.loadChunk = buf.readBoolean();
+      this.availableSections = buf.readVarInt();
+      int i = buf.readVarInt();
+      if (i > 2097152) {
          throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");
       } else {
-         this.buffer = new byte[var2];
-         var1.readBytes(this.buffer);
-         int var3 = var1.readVarInt();
+         this.buffer = new byte[i];
+         buf.readBytes(this.buffer);
+         int j = buf.readVarInt();
          this.tileEntityTags = Lists.newArrayList();
 
-         for(int var4 = 0; var4 < var3; ++var4) {
-            this.tileEntityTags.add(var1.readCompoundTag());
+         for(int k = 0; k < j; ++k) {
+            this.tileEntityTags.add(buf.readCompoundTag());
          }
 
       }
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeInt(this.chunkX);
-      var1.writeInt(this.chunkZ);
-      var1.writeBoolean(this.loadChunk);
-      var1.writeVarInt(this.availableSections);
-      var1.writeVarInt(this.buffer.length);
-      var1.writeBytes(this.buffer);
-      var1.writeVarInt(this.tileEntityTags.size());
+      buf.writeInt(this.chunkX);
+      buf.writeInt(this.chunkZ);
+      buf.writeBoolean(this.loadChunk);
+      buf.writeVarInt(this.availableSections);
+      buf.writeVarInt(this.buffer.length);
+      buf.writeBytes(this.buffer);
+      buf.writeVarInt(this.tileEntityTags.size());
 
-      for(NBTTagCompound var3 : this.tileEntityTags) {
-         var1.writeCompoundTag(var3);
+      for(NBTTagCompound nbttagcompound : this.tileEntityTags) {
+         buf.writeCompoundTag(nbttagcompound);
       }
 
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      var1.handleChunkData(this);
+      handler.handleChunkData(this);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public PacketBuffer getReadBuffer() {
+      return new PacketBuffer(Unpooled.wrappedBuffer(this.buffer));
    }
 
    private ByteBuf getWriteBuffer() {
-      ByteBuf var1 = Unpooled.wrappedBuffer(this.buffer);
-      var1.writerIndex(0);
-      return var1;
+      ByteBuf bytebuf = Unpooled.wrappedBuffer(this.buffer);
+      bytebuf.writerIndex(0);
+      return bytebuf;
    }
 
    public int extractChunkData(PacketBuffer var1, Chunk var2, boolean var3, int var4) {
-      int var5 = 0;
-      ExtendedBlockStorage[] var6 = var2.getBlockStorageArray();
-      int var7 = 0;
+      int i = 0;
+      ExtendedBlockStorage[] aextendedblockstorage = p_189555_2_.getBlockStorageArray();
+      int j = 0;
 
-      for(int var8 = var6.length; var7 < var8; ++var7) {
-         ExtendedBlockStorage var9 = var6[var7];
-         if (var9 != Chunk.NULL_BLOCK_STORAGE && (!this.doChunkLoad() || !var9.isEmpty()) && (var4 & 1 << var7) != 0) {
-            var5 |= 1 << var7;
-            var9.getData().write(var1);
-            var1.writeBytes(var9.getBlocklightArray().getData());
-            if (var3) {
-               var1.writeBytes(var9.getSkylightArray().getData());
+      for(int k = aextendedblockstorage.length; j < k; ++j) {
+         ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
+         if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (!this.doChunkLoad() || !extendedblockstorage.isEmpty()) && (p_189555_4_ & 1 << j) != 0) {
+            i |= 1 << j;
+            extendedblockstorage.getData().write(p_189555_1_);
+            p_189555_1_.writeBytes(extendedblockstorage.getBlocklightArray().getData());
+            if (p_189555_3_) {
+               p_189555_1_.writeBytes(extendedblockstorage.getSkylightArray().getData());
             }
          }
       }
 
       if (this.doChunkLoad()) {
-         var1.writeBytes(var2.getBiomeArray());
+         p_189555_1_.writeBytes(p_189555_2_.getBiomeArray());
       }
 
-      return var5;
+      return i;
    }
 
    protected int calculateChunkSize(Chunk var1, boolean var2, int var3) {
-      int var4 = 0;
-      ExtendedBlockStorage[] var5 = var1.getBlockStorageArray();
-      int var6 = 0;
+      int i = 0;
+      ExtendedBlockStorage[] aextendedblockstorage = chunkIn.getBlockStorageArray();
+      int j = 0;
 
-      for(int var7 = var5.length; var6 < var7; ++var6) {
-         ExtendedBlockStorage var8 = var5[var6];
-         if (var8 != Chunk.NULL_BLOCK_STORAGE && (!this.doChunkLoad() || !var8.isEmpty()) && (var3 & 1 << var6) != 0) {
-            var4 = var4 + var8.getData().getSerializedSize();
-            var4 = var4 + var8.getBlocklightArray().getData().length;
-            if (var2) {
-               var4 += var8.getSkylightArray().getData().length;
+      for(int k = aextendedblockstorage.length; j < k; ++j) {
+         ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
+         if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (!this.doChunkLoad() || !extendedblockstorage.isEmpty()) && (p_189556_3_ & 1 << j) != 0) {
+            i = i + extendedblockstorage.getData().getSerializedSize();
+            i = i + extendedblockstorage.getBlocklightArray().getData().length;
+            if (p_189556_2_) {
+               i += extendedblockstorage.getSkylightArray().getData().length;
             }
          }
       }
 
       if (this.doChunkLoad()) {
-         var4 += var1.getBiomeArray().length;
+         i += chunkIn.getBiomeArray().length;
       }
 
-      return var4;
+      return i;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getChunkX() {
+      return this.chunkX;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getChunkZ() {
+      return this.chunkZ;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getExtractedSize() {
+      return this.availableSections;
    }
 
    public boolean doChunkLoad() {
       return this.loadChunk;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public List getTileEntityTags() {
+      return this.tileEntityTags;
    }
 }

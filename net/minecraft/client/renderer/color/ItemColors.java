@@ -28,26 +28,26 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ItemColors {
    private final Map itemColorMap = Maps.newHashMap();
 
-   public static ItemColors init(final BlockColors p_186729_0_) {
+   public static ItemColors init(final BlockColors var0) {
       ItemColors itemcolors = new ItemColors();
       itemcolors.registerItemColorHandler(new IItemColor() {
-         public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+         public int getColorFromItemstack(ItemStack var1, int var2) {
             return tintIndex > 0 ? -1 : ((ItemArmor)stack.getItem()).getColor(stack);
          }
       }, Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS);
       itemcolors.registerItemColorHandler(new IItemColor() {
-         public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+         public int getColorFromItemstack(ItemStack var1, int var2) {
             return tintIndex > 0 ? -1 : ItemBanner.getBaseColor(stack).getMapColor().colorValue;
          }
       }, Items.BANNER, Items.SHIELD);
       itemcolors.registerItemColorHandler(new IItemColor() {
-         public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+         public int getColorFromItemstack(ItemStack var1, int var2) {
             BlockDoublePlant.EnumPlantType blockdoubleplant$enumplanttype = BlockDoublePlant.EnumPlantType.byMetadata(stack.getMetadata());
             return blockdoubleplant$enumplanttype != BlockDoublePlant.EnumPlantType.GRASS && blockdoubleplant$enumplanttype != BlockDoublePlant.EnumPlantType.FERN ? -1 : ColorizerGrass.getGrassColor(0.5D, 1.0D);
          }
       }, Blocks.DOUBLE_PLANT);
       itemcolors.registerItemColorHandler(new IItemColor() {
-         public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+         public int getColorFromItemstack(ItemStack var1, int var2) {
             if (tintIndex != 1) {
                return -1;
             } else {
@@ -79,36 +79,36 @@ public class ItemColors {
          }
       }, Items.FIREWORK_CHARGE);
       itemcolors.registerItemColorHandler(new IItemColor() {
-         public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+         public int getColorFromItemstack(ItemStack var1, int var2) {
             return tintIndex > 0 ? -1 : PotionUtils.getPotionColorFromEffectList(PotionUtils.getEffectsFromStack(stack));
          }
       }, Items.POTIONITEM, Items.SPLASH_POTION, Items.LINGERING_POTION);
       itemcolors.registerItemColorHandler(new IItemColor() {
-         public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+         public int getColorFromItemstack(ItemStack var1, int var2) {
             EntityList.EntityEggInfo entitylist$entityegginfo = (EntityList.EntityEggInfo)EntityList.ENTITY_EGGS.get(ItemMonsterPlacer.getEntityIdFromItem(stack));
             return entitylist$entityegginfo == null ? -1 : (tintIndex == 0 ? entitylist$entityegginfo.primaryColor : entitylist$entityegginfo.secondaryColor);
          }
       }, Items.SPAWN_EGG);
       itemcolors.registerItemColorHandler(new IItemColor() {
-         public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+         public int getColorFromItemstack(ItemStack var1, int var2) {
             IBlockState iblockstate = ((ItemBlock)stack.getItem()).getBlock().getStateFromMeta(stack.getMetadata());
             return p_186729_0_.colorMultiplier(iblockstate, (IBlockAccess)null, (BlockPos)null, tintIndex);
          }
       }, Blocks.GRASS, Blocks.TALLGRASS, Blocks.VINE, Blocks.LEAVES, Blocks.LEAVES2, Blocks.WATERLILY);
       itemcolors.registerItemColorHandler(new IItemColor() {
-         public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+         public int getColorFromItemstack(ItemStack var1, int var2) {
             return tintIndex == 0 ? PotionUtils.getPotionColorFromEffectList(PotionUtils.getEffectsFromStack(stack)) : -1;
          }
       }, Items.TIPPED_ARROW);
       return itemcolors;
    }
 
-   public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+   public int getColorFromItemstack(ItemStack var1, int var2) {
       IItemColor iitemcolor = (IItemColor)this.itemColorMap.get(stack.getItem().delegate);
       return iitemcolor == null ? -1 : iitemcolor.getColorFromItemstack(stack, tintIndex);
    }
 
-   public void registerItemColorHandler(IItemColor itemColor, Block... blocksIn) {
+   public void registerItemColorHandler(IItemColor var1, Block... var2) {
       for(Block block : blocksIn) {
          if (block == null) {
             throw new IllegalArgumentException("Block registered to item color handler cannot be null!");
@@ -123,7 +123,7 @@ public class ItemColors {
 
    }
 
-   public void registerItemColorHandler(IItemColor itemColor, Item... itemsIn) {
+   public void registerItemColorHandler(IItemColor var1, Item... var2) {
       for(Item item : itemsIn) {
          if (item == null) {
             throw new IllegalArgumentException("Item registered to item color handler cannot be null!");

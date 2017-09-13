@@ -19,7 +19,7 @@ public class DebugRenderer {
    private boolean waterEnabled;
    private boolean heightmapEnabled;
 
-   public DebugRenderer(Minecraft clientIn) {
+   public DebugRenderer(Minecraft var1) {
       this.debugRendererPathfinding = new DebugRendererPathfinding(clientIn);
       this.debugRendererWater = new DebugRendererWater(clientIn);
       this.debugRendererChunkBorder = new DebugRendererChunkBorder(clientIn);
@@ -35,7 +35,7 @@ public class DebugRenderer {
       return this.chunkBordersEnabled;
    }
 
-   public void renderDebug(float partialTicks, long finishTimeNano) {
+   public void renderDebug(float var1, long var2) {
       if (this.pathfindingEnabled) {
          this.debugRendererPathfinding.render(partialTicks, finishTimeNano);
       }
@@ -54,7 +54,7 @@ public class DebugRenderer {
 
    }
 
-   public static void renderDebugText(String str, double x, double y, double z, float partialTicks, int color) {
+   public static void renderDebugText(String var0, double var1, double var3, double var5, float var7, int var8) {
       Minecraft minecraft = Minecraft.getMinecraft();
       if (minecraft.player != null && minecraft.getRenderManager() != null && minecraft.getRenderManager().options != null) {
          FontRenderer fontrenderer = minecraft.fontRendererObj;

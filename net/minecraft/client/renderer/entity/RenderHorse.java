@@ -17,11 +17,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderHorse extends RenderLiving {
    private static final Map LAYERED_LOCATION_CACHE = Maps.newHashMap();
 
-   public RenderHorse(RenderManager rendermanagerIn, ModelHorse model, float shadowSizeIn) {
+   public RenderHorse(RenderManager var1, ModelHorse var2, float var3) {
       super(rendermanagerIn, model, shadowSizeIn);
    }
 
-   protected void preRenderCallback(EntityHorse entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityHorse var1, float var2) {
       float f = 1.0F;
       HorseType horsetype = entitylivingbaseIn.getType();
       if (horsetype == HorseType.DONKEY) {
@@ -34,12 +34,12 @@ public class RenderHorse extends RenderLiving {
       super.preRenderCallback(entitylivingbaseIn, partialTickTime);
    }
 
-   protected ResourceLocation getEntityTexture(EntityHorse entity) {
+   protected ResourceLocation getEntityTexture(EntityHorse var1) {
       return !entity.hasLayeredTextures() ? entity.getType().getTexture() : this.getOrCreateLayeredResourceLoc(entity);
    }
 
    @Nullable
-   private ResourceLocation getOrCreateLayeredResourceLoc(EntityHorse p_188328_1_) {
+   private ResourceLocation getOrCreateLayeredResourceLoc(EntityHorse var1) {
       String s = p_188328_1_.getHorseTexture();
       if (!p_188328_1_.hasTexture()) {
          return null;

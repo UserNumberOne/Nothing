@@ -50,7 +50,7 @@ public class Material {
    private boolean isAdventureModeExempt;
 
    public Material(MapColor var1) {
-      this.materialMapColor = var1;
+      this.materialMapColor = color;
    }
 
    public boolean isLiquid() {

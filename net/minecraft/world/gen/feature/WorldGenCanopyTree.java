@@ -1,12 +1,11 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockNewLeaf;
 import net.minecraft.block.BlockNewLog;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.material.Material;
+import net.minecraft.block.BlockSapling;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
@@ -18,110 +17,113 @@ public class WorldGenCanopyTree extends WorldGenAbstractTree {
    private static final IBlockState DARK_OAK_LEAVES = Blocks.LEAVES2.getDefaultState().withProperty(BlockNewLeaf.VARIANT, BlockPlanks.EnumType.DARK_OAK).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
 
    public WorldGenCanopyTree(boolean var1) {
-      super(var1);
+      super(notify);
    }
 
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      int var4 = var2.nextInt(3) + var2.nextInt(2) + 6;
-      int var5 = var3.getX();
-      int var6 = var3.getY();
-      int var7 = var3.getZ();
-      if (var6 >= 1 && var6 + var4 + 1 < 256) {
-         BlockPos var8 = var3.down();
-         Block var9 = var1.getBlockState(var8).getBlock();
-         if (var9 != Blocks.GRASS && var9 != Blocks.DIRT) {
-            return false;
-         } else if (!this.placeTreeOfHeight(var1, var3, var4)) {
-            return false;
-         } else {
-            this.setDirtAt(var1, var8);
-            this.setDirtAt(var1, var8.east());
-            this.setDirtAt(var1, var8.south());
-            this.setDirtAt(var1, var8.south().east());
-            EnumFacing var10 = EnumFacing.Plane.HORIZONTAL.random(var2);
-            int var11 = var4 - var2.nextInt(4);
-            int var12 = 2 - var2.nextInt(3);
-            int var13 = var5;
-            int var14 = var7;
-            int var15 = var6 + var4 - 1;
+      int i = rand.nextInt(3) + rand.nextInt(2) + 6;
+      int j = position.getX();
+      int k = position.getY();
+      int l = position.getZ();
+      if (k >= 1 && k + i + 1 < 256) {
+         BlockPos blockpos = position.down();
+         IBlockState state = worldIn.getBlockState(blockpos);
+         boolean isSoil = state.getBlock().canSustainPlant(state, worldIn, blockpos, EnumFacing.UP, (BlockSapling)Blocks.SAPLING);
+         if (isSoil && position.getY() < worldIn.getHeight() - i - 1) {
+            if (!this.placeTreeOfHeight(worldIn, position, i)) {
+               return false;
+            } else {
+               this.onPlantGrow(worldIn, blockpos, position);
+               this.onPlantGrow(worldIn, blockpos.east(), position);
+               this.onPlantGrow(worldIn, blockpos.south(), position);
+               this.onPlantGrow(worldIn, blockpos.south().east(), position);
+               EnumFacing enumfacing = EnumFacing.Plane.HORIZONTAL.random(rand);
+               int i1 = i - rand.nextInt(4);
+               int j1 = 2 - rand.nextInt(3);
+               int k1 = j;
+               int l1 = l;
+               int i2 = k + i - 1;
 
-            for(int var16 = 0; var16 < var4; ++var16) {
-               if (var16 >= var11 && var12 > 0) {
-                  var13 += var10.getFrontOffsetX();
-                  var14 += var10.getFrontOffsetZ();
-                  --var12;
-               }
+               for(int j2 = 0; j2 < i; ++j2) {
+                  if (j2 >= i1 && j1 > 0) {
+                     k1 += enumfacing.getFrontOffsetX();
+                     l1 += enumfacing.getFrontOffsetZ();
+                     --j1;
+                  }
 
-               int var17 = var6 + var16;
-               BlockPos var18 = new BlockPos(var13, var17, var14);
-               Material var19 = var1.getBlockState(var18).getMaterial();
-               if (var19 == Material.AIR || var19 == Material.LEAVES) {
-                  this.placeLogAt(var1, var18);
-                  this.placeLogAt(var1, var18.east());
-                  this.placeLogAt(var1, var18.south());
-                  this.placeLogAt(var1, var18.east().south());
-               }
-            }
-
-            for(int var21 = -2; var21 <= 0; ++var21) {
-               for(int var24 = -2; var24 <= 0; ++var24) {
-                  byte var27 = -1;
-                  this.placeLeafAt(var1, var13 + var21, var15 + var27, var14 + var24);
-                  this.placeLeafAt(var1, 1 + var13 - var21, var15 + var27, var14 + var24);
-                  this.placeLeafAt(var1, var13 + var21, var15 + var27, 1 + var14 - var24);
-                  this.placeLeafAt(var1, 1 + var13 - var21, var15 + var27, 1 + var14 - var24);
-                  if ((var21 > -2 || var24 > -1) && (var21 != -1 || var24 != -2)) {
-                     var27 = 1;
-                     this.placeLeafAt(var1, var13 + var21, var15 + var27, var14 + var24);
-                     this.placeLeafAt(var1, 1 + var13 - var21, var15 + var27, var14 + var24);
-                     this.placeLeafAt(var1, var13 + var21, var15 + var27, 1 + var14 - var24);
-                     this.placeLeafAt(var1, 1 + var13 - var21, var15 + var27, 1 + var14 - var24);
+                  int k2 = k + j2;
+                  BlockPos blockpos1 = new BlockPos(k1, k2, l1);
+                  state = worldIn.getBlockState(blockpos1);
+                  if (state.getBlock().isAir(state, worldIn, blockpos1) || state.getBlock().isLeaves(state, worldIn, blockpos1)) {
+                     this.placeLogAt(worldIn, blockpos1);
+                     this.placeLogAt(worldIn, blockpos1.east());
+                     this.placeLogAt(worldIn, blockpos1.south());
+                     this.placeLogAt(worldIn, blockpos1.east().south());
                   }
                }
-            }
 
-            if (var2.nextBoolean()) {
-               this.placeLeafAt(var1, var13, var15 + 2, var14);
-               this.placeLeafAt(var1, var13 + 1, var15 + 2, var14);
-               this.placeLeafAt(var1, var13 + 1, var15 + 2, var14 + 1);
-               this.placeLeafAt(var1, var13, var15 + 2, var14 + 1);
-            }
-
-            for(int var22 = -3; var22 <= 4; ++var22) {
-               for(int var25 = -3; var25 <= 4; ++var25) {
-                  if ((var22 != -3 || var25 != -3) && (var22 != -3 || var25 != 4) && (var22 != 4 || var25 != -3) && (var22 != 4 || var25 != 4) && (Math.abs(var22) < 3 || Math.abs(var25) < 3)) {
-                     this.placeLeafAt(var1, var13 + var22, var15, var14 + var25);
-                  }
-               }
-            }
-
-            for(int var23 = -1; var23 <= 2; ++var23) {
-               for(int var26 = -1; var26 <= 2; ++var26) {
-                  if ((var23 < 0 || var23 > 1 || var26 < 0 || var26 > 1) && var2.nextInt(3) <= 0) {
-                     int var29 = var2.nextInt(3) + 2;
-
-                     for(int var30 = 0; var30 < var29; ++var30) {
-                        this.placeLogAt(var1, new BlockPos(var5 + var23, var15 - var30 - 1, var7 + var26));
+               for(int i3 = -2; i3 <= 0; ++i3) {
+                  for(int l3 = -2; l3 <= 0; ++l3) {
+                     int k4 = -1;
+                     this.placeLeafAt(worldIn, k1 + i3, i2 + k4, l1 + l3);
+                     this.placeLeafAt(worldIn, 1 + k1 - i3, i2 + k4, l1 + l3);
+                     this.placeLeafAt(worldIn, k1 + i3, i2 + k4, 1 + l1 - l3);
+                     this.placeLeafAt(worldIn, 1 + k1 - i3, i2 + k4, 1 + l1 - l3);
+                     if ((i3 > -2 || l3 > -1) && (i3 != -1 || l3 != -2)) {
+                        k4 = 1;
+                        this.placeLeafAt(worldIn, k1 + i3, i2 + k4, l1 + l3);
+                        this.placeLeafAt(worldIn, 1 + k1 - i3, i2 + k4, l1 + l3);
+                        this.placeLeafAt(worldIn, k1 + i3, i2 + k4, 1 + l1 - l3);
+                        this.placeLeafAt(worldIn, 1 + k1 - i3, i2 + k4, 1 + l1 - l3);
                      }
+                  }
+               }
 
-                     for(int var31 = -1; var31 <= 1; ++var31) {
-                        for(int var20 = -1; var20 <= 1; ++var20) {
-                           this.placeLeafAt(var1, var13 + var23 + var31, var15, var14 + var26 + var20);
+               if (rand.nextBoolean()) {
+                  this.placeLeafAt(worldIn, k1, i2 + 2, l1);
+                  this.placeLeafAt(worldIn, k1 + 1, i2 + 2, l1);
+                  this.placeLeafAt(worldIn, k1 + 1, i2 + 2, l1 + 1);
+                  this.placeLeafAt(worldIn, k1, i2 + 2, l1 + 1);
+               }
+
+               for(int j3 = -3; j3 <= 4; ++j3) {
+                  for(int i4 = -3; i4 <= 4; ++i4) {
+                     if ((j3 != -3 || i4 != -3) && (j3 != -3 || i4 != 4) && (j3 != 4 || i4 != -3) && (j3 != 4 || i4 != 4) && (Math.abs(j3) < 3 || Math.abs(i4) < 3)) {
+                        this.placeLeafAt(worldIn, k1 + j3, i2, l1 + i4);
+                     }
+                  }
+               }
+
+               for(int k3 = -1; k3 <= 2; ++k3) {
+                  for(int j4 = -1; j4 <= 2; ++j4) {
+                     if ((k3 < 0 || k3 > 1 || j4 < 0 || j4 > 1) && rand.nextInt(3) <= 0) {
+                        int l4 = rand.nextInt(3) + 2;
+
+                        for(int i5 = 0; i5 < l4; ++i5) {
+                           this.placeLogAt(worldIn, new BlockPos(j + k3, i2 - i5 - 1, l + j4));
                         }
-                     }
 
-                     for(int var32 = -2; var32 <= 2; ++var32) {
-                        for(int var33 = -2; var33 <= 2; ++var33) {
-                           if (Math.abs(var32) != 2 || Math.abs(var33) != 2) {
-                              this.placeLeafAt(var1, var13 + var23 + var32, var15 - 1, var14 + var26 + var33);
+                        for(int j5 = -1; j5 <= 1; ++j5) {
+                           for(int l2 = -1; l2 <= 1; ++l2) {
+                              this.placeLeafAt(worldIn, k1 + k3 + j5, i2, l1 + j4 + l2);
+                           }
+                        }
+
+                        for(int k5 = -2; k5 <= 2; ++k5) {
+                           for(int l5 = -2; l5 <= 2; ++l5) {
+                              if (Math.abs(k5) != 2 || Math.abs(l5) != 2) {
+                                 this.placeLeafAt(worldIn, k1 + k3 + k5, i2 - 1, l1 + j4 + l5);
+                              }
                            }
                         }
                      }
                   }
                }
-            }
 
-            return true;
+               return true;
+            }
+         } else {
+            return false;
          }
       } else {
          return false;
@@ -129,24 +131,24 @@ public class WorldGenCanopyTree extends WorldGenAbstractTree {
    }
 
    private boolean placeTreeOfHeight(World var1, BlockPos var2, int var3) {
-      int var4 = var2.getX();
-      int var5 = var2.getY();
-      int var6 = var2.getZ();
-      BlockPos.MutableBlockPos var7 = new BlockPos.MutableBlockPos();
+      int i = pos.getX();
+      int j = pos.getY();
+      int k = pos.getZ();
+      BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
-      for(int var8 = 0; var8 <= var3 + 1; ++var8) {
-         byte var9 = 1;
-         if (var8 == 0) {
-            var9 = 0;
+      for(int l = 0; l <= height + 1; ++l) {
+         int i1 = 1;
+         if (l == 0) {
+            i1 = 0;
          }
 
-         if (var8 >= var3 - 1) {
-            var9 = 2;
+         if (l >= height - 1) {
+            i1 = 2;
          }
 
-         for(int var10 = -var9; var10 <= var9; ++var10) {
-            for(int var11 = -var9; var11 <= var9; ++var11) {
-               if (!this.canGrowInto(var1.getBlockState(var7.setPos(var4 + var10, var5 + var8, var6 + var11)).getBlock())) {
+         for(int j1 = -i1; j1 <= i1; ++j1) {
+            for(int k1 = -i1; k1 <= i1; ++k1) {
+               if (!this.isReplaceable(worldIn, blockpos$mutableblockpos.setPos(i + j1, j + l, k + k1))) {
                   return false;
                }
             }
@@ -157,18 +159,23 @@ public class WorldGenCanopyTree extends WorldGenAbstractTree {
    }
 
    private void placeLogAt(World var1, BlockPos var2) {
-      if (this.canGrowInto(var1.getBlockState(var2).getBlock())) {
-         this.setBlockAndNotifyAdequately(var1, var2, DARK_OAK_LOG);
+      if (this.canGrowInto(worldIn.getBlockState(pos).getBlock())) {
+         this.setBlockAndNotifyAdequately(worldIn, pos, DARK_OAK_LOG);
       }
 
    }
 
    private void placeLeafAt(World var1, int var2, int var3, int var4) {
-      BlockPos var5 = new BlockPos(var2, var3, var4);
-      Material var6 = var1.getBlockState(var5).getMaterial();
-      if (var6 == Material.AIR) {
-         this.setBlockAndNotifyAdequately(var1, var5, DARK_OAK_LEAVES);
+      BlockPos blockpos = new BlockPos(x, y, z);
+      IBlockState state = worldIn.getBlockState(blockpos);
+      if (state.getBlock().isAir(state, worldIn, blockpos)) {
+         this.setBlockAndNotifyAdequately(worldIn, blockpos, DARK_OAK_LEAVES);
       }
 
+   }
+
+   private void onPlantGrow(World var1, BlockPos var2, BlockPos var3) {
+      IBlockState state = world.getBlockState(pos);
+      state.getBlock().onPlantGrow(state, world, pos, source);
    }
 }

@@ -27,17 +27,17 @@ public class DebugRendererPathfinding implements DebugRenderer.IDebugRenderer {
    private double yo;
    private double zo;
 
-   public DebugRendererPathfinding(Minecraft minecraftIn) {
+   public DebugRendererPathfinding(Minecraft var1) {
       this.minecraft = minecraftIn;
    }
 
-   public void addPath(int p_188289_1_, Path p_188289_2_, float p_188289_3_) {
+   public void addPath(int var1, Path var2, float var3) {
       this.pathMap.put(Integer.valueOf(p_188289_1_), p_188289_2_);
       this.creationMap.put(Integer.valueOf(p_188289_1_), Long.valueOf(System.currentTimeMillis()));
       this.pathMaxDistance.put(Integer.valueOf(p_188289_1_), Float.valueOf(p_188289_3_));
    }
 
-   public void render(float p_190060_1_, long p_190060_2_) {
+   public void render(float var1, long var2) {
       if (this.pathMap.size() != 0) {
          long i = System.currentTimeMillis();
          this.player = this.minecraft.player;
@@ -110,7 +110,7 @@ public class DebugRendererPathfinding implements DebugRenderer.IDebugRenderer {
 
    }
 
-   public void renderPathLine(float p_190067_1_, Path p_190067_2_) {
+   public void renderPathLine(float var1, Path var2) {
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
       vertexbuffer.begin(3, DefaultVertexFormats.POSITION_COLOR);
@@ -130,7 +130,7 @@ public class DebugRendererPathfinding implements DebugRenderer.IDebugRenderer {
       tessellator.draw();
    }
 
-   private float addDistanceToPlayer(PathPoint p_190066_1_) {
+   private float addDistanceToPlayer(PathPoint var1) {
       return (float)(Math.abs((double)p_190066_1_.xCoord - this.player.posX) + Math.abs((double)p_190066_1_.yCoord - this.player.posY) + Math.abs((double)p_190066_1_.zCoord - this.player.posZ));
    }
 }

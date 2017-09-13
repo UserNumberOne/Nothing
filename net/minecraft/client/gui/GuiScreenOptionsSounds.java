@@ -20,7 +20,7 @@ public class GuiScreenOptionsSounds extends GuiScreen {
    protected String title = "Options";
    private String offDisplayString;
 
-   public GuiScreenOptionsSounds(GuiScreen parentIn, GameSettings settingsIn) {
+   public GuiScreenOptionsSounds(GuiScreen var1, GameSettings var2) {
       this.parent = parentIn;
       this.game_settings_4 = settingsIn;
    }
@@ -46,7 +46,7 @@ public class GuiScreenOptionsSounds extends GuiScreen {
       this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height / 6 + 168, I18n.format("gui.done")));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 200) {
             this.mc.gameSettings.saveOptions();
@@ -60,13 +60,13 @@ public class GuiScreenOptionsSounds extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 15, 16777215);
       super.drawScreen(mouseX, mouseY, partialTicks);
    }
 
-   protected String getDisplayString(SoundCategory category) {
+   protected String getDisplayString(SoundCategory var1) {
       float f = this.game_settings_4.getSoundLevel(category);
       return f == 0.0F ? this.offDisplayString : (int)(f * 100.0F) + "%";
    }
@@ -78,7 +78,7 @@ public class GuiScreenOptionsSounds extends GuiScreen {
       public float volume = 1.0F;
       public boolean pressed;
 
-      public Button(int p_i46744_2_, int x, int y, SoundCategory categoryIn, boolean master) {
+      public Button(int var2, int var3, int var4, SoundCategory var5, boolean var6) {
          super(p_i46744_2_, x, y, master ? 310 : 150, 20, "");
          this.category = categoryIn;
          this.categoryName = I18n.format("soundCategory." + categoryIn.getName());
@@ -86,11 +86,11 @@ public class GuiScreenOptionsSounds extends GuiScreen {
          this.volume = GuiScreenOptionsSounds.this.game_settings_4.getSoundLevel(categoryIn);
       }
 
-      protected int getHoverState(boolean mouseOver) {
+      protected int getHoverState(boolean var1) {
          return 0;
       }
 
-      protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
+      protected void mouseDragged(Minecraft var1, int var2, int var3) {
          if (this.visible) {
             if (this.pressed) {
                this.volume = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
@@ -107,7 +107,7 @@ public class GuiScreenOptionsSounds extends GuiScreen {
 
       }
 
-      public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+      public boolean mousePressed(Minecraft var1, int var2, int var3) {
          if (super.mousePressed(mc, mouseX, mouseY)) {
             this.volume = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
             this.volume = MathHelper.clamp(this.volume, 0.0F, 1.0F);
@@ -121,10 +121,10 @@ public class GuiScreenOptionsSounds extends GuiScreen {
          }
       }
 
-      public void playPressSound(SoundHandler soundHandlerIn) {
+      public void playPressSound(SoundHandler var1) {
       }
 
-      public void mouseReleased(int mouseX, int mouseY) {
+      public void mouseReleased(int var1, int var2) {
          if (this.pressed) {
             GuiScreenOptionsSounds.this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
          }

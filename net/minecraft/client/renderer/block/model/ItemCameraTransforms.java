@@ -40,7 +40,7 @@ public class ItemCameraTransforms {
 
    /** @deprecated */
    @Deprecated
-   public ItemCameraTransforms(ItemCameraTransforms transforms) {
+   public ItemCameraTransforms(ItemCameraTransforms var1) {
       this.thirdperson_left = transforms.thirdperson_left;
       this.thirdperson_right = transforms.thirdperson_right;
       this.firstperson_left = transforms.firstperson_left;
@@ -53,7 +53,7 @@ public class ItemCameraTransforms {
 
    /** @deprecated */
    @Deprecated
-   public ItemCameraTransforms(ItemTransformVec3f thirdperson_leftIn, ItemTransformVec3f thirdperson_rightIn, ItemTransformVec3f firstperson_leftIn, ItemTransformVec3f firstperson_rightIn, ItemTransformVec3f headIn, ItemTransformVec3f guiIn, ItemTransformVec3f groundIn, ItemTransformVec3f fixedIn) {
+   public ItemCameraTransforms(ItemTransformVec3f var1, ItemTransformVec3f var2, ItemTransformVec3f var3, ItemTransformVec3f var4, ItemTransformVec3f var5, ItemTransformVec3f var6, ItemTransformVec3f var7, ItemTransformVec3f var8) {
       this.thirdperson_left = thirdperson_leftIn;
       this.thirdperson_right = thirdperson_rightIn;
       this.firstperson_left = firstperson_leftIn;
@@ -64,11 +64,11 @@ public class ItemCameraTransforms {
       this.fixed = fixedIn;
    }
 
-   public void applyTransform(ItemCameraTransforms.TransformType type) {
+   public void applyTransform(ItemCameraTransforms.TransformType var1) {
       applyTransformSide(this.getTransform(type), false);
    }
 
-   public static void applyTransformSide(ItemTransformVec3f vec, boolean leftHand) {
+   public static void applyTransformSide(ItemTransformVec3f var0, boolean var1) {
       if (vec != ItemTransformVec3f.DEFAULT) {
          int i = leftHand ? -1 : 1;
          GlStateManager.translate((float)i * (offsetTranslateX + vec.translation.x), offsetTranslateY + vec.translation.y, offsetTranslateZ + vec.translation.z);
@@ -86,7 +86,7 @@ public class ItemCameraTransforms {
 
    }
 
-   private static Quaternion makeQuaternion(float p_188035_0_, float p_188035_1_, float p_188035_2_) {
+   private static Quaternion makeQuaternion(float var0, float var1, float var2) {
       float f = p_188035_0_ * 0.017453292F;
       float f1 = p_188035_1_ * 0.017453292F;
       float f2 = p_188035_2_ * 0.017453292F;
@@ -101,7 +101,7 @@ public class ItemCameraTransforms {
 
    /** @deprecated */
    @Deprecated
-   public ItemTransformVec3f getTransform(ItemCameraTransforms.TransformType type) {
+   public ItemTransformVec3f getTransform(ItemCameraTransforms.TransformType var1) {
       switch(type) {
       case THIRD_PERSON_LEFT_HAND:
          return this.thirdperson_left;
@@ -124,13 +124,13 @@ public class ItemCameraTransforms {
       }
    }
 
-   public boolean hasCustomTransform(ItemCameraTransforms.TransformType type) {
+   public boolean hasCustomTransform(ItemCameraTransforms.TransformType var1) {
       return this.getTransform(type) != ItemTransformVec3f.DEFAULT;
    }
 
    @SideOnly(Side.CLIENT)
    static class Deserializer implements JsonDeserializer {
-      public ItemCameraTransforms deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public ItemCameraTransforms deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          ItemTransformVec3f itemtransformvec3f = this.getTransform(p_deserialize_3_, jsonobject, "thirdperson_righthand");
          ItemTransformVec3f itemtransformvec3f1 = this.getTransform(p_deserialize_3_, jsonobject, "thirdperson_lefthand");
@@ -151,7 +151,7 @@ public class ItemCameraTransforms {
          return new ItemCameraTransforms(itemtransformvec3f1, itemtransformvec3f, itemtransformvec3f3, itemtransformvec3f2, itemtransformvec3f4, itemtransformvec3f5, itemtransformvec3f6, itemtransformvec3f7);
       }
 
-      private ItemTransformVec3f getTransform(JsonDeserializationContext p_181683_1_, JsonObject p_181683_2_, String p_181683_3_) {
+      private ItemTransformVec3f getTransform(JsonDeserializationContext var1, JsonObject var2, String var3) {
          return p_181683_2_.has(p_181683_3_) ? (ItemTransformVec3f)p_181683_1_.deserialize(p_181683_2_.get(p_181683_3_), ItemTransformVec3f.class) : ItemTransformVec3f.DEFAULT;
       }
    }

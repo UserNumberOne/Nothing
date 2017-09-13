@@ -45,15 +45,15 @@ public class ModelBlock {
    @VisibleForTesting
    protected ResourceLocation parentLocation;
 
-   public static ModelBlock deserialize(Reader readerIn) {
+   public static ModelBlock deserialize(Reader var0) {
       return (ModelBlock)JsonUtils.gsonDeserialize(SERIALIZER, readerIn, ModelBlock.class, false);
    }
 
-   public static ModelBlock deserialize(String jsonString) {
+   public static ModelBlock deserialize(String var0) {
       return deserialize(new StringReader(jsonString));
    }
 
-   public ModelBlock(@Nullable ResourceLocation parentLocationIn, List elementsIn, Map texturesIn, boolean ambientOcclusionIn, boolean gui3dIn, ItemCameraTransforms cameraTransformsIn, List overridesIn) {
+   public ModelBlock(@Nullable ResourceLocation var1, List var2, Map var3, boolean var4, boolean var5, ItemCameraTransforms var6, List var7) {
       this.elements = elementsIn;
       this.ambientOcclusion = ambientOcclusionIn;
       this.gui3d = gui3dIn;
@@ -83,7 +83,7 @@ public class ModelBlock {
       return this.parentLocation == null || this.parent != null && this.parent.isResolved();
    }
 
-   public void getParentFromMap(Map p_178299_1_) {
+   public void getParentFromMap(Map var1) {
       if (this.parentLocation != null) {
          this.parent = (ModelBlock)p_178299_1_.get(this.parentLocation);
       }
@@ -108,11 +108,11 @@ public class ModelBlock {
       return this.overrides.isEmpty() ? ItemOverrideList.NONE : new ItemOverrideList(this.overrides);
    }
 
-   public boolean isTexturePresent(String textureName) {
+   public boolean isTexturePresent(String var1) {
       return !"missingno".equals(this.resolveTextureName(textureName));
    }
 
-   public String resolveTextureName(String textureName) {
+   public String resolveTextureName(String var1) {
       if (!this.startsWithHash(textureName)) {
          textureName = '#' + textureName;
       }
@@ -120,7 +120,7 @@ public class ModelBlock {
       return this.resolveTextureName(textureName, new ModelBlock.Bookkeep(this));
    }
 
-   private String resolveTextureName(String textureName, ModelBlock.Bookkeep p_178302_2_) {
+   private String resolveTextureName(String var1, ModelBlock.Bookkeep var2) {
       if (this.startsWithHash(textureName)) {
          if (this == p_178302_2_.modelExt) {
             LOGGER.warn("Unable to resolve texture due to upward reference: {} in {}", new Object[]{textureName, this.name});
@@ -143,7 +143,7 @@ public class ModelBlock {
       }
    }
 
-   private boolean startsWithHash(String hash) {
+   private boolean startsWithHash(String var1) {
       return hash.charAt(0) == '#';
    }
 
@@ -168,11 +168,11 @@ public class ModelBlock {
       return new ItemCameraTransforms(itemtransformvec3f, itemtransformvec3f1, itemtransformvec3f2, itemtransformvec3f3, itemtransformvec3f4, itemtransformvec3f5, itemtransformvec3f6, itemtransformvec3f7);
    }
 
-   private ItemTransformVec3f getTransform(ItemCameraTransforms.TransformType type) {
+   private ItemTransformVec3f getTransform(ItemCameraTransforms.TransformType var1) {
       return this.parent != null && !this.cameraTransforms.hasCustomTransform(type) ? this.parent.getTransform(type) : this.cameraTransforms.getTransform(type);
    }
 
-   public static void checkModelHierarchy(Map p_178312_0_) {
+   public static void checkModelHierarchy(Map var0) {
       for(ModelBlock modelblock : p_178312_0_.values()) {
          try {
             ModelBlock modelblock1 = modelblock.parent;
@@ -194,14 +194,14 @@ public class ModelBlock {
       public final ModelBlock model;
       public ModelBlock modelExt;
 
-      private Bookkeep(ModelBlock modelIn) {
+      private Bookkeep(ModelBlock var1) {
          this.model = modelIn;
       }
    }
 
    @SideOnly(Side.CLIENT)
    public static class Deserializer implements JsonDeserializer {
-      public ModelBlock deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public ModelBlock deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          List list = this.getModelElements(p_deserialize_3_, jsonobject);
          String s = this.getParent(jsonobject);
@@ -218,7 +218,7 @@ public class ModelBlock {
          return new ModelBlock(resourcelocation, list, map, flag, true, itemcameratransforms, list1);
       }
 
-      protected List getItemOverrides(JsonDeserializationContext deserializationContext, JsonObject object) {
+      protected List getItemOverrides(JsonDeserializationContext var1, JsonObject var2) {
          List list = Lists.newArrayList();
          if (object.has("overrides")) {
             for(JsonElement jsonelement : JsonUtils.getJsonArray(object, "overrides")) {
@@ -229,7 +229,7 @@ public class ModelBlock {
          return list;
       }
 
-      private Map getTextures(JsonObject object) {
+      private Map getTextures(JsonObject var1) {
          Map map = Maps.newHashMap();
          if (object.has("textures")) {
             JsonObject jsonobject = object.getAsJsonObject("textures");
@@ -242,15 +242,15 @@ public class ModelBlock {
          return map;
       }
 
-      private String getParent(JsonObject object) {
+      private String getParent(JsonObject var1) {
          return JsonUtils.getString(object, "parent", "");
       }
 
-      protected boolean getAmbientOcclusionEnabled(JsonObject object) {
+      protected boolean getAmbientOcclusionEnabled(JsonObject var1) {
          return JsonUtils.getBoolean(object, "ambientocclusion", true);
       }
 
-      protected List getModelElements(JsonDeserializationContext deserializationContext, JsonObject object) {
+      protected List getModelElements(JsonDeserializationContext var1, JsonObject var2) {
          List list = Lists.newArrayList();
          if (object.has("elements")) {
             for(JsonElement jsonelement : JsonUtils.getJsonArray(object, "elements")) {

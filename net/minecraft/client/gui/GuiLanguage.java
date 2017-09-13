@@ -21,7 +21,7 @@ public class GuiLanguage extends GuiScreen {
    private GuiOptionButton forceUnicodeFontBtn;
    private GuiOptionButton confirmSettingsBtn;
 
-   public GuiLanguage(GuiScreen screen, GameSettings gameSettingsObj, LanguageManager manager) {
+   public GuiLanguage(GuiScreen var1, GameSettings var2, LanguageManager var3) {
       this.parentScreen = screen;
       this.game_settings_3 = gameSettingsObj;
       this.languageManager = manager;
@@ -39,7 +39,7 @@ public class GuiLanguage extends GuiScreen {
       this.list.handleMouseInput();
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          switch(button.id) {
          case 5:
@@ -64,7 +64,7 @@ public class GuiLanguage extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.list.drawScreen(mouseX, mouseY, partialTicks);
       this.drawCenteredString(this.fontRendererObj, I18n.format("options.language"), this.width / 2, 16, 16777215);
       this.drawCenteredString(this.fontRendererObj, "(" + I18n.format("options.languageWarning") + ")", this.width / 2, this.height - 56, 8421504);
@@ -76,7 +76,7 @@ public class GuiLanguage extends GuiScreen {
       private final java.util.List langCodeList = Lists.newArrayList();
       private final Map languageMap = Maps.newHashMap();
 
-      public List(Minecraft mcIn) {
+      public List(Minecraft var2) {
          super(mcIn, GuiLanguage.this.width, GuiLanguage.this.height, 32, GuiLanguage.this.height - 65 + 4, 18);
 
          for(Language language : GuiLanguage.this.languageManager.getLanguages()) {
@@ -90,7 +90,7 @@ public class GuiLanguage extends GuiScreen {
          return this.langCodeList.size();
       }
 
-      protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY) {
+      protected void elementClicked(int var1, boolean var2, int var3, int var4) {
          Language language = (Language)this.languageMap.get(this.langCodeList.get(slotIndex));
          GuiLanguage.this.languageManager.setCurrentLanguage(language);
          GuiLanguage.this.game_settings_3.language = language.getLanguageCode();
@@ -102,7 +102,7 @@ public class GuiLanguage extends GuiScreen {
          GuiLanguage.this.game_settings_3.saveOptions();
       }
 
-      protected boolean isSelected(int slotIndex) {
+      protected boolean isSelected(int var1) {
          return ((String)this.langCodeList.get(slotIndex)).equals(GuiLanguage.this.languageManager.getCurrentLanguage().getLanguageCode());
       }
 
@@ -114,7 +114,7 @@ public class GuiLanguage extends GuiScreen {
          GuiLanguage.this.drawDefaultBackground();
       }
 
-      protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn) {
+      protected void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6) {
          GuiLanguage.this.fontRendererObj.setBidiFlag(true);
          GuiLanguage.this.drawCenteredString(GuiLanguage.this.fontRendererObj, ((Language)this.languageMap.get(this.langCodeList.get(entryID))).toString(), this.width / 2, yPos + 1, 16777215);
          GuiLanguage.this.fontRendererObj.setBidiFlag(GuiLanguage.this.languageManager.getCurrentLanguage().isBidirectional());

@@ -35,14 +35,14 @@ public class VertexBuffer {
    private VertexFormat vertexFormat;
    private boolean isDrawing;
 
-   public VertexBuffer(int bufferSizeIn) {
+   public VertexBuffer(int var1) {
       this.byteBuffer = GLAllocation.createDirectByteBuffer(bufferSizeIn * 4);
       this.rawIntBuffer = this.byteBuffer.asIntBuffer();
       this.rawShortBuffer = this.byteBuffer.asShortBuffer();
       this.rawFloatBuffer = this.byteBuffer.asFloatBuffer();
    }
 
-   private void growBuffer(int p_181670_1_) {
+   private void growBuffer(int var1) {
       if (MathHelper.roundUp(p_181670_1_, 4) / 4 > this.rawIntBuffer.remaining() || this.vertexCount * this.vertexFormat.getNextOffset() + p_181670_1_ > this.byteBuffer.capacity()) {
          int i = this.byteBuffer.capacity();
          int j = i + MathHelper.roundUp(p_181670_1_, 2097152);
@@ -62,7 +62,7 @@ public class VertexBuffer {
 
    }
 
-   public void sortVertexData(float p_181674_1_, float p_181674_2_, float p_181674_3_) {
+   public void sortVertexData(float var1, float var2, float var3) {
       int i = this.vertexCount / 4;
       final float[] afloat = new float[i];
 
@@ -77,7 +77,7 @@ public class VertexBuffer {
       }
 
       Arrays.sort(ainteger, new Comparator() {
-         public int compare(Integer p_compare_1_, Integer p_compare_2_) {
+         public int compare(Integer var1, Integer var2) {
             return Floats.compare(afloat[p_compare_2_.intValue()], afloat[p_compare_1_.intValue()]);
          }
       });
@@ -131,7 +131,7 @@ public class VertexBuffer {
       return this.vertexCount * this.vertexFormat.getIntegerSize();
    }
 
-   private static float getDistanceSq(FloatBuffer p_181665_0_, float p_181665_1_, float p_181665_2_, float p_181665_3_, int p_181665_4_, int p_181665_5_) {
+   private static float getDistanceSq(FloatBuffer var0, float var1, float var2, float var3, int var4, int var5) {
       float f = p_181665_0_.get(p_181665_5_ + p_181665_4_ * 0 + 0);
       float f1 = p_181665_0_.get(p_181665_5_ + p_181665_4_ * 0 + 1);
       float f2 = p_181665_0_.get(p_181665_5_ + p_181665_4_ * 0 + 2);
@@ -150,7 +150,7 @@ public class VertexBuffer {
       return f12 * f12 + f13 * f13 + f14 * f14;
    }
 
-   public void setVertexState(VertexBuffer.State state) {
+   public void setVertexState(VertexBuffer.State var1) {
       this.rawIntBuffer.clear();
       this.growBuffer(state.getRawBuffer().length * 4);
       this.rawIntBuffer.put(state.getRawBuffer());
@@ -164,7 +164,7 @@ public class VertexBuffer {
       this.vertexFormatIndex = 0;
    }
 
-   public void begin(int glMode, VertexFormat format) {
+   public void begin(int var1, VertexFormat var2) {
       if (this.isDrawing) {
          throw new IllegalStateException("Already building!");
       } else {
@@ -178,7 +178,7 @@ public class VertexBuffer {
       }
    }
 
-   public VertexBuffer tex(double u, double v) {
+   public VertexBuffer tex(double var1, double var3) {
       int i = this.vertexCount * this.vertexFormat.getNextOffset() + this.vertexFormat.getOffset(this.vertexFormatIndex);
       switch(this.vertexFormatElement.getType()) {
       case FLOAT:
@@ -205,7 +205,7 @@ public class VertexBuffer {
       return this;
    }
 
-   public VertexBuffer lightmap(int p_187314_1_, int p_187314_2_) {
+   public VertexBuffer lightmap(int var1, int var2) {
       int i = this.vertexCount * this.vertexFormat.getNextOffset() + this.vertexFormat.getOffset(this.vertexFormatIndex);
       switch(this.vertexFormatElement.getType()) {
       case FLOAT:
@@ -232,7 +232,7 @@ public class VertexBuffer {
       return this;
    }
 
-   public void putBrightness4(int p_178962_1_, int p_178962_2_, int p_178962_3_, int p_178962_4_) {
+   public void putBrightness4(int var1, int var2, int var3, int var4) {
       int i = (this.vertexCount - 4) * this.vertexFormat.getIntegerSize() + this.vertexFormat.getUvOffsetById(1) / 4;
       int j = this.vertexFormat.getNextOffset() >> 2;
       this.rawIntBuffer.put(i, p_178962_1_);
@@ -241,7 +241,7 @@ public class VertexBuffer {
       this.rawIntBuffer.put(i + j * 3, p_178962_4_);
    }
 
-   public void putPosition(double x, double y, double z) {
+   public void putPosition(double var1, double var3, double var5) {
       int i = this.vertexFormat.getIntegerSize();
       int j = (this.vertexCount - 4) * i;
 
@@ -256,11 +256,11 @@ public class VertexBuffer {
 
    }
 
-   public int getColorIndex(int vertexIndex) {
+   public int getColorIndex(int var1) {
       return ((this.vertexCount - vertexIndex) * this.vertexFormat.getNextOffset() + this.vertexFormat.getColorOffset()) / 4;
    }
 
-   public void putColorMultiplier(float red, float green, float blue, int vertexIndex) {
+   public void putColorMultiplier(float var1, float var2, float var3, int var4) {
       int i = this.getColorIndex(vertexIndex);
       int j = -1;
       if (!this.noColor) {
@@ -283,7 +283,7 @@ public class VertexBuffer {
       this.rawIntBuffer.put(i, j);
    }
 
-   private void putColor(int argb, int vertexIndex) {
+   private void putColor(int var1, int var2) {
       int i = this.getColorIndex(vertexIndex);
       int j = argb >> 16 & 255;
       int k = argb >> 8 & 255;
@@ -292,7 +292,7 @@ public class VertexBuffer {
       this.putColorRGBA(i, j, k, l, i1);
    }
 
-   public void putColorRGB_F(float red, float green, float blue, int vertexIndex) {
+   public void putColorRGB_F(float var1, float var2, float var3, int var4) {
       int i = this.getColorIndex(vertexIndex);
       int j = MathHelper.clamp((int)(red * 255.0F), 0, 255);
       int k = MathHelper.clamp((int)(green * 255.0F), 0, 255);
@@ -300,7 +300,7 @@ public class VertexBuffer {
       this.putColorRGBA(i, j, k, l, 255);
    }
 
-   public void putColorRGBA(int index, int red, int green, int blue, int alpha) {
+   public void putColorRGBA(int var1, int var2, int var3, int var4, int var5) {
       if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
          this.rawIntBuffer.put(index, alpha << 24 | blue << 16 | green << 8 | red);
       } else {
@@ -313,11 +313,11 @@ public class VertexBuffer {
       this.noColor = true;
    }
 
-   public VertexBuffer color(float red, float green, float blue, float alpha) {
+   public VertexBuffer color(float var1, float var2, float var3, float var4) {
       return this.color((int)(red * 255.0F), (int)(green * 255.0F), (int)(blue * 255.0F), (int)(alpha * 255.0F));
    }
 
-   public VertexBuffer color(int red, int green, int blue, int alpha) {
+   public VertexBuffer color(int var1, int var2, int var3, int var4) {
       if (this.noColor) {
          return this;
       } else {
@@ -363,7 +363,7 @@ public class VertexBuffer {
       }
    }
 
-   public void addVertexData(int[] vertexData) {
+   public void addVertexData(int[] var1) {
       this.growBuffer(vertexData.length * 4);
       this.rawIntBuffer.position(this.getBufferSize());
       this.rawIntBuffer.put(vertexData);
@@ -375,7 +375,7 @@ public class VertexBuffer {
       this.growBuffer(this.vertexFormat.getNextOffset());
    }
 
-   public VertexBuffer pos(double x, double y, double z) {
+   public VertexBuffer pos(double var1, double var3, double var5) {
       int i = this.vertexCount * this.vertexFormat.getNextOffset() + this.vertexFormat.getOffset(this.vertexFormatIndex);
       switch(this.vertexFormatElement.getType()) {
       case FLOAT:
@@ -406,7 +406,7 @@ public class VertexBuffer {
       return this;
    }
 
-   public void putNormal(float x, float y, float z) {
+   public void putNormal(float var1, float var2, float var3) {
       int i = (byte)((int)(x * 127.0F)) & 255;
       int j = (byte)((int)(y * 127.0F)) & 255;
       int k = (byte)((int)(z * 127.0F)) & 255;
@@ -429,7 +429,7 @@ public class VertexBuffer {
 
    }
 
-   public VertexBuffer normal(float x, float y, float z) {
+   public VertexBuffer normal(float var1, float var2, float var3) {
       int i = this.vertexCount * this.vertexFormat.getNextOffset() + this.vertexFormat.getOffset(this.vertexFormatIndex);
       switch(this.vertexFormatElement.getType()) {
       case FLOAT:
@@ -460,7 +460,7 @@ public class VertexBuffer {
       return this;
    }
 
-   public void setTranslation(double x, double y, double z) {
+   public void setTranslation(double var1, double var3, double var5) {
       this.xOffset = x;
       this.yOffset = y;
       this.zOffset = z;
@@ -492,14 +492,14 @@ public class VertexBuffer {
       return this.drawMode;
    }
 
-   public void putColor4(int argb) {
+   public void putColor4(int var1) {
       for(int i = 0; i < 4; ++i) {
          this.putColor(argb, i + 1);
       }
 
    }
 
-   public void putColorRGB_F4(float red, float green, float blue) {
+   public void putColorRGB_F4(float var1, float var2, float var3) {
       for(int i = 0; i < 4; ++i) {
          this.putColorRGB_F(red, green, blue, i + 1);
       }
@@ -515,7 +515,7 @@ public class VertexBuffer {
       private final int[] stateRawBuffer;
       private final VertexFormat stateVertexFormat;
 
-      public State(int[] buffer, VertexFormat format) {
+      public State(int[] var2, VertexFormat var3) {
          this.stateRawBuffer = buffer;
          this.stateVertexFormat = format;
       }

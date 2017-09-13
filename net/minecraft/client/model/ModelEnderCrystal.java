@@ -11,7 +11,7 @@ public class ModelEnderCrystal extends ModelBase {
    private final ModelRenderer glass = new ModelRenderer(this, "glass");
    private ModelRenderer base;
 
-   public ModelEnderCrystal(float p_i1170_1_, boolean renderBase) {
+   public ModelEnderCrystal(float var1, boolean var2) {
       this.glass.setTextureOffset(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
       this.cube = new ModelRenderer(this, "cube");
       this.cube.setTextureOffset(32, 0).addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
@@ -22,7 +22,7 @@ public class ModelEnderCrystal extends ModelBase {
 
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       GlStateManager.pushMatrix();
       GlStateManager.scale(2.0F, 2.0F, 2.0F);
       GlStateManager.translate(0.0F, -0.5F, 0.0F);

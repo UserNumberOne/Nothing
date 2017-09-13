@@ -13,17 +13,17 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderSlime extends RenderLiving {
    private static final ResourceLocation SLIME_TEXTURES = new ResourceLocation("textures/entity/slime/slime.png");
 
-   public RenderSlime(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn) {
+   public RenderSlime(RenderManager var1, ModelBase var2, float var3) {
       super(renderManagerIn, modelBaseIn, shadowSizeIn);
       this.addLayer(new LayerSlimeGel(this));
    }
 
-   public void doRender(EntitySlime entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntitySlime var1, double var2, double var4, double var6, float var8, float var9) {
       this.shadowSize = 0.25F * (float)entity.getSlimeSize();
       super.doRender((EntityLiving)entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected void preRenderCallback(EntitySlime entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntitySlime var1, float var2) {
       float f = 0.999F;
       GlStateManager.scale(0.999F, 0.999F, 0.999F);
       float f1 = (float)entitylivingbaseIn.getSlimeSize();
@@ -32,7 +32,7 @@ public class RenderSlime extends RenderLiving {
       GlStateManager.scale(f3 * f1, 1.0F / f3 * f1, f3 * f1);
    }
 
-   protected ResourceLocation getEntityTexture(EntitySlime entity) {
+   protected ResourceLocation getEntityTexture(EntitySlime var1) {
       return SLIME_TEXTURES;
    }
 }

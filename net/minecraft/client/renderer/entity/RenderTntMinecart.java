@@ -12,11 +12,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderTntMinecart extends RenderMinecart {
-   public RenderTntMinecart(RenderManager renderManagerIn) {
+   public RenderTntMinecart(RenderManager var1) {
       super(renderManagerIn);
    }
 
-   protected void renderCartContents(EntityMinecartTNT p_188319_1_, float partialTicks, IBlockState p_188319_3_) {
+   protected void renderCartContents(EntityMinecartTNT var1, float var2, IBlockState var3) {
       int i = p_188319_1_.getFuseTicks();
       if (i > -1 && (float)i - partialTicks + 1.0F < 10.0F) {
          float f = 1.0F - ((float)i - partialTicks + 1.0F) / 10.0F;

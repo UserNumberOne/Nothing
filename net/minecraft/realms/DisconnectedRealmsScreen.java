@@ -13,7 +13,7 @@ public class DisconnectedRealmsScreen extends RealmsScreen {
    private final RealmsScreen parent;
    private int textHeight;
 
-   public DisconnectedRealmsScreen(RealmsScreen parentIn, String unlocalizedTitle, ITextComponent reasonIn) {
+   public DisconnectedRealmsScreen(RealmsScreen var1, String var2, ITextComponent var3) {
       this.parent = parentIn;
       this.title = getLocalizedString(unlocalizedTitle);
       this.reason = reasonIn;
@@ -28,21 +28,21 @@ public class DisconnectedRealmsScreen extends RealmsScreen {
       this.buttonsAdd(newButton(0, this.width() / 2 - 100, this.height() / 2 + this.textHeight / 2 + this.fontLineHeight(), getLocalizedString("gui.back")));
    }
 
-   public void keyPressed(char p_keyPressed_1_, int p_keyPressed_2_) {
+   public void keyPressed(char var1, int var2) {
       if (p_keyPressed_2_ == 1) {
          Realms.setScreen(this.parent);
       }
 
    }
 
-   public void buttonClicked(RealmsButton p_buttonClicked_1_) {
+   public void buttonClicked(RealmsButton var1) {
       if (p_buttonClicked_1_.id() == 0) {
          Realms.setScreen(this.parent);
       }
 
    }
 
-   public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
+   public void render(int var1, int var2, float var3) {
       this.renderBackground();
       this.drawCenteredString(this.title, this.width() / 2, this.height() / 2 - this.textHeight / 2 - this.fontLineHeight() * 2, 11184810);
       int i = this.height() / 2 - this.textHeight / 2;

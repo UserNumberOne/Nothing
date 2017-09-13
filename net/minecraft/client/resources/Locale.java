@@ -23,7 +23,7 @@ public class Locale {
    Map properties = Maps.newHashMap();
    private boolean unicode;
 
-   public synchronized void loadLocaleDataFiles(IResourceManager resourceManager, List languageList) {
+   public synchronized void loadLocaleDataFiles(IResourceManager var1, List var2) {
       this.properties.clear();
 
       for(String s : languageList) {
@@ -65,7 +65,7 @@ public class Locale {
       this.unicode = (double)f > 0.1D;
    }
 
-   private void loadLocaleData(List resourcesList) throws IOException {
+   private void loadLocaleData(List var1) throws IOException {
       for(IResource iresource : resourcesList) {
          InputStream inputstream = iresource.getInputStream();
 
@@ -78,7 +78,7 @@ public class Locale {
 
    }
 
-   private void loadLocaleData(InputStream inputStreamIn) throws IOException {
+   private void loadLocaleData(InputStream var1) throws IOException {
       inputStreamIn = FMLCommonHandler.instance().loadLanguage(this.properties, inputStreamIn);
       if (inputStreamIn != null) {
          for(String s : IOUtils.readLines(inputStreamIn, Charsets.UTF_8)) {
@@ -95,12 +95,12 @@ public class Locale {
       }
    }
 
-   private String translateKeyPrivate(String translateKey) {
+   private String translateKeyPrivate(String var1) {
       String s = (String)this.properties.get(translateKey);
       return s == null ? translateKey : s;
    }
 
-   public String formatMessage(String translateKey, Object[] parameters) {
+   public String formatMessage(String var1, Object[] var2) {
       String s = this.translateKeyPrivate(translateKey);
 
       try {
@@ -110,7 +110,7 @@ public class Locale {
       }
    }
 
-   public boolean hasKey(String key) {
+   public boolean hasKey(String var1) {
       return this.properties.containsKey(key);
    }
 }

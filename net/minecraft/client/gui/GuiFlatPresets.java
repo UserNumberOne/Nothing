@@ -36,7 +36,7 @@ public class GuiFlatPresets extends GuiScreen {
    private GuiButton btnSelect;
    private GuiTextField export;
 
-   public GuiFlatPresets(GuiCreateFlatWorld p_i46318_1_) {
+   public GuiFlatPresets(GuiCreateFlatWorld var1) {
       this.parentScreen = p_i46318_1_;
    }
 
@@ -64,19 +64,19 @@ public class GuiFlatPresets extends GuiScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       this.export.mouseClicked(mouseX, mouseY, mouseButton);
       super.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (!this.export.textboxKeyTyped(typedChar, keyCode)) {
          super.keyTyped(typedChar, keyCode);
       }
 
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.id == 0 && this.hasValidSelection()) {
          this.parentScreen.setPreset(this.export.getText());
          this.mc.displayGuiScreen(this.parentScreen);
@@ -86,7 +86,7 @@ public class GuiFlatPresets extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.list.drawScreen(mouseX, mouseY, partialTicks);
       this.drawCenteredString(this.fontRendererObj, this.presetsTitle, this.width / 2, 8, 16777215);
@@ -109,15 +109,15 @@ public class GuiFlatPresets extends GuiScreen {
       return this.list.selected > -1 && this.list.selected < FLAT_WORLD_PRESETS.size() || this.export.getText().length() > 1;
    }
 
-   private static void registerPreset(String name, Item icon, Biome biome, FlatLayerInfo... layers) {
+   private static void registerPreset(String var0, Item var1, Biome var2, FlatLayerInfo... var3) {
       registerPreset(name, icon, 0, biome, (List)null, layers);
    }
 
-   private static void registerPreset(String name, Item icon, Biome biome, @Nullable List features, FlatLayerInfo... layers) {
+   private static void registerPreset(String var0, Item var1, Biome var2, @Nullable List var3, FlatLayerInfo... var4) {
       registerPreset(name, icon, 0, biome, features, layers);
    }
 
-   private static void registerPreset(String name, Item icon, int iconMetadata, Biome biome, @Nullable List features, FlatLayerInfo... layers) {
+   private static void registerPreset(String var0, Item var1, int var2, Biome var3, @Nullable List var4, FlatLayerInfo... var5) {
       FlatGeneratorInfo flatgeneratorinfo = new FlatGeneratorInfo();
 
       for(int i = layers.length - 1; i >= 0; --i) {
@@ -154,7 +154,7 @@ public class GuiFlatPresets extends GuiScreen {
       public String name;
       public String generatorInfo;
 
-      public LayerItem(Item iconIn, int iconMetadataIn, String nameIn, String generatorInfoIn) {
+      public LayerItem(Item var1, int var2, String var3, String var4) {
          this.icon = iconIn;
          this.iconMetadata = iconMetadataIn;
          this.name = nameIn;
@@ -170,7 +170,7 @@ public class GuiFlatPresets extends GuiScreen {
          super(GuiFlatPresets.this.mc, GuiFlatPresets.this.width, GuiFlatPresets.this.height, 80, GuiFlatPresets.this.height - 37, 24);
       }
 
-      private void renderIcon(int p_178054_1_, int p_178054_2_, Item icon, int iconMetadata) {
+      private void renderIcon(int var1, int var2, Item var3, int var4) {
          this.blitSlotBg(p_178054_1_ + 1, p_178054_2_ + 1);
          GlStateManager.enableRescaleNormal();
          RenderHelper.enableGUIStandardItemLighting();
@@ -179,11 +179,11 @@ public class GuiFlatPresets extends GuiScreen {
          GlStateManager.disableRescaleNormal();
       }
 
-      private void blitSlotBg(int p_148173_1_, int p_148173_2_) {
+      private void blitSlotBg(int var1, int var2) {
          this.blitSlotIcon(p_148173_1_, p_148173_2_, 0, 0);
       }
 
-      private void blitSlotIcon(int p_148171_1_, int p_148171_2_, int p_148171_3_, int p_148171_4_) {
+      private void blitSlotIcon(int var1, int var2, int var3, int var4) {
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          this.mc.getTextureManager().bindTexture(Gui.STAT_ICONS);
          float f = 0.0078125F;
@@ -204,20 +204,20 @@ public class GuiFlatPresets extends GuiScreen {
          return GuiFlatPresets.FLAT_WORLD_PRESETS.size();
       }
 
-      protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY) {
+      protected void elementClicked(int var1, boolean var2, int var3, int var4) {
          this.selected = slotIndex;
          GuiFlatPresets.this.updateButtonValidity();
          GuiFlatPresets.this.export.setText(((GuiFlatPresets.LayerItem)GuiFlatPresets.FLAT_WORLD_PRESETS.get(GuiFlatPresets.this.list.selected)).generatorInfo);
       }
 
-      protected boolean isSelected(int slotIndex) {
+      protected boolean isSelected(int var1) {
          return slotIndex == this.selected;
       }
 
       protected void drawBackground() {
       }
 
-      protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn) {
+      protected void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6) {
          GuiFlatPresets.LayerItem guiflatpresets$layeritem = (GuiFlatPresets.LayerItem)GuiFlatPresets.FLAT_WORLD_PRESETS.get(entryID);
          this.renderIcon(insideLeft, yPos, guiflatpresets$layeritem.icon, guiflatpresets$layeritem.iconMetadata);
          GuiFlatPresets.this.fontRendererObj.drawString(guiflatpresets$layeritem.name, insideLeft + 18 + 5, yPos + 6, 16777215);

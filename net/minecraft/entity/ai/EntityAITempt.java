@@ -4,14 +4,10 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathNavigateGround;
-import org.bukkit.craftbukkit.v1_10_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAITempt extends EntityAIBase {
    private final EntityCreature temptedEntity;
@@ -21,23 +17,23 @@ public class EntityAITempt extends EntityAIBase {
    private double targetZ;
    private double pitch;
    private double yaw;
-   private EntityLivingBase temptingPlayer;
+   private EntityPlayer temptingPlayer;
    private int delayTemptCounter;
    private boolean isRunning;
    private final Set temptItem;
    private final boolean scaredByPlayerMovement;
 
-   public EntityAITempt(EntityCreature entitycreature, double d0, Item item, boolean flag) {
-      this(entitycreature, d0, flag, Sets.newHashSet(new Item[]{item}));
+   public EntityAITempt(EntityCreature var1, double var2, Item var4, boolean var5) {
+      this(temptedEntityIn, speedIn, scaredByPlayerMovementIn, Sets.newHashSet(new Item[]{temptItemIn}));
    }
 
-   public EntityAITempt(EntityCreature entitycreature, double d0, boolean flag, Set set) {
-      this.temptedEntity = entitycreature;
-      this.speed = d0;
-      this.temptItem = set;
-      this.scaredByPlayerMovement = flag;
+   public EntityAITempt(EntityCreature var1, double var2, boolean var4, Set var5) {
+      this.temptedEntity = temptedEntityIn;
+      this.speed = speedIn;
+      this.temptItem = temptItemIn;
+      this.scaredByPlayerMovement = scaredByPlayerMovementIn;
       this.setMutexBits(3);
-      if (!(entitycreature.getNavigator() instanceof PathNavigateGround)) {
+      if (!(temptedEntityIn.getNavigator() instanceof PathNavigateGround)) {
          throw new IllegalArgumentException("Unsupported mob type for TemptGoal");
       }
    }
@@ -48,22 +44,12 @@ public class EntityAITempt extends EntityAIBase {
          return false;
       } else {
          this.temptingPlayer = this.temptedEntity.world.getClosestPlayerToEntity(this.temptedEntity, 10.0D);
-         boolean tempt = this.temptingPlayer == null ? false : this.isTempting(this.temptingPlayer.getHeldItemMainhand()) || this.isTempting(this.temptingPlayer.getHeldItemOffhand());
-         if (tempt) {
-            EntityTargetLivingEntityEvent event = CraftEventFactory.callEntityTargetLivingEvent(this.temptedEntity, this.temptingPlayer, TargetReason.TEMPT);
-            if (event.isCancelled()) {
-               return false;
-            }
-
-            this.temptingPlayer = ((CraftLivingEntity)event.getTarget()).getHandle();
-         }
-
-         return tempt;
+         return this.temptingPlayer == null ? false : this.isTempting(this.temptingPlayer.getHeldItemMainhand()) || this.isTempting(this.temptingPlayer.getHeldItemOffhand());
       }
    }
 
-   protected boolean isTempting(@Nullable ItemStack itemstack) {
-      return itemstack == null ? false : this.temptItem.contains(itemstack.getItem());
+   protected boolean isTempting(@Nullable ItemStack var1) {
+      return stack == null ? false : this.temptItem.contains(stack.getItem());
    }
 
    public boolean continueExecuting() {

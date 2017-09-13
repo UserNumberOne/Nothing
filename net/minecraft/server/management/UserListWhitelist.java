@@ -3,47 +3,45 @@ package net.minecraft.server.management;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import java.io.File;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class UserListWhitelist extends UserList {
    public UserListWhitelist(File var1) {
-      super(var1);
+      super(p_i1132_1_);
    }
 
    protected UserListEntry createEntry(JsonObject var1) {
-      return new UserListWhitelistEntry(var1);
-   }
-
-   public boolean isWhitelisted(GameProfile var1) {
-      return this.hasEntry(var1);
+      return new UserListWhitelistEntry(entryData);
    }
 
    public String[] getKeys() {
-      String[] var1 = new String[this.getValues().size()];
-      int var2 = 0;
+      String[] astring = new String[this.getValues().size()];
+      int i = 0;
 
-      for(UserListWhitelistEntry var4 : this.getValues().values()) {
-         var1[var2++] = ((GameProfile)var4.getValue()).getName();
+      for(UserListWhitelistEntry userlistwhitelistentry : this.getValues().values()) {
+         astring[i++] = ((GameProfile)userlistwhitelistentry.getValue()).getName();
       }
 
-      return var1;
+      return astring;
+   }
+
+   @SideOnly(Side.SERVER)
+   public boolean isWhitelisted(GameProfile var1) {
+      return this.hasEntry(profile);
    }
 
    protected String getObjectKey(GameProfile var1) {
-      return var1.getId().toString();
+      return obj.getId().toString();
    }
 
    public GameProfile getByName(String var1) {
-      for(UserListWhitelistEntry var3 : this.getValues().values()) {
-         if (var1.equalsIgnoreCase(((GameProfile)var3.getValue()).getName())) {
-            return (GameProfile)var3.getValue();
+      for(UserListWhitelistEntry userlistwhitelistentry : this.getValues().values()) {
+         if (profileName.equalsIgnoreCase(((GameProfile)userlistwhitelistentry.getValue()).getName())) {
+            return (GameProfile)userlistwhitelistentry.getValue();
          }
       }
 
       return null;
-   }
-
-   // $FF: synthetic method
-   protected String getObjectKey(Object var1) {
-      return this.getObjectKey((GameProfile)var1);
    }
 }

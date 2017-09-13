@@ -9,15 +9,13 @@ import com.google.gson.JsonParser;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketStatistics;
-import net.minecraft.src.MinecraftServer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IJsonSerializable;
 import net.minecraft.util.TupleIntJsonSerializable;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -34,8 +32,8 @@ public class StatisticsManagerServer extends StatisticsManager {
    private boolean hasUnsentAchievement;
 
    public StatisticsManagerServer(MinecraftServer var1, File var2) {
-      this.mcServer = var1;
-      this.statsFile = var2;
+      this.mcServer = serverIn;
+      this.statsFile = statsFileIn;
    }
 
    public void readStatFile() {
@@ -62,129 +60,129 @@ public class StatisticsManagerServer extends StatisticsManager {
    }
 
    public void unlockAchievement(EntityPlayer var1, StatBase var2, int var3) {
-      int var4 = var2.isAchievement() ? this.readStat(var2) : 0;
-      super.unlockAchievement(var1, var2, var3);
-      this.dirty.add(var2);
-      if (var2.isAchievement() && var4 == 0 && var3 > 0) {
+      int i = statIn.isAchievement() ? this.readStat(statIn) : 0;
+      super.unlockAchievement(playerIn, statIn, p_150873_3_);
+      this.dirty.add(statIn);
+      if (statIn.isAchievement() && i == 0 && p_150873_3_ > 0) {
          this.hasUnsentAchievement = true;
-         if (this.mcServer.ax()) {
-            this.mcServer.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.achievement", new Object[]{var1.getDisplayName(), var2.createChatComponent()}));
+         if (this.mcServer.isAnnouncingPlayerAchievements()) {
+            this.mcServer.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.achievement", new Object[]{playerIn.getDisplayName(), statIn.createChatComponent()}));
          }
       }
 
-      if (var2.isAchievement() && var4 > 0 && var3 == 0) {
+      if (statIn.isAchievement() && i > 0 && p_150873_3_ == 0) {
          this.hasUnsentAchievement = true;
-         if (this.mcServer.ax()) {
-            this.mcServer.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.achievement.taken", new Object[]{var1.getDisplayName(), var2.createChatComponent()}));
+         if (this.mcServer.isAnnouncingPlayerAchievements()) {
+            this.mcServer.getPlayerList().sendChatMsg(new TextComponentTranslation("chat.type.achievement.taken", new Object[]{playerIn.getDisplayName(), statIn.createChatComponent()}));
          }
       }
 
    }
 
    public Set getDirty() {
-      HashSet var1 = Sets.newHashSet(this.dirty);
+      Set set = Sets.newHashSet(this.dirty);
       this.dirty.clear();
       this.hasUnsentAchievement = false;
-      return var1;
+      return set;
    }
 
    public Map parseJson(String var1) {
-      JsonElement var2 = (new JsonParser()).parse(var1);
-      if (!var2.isJsonObject()) {
+      JsonElement jsonelement = (new JsonParser()).parse(p_150881_1_);
+      if (!jsonelement.isJsonObject()) {
          return Maps.newHashMap();
       } else {
-         JsonObject var3 = var2.getAsJsonObject();
-         HashMap var4 = Maps.newHashMap();
+         JsonObject jsonobject = jsonelement.getAsJsonObject();
+         Map map = Maps.newHashMap();
 
-         for(Entry var6 : var3.entrySet()) {
-            StatBase var7 = StatList.getOneShotStat((String)var6.getKey());
-            if (var7 != null) {
-               TupleIntJsonSerializable var8 = new TupleIntJsonSerializable();
-               if (((JsonElement)var6.getValue()).isJsonPrimitive() && ((JsonElement)var6.getValue()).getAsJsonPrimitive().isNumber()) {
-                  var8.setIntegerValue(((JsonElement)var6.getValue()).getAsInt());
-               } else if (((JsonElement)var6.getValue()).isJsonObject()) {
-                  JsonObject var9 = ((JsonElement)var6.getValue()).getAsJsonObject();
-                  if (var9.has("value") && var9.get("value").isJsonPrimitive() && var9.get("value").getAsJsonPrimitive().isNumber()) {
-                     var8.setIntegerValue(var9.getAsJsonPrimitive("value").getAsInt());
+         for(Entry entry : jsonobject.entrySet()) {
+            StatBase statbase = StatList.getOneShotStat((String)entry.getKey());
+            if (statbase != null) {
+               TupleIntJsonSerializable tupleintjsonserializable = new TupleIntJsonSerializable();
+               if (((JsonElement)entry.getValue()).isJsonPrimitive() && ((JsonElement)entry.getValue()).getAsJsonPrimitive().isNumber()) {
+                  tupleintjsonserializable.setIntegerValue(((JsonElement)entry.getValue()).getAsInt());
+               } else if (((JsonElement)entry.getValue()).isJsonObject()) {
+                  JsonObject jsonobject1 = ((JsonElement)entry.getValue()).getAsJsonObject();
+                  if (jsonobject1.has("value") && jsonobject1.get("value").isJsonPrimitive() && jsonobject1.get("value").getAsJsonPrimitive().isNumber()) {
+                     tupleintjsonserializable.setIntegerValue(jsonobject1.getAsJsonPrimitive("value").getAsInt());
                   }
 
-                  if (var9.has("progress") && var7.getSerializableClazz() != null) {
+                  if (jsonobject1.has("progress") && statbase.getSerializableClazz() != null) {
                      try {
-                        Constructor var10 = var7.getSerializableClazz().getConstructor();
-                        IJsonSerializable var11 = (IJsonSerializable)var10.newInstance();
-                        var11.fromJson(var9.get("progress"));
-                        var8.setJsonSerializableValue(var11);
+                        Constructor constructor = statbase.getSerializableClazz().getConstructor();
+                        IJsonSerializable ijsonserializable = (IJsonSerializable)constructor.newInstance();
+                        ijsonserializable.fromJson(jsonobject1.get("progress"));
+                        tupleintjsonserializable.setJsonSerializableValue(ijsonserializable);
                      } catch (Throwable var12) {
                         LOGGER.warn("Invalid statistic progress in {}", new Object[]{this.statsFile, var12});
                      }
                   }
                }
 
-               var4.put(var7, var8);
+               map.put(statbase, tupleintjsonserializable);
             } else {
-               LOGGER.warn("Invalid statistic in {}: Don't know what {} is", new Object[]{this.statsFile, var6.getKey()});
+               LOGGER.warn("Invalid statistic in {}: Don't know what {} is", new Object[]{this.statsFile, entry.getKey()});
             }
          }
 
-         return var4;
+         return map;
       }
    }
 
    public static String dumpJson(Map var0) {
-      JsonObject var1 = new JsonObject();
+      JsonObject jsonobject = new JsonObject();
 
-      for(Entry var3 : var0.entrySet()) {
-         if (((TupleIntJsonSerializable)var3.getValue()).getJsonSerializableValue() != null) {
-            JsonObject var4 = new JsonObject();
-            var4.addProperty("value", Integer.valueOf(((TupleIntJsonSerializable)var3.getValue()).getIntegerValue()));
+      for(Entry entry : p_150880_0_.entrySet()) {
+         if (((TupleIntJsonSerializable)entry.getValue()).getJsonSerializableValue() != null) {
+            JsonObject jsonobject1 = new JsonObject();
+            jsonobject1.addProperty("value", Integer.valueOf(((TupleIntJsonSerializable)entry.getValue()).getIntegerValue()));
 
             try {
-               var4.add("progress", ((TupleIntJsonSerializable)var3.getValue()).getJsonSerializableValue().getSerializableElement());
+               jsonobject1.add("progress", ((TupleIntJsonSerializable)entry.getValue()).getJsonSerializableValue().getSerializableElement());
             } catch (Throwable var6) {
-               LOGGER.warn("Couldn't save statistic {}: error serializing progress", new Object[]{((StatBase)var3.getKey()).getStatName(), var6});
+               LOGGER.warn("Couldn't save statistic {}: error serializing progress", new Object[]{((StatBase)entry.getKey()).getStatName(), var6});
             }
 
-            var1.add(((StatBase)var3.getKey()).statId, var4);
+            jsonobject.add(((StatBase)entry.getKey()).statId, jsonobject1);
          } else {
-            var1.addProperty(((StatBase)var3.getKey()).statId, Integer.valueOf(((TupleIntJsonSerializable)var3.getValue()).getIntegerValue()));
+            jsonobject.addProperty(((StatBase)entry.getKey()).statId, Integer.valueOf(((TupleIntJsonSerializable)entry.getValue()).getIntegerValue()));
          }
       }
 
-      return var1.toString();
+      return jsonobject.toString();
    }
 
    public void markAllDirty() {
-      for(StatBase var2 : this.statsData.keySet()) {
-         this.dirty.add(var2);
+      for(StatBase statbase : this.statsData.keySet()) {
+         this.dirty.add(statbase);
       }
 
    }
 
    public void sendStats(EntityPlayerMP var1) {
-      int var2 = this.mcServer.ap();
-      HashMap var3 = Maps.newHashMap();
-      if (this.hasUnsentAchievement || var2 - this.lastStatRequest > 300) {
-         this.lastStatRequest = var2;
+      int i = this.mcServer.getTickCounter();
+      Map map = Maps.newHashMap();
+      if (this.hasUnsentAchievement || i - this.lastStatRequest > 300) {
+         this.lastStatRequest = i;
 
-         for(StatBase var5 : this.getDirty()) {
-            var3.put(var5, Integer.valueOf(this.readStat(var5)));
+         for(StatBase statbase : this.getDirty()) {
+            map.put(statbase, Integer.valueOf(this.readStat(statbase)));
          }
       }
 
-      var1.connection.sendPacket(new SPacketStatistics(var3));
+      player.connection.sendPacket(new SPacketStatistics(map));
    }
 
    public void sendAchievements(EntityPlayerMP var1) {
-      HashMap var2 = Maps.newHashMap();
+      Map map = Maps.newHashMap();
 
-      for(Achievement var4 : AchievementList.ACHIEVEMENTS) {
-         if (this.hasAchievementUnlocked(var4)) {
-            var2.put(var4, Integer.valueOf(this.readStat(var4)));
-            this.dirty.remove(var4);
+      for(Achievement achievement : AchievementList.ACHIEVEMENTS) {
+         if (this.hasAchievementUnlocked(achievement)) {
+            map.put(achievement, Integer.valueOf(this.readStat(achievement)));
+            this.dirty.remove(achievement);
          }
       }
 
-      var1.connection.sendPacket(new SPacketStatistics(var2));
+      player.connection.sendPacket(new SPacketStatistics(map));
    }
 
    public boolean hasUnsentAchievement() {

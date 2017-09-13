@@ -5,6 +5,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.IntIdentityHashBiMap;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockStatePaletteHashMap implements IBlockStatePalette {
    private final IntIdentityHashBiMap statePaletteMap;
@@ -12,45 +14,56 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
    private final int bits;
 
    public BlockStatePaletteHashMap(int var1, IBlockStatePaletteResizer var2) {
-      this.bits = var1;
-      this.paletteResizer = var2;
-      this.statePaletteMap = new IntIdentityHashBiMap(1 << var1);
+      this.bits = bitsIn;
+      this.paletteResizer = p_i47089_2_;
+      this.statePaletteMap = new IntIdentityHashBiMap(1 << bitsIn);
    }
 
    public int idFor(IBlockState var1) {
-      int var2 = this.statePaletteMap.getId(var1);
-      if (var2 == -1) {
-         var2 = this.statePaletteMap.add(var1);
-         if (var2 >= 1 << this.bits) {
-            var2 = this.paletteResizer.onResize(this.bits + 1, var1);
+      int i = this.statePaletteMap.getId(state);
+      if (i == -1) {
+         i = this.statePaletteMap.add(state);
+         if (i >= 1 << this.bits) {
+            i = this.paletteResizer.onResize(this.bits + 1, state);
          }
       }
 
-      return var2;
+      return i;
    }
 
    @Nullable
    public IBlockState getBlockState(int var1) {
-      return (IBlockState)this.statePaletteMap.get(var1);
+      return (IBlockState)this.statePaletteMap.get(indexKey);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void read(PacketBuffer var1) {
+      this.statePaletteMap.clear();
+      int i = buf.readVarInt();
+
+      for(int j = 0; j < i; ++j) {
+         this.statePaletteMap.add(Block.BLOCK_STATE_IDS.getByValue(buf.readVarInt()));
+      }
+
    }
 
    public void write(PacketBuffer var1) {
-      int var2 = this.statePaletteMap.size();
-      var1.writeVarInt(var2);
+      int i = this.statePaletteMap.size();
+      buf.writeVarInt(i);
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-         var1.writeVarInt(Block.BLOCK_STATE_IDS.get(this.statePaletteMap.get(var3)));
+      for(int j = 0; j < i; ++j) {
+         buf.writeVarInt(Block.BLOCK_STATE_IDS.get(this.statePaletteMap.get(j)));
       }
 
    }
 
    public int getSerializedState() {
-      int var1 = PacketBuffer.getVarIntSize(this.statePaletteMap.size());
+      int i = PacketBuffer.getVarIntSize(this.statePaletteMap.size());
 
-      for(int var2 = 0; var2 < this.statePaletteMap.size(); ++var2) {
-         var1 += PacketBuffer.getVarIntSize(Block.BLOCK_STATE_IDS.get(this.statePaletteMap.get(var2)));
+      for(int j = 0; j < this.statePaletteMap.size(); ++j) {
+         i += PacketBuffer.getVarIntSize(Block.BLOCK_STATE_IDS.get(this.statePaletteMap.get(j)));
       }
 
-      return var1;
+      return i;
    }
 }

@@ -10,28 +10,28 @@ public class PaintingDirection implements IFixableData {
    }
 
    public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
-      String var2 = var1.getString("id");
-      boolean var3 = "Painting".equals(var2);
-      boolean var4 = "ItemFrame".equals(var2);
-      if ((var3 || var4) && !var1.hasKey("Facing", 99)) {
-         EnumFacing var5;
-         if (var1.hasKey("Direction", 99)) {
-            var5 = EnumFacing.getHorizontal(var1.getByte("Direction"));
-            var1.setInteger("TileX", var1.getInteger("TileX") + var5.getFrontOffsetX());
-            var1.setInteger("TileY", var1.getInteger("TileY") + var5.getFrontOffsetY());
-            var1.setInteger("TileZ", var1.getInteger("TileZ") + var5.getFrontOffsetZ());
-            var1.removeTag("Direction");
-            if (var4 && var1.hasKey("ItemRotation", 99)) {
-               var1.setByte("ItemRotation", (byte)(var1.getByte("ItemRotation") * 2));
+      String s = compound.getString("id");
+      boolean flag = "Painting".equals(s);
+      boolean flag1 = "ItemFrame".equals(s);
+      if ((flag || flag1) && !compound.hasKey("Facing", 99)) {
+         EnumFacing enumfacing;
+         if (compound.hasKey("Direction", 99)) {
+            enumfacing = EnumFacing.getHorizontal(compound.getByte("Direction"));
+            compound.setInteger("TileX", compound.getInteger("TileX") + enumfacing.getFrontOffsetX());
+            compound.setInteger("TileY", compound.getInteger("TileY") + enumfacing.getFrontOffsetY());
+            compound.setInteger("TileZ", compound.getInteger("TileZ") + enumfacing.getFrontOffsetZ());
+            compound.removeTag("Direction");
+            if (flag1 && compound.hasKey("ItemRotation", 99)) {
+               compound.setByte("ItemRotation", (byte)(compound.getByte("ItemRotation") * 2));
             }
          } else {
-            var5 = EnumFacing.getHorizontal(var1.getByte("Dir"));
-            var1.removeTag("Dir");
+            enumfacing = EnumFacing.getHorizontal(compound.getByte("Dir"));
+            compound.removeTag("Dir");
          }
 
-         var1.setByte("Facing", (byte)var5.getHorizontalIndex());
+         compound.setByte("Facing", (byte)enumfacing.getHorizontalIndex());
       }
 
-      return var1;
+      return compound;
    }
 }

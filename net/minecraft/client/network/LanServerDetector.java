@@ -37,7 +37,7 @@ public class LanServerDetector {
          return Collections.unmodifiableList(this.listOfLanServers);
       }
 
-      public synchronized void addServer(String pingResponse, InetAddress ipAddress) {
+      public synchronized void addServer(String var1, InetAddress var2) {
          String s = ThreadLanServerPing.getMotdFromPingResponse(pingResponse);
          String s1 = ThreadLanServerPing.getAdFromPingResponse(pingResponse);
          if (s1 != null) {
@@ -67,7 +67,7 @@ public class LanServerDetector {
       private final InetAddress broadcastAddress;
       private final MulticastSocket socket;
 
-      public ThreadLanServerFind(LanServerDetector.LanServerList list) throws IOException {
+      public ThreadLanServerFind(LanServerDetector.LanServerList var1) throws IOException {
          super("LanServerDetector #" + LanServerDetector.ATOMIC_COUNTER.incrementAndGet());
          this.localServerList = list;
          this.setDaemon(true);

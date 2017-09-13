@@ -7,7 +7,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class LayerVillagerArmor extends LayerBipedArmor {
-   public LayerVillagerArmor(RenderLivingBase rendererIn) {
+   public LayerVillagerArmor(RenderLivingBase var1) {
       super(rendererIn);
    }
 

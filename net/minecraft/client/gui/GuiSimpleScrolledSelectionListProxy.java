@@ -14,7 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiSimpleScrolledSelectionListProxy extends GuiSlot {
    private final RealmsSimpleScrolledSelectionList realmsScrolledSelectionList;
 
-   public GuiSimpleScrolledSelectionListProxy(RealmsSimpleScrolledSelectionList p_i45525_1_, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
+   public GuiSimpleScrolledSelectionListProxy(RealmsSimpleScrolledSelectionList var1, int var2, int var3, int var4, int var5, int var6) {
       super(Minecraft.getMinecraft(), widthIn, heightIn, topIn, bottomIn, slotHeightIn);
       this.realmsScrolledSelectionList = p_i45525_1_;
    }
@@ -23,11 +23,11 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot {
       return this.realmsScrolledSelectionList.getItemCount();
    }
 
-   protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY) {
+   protected void elementClicked(int var1, boolean var2, int var3, int var4) {
       this.realmsScrolledSelectionList.selectItem(slotIndex, isDoubleClick, mouseX, mouseY);
    }
 
-   protected boolean isSelected(int slotIndex) {
+   protected boolean isSelected(int var1) {
       return this.realmsScrolledSelectionList.isSelectedItem(slotIndex);
    }
 
@@ -35,7 +35,7 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot {
       this.realmsScrolledSelectionList.renderBackground();
    }
 
-   protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn) {
+   protected void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6) {
       this.realmsScrolledSelectionList.renderItem(entryID, insideLeft, yPos, insideSlotHeight, mouseXIn, mouseYIn);
    }
 
@@ -63,7 +63,7 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot {
       super.handleMouseInput();
    }
 
-   public void drawScreen(int mouseXIn, int mouseYIn, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       if (this.visible) {
          this.mouseX = mouseXIn;
          this.mouseY = mouseYIn;

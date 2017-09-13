@@ -15,11 +15,11 @@ public class ModelBox {
    public final float posZ2;
    public String boxName;
 
-   public ModelBox(ModelRenderer renderer, int texU, int texV, float x, float y, float z, int dx, int dy, int dz, float delta) {
+   public ModelBox(ModelRenderer var1, int var2, int var3, float var4, float var5, float var6, int var7, int var8, int var9, float var10) {
       this(renderer, texU, texV, x, y, z, dx, dy, dz, delta, renderer.mirror);
    }
 
-   public ModelBox(ModelRenderer renderer, int texU, int texV, float x, float y, float z, int dx, int dy, int dz, float delta, boolean mirror) {
+   public ModelBox(ModelRenderer var1, int var2, int var3, float var4, float var5, float var6, int var7, int var8, int var9, float var10, boolean var11) {
       this.posX1 = x;
       this.posY1 = y;
       this.posZ1 = z;
@@ -74,14 +74,14 @@ public class ModelBox {
    }
 
    @SideOnly(Side.CLIENT)
-   public void render(VertexBuffer renderer, float scale) {
+   public void render(VertexBuffer var1, float var2) {
       for(TexturedQuad texturedquad : this.quadList) {
          texturedquad.draw(renderer, scale);
       }
 
    }
 
-   public ModelBox setBoxName(String name) {
+   public ModelBox setBoxName(String var1) {
       this.boxName = name;
       return this;
    }

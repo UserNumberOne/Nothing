@@ -53,11 +53,11 @@ public class Realms {
       return Minecraft.getMinecraft().getSession().getUsername();
    }
 
-   public static String uuidToName(String p_uuidToName_0_) {
+   public static String uuidToName(String var0) {
       return Minecraft.getMinecraft().getSessionService().fillProfileProperties(new GameProfile(UUIDTypeAdapter.fromString(p_uuidToName_0_), (String)null), false).getName();
    }
 
-   public static void setScreen(RealmsScreen p_setScreen_0_) {
+   public static void setScreen(RealmsScreen var0) {
       Minecraft.getMinecraft().displayGuiScreen(p_setScreen_0_.getProxy());
    }
 
@@ -81,11 +81,11 @@ public class Realms {
       return GameType.SPECTATOR.getID();
    }
 
-   public static void setConnectedToRealms(boolean p_setConnectedToRealms_0_) {
+   public static void setConnectedToRealms(boolean var0) {
       Minecraft.getMinecraft().setConnectedToRealms(p_setConnectedToRealms_0_);
    }
 
-   public static ListenableFuture downloadResourcePack(String p_downloadResourcePack_0_, String p_downloadResourcePack_1_) {
+   public static ListenableFuture downloadResourcePack(String var0, String var1) {
       return Minecraft.getMinecraft().getResourcePackRepository().downloadResourcePack(p_downloadResourcePack_0_, p_downloadResourcePack_1_);
    }
 
@@ -101,7 +101,7 @@ public class Realms {
       return Minecraft.getMinecraft().currentScreen != null && Minecraft.getMinecraft().currentScreen instanceof GuiMainMenu;
    }
 
-   public static void deletePlayerTag(File p_deletePlayerTag_0_) {
+   public static void deletePlayerTag(File var0) {
       if (p_deletePlayerTag_0_.exists()) {
          try {
             NBTTagCompound nbttagcompound = CompressedStreamTools.readCompressed(new FileInputStream(p_deletePlayerTag_0_));

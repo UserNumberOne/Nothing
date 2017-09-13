@@ -29,7 +29,7 @@ public class GuiRepair extends GuiContainer implements IContainerListener {
    private GuiTextField nameField;
    private final InventoryPlayer playerInventory;
 
-   public GuiRepair(InventoryPlayer inventoryIn, World worldIn) {
+   public GuiRepair(InventoryPlayer var1, World var2) {
       super(new ContainerRepair(inventoryIn, worldIn, Minecraft.getMinecraft().player));
       this.playerInventory = inventoryIn;
       this.anvil = (ContainerRepair)this.inventorySlots;
@@ -55,7 +55,7 @@ public class GuiRepair extends GuiContainer implements IContainerListener {
       this.inventorySlots.removeListener(this);
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       GlStateManager.disableLighting();
       GlStateManager.disableBlend();
       this.fontRendererObj.drawString(I18n.format("container.repair"), 60, 6, 4210752);
@@ -92,7 +92,7 @@ public class GuiRepair extends GuiContainer implements IContainerListener {
       GlStateManager.enableLighting();
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (this.nameField.textboxKeyTyped(typedChar, keyCode)) {
          this.renameItem();
       } else {
@@ -112,19 +112,19 @@ public class GuiRepair extends GuiContainer implements IContainerListener {
       this.mc.player.connection.sendPacket(new CPacketCustomPayload("MC|ItemName", (new PacketBuffer(Unpooled.buffer())).writeString(s)));
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       this.nameField.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       super.drawScreen(mouseX, mouseY, partialTicks);
       GlStateManager.disableLighting();
       GlStateManager.disableBlend();
       this.nameField.drawTextBox();
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(ANVIL_RESOURCE);
       int i = (this.width - this.xSize) / 2;
@@ -137,11 +137,11 @@ public class GuiRepair extends GuiContainer implements IContainerListener {
 
    }
 
-   public void updateCraftingInventory(Container containerToSend, List itemsList) {
+   public void updateCraftingInventory(Container var1, List var2) {
       this.sendSlotContents(containerToSend, 0, containerToSend.getSlot(0).getStack());
    }
 
-   public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
+   public void sendSlotContents(Container var1, int var2, ItemStack var3) {
       if (slotInd == 0) {
          this.nameField.setText(stack == null ? "" : stack.getDisplayName());
          this.nameField.setEnabled(stack != null);
@@ -152,9 +152,9 @@ public class GuiRepair extends GuiContainer implements IContainerListener {
 
    }
 
-   public void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue) {
+   public void sendProgressBarUpdate(Container var1, int var2, int var3) {
    }
 
-   public void sendAllWindowProperties(Container containerIn, IInventory inventory) {
+   public void sendAllWindowProperties(Container var1, IInventory var2) {
    }
 }

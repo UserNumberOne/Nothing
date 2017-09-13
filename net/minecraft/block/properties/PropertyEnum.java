@@ -16,16 +16,16 @@ public class PropertyEnum extends PropertyHelper {
    private final Map nameToValue = Maps.newHashMap();
 
    protected PropertyEnum(String var1, Class var2, Collection var3) {
-      super(var1, var2);
-      this.allowedValues = ImmutableSet.copyOf(var3);
+      super(name, valueClass);
+      this.allowedValues = ImmutableSet.copyOf(allowedValues);
 
-      for(Enum var5 : var3) {
-         String var6 = ((IStringSerializable)var5).getName();
-         if (this.nameToValue.containsKey(var6)) {
-            throw new IllegalArgumentException("Multiple values have the same name '" + var6 + "'");
+      for(Enum t : allowedValues) {
+         String s = ((IStringSerializable)t).getName();
+         if (this.nameToValue.containsKey(s)) {
+            throw new IllegalArgumentException("Multiple values have the same name '" + s + "'");
          }
 
-         this.nameToValue.put(var6, var5);
+         this.nameToValue.put(s, t);
       }
 
    }
@@ -35,44 +35,44 @@ public class PropertyEnum extends PropertyHelper {
    }
 
    public Optional parseValue(String var1) {
-      return Optional.fromNullable(this.nameToValue.get(var1));
+      return Optional.fromNullable(this.nameToValue.get(value));
    }
 
    public String getName(Enum var1) {
-      return ((IStringSerializable)var1).getName();
+      return ((IStringSerializable)value).getName();
    }
 
    public boolean equals(Object var1) {
-      if (this == var1) {
+      if (this == p_equals_1_) {
          return true;
-      } else if (var1 instanceof PropertyEnum && super.equals(var1)) {
-         PropertyEnum var2 = (PropertyEnum)var1;
-         return this.allowedValues.equals(var2.allowedValues) && this.nameToValue.equals(var2.nameToValue);
+      } else if (p_equals_1_ instanceof PropertyEnum && super.equals(p_equals_1_)) {
+         PropertyEnum propertyenum = (PropertyEnum)p_equals_1_;
+         return this.allowedValues.equals(propertyenum.allowedValues) && this.nameToValue.equals(propertyenum.nameToValue);
       } else {
          return false;
       }
    }
 
    public int hashCode() {
-      int var1 = super.hashCode();
-      var1 = 31 * var1 + this.allowedValues.hashCode();
-      var1 = 31 * var1 + this.nameToValue.hashCode();
-      return var1;
+      int i = super.hashCode();
+      i = 31 * i + this.allowedValues.hashCode();
+      i = 31 * i + this.nameToValue.hashCode();
+      return i;
    }
 
    public static PropertyEnum create(String var0, Class var1) {
-      return create(var0, var1, Predicates.alwaysTrue());
+      return create(name, clazz, Predicates.alwaysTrue());
    }
 
    public static PropertyEnum create(String var0, Class var1, Predicate var2) {
-      return create(var0, var1, Collections2.filter(Lists.newArrayList(var1.getEnumConstants()), var2));
+      return create(name, clazz, Collections2.filter(Lists.newArrayList(clazz.getEnumConstants()), filter));
    }
 
    public static PropertyEnum create(String var0, Class var1, Enum... var2) {
-      return create(var0, var1, Lists.newArrayList(var2));
+      return create(name, clazz, Lists.newArrayList(values));
    }
 
    public static PropertyEnum create(String var0, Class var1, Collection var2) {
-      return new PropertyEnum(var0, var1, var2);
+      return new PropertyEnum(name, clazz, values);
    }
 }

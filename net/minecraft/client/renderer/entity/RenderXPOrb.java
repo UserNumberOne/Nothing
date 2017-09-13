@@ -16,13 +16,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderXPOrb extends Render {
    private static final ResourceLocation EXPERIENCE_ORB_TEXTURES = new ResourceLocation("textures/entity/experience_orb.png");
 
-   public RenderXPOrb(RenderManager renderManagerIn) {
+   public RenderXPOrb(RenderManager var1) {
       super(renderManagerIn);
       this.shadowSize = 0.15F;
       this.shadowOpaque = 0.75F;
    }
 
-   public void doRender(EntityXPOrb entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityXPOrb var1, double var2, double var4, double var6, float var8, float var9) {
       if (!this.renderOutlines) {
          GlStateManager.pushMatrix();
          GlStateManager.translate((float)x, (float)y, (float)z);
@@ -67,7 +67,7 @@ public class RenderXPOrb extends Render {
 
    }
 
-   protected ResourceLocation getEntityTexture(EntityXPOrb entity) {
+   protected ResourceLocation getEntityTexture(EntityXPOrb var1) {
       return EXPERIENCE_ORB_TEXTURES;
    }
 }

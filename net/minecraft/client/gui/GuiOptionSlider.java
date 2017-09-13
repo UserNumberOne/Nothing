@@ -15,11 +15,11 @@ public class GuiOptionSlider extends GuiButton {
    private final float minValue;
    private final float maxValue;
 
-   public GuiOptionSlider(int buttonId, int x, int y, GameSettings.Options optionIn) {
+   public GuiOptionSlider(int var1, int var2, int var3, GameSettings.Options var4) {
       this(buttonId, x, y, optionIn, 0.0F, 1.0F);
    }
 
-   public GuiOptionSlider(int buttonId, int x, int y, GameSettings.Options optionIn, float minValueIn, float maxValue) {
+   public GuiOptionSlider(int var1, int var2, int var3, GameSettings.Options var4, float var5, float var6) {
       super(buttonId, x, y, 150, 20, "");
       this.sliderValue = 1.0F;
       this.options = optionIn;
@@ -30,11 +30,11 @@ public class GuiOptionSlider extends GuiButton {
       this.displayString = minecraft.gameSettings.getKeyBinding(optionIn);
    }
 
-   protected int getHoverState(boolean mouseOver) {
+   protected int getHoverState(boolean var1) {
       return 0;
    }
 
-   protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
+   protected void mouseDragged(Minecraft var1, int var2, int var3) {
       if (this.visible) {
          if (this.dragging) {
             this.sliderValue = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
@@ -53,7 +53,7 @@ public class GuiOptionSlider extends GuiButton {
 
    }
 
-   public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+   public boolean mousePressed(Minecraft var1, int var2, int var3) {
       if (super.mousePressed(mc, mouseX, mouseY)) {
          this.sliderValue = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
          this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0F, 1.0F);
@@ -66,7 +66,7 @@ public class GuiOptionSlider extends GuiButton {
       }
    }
 
-   public void mouseReleased(int mouseX, int mouseY) {
+   public void mouseReleased(int var1, int var2) {
       this.dragging = false;
    }
 }

@@ -22,14 +22,14 @@ public class RenderDragon extends RenderLiving {
    private static final ResourceLocation DRAGON_TEXTURES = new ResourceLocation("textures/entity/enderdragon/dragon.png");
    protected ModelDragon modelDragon;
 
-   public RenderDragon(RenderManager renderManagerIn) {
+   public RenderDragon(RenderManager var1) {
       super(renderManagerIn, new ModelDragon(0.0F), 0.5F);
       this.modelDragon = (ModelDragon)this.mainModel;
       this.addLayer(new LayerEnderDragonEyes(this));
       this.addLayer(new LayerEnderDragonDeath());
    }
 
-   protected void applyRotations(EntityDragon entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
+   protected void applyRotations(EntityDragon var1, float var2, float var3, float var4) {
       float f = (float)entityLiving.getMovementOffsets(7, partialTicks)[0];
       float f1 = (float)(entityLiving.getMovementOffsets(5, partialTicks)[1] - entityLiving.getMovementOffsets(10, partialTicks)[1]);
       GlStateManager.rotate(-f, 0.0F, 1.0F, 0.0F);
@@ -47,7 +47,7 @@ public class RenderDragon extends RenderLiving {
 
    }
 
-   protected void renderModel(EntityDragon entitylivingbaseIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor) {
+   protected void renderModel(EntityDragon var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       if (entitylivingbaseIn.deathTicks > 0) {
          float f = (float)entitylivingbaseIn.deathTicks / 200.0F;
          GlStateManager.depthFunc(515);
@@ -75,7 +75,7 @@ public class RenderDragon extends RenderLiving {
 
    }
 
-   public void doRender(EntityDragon entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityDragon var1, double var2, double var4, double var6, float var8, float var9) {
       super.doRender((EntityLiving)entity, x, y, z, entityYaw, partialTicks);
       if (entity.healingEnderCrystal != null) {
          this.bindTexture(ENDERCRYSTAL_BEAM_TEXTURES);
@@ -86,7 +86,7 @@ public class RenderDragon extends RenderLiving {
 
    }
 
-   public static void renderCrystalBeams(double p_188325_0_, double p_188325_2_, double p_188325_4_, float p_188325_6_, double p_188325_7_, double p_188325_9_, double p_188325_11_, int p_188325_13_, double p_188325_14_, double p_188325_16_, double p_188325_18_) {
+   public static void renderCrystalBeams(double var0, double var2, double var4, float var6, double var7, double var9, double var11, int var13, double var14, double var16, double var18) {
       float f = (float)(p_188325_14_ - p_188325_7_);
       float f1 = (float)(p_188325_16_ - 1.0D - p_188325_9_);
       float f2 = (float)(p_188325_18_ - p_188325_11_);
@@ -121,7 +121,7 @@ public class RenderDragon extends RenderLiving {
       GlStateManager.popMatrix();
    }
 
-   protected ResourceLocation getEntityTexture(EntityDragon entity) {
+   protected ResourceLocation getEntityTexture(EntityDragon var1) {
       return DRAGON_TEXTURES;
    }
 }

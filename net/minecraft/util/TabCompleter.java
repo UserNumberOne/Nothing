@@ -22,7 +22,7 @@ public abstract class TabCompleter {
    protected int completionIdx;
    protected List completions = Lists.newArrayList();
 
-   public TabCompleter(GuiTextField textFieldIn, boolean hasTargetBlockIn) {
+   public TabCompleter(GuiTextField var1, boolean var2) {
       this.textField = textFieldIn;
       this.hasTargetBlock = hasTargetBlockIn;
    }
@@ -51,7 +51,7 @@ public abstract class TabCompleter {
       this.textField.writeText(TextFormatting.getTextWithoutFormattingCodes((String)this.completions.get(this.completionIdx++)));
    }
 
-   private void requestCompletions(String prefix) {
+   private void requestCompletions(String var1) {
       if (prefix.length() >= 1) {
          ClientCommandHandler.instance.autoComplete(prefix);
          Minecraft.getMinecraft().player.connection.sendPacket(new CPacketTabComplete(prefix, this.getTargetBlockPos(), this.hasTargetBlock));
@@ -63,7 +63,7 @@ public abstract class TabCompleter {
    @Nullable
    public abstract BlockPos getTargetBlockPos();
 
-   public void setCompletions(String... newCompl) {
+   public void setCompletions(String... var1) {
       if (this.requestedCompletions) {
          this.didComplete = false;
          this.completions.clear();

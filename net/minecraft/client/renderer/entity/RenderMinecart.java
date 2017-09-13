@@ -19,12 +19,12 @@ public class RenderMinecart extends Render {
    private static final ResourceLocation MINECART_TEXTURES = new ResourceLocation("textures/entity/minecart.png");
    protected ModelBase modelMinecart = new ModelMinecart();
 
-   public RenderMinecart(RenderManager renderManagerIn) {
+   public RenderMinecart(RenderManager var1) {
       super(renderManagerIn);
       this.shadowSize = 0.5F;
    }
 
-   public void doRender(EntityMinecart entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityMinecart var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       this.bindEntityTexture(entity);
       long i = (long)entity.getEntityId() * 493286711L;
@@ -104,11 +104,11 @@ public class RenderMinecart extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityMinecart entity) {
+   protected ResourceLocation getEntityTexture(EntityMinecart var1) {
       return MINECART_TEXTURES;
    }
 
-   protected void renderCartContents(EntityMinecart p_188319_1_, float partialTicks, IBlockState p_188319_3_) {
+   protected void renderCartContents(EntityMinecart var1, float var2, IBlockState var3) {
       GlStateManager.pushMatrix();
       Minecraft.getMinecraft().getBlockRendererDispatcher().renderBlockBrightness(p_188319_3_, p_188319_1_.getBrightness(partialTicks));
       GlStateManager.popMatrix();

@@ -31,7 +31,7 @@ public class ModelMagmaCube extends ModelBase {
       this.core.addBox(-2.0F, 18.0F, -2.0F, 4, 4, 4);
    }
 
-   public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
+   public void setLivingAnimations(EntityLivingBase var1, float var2, float var3, float var4) {
       EntityMagmaCube entitymagmacube = (EntityMagmaCube)entitylivingbaseIn;
       float f = entitymagmacube.prevSquishFactor + (entitymagmacube.squishFactor - entitymagmacube.prevSquishFactor) * partialTickTime;
       if (f < 0.0F) {
@@ -44,7 +44,7 @@ public class ModelMagmaCube extends ModelBase {
 
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
       this.core.render(scale);
 

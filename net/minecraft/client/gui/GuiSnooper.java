@@ -20,7 +20,7 @@ public class GuiSnooper extends GuiScreen {
    private GuiSnooper.List list;
    private GuiButton toggleButton;
 
-   public GuiSnooper(GuiScreen p_i1061_1_, GameSettings p_i1061_2_) {
+   public GuiSnooper(GuiScreen var1, GameSettings var2) {
       this.lastScreen = p_i1061_1_;
       this.game_settings_2 = p_i1061_2_;
    }
@@ -61,7 +61,7 @@ public class GuiSnooper extends GuiScreen {
       this.list.handleMouseInput();
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 2) {
             this.game_settings_2.saveOptions();
@@ -77,7 +77,7 @@ public class GuiSnooper extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.list.drawScreen(mouseX, mouseY, partialTicks);
       this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 8, 16777215);
@@ -101,17 +101,17 @@ public class GuiSnooper extends GuiScreen {
          return GuiSnooper.this.keys.size();
       }
 
-      protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY) {
+      protected void elementClicked(int var1, boolean var2, int var3, int var4) {
       }
 
-      protected boolean isSelected(int slotIndex) {
+      protected boolean isSelected(int var1) {
          return false;
       }
 
       protected void drawBackground() {
       }
 
-      protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn) {
+      protected void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6) {
          GuiSnooper.this.fontRendererObj.drawString((String)GuiSnooper.this.keys.get(entryID), 10, yPos, 16777215);
          GuiSnooper.this.fontRendererObj.drawString((String)GuiSnooper.this.values.get(entryID), 230, yPos, 16777215);
       }

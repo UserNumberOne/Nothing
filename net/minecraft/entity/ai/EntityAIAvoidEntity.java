@@ -24,43 +24,38 @@ public class EntityAIAvoidEntity extends EntityAIBase {
    private final Predicate avoidTargetSelector;
 
    public EntityAIAvoidEntity(EntityCreature var1, Class var2, float var3, double var4, double var6) {
-      this(var1, var2, Predicates.alwaysTrue(), var3, var4, var6);
+      this(theEntityIn, classToAvoidIn, Predicates.alwaysTrue(), avoidDistanceIn, farSpeedIn, nearSpeedIn);
    }
 
    public EntityAIAvoidEntity(EntityCreature var1, Class var2, Predicate var3, float var4, double var5, double var7) {
       this.canBeSeenSelector = new Predicate() {
          public boolean apply(@Nullable Entity var1) {
-            return var1.isEntityAlive() && EntityAIAvoidEntity.this.theEntity.getEntitySenses().canSee(var1);
-         }
-
-         // $FF: synthetic method
-         public boolean apply(Object var1) {
-            return this.apply((Entity)var1);
+            return p_apply_1_.isEntityAlive() && EntityAIAvoidEntity.this.theEntity.getEntitySenses().canSee(p_apply_1_);
          }
       };
-      this.theEntity = var1;
-      this.classToAvoid = var2;
-      this.avoidTargetSelector = var3;
-      this.avoidDistance = var4;
-      this.farSpeed = var5;
-      this.nearSpeed = var7;
-      this.entityPathNavigate = var1.getNavigator();
+      this.theEntity = theEntityIn;
+      this.classToAvoid = classToAvoidIn;
+      this.avoidTargetSelector = avoidTargetSelectorIn;
+      this.avoidDistance = avoidDistanceIn;
+      this.farSpeed = farSpeedIn;
+      this.nearSpeed = nearSpeedIn;
+      this.entityPathNavigate = theEntityIn.getNavigator();
       this.setMutexBits(1);
    }
 
    public boolean shouldExecute() {
-      List var1 = this.theEntity.world.getEntitiesWithinAABB(this.classToAvoid, this.theEntity.getEntityBoundingBox().expand((double)this.avoidDistance, 3.0D, (double)this.avoidDistance), Predicates.and(new Predicate[]{EntitySelectors.CAN_AI_TARGET, this.canBeSeenSelector, this.avoidTargetSelector}));
-      if (var1.isEmpty()) {
+      List list = this.theEntity.world.getEntitiesWithinAABB(this.classToAvoid, this.theEntity.getEntityBoundingBox().expand((double)this.avoidDistance, 3.0D, (double)this.avoidDistance), Predicates.and(new Predicate[]{EntitySelectors.CAN_AI_TARGET, this.canBeSeenSelector, this.avoidTargetSelector}));
+      if (list.isEmpty()) {
          return false;
       } else {
-         this.closestLivingEntity = (Entity)var1.get(0);
-         Vec3d var2 = RandomPositionGenerator.findRandomTargetBlockAwayFrom(this.theEntity, 16, 7, new Vec3d(this.closestLivingEntity.posX, this.closestLivingEntity.posY, this.closestLivingEntity.posZ));
-         if (var2 == null) {
+         this.closestLivingEntity = (Entity)list.get(0);
+         Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockAwayFrom(this.theEntity, 16, 7, new Vec3d(this.closestLivingEntity.posX, this.closestLivingEntity.posY, this.closestLivingEntity.posZ));
+         if (vec3d == null) {
             return false;
-         } else if (this.closestLivingEntity.getDistanceSq(var2.xCoord, var2.yCoord, var2.zCoord) < this.closestLivingEntity.getDistanceSqToEntity(this.theEntity)) {
+         } else if (this.closestLivingEntity.getDistanceSq(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord) < this.closestLivingEntity.getDistanceSqToEntity(this.theEntity)) {
             return false;
          } else {
-            this.entityPathEntity = this.entityPathNavigate.getPathToXYZ(var2.xCoord, var2.yCoord, var2.zCoord);
+            this.entityPathEntity = this.entityPathNavigate.getPathToXYZ(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord);
             return this.entityPathEntity != null;
          }
       }

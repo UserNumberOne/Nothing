@@ -5,7 +5,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class AnvilConverterException extends Exception {
-   public AnvilConverterException(String exceptionMessage) {
+   public AnvilConverterException(String var1) {
       super(exceptionMessage);
    }
 }

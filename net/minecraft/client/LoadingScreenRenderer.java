@@ -26,24 +26,24 @@ public class LoadingScreenRenderer implements IProgressUpdate {
    private final ScaledResolution scaledResolution;
    private final Framebuffer framebuffer;
 
-   public LoadingScreenRenderer(Minecraft mcIn) {
+   public LoadingScreenRenderer(Minecraft var1) {
       this.mc = mcIn;
       this.scaledResolution = new ScaledResolution(mcIn);
       this.framebuffer = new Framebuffer(mcIn.displayWidth, mcIn.displayHeight, false);
       this.framebuffer.setFramebufferFilter(9728);
    }
 
-   public void resetProgressAndMessage(String message) {
+   public void resetProgressAndMessage(String var1) {
       this.loadingSuccess = false;
       this.displayString(message);
    }
 
-   public void displaySavingString(String message) {
+   public void displaySavingString(String var1) {
       this.loadingSuccess = true;
       this.displayString(message);
    }
 
-   private void displayString(String message) {
+   private void displayString(String var1) {
       this.currentlyDisplayedText = message;
       if (!this.mc.running) {
          if (!this.loadingSuccess) {
@@ -68,7 +68,7 @@ public class LoadingScreenRenderer implements IProgressUpdate {
 
    }
 
-   public void displayLoadingString(String message) {
+   public void displayLoadingString(String var1) {
       if (!this.mc.running) {
          if (!this.loadingSuccess) {
             throw new MinecraftError();
@@ -82,7 +82,7 @@ public class LoadingScreenRenderer implements IProgressUpdate {
 
    }
 
-   public void setLoadingProgress(int progress) {
+   public void setLoadingProgress(int var1) {
       if (!this.mc.running) {
          if (!this.loadingSuccess) {
             throw new MinecraftError();

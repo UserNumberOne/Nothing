@@ -5,6 +5,7 @@ import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.entity.passive.EntityRabbit;
 import net.minecraft.entity.passive.EntityWolf;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -12,6 +13,10 @@ import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenBirchTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
+import net.minecraftforge.event.terraingen.TerrainGen;
+import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate.EventType;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BiomeForest extends Biome {
    protected static final WorldGenBirchTree SUPER_BIRCH_TREE = new WorldGenBirchTree(false, true);
@@ -20,8 +25,8 @@ public class BiomeForest extends Biome {
    private final BiomeForest.Type type;
 
    public BiomeForest(BiomeForest.Type var1, Biome.BiomeProperties var2) {
-      super(var2);
-      this.type = var1;
+      super(properties);
+      this.type = typeIn;
       this.theBiomeDecorator.treesPerChunk = 10;
       this.theBiomeDecorator.grassPerChunk = 2;
       if (this.type == BiomeForest.Type.FLOWER) {
@@ -42,53 +47,50 @@ public class BiomeForest extends Biome {
    }
 
    public WorldGenAbstractTree genBigTreeChance(Random var1) {
-      if (this.type == BiomeForest.Type.ROOFED && var1.nextInt(3) > 0) {
-         return ROOF_TREE;
-      } else if (this.type != BiomeForest.Type.BIRCH && var1.nextInt(5) != 0) {
-         return (WorldGenAbstractTree)(var1.nextInt(10) == 0 ? BIG_TREE_FEATURE : TREE_FEATURE);
-      } else {
-         return BIRCH_TREE;
-      }
+      return (WorldGenAbstractTree)(this.type == BiomeForest.Type.ROOFED && rand.nextInt(3) > 0 ? ROOF_TREE : (this.type != BiomeForest.Type.BIRCH && rand.nextInt(5) != 0 ? (rand.nextInt(10) == 0 ? BIG_TREE_FEATURE : TREE_FEATURE) : BIRCH_TREE));
    }
 
    public BlockFlower.EnumFlowerType pickRandomFlower(Random var1, BlockPos var2) {
       if (this.type == BiomeForest.Type.FLOWER) {
-         double var3 = MathHelper.clamp((1.0D + GRASS_COLOR_NOISE.getValue((double)var2.getX() / 48.0D, (double)var2.getZ() / 48.0D)) / 2.0D, 0.0D, 0.9999D);
-         BlockFlower.EnumFlowerType var5 = BlockFlower.EnumFlowerType.values()[(int)(var3 * (double)BlockFlower.EnumFlowerType.values().length)];
-         return var5 == BlockFlower.EnumFlowerType.BLUE_ORCHID ? BlockFlower.EnumFlowerType.POPPY : var5;
+         double d0 = MathHelper.clamp((1.0D + GRASS_COLOR_NOISE.getValue((double)pos.getX() / 48.0D, (double)pos.getZ() / 48.0D)) / 2.0D, 0.0D, 0.9999D);
+         BlockFlower.EnumFlowerType blockflower$enumflowertype = BlockFlower.EnumFlowerType.values()[(int)(d0 * (double)BlockFlower.EnumFlowerType.values().length)];
+         return blockflower$enumflowertype == BlockFlower.EnumFlowerType.BLUE_ORCHID ? BlockFlower.EnumFlowerType.POPPY : blockflower$enumflowertype;
       } else {
-         return super.pickRandomFlower(var1, var2);
+         return super.pickRandomFlower(rand, pos);
       }
    }
 
    public void decorate(World var1, Random var2, BlockPos var3) {
       if (this.type == BiomeForest.Type.ROOFED) {
-         this.addMushrooms(var1, var2, var3);
+         this.addMushrooms(worldIn, rand, pos);
       }
 
-      int var4 = var2.nextInt(5) - 3;
-      if (this.type == BiomeForest.Type.FLOWER) {
-         var4 += 2;
+      if (TerrainGen.decorate(worldIn, rand, pos, EventType.FLOWERS)) {
+         int i = rand.nextInt(5) - 3;
+         if (this.type == BiomeForest.Type.FLOWER) {
+            i += 2;
+         }
+
+         this.addDoublePlants(worldIn, rand, pos, i);
       }
 
-      this.addDoublePlants(var1, var2, var3, var4);
-      super.decorate(var1, var2, var3);
+      super.decorate(worldIn, rand, pos);
    }
 
-   protected void addMushrooms(World var1, Random var2, BlockPos var3) {
-      for(int var4 = 0; var4 < 4; ++var4) {
-         for(int var5 = 0; var5 < 4; ++var5) {
-            int var6 = var4 * 4 + 1 + 8 + var2.nextInt(3);
-            int var7 = var5 * 4 + 1 + 8 + var2.nextInt(3);
-            BlockPos var8 = var1.getHeight(var3.add(var6, 0, var7));
-            if (var2.nextInt(20) == 0) {
-               WorldGenBigMushroom var9 = new WorldGenBigMushroom();
-               var9.generate(var1, var2, var8);
-            } else {
-               WorldGenAbstractTree var10 = this.genBigTreeChance(var2);
-               var10.setDecorationDefaults();
-               if (var10.generate(var1, var2, var8)) {
-                  var10.generateSaplings(var1, var2, var8);
+   public void addMushrooms(World var1, Random var2, BlockPos var3) {
+      for(int i = 0; i < 4; ++i) {
+         for(int j = 0; j < 4; ++j) {
+            int k = i * 4 + 1 + 8 + p_185379_2_.nextInt(3);
+            int l = j * 4 + 1 + 8 + p_185379_2_.nextInt(3);
+            BlockPos blockpos = p_185379_1_.getHeight(p_185379_3_.add(k, 0, l));
+            if (p_185379_2_.nextInt(20) == 0 && TerrainGen.decorate(p_185379_1_, p_185379_2_, blockpos, EventType.BIG_SHROOM)) {
+               WorldGenBigMushroom worldgenbigmushroom = new WorldGenBigMushroom();
+               worldgenbigmushroom.generate(p_185379_1_, p_185379_2_, blockpos);
+            } else if (TerrainGen.decorate(p_185379_1_, p_185379_2_, blockpos, EventType.TREE)) {
+               WorldGenAbstractTree worldgenabstracttree = this.genBigTreeChance(p_185379_2_);
+               worldgenabstracttree.setDecorationDefaults();
+               if (worldgenabstracttree.generate(p_185379_1_, p_185379_2_, blockpos)) {
+                  worldgenabstracttree.generateSaplings(p_185379_1_, p_185379_2_, blockpos);
                }
             }
          }
@@ -96,22 +98,22 @@ public class BiomeForest extends Biome {
 
    }
 
-   protected void addDoublePlants(World var1, Random var2, BlockPos var3, int var4) {
-      for(int var5 = 0; var5 < var4; ++var5) {
-         int var6 = var2.nextInt(3);
-         if (var6 == 0) {
+   public void addDoublePlants(World var1, Random var2, BlockPos var3, int var4) {
+      for(int i = 0; i < p_185378_4_; ++i) {
+         int j = p_185378_2_.nextInt(3);
+         if (j == 0) {
             DOUBLE_PLANT_GENERATOR.setPlantType(BlockDoublePlant.EnumPlantType.SYRINGA);
-         } else if (var6 == 1) {
+         } else if (j == 1) {
             DOUBLE_PLANT_GENERATOR.setPlantType(BlockDoublePlant.EnumPlantType.ROSE);
-         } else if (var6 == 2) {
+         } else if (j == 2) {
             DOUBLE_PLANT_GENERATOR.setPlantType(BlockDoublePlant.EnumPlantType.PAEONIA);
          }
 
-         for(int var7 = 0; var7 < 5; ++var7) {
-            int var8 = var2.nextInt(16) + 8;
-            int var9 = var2.nextInt(16) + 8;
-            int var10 = var2.nextInt(var1.getHeight(var3.add(var8, 0, var9)).getY() + 32);
-            if (DOUBLE_PLANT_GENERATOR.generate(var1, var2, new BlockPos(var3.getX() + var8, var10, var3.getZ() + var9))) {
+         for(int k = 0; k < 5; ++k) {
+            int l = p_185378_2_.nextInt(16) + 8;
+            int i1 = p_185378_2_.nextInt(16) + 8;
+            int j1 = p_185378_2_.nextInt(p_185378_1_.getHeight(p_185378_3_.add(l, 0, i1)).getY() + 32);
+            if (DOUBLE_PLANT_GENERATOR.generate(p_185378_1_, p_185378_2_, new BlockPos(p_185378_3_.getX() + l, j1, p_185378_3_.getZ() + i1))) {
                break;
             }
          }
@@ -119,8 +121,31 @@ public class BiomeForest extends Biome {
 
    }
 
+   public void addDefaultFlowers() {
+      if (this.type != BiomeForest.Type.FLOWER) {
+         super.addDefaultFlowers();
+      } else {
+         for(BlockFlower.EnumFlowerType type : BlockFlower.EnumFlowerType.values()) {
+            if (type.getBlockType() != BlockFlower.EnumFlowerColor.YELLOW) {
+               if (type == BlockFlower.EnumFlowerType.BLUE_ORCHID) {
+                  type = BlockFlower.EnumFlowerType.POPPY;
+               }
+
+               this.addFlower(Blocks.RED_FLOWER.getDefaultState().withProperty(Blocks.RED_FLOWER.getTypeProperty(), type), 10);
+            }
+         }
+
+      }
+   }
+
    public Class getBiomeClass() {
       return BiomeForest.class;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public int getGrassColorAtPos(BlockPos var1) {
+      int i = super.getGrassColorAtPos(pos);
+      return this.type == BiomeForest.Type.ROOFED ? (i & 16711422) + 2634762 >> 1 : i;
    }
 
    public static enum Type {

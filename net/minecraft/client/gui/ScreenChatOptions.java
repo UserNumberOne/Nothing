@@ -13,7 +13,7 @@ public class ScreenChatOptions extends GuiScreen {
    private final GameSettings game_settings;
    private String chatTitle;
 
-   public ScreenChatOptions(GuiScreen parentScreenIn, GameSettings gameSettingsIn) {
+   public ScreenChatOptions(GuiScreen var1, GameSettings var2) {
       this.parentScreen = parentScreenIn;
       this.game_settings = gameSettingsIn;
    }
@@ -35,7 +35,7 @@ public class ScreenChatOptions extends GuiScreen {
       this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height / 6 + 120, I18n.format("gui.done")));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id < 100 && button instanceof GuiOptionButton) {
             this.game_settings.setOptionValue(((GuiOptionButton)button).returnEnumOptions(), 1);
@@ -50,7 +50,7 @@ public class ScreenChatOptions extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, this.chatTitle, this.width / 2, 20, 16777215);
       super.drawScreen(mouseX, mouseY, partialTicks);

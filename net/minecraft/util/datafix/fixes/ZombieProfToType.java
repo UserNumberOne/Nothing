@@ -13,27 +13,27 @@ public class ZombieProfToType implements IFixableData {
    }
 
    public NBTTagCompound fixTagCompound(NBTTagCompound var1) {
-      if ("Zombie".equals(var1.getString("id")) && var1.getBoolean("IsVillager")) {
-         if (!var1.hasKey("ZombieType", 99)) {
-            ZombieType var2 = null;
-            if (var1.hasKey("VillagerProfession", 99)) {
+      if ("Zombie".equals(compound.getString("id")) && compound.getBoolean("IsVillager")) {
+         if (!compound.hasKey("ZombieType", 99)) {
+            ZombieType zombietype = null;
+            if (compound.hasKey("VillagerProfession", 99)) {
                try {
-                  var2 = ZombieType.getByOrdinal(var1.getInteger("VillagerProfession") + 1);
+                  zombietype = ZombieType.getByOrdinal(compound.getInteger("VillagerProfession") + 1);
                } catch (RuntimeException var4) {
                   ;
                }
             }
 
-            if (var2 == null) {
-               var2 = ZombieType.getByOrdinal(RANDOM.nextInt(5) + 1);
+            if (zombietype == null) {
+               zombietype = ZombieType.getByOrdinal(RANDOM.nextInt(5) + 1);
             }
 
-            var1.setInteger("ZombieType", var2.getId());
+            compound.setInteger("ZombieType", zombietype.getId());
          }
 
-         var1.removeTag("IsVillager");
+         compound.removeTag("IsVillager");
       }
 
-      return var1;
+      return compound;
    }
 }

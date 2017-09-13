@@ -22,7 +22,7 @@ public class ItemOverrideList {
    private ItemOverrideList() {
    }
 
-   public ItemOverrideList(List overridesIn) {
+   public ItemOverrideList(List var1) {
       for(int i = overridesIn.size() - 1; i >= 0; --i) {
          this.overrides.add(overridesIn.get(i));
       }
@@ -32,7 +32,7 @@ public class ItemOverrideList {
    /** @deprecated */
    @Nullable
    @Deprecated
-   public ResourceLocation applyOverride(ItemStack stack, @Nullable World worldIn, @Nullable EntityLivingBase entityIn) {
+   public ResourceLocation applyOverride(ItemStack var1, @Nullable World var2, @Nullable EntityLivingBase var3) {
       if (!this.overrides.isEmpty()) {
          for(ItemOverride itemoverride : this.overrides) {
             if (itemoverride.matchesItemStack(stack, worldIn, entityIn)) {
@@ -44,7 +44,7 @@ public class ItemOverrideList {
       return null;
    }
 
-   public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity) {
+   public IBakedModel handleItemState(IBakedModel var1, ItemStack var2, World var3, EntityLivingBase var4) {
       Item item = stack.getItem();
       if (item != null && item.hasCustomProperties()) {
          ResourceLocation location = this.applyOverride(stack, world, entity);

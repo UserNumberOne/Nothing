@@ -12,19 +12,19 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderBat extends RenderLiving {
    private static final ResourceLocation BAT_TEXTURES = new ResourceLocation("textures/entity/bat.png");
 
-   public RenderBat(RenderManager renderManagerIn) {
+   public RenderBat(RenderManager var1) {
       super(renderManagerIn, new ModelBat(), 0.25F);
    }
 
-   protected ResourceLocation getEntityTexture(EntityBat entity) {
+   protected ResourceLocation getEntityTexture(EntityBat var1) {
       return BAT_TEXTURES;
    }
 
-   protected void preRenderCallback(EntityBat entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityBat var1, float var2) {
       GlStateManager.scale(0.35F, 0.35F, 0.35F);
    }
 
-   protected void applyRotations(EntityBat entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
+   protected void applyRotations(EntityBat var1, float var2, float var3, float var4) {
       if (entityLiving.getIsBatHanging()) {
          GlStateManager.translate(0.0F, -0.1F, 0.0F);
       } else {

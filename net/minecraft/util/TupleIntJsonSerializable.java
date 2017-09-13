@@ -9,7 +9,7 @@ public class TupleIntJsonSerializable {
    }
 
    public void setIntegerValue(int var1) {
-      this.integerValue = var1;
+      this.integerValue = integerValueIn;
    }
 
    public IJsonSerializable getJsonSerializableValue() {
@@ -17,6 +17,6 @@ public class TupleIntJsonSerializable {
    }
 
    public void setJsonSerializableValue(IJsonSerializable var1) {
-      this.jsonSerializableValue = var1;
+      this.jsonSerializableValue = jsonSerializableValueIn;
    }
 }

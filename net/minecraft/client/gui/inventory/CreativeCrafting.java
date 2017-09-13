@@ -13,20 +13,20 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class CreativeCrafting implements IContainerListener {
    private final Minecraft mc;
 
-   public CreativeCrafting(Minecraft mc) {
+   public CreativeCrafting(Minecraft var1) {
       this.mc = mc;
    }
 
-   public void updateCraftingInventory(Container containerToSend, List itemsList) {
+   public void updateCraftingInventory(Container var1, List var2) {
    }
 
-   public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
+   public void sendSlotContents(Container var1, int var2, ItemStack var3) {
       this.mc.playerController.sendSlotPacket(stack, slotInd);
    }
 
-   public void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue) {
+   public void sendProgressBarUpdate(Container var1, int var2, int var3) {
    }
 
-   public void sendAllWindowProperties(Container containerIn, IInventory inventory) {
+   public void sendAllWindowProperties(Container var1, IInventory var2) {
    }
 }

@@ -18,11 +18,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LayerHeldItemWitch implements LayerRenderer {
    private final RenderWitch witchRenderer;
 
-   public LayerHeldItemWitch(RenderWitch witchRendererIn) {
+   public LayerHeldItemWitch(RenderWitch var1) {
       this.witchRenderer = witchRendererIn;
    }
 
-   public void doRenderLayer(EntityWitch entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityWitch var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       ItemStack itemstack = entitylivingbaseIn.getHeldItemMainhand();
       if (itemstack != null) {
          GlStateManager.color(1.0F, 1.0F, 1.0F);

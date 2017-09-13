@@ -19,7 +19,7 @@ public class ThreadLanServerPing extends Thread {
    private boolean isStopping = true;
    private final String address;
 
-   public ThreadLanServerPing(String p_i1321_1_, String p_i1321_2_) throws IOException {
+   public ThreadLanServerPing(String var1, String var2) throws IOException {
       super("LanServerPinger #" + UNIQUE_THREAD_ID.incrementAndGet());
       this.motd = p_i1321_1_;
       this.address = p_i1321_2_;
@@ -55,11 +55,11 @@ public class ThreadLanServerPing extends Thread {
       this.isStopping = false;
    }
 
-   public static String getPingResponse(String p_77525_0_, String p_77525_1_) {
+   public static String getPingResponse(String var0, String var1) {
       return "[MOTD]" + p_77525_0_ + "[/MOTD][AD]" + p_77525_1_ + "[/AD]";
    }
 
-   public static String getMotdFromPingResponse(String p_77524_0_) {
+   public static String getMotdFromPingResponse(String var0) {
       int i = p_77524_0_.indexOf("[MOTD]");
       if (i < 0) {
          return "missing no";
@@ -69,7 +69,7 @@ public class ThreadLanServerPing extends Thread {
       }
    }
 
-   public static String getAdFromPingResponse(String p_77523_0_) {
+   public static String getAdFromPingResponse(String var0) {
       int i = p_77523_0_.indexOf("[/MOTD]");
       if (i < 0) {
          return null;

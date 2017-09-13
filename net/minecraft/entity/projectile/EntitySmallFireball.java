@@ -8,54 +8,47 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.entity.EntityCombustByEntityEvent;
 
 public class EntitySmallFireball extends EntityFireball {
-   public EntitySmallFireball(World world) {
-      super(world);
+   public EntitySmallFireball(World var1) {
+      super(worldIn);
       this.setSize(0.3125F, 0.3125F);
    }
 
-   public EntitySmallFireball(World world, EntityLivingBase entityliving, double d0, double d1, double d2) {
-      super(world, entityliving, d0, d1, d2);
+   public EntitySmallFireball(World var1, EntityLivingBase var2, double var3, double var5, double var7) {
+      super(worldIn, shooter, accelX, accelY, accelZ);
       this.setSize(0.3125F, 0.3125F);
    }
 
-   public EntitySmallFireball(World world, double d0, double d1, double d2, double d3, double d4, double d5) {
-      super(world, d0, d1, d2, d3, d4, d5);
+   public EntitySmallFireball(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
+      super(worldIn, x, y, z, accelX, accelY, accelZ);
       this.setSize(0.3125F, 0.3125F);
    }
 
-   public static void registerFixesSmallFireball(DataFixer dataconvertermanager) {
-      EntityFireball.registerFixesFireball(dataconvertermanager, "SmallFireball");
+   public static void registerFixesSmallFireball(DataFixer var0) {
+      EntityFireball.registerFixesFireball(fixer, "SmallFireball");
    }
 
-   protected void onImpact(RayTraceResult movingobjectposition) {
+   protected void onImpact(RayTraceResult var1) {
       if (!this.world.isRemote) {
-         if (movingobjectposition.entityHit != null) {
-            if (!movingobjectposition.entityHit.isImmuneToFire()) {
-               boolean flag = movingobjectposition.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F);
+         if (result.entityHit != null) {
+            if (!result.entityHit.isImmuneToFire()) {
+               boolean flag = result.entityHit.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F);
                if (flag) {
-                  this.applyEnchantments(this.shootingEntity, movingobjectposition.entityHit);
-                  EntityCombustByEntityEvent event = new EntityCombustByEntityEvent((Projectile)this.getBukkitEntity(), movingobjectposition.entityHit.getBukkitEntity(), 5);
-                  movingobjectposition.entityHit.world.getServer().getPluginManager().callEvent(event);
-                  if (!event.isCancelled()) {
-                     movingobjectposition.entityHit.setFire(event.getDuration());
-                  }
+                  this.applyEnchantments(this.shootingEntity, result.entityHit);
+                  result.entityHit.setFire(5);
                }
             }
          } else {
-            boolean flag = true;
+            boolean flag1 = true;
             if (this.shootingEntity != null && this.shootingEntity instanceof EntityLiving) {
-               flag = this.world.getGameRules().getBoolean("mobGriefing");
+               flag1 = this.world.getGameRules().getBoolean("mobGriefing");
             }
 
-            if (flag) {
-               BlockPos blockposition = movingobjectposition.getBlockPos().offset(movingobjectposition.sideHit);
-               if (this.world.isAirBlock(blockposition) && this.isIncendiary && !CraftEventFactory.callBlockIgniteEvent(this.world, blockposition.getX(), blockposition.getY(), blockposition.getZ(), this).isCancelled()) {
-                  this.world.setBlockState(blockposition, Blocks.FIRE.getDefaultState());
+            if (flag1) {
+               BlockPos blockpos = result.getBlockPos().offset(result.sideHit);
+               if (this.world.isAirBlock(blockpos)) {
+                  this.world.setBlockState(blockpos, Blocks.FIRE.getDefaultState());
                }
             }
          }
@@ -69,7 +62,7 @@ public class EntitySmallFireball extends EntityFireball {
       return false;
    }
 
-   public boolean attackEntityFrom(DamageSource damagesource, float f) {
+   public boolean attackEntityFrom(DamageSource var1, float var2) {
       return false;
    }
 }

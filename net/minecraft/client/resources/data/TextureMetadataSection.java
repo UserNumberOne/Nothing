@@ -8,7 +8,7 @@ public class TextureMetadataSection implements IMetadataSection {
    private final boolean textureBlur;
    private final boolean textureClamp;
 
-   public TextureMetadataSection(boolean textureBlurIn, boolean textureClampIn) {
+   public TextureMetadataSection(boolean var1, boolean var2) {
       this.textureBlur = textureBlurIn;
       this.textureClamp = textureClampIn;
    }

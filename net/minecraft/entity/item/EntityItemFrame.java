@@ -23,20 +23,21 @@ import net.minecraft.util.datafix.walkers.ItemStackData;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityItemFrame extends EntityHanging {
    private static final DataParameter ITEM = EntityDataManager.createKey(EntityItemFrame.class, DataSerializers.OPTIONAL_ITEM_STACK);
    private static final DataParameter ROTATION = EntityDataManager.createKey(EntityItemFrame.class, DataSerializers.VARINT);
    private float itemDropChance = 1.0F;
 
-   public EntityItemFrame(World world) {
-      super(world);
+   public EntityItemFrame(World var1) {
+      super(worldIn);
    }
 
-   public EntityItemFrame(World world, BlockPos blockposition, EnumFacing enumdirection) {
-      super(world, blockposition);
-      this.updateFacingWithBoundingBox(enumdirection);
+   public EntityItemFrame(World var1, BlockPos var2, EnumFacing var3) {
+      super(worldIn, p_i45852_2_);
+      this.updateFacingWithBoundingBox(p_i45852_3_);
    }
 
    protected void entityInit() {
@@ -48,23 +49,19 @@ public class EntityItemFrame extends EntityHanging {
       return 0.0F;
    }
 
-   public boolean attackEntityFrom(DamageSource damagesource, float f) {
-      if (this.isEntityInvulnerable(damagesource)) {
+   public boolean attackEntityFrom(DamageSource var1, float var2) {
+      if (this.isEntityInvulnerable(source)) {
          return false;
-      } else if (!damagesource.isExplosion() && this.getDisplayedItem() != null) {
+      } else if (!source.isExplosion() && this.getDisplayedItem() != null) {
          if (!this.world.isRemote) {
-            if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, damagesource, (double)f, false) || this.isDead) {
-               return true;
-            }
-
-            this.dropItemOrSelf(damagesource.getEntity(), false);
+            this.dropItemOrSelf(source.getEntity(), false);
             this.playSound(SoundEvents.ENTITY_ITEMFRAME_REMOVE_ITEM, 1.0F, 1.0F);
             this.setDisplayedItem((ItemStack)null);
          }
 
          return true;
       } else {
-         return super.attackEntityFrom(damagesource, f);
+         return super.attackEntityFrom(source, amount);
       }
    }
 
@@ -76,27 +73,34 @@ public class EntityItemFrame extends EntityHanging {
       return 12;
    }
 
-   public void onBroken(@Nullable Entity entity) {
+   @SideOnly(Side.CLIENT)
+   public boolean isInRangeToRenderDist(double var1) {
+      double d0 = 16.0D;
+      d0 = d0 * 64.0D * getRenderDistanceWeight();
+      return distance < d0 * d0;
+   }
+
+   public void onBroken(@Nullable Entity var1) {
       this.playSound(SoundEvents.ENTITY_ITEMFRAME_BREAK, 1.0F, 1.0F);
-      this.dropItemOrSelf(entity, true);
+      this.dropItemOrSelf(brokenEntity, true);
    }
 
    public void playPlaceSound() {
       this.playSound(SoundEvents.ENTITY_ITEMFRAME_PLACE, 1.0F, 1.0F);
    }
 
-   public void dropItemOrSelf(@Nullable Entity entity, boolean flag) {
+   public void dropItemOrSelf(@Nullable Entity var1, boolean var2) {
       if (this.world.getGameRules().getBoolean("doEntityDrops")) {
          ItemStack itemstack = this.getDisplayedItem();
-         if (entity instanceof EntityPlayer) {
-            EntityPlayer entityhuman = (EntityPlayer)entity;
-            if (entityhuman.capabilities.isCreativeMode) {
+         if (entityIn instanceof EntityPlayer) {
+            EntityPlayer entityplayer = (EntityPlayer)entityIn;
+            if (entityplayer.capabilities.isCreativeMode) {
                this.removeFrameFromMap(itemstack);
                return;
             }
          }
 
-         if (flag) {
+         if (p_146065_2_) {
             this.entityDropItem(new ItemStack(Items.ITEM_FRAME), 0.0F);
          }
 
@@ -109,14 +113,14 @@ public class EntityItemFrame extends EntityHanging {
 
    }
 
-   private void removeFrameFromMap(ItemStack itemstack) {
-      if (itemstack != null) {
-         if (itemstack.getItem() == Items.FILLED_MAP) {
-            MapData worldmap = ((ItemMap)itemstack.getItem()).getMapData(itemstack, this.world);
-            worldmap.mapDecorations.remove("frame-" + this.getEntityId());
+   private void removeFrameFromMap(ItemStack var1) {
+      if (stack != null) {
+         if (stack.getItem() instanceof ItemMap) {
+            MapData mapdata = ((ItemMap)stack.getItem()).getMapData(stack, this.world);
+            mapdata.mapDecorations.remove("frame-" + this.getEntityId());
          }
 
-         itemstack.setItemFrame((EntityItemFrame)null);
+         stack.setItemFrame((EntityItemFrame)null);
       }
 
    }
@@ -126,31 +130,31 @@ public class EntityItemFrame extends EntityHanging {
       return (ItemStack)((Optional)this.getDataManager().get(ITEM)).orNull();
    }
 
-   public void setDisplayedItem(@Nullable ItemStack itemstack) {
-      this.setDisplayedItemWithUpdate(itemstack, true);
+   public void setDisplayedItem(@Nullable ItemStack var1) {
+      this.setDisplayedItemWithUpdate(stack, true);
    }
 
-   private void setDisplayedItemWithUpdate(@Nullable ItemStack itemstack, boolean flag) {
-      if (itemstack != null) {
-         itemstack = itemstack.copy();
-         itemstack.stackSize = 1;
-         itemstack.setItemFrame(this);
+   private void setDisplayedItemWithUpdate(@Nullable ItemStack var1, boolean var2) {
+      if (stack != null) {
+         stack = stack.copy();
+         stack.stackSize = 1;
+         stack.setItemFrame(this);
       }
 
-      this.getDataManager().set(ITEM, Optional.fromNullable(itemstack));
+      this.getDataManager().set(ITEM, Optional.fromNullable(stack));
       this.getDataManager().setDirty(ITEM);
-      if (itemstack != null) {
+      if (stack != null) {
          this.playSound(SoundEvents.ENTITY_ITEMFRAME_ADD_ITEM, 1.0F, 1.0F);
       }
 
-      if (flag && this.hangingPosition != null) {
+      if (p_174864_2_ && this.hangingPosition != null) {
          this.world.updateComparatorOutputLevel(this.hangingPosition, Blocks.AIR);
       }
 
    }
 
-   public void notifyDataManagerChange(DataParameter datawatcherobject) {
-      if (datawatcherobject.equals(ITEM)) {
+   public void notifyDataManagerChange(DataParameter var1) {
+      if (key.equals(ITEM)) {
          ItemStack itemstack = this.getDisplayedItem();
          if (itemstack != null && itemstack.getItemFrame() != this) {
             itemstack.setItemFrame(this);
@@ -163,51 +167,51 @@ public class EntityItemFrame extends EntityHanging {
       return ((Integer)this.getDataManager().get(ROTATION)).intValue();
    }
 
-   public void setItemRotation(int i) {
-      this.setRotation(i, true);
+   public void setItemRotation(int var1) {
+      this.setRotation(rotationIn, true);
    }
 
-   private void setRotation(int i, boolean flag) {
-      this.getDataManager().set(ROTATION, Integer.valueOf(i % 8));
-      if (flag && this.hangingPosition != null) {
+   private void setRotation(int var1, boolean var2) {
+      this.getDataManager().set(ROTATION, Integer.valueOf(rotationIn % 8));
+      if (p_174865_2_ && this.hangingPosition != null) {
          this.world.updateComparatorOutputLevel(this.hangingPosition, Blocks.AIR);
       }
 
    }
 
-   public static void registerFixesItemFrame(DataFixer dataconvertermanager) {
-      dataconvertermanager.registerWalker(FixTypes.ENTITY, new ItemStackData("ItemFrame", new String[]{"Item"}));
+   public static void registerFixesItemFrame(DataFixer var0) {
+      fixer.registerWalker(FixTypes.ENTITY, new ItemStackData("ItemFrame", new String[]{"Item"}));
    }
 
-   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+   public void writeEntityToNBT(NBTTagCompound var1) {
       if (this.getDisplayedItem() != null) {
-         nbttagcompound.setTag("Item", this.getDisplayedItem().writeToNBT(new NBTTagCompound()));
-         nbttagcompound.setByte("ItemRotation", (byte)this.getRotation());
-         nbttagcompound.setFloat("ItemDropChance", this.itemDropChance);
+         compound.setTag("Item", this.getDisplayedItem().writeToNBT(new NBTTagCompound()));
+         compound.setByte("ItemRotation", (byte)this.getRotation());
+         compound.setFloat("ItemDropChance", this.itemDropChance);
       }
 
-      super.writeEntityToNBT(nbttagcompound);
+      super.writeEntityToNBT(compound);
    }
 
-   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-      NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("Item");
-      if (nbttagcompound1 != null && !nbttagcompound1.hasNoTags()) {
-         this.setDisplayedItemWithUpdate(ItemStack.loadItemStackFromNBT(nbttagcompound1), false);
-         this.setRotation(nbttagcompound.getByte("ItemRotation"), false);
-         if (nbttagcompound.hasKey("ItemDropChance", 99)) {
-            this.itemDropChance = nbttagcompound.getFloat("ItemDropChance");
+   public void readEntityFromNBT(NBTTagCompound var1) {
+      NBTTagCompound nbttagcompound = compound.getCompoundTag("Item");
+      if (nbttagcompound != null && !nbttagcompound.hasNoTags()) {
+         this.setDisplayedItemWithUpdate(ItemStack.loadItemStackFromNBT(nbttagcompound), false);
+         this.setRotation(compound.getByte("ItemRotation"), false);
+         if (compound.hasKey("ItemDropChance", 99)) {
+            this.itemDropChance = compound.getFloat("ItemDropChance");
          }
       }
 
-      super.readEntityFromNBT(nbttagcompound);
+      super.readEntityFromNBT(compound);
    }
 
-   public boolean processInitialInteract(EntityPlayer entityhuman, @Nullable ItemStack itemstack, EnumHand enumhand) {
+   public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
       if (this.getDisplayedItem() == null) {
-         if (itemstack != null && !this.world.isRemote) {
-            this.setDisplayedItem(itemstack);
-            if (!entityhuman.capabilities.isCreativeMode) {
-               --itemstack.stackSize;
+         if (stack != null && !this.world.isRemote) {
+            this.setDisplayedItem(stack);
+            if (!player.capabilities.isCreativeMode) {
+               --stack.stackSize;
             }
          }
       } else if (!this.world.isRemote) {

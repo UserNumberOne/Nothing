@@ -17,28 +17,28 @@ public abstract class ModelBase {
    public int textureWidth = 64;
    public int textureHeight = 32;
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
    }
 
-   public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
+   public void setLivingAnimations(EntityLivingBase var1, float var2, float var3, float var4) {
    }
 
-   public ModelRenderer getRandomModelBox(Random rand) {
+   public ModelRenderer getRandomModelBox(Random var1) {
       return (ModelRenderer)this.boxList.get(rand.nextInt(this.boxList.size()));
    }
 
-   protected void setTextureOffset(String partName, int x, int y) {
+   protected void setTextureOffset(String var1, int var2, int var3) {
       this.modelTextureMap.put(partName, new TextureOffset(x, y));
    }
 
-   public TextureOffset getTextureOffset(String partName) {
+   public TextureOffset getTextureOffset(String var1) {
       return (TextureOffset)this.modelTextureMap.get(partName);
    }
 
-   public static void copyModelAngles(ModelRenderer source, ModelRenderer dest) {
+   public static void copyModelAngles(ModelRenderer var0, ModelRenderer var1) {
       dest.rotateAngleX = source.rotateAngleX;
       dest.rotateAngleY = source.rotateAngleY;
       dest.rotateAngleZ = source.rotateAngleZ;
@@ -47,7 +47,7 @@ public abstract class ModelBase {
       dest.rotationPointZ = source.rotationPointZ;
    }
 
-   public void setModelAttributes(ModelBase model) {
+   public void setModelAttributes(ModelBase var1) {
       this.swingProgress = model.swingProgress;
       this.isRiding = model.isRiding;
       this.isChild = model.isChild;

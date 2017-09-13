@@ -21,12 +21,12 @@ public class ConditionPropertyValue implements ICondition {
    private final String key;
    private final String value;
 
-   public ConditionPropertyValue(String keyIn, String valueIn) {
+   public ConditionPropertyValue(String var1, String var2) {
       this.key = keyIn;
       this.value = valueIn;
    }
 
-   public Predicate getPredicate(BlockStateContainer blockState) {
+   public Predicate getPredicate(BlockStateContainer var1) {
       final IProperty iproperty = blockState.getProperty(this.key);
       if (iproperty == null) {
          throw new RuntimeException(this.toString() + ": Definition: " + blockState + " has no property: " + this.key);
@@ -47,7 +47,7 @@ public class ConditionPropertyValue implements ICondition {
             } else {
                predicate = Predicates.or(Iterables.transform(list, new Function() {
                   @Nullable
-                  public Predicate apply(@Nullable String p_apply_1_) {
+                  public Predicate apply(@Nullable String var1) {
                      return ConditionPropertyValue.this.makePredicate(iproperty, p_apply_1_);
                   }
                }));
@@ -58,13 +58,13 @@ public class ConditionPropertyValue implements ICondition {
       }
    }
 
-   private Predicate makePredicate(final IProperty property, String valueIn) {
+   private Predicate makePredicate(final IProperty var1, String var2) {
       final Optional optional = property.parseValue(valueIn);
       if (!optional.isPresent()) {
          throw new RuntimeException(this.toString() + ": has an unknown value: " + this.value);
       } else {
          return new Predicate() {
-            public boolean apply(@Nullable IBlockState p_apply_1_) {
+            public boolean apply(@Nullable IBlockState var1x) {
                return p_apply_1_ != null && p_apply_1_.getValue(property).equals(optional.get());
             }
          };

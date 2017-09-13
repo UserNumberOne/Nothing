@@ -4,16 +4,16 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentMending extends Enchantment {
    public EnchantmentMending(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
-      super(var1, EnumEnchantmentType.BREAKABLE, var2);
+      super(rarityIn, EnumEnchantmentType.BREAKABLE, slots);
       this.setName("mending");
    }
 
    public int getMinEnchantability(int var1) {
-      return var1 * 25;
+      return enchantmentLevel * 25;
    }
 
    public int getMaxEnchantability(int var1) {
-      return this.getMinEnchantability(var1) + 50;
+      return this.getMinEnchantability(enchantmentLevel) + 50;
    }
 
    public boolean isTreasureEnchantment() {

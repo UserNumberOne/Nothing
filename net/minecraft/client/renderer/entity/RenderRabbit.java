@@ -18,11 +18,11 @@ public class RenderRabbit extends RenderLiving {
    private static final ResourceLocation TOAST = new ResourceLocation("textures/entity/rabbit/toast.png");
    private static final ResourceLocation CAERBANNOG = new ResourceLocation("textures/entity/rabbit/caerbannog.png");
 
-   public RenderRabbit(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn) {
+   public RenderRabbit(RenderManager var1, ModelBase var2, float var3) {
       super(renderManagerIn, modelBaseIn, shadowSizeIn);
    }
 
-   protected ResourceLocation getEntityTexture(EntityRabbit entity) {
+   protected ResourceLocation getEntityTexture(EntityRabbit var1) {
       String s = TextFormatting.getTextWithoutFormattingCodes(entity.getName());
       if (s != null && "Toast".equals(s)) {
          return TOAST;

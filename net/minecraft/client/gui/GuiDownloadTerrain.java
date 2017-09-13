@@ -12,11 +12,11 @@ public class GuiDownloadTerrain extends GuiScreen {
    private final NetHandlerPlayClient connection;
    private int progress;
 
-   public GuiDownloadTerrain(NetHandlerPlayClient netHandler) {
+   public GuiDownloadTerrain(NetHandlerPlayClient var1) {
       this.connection = netHandler;
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
    }
 
    public void initGui() {
@@ -31,7 +31,7 @@ public class GuiDownloadTerrain extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawBackground(0);
       this.drawCenteredString(this.fontRendererObj, I18n.format("multiplayer.downloadingTerrain"), this.width / 2, this.height / 2 - 50, 16777215);
       super.drawScreen(mouseX, mouseY, partialTicks);

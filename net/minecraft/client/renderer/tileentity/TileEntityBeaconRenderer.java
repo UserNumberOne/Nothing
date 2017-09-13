@@ -15,11 +15,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class TileEntityBeaconRenderer extends TileEntitySpecialRenderer {
    public static final ResourceLocation TEXTURE_BEACON_BEAM = new ResourceLocation("textures/entity/beacon_beam.png");
 
-   public void renderTileEntityAt(TileEntityBeacon te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntityBeacon var1, double var2, double var4, double var6, float var8, int var9) {
       this.renderBeacon(x, y, z, (double)partialTicks, (double)te.shouldBeamRender(), te.getBeamSegments(), (double)te.getWorld().getTotalWorldTime());
    }
 
-   public void renderBeacon(double p_188206_1_, double p_188206_3_, double p_188206_5_, double p_188206_7_, double p_188206_9_, List p_188206_11_, double p_188206_12_) {
+   public void renderBeacon(double var1, double var3, double var5, double var7, double var9, List var11, double var12) {
       GlStateManager.alphaFunc(516, 0.1F);
       this.bindTexture(TEXTURE_BEACON_BEAM);
       if (p_188206_9_ > 0.0D) {
@@ -37,11 +37,11 @@ public class TileEntityBeaconRenderer extends TileEntitySpecialRenderer {
 
    }
 
-   public static void renderBeamSegment(double x, double y, double z, double partialTicks, double textureScale, double totalWorldTime, int yOffset, int height, float[] colors) {
+   public static void renderBeamSegment(double var0, double var2, double var4, double var6, double var8, double var10, int var12, int var13, float[] var14) {
       renderBeamSegment(x, y, z, partialTicks, textureScale, totalWorldTime, yOffset, height, colors, 0.2D, 0.25D);
    }
 
-   public static void renderBeamSegment(double x, double y, double z, double partialTicks, double textureScale, double totalWorldTime, int yOffset, int height, float[] colors, double beamRadius, double glowRadius) {
+   public static void renderBeamSegment(double var0, double var2, double var4, double var6, double var8, double var10, int var12, int var13, float[] var14, double var15, double var17) {
       int i = yOffset + height;
       GlStateManager.glTexParameteri(3553, 10242, 10497);
       GlStateManager.glTexParameteri(3553, 10243, 10497);
@@ -127,7 +127,7 @@ public class TileEntityBeaconRenderer extends TileEntitySpecialRenderer {
       GlStateManager.depthMask(true);
    }
 
-   public boolean isGlobalRenderer(TileEntityBeacon te) {
+   public boolean isGlobalRenderer(TileEntityBeacon var1) {
       return true;
    }
 }

@@ -5,11 +5,15 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.SERVER)
 public class RConThreadMain extends RConThreadBase {
    private int rconPort;
    private final int serverPort;
@@ -19,20 +23,20 @@ public class RConThreadMain extends RConThreadBase {
    private Map clientThreads;
 
    public RConThreadMain(IServer var1) {
-      super(var1, "RCON Listener");
-      this.rconPort = var1.getIntProperty("rcon.port", 0);
-      this.rconPassword = var1.getStringProperty("rcon.password", "");
-      this.hostname = var1.getHostname();
-      this.serverPort = var1.getPort();
+      super(p_i1538_1_, "RCON Listener");
+      this.rconPort = p_i1538_1_.getIntProperty("rcon.port", 0);
+      this.rconPassword = p_i1538_1_.getStringProperty("rcon.password", "");
+      this.hostname = p_i1538_1_.getHostname();
+      this.serverPort = p_i1538_1_.getPort();
       if (0 == this.rconPort) {
          this.rconPort = this.serverPort + 10;
          this.logInfo("Setting default rcon port to " + this.rconPort);
-         var1.setProperty("rcon.port", Integer.valueOf(this.rconPort));
+         p_i1538_1_.setProperty("rcon.port", Integer.valueOf(this.rconPort));
          if (this.rconPassword.isEmpty()) {
-            var1.setProperty("rcon.password", "");
+            p_i1538_1_.setProperty("rcon.password", "");
          }
 
-         var1.saveProperties();
+         p_i1538_1_.saveProperties();
       }
 
       if (this.hostname.isEmpty()) {
@@ -48,12 +52,12 @@ public class RConThreadMain extends RConThreadBase {
    }
 
    private void cleanClientThreadsMap() {
-      Iterator var1 = this.clientThreads.entrySet().iterator();
+      Iterator iterator = this.clientThreads.entrySet().iterator();
 
-      while(var1.hasNext()) {
-         Entry var2 = (Entry)var1.next();
-         if (!((RConThreadClient)var2.getValue()).isRunning()) {
-            var1.remove();
+      while(iterator.hasNext()) {
+         Entry entry = (Entry)iterator.next();
+         if (!((RConThreadClient)entry.getValue()).isRunning()) {
+            iterator.remove();
          }
       }
 
@@ -65,11 +69,11 @@ public class RConThreadMain extends RConThreadBase {
       try {
          while(this.running) {
             try {
-               Socket var1 = this.serverSocket.accept();
-               var1.setSoTimeout(500);
-               RConThreadClient var2 = new RConThreadClient(this.server, var1);
-               var2.startThread();
-               this.clientThreads.put(var1.getRemoteSocketAddress(), var2);
+               Socket socket = this.serverSocket.accept();
+               socket.setSoTimeout(500);
+               RConThreadClient rconthreadclient = new RConThreadClient(this.server, socket);
+               rconthreadclient.startThread();
+               this.clientThreads.put(socket.getRemoteSocketAddress(), rconthreadclient);
                this.cleanClientThreadsMap();
             } catch (SocketTimeoutException var7) {
                this.cleanClientThreadsMap();
@@ -97,10 +101,10 @@ public class RConThreadMain extends RConThreadBase {
             } catch (IOException var2) {
                this.logWarning("Unable to initialise rcon on " + this.hostname + ":" + this.rconPort + " : " + var2.getMessage());
             }
-
          }
       } else {
          this.logWarning("Invalid rcon port " + this.rconPort + " found in '" + this.server.getSettingsFilename() + "', rcon disabled!");
       }
+
    }
 }

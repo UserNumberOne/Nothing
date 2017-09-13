@@ -7,11 +7,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiButtonLanguage extends GuiButton {
-   public GuiButtonLanguage(int buttonID, int xPos, int yPos) {
+   public GuiButtonLanguage(int var1, int var2, int var3) {
       super(buttonID, xPos, yPos, 20, 20, "");
    }
 
-   public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+   public void drawButton(Minecraft var1, int var2, int var3) {
       if (this.visible) {
          mc.getTextureManager().bindTexture(GuiButton.BUTTON_TEXTURES);
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

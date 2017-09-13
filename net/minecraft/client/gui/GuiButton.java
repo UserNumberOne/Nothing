@@ -23,11 +23,11 @@ public class GuiButton extends Gui {
    protected boolean hovered;
    public int packedFGColour;
 
-   public GuiButton(int buttonId, int x, int y, String buttonText) {
+   public GuiButton(int var1, int var2, int var3, String var4) {
       this(buttonId, x, y, 200, 20, buttonText);
    }
 
-   public GuiButton(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText) {
+   public GuiButton(int var1, int var2, int var3, int var4, int var5, String var6) {
       this.width = 200;
       this.height = 20;
       this.enabled = true;
@@ -40,7 +40,7 @@ public class GuiButton extends Gui {
       this.displayString = buttonText;
    }
 
-   protected int getHoverState(boolean mouseOver) {
+   protected int getHoverState(boolean var1) {
       int i = 1;
       if (!this.enabled) {
          i = 0;
@@ -51,7 +51,7 @@ public class GuiButton extends Gui {
       return i;
    }
 
-   public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+   public void drawButton(Minecraft var1, int var2, int var3) {
       if (this.visible) {
          FontRenderer fontrenderer = mc.fontRendererObj;
          mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
@@ -78,13 +78,13 @@ public class GuiButton extends Gui {
 
    }
 
-   protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
+   protected void mouseDragged(Minecraft var1, int var2, int var3) {
    }
 
-   public void mouseReleased(int mouseX, int mouseY) {
+   public void mouseReleased(int var1, int var2) {
    }
 
-   public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+   public boolean mousePressed(Minecraft var1, int var2, int var3) {
       return this.enabled && this.visible && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
    }
 
@@ -92,10 +92,10 @@ public class GuiButton extends Gui {
       return this.hovered;
    }
 
-   public void drawButtonForegroundLayer(int mouseX, int mouseY) {
+   public void drawButtonForegroundLayer(int var1, int var2) {
    }
 
-   public void playPressSound(SoundHandler soundHandlerIn) {
+   public void playPressSound(SoundHandler var1) {
       soundHandlerIn.playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
    }
 
@@ -103,7 +103,7 @@ public class GuiButton extends Gui {
       return this.width;
    }
 
-   public void setWidth(int width) {
+   public void setWidth(int var1) {
       this.width = width;
    }
 }

@@ -7,7 +7,7 @@ public class PhaseSittingAttacking extends PhaseSittingBase {
    private int attackingTicks;
 
    public PhaseSittingAttacking(EntityDragon var1) {
-      super(var1);
+      super(dragonIn);
    }
 
    public void doClientRenderEffects() {

@@ -23,13 +23,13 @@ public class MetadataSerializer {
       this.gsonBuilder.registerTypeAdapterFactory(new EnumTypeAdapterFactory());
    }
 
-   public void registerMetadataSectionType(IMetadataSectionSerializer metadataSectionSerializer, Class clazz) {
+   public void registerMetadataSectionType(IMetadataSectionSerializer var1, Class var2) {
       this.metadataSectionSerializerRegistry.putObject(metadataSectionSerializer.getSectionName(), new MetadataSerializer.Registration(metadataSectionSerializer, clazz));
       this.gsonBuilder.registerTypeAdapter(clazz, metadataSectionSerializer);
       this.gson = null;
    }
 
-   public IMetadataSection parseMetadataSection(String sectionName, JsonObject json) {
+   public IMetadataSection parseMetadataSection(String var1, JsonObject var2) {
       if (sectionName == null) {
          throw new IllegalArgumentException("Metadata section name cannot be null");
       } else if (!json.has(sectionName)) {
@@ -59,7 +59,7 @@ public class MetadataSerializer {
       final IMetadataSectionSerializer section;
       final Class clazz;
 
-      private Registration(IMetadataSectionSerializer metadataSectionSerializer, Class clazzToRegister) {
+      private Registration(IMetadataSectionSerializer var2, Class var3) {
          this.section = metadataSectionSerializer;
          this.clazz = clazzToRegister;
       }

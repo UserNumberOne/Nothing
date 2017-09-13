@@ -16,7 +16,7 @@ public class Gui {
    public static final ResourceLocation ICONS = new ResourceLocation("textures/gui/icons.png");
    protected float zLevel;
 
-   protected void drawHorizontalLine(int startX, int endX, int y, int color) {
+   protected void drawHorizontalLine(int var1, int var2, int var3, int var4) {
       if (endX < startX) {
          int i = startX;
          startX = endX;
@@ -26,7 +26,7 @@ public class Gui {
       drawRect(startX, y, endX + 1, y + 1, color);
    }
 
-   protected void drawVerticalLine(int x, int startY, int endY, int color) {
+   protected void drawVerticalLine(int var1, int var2, int var3, int var4) {
       if (endY < startY) {
          int i = startY;
          startY = endY;
@@ -36,7 +36,7 @@ public class Gui {
       drawRect(x, startY + 1, x + 1, endY, color);
    }
 
-   public static void drawRect(int left, int top, int right, int bottom, int color) {
+   public static void drawRect(int var0, int var1, int var2, int var3, int var4) {
       if (left < right) {
          int i = left;
          left = right;
@@ -69,7 +69,7 @@ public class Gui {
       GlStateManager.disableBlend();
    }
 
-   protected void drawGradientRect(int left, int top, int right, int bottom, int startColor, int endColor) {
+   protected void drawGradientRect(int var1, int var2, int var3, int var4, int var5, int var6) {
       float f = (float)(startColor >> 24 & 255) / 255.0F;
       float f1 = (float)(startColor >> 16 & 255) / 255.0F;
       float f2 = (float)(startColor >> 8 & 255) / 255.0F;
@@ -97,15 +97,15 @@ public class Gui {
       GlStateManager.enableTexture2D();
    }
 
-   public void drawCenteredString(FontRenderer fontRendererIn, String text, int x, int y, int color) {
+   public void drawCenteredString(FontRenderer var1, String var2, int var3, int var4, int var5) {
       fontRendererIn.drawStringWithShadow(text, (float)(x - fontRendererIn.getStringWidth(text) / 2), (float)y, color);
    }
 
-   public void drawString(FontRenderer fontRendererIn, String text, int x, int y, int color) {
+   public void drawString(FontRenderer var1, String var2, int var3, int var4, int var5) {
       fontRendererIn.drawStringWithShadow(text, (float)x, (float)y, color);
    }
 
-   public void drawTexturedModalRect(int x, int y, int textureX, int textureY, int width, int height) {
+   public void drawTexturedModalRect(int var1, int var2, int var3, int var4, int var5, int var6) {
       float f = 0.00390625F;
       float f1 = 0.00390625F;
       Tessellator tessellator = Tessellator.getInstance();
@@ -118,7 +118,7 @@ public class Gui {
       tessellator.draw();
    }
 
-   public void drawTexturedModalRect(float xCoord, float yCoord, int minU, int minV, int maxU, int maxV) {
+   public void drawTexturedModalRect(float var1, float var2, int var3, int var4, int var5, int var6) {
       float f = 0.00390625F;
       float f1 = 0.00390625F;
       Tessellator tessellator = Tessellator.getInstance();
@@ -131,7 +131,7 @@ public class Gui {
       tessellator.draw();
    }
 
-   public void drawTexturedModalRect(int xCoord, int yCoord, TextureAtlasSprite textureSprite, int widthIn, int heightIn) {
+   public void drawTexturedModalRect(int var1, int var2, TextureAtlasSprite var3, int var4, int var5) {
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
       vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX);
@@ -142,7 +142,7 @@ public class Gui {
       tessellator.draw();
    }
 
-   public static void drawModalRectWithCustomSizedTexture(int x, int y, float u, float v, int width, int height, float textureWidth, float textureHeight) {
+   public static void drawModalRectWithCustomSizedTexture(int var0, int var1, float var2, float var3, int var4, int var5, float var6, float var7) {
       float f = 1.0F / textureWidth;
       float f1 = 1.0F / textureHeight;
       Tessellator tessellator = Tessellator.getInstance();
@@ -155,7 +155,7 @@ public class Gui {
       tessellator.draw();
    }
 
-   public static void drawScaledCustomSizeModalRect(int x, int y, float u, float v, int uWidth, int vHeight, int width, int height, float tileWidth, float tileHeight) {
+   public static void drawScaledCustomSizeModalRect(int var0, int var1, float var2, float var3, int var4, int var5, int var6, int var7, float var8, float var9) {
       float f = 1.0F / tileWidth;
       float f1 = 1.0F / tileHeight;
       Tessellator tessellator = Tessellator.getInstance();

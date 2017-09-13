@@ -13,22 +13,19 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import org.bukkit.block.BlockState;
-import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
-import org.bukkit.event.block.EntityBlockFormEvent;
 
 public class EnchantmentFrostWalker extends Enchantment {
-   public EnchantmentFrostWalker(Enchantment.Rarity enchantment_rarity, EntityEquipmentSlot... aenumitemslot) {
-      super(enchantment_rarity, EnumEnchantmentType.ARMOR_FEET, aenumitemslot);
+   public EnchantmentFrostWalker(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
+      super(rarityIn, EnumEnchantmentType.ARMOR_FEET, slots);
       this.setName("frostWalker");
    }
 
-   public int getMinEnchantability(int i) {
-      return i * 10;
+   public int getMinEnchantability(int var1) {
+      return enchantmentLevel * 10;
    }
 
-   public int getMaxEnchantability(int i) {
-      return this.getMinEnchantability(i) + 15;
+   public int getMaxEnchantability(int var1) {
+      return this.getMinEnchantability(enchantmentLevel) + 15;
    }
 
    public boolean isTreasureEnchantment() {
@@ -39,26 +36,20 @@ public class EnchantmentFrostWalker extends Enchantment {
       return 2;
    }
 
-   public static void freezeNearby(EntityLivingBase entityliving, World world, BlockPos blockposition, int i) {
-      if (entityliving.onGround) {
-         float f = (float)Math.min(16, 2 + i);
-         BlockPos.MutableBlockPos blockposition_mutableblockposition = new BlockPos.MutableBlockPos(0, 0, 0);
+   public static void freezeNearby(EntityLivingBase var0, World var1, BlockPos var2, int var3) {
+      if (living.onGround) {
+         float f = (float)Math.min(16, 2 + level);
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(0, 0, 0);
 
-         for(BlockPos.MutableBlockPos blockposition_mutableblockposition1 : BlockPos.getAllInBoxMutable(blockposition.add((double)(-f), -1.0D, (double)(-f)), blockposition.add((double)f, -1.0D, (double)f))) {
-            if (blockposition_mutableblockposition1.distanceSqToCenter(entityliving.posX, entityliving.posY, entityliving.posZ) <= (double)(f * f)) {
-               blockposition_mutableblockposition.setPos(blockposition_mutableblockposition1.getX(), blockposition_mutableblockposition1.getY() + 1, blockposition_mutableblockposition1.getZ());
-               IBlockState iblockdata = world.getBlockState(blockposition_mutableblockposition);
-               if (iblockdata.getMaterial() == Material.AIR) {
-                  IBlockState iblockdata1 = world.getBlockState(blockposition_mutableblockposition1);
-                  if (iblockdata1.getMaterial() == Material.WATER && ((Integer)iblockdata1.getValue(BlockLiquid.LEVEL)).intValue() == 0 && world.canBlockBePlaced(Blocks.FROSTED_ICE, blockposition_mutableblockposition1, false, EnumFacing.DOWN, (Entity)null, (ItemStack)null)) {
-                     BlockState blockState = world.getWorld().getBlockAt(blockposition_mutableblockposition1.getX(), blockposition_mutableblockposition1.getY(), blockposition_mutableblockposition1.getZ()).getState();
-                     blockState.setType(CraftMagicNumbers.getMaterial(Blocks.FROSTED_ICE));
-                     EntityBlockFormEvent event = new EntityBlockFormEvent(entityliving.bukkitEntity, blockState.getBlock(), blockState);
-                     world.getServer().getPluginManager().callEvent(event);
-                     if (!event.isCancelled()) {
-                        blockState.update(true);
-                        world.scheduleUpdate(blockposition_mutableblockposition1.toImmutable(), Blocks.FROSTED_ICE, MathHelper.getInt(entityliving.getRNG(), 60, 120));
-                     }
+         for(BlockPos.MutableBlockPos blockpos$mutableblockpos1 : BlockPos.getAllInBoxMutable(pos.add((double)(-f), -1.0D, (double)(-f)), pos.add((double)f, -1.0D, (double)f))) {
+            if (blockpos$mutableblockpos1.distanceSqToCenter(living.posX, living.posY, living.posZ) <= (double)(f * f)) {
+               blockpos$mutableblockpos.setPos(blockpos$mutableblockpos1.getX(), blockpos$mutableblockpos1.getY() + 1, blockpos$mutableblockpos1.getZ());
+               IBlockState iblockstate = worldIn.getBlockState(blockpos$mutableblockpos);
+               if (iblockstate.getMaterial() == Material.AIR) {
+                  IBlockState iblockstate1 = worldIn.getBlockState(blockpos$mutableblockpos1);
+                  if (iblockstate1.getMaterial() == Material.WATER && ((Integer)iblockstate1.getValue(BlockLiquid.LEVEL)).intValue() == 0 && worldIn.canBlockBePlaced(Blocks.FROSTED_ICE, blockpos$mutableblockpos1, false, EnumFacing.DOWN, (Entity)null, (ItemStack)null)) {
+                     worldIn.setBlockState(blockpos$mutableblockpos1, Blocks.FROSTED_ICE.getDefaultState());
+                     worldIn.scheduleUpdate(blockpos$mutableblockpos1.toImmutable(), Blocks.FROSTED_ICE, MathHelper.getInt(living.getRNG(), 60, 120));
                   }
                }
             }
@@ -67,7 +58,7 @@ public class EnchantmentFrostWalker extends Enchantment {
 
    }
 
-   public boolean canApplyTogether(Enchantment enchantment) {
-      return super.canApplyTogether(enchantment) && enchantment != Enchantments.DEPTH_STRIDER;
+   public boolean canApplyTogether(Enchantment var1) {
+      return super.canApplyTogether(ench) && ench != Enchantments.DEPTH_STRIDER;
    }
 }

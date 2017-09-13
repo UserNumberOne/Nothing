@@ -18,6 +18,8 @@ import net.minecraft.server.management.PreYggdrasilConverter;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityTameable extends EntityAnimal implements IEntityOwnable {
    protected static final DataParameter TAMED = EntityDataManager.createKey(EntityTameable.class, DataSerializers.BYTE);
@@ -25,7 +27,7 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
    protected EntityAISit aiSit;
 
    public EntityTameable(World var1) {
-      super(var1);
+      super(worldIn);
       this.setupTamedAI();
    }
 
@@ -36,29 +38,29 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
    }
 
    public void writeEntityToNBT(NBTTagCompound var1) {
-      super.writeEntityToNBT(var1);
+      super.writeEntityToNBT(compound);
       if (this.getOwnerId() == null) {
-         var1.setString("OwnerUUID", "");
+         compound.setString("OwnerUUID", "");
       } else {
-         var1.setString("OwnerUUID", this.getOwnerId().toString());
+         compound.setString("OwnerUUID", this.getOwnerId().toString());
       }
 
-      var1.setBoolean("Sitting", this.isSitting());
+      compound.setBoolean("Sitting", this.isSitting());
    }
 
    public void readEntityFromNBT(NBTTagCompound var1) {
-      super.readEntityFromNBT(var1);
-      String var2;
-      if (var1.hasKey("OwnerUUID", 8)) {
-         var2 = var1.getString("OwnerUUID");
+      super.readEntityFromNBT(compound);
+      String s;
+      if (compound.hasKey("OwnerUUID", 8)) {
+         s = compound.getString("OwnerUUID");
       } else {
-         String var3 = var1.getString("Owner");
-         var2 = PreYggdrasilConverter.a(this.h(), var3);
+         String s1 = compound.getString("Owner");
+         s = PreYggdrasilConverter.convertMobOwnerIfNeeded(this.getServer(), s1);
       }
 
-      if (!var2.isEmpty()) {
+      if (!s.isEmpty()) {
          try {
-            this.setOwnerId(UUID.fromString(var2));
+            this.setOwnerId(UUID.fromString(s));
             this.setTamed(true);
          } catch (Throwable var4) {
             this.setTamed(false);
@@ -66,27 +68,39 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
       }
 
       if (this.aiSit != null) {
-         this.aiSit.setSitting(var1.getBoolean("Sitting"));
+         this.aiSit.setSitting(compound.getBoolean("Sitting"));
       }
 
-      this.setSitting(var1.getBoolean("Sitting"));
+      this.setSitting(compound.getBoolean("Sitting"));
    }
 
    public boolean canBeLeashedTo(EntityPlayer var1) {
-      return this.isTamed() && this.isOwner(var1);
+      return this.isTamed() && this.isOwner(player);
    }
 
    protected void playTameEffect(boolean var1) {
-      EnumParticleTypes var2 = EnumParticleTypes.HEART;
-      if (!var1) {
-         var2 = EnumParticleTypes.SMOKE_NORMAL;
+      EnumParticleTypes enumparticletypes = EnumParticleTypes.HEART;
+      if (!play) {
+         enumparticletypes = EnumParticleTypes.SMOKE_NORMAL;
       }
 
-      for(int var3 = 0; var3 < 7; ++var3) {
-         double var4 = this.rand.nextGaussian() * 0.02D;
-         double var6 = this.rand.nextGaussian() * 0.02D;
-         double var8 = this.rand.nextGaussian() * 0.02D;
-         this.world.spawnParticle(var2, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, var4, var6, var8);
+      for(int i = 0; i < 7; ++i) {
+         double d0 = this.rand.nextGaussian() * 0.02D;
+         double d1 = this.rand.nextGaussian() * 0.02D;
+         double d2 = this.rand.nextGaussian() * 0.02D;
+         this.world.spawnParticle(enumparticletypes, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, d0, d1, d2);
+      }
+
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void handleStatusUpdate(byte var1) {
+      if (id == 7) {
+         this.playTameEffect(true);
+      } else if (id == 6) {
+         this.playTameEffect(false);
+      } else {
+         super.handleStatusUpdate(id);
       }
 
    }
@@ -96,11 +110,11 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
    }
 
    public void setTamed(boolean var1) {
-      byte var2 = ((Byte)this.dataManager.get(TAMED)).byteValue();
-      if (var1) {
-         this.dataManager.set(TAMED, Byte.valueOf((byte)(var2 | 4)));
+      byte b0 = ((Byte)this.dataManager.get(TAMED)).byteValue();
+      if (tamed) {
+         this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 | 4)));
       } else {
-         this.dataManager.set(TAMED, Byte.valueOf((byte)(var2 & -5)));
+         this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 & -5)));
       }
 
       this.setupTamedAI();
@@ -114,11 +128,11 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
    }
 
    public void setSitting(boolean var1) {
-      byte var2 = ((Byte)this.dataManager.get(TAMED)).byteValue();
-      if (var1) {
-         this.dataManager.set(TAMED, Byte.valueOf((byte)(var2 | 1)));
+      byte b0 = ((Byte)this.dataManager.get(TAMED)).byteValue();
+      if (sitting) {
+         this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 | 1)));
       } else {
-         this.dataManager.set(TAMED, Byte.valueOf((byte)(var2 & -2)));
+         this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 & -2)));
       }
 
    }
@@ -129,21 +143,21 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
    }
 
    public void setOwnerId(@Nullable UUID var1) {
-      this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(var1));
+      this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(p_184754_1_));
    }
 
    @Nullable
    public EntityLivingBase getOwner() {
       try {
-         UUID var1 = this.getOwnerId();
-         return var1 == null ? null : this.world.getPlayerEntityByUUID(var1);
+         UUID uuid = this.getOwnerId();
+         return uuid == null ? null : this.world.getPlayerEntityByUUID(uuid);
       } catch (IllegalArgumentException var2) {
          return null;
       }
    }
 
    public boolean isOwner(EntityLivingBase var1) {
-      return var1 == this.getOwner();
+      return entityIn == this.getOwner();
    }
 
    public EntityAISit getAISit() {
@@ -156,9 +170,9 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
 
    public Team getTeam() {
       if (this.isTamed()) {
-         EntityLivingBase var1 = this.getOwner();
-         if (var1 != null) {
-            return var1.getTeam();
+         EntityLivingBase entitylivingbase = this.getOwner();
+         if (entitylivingbase != null) {
+            return entitylivingbase.getTeam();
          }
       }
 
@@ -167,17 +181,17 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
 
    public boolean isOnSameTeam(Entity var1) {
       if (this.isTamed()) {
-         EntityLivingBase var2 = this.getOwner();
-         if (var1 == var2) {
+         EntityLivingBase entitylivingbase = this.getOwner();
+         if (entityIn == entitylivingbase) {
             return true;
          }
 
-         if (var2 != null) {
-            return var2.isOnSameTeam(var1);
+         if (entitylivingbase != null) {
+            return entitylivingbase.isOnSameTeam(entityIn);
          }
       }
 
-      return super.isOnSameTeam(var1);
+      return super.isOnSameTeam(entityIn);
    }
 
    public void onDeath(DamageSource var1) {
@@ -185,11 +199,6 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
          this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage());
       }
 
-      super.onDeath(var1);
-   }
-
-   // $FF: synthetic method
-   public Entity getOwner() {
-      return this.getOwner();
+      super.onDeath(cause);
    }
 }

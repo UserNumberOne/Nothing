@@ -23,7 +23,7 @@ public class ParticleExplosionLarge extends Particle {
    private final TextureManager theRenderEngine;
    private final float size;
 
-   protected ParticleExplosionLarge(TextureManager renderEngine, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double p_i1213_9_, double p_i1213_11_, double p_i1213_13_) {
+   protected ParticleExplosionLarge(TextureManager var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0D, 0.0D, 0.0D);
       this.theRenderEngine = renderEngine;
       this.lifeTime = 6 + this.rand.nextInt(4);
@@ -34,7 +34,7 @@ public class ParticleExplosionLarge extends Particle {
       this.size = 1.0F - (float)p_i1213_9_ * 0.5F;
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       int i = (int)(((float)this.life + partialTicks) * 15.0F / (float)this.lifeTime);
       if (i <= 15) {
          this.theRenderEngine.bindTexture(EXPLOSION_TEXTURE);
@@ -60,7 +60,7 @@ public class ParticleExplosionLarge extends Particle {
 
    }
 
-   public int getBrightnessForRender(float p_189214_1_) {
+   public int getBrightnessForRender(float var1) {
       return 61680;
    }
 
@@ -81,7 +81,7 @@ public class ParticleExplosionLarge extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleExplosionLarge(Minecraft.getMinecraft().getTextureManager(), worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
       }
    }

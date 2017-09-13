@@ -19,11 +19,11 @@ public class GuiSubtitleOverlay extends Gui implements ISoundEventListener {
    private final List subtitles = Lists.newArrayList();
    private boolean enabled;
 
-   public GuiSubtitleOverlay(Minecraft clientIn) {
+   public GuiSubtitleOverlay(Minecraft var1) {
       this.client = clientIn;
    }
 
-   public void renderSubtitles(ScaledResolution resolution) {
+   public void renderSubtitles(ScaledResolution var1) {
       if (!this.enabled && this.client.gameSettings.showSubtitles) {
          this.client.getSoundHandler().addListener(this);
          this.enabled = true;
@@ -93,7 +93,7 @@ public class GuiSubtitleOverlay extends Gui implements ISoundEventListener {
 
    }
 
-   public void soundPlay(ISound soundIn, SoundEventAccessor accessor) {
+   public void soundPlay(ISound var1, SoundEventAccessor var2) {
       if (accessor.getSubtitle() != null) {
          String s = accessor.getSubtitle().getFormattedText();
          if (!this.subtitles.isEmpty()) {
@@ -116,7 +116,7 @@ public class GuiSubtitleOverlay extends Gui implements ISoundEventListener {
       private long startTime;
       private Vec3d location;
 
-      public Subtitle(String subtitleIn, Vec3d locationIn) {
+      public Subtitle(String var2, Vec3d var3) {
          this.subtitle = subtitleIn;
          this.location = locationIn;
          this.startTime = Minecraft.getSystemTime();
@@ -134,7 +134,7 @@ public class GuiSubtitleOverlay extends Gui implements ISoundEventListener {
          return this.location;
       }
 
-      public void refresh(Vec3d locationIn) {
+      public void refresh(Vec3d var1) {
          this.location = locationIn;
          this.startTime = Minecraft.getSystemTime();
       }

@@ -17,11 +17,11 @@ public class SimpleTexture extends AbstractTexture {
    private static final Logger LOG = LogManager.getLogger();
    protected final ResourceLocation textureLocation;
 
-   public SimpleTexture(ResourceLocation textureResourceLocation) {
+   public SimpleTexture(ResourceLocation var1) {
       this.textureLocation = textureResourceLocation;
    }
 
-   public void loadTexture(IResourceManager resourceManager) throws IOException {
+   public void loadTexture(IResourceManager var1) throws IOException {
       this.deleteGlTexture();
       IResource iresource = null;
 

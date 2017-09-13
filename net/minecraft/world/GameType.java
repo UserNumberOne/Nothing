@@ -1,6 +1,8 @@
 package net.minecraft.world;
 
 import net.minecraft.entity.player.PlayerCapabilities;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public enum GameType {
    NOT_SET(-1, "", ""),
@@ -14,9 +16,9 @@ public enum GameType {
    String shortName;
 
    private GameType(int var3, String var4, String var5) {
-      this.id = var3;
-      this.name = var4;
-      this.shortName = var5;
+      this.id = idIn;
+      this.name = nameIn;
+      this.shortName = shortNameIn;
    }
 
    public int getID() {
@@ -29,22 +31,22 @@ public enum GameType {
 
    public void configurePlayerCapabilities(PlayerCapabilities var1) {
       if (this == CREATIVE) {
-         var1.allowFlying = true;
-         var1.isCreativeMode = true;
-         var1.disableDamage = true;
+         capabilities.allowFlying = true;
+         capabilities.isCreativeMode = true;
+         capabilities.disableDamage = true;
       } else if (this == SPECTATOR) {
-         var1.allowFlying = true;
-         var1.isCreativeMode = false;
-         var1.disableDamage = true;
-         var1.isFlying = true;
+         capabilities.allowFlying = true;
+         capabilities.isCreativeMode = false;
+         capabilities.disableDamage = true;
+         capabilities.isFlying = true;
       } else {
-         var1.allowFlying = false;
-         var1.isCreativeMode = false;
-         var1.disableDamage = false;
-         var1.isFlying = false;
+         capabilities.allowFlying = false;
+         capabilities.isCreativeMode = false;
+         capabilities.disableDamage = false;
+         capabilities.isFlying = false;
       }
 
-      var1.allowEdit = !this.isAdventure();
+      capabilities.allowEdit = !this.isAdventure();
    }
 
    public boolean isAdventure() {
@@ -60,26 +62,31 @@ public enum GameType {
    }
 
    public static GameType getByID(int var0) {
-      return parseGameTypeWithDefault(var0, SURVIVAL);
+      return parseGameTypeWithDefault(idIn, SURVIVAL);
    }
 
    public static GameType parseGameTypeWithDefault(int var0, GameType var1) {
-      for(GameType var5 : values()) {
-         if (var5.id == var0) {
-            return var5;
+      for(GameType gametype : values()) {
+         if (gametype.id == targetId) {
+            return gametype;
          }
       }
 
-      return var1;
+      return fallback;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public static GameType getByName(String var0) {
+      return parseGameTypeWithDefault(gamemodeName, SURVIVAL);
    }
 
    public static GameType parseGameTypeWithDefault(String var0, GameType var1) {
-      for(GameType var5 : values()) {
-         if (var5.name.equals(var0) || var5.shortName.equals(var0)) {
-            return var5;
+      for(GameType gametype : values()) {
+         if (gametype.name.equals(targetName) || gametype.shortName.equals(targetName)) {
+            return gametype;
          }
       }
 
-      return var1;
+      return fallback;
    }
 }

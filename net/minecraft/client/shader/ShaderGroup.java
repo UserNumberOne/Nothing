@@ -39,7 +39,7 @@ public class ShaderGroup {
    private float time;
    private float lastStamp;
 
-   public ShaderGroup(TextureManager p_i1050_1_, IResourceManager resourceManagerIn, Framebuffer mainFramebufferIn, ResourceLocation p_i1050_4_) throws JsonException, IOException, JsonSyntaxException {
+   public ShaderGroup(TextureManager var1, IResourceManager var2, Framebuffer var3, ResourceLocation var4) throws JsonException, IOException, JsonSyntaxException {
       this.resourceManager = resourceManagerIn;
       this.mainFramebuffer = mainFramebufferIn;
       this.time = 0.0F;
@@ -51,7 +51,7 @@ public class ShaderGroup {
       this.parseGroup(p_i1050_1_, p_i1050_4_);
    }
 
-   public void parseGroup(TextureManager p_152765_1_, ResourceLocation p_152765_2_) throws JsonException, IOException, JsonSyntaxException {
+   public void parseGroup(TextureManager var1, ResourceLocation var2) throws JsonException, IOException, JsonSyntaxException {
       JsonParser jsonparser = new JsonParser();
       IResource iresource = null;
 
@@ -101,7 +101,7 @@ public class ShaderGroup {
 
    }
 
-   private void initTarget(JsonElement p_148027_1_) throws JsonException {
+   private void initTarget(JsonElement var1) throws JsonException {
       if (JsonUtils.isString(p_148027_1_)) {
          this.addFramebuffer(p_148027_1_.getAsString(), this.mainFramebufferWidth, this.mainFramebufferHeight);
       } else {
@@ -118,7 +118,7 @@ public class ShaderGroup {
 
    }
 
-   private void parsePass(TextureManager p_152764_1_, JsonElement p_152764_2_) throws JsonException, IOException {
+   private void parsePass(TextureManager var1, JsonElement var2) throws JsonException, IOException {
       JsonObject jsonobject = JsonUtils.getJsonObject(p_152764_2_, "pass");
       String s = JsonUtils.getString(jsonobject, "name");
       String s1 = JsonUtils.getString(jsonobject, "intarget");
@@ -154,10 +154,10 @@ public class ShaderGroup {
                      }
 
                      p_152764_1_.bindTexture(resourcelocation);
-                     ITextureObject lvt_20_1_ = p_152764_1_.getTexture(resourcelocation);
-                     int lvt_21_1_ = JsonUtils.getInt(jsonobject1, "width");
-                     int lvt_22_1_ = JsonUtils.getInt(jsonobject1, "height");
-                     boolean lvt_23_1_ = JsonUtils.getBoolean(jsonobject1, "bilinear");
+                     ITextureObject var20 = p_152764_1_.getTexture(resourcelocation);
+                     int var21 = JsonUtils.getInt(jsonobject1, "width");
+                     int var22 = JsonUtils.getInt(jsonobject1, "height");
+                     boolean var23 = JsonUtils.getBoolean(jsonobject1, "bilinear");
                      if (lvt_23_1_) {
                         GlStateManager.glTexParameteri(3553, 10241, 9729);
                         GlStateManager.glTexParameteri(3553, 10240, 9729);
@@ -166,7 +166,7 @@ public class ShaderGroup {
                         GlStateManager.glTexParameteri(3553, 10240, 9728);
                      }
 
-                     shader.addAuxFramebuffer(s4, Integer.valueOf(lvt_20_1_.getGlTextureId()), lvt_21_1_, lvt_22_1_);
+                     shader.addAuxFramebuffer(s4, Integer.valueOf(var20.getGlTextureId()), var21, var22);
                   } else {
                      shader.addAuxFramebuffer(s4, framebuffer2, framebuffer2.framebufferTextureWidth, framebuffer2.framebufferTextureHeight);
                   }
@@ -200,7 +200,7 @@ public class ShaderGroup {
       }
    }
 
-   private void initUniform(JsonElement p_148028_1_) throws JsonException {
+   private void initUniform(JsonElement var1) throws JsonException {
       JsonObject jsonobject = JsonUtils.getJsonObject(p_148028_1_, "uniform");
       String s = JsonUtils.getString(jsonobject, "name");
       ShaderUniform shaderuniform = ((Shader)this.listShaders.get(this.listShaders.size() - 1)).getShaderManager().getShaderUniform(s);
@@ -242,11 +242,11 @@ public class ShaderGroup {
       }
    }
 
-   public Framebuffer getFramebufferRaw(String p_177066_1_) {
+   public Framebuffer getFramebufferRaw(String var1) {
       return (Framebuffer)this.mapFramebuffers.get(p_177066_1_);
    }
 
-   public void addFramebuffer(String p_148020_1_, int p_148020_2_, int p_148020_3_) {
+   public void addFramebuffer(String var1, int var2, int var3) {
       Framebuffer framebuffer = new Framebuffer(p_148020_2_, p_148020_3_, true);
       framebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
       this.mapFramebuffers.put(p_148020_1_, framebuffer);
@@ -268,7 +268,7 @@ public class ShaderGroup {
       this.listShaders.clear();
    }
 
-   public Shader addShader(String p_148023_1_, Framebuffer p_148023_2_, Framebuffer p_148023_3_) throws JsonException, IOException {
+   public Shader addShader(String var1, Framebuffer var2, Framebuffer var3) throws JsonException, IOException {
       Shader shader = new Shader(this.resourceManager, p_148023_1_, p_148023_2_, p_148023_3_);
       this.listShaders.add(this.listShaders.size(), shader);
       return shader;
@@ -286,7 +286,7 @@ public class ShaderGroup {
       this.projectionMatrix.m23 = -1.0001999F;
    }
 
-   public void createBindFramebuffers(int width, int height) {
+   public void createBindFramebuffers(int var1, int var2) {
       this.mainFramebufferWidth = this.mainFramebuffer.framebufferTextureWidth;
       this.mainFramebufferHeight = this.mainFramebuffer.framebufferTextureHeight;
       this.resetProjectionMatrix();
@@ -301,7 +301,7 @@ public class ShaderGroup {
 
    }
 
-   public void loadShaderGroup(float partialTicks) {
+   public void loadShaderGroup(float var1) {
       if (partialTicks < this.lastStamp) {
          this.time += 1.0F - this.lastStamp;
          this.time += partialTicks;
@@ -323,7 +323,7 @@ public class ShaderGroup {
       return this.shaderGroupName;
    }
 
-   private Framebuffer getFramebuffer(String p_148017_1_) {
+   private Framebuffer getFramebuffer(String var1) {
       return p_148017_1_ == null ? null : (p_148017_1_.equals("minecraft:main") ? this.mainFramebuffer : (Framebuffer)this.mapFramebuffers.get(p_148017_1_));
    }
 }

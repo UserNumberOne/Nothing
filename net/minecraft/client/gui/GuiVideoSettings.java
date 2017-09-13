@@ -15,7 +15,7 @@ public class GuiVideoSettings extends GuiScreen {
    private GuiListExtended optionsRowList;
    private static final GameSettings.Options[] VIDEO_OPTIONS = new GameSettings.Options[]{GameSettings.Options.GRAPHICS, GameSettings.Options.RENDER_DISTANCE, GameSettings.Options.AMBIENT_OCCLUSION, GameSettings.Options.FRAMERATE_LIMIT, GameSettings.Options.ANAGLYPH, GameSettings.Options.VIEW_BOBBING, GameSettings.Options.GUI_SCALE, GameSettings.Options.ATTACK_INDICATOR, GameSettings.Options.GAMMA, GameSettings.Options.RENDER_CLOUDS, GameSettings.Options.PARTICLES, GameSettings.Options.USE_FULLSCREEN, GameSettings.Options.ENABLE_VSYNC, GameSettings.Options.MIPMAP_LEVELS, GameSettings.Options.USE_VBO, GameSettings.Options.ENTITY_SHADOWS};
 
-   public GuiVideoSettings(GuiScreen parentScreenIn, GameSettings gameSettingsIn) {
+   public GuiVideoSettings(GuiScreen var1, GameSettings var2) {
       this.parentGuiScreen = parentScreenIn;
       this.guiGameSettings = gameSettingsIn;
    }
@@ -49,7 +49,7 @@ public class GuiVideoSettings extends GuiScreen {
       this.optionsRowList.handleMouseInput();
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled && button.id == 200) {
          this.mc.gameSettings.saveOptions();
          this.mc.displayGuiScreen(this.parentGuiScreen);
@@ -57,7 +57,7 @@ public class GuiVideoSettings extends GuiScreen {
 
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       int i = this.guiGameSettings.guiScale;
       super.mouseClicked(mouseX, mouseY, mouseButton);
       this.optionsRowList.mouseClicked(mouseX, mouseY, mouseButton);
@@ -70,7 +70,7 @@ public class GuiVideoSettings extends GuiScreen {
 
    }
 
-   protected void mouseReleased(int mouseX, int mouseY, int state) {
+   protected void mouseReleased(int var1, int var2, int var3) {
       int i = this.guiGameSettings.guiScale;
       super.mouseReleased(mouseX, mouseY, state);
       this.optionsRowList.mouseReleased(mouseX, mouseY, state);
@@ -83,7 +83,7 @@ public class GuiVideoSettings extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.optionsRowList.drawScreen(mouseX, mouseY, partialTicks);
       this.drawCenteredString(this.fontRendererObj, this.screenTitle, this.width / 2, 5, 16777215);

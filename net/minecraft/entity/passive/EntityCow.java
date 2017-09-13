@@ -17,7 +17,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -25,19 +24,15 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
-import org.bukkit.event.player.PlayerBucketFillEvent;
 
 public class EntityCow extends EntityAnimal {
-   public EntityCow(World world) {
-      super(world);
+   public EntityCow(World var1) {
+      super(worldIn);
       this.setSize(0.9F, 1.4F);
    }
 
-   public static void registerFixesCow(DataFixer dataconvertermanager) {
-      EntityLiving.registerFixesMob(dataconvertermanager, "Cow");
+   public static void registerFixesCow(DataFixer var0) {
+      EntityLiving.registerFixesMob(fixer, "Cow");
    }
 
    protected void initEntityAI() {
@@ -69,7 +64,7 @@ public class EntityCow extends EntityAnimal {
       return SoundEvents.ENTITY_COW_DEATH;
    }
 
-   protected void playStepSound(BlockPos blockposition, Block block) {
+   protected void playStepSound(BlockPos var1, Block var2) {
       this.playSound(SoundEvents.ENTITY_COW_STEP, 0.15F, 1.0F);
    }
 
@@ -82,37 +77,26 @@ public class EntityCow extends EntityAnimal {
       return LootTableList.ENTITIES_COW;
    }
 
-   public boolean processInteract(EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack) {
-      if (itemstack != null && itemstack.getItem() == Items.BUCKET && !entityhuman.capabilities.isCreativeMode && !this.isChild()) {
-         Location loc = this.getBukkitEntity().getLocation();
-         PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(entityhuman, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), (EnumFacing)null, itemstack, Items.MILK_BUCKET);
-         if (event.isCancelled()) {
-            return false;
-         } else {
-            ItemStack result = CraftItemStack.asNMSCopy(event.getItemStack());
-            entityhuman.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
-            if (--itemstack.stackSize <= 0) {
-               entityhuman.setHeldItem(enumhand, result);
-            } else if (!entityhuman.inventory.addItemStackToInventory(result)) {
-               entityhuman.dropItem(result, false);
-            }
-
-            return true;
+   public boolean processInteract(EntityPlayer var1, EnumHand var2, @Nullable ItemStack var3) {
+      if (stack != null && stack.getItem() == Items.BUCKET && !player.capabilities.isCreativeMode && !this.isChild()) {
+         player.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
+         if (--stack.stackSize == 0) {
+            player.setHeldItem(hand, new ItemStack(Items.MILK_BUCKET));
+         } else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MILK_BUCKET))) {
+            player.dropItem(new ItemStack(Items.MILK_BUCKET), false);
          }
+
+         return true;
       } else {
-         return super.processInteract(entityhuman, enumhand, itemstack);
+         return super.processInteract(player, hand, stack);
       }
    }
 
-   public EntityCow createChild(EntityAgeable entityageable) {
+   public EntityCow createChild(EntityAgeable var1) {
       return new EntityCow(this.world);
    }
 
    public float getEyeHeight() {
       return this.isChild() ? this.height : 1.3F;
-   }
-
-   public EntityAgeable createChild(EntityAgeable entityageable) {
-      return this.createChild(entityageable);
    }
 }

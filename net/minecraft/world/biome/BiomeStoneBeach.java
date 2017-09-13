@@ -4,7 +4,7 @@ import net.minecraft.init.Blocks;
 
 public class BiomeStoneBeach extends Biome {
    public BiomeStoneBeach(Biome.BiomeProperties var1) {
-      super(var1);
+      super(properties);
       this.spawnableCreatureList.clear();
       this.topBlock = Blocks.STONE.getDefaultState();
       this.fillerBlock = Blocks.STONE.getDefaultState();

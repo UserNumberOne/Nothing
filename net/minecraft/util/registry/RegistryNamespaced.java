@@ -17,8 +17,8 @@ public class RegistryNamespaced extends RegistrySimple implements IObjectIntIter
    }
 
    public void register(int var1, Object var2, Object var3) {
-      this.underlyingIntegerMap.put(var3, var1);
-      this.putObject(var2, var3);
+      this.underlyingIntegerMap.put(value, id);
+      this.putObject(key, value);
    }
 
    protected Map createUnderlyingMap() {
@@ -27,25 +27,25 @@ public class RegistryNamespaced extends RegistrySimple implements IObjectIntIter
 
    @Nullable
    public Object getObject(@Nullable Object var1) {
-      return super.getObject(var1);
+      return super.getObject(name);
    }
 
    @Nullable
    public Object getNameForObject(Object var1) {
-      return this.inverseObjectRegistry.get(var1);
+      return this.inverseObjectRegistry.get(value);
    }
 
    public boolean containsKey(Object var1) {
-      return super.containsKey(var1);
+      return super.containsKey(key);
    }
 
    public int getIDForObject(Object var1) {
-      return this.underlyingIntegerMap.getId(var1);
+      return this.underlyingIntegerMap.getId(value);
    }
 
    @Nullable
    public Object getObjectById(int var1) {
-      return this.underlyingIntegerMap.get(var1);
+      return this.underlyingIntegerMap.get(id);
    }
 
    public Iterator iterator() {

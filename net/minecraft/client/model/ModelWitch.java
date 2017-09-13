@@ -11,7 +11,7 @@ public class ModelWitch extends ModelVillager {
    private final ModelRenderer mole = (new ModelRenderer(this)).setTextureSize(64, 128);
    private final ModelRenderer witchHat;
 
-   public ModelWitch(float scale) {
+   public ModelWitch(float var1) {
       super(scale, 0.0F, 64, 128);
       this.mole.setRotationPoint(0.0F, -2.0F, 0.0F);
       this.mole.setTextureOffset(0, 0).addBox(0.0F, 3.0F, -6.75F, 1, 1, 1, -0.25F);
@@ -40,7 +40,7 @@ public class ModelWitch extends ModelVillager {
       modelrenderer1.addChild(modelrenderer2);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
       this.villagerNose.offsetX = 0.0F;
       this.villagerNose.offsetY = 0.0F;

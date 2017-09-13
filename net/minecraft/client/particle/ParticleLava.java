@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ParticleLava extends Particle {
    private final float lavaParticleScale;
 
-   protected ParticleLava(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn) {
+   protected ParticleLava(World var1, double var2, double var4, double var6) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0D, 0.0D, 0.0D);
       this.motionX *= 0.800000011920929D;
       this.motionY *= 0.800000011920929D;
@@ -26,14 +26,14 @@ public class ParticleLava extends Particle {
       this.setParticleTextureIndex(49);
    }
 
-   public int getBrightnessForRender(float p_189214_1_) {
+   public int getBrightnessForRender(float var1) {
       int i = super.getBrightnessForRender(p_189214_1_);
       int j = 240;
       int k = i >> 16 & 255;
       return 240 | k << 16;
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = ((float)this.particleAge + partialTicks) / (float)this.particleMaxAge;
       this.particleScale = this.lavaParticleScale * (1.0F - f * f);
       super.renderParticle(buffer, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
@@ -66,7 +66,7 @@ public class ParticleLava extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleLava(worldIn, xCoordIn, yCoordIn, zCoordIn);
       }
    }

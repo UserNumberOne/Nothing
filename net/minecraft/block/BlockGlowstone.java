@@ -12,16 +12,16 @@ import net.minecraft.util.math.MathHelper;
 
 public class BlockGlowstone extends Block {
    public BlockGlowstone(Material var1) {
-      super(var1);
+      super(materialIn);
       this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
    }
 
    public int quantityDroppedWithBonus(int var1, Random var2) {
-      return MathHelper.clamp(this.quantityDropped(var2) + var2.nextInt(var1 + 1), 1, 4);
+      return MathHelper.clamp(this.quantityDropped(random) + random.nextInt(fortune + 1), 1, 4);
    }
 
    public int quantityDropped(Random var1) {
-      return 2 + var1.nextInt(3);
+      return 2 + random.nextInt(3);
    }
 
    @Nullable

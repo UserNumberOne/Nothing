@@ -33,7 +33,7 @@ public class GuiMerchant extends GuiContainer {
    private int selectedMerchantRecipe;
    private final ITextComponent chatComponent;
 
-   public GuiMerchant(InventoryPlayer p_i45500_1_, IMerchant p_i45500_2_, World worldIn) {
+   public GuiMerchant(InventoryPlayer var1, IMerchant var2, World var3) {
       super(new ContainerMerchant(p_i45500_1_, p_i45500_2_, worldIn));
       this.merchant = p_i45500_2_;
       this.chatComponent = p_i45500_2_.getDisplayName();
@@ -49,7 +49,7 @@ public class GuiMerchant extends GuiContainer {
       this.previousButton.enabled = false;
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       String s = this.chatComponent.getUnformattedText();
       this.fontRendererObj.drawString(s, this.xSize / 2 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);
       this.fontRendererObj.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
@@ -65,7 +65,7 @@ public class GuiMerchant extends GuiContainer {
 
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       boolean flag = false;
       if (button == this.nextButton) {
          ++this.selectedMerchantRecipe;
@@ -93,7 +93,7 @@ public class GuiMerchant extends GuiContainer {
 
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
       int i = (this.width - this.xSize) / 2;
@@ -118,7 +118,7 @@ public class GuiMerchant extends GuiContainer {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       super.drawScreen(mouseX, mouseY, partialTicks);
       MerchantRecipeList merchantrecipelist = this.merchant.getRecipes(this.mc.player);
       if (merchantrecipelist != null && !merchantrecipelist.isEmpty()) {
@@ -173,12 +173,12 @@ public class GuiMerchant extends GuiContainer {
    static class MerchantButton extends GuiButton {
       private final boolean forward;
 
-      public MerchantButton(int buttonID, int x, int y, boolean p_i1095_4_) {
+      public MerchantButton(int var1, int var2, int var3, boolean var4) {
          super(buttonID, x, y, 12, 19, "");
          this.forward = p_i1095_4_;
       }
 
-      public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+      public void drawButton(Minecraft var1, int var2, int var3) {
          if (this.visible) {
             mc.getTextureManager().bindTexture(GuiMerchant.MERCHANT_GUI_TEXTURE);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

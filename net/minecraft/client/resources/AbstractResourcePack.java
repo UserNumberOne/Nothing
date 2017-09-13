@@ -25,23 +25,23 @@ public abstract class AbstractResourcePack implements IResourcePack {
    private static final Logger LOGGER = LogManager.getLogger();
    protected final File resourcePackFile;
 
-   public AbstractResourcePack(File resourcePackFileIn) {
+   public AbstractResourcePack(File var1) {
       this.resourcePackFile = resourcePackFileIn;
    }
 
-   private static String locationToName(ResourceLocation location) {
+   private static String locationToName(ResourceLocation var0) {
       return String.format("%s/%s/%s", "assets", location.getResourceDomain(), location.getResourcePath());
    }
 
-   protected static String getRelativeName(File p_110595_0_, File p_110595_1_) {
+   protected static String getRelativeName(File var0, File var1) {
       return p_110595_0_.toURI().relativize(p_110595_1_.toURI()).getPath();
    }
 
-   public InputStream getInputStream(ResourceLocation location) throws IOException {
+   public InputStream getInputStream(ResourceLocation var1) throws IOException {
       return this.getInputStreamByName(locationToName(location));
    }
 
-   public boolean resourceExists(ResourceLocation location) {
+   public boolean resourceExists(ResourceLocation var1) {
       return this.hasResourceName(locationToName(location));
    }
 
@@ -49,15 +49,15 @@ public abstract class AbstractResourcePack implements IResourcePack {
 
    protected abstract boolean hasResourceName(String var1);
 
-   protected void logNameNotLowercase(String name) {
+   protected void logNameNotLowercase(String var1) {
       LOGGER.warn("ResourcePack: ignored non-lowercase namespace: {} in {}", new Object[]{name, this.resourcePackFile});
    }
 
-   public IMetadataSection getPackMetadata(MetadataSerializer metadataSerializer, String metadataSectionName) throws IOException {
+   public IMetadataSection getPackMetadata(MetadataSerializer var1, String var2) throws IOException {
       return readMetadata(metadataSerializer, this.getInputStreamByName("pack.mcmeta"), metadataSectionName);
    }
 
-   static IMetadataSection readMetadata(MetadataSerializer metadataSerializer, InputStream p_110596_1_, String sectionName) {
+   static IMetadataSection readMetadata(MetadataSerializer var0, InputStream var1, String var2) {
       JsonObject jsonobject = null;
       BufferedReader bufferedreader = null;
 

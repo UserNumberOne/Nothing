@@ -7,12 +7,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class VertexBufferUploader extends WorldVertexBufferUploader {
    private net.minecraft.client.renderer.vertex.VertexBuffer vertexBuffer;
 
-   public void draw(VertexBuffer vertexBufferIn) {
+   public void draw(VertexBuffer var1) {
       vertexBufferIn.reset();
       this.vertexBuffer.bufferData(vertexBufferIn.getByteBuffer());
    }
 
-   public void setVertexBuffer(net.minecraft.client.renderer.vertex.VertexBuffer vertexBufferIn) {
+   public void setVertexBuffer(net.minecraft.client.renderer.vertex.VertexBuffer var1) {
       this.vertexBuffer = vertexBufferIn;
    }
 }

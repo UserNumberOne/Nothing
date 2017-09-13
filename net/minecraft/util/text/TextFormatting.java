@@ -2,8 +2,8 @@ package net.minecraft.util.text;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -41,23 +41,23 @@ public enum TextFormatting {
    private final int colorIndex;
 
    private static String lowercaseAlpha(String var0) {
-      return var0.toLowerCase().replaceAll("[^a-z]", "");
+      return p_175745_0_.toLowerCase().replaceAll("[^a-z]", "");
    }
 
    private TextFormatting(String var3, char var4, int var5) {
-      this(var3, var4, false, var5);
+      this(formattingName, formattingCodeIn, false, colorIndex);
    }
 
    private TextFormatting(String var3, char var4, boolean var5) {
-      this(var3, var4, var5, -1);
+      this(formattingName, formattingCodeIn, fancyStylingIn, -1);
    }
 
    private TextFormatting(String var3, char var4, boolean var5, int var6) {
-      this.name = var3;
-      this.formattingCode = var4;
-      this.fancyStyling = var5;
-      this.colorIndex = var6;
-      this.controlString = "§" + var4;
+      this.name = formattingName;
+      this.formattingCode = formattingCodeIn;
+      this.fancyStyling = fancyStylingIn;
+      this.colorIndex = colorIndex;
+      this.controlString = "§" + formattingCodeIn;
    }
 
    public int getColorIndex() {
@@ -82,22 +82,22 @@ public enum TextFormatting {
 
    @Nullable
    public static String getTextWithoutFormattingCodes(@Nullable String var0) {
-      return var0 == null ? null : FORMATTING_CODE_PATTERN.matcher(var0).replaceAll("");
+      return text == null ? null : FORMATTING_CODE_PATTERN.matcher(text).replaceAll("");
    }
 
    @Nullable
    public static TextFormatting getValueByName(@Nullable String var0) {
-      return var0 == null ? null : (TextFormatting)NAME_MAPPING.get(lowercaseAlpha(var0));
+      return friendlyName == null ? null : (TextFormatting)NAME_MAPPING.get(lowercaseAlpha(friendlyName));
    }
 
    @Nullable
    public static TextFormatting fromColorIndex(int var0) {
-      if (var0 < 0) {
+      if (index < 0) {
          return RESET;
       } else {
-         for(TextFormatting var4 : values()) {
-            if (var4.getColorIndex() == var0) {
-               return var4;
+         for(TextFormatting textformatting : values()) {
+            if (textformatting.getColorIndex() == index) {
+               return textformatting;
             }
          }
 
@@ -106,20 +106,20 @@ public enum TextFormatting {
    }
 
    public static Collection getValidValues(boolean var0, boolean var1) {
-      ArrayList var2 = Lists.newArrayList();
+      List list = Lists.newArrayList();
 
-      for(TextFormatting var6 : values()) {
-         if ((!var6.isColor() || var0) && (!var6.isFancyStyling() || var1)) {
-            var2.add(var6.getFriendlyName());
+      for(TextFormatting textformatting : values()) {
+         if ((!textformatting.isColor() || p_96296_0_) && (!textformatting.isFancyStyling() || p_96296_1_)) {
+            list.add(textformatting.getFriendlyName());
          }
       }
 
-      return var2;
+      return list;
    }
 
    static {
-      for(TextFormatting var3 : values()) {
-         NAME_MAPPING.put(lowercaseAlpha(var3.name), var3);
+      for(TextFormatting textformatting : values()) {
+         NAME_MAPPING.put(lowercaseAlpha(textformatting.name), textformatting);
       }
 
    }

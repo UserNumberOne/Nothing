@@ -20,7 +20,7 @@ public class ModelBlaze extends ModelBase {
       this.blazeHead.addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
       this.blazeHead.render(scale);
 
@@ -30,7 +30,7 @@ public class ModelBlaze extends ModelBase {
 
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       float f = ageInTicks * 3.1415927F * -0.1F;
 
       for(int i = 0; i < 4; ++i) {

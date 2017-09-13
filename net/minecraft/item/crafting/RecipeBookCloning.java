@@ -1,6 +1,5 @@
 package net.minecraft.item.crafting;
 
-import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
@@ -8,17 +7,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemWrittenBook;
 import net.minecraft.world.World;
 
-public class RecipeBookCloning extends ShapelessRecipes implements IRecipe {
-   public RecipeBookCloning() {
-      super(new ItemStack(Items.WRITTEN_BOOK, 0, -1), Arrays.asList(new ItemStack(Items.WRITABLE_BOOK, 0, 0)));
-   }
-
-   public boolean matches(InventoryCrafting inventorycrafting, World world) {
+public class RecipeBookCloning implements IRecipe {
+   public boolean matches(InventoryCrafting var1, World var2) {
       int i = 0;
       ItemStack itemstack = null;
 
-      for(int j = 0; j < inventorycrafting.getSizeInventory(); ++j) {
-         ItemStack itemstack1 = inventorycrafting.getStackInSlot(j);
+      for(int j = 0; j < inv.getSizeInventory(); ++j) {
+         ItemStack itemstack1 = inv.getStackInSlot(j);
          if (itemstack1 != null) {
             if (itemstack1.getItem() == Items.WRITTEN_BOOK) {
                if (itemstack != null) {
@@ -36,20 +31,16 @@ public class RecipeBookCloning extends ShapelessRecipes implements IRecipe {
          }
       }
 
-      if (itemstack != null && i > 0) {
-         return true;
-      } else {
-         return false;
-      }
+      return itemstack != null && i > 0;
    }
 
    @Nullable
-   public ItemStack getCraftingResult(InventoryCrafting inventorycrafting) {
+   public ItemStack getCraftingResult(InventoryCrafting var1) {
       int i = 0;
       ItemStack itemstack = null;
 
-      for(int j = 0; j < inventorycrafting.getSizeInventory(); ++j) {
-         ItemStack itemstack1 = inventorycrafting.getStackInSlot(j);
+      for(int j = 0; j < inv.getSizeInventory(); ++j) {
+         ItemStack itemstack1 = inv.getStackInSlot(j);
          if (itemstack1 != null) {
             if (itemstack1.getItem() == Items.WRITTEN_BOOK) {
                if (itemstack != null) {
@@ -90,11 +81,11 @@ public class RecipeBookCloning extends ShapelessRecipes implements IRecipe {
       return null;
    }
 
-   public ItemStack[] getRemainingItems(InventoryCrafting inventorycrafting) {
-      ItemStack[] aitemstack = new ItemStack[inventorycrafting.getSizeInventory()];
+   public ItemStack[] getRemainingItems(InventoryCrafting var1) {
+      ItemStack[] aitemstack = new ItemStack[inv.getSizeInventory()];
 
       for(int i = 0; i < aitemstack.length; ++i) {
-         ItemStack itemstack = inventorycrafting.getStackInSlot(i);
+         ItemStack itemstack = inv.getStackInSlot(i);
          if (itemstack != null && itemstack.getItem() instanceof ItemWrittenBook) {
             aitemstack[i] = itemstack.copy();
             aitemstack[i].stackSize = 1;

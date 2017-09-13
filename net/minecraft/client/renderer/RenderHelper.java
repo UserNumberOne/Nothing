@@ -38,11 +38,11 @@ public class RenderHelper {
       GlStateManager.glLightModel(2899, setColorBuffer(0.4F, 0.4F, 0.4F, 1.0F));
    }
 
-   private static FloatBuffer setColorBuffer(double p_74517_0_, double p_74517_2_, double p_74517_4_, double p_74517_6_) {
+   private static FloatBuffer setColorBuffer(double var0, double var2, double var4, double var6) {
       return setColorBuffer((float)p_74517_0_, (float)p_74517_2_, (float)p_74517_4_, (float)p_74517_6_);
    }
 
-   public static FloatBuffer setColorBuffer(float p_74521_0_, float p_74521_1_, float p_74521_2_, float p_74521_3_) {
+   public static FloatBuffer setColorBuffer(float var0, float var1, float var2, float var3) {
       COLOR_BUFFER.clear();
       COLOR_BUFFER.put(p_74521_0_).put(p_74521_1_).put(p_74521_2_).put(p_74521_3_);
       COLOR_BUFFER.flip();

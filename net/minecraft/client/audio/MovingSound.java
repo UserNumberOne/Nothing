@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public abstract class MovingSound extends PositionedSound implements ITickableSound {
    protected boolean donePlaying;
 
-   protected MovingSound(SoundEvent soundIn, SoundCategory categoryIn) {
+   protected MovingSound(SoundEvent var1, SoundCategory var2) {
       super(soundIn, categoryIn);
    }
 

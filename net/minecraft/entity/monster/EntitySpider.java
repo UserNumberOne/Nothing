@@ -34,18 +34,17 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 public class EntitySpider extends EntityMob {
    private static final DataParameter CLIMBING = EntityDataManager.createKey(EntitySpider.class, DataSerializers.BYTE);
 
-   public EntitySpider(World world) {
-      super(world);
+   public EntitySpider(World var1) {
+      super(worldIn);
       this.setSize(1.4F, 0.9F);
    }
 
-   public static void registerFixesSpider(DataFixer dataconvertermanager) {
-      EntityLiving.registerFixesMob(dataconvertermanager, "Spider");
+   public static void registerFixesSpider(DataFixer var0) {
+      EntityLiving.registerFixesMob(fixer, "Spider");
    }
 
    protected void initEntityAI() {
@@ -64,8 +63,8 @@ public class EntitySpider extends EntityMob {
       return (double)(this.height * 0.5F);
    }
 
-   protected PathNavigate createNavigator(World world) {
-      return new PathNavigateClimber(this, world);
+   protected PathNavigate createNavigator(World var1) {
+      return new PathNavigateClimber(this, worldIn);
    }
 
    protected void entityInit() {
@@ -99,7 +98,7 @@ public class EntitySpider extends EntityMob {
       return SoundEvents.ENTITY_SPIDER_DEATH;
    }
 
-   protected void playStepSound(BlockPos blockposition, Block block) {
+   protected void playStepSound(BlockPos var1, Block var2) {
       this.playSound(SoundEvents.ENTITY_SPIDER_STEP, 0.15F, 1.0F);
    }
 
@@ -119,17 +118,17 @@ public class EntitySpider extends EntityMob {
       return EnumCreatureAttribute.ARTHROPOD;
    }
 
-   public boolean isPotionApplicable(PotionEffect mobeffect) {
-      return mobeffect.getPotion() == MobEffects.POISON ? false : super.isPotionApplicable(mobeffect);
+   public boolean isPotionApplicable(PotionEffect var1) {
+      return potioneffectIn.getPotion() == MobEffects.POISON ? false : super.isPotionApplicable(potioneffectIn);
    }
 
    public boolean isBesideClimbableBlock() {
       return (((Byte)this.dataManager.get(CLIMBING)).byteValue() & 1) != 0;
    }
 
-   public void setBesideClimbableBlock(boolean flag) {
+   public void setBesideClimbableBlock(boolean var1) {
       byte b0 = ((Byte)this.dataManager.get(CLIMBING)).byteValue();
-      if (flag) {
+      if (climbing) {
          b0 = (byte)(b0 | 1);
       } else {
          b0 = (byte)(b0 & -2);
@@ -139,31 +138,31 @@ public class EntitySpider extends EntityMob {
    }
 
    @Nullable
-   public IEntityLivingData onInitialSpawn(DifficultyInstance difficultydamagescaler, @Nullable IEntityLivingData groupdataentity) {
-      Object object = super.onInitialSpawn(difficultydamagescaler, groupdataentity);
+   public IEntityLivingData onInitialSpawn(DifficultyInstance var1, @Nullable IEntityLivingData var2) {
+      livingdata = super.onInitialSpawn(difficulty, livingdata);
       if (this.world.rand.nextInt(100) == 0) {
          EntitySkeleton entityskeleton = new EntitySkeleton(this.world);
          entityskeleton.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-         entityskeleton.onInitialSpawn(difficultydamagescaler, (IEntityLivingData)null);
-         this.world.addEntity(entityskeleton, SpawnReason.JOCKEY);
+         entityskeleton.onInitialSpawn(difficulty, (IEntityLivingData)null);
+         this.world.spawnEntity(entityskeleton);
          entityskeleton.startRiding(this);
       }
 
-      if (object == null) {
-         object = new EntitySpider.GroupData();
-         if (this.world.getDifficulty() == EnumDifficulty.HARD && this.world.rand.nextFloat() < 0.1F * difficultydamagescaler.getClampedAdditionalDifficulty()) {
-            ((EntitySpider.GroupData)object).setRandomEffect(this.world.rand);
+      if (livingdata == null) {
+         livingdata = new EntitySpider.GroupData();
+         if (this.world.getDifficulty() == EnumDifficulty.HARD && this.world.rand.nextFloat() < 0.1F * difficulty.getClampedAdditionalDifficulty()) {
+            ((EntitySpider.GroupData)livingdata).setRandomEffect(this.world.rand);
          }
       }
 
-      if (object instanceof EntitySpider.GroupData) {
-         Potion mobeffectlist = ((EntitySpider.GroupData)object).effect;
-         if (mobeffectlist != null) {
-            this.addPotionEffect(new PotionEffect(mobeffectlist, Integer.MAX_VALUE));
+      if (livingdata instanceof EntitySpider.GroupData) {
+         Potion potion = ((EntitySpider.GroupData)livingdata).effect;
+         if (potion != null) {
+            this.addPotionEffect(new PotionEffect(potion, Integer.MAX_VALUE));
          }
       }
 
-      return (IEntityLivingData)object;
+      return livingdata;
    }
 
    public float getEyeHeight() {
@@ -171,8 +170,8 @@ public class EntitySpider extends EntityMob {
    }
 
    static class AISpiderAttack extends EntityAIAttackMelee {
-      public AISpiderAttack(EntitySpider entityspider) {
-         super(entityspider, 1.0D, true);
+      public AISpiderAttack(EntitySpider var1) {
+         super(spider, 1.0D, true);
       }
 
       public boolean continueExecuting() {
@@ -185,14 +184,14 @@ public class EntitySpider extends EntityMob {
          }
       }
 
-      protected double getAttackReachSqr(EntityLivingBase entityliving) {
-         return (double)(4.0F + entityliving.width);
+      protected double getAttackReachSqr(EntityLivingBase var1) {
+         return (double)(4.0F + attackTarget.width);
       }
    }
 
    static class AISpiderTarget extends EntityAINearestAttackableTarget {
-      public AISpiderTarget(EntitySpider entityspider, Class oclass) {
-         super(entityspider, oclass, true);
+      public AISpiderTarget(EntitySpider var1, Class var2) {
+         super(spider, classTarget, true);
       }
 
       public boolean shouldExecute() {
@@ -204,8 +203,8 @@ public class EntitySpider extends EntityMob {
    public static class GroupData implements IEntityLivingData {
       public Potion effect;
 
-      public void setRandomEffect(Random random) {
-         int i = random.nextInt(5);
+      public void setRandomEffect(Random var1) {
+         int i = rand.nextInt(5);
          if (i <= 1) {
             this.effect = MobEffects.SPEED;
          } else if (i <= 2) {

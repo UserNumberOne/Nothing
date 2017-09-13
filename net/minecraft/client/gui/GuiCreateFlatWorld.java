@@ -30,7 +30,7 @@ public class GuiCreateFlatWorld extends GuiScreen {
    private GuiButton editLayerButton;
    private GuiButton removeLayerButton;
 
-   public GuiCreateFlatWorld(GuiCreateWorld createWorldGuiIn, String preset) {
+   public GuiCreateFlatWorld(GuiCreateWorld var1, String var2) {
       this.createWorldGui = createWorldGuiIn;
       this.setPreset(preset);
    }
@@ -39,7 +39,7 @@ public class GuiCreateFlatWorld extends GuiScreen {
       return this.theFlatGeneratorInfo.toString();
    }
 
-   public void setPreset(String preset) {
+   public void setPreset(String var1) {
       this.theFlatGeneratorInfo = FlatGeneratorInfo.createFlatGeneratorFromString(preset);
    }
 
@@ -66,7 +66,7 @@ public class GuiCreateFlatWorld extends GuiScreen {
       this.createFlatWorldListSlotGui.handleMouseInput();
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       int i = this.theFlatGeneratorInfo.getFlatLayers().size() - this.createFlatWorldListSlotGui.selectedLayer - 1;
       if (button.id == 1) {
          this.mc.displayGuiScreen(this.createWorldGui);
@@ -96,7 +96,7 @@ public class GuiCreateFlatWorld extends GuiScreen {
       return this.createFlatWorldListSlotGui.selectedLayer > -1 && this.createFlatWorldListSlotGui.selectedLayer < this.theFlatGeneratorInfo.getFlatLayers().size();
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.createFlatWorldListSlotGui.drawScreen(mouseX, mouseY, partialTicks);
       this.drawCenteredString(this.fontRendererObj, this.flatWorldTitle, this.width / 2, 8, 16777215);
@@ -114,7 +114,7 @@ public class GuiCreateFlatWorld extends GuiScreen {
          super(GuiCreateFlatWorld.this.mc, GuiCreateFlatWorld.this.width, GuiCreateFlatWorld.this.height, 43, GuiCreateFlatWorld.this.height - 60, 24);
       }
 
-      private void drawItem(int x, int z, ItemStack itemToDraw) {
+      private void drawItem(int var1, int var2, ItemStack var3) {
          this.drawItemBackground(x + 1, z + 1);
          GlStateManager.enableRescaleNormal();
          if (itemToDraw != null && itemToDraw.getItem() != null) {
@@ -126,11 +126,11 @@ public class GuiCreateFlatWorld extends GuiScreen {
          GlStateManager.disableRescaleNormal();
       }
 
-      private void drawItemBackground(int x, int y) {
+      private void drawItemBackground(int var1, int var2) {
          this.drawItemBackground(x, y, 0, 0);
       }
 
-      private void drawItemBackground(int x, int z, int textureX, int textureY) {
+      private void drawItemBackground(int var1, int var2, int var3, int var4) {
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          this.mc.getTextureManager().bindTexture(Gui.STAT_ICONS);
          float f = 0.0078125F;
@@ -151,19 +151,19 @@ public class GuiCreateFlatWorld extends GuiScreen {
          return GuiCreateFlatWorld.this.theFlatGeneratorInfo.getFlatLayers().size();
       }
 
-      protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY) {
+      protected void elementClicked(int var1, boolean var2, int var3, int var4) {
          this.selectedLayer = slotIndex;
          GuiCreateFlatWorld.this.onLayersChanged();
       }
 
-      protected boolean isSelected(int slotIndex) {
+      protected boolean isSelected(int var1) {
          return slotIndex == this.selectedLayer;
       }
 
       protected void drawBackground() {
       }
 
-      protected void drawSlot(int entryID, int insideLeft, int yPos, int insideSlotHeight, int mouseXIn, int mouseYIn) {
+      protected void drawSlot(int var1, int var2, int var3, int var4, int var5, int var6) {
          FlatLayerInfo flatlayerinfo = (FlatLayerInfo)GuiCreateFlatWorld.this.theFlatGeneratorInfo.getFlatLayers().get(GuiCreateFlatWorld.this.theFlatGeneratorInfo.getFlatLayers().size() - entryID - 1);
          IBlockState iblockstate = flatlayerinfo.getLayerMaterial();
          Block block = iblockstate.getBlock();

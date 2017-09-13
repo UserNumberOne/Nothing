@@ -12,20 +12,20 @@ public class DynamicTexture extends AbstractTexture {
    private final int width;
    private final int height;
 
-   public DynamicTexture(BufferedImage bufferedImage) {
+   public DynamicTexture(BufferedImage var1) {
       this(bufferedImage.getWidth(), bufferedImage.getHeight());
       bufferedImage.getRGB(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), this.dynamicTextureData, 0, bufferedImage.getWidth());
       this.updateDynamicTexture();
    }
 
-   public DynamicTexture(int textureWidth, int textureHeight) {
+   public DynamicTexture(int var1, int var2) {
       this.width = textureWidth;
       this.height = textureHeight;
       this.dynamicTextureData = new int[textureWidth * textureHeight];
       TextureUtil.allocateTexture(this.getGlTextureId(), textureWidth, textureHeight);
    }
 
-   public void loadTexture(IResourceManager resourceManager) throws IOException {
+   public void loadTexture(IResourceManager var1) throws IOException {
    }
 
    public void updateDynamicTexture() {

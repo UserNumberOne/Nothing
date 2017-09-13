@@ -1,7 +1,7 @@
 package net.minecraft.entity.item;
 
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
@@ -13,45 +13,60 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityPainting extends EntityHanging {
    public EntityPainting.EnumArt art;
 
-   public EntityPainting(World world) {
-      super(world);
-      this.art = EntityPainting.EnumArt.values()[this.rand.nextInt(EntityPainting.EnumArt.values().length)];
+   public EntityPainting(World var1) {
+      super(worldIn);
    }
 
-   public EntityPainting(World world, BlockPos blockposition, EnumFacing enumdirection) {
-      super(world, blockposition);
-      ArrayList arraylist = Lists.newArrayList();
+   public EntityPainting(World var1, BlockPos var2, EnumFacing var3) {
+      super(worldIn, pos);
+      List list = Lists.newArrayList();
 
-      for(EntityPainting.EnumArt entitypainting_enumart : EntityPainting.EnumArt.values()) {
-         this.art = entitypainting_enumart;
-         this.updateFacingWithBoundingBox(enumdirection);
+      for(EntityPainting.EnumArt entitypainting$enumart : EntityPainting.EnumArt.values()) {
+         this.art = entitypainting$enumart;
+         this.updateFacingWithBoundingBox(facing);
          if (this.onValidSurface()) {
-            arraylist.add(entitypainting_enumart);
+            list.add(entitypainting$enumart);
          }
       }
 
-      if (!arraylist.isEmpty()) {
-         this.art = (EntityPainting.EnumArt)arraylist.get(this.rand.nextInt(arraylist.size()));
+      if (!list.isEmpty()) {
+         this.art = (EntityPainting.EnumArt)list.get(this.rand.nextInt(list.size()));
       }
 
-      this.updateFacingWithBoundingBox(enumdirection);
+      this.updateFacingWithBoundingBox(facing);
    }
 
-   public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-      nbttagcompound.setString("Motive", this.art.title);
-      super.writeEntityToNBT(nbttagcompound);
+   @SideOnly(Side.CLIENT)
+   public EntityPainting(World var1, BlockPos var2, EnumFacing var3, String var4) {
+      this(worldIn, pos, facing);
+
+      for(EntityPainting.EnumArt entitypainting$enumart : EntityPainting.EnumArt.values()) {
+         if (entitypainting$enumart.title.equals(title)) {
+            this.art = entitypainting$enumart;
+            break;
+         }
+      }
+
+      this.updateFacingWithBoundingBox(facing);
    }
 
-   public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-      String s = nbttagcompound.getString("Motive");
+   public void writeEntityToNBT(NBTTagCompound var1) {
+      compound.setString("Motive", this.art.title);
+      super.writeEntityToNBT(compound);
+   }
 
-      for(EntityPainting.EnumArt entitypainting_enumart : EntityPainting.EnumArt.values()) {
-         if (entitypainting_enumart.title.equals(s)) {
-            this.art = entitypainting_enumart;
+   public void readEntityFromNBT(NBTTagCompound var1) {
+      String s = compound.getString("Motive");
+
+      for(EntityPainting.EnumArt entitypainting$enumart : EntityPainting.EnumArt.values()) {
+         if (entitypainting$enumart.title.equals(s)) {
+            this.art = entitypainting$enumart;
          }
       }
 
@@ -59,7 +74,7 @@ public class EntityPainting extends EntityHanging {
          this.art = EntityPainting.EnumArt.KEBAB;
       }
 
-      super.readEntityFromNBT(nbttagcompound);
+      super.readEntityFromNBT(compound);
    }
 
    public int getWidthPixels() {
@@ -70,12 +85,12 @@ public class EntityPainting extends EntityHanging {
       return this.art.sizeY;
    }
 
-   public void onBroken(@Nullable Entity entity) {
+   public void onBroken(@Nullable Entity var1) {
       if (this.world.getGameRules().getBoolean("doEntityDrops")) {
          this.playSound(SoundEvents.ENTITY_PAINTING_BREAK, 1.0F, 1.0F);
-         if (entity instanceof EntityPlayer) {
-            EntityPlayer entityhuman = (EntityPlayer)entity;
-            if (entityhuman.capabilities.isCreativeMode) {
+         if (brokenEntity instanceof EntityPlayer) {
+            EntityPlayer entityplayer = (EntityPlayer)brokenEntity;
+            if (entityplayer.capabilities.isCreativeMode) {
                return;
             }
          }
@@ -89,8 +104,14 @@ public class EntityPainting extends EntityHanging {
       this.playSound(SoundEvents.ENTITY_PAINTING_PLACE, 1.0F, 1.0F);
    }
 
-   public void setLocationAndAngles(double d0, double d1, double d2, float f, float f1) {
-      this.setPosition(d0, d1, d2);
+   public void setLocationAndAngles(double var1, double var3, double var5, float var7, float var8) {
+      this.setPosition(x, y, z);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void setPositionAndRotationDirect(double var1, double var3, double var5, float var7, float var8, int var9, boolean var10) {
+      BlockPos blockpos = this.hangingPosition.add(x - this.posX, y - this.posY, z - this.posZ);
+      this.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
    }
 
    public static enum EnumArt {
@@ -128,12 +149,12 @@ public class EntityPainting extends EntityHanging {
       public final int offsetX;
       public final int offsetY;
 
-      private EnumArt(String s, int i, int j, int k, int l) {
-         this.title = s;
-         this.sizeX = i;
-         this.sizeY = j;
-         this.offsetX = k;
-         this.offsetY = l;
+      private EnumArt(String var3, int var4, int var5, int var6, int var7) {
+         this.title = titleIn;
+         this.sizeX = width;
+         this.sizeY = height;
+         this.offsetX = textureU;
+         this.offsetY = textureV;
       }
    }
 }

@@ -12,7 +12,7 @@ public class GuiCustomizeSkin extends GuiScreen {
    private final GuiScreen parentScreen;
    private String title;
 
-   public GuiCustomizeSkin(GuiScreen parentScreenIn) {
+   public GuiCustomizeSkin(GuiScreen var1) {
       this.parentScreen = parentScreenIn;
    }
 
@@ -34,7 +34,7 @@ public class GuiCustomizeSkin extends GuiScreen {
       this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height / 6 + 24 * (i >> 1), I18n.format("gui.done")));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 200) {
             this.mc.gameSettings.saveOptions();
@@ -52,13 +52,13 @@ public class GuiCustomizeSkin extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 20, 16777215);
       super.drawScreen(mouseX, mouseY, partialTicks);
    }
 
-   private String getMessage(EnumPlayerModelParts playerModelParts) {
+   private String getMessage(EnumPlayerModelParts var1) {
       String s;
       if (this.mc.gameSettings.getModelParts().contains(playerModelParts)) {
          s = I18n.format("options.on");
@@ -73,7 +73,7 @@ public class GuiCustomizeSkin extends GuiScreen {
    class ButtonPart extends GuiButton {
       private final EnumPlayerModelParts playerModelParts;
 
-      private ButtonPart(int p_i45514_2_, int p_i45514_3_, int p_i45514_4_, int p_i45514_5_, int p_i45514_6_, EnumPlayerModelParts playerModelParts) {
+      private ButtonPart(int var2, int var3, int var4, int var5, int var6, EnumPlayerModelParts var7) {
          super(p_i45514_2_, p_i45514_3_, p_i45514_4_, p_i45514_5_, p_i45514_6_, GuiCustomizeSkin.this.getMessage(playerModelParts));
          this.playerModelParts = playerModelParts;
       }

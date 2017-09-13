@@ -7,8 +7,8 @@ public class EntityAILookAtTradePlayer extends EntityAIWatchClosest {
    private final EntityVillager theMerchant;
 
    public EntityAILookAtTradePlayer(EntityVillager var1) {
-      super(var1, EntityPlayer.class, 8.0F);
-      this.theMerchant = var1;
+      super(theMerchantIn, EntityPlayer.class, 8.0F);
+      this.theMerchant = theMerchantIn;
    }
 
    public boolean shouldExecute() {

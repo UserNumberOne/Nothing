@@ -18,7 +18,7 @@ public class TileEntitySignRenderer extends TileEntitySpecialRenderer {
    private static final ResourceLocation SIGN_TEXTURE = new ResourceLocation("textures/entity/sign.png");
    private final ModelSign model = new ModelSign();
 
-   public void renderTileEntityAt(TileEntitySign te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntitySign var1, double var2, double var4, double var6, float var8, int var9) {
       Block block = te.getBlockType();
       GlStateManager.pushMatrix();
       float f = 0.6666667F;

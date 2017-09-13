@@ -15,19 +15,19 @@ public class GuiFurnace extends GuiContainer {
    private final InventoryPlayer playerInventory;
    private final IInventory tileFurnace;
 
-   public GuiFurnace(InventoryPlayer playerInv, IInventory furnaceInv) {
+   public GuiFurnace(InventoryPlayer var1, IInventory var2) {
       super(new ContainerFurnace(playerInv, furnaceInv));
       this.playerInventory = playerInv;
       this.tileFurnace = furnaceInv;
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       String s = this.tileFurnace.getDisplayName().getUnformattedText();
       this.fontRendererObj.drawString(s, this.xSize / 2 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);
       this.fontRendererObj.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(FURNACE_GUI_TEXTURES);
       int i = (this.width - this.xSize) / 2;
@@ -42,13 +42,13 @@ public class GuiFurnace extends GuiContainer {
       this.drawTexturedModalRect(i + 79, j + 34, 176, 14, l + 1, 16);
    }
 
-   private int getCookProgressScaled(int pixels) {
+   private int getCookProgressScaled(int var1) {
       int i = this.tileFurnace.getField(2);
       int j = this.tileFurnace.getField(3);
       return j != 0 && i != 0 ? i * pixels / j : 0;
    }
 
-   private int getBurnLeftScaled(int pixels) {
+   private int getBurnLeftScaled(int var1) {
       int i = this.tileFurnace.getField(1);
       if (i == 0) {
          i = 200;

@@ -5,30 +5,30 @@ import net.minecraft.world.biome.Biome;
 
 public class GenLayerRareBiome extends GenLayer {
    public GenLayerRareBiome(long var1, GenLayer var3) {
-      super(var1);
-      this.parent = var3;
+      super(p_i45478_1_);
+      this.parent = p_i45478_3_;
    }
 
    public int[] getInts(int var1, int var2, int var3, int var4) {
-      int[] var5 = this.parent.getInts(var1 - 1, var2 - 1, var3 + 2, var4 + 2);
-      int[] var6 = IntCache.getIntCache(var3 * var4);
+      int[] aint = this.parent.getInts(areaX - 1, areaY - 1, areaWidth + 2, areaHeight + 2);
+      int[] aint1 = IntCache.getIntCache(areaWidth * areaHeight);
 
-      for(int var7 = 0; var7 < var4; ++var7) {
-         for(int var8 = 0; var8 < var3; ++var8) {
-            this.initChunkSeed((long)(var8 + var1), (long)(var7 + var2));
-            int var9 = var5[var8 + 1 + (var7 + 1) * (var3 + 2)];
+      for(int i = 0; i < areaHeight; ++i) {
+         for(int j = 0; j < areaWidth; ++j) {
+            this.initChunkSeed((long)(j + areaX), (long)(i + areaY));
+            int k = aint[j + 1 + (i + 1) * (areaWidth + 2)];
             if (this.nextInt(57) == 0) {
-               if (var9 == Biome.getIdForBiome(Biomes.PLAINS)) {
-                  var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.MUTATED_PLAINS);
+               if (k == Biome.getIdForBiome(Biomes.PLAINS)) {
+                  aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.MUTATED_PLAINS);
                } else {
-                  var6[var8 + var7 * var3] = var9;
+                  aint1[j + i * areaWidth] = k;
                }
             } else {
-               var6[var8 + var7 * var3] = var9;
+               aint1[j + i * areaWidth] = k;
             }
          }
       }
 
-      return var6;
+      return aint1;
    }
 }

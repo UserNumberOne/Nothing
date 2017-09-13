@@ -9,8 +9,8 @@ public class DifficultyInstance {
    private final float additionalDifficulty;
 
    public DifficultyInstance(EnumDifficulty var1, long var2, long var4, float var6) {
-      this.worldDifficulty = var1;
-      this.additionalDifficulty = this.calculateAdditionalDifficulty(var1, var2, var4, var6);
+      this.worldDifficulty = worldDifficulty;
+      this.additionalDifficulty = this.calculateAdditionalDifficulty(worldDifficulty, worldTime, chunkInhabitedTime, moonPhaseFactor);
    }
 
    public float getAdditionalDifficulty() {
@@ -22,30 +22,26 @@ public class DifficultyInstance {
    }
 
    public float getClampedAdditionalDifficulty() {
-      if (this.additionalDifficulty < 2.0F) {
-         return 0.0F;
-      } else {
-         return this.additionalDifficulty > 4.0F ? 1.0F : (this.additionalDifficulty - 2.0F) / 2.0F;
-      }
+      return this.additionalDifficulty < 2.0F ? 0.0F : (this.additionalDifficulty > 4.0F ? 1.0F : (this.additionalDifficulty - 2.0F) / 2.0F);
    }
 
    private float calculateAdditionalDifficulty(EnumDifficulty var1, long var2, long var4, float var6) {
-      if (var1 == EnumDifficulty.PEACEFUL) {
+      if (difficulty == EnumDifficulty.PEACEFUL) {
          return 0.0F;
       } else {
-         boolean var7 = var1 == EnumDifficulty.HARD;
-         float var8 = 0.75F;
-         float var9 = MathHelper.clamp(((float)var2 + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
-         var8 = var8 + var9;
-         float var10 = 0.0F;
-         var10 = var10 + MathHelper.clamp((float)var4 / 3600000.0F, 0.0F, 1.0F) * (var7 ? 1.0F : 0.75F);
-         var10 = var10 + MathHelper.clamp(var6 * 0.25F, 0.0F, var9);
-         if (var1 == EnumDifficulty.EASY) {
-            var10 *= 0.5F;
+         boolean flag = difficulty == EnumDifficulty.HARD;
+         float f = 0.75F;
+         float f1 = MathHelper.clamp(((float)worldTime + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
+         f = f + f1;
+         float f2 = 0.0F;
+         f2 = f2 + MathHelper.clamp((float)chunkInhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
+         f2 = f2 + MathHelper.clamp(moonPhaseFactor * 0.25F, 0.0F, f1);
+         if (difficulty == EnumDifficulty.EASY) {
+            f2 *= 0.5F;
          }
 
-         var8 = var8 + var10;
-         return (float)var1.getDifficultyId() * var8;
+         f = f + f2;
+         return (float)difficulty.getDifficultyId() * f;
       }
    }
 }

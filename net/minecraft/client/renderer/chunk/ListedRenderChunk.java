@@ -11,11 +11,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ListedRenderChunk extends RenderChunk {
    private final int baseDisplayList = GLAllocation.generateDisplayLists(BlockRenderLayer.values().length);
 
-   public ListedRenderChunk(World p_i47121_1_, RenderGlobal p_i47121_2_, int p_i47121_3_) {
+   public ListedRenderChunk(World var1, RenderGlobal var2, int var3) {
       super(p_i47121_1_, p_i47121_2_, p_i47121_3_);
    }
 
-   public int getDisplayList(BlockRenderLayer layer, CompiledChunk p_178600_2_) {
+   public int getDisplayList(BlockRenderLayer var1, CompiledChunk var2) {
       return !p_178600_2_.isLayerEmpty(layer) ? this.baseDisplayList + layer.ordinal() : -1;
    }
 

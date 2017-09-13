@@ -192,7 +192,7 @@ public class ModelHorse extends ModelBase {
       this.setBoxRotation(this.horseFaceRopes, 0.5235988F, 0.0F, 0.0F);
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       EntityHorse entityhorse = (EntityHorse)entityIn;
       HorseType horsetype = entityhorse.getType();
       float f = entityhorse.getGrassEatingAmount(0.0F);
@@ -282,13 +282,13 @@ public class ModelHorse extends ModelBase {
 
    }
 
-   private void setBoxRotation(ModelRenderer renderer, float rotateAngleX, float rotateAngleY, float rotateAngleZ) {
+   private void setBoxRotation(ModelRenderer var1, float var2, float var3, float var4) {
       renderer.rotateAngleX = rotateAngleX;
       renderer.rotateAngleY = rotateAngleY;
       renderer.rotateAngleZ = rotateAngleZ;
    }
 
-   private float updateHorseRotation(float p_110683_1_, float p_110683_2_, float p_110683_3_) {
+   private float updateHorseRotation(float var1, float var2, float var3) {
       float f;
       for(f = p_110683_2_ - p_110683_1_; f < -180.0F; f += 360.0F) {
          ;
@@ -301,7 +301,7 @@ public class ModelHorse extends ModelBase {
       return p_110683_1_ + p_110683_3_ * f;
    }
 
-   public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
+   public void setLivingAnimations(EntityLivingBase var1, float var2, float var3, float var4) {
       super.setLivingAnimations(entitylivingbaseIn, p_78086_2_, p_78086_3_, partialTickTime);
       float f = this.updateHorseRotation(entitylivingbaseIn.prevRenderYawOffset, entitylivingbaseIn.renderYawOffset, partialTickTime);
       float f1 = this.updateHorseRotation(entitylivingbaseIn.prevRotationYawHead, entitylivingbaseIn.rotationYawHead, partialTickTime);

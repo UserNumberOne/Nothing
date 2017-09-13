@@ -4,28 +4,27 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.util.math.AxisAlignedBB;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 public class EntityAIHurtByTarget extends EntityAITarget {
    private final boolean entityCallsForHelp;
    private int revengeTimerOld;
    private final Class[] targetClasses;
 
-   public EntityAIHurtByTarget(EntityCreature entitycreature, boolean flag, Class... aclass) {
-      super(entitycreature, true);
-      this.entityCallsForHelp = flag;
-      this.targetClasses = aclass;
+   public EntityAIHurtByTarget(EntityCreature var1, boolean var2, Class... var3) {
+      super(creatureIn, true);
+      this.entityCallsForHelp = entityCallsForHelpIn;
+      this.targetClasses = targetClassesIn;
       this.setMutexBits(1);
    }
 
    public boolean shouldExecute() {
       int i = this.taskOwner.getRevengeTimer();
-      EntityLivingBase entityliving = this.taskOwner.getAITarget();
-      return i != this.revengeTimerOld && entityliving != null && this.isSuitableTarget(entityliving, false);
+      EntityLivingBase entitylivingbase = this.taskOwner.getAITarget();
+      return i != this.revengeTimerOld && entitylivingbase != null && this.isSuitableTarget(entitylivingbase, false);
    }
 
    public void startExecuting() {
-      this.taskOwner.setGoalTarget(this.taskOwner.getAITarget(), TargetReason.TARGET_ATTACKED_ENTITY, true);
+      this.taskOwner.setAttackTarget(this.taskOwner.getAITarget());
       this.target = this.taskOwner.getAttackTarget();
       this.revengeTimerOld = this.taskOwner.getRevengeTimer();
       this.unseenMemoryTicks = 300;
@@ -58,7 +57,7 @@ public class EntityAIHurtByTarget extends EntityAITarget {
 
    }
 
-   protected void setEntityAttackTarget(EntityCreature entitycreature, EntityLivingBase entityliving) {
-      entitycreature.setGoalTarget(entityliving, TargetReason.TARGET_ATTACKED_NEARBY_ENTITY, true);
+   protected void setEntityAttackTarget(EntityCreature var1, EntityLivingBase var2) {
+      creatureIn.setAttackTarget(entityLivingBaseIn);
    }
 }

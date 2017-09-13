@@ -22,7 +22,7 @@ public class Variant implements ISmartVariant {
    private final boolean uvLock;
    private final int weight;
 
-   public Variant(ResourceLocation modelLocationIn, ModelRotation rotationIn, boolean uvLockIn, int weightIn) {
+   public Variant(ResourceLocation var1, ModelRotation var2, boolean var3, int var4) {
       this.modelLocation = modelLocationIn;
       this.rotation = rotationIn;
       this.uvLock = uvLockIn;
@@ -55,7 +55,7 @@ public class Variant implements ISmartVariant {
       return "Variant{modelLocation=" + this.modelLocation + ", rotation=" + this.rotation + ", uvLock=" + this.uvLock + ", weight=" + this.weight + '}';
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else if (!(p_equals_1_ instanceof Variant)) {
@@ -74,13 +74,13 @@ public class Variant implements ISmartVariant {
       return i;
    }
 
-   public IModel process(IModel base) {
+   public IModel process(IModel var1) {
       return ModelProcessingHelper.uvlock(base, this.isUvLock());
    }
 
    @SideOnly(Side.CLIENT)
    public static class Deserializer implements JsonDeserializer {
-      public Variant deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public Variant deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          String s = this.getStringModel(jsonobject);
          ModelRotation modelrotation = this.parseModelRotation(jsonobject);
@@ -89,17 +89,17 @@ public class Variant implements ISmartVariant {
          return new Variant(this.getResourceLocationBlock(s), modelrotation, flag, i);
       }
 
-      private ResourceLocation getResourceLocationBlock(String p_188041_1_) {
+      private ResourceLocation getResourceLocationBlock(String var1) {
          ResourceLocation resourcelocation = new ResourceLocation(p_188041_1_);
          resourcelocation = new ResourceLocation(resourcelocation.getResourceDomain(), "block/" + resourcelocation.getResourcePath());
          return resourcelocation;
       }
 
-      private boolean parseUvLock(JsonObject json) {
+      private boolean parseUvLock(JsonObject var1) {
          return JsonUtils.getBoolean(json, "uvlock", false);
       }
 
-      protected ModelRotation parseModelRotation(JsonObject json) {
+      protected ModelRotation parseModelRotation(JsonObject var1) {
          int i = JsonUtils.getInt(json, "x", 0);
          int j = JsonUtils.getInt(json, "y", 0);
          ModelRotation modelrotation = ModelRotation.getModelRotation(i, j);
@@ -110,11 +110,11 @@ public class Variant implements ISmartVariant {
          }
       }
 
-      protected String getStringModel(JsonObject json) {
+      protected String getStringModel(JsonObject var1) {
          return JsonUtils.getString(json, "model");
       }
 
-      protected int parseWeight(JsonObject json) {
+      protected int parseWeight(JsonObject var1) {
          int i = JsonUtils.getInt(json, "weight", 1);
          if (i < 1) {
             throw new JsonParseException("Invalid weight " + i + " found, expected integer >= 1");

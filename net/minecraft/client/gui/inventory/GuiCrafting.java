@@ -14,20 +14,20 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiCrafting extends GuiContainer {
    private static final ResourceLocation CRAFTING_TABLE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/crafting_table.png");
 
-   public GuiCrafting(InventoryPlayer playerInv, World worldIn) {
+   public GuiCrafting(InventoryPlayer var1, World var2) {
       this(playerInv, worldIn, BlockPos.ORIGIN);
    }
 
-   public GuiCrafting(InventoryPlayer playerInv, World worldIn, BlockPos blockPosition) {
+   public GuiCrafting(InventoryPlayer var1, World var2, BlockPos var3) {
       super(new ContainerWorkbench(playerInv, worldIn, blockPosition));
    }
 
-   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+   protected void drawGuiContainerForegroundLayer(int var1, int var2) {
       this.fontRendererObj.drawString(I18n.format("container.crafting"), 28, 6, 4210752);
       this.fontRendererObj.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
    }
 
-   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(CRAFTING_TABLE_GUI_TEXTURES);
       int i = (this.width - this.xSize) / 2;

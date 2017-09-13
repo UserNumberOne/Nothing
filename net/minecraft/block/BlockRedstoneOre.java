@@ -14,149 +14,131 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityInteractEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockRedstoneOre extends Block {
    private final boolean isOn;
 
-   public BlockRedstoneOre(boolean flag) {
+   public BlockRedstoneOre(boolean var1) {
       super(Material.ROCK);
-      if (flag) {
+      if (isOn) {
          this.setTickRandomly(true);
       }
 
-      this.isOn = flag;
+      this.isOn = isOn;
    }
 
-   public int tickRate(World world) {
+   public int tickRate(World var1) {
       return 30;
    }
 
-   public void onBlockClicked(World world, BlockPos blockposition, EntityPlayer entityhuman) {
-      this.interact(world, blockposition, entityhuman);
-      super.onBlockClicked(world, blockposition, entityhuman);
+   public void onBlockClicked(World var1, BlockPos var2, EntityPlayer var3) {
+      this.activate(worldIn, pos);
+      super.onBlockClicked(worldIn, pos, playerIn);
    }
 
-   public void onEntityWalk(World world, BlockPos blockposition, Entity entity) {
-      if (entity instanceof EntityPlayer) {
-         PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent((EntityPlayer)entity, Action.PHYSICAL, blockposition, (EnumFacing)null, (ItemStack)null, (EnumHand)null);
-         if (!event.isCancelled()) {
-            this.interact(world, blockposition, entity);
-            super.onEntityWalk(world, blockposition, entity);
-         }
-      } else {
-         EntityInteractEvent event = new EntityInteractEvent(entity.getBukkitEntity(), world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()));
-         world.getServer().getPluginManager().callEvent(event);
-         if (!event.isCancelled()) {
-            this.interact(world, blockposition, entity);
-            super.onEntityWalk(world, blockposition, entity);
-         }
-      }
-
+   public void onEntityWalk(World var1, BlockPos var2, Entity var3) {
+      this.activate(worldIn, pos);
+      super.onEntityWalk(worldIn, pos, entityIn);
    }
 
-   public boolean onBlockActivated(World world, BlockPos blockposition, IBlockState iblockdata, EntityPlayer entityhuman, EnumHand enumhand, @Nullable ItemStack itemstack, EnumFacing enumdirection, float f, float f1, float f2) {
-      this.interact(world, blockposition, entityhuman);
-      return super.onBlockActivated(world, blockposition, iblockdata, entityhuman, enumhand, itemstack, enumdirection, f, f1, f2);
+   public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
+      this.activate(worldIn, pos);
+      return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
    }
 
-   private void interact(World world, BlockPos blockposition, Entity entity) {
-      this.spawnParticles(world, blockposition);
+   private void activate(World var1, BlockPos var2) {
+      this.spawnParticles(worldIn, pos);
       if (this == Blocks.REDSTONE_ORE) {
-         if (CraftEventFactory.callEntityChangeBlockEvent(entity, blockposition, Blocks.LIT_REDSTONE_ORE, 0).isCancelled()) {
-            return;
-         }
-
-         world.setBlockState(blockposition, Blocks.LIT_REDSTONE_ORE.getDefaultState());
+         worldIn.setBlockState(pos, Blocks.LIT_REDSTONE_ORE.getDefaultState());
       }
 
    }
 
-   public void updateTick(World world, BlockPos blockposition, IBlockState iblockdata, Random random) {
+   public void updateTick(World var1, BlockPos var2, IBlockState var3, Random var4) {
       if (this == Blocks.LIT_REDSTONE_ORE) {
-         if (CraftEventFactory.callBlockFadeEvent(world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), Blocks.REDSTONE_ORE).isCancelled()) {
-            return;
-         }
-
-         world.setBlockState(blockposition, Blocks.REDSTONE_ORE.getDefaultState());
+         worldIn.setBlockState(pos, Blocks.REDSTONE_ORE.getDefaultState());
       }
 
    }
 
    @Nullable
-   public Item getItemDropped(IBlockState iblockdata, Random random, int i) {
+   public Item getItemDropped(IBlockState var1, Random var2, int var3) {
       return Items.REDSTONE;
    }
 
-   public int quantityDroppedWithBonus(int i, Random random) {
-      return this.quantityDropped(random) + random.nextInt(i + 1);
+   public int quantityDroppedWithBonus(int var1, Random var2) {
+      return this.quantityDropped(random) + random.nextInt(fortune + 1);
    }
 
-   public int quantityDropped(Random random) {
+   public int quantityDropped(Random var1) {
       return 4 + random.nextInt(2);
    }
 
-   public void dropBlockAsItemWithChance(World world, BlockPos blockposition, IBlockState iblockdata, float f, int i) {
-      super.dropBlockAsItemWithChance(world, blockposition, iblockdata, f, i);
+   public void dropBlockAsItemWithChance(World var1, BlockPos var2, IBlockState var3, float var4, int var5) {
+      super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
    }
 
-   public int getExpDrop(World world, IBlockState data, int i) {
-      if (this.getItemDropped(data, world.rand, i) != Item.getItemFromBlock(this)) {
-         int j = 1 + world.rand.nextInt(5);
-         return j;
-      } else {
-         return 0;
+   public int getExpDrop(IBlockState var1, IBlockAccess var2, BlockPos var3, int var4) {
+      return this.getItemDropped(state, RANDOM, fortune) != Item.getItemFromBlock(this) ? 1 + RANDOM.nextInt(5) : 0;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void randomDisplayTick(IBlockState var1, World var2, BlockPos var3, Random var4) {
+      if (this.isOn) {
+         this.spawnParticles(worldIn, pos);
       }
+
    }
 
-   private void spawnParticles(World world, BlockPos blockposition) {
-      Random random = world.rand;
+   private void spawnParticles(World var1, BlockPos var2) {
+      Random random = worldIn.rand;
+      double d0 = 0.0625D;
 
       for(int i = 0; i < 6; ++i) {
-         double d1 = (double)((float)blockposition.getX() + random.nextFloat());
-         double d2 = (double)((float)blockposition.getY() + random.nextFloat());
-         double d3 = (double)((float)blockposition.getZ() + random.nextFloat());
-         if (i == 0 && !world.getBlockState(blockposition.up()).isOpaqueCube()) {
-            d2 = (double)blockposition.getY() + 0.0625D + 1.0D;
+         double d1 = (double)((float)pos.getX() + random.nextFloat());
+         double d2 = (double)((float)pos.getY() + random.nextFloat());
+         double d3 = (double)((float)pos.getZ() + random.nextFloat());
+         if (i == 0 && !worldIn.getBlockState(pos.up()).isOpaqueCube()) {
+            d2 = (double)pos.getY() + 0.0625D + 1.0D;
          }
 
-         if (i == 1 && !world.getBlockState(blockposition.down()).isOpaqueCube()) {
-            d2 = (double)blockposition.getY() - 0.0625D;
+         if (i == 1 && !worldIn.getBlockState(pos.down()).isOpaqueCube()) {
+            d2 = (double)pos.getY() - 0.0625D;
          }
 
-         if (i == 2 && !world.getBlockState(blockposition.south()).isOpaqueCube()) {
-            d3 = (double)blockposition.getZ() + 0.0625D + 1.0D;
+         if (i == 2 && !worldIn.getBlockState(pos.south()).isOpaqueCube()) {
+            d3 = (double)pos.getZ() + 0.0625D + 1.0D;
          }
 
-         if (i == 3 && !world.getBlockState(blockposition.north()).isOpaqueCube()) {
-            d3 = (double)blockposition.getZ() - 0.0625D;
+         if (i == 3 && !worldIn.getBlockState(pos.north()).isOpaqueCube()) {
+            d3 = (double)pos.getZ() - 0.0625D;
          }
 
-         if (i == 4 && !world.getBlockState(blockposition.east()).isOpaqueCube()) {
-            d1 = (double)blockposition.getX() + 0.0625D + 1.0D;
+         if (i == 4 && !worldIn.getBlockState(pos.east()).isOpaqueCube()) {
+            d1 = (double)pos.getX() + 0.0625D + 1.0D;
          }
 
-         if (i == 5 && !world.getBlockState(blockposition.west()).isOpaqueCube()) {
-            d1 = (double)blockposition.getX() - 0.0625D;
+         if (i == 5 && !worldIn.getBlockState(pos.west()).isOpaqueCube()) {
+            d1 = (double)pos.getX() - 0.0625D;
          }
 
-         if (d1 < (double)blockposition.getX() || d1 > (double)(blockposition.getX() + 1) || d2 < 0.0D || d2 > (double)(blockposition.getY() + 1) || d3 < (double)blockposition.getZ() || d3 > (double)(blockposition.getZ() + 1)) {
-            world.spawnParticle(EnumParticleTypes.REDSTONE, d1, d2, d3, 0.0D, 0.0D, 0.0D);
+         if (d1 < (double)pos.getX() || d1 > (double)(pos.getX() + 1) || d2 < 0.0D || d2 > (double)(pos.getY() + 1) || d3 < (double)pos.getZ() || d3 > (double)(pos.getZ() + 1)) {
+            worldIn.spawnParticle(EnumParticleTypes.REDSTONE, d1, d2, d3, 0.0D, 0.0D, 0.0D);
          }
       }
 
    }
 
-   protected ItemStack getSilkTouchDrop(IBlockState iblockdata) {
+   protected ItemStack getSilkTouchDrop(IBlockState var1) {
       return new ItemStack(Blocks.REDSTONE_ORE);
    }
 
    @Nullable
-   public ItemStack getItem(World world, BlockPos blockposition, IBlockState iblockdata) {
-      return new ItemStack(Item.getItemFromBlock(Blocks.REDSTONE_ORE), 1, this.damageDropped(iblockdata));
+   public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
+      return new ItemStack(Item.getItemFromBlock(Blocks.REDSTONE_ORE), 1, this.damageDropped(state));
    }
 }

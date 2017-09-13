@@ -17,11 +17,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderFish extends Render {
    private static final ResourceLocation FISH_PARTICLES = new ResourceLocation("textures/particle/particles.png");
 
-   public RenderFish(RenderManager renderManagerIn) {
+   public RenderFish(RenderManager var1) {
       super(renderManagerIn);
    }
 
-   public void doRender(EntityFishHook entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityFishHook var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       GlStateManager.translate((float)x, (float)y, (float)z);
       GlStateManager.enableRescaleNormal();
@@ -112,7 +112,7 @@ public class RenderFish extends Render {
 
    }
 
-   protected ResourceLocation getEntityTexture(EntityFishHook entity) {
+   protected ResourceLocation getEntityTexture(EntityFishHook var1) {
       return FISH_PARTICLES;
    }
 }

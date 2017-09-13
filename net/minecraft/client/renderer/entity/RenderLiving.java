@@ -16,15 +16,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public abstract class RenderLiving extends RenderLivingBase {
-   public RenderLiving(RenderManager rendermanagerIn, ModelBase modelbaseIn, float shadowsizeIn) {
+   public RenderLiving(RenderManager var1, ModelBase var2, float var3) {
       super(rendermanagerIn, modelbaseIn, shadowsizeIn);
    }
 
-   protected boolean canRenderName(EntityLiving entity) {
+   protected boolean canRenderName(EntityLiving var1) {
       return super.canRenderName((EntityLivingBase)entity) && (entity.getAlwaysRenderNameTagForRender() || entity.hasCustomName() && entity == this.renderManager.pointedEntity);
    }
 
-   public boolean shouldRender(EntityLiving livingEntity, ICamera camera, double camX, double camY, double camZ) {
+   public boolean shouldRender(EntityLiving var1, ICamera var2, double var3, double var5, double var7) {
       if (super.shouldRender(livingEntity, camera, camX, camY, camZ)) {
          return true;
       } else if (livingEntity.getLeashed() && livingEntity.getLeashedToEntity() != null) {
@@ -35,7 +35,7 @@ public abstract class RenderLiving extends RenderLivingBase {
       }
    }
 
-   public void doRender(EntityLiving entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityLiving var1, double var2, double var4, double var6, float var8, float var9) {
       super.doRender((EntityLivingBase)entity, x, y, z, entityYaw, partialTicks);
       if (!this.renderOutlines) {
          this.renderLeash(entity, x, y, z, entityYaw, partialTicks);
@@ -43,18 +43,18 @@ public abstract class RenderLiving extends RenderLivingBase {
 
    }
 
-   public void setLightmap(EntityLiving entityLivingIn, float partialTicks) {
+   public void setLightmap(EntityLiving var1, float var2) {
       int i = entityLivingIn.getBrightnessForRender(partialTicks);
       int j = i % 65536;
       int k = i / 65536;
       OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
    }
 
-   private double interpolateValue(double start, double end, double pct) {
+   private double interpolateValue(double var1, double var3, double var5) {
       return start + (end - start) * pct;
    }
 
-   protected void renderLeash(EntityLiving entityLivingIn, double x, double y, double z, float entityYaw, float partialTicks) {
+   protected void renderLeash(EntityLiving var1, double var2, double var4, double var6, float var8, float var9) {
       Entity entity = entityLivingIn.getLeashedToEntity();
       if (entity != null) {
          y = y - (1.6D - (double)entityLivingIn.height) * 0.5D;

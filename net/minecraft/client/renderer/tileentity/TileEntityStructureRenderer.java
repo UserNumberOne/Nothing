@@ -16,7 +16,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class TileEntityStructureRenderer extends TileEntitySpecialRenderer {
-   public void renderTileEntityAt(TileEntityStructure te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntityStructure var1, double var2, double var4, double var6, float var8, int var9) {
       if (Minecraft.getMinecraft().player.canUseCommandBlock() || Minecraft.getMinecraft().player.isSpectator()) {
          super.renderTileEntityAt(te, x, y, z, partialTicks, destroyStage);
          BlockPos blockpos = te.getPosition();
@@ -105,7 +105,7 @@ public class TileEntityStructureRenderer extends TileEntitySpecialRenderer {
 
    }
 
-   private void renderInvisibleBlocks(TileEntityStructure p_190054_1_, double p_190054_2_, double p_190054_4_, double p_190054_6_, BlockPos p_190054_8_, Tessellator p_190054_9_, VertexBuffer p_190054_10_, boolean p_190054_11_) {
+   private void renderInvisibleBlocks(TileEntityStructure var1, double var2, double var4, double var6, BlockPos var8, Tessellator var9, VertexBuffer var10, boolean var11) {
       GlStateManager.glLineWidth(p_190054_11_ ? 3.0F : 1.0F);
       p_190054_10_.begin(3, DefaultVertexFormats.POSITION_COLOR);
       World world = p_190054_1_.getWorld();
@@ -137,7 +137,7 @@ public class TileEntityStructureRenderer extends TileEntitySpecialRenderer {
       p_190054_9_.draw();
    }
 
-   private void renderBox(Tessellator p_190055_1_, VertexBuffer p_190055_2_, double p_190055_3_, double p_190055_5_, double p_190055_7_, double p_190055_9_, double p_190055_11_, double p_190055_13_, int p_190055_15_, int p_190055_16_, int p_190055_17_) {
+   private void renderBox(Tessellator var1, VertexBuffer var2, double var3, double var5, double var7, double var9, double var11, double var13, int var15, int var16, int var17) {
       GlStateManager.glLineWidth(2.0F);
       p_190055_2_.begin(3, DefaultVertexFormats.POSITION_COLOR);
       p_190055_2_.pos(p_190055_3_, p_190055_5_, p_190055_7_).color((float)p_190055_16_, (float)p_190055_16_, (float)p_190055_16_, 0.0F).endVertex();
@@ -162,7 +162,7 @@ public class TileEntityStructureRenderer extends TileEntitySpecialRenderer {
       GlStateManager.glLineWidth(1.0F);
    }
 
-   public boolean isGlobalRenderer(TileEntityStructure te) {
+   public boolean isGlobalRenderer(TileEntityStructure var1) {
       return true;
    }
 }

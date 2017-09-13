@@ -11,12 +11,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderSnowMan extends RenderLiving {
    private static final ResourceLocation SNOW_MAN_TEXTURES = new ResourceLocation("textures/entity/snowman.png");
 
-   public RenderSnowMan(RenderManager renderManagerIn) {
+   public RenderSnowMan(RenderManager var1) {
       super(renderManagerIn, new ModelSnowMan(), 0.5F);
       this.addLayer(new LayerSnowmanHead(this));
    }
 
-   protected ResourceLocation getEntityTexture(EntitySnowman entity) {
+   protected ResourceLocation getEntityTexture(EntitySnowman var1) {
       return SNOW_MAN_TEXTURES;
    }
 

@@ -13,6 +13,8 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketPlayerListItem implements Packet {
    private SPacketPlayerListItem.Action action;
@@ -22,134 +24,144 @@ public class SPacketPlayerListItem implements Packet {
    }
 
    public SPacketPlayerListItem(SPacketPlayerListItem.Action var1, EntityPlayerMP... var2) {
-      this.action = var1;
+      this.action = actionIn;
 
-      for(EntityPlayerMP var6 : var2) {
-         this.players.add(new SPacketPlayerListItem.AddPlayerData(var6.getGameProfile(), var6.ping, var6.interactionManager.getGameType(), var6.getTabListDisplayName()));
+      for(EntityPlayerMP entityplayermp : playersIn) {
+         this.players.add(new SPacketPlayerListItem.AddPlayerData(entityplayermp.getGameProfile(), entityplayermp.ping, entityplayermp.interactionManager.getGameType(), entityplayermp.getTabListDisplayName()));
       }
 
    }
 
    public SPacketPlayerListItem(SPacketPlayerListItem.Action var1, Iterable var2) {
-      this.action = var1;
+      this.action = actionIn;
 
-      for(EntityPlayerMP var4 : var2) {
-         this.players.add(new SPacketPlayerListItem.AddPlayerData(var4.getGameProfile(), var4.ping, var4.interactionManager.getGameType(), var4.getTabListDisplayName()));
+      for(EntityPlayerMP entityplayermp : playersIn) {
+         this.players.add(new SPacketPlayerListItem.AddPlayerData(entityplayermp.getGameProfile(), entityplayermp.ping, entityplayermp.interactionManager.getGameType(), entityplayermp.getTabListDisplayName()));
       }
 
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.action = (SPacketPlayerListItem.Action)var1.readEnumValue(SPacketPlayerListItem.Action.class);
-      int var2 = var1.readVarInt();
+      this.action = (SPacketPlayerListItem.Action)buf.readEnumValue(SPacketPlayerListItem.Action.class);
+      int i = buf.readVarInt();
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-         GameProfile var4 = null;
-         int var5 = 0;
-         GameType var6 = null;
-         ITextComponent var7 = null;
+      for(int j = 0; j < i; ++j) {
+         GameProfile gameprofile = null;
+         int k = 0;
+         GameType gametype = null;
+         ITextComponent itextcomponent = null;
          switch(this.action) {
          case ADD_PLAYER:
-            var4 = new GameProfile(var1.readUniqueId(), var1.readString(16));
-            int var8 = var1.readVarInt();
-            int var9 = 0;
+            gameprofile = new GameProfile(buf.readUniqueId(), buf.readString(16));
+            int l = buf.readVarInt();
+            int i1 = 0;
 
-            for(; var9 < var8; ++var9) {
-               String var10 = var1.readString(32767);
-               String var11 = var1.readString(32767);
-               if (var1.readBoolean()) {
-                  var4.getProperties().put(var10, new Property(var10, var11, var1.readString(32767)));
+            for(; i1 < l; ++i1) {
+               String s = buf.readString(32767);
+               String s1 = buf.readString(32767);
+               if (buf.readBoolean()) {
+                  gameprofile.getProperties().put(s, new Property(s, s1, buf.readString(32767)));
                } else {
-                  var4.getProperties().put(var10, new Property(var10, var11));
+                  gameprofile.getProperties().put(s, new Property(s, s1));
                }
             }
 
-            var6 = GameType.getByID(var1.readVarInt());
-            var5 = var1.readVarInt();
-            if (var1.readBoolean()) {
-               var7 = var1.readTextComponent();
+            gametype = GameType.getByID(buf.readVarInt());
+            k = buf.readVarInt();
+            if (buf.readBoolean()) {
+               itextcomponent = buf.readTextComponent();
             }
             break;
          case UPDATE_GAME_MODE:
-            var4 = new GameProfile(var1.readUniqueId(), (String)null);
-            var6 = GameType.getByID(var1.readVarInt());
+            gameprofile = new GameProfile(buf.readUniqueId(), (String)null);
+            gametype = GameType.getByID(buf.readVarInt());
             break;
          case UPDATE_LATENCY:
-            var4 = new GameProfile(var1.readUniqueId(), (String)null);
-            var5 = var1.readVarInt();
+            gameprofile = new GameProfile(buf.readUniqueId(), (String)null);
+            k = buf.readVarInt();
             break;
          case UPDATE_DISPLAY_NAME:
-            var4 = new GameProfile(var1.readUniqueId(), (String)null);
-            if (var1.readBoolean()) {
-               var7 = var1.readTextComponent();
+            gameprofile = new GameProfile(buf.readUniqueId(), (String)null);
+            if (buf.readBoolean()) {
+               itextcomponent = buf.readTextComponent();
             }
             break;
          case REMOVE_PLAYER:
-            var4 = new GameProfile(var1.readUniqueId(), (String)null);
+            gameprofile = new GameProfile(buf.readUniqueId(), (String)null);
          }
 
-         this.players.add(new SPacketPlayerListItem.AddPlayerData(var4, var5, var6, var7));
+         this.players.add(new SPacketPlayerListItem.AddPlayerData(gameprofile, k, gametype, itextcomponent));
       }
 
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeEnumValue(this.action);
-      var1.writeVarInt(this.players.size());
+      buf.writeEnumValue(this.action);
+      buf.writeVarInt(this.players.size());
 
-      for(SPacketPlayerListItem.AddPlayerData var3 : this.players) {
+      for(SPacketPlayerListItem.AddPlayerData spacketplayerlistitem$addplayerdata : this.players) {
          switch(this.action) {
          case ADD_PLAYER:
-            var1.writeUniqueId(var3.getProfile().getId());
-            var1.writeString(var3.getProfile().getName());
-            var1.writeVarInt(var3.getProfile().getProperties().size());
+            buf.writeUniqueId(spacketplayerlistitem$addplayerdata.getProfile().getId());
+            buf.writeString(spacketplayerlistitem$addplayerdata.getProfile().getName());
+            buf.writeVarInt(spacketplayerlistitem$addplayerdata.getProfile().getProperties().size());
 
-            for(Property var5 : var3.getProfile().getProperties().values()) {
-               var1.writeString(var5.getName());
-               var1.writeString(var5.getValue());
-               if (var5.hasSignature()) {
-                  var1.writeBoolean(true);
-                  var1.writeString(var5.getSignature());
+            for(Property property : spacketplayerlistitem$addplayerdata.getProfile().getProperties().values()) {
+               buf.writeString(property.getName());
+               buf.writeString(property.getValue());
+               if (property.hasSignature()) {
+                  buf.writeBoolean(true);
+                  buf.writeString(property.getSignature());
                } else {
-                  var1.writeBoolean(false);
+                  buf.writeBoolean(false);
                }
             }
 
-            var1.writeVarInt(var3.getGameMode().getID());
-            var1.writeVarInt(var3.getPing());
-            if (var3.getDisplayName() == null) {
-               var1.writeBoolean(false);
+            buf.writeVarInt(spacketplayerlistitem$addplayerdata.getGameMode().getID());
+            buf.writeVarInt(spacketplayerlistitem$addplayerdata.getPing());
+            if (spacketplayerlistitem$addplayerdata.getDisplayName() == null) {
+               buf.writeBoolean(false);
             } else {
-               var1.writeBoolean(true);
-               var1.writeTextComponent(var3.getDisplayName());
+               buf.writeBoolean(true);
+               buf.writeTextComponent(spacketplayerlistitem$addplayerdata.getDisplayName());
             }
             break;
          case UPDATE_GAME_MODE:
-            var1.writeUniqueId(var3.getProfile().getId());
-            var1.writeVarInt(var3.getGameMode().getID());
+            buf.writeUniqueId(spacketplayerlistitem$addplayerdata.getProfile().getId());
+            buf.writeVarInt(spacketplayerlistitem$addplayerdata.getGameMode().getID());
             break;
          case UPDATE_LATENCY:
-            var1.writeUniqueId(var3.getProfile().getId());
-            var1.writeVarInt(var3.getPing());
+            buf.writeUniqueId(spacketplayerlistitem$addplayerdata.getProfile().getId());
+            buf.writeVarInt(spacketplayerlistitem$addplayerdata.getPing());
             break;
          case UPDATE_DISPLAY_NAME:
-            var1.writeUniqueId(var3.getProfile().getId());
-            if (var3.getDisplayName() == null) {
-               var1.writeBoolean(false);
+            buf.writeUniqueId(spacketplayerlistitem$addplayerdata.getProfile().getId());
+            if (spacketplayerlistitem$addplayerdata.getDisplayName() == null) {
+               buf.writeBoolean(false);
             } else {
-               var1.writeBoolean(true);
-               var1.writeTextComponent(var3.getDisplayName());
+               buf.writeBoolean(true);
+               buf.writeTextComponent(spacketplayerlistitem$addplayerdata.getDisplayName());
             }
             break;
          case REMOVE_PLAYER:
-            var1.writeUniqueId(var3.getProfile().getId());
+            buf.writeUniqueId(spacketplayerlistitem$addplayerdata.getProfile().getId());
          }
       }
 
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      var1.handlePlayerListItem(this);
+      handler.handlePlayerListItem(this);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public List getEntries() {
+      return this.players;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public SPacketPlayerListItem.Action getAction() {
+      return this.action;
    }
 
    public String toString() {
@@ -171,10 +183,10 @@ public class SPacketPlayerListItem implements Packet {
       private final ITextComponent displayName;
 
       public AddPlayerData(GameProfile var2, int var3, GameType var4, @Nullable ITextComponent var5) {
-         this.profile = var2;
-         this.ping = var3;
-         this.gamemode = var4;
-         this.displayName = var5;
+         this.profile = profileIn;
+         this.ping = latencyIn;
+         this.gamemode = gameModeIn;
+         this.displayName = displayNameIn;
       }
 
       public GameProfile getProfile() {

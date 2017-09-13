@@ -20,7 +20,7 @@ public enum EnumPlayerModelParts {
    private final String partName;
    private final ITextComponent name;
 
-   private EnumPlayerModelParts(int partIdIn, String partNameIn) {
+   private EnumPlayerModelParts(int var3, String var4) {
       this.partId = partIdIn;
       this.partMask = 1 << partIdIn;
       this.partName = partNameIn;

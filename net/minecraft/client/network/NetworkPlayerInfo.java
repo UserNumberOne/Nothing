@@ -33,11 +33,11 @@ public class NetworkPlayerInfo {
    private long healthBlinkTime;
    private long renderVisibilityId;
 
-   public NetworkPlayerInfo(GameProfile profile) {
+   public NetworkPlayerInfo(GameProfile var1) {
       this.gameProfile = profile;
    }
 
-   public NetworkPlayerInfo(SPacketPlayerListItem.AddPlayerData entry) {
+   public NetworkPlayerInfo(SPacketPlayerListItem.AddPlayerData var1) {
       this.gameProfile = entry.getProfile();
       this.gameType = entry.getGameMode();
       this.responseTime = entry.getPing();
@@ -52,7 +52,7 @@ public class NetworkPlayerInfo {
       return this.gameType;
    }
 
-   protected void setGameType(GameType gameMode) {
+   protected void setGameType(GameType var1) {
       this.gameType = gameMode;
    }
 
@@ -60,7 +60,7 @@ public class NetworkPlayerInfo {
       return this.responseTime;
    }
 
-   protected void setResponseTime(int latency) {
+   protected void setResponseTime(int var1) {
       this.responseTime = latency;
    }
 
@@ -99,7 +99,7 @@ public class NetworkPlayerInfo {
          if (!this.playerTexturesLoaded) {
             this.playerTexturesLoaded = true;
             Minecraft.getMinecraft().getSkinManager().loadProfileTextures(this.gameProfile, new SkinManager.SkinAvailableCallback() {
-               public void skinAvailable(Type typeIn, ResourceLocation location, MinecraftProfileTexture profileTexture) {
+               public void skinAvailable(Type var1, ResourceLocation var2, MinecraftProfileTexture var3) {
                   switch(typeIn) {
                   case SKIN:
                      NetworkPlayerInfo.this.playerTextures.put(Type.SKIN, location);
@@ -122,7 +122,7 @@ public class NetworkPlayerInfo {
       }
    }
 
-   public void setDisplayName(@Nullable ITextComponent displayNameIn) {
+   public void setDisplayName(@Nullable ITextComponent var1) {
       this.displayName = displayNameIn;
    }
 
@@ -135,7 +135,7 @@ public class NetworkPlayerInfo {
       return this.lastHealth;
    }
 
-   public void setLastHealth(int p_178836_1_) {
+   public void setLastHealth(int var1) {
       this.lastHealth = p_178836_1_;
    }
 
@@ -143,7 +143,7 @@ public class NetworkPlayerInfo {
       return this.displayHealth;
    }
 
-   public void setDisplayHealth(int p_178857_1_) {
+   public void setDisplayHealth(int var1) {
       this.displayHealth = p_178857_1_;
    }
 
@@ -151,7 +151,7 @@ public class NetworkPlayerInfo {
       return this.lastHealthTime;
    }
 
-   public void setLastHealthTime(long p_178846_1_) {
+   public void setLastHealthTime(long var1) {
       this.lastHealthTime = p_178846_1_;
    }
 
@@ -159,7 +159,7 @@ public class NetworkPlayerInfo {
       return this.healthBlinkTime;
    }
 
-   public void setHealthBlinkTime(long p_178844_1_) {
+   public void setHealthBlinkTime(long var1) {
       this.healthBlinkTime = p_178844_1_;
    }
 
@@ -167,7 +167,7 @@ public class NetworkPlayerInfo {
       return this.renderVisibilityId;
    }
 
-   public void setRenderVisibilityId(long p_178843_1_) {
+   public void setRenderVisibilityId(long var1) {
       this.renderVisibilityId = p_178843_1_;
    }
 }

@@ -12,7 +12,7 @@ public abstract class AbstractTexture implements ITextureObject {
    protected boolean blurLast;
    protected boolean mipmapLast;
 
-   public void setBlurMipmapDirect(boolean blurIn, boolean mipmapIn) {
+   public void setBlurMipmapDirect(boolean var1, boolean var2) {
       this.blur = blurIn;
       this.mipmap = mipmapIn;
       int i;
@@ -29,7 +29,7 @@ public abstract class AbstractTexture implements ITextureObject {
       GlStateManager.glTexParameteri(3553, 10240, j);
    }
 
-   public void setBlurMipmap(boolean blurIn, boolean mipmapIn) {
+   public void setBlurMipmap(boolean var1, boolean var2) {
       this.blurLast = this.blur;
       this.mipmapLast = this.mipmap;
       this.setBlurMipmapDirect(blurIn, mipmapIn);

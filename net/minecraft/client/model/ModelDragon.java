@@ -23,7 +23,7 @@ public class ModelDragon extends ModelBase {
    private final ModelRenderer wingTip;
    private float partialTicks;
 
-   public ModelDragon(float p_i46360_1_) {
+   public ModelDragon(float var1) {
       this.textureWidth = 256;
       this.textureHeight = 256;
       this.setTextureOffset("body.body", 0, 0);
@@ -101,11 +101,11 @@ public class ModelDragon extends ModelBase {
       this.rearLegTip.addChild(this.rearFoot);
    }
 
-   public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
+   public void setLivingAnimations(EntityLivingBase var1, float var2, float var3, float var4) {
       this.partialTicks = partialTickTime;
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       GlStateManager.pushMatrix();
       EntityDragon entitydragon = (EntityDragon)entityIn;
       float f = entitydragon.prevAnimTime + (entitydragon.animTime - entitydragon.prevAnimTime) * this.partialTicks;
@@ -204,7 +204,7 @@ public class ModelDragon extends ModelBase {
       GlStateManager.popMatrix();
    }
 
-   private float updateRotations(double p_78214_1_) {
+   private float updateRotations(double var1) {
       while(p_78214_1_ >= 180.0D) {
          p_78214_1_ -= 360.0D;
       }

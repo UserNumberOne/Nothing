@@ -14,10 +14,10 @@ public enum EntityEquipmentSlot {
    private final String name;
 
    private EntityEquipmentSlot(EntityEquipmentSlot.Type var3, int var4, int var5, String var6) {
-      this.slotType = var3;
-      this.index = var4;
-      this.slotIndex = var5;
-      this.name = var6;
+      this.slotType = slotTypeIn;
+      this.index = indexIn;
+      this.slotIndex = slotIndexIn;
+      this.name = nameIn;
    }
 
    public EntityEquipmentSlot.Type getSlotType() {
@@ -37,13 +37,13 @@ public enum EntityEquipmentSlot {
    }
 
    public static EntityEquipmentSlot fromString(String var0) {
-      for(EntityEquipmentSlot var4 : values()) {
-         if (var4.getName().equals(var0)) {
-            return var4;
+      for(EntityEquipmentSlot entityequipmentslot : values()) {
+         if (entityequipmentslot.getName().equals(targetName)) {
+            return entityequipmentslot;
          }
       }
 
-      throw new IllegalArgumentException("Invalid slot '" + var0 + "'");
+      throw new IllegalArgumentException("Invalid slot '" + targetName + "'");
    }
 
    public static enum Type {

@@ -4,7 +4,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentArrowInfinite extends Enchantment {
    public EnchantmentArrowInfinite(Enchantment.Rarity var1, EntityEquipmentSlot... var2) {
-      super(var1, EnumEnchantmentType.BOW, var2);
+      super(rarityIn, EnumEnchantmentType.BOW, slots);
       this.setName("arrowInfinite");
    }
 

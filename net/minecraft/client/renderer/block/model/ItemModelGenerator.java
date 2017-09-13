@@ -16,7 +16,7 @@ import org.lwjgl.util.vector.Vector3f;
 public class ItemModelGenerator {
    public static final List LAYERS = Lists.newArrayList(new String[]{"layer0", "layer1", "layer2", "layer3", "layer4"});
 
-   public ModelBlock makeItemModel(TextureMap textureMapIn, ModelBlock blockModel) {
+   public ModelBlock makeItemModel(TextureMap var1, ModelBlock var2) {
       Map map = Maps.newHashMap();
       List list = Lists.newArrayList();
 
@@ -40,7 +40,7 @@ public class ItemModelGenerator {
       }
    }
 
-   private List getBlockParts(int tintIndex, String p_178394_2_, TextureAtlasSprite p_178394_3_) {
+   private List getBlockParts(int var1, String var2, TextureAtlasSprite var3) {
       Map map = Maps.newHashMap();
       map.put(EnumFacing.SOUTH, new BlockPartFace((EnumFacing)null, tintIndex, p_178394_2_, new BlockFaceUV(new float[]{0.0F, 0.0F, 16.0F, 16.0F}, 0)));
       map.put(EnumFacing.NORTH, new BlockPartFace((EnumFacing)null, tintIndex, p_178394_2_, new BlockFaceUV(new float[]{16.0F, 0.0F, 0.0F, 16.0F}, 0)));
@@ -50,7 +50,7 @@ public class ItemModelGenerator {
       return list;
    }
 
-   private List getBlockParts(TextureAtlasSprite p_178397_1_, String p_178397_2_, int p_178397_3_) {
+   private List getBlockParts(TextureAtlasSprite var1, String var2, int var3) {
       float f = (float)p_178397_1_.getIconWidth();
       float f1 = (float)p_178397_1_.getIconHeight();
       List list = Lists.newArrayList();
@@ -148,7 +148,7 @@ public class ItemModelGenerator {
       return list;
    }
 
-   private List getSpans(TextureAtlasSprite p_178393_1_) {
+   private List getSpans(TextureAtlasSprite var1) {
       int i = p_178393_1_.getIconWidth();
       int j = p_178393_1_.getIconHeight();
       List list = Lists.newArrayList();
@@ -170,7 +170,7 @@ public class ItemModelGenerator {
       return list;
    }
 
-   private void checkTransition(ItemModelGenerator.SpanFacing p_178396_1_, List p_178396_2_, int[] p_178396_3_, int p_178396_4_, int p_178396_5_, int p_178396_6_, int p_178396_7_, boolean p_178396_8_) {
+   private void checkTransition(ItemModelGenerator.SpanFacing var1, List var2, int[] var3, int var4, int var5, int var6, int var7, boolean var8) {
       boolean flag = this.isTransparent(p_178396_3_, p_178396_4_ + p_178396_1_.getXOffset(), p_178396_5_ + p_178396_1_.getYOffset(), p_178396_6_, p_178396_7_) && p_178396_8_;
       if (flag) {
          this.createOrExpandSpan(p_178396_2_, p_178396_1_, p_178396_4_, p_178396_5_);
@@ -178,7 +178,7 @@ public class ItemModelGenerator {
 
    }
 
-   private void createOrExpandSpan(List p_178395_1_, ItemModelGenerator.SpanFacing p_178395_2_, int p_178395_3_, int p_178395_4_) {
+   private void createOrExpandSpan(List var1, ItemModelGenerator.SpanFacing var2, int var3, int var4) {
       ItemModelGenerator.Span itemmodelgenerator$span = null;
 
       for(ItemModelGenerator.Span itemmodelgenerator$span1 : p_178395_1_) {
@@ -201,7 +201,7 @@ public class ItemModelGenerator {
 
    }
 
-   private boolean isTransparent(int[] p_178391_1_, int p_178391_2_, int p_178391_3_, int p_178391_4_, int p_178391_5_) {
+   private boolean isTransparent(int[] var1, int var2, int var3, int var4, int var5) {
       return p_178391_2_ >= 0 && p_178391_3_ >= 0 && p_178391_2_ < p_178391_4_ && p_178391_3_ < p_178391_5_ ? (p_178391_1_[p_178391_3_ * p_178391_4_ + p_178391_2_] >> 24 & 255) == 0 : true;
    }
 
@@ -212,14 +212,14 @@ public class ItemModelGenerator {
       private int max;
       private final int anchor;
 
-      public Span(ItemModelGenerator.SpanFacing spanFacingIn, int p_i46216_2_, int p_i46216_3_) {
+      public Span(ItemModelGenerator.SpanFacing var1, int var2, int var3) {
          this.spanFacing = spanFacingIn;
          this.min = p_i46216_2_;
          this.max = p_i46216_2_;
          this.anchor = p_i46216_3_;
       }
 
-      public void expand(int p_178382_1_) {
+      public void expand(int var1) {
          if (p_178382_1_ < this.min) {
             this.min = p_178382_1_;
          } else if (p_178382_1_ > this.max) {
@@ -256,7 +256,7 @@ public class ItemModelGenerator {
       private final int xOffset;
       private final int yOffset;
 
-      private SpanFacing(EnumFacing facing, int p_i46215_4_, int p_i46215_5_) {
+      private SpanFacing(EnumFacing var3, int var4, int var5) {
          this.facing = facing;
          this.xOffset = p_i46215_4_;
          this.yOffset = p_i46215_5_;

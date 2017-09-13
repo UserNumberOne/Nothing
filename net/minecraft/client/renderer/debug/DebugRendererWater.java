@@ -22,11 +22,11 @@ public class DebugRendererWater implements DebugRenderer.IDebugRenderer {
    private double yo;
    private double zo;
 
-   public DebugRendererWater(Minecraft minecraftIn) {
+   public DebugRendererWater(Minecraft var1) {
       this.minecraft = minecraftIn;
    }
 
-   public void render(float p_190060_1_, long p_190060_2_) {
+   public void render(float var1, long var2) {
       this.player = this.minecraft.player;
       this.xo = this.player.lastTickPosX + (this.player.posX - this.player.lastTickPosX) * (double)p_190060_1_;
       this.yo = this.player.lastTickPosY + (this.player.posY - this.player.lastTickPosY) * (double)p_190060_1_;

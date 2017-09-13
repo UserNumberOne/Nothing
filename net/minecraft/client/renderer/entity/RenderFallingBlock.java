@@ -19,12 +19,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderFallingBlock extends Render {
-   public RenderFallingBlock(RenderManager renderManagerIn) {
+   public RenderFallingBlock(RenderManager var1) {
       super(renderManagerIn);
       this.shadowSize = 0.5F;
    }
 
-   public void doRender(EntityFallingBlock entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityFallingBlock var1, double var2, double var4, double var6, float var8, float var9) {
       if (entity.getBlock() != null) {
          IBlockState iblockstate = entity.getBlock();
          if (iblockstate.getRenderType() == EnumBlockRenderType.MODEL) {
@@ -60,7 +60,7 @@ public class RenderFallingBlock extends Render {
 
    }
 
-   protected ResourceLocation getEntityTexture(EntityFallingBlock entity) {
+   protected ResourceLocation getEntityTexture(EntityFallingBlock var1) {
       return TextureMap.LOCATION_BLOCKS_TEXTURE;
    }
 }

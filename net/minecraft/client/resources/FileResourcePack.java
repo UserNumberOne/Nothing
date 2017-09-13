@@ -21,7 +21,7 @@ public class FileResourcePack extends AbstractResourcePack implements Closeable 
    public static final Splitter ENTRY_NAME_SPLITTER = Splitter.on('/').omitEmptyStrings().limit(3);
    private ZipFile resourcePackZipFile;
 
-   public FileResourcePack(File resourcePackFileIn) {
+   public FileResourcePack(File var1) {
       super(resourcePackFileIn);
    }
 
@@ -33,7 +33,7 @@ public class FileResourcePack extends AbstractResourcePack implements Closeable 
       return this.resourcePackZipFile;
    }
 
-   protected InputStream getInputStreamByName(String name) throws IOException {
+   protected InputStream getInputStreamByName(String var1) throws IOException {
       ZipFile zipfile = this.getResourcePackZipFile();
       ZipEntry zipentry = zipfile.getEntry(name);
       if (zipentry == null) {
@@ -43,7 +43,7 @@ public class FileResourcePack extends AbstractResourcePack implements Closeable 
       }
    }
 
-   public boolean hasResourceName(String name) {
+   public boolean hasResourceName(String var1) {
       try {
          return this.getResourcePackZipFile().getEntry(name) != null;
       } catch (IOException var3) {

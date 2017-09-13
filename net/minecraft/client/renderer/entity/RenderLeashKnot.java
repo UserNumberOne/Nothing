@@ -12,11 +12,11 @@ public class RenderLeashKnot extends Render {
    private static final ResourceLocation LEASH_KNOT_TEXTURES = new ResourceLocation("textures/entity/lead_knot.png");
    private final ModelLeashKnot leashKnotModel = new ModelLeashKnot();
 
-   public RenderLeashKnot(RenderManager renderManagerIn) {
+   public RenderLeashKnot(RenderManager var1) {
       super(renderManagerIn);
    }
 
-   public void doRender(EntityLeashKnot entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityLeashKnot var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       GlStateManager.disableCull();
       GlStateManager.translate((float)x, (float)y, (float)z);
@@ -40,7 +40,7 @@ public class RenderLeashKnot extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityLeashKnot entity) {
+   protected ResourceLocation getEntityTexture(EntityLeashKnot var1) {
       return LEASH_KNOT_TEXTURES;
    }
 }

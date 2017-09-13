@@ -29,12 +29,12 @@ public abstract class LayerArmorBase implements LayerRenderer {
    private boolean skipRenderGlint;
    private static final Map ARMOR_TEXTURE_RES_MAP = Maps.newHashMap();
 
-   public LayerArmorBase(RenderLivingBase rendererIn) {
+   public LayerArmorBase(RenderLivingBase var1) {
       this.renderer = rendererIn;
       this.initArmor();
    }
 
-   public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityLivingBase var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       this.renderArmorLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.CHEST);
       this.renderArmorLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.LEGS);
       this.renderArmorLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.FEET);
@@ -45,7 +45,7 @@ public abstract class LayerArmorBase implements LayerRenderer {
       return false;
    }
 
-   private void renderArmorLayer(EntityLivingBase entityLivingBaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale, EntityEquipmentSlot slotIn) {
+   private void renderArmorLayer(EntityLivingBase var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8, EntityEquipmentSlot var9) {
       ItemStack itemstack = this.getItemStackFromSlot(entityLivingBaseIn, slotIn);
       if (itemstack != null && itemstack.getItem() instanceof ItemArmor) {
          ItemArmor itemarmor = (ItemArmor)itemstack.getItem();
@@ -78,19 +78,19 @@ public abstract class LayerArmorBase implements LayerRenderer {
    }
 
    @Nullable
-   public ItemStack getItemStackFromSlot(EntityLivingBase living, EntityEquipmentSlot slotIn) {
+   public ItemStack getItemStackFromSlot(EntityLivingBase var1, EntityEquipmentSlot var2) {
       return living.getItemStackFromSlot(slotIn);
    }
 
-   public ModelBase getModelFromSlot(EntityEquipmentSlot slotIn) {
+   public ModelBase getModelFromSlot(EntityEquipmentSlot var1) {
       return this.isLegSlot(slotIn) ? this.modelLeggings : this.modelArmor;
    }
 
-   private boolean isLegSlot(EntityEquipmentSlot slotIn) {
+   private boolean isLegSlot(EntityEquipmentSlot var1) {
       return slotIn == EntityEquipmentSlot.LEGS;
    }
 
-   public static void renderEnchantedGlint(RenderLivingBase p_188364_0_, EntityLivingBase p_188364_1_, ModelBase model, float p_188364_3_, float p_188364_4_, float p_188364_5_, float p_188364_6_, float p_188364_7_, float p_188364_8_, float p_188364_9_) {
+   public static void renderEnchantedGlint(RenderLivingBase var0, EntityLivingBase var1, ModelBase var2, float var3, float var4, float var5, float var6, float var7, float var8, float var9) {
       float f = (float)p_188364_1_.ticksExisted + p_188364_5_;
       p_188364_0_.bindTexture(ENCHANTED_ITEM_GLINT_RES);
       GlStateManager.enableBlend();
@@ -125,13 +125,13 @@ public abstract class LayerArmorBase implements LayerRenderer {
 
    /** @deprecated */
    @Deprecated
-   private ResourceLocation getArmorResource(ItemArmor armor, boolean p_177181_2_) {
+   private ResourceLocation getArmorResource(ItemArmor var1, boolean var2) {
       return this.getArmorResource(armor, p_177181_2_, (String)null);
    }
 
    /** @deprecated */
    @Deprecated
-   private ResourceLocation getArmorResource(ItemArmor armor, boolean p_177178_2_, String p_177178_3_) {
+   private ResourceLocation getArmorResource(ItemArmor var1, boolean var2, String var3) {
       String s = String.format("textures/models/armor/%s_layer_%d%s.png", armor.getArmorMaterial().getName(), p_177178_2_ ? 2 : 1, p_177178_3_ == null ? "" : String.format("_%s", p_177178_3_));
       ResourceLocation resourcelocation = (ResourceLocation)ARMOR_TEXTURE_RES_MAP.get(s);
       if (resourcelocation == null) {
@@ -146,11 +146,11 @@ public abstract class LayerArmorBase implements LayerRenderer {
 
    protected abstract void setModelSlotVisible(ModelBase var1, EntityEquipmentSlot var2);
 
-   protected ModelBase getArmorModelHook(EntityLivingBase entity, ItemStack itemStack, EntityEquipmentSlot slot, ModelBase model) {
+   protected ModelBase getArmorModelHook(EntityLivingBase var1, ItemStack var2, EntityEquipmentSlot var3, ModelBase var4) {
       return model;
    }
 
-   public ResourceLocation getArmorResource(Entity entity, ItemStack stack, EntityEquipmentSlot slot, String type) {
+   public ResourceLocation getArmorResource(Entity var1, ItemStack var2, EntityEquipmentSlot var3, String var4) {
       ItemArmor item = (ItemArmor)stack.getItem();
       String texture = item.getArmorMaterial().getName();
       String domain = "minecraft";

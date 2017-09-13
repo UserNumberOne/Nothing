@@ -6,25 +6,25 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
 public class CPacketResourcePackStatus implements Packet {
-   public CPacketResourcePackStatus.Action action;
+   private CPacketResourcePackStatus.Action action;
 
    public CPacketResourcePackStatus() {
    }
 
    public CPacketResourcePackStatus(CPacketResourcePackStatus.Action var1) {
-      this.action = var1;
+      this.action = p_i47156_1_;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.action = (CPacketResourcePackStatus.Action)var1.readEnumValue(CPacketResourcePackStatus.Action.class);
+      this.action = (CPacketResourcePackStatus.Action)buf.readEnumValue(CPacketResourcePackStatus.Action.class);
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeEnumValue(this.action);
+      buf.writeEnumValue(this.action);
    }
 
    public void processPacket(INetHandlerPlayServer var1) {
-      var1.handleResourcePackStatus(this);
+      handler.handleResourcePackStatus(this);
    }
 
    public static enum Action {

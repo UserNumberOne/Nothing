@@ -15,11 +15,11 @@ public class RenderWitherSkull extends Render {
    private static final ResourceLocation WITHER_TEXTURES = new ResourceLocation("textures/entity/wither/wither.png");
    private final ModelSkeletonHead skeletonHeadModel = new ModelSkeletonHead();
 
-   public RenderWitherSkull(RenderManager renderManagerIn) {
+   public RenderWitherSkull(RenderManager var1) {
       super(renderManagerIn);
    }
 
-   private float getRenderYaw(float p_82400_1_, float p_82400_2_, float p_82400_3_) {
+   private float getRenderYaw(float var1, float var2, float var3) {
       float f;
       for(f = p_82400_2_ - p_82400_1_; f < -180.0F; f += 360.0F) {
          ;
@@ -32,7 +32,7 @@ public class RenderWitherSkull extends Render {
       return p_82400_1_ + p_82400_3_ * f;
    }
 
-   public void doRender(EntityWitherSkull entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityWitherSkull var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       GlStateManager.disableCull();
       float f = this.getRenderYaw(entity.prevRotationYaw, entity.rotationYaw, partialTicks);
@@ -58,7 +58,7 @@ public class RenderWitherSkull extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityWitherSkull entity) {
+   protected ResourceLocation getEntityTexture(EntityWitherSkull var1) {
       return entity.isInvulnerable() ? INVULNERABLE_WITHER_TEXTURES : WITHER_TEXTURES;
    }
 }

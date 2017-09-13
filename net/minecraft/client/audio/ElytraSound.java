@@ -12,7 +12,7 @@ public class ElytraSound extends MovingSound {
    private final EntityPlayerSP player;
    private int time;
 
-   public ElytraSound(EntityPlayerSP p_i47113_1_) {
+   public ElytraSound(EntityPlayerSP var1) {
       super(SoundEvents.ITEM_ELYTRA_FLYING, SoundCategory.PLAYERS);
       this.player = p_i47113_1_;
       this.repeat = true;

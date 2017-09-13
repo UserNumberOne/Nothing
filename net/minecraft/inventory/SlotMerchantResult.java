@@ -14,10 +14,10 @@ public class SlotMerchantResult extends Slot {
    private final IMerchant theMerchant;
 
    public SlotMerchantResult(EntityPlayer var1, IMerchant var2, InventoryMerchant var3, int var4, int var5, int var6) {
-      super(var3, var4, var5, var6);
-      this.player = var1;
-      this.theMerchant = var2;
-      this.theMerchantInventory = var3;
+      super(merchantInventory, slotIndex, xPosition, yPosition);
+      this.player = player;
+      this.theMerchant = merchant;
+      this.theMerchantInventory = merchantInventory;
    }
 
    public boolean isItemValid(@Nullable ItemStack var1) {
@@ -26,58 +26,58 @@ public class SlotMerchantResult extends Slot {
 
    public ItemStack decrStackSize(int var1) {
       if (this.getHasStack()) {
-         this.removeCount += Math.min(var1, this.getStack().stackSize);
+         this.removeCount += Math.min(amount, this.getStack().stackSize);
       }
 
-      return super.decrStackSize(var1);
+      return super.decrStackSize(amount);
    }
 
    protected void onCrafting(ItemStack var1, int var2) {
-      this.removeCount += var2;
-      this.onCrafting(var1);
+      this.removeCount += amount;
+      this.onCrafting(stack);
    }
 
    protected void onCrafting(ItemStack var1) {
-      var1.onCrafting(this.player.world, this.player, this.removeCount);
+      stack.onCrafting(this.player.world, this.player, this.removeCount);
       this.removeCount = 0;
    }
 
    public void onPickupFromSlot(EntityPlayer var1, ItemStack var2) {
-      this.onCrafting(var2);
-      MerchantRecipe var3 = this.theMerchantInventory.getCurrentRecipe();
-      if (var3 != null) {
-         ItemStack var4 = this.theMerchantInventory.getStackInSlot(0);
-         ItemStack var5 = this.theMerchantInventory.getStackInSlot(1);
-         if (this.doTrade(var3, var4, var5) || this.doTrade(var3, var5, var4)) {
-            this.theMerchant.useRecipe(var3);
-            var1.addStat(StatList.TRADED_WITH_VILLAGER);
-            if (var4 != null && var4.stackSize <= 0) {
-               var4 = null;
+      this.onCrafting(stack);
+      MerchantRecipe merchantrecipe = this.theMerchantInventory.getCurrentRecipe();
+      if (merchantrecipe != null) {
+         ItemStack itemstack = this.theMerchantInventory.getStackInSlot(0);
+         ItemStack itemstack1 = this.theMerchantInventory.getStackInSlot(1);
+         if (this.doTrade(merchantrecipe, itemstack, itemstack1) || this.doTrade(merchantrecipe, itemstack1, itemstack)) {
+            this.theMerchant.useRecipe(merchantrecipe);
+            playerIn.addStat(StatList.TRADED_WITH_VILLAGER);
+            if (itemstack != null && itemstack.stackSize <= 0) {
+               itemstack = null;
             }
 
-            if (var5 != null && var5.stackSize <= 0) {
-               var5 = null;
+            if (itemstack1 != null && itemstack1.stackSize <= 0) {
+               itemstack1 = null;
             }
 
-            this.theMerchantInventory.setInventorySlotContents(0, var4);
-            this.theMerchantInventory.setInventorySlotContents(1, var5);
+            this.theMerchantInventory.setInventorySlotContents(0, itemstack);
+            this.theMerchantInventory.setInventorySlotContents(1, itemstack1);
          }
       }
 
    }
 
    private boolean doTrade(MerchantRecipe var1, ItemStack var2, ItemStack var3) {
-      ItemStack var4 = var1.getItemToBuy();
-      ItemStack var5 = var1.getSecondItemToBuy();
-      if (var2 != null && var2.getItem() == var4.getItem() && var2.stackSize >= var4.stackSize) {
-         if (var5 != null && var3 != null && var5.getItem() == var3.getItem() && var3.stackSize >= var5.stackSize) {
-            var2.stackSize -= var4.stackSize;
-            var3.stackSize -= var5.stackSize;
+      ItemStack itemstack = trade.getItemToBuy();
+      ItemStack itemstack1 = trade.getSecondItemToBuy();
+      if (firstItem != null && firstItem.getItem() == itemstack.getItem() && firstItem.stackSize >= itemstack.stackSize) {
+         if (itemstack1 != null && secondItem != null && itemstack1.getItem() == secondItem.getItem() && secondItem.stackSize >= itemstack1.stackSize) {
+            firstItem.stackSize -= itemstack.stackSize;
+            secondItem.stackSize -= itemstack1.stackSize;
             return true;
          }
 
-         if (var5 == null && var3 == null) {
-            var2.stackSize -= var4.stackSize;
+         if (itemstack1 == null && secondItem == null) {
+            firstItem.stackSize -= itemstack.stackSize;
             return true;
          }
       }

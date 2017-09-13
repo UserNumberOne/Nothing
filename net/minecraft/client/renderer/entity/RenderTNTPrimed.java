@@ -13,12 +13,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderTNTPrimed extends Render {
-   public RenderTNTPrimed(RenderManager renderManagerIn) {
+   public RenderTNTPrimed(RenderManager var1) {
       super(renderManagerIn);
       this.shadowSize = 0.5F;
    }
 
-   public void doRender(EntityTNTPrimed entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityTNTPrimed var1, double var2, double var4, double var6, float var8, float var9) {
       BlockRendererDispatcher blockrendererdispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
       GlStateManager.pushMatrix();
       GlStateManager.translate((float)x, (float)y + 0.5F, (float)z);
@@ -64,7 +64,7 @@ public class RenderTNTPrimed extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityTNTPrimed entity) {
+   protected ResourceLocation getEntityTexture(EntityTNTPrimed var1) {
       return TextureMap.LOCATION_BLOCKS_TEXTURE;
    }
 }

@@ -11,7 +11,7 @@ public class ParticleEnchantmentTable extends Particle {
    private final double coordY;
    private final double coordZ;
 
-   protected ParticleEnchantmentTable(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn) {
+   protected ParticleEnchantmentTable(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
       this.motionX = xSpeedIn;
       this.motionY = ySpeedIn;
@@ -35,12 +35,12 @@ public class ParticleEnchantmentTable extends Particle {
       this.setParticleTextureIndex((int)(Math.random() * 26.0D + 1.0D + 224.0D));
    }
 
-   public void move(double x, double y, double z) {
+   public void move(double var1, double var3, double var5) {
       this.setBoundingBox(this.getBoundingBox().offset(x, y, z));
       this.resetPositionToBB();
    }
 
-   public int getBrightnessForRender(float p_189214_1_) {
+   public int getBrightnessForRender(float var1) {
       int i = super.getBrightnessForRender(p_189214_1_);
       float f = (float)this.particleAge / (float)this.particleMaxAge;
       f = f * f;
@@ -75,7 +75,7 @@ public class ParticleEnchantmentTable extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class EnchantmentTable implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleEnchantmentTable(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
       }
    }

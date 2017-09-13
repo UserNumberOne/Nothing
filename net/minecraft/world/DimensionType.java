@@ -2,6 +2,7 @@ package net.minecraft.world;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import net.minecraftforge.common.util.EnumHelper;
 
 public enum DimensionType {
    OVERWORLD(0, "Overworld", "", WorldProviderSurface.class),
@@ -12,12 +13,15 @@ public enum DimensionType {
    private final String name;
    private final String suffix;
    private final Class clazz;
+   private boolean shouldLoadSpawn = false;
+   private static Class[] ENUM_ARGS = new Class[]{Integer.TYPE, String.class, String.class, Class.class};
 
    private DimensionType(int var3, String var4, String var5, Class var6) {
-      this.id = var3;
-      this.name = var4;
-      this.suffix = var5;
-      this.clazz = var6;
+      this.id = idIn;
+      this.name = nameIn;
+      this.suffix = suffixIn;
+      this.clazz = clazzIn;
+      this.shouldLoadSpawn = idIn == 0;
    }
 
    public int getId() {
@@ -34,8 +38,8 @@ public enum DimensionType {
 
    public WorldProvider createDimension() {
       try {
-         Constructor var1 = this.clazz.getConstructor();
-         return (WorldProvider)var1.newInstance();
+         Constructor constructor = this.clazz.getConstructor();
+         return (WorldProvider)constructor.newInstance();
       } catch (NoSuchMethodException var2) {
          throw new Error("Could not create new dimension", var2);
       } catch (InvocationTargetException var3) {
@@ -48,12 +52,31 @@ public enum DimensionType {
    }
 
    public static DimensionType getById(int var0) {
-      for(DimensionType var4 : values()) {
-         if (var4.getId() == var0) {
-            return var4;
+      for(DimensionType dimensiontype : values()) {
+         if (dimensiontype.getId() == id) {
+            return dimensiontype;
          }
       }
 
-      throw new IllegalArgumentException("Invalid dimension id " + var0);
+      throw new IllegalArgumentException("Invalid dimension id " + id);
+   }
+
+   public boolean shouldLoadSpawn() {
+      return this.shouldLoadSpawn;
+   }
+
+   public DimensionType setLoadSpawn(boolean var1) {
+      this.shouldLoadSpawn = value;
+      return this;
+   }
+
+   public static DimensionType register(String var0, String var1, int var2, Class var3, boolean var4) {
+      String enum_name = name.replace(" ", "_").toLowerCase();
+      DimensionType ret = (DimensionType)EnumHelper.addEnum(DimensionType.class, enum_name, ENUM_ARGS, new Object[]{id, name, suffix, provider});
+      return ret.setLoadSpawn(keepLoaded);
+   }
+
+   static {
+      EnumHelper.testEnum(DimensionType.class, ENUM_ARGS);
    }
 }

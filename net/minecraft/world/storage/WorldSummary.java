@@ -20,7 +20,7 @@ public class WorldSummary implements Comparable {
    private final int versionId;
    private final boolean versionSnapshot;
 
-   public WorldSummary(WorldInfo info, String fileNameIn, String displayNameIn, long sizeOnDiskIn, boolean requiresConversionIn) {
+   public WorldSummary(WorldInfo var1, String var2, String var3, long var4, boolean var6) {
       this.fileName = fileNameIn;
       this.displayName = displayNameIn;
       this.lastTimePlayed = info.getLastTimePlayed();
@@ -54,7 +54,7 @@ public class WorldSummary implements Comparable {
       return this.lastTimePlayed;
    }
 
-   public int compareTo(WorldSummary p_compareTo_1_) {
+   public int compareTo(WorldSummary var1) {
       return this.lastTimePlayed < p_compareTo_1_.lastTimePlayed ? 1 : (this.lastTimePlayed > p_compareTo_1_.lastTimePlayed ? -1 : this.fileName.compareTo(p_compareTo_1_.fileName));
    }
 

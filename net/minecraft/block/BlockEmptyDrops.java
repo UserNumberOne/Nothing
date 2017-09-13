@@ -8,7 +8,7 @@ import net.minecraft.item.Item;
 
 public class BlockEmptyDrops extends Block {
    public BlockEmptyDrops(Material var1) {
-      super(var1);
+      super(materialIn);
    }
 
    public int quantityDropped(Random var1) {

@@ -13,22 +13,22 @@ public class JsonException extends IOException {
    private final List entries = Lists.newArrayList();
    private final String message;
 
-   public JsonException(String messageIn) {
+   public JsonException(String var1) {
       this.entries.add(new JsonException.Entry());
       this.message = messageIn;
    }
 
-   public JsonException(String messageIn, Throwable cause) {
+   public JsonException(String var1, Throwable var2) {
       super(cause);
       this.entries.add(new JsonException.Entry());
       this.message = messageIn;
    }
 
-   public void prependJsonKey(String p_151380_1_) {
+   public void prependJsonKey(String var1) {
       ((JsonException.Entry)this.entries.get(0)).addJsonKey(p_151380_1_);
    }
 
-   public void setFilenameAndFlush(String p_151381_1_) {
+   public void setFilenameAndFlush(String var1) {
       ((JsonException.Entry)this.entries.get(0)).filename = p_151381_1_;
       this.entries.add(0, new JsonException.Entry());
    }
@@ -37,7 +37,7 @@ public class JsonException extends IOException {
       return "Invalid " + this.entries.get(this.entries.size() - 1) + ": " + this.message;
    }
 
-   public static JsonException forException(Exception p_151379_0_) {
+   public static JsonException forException(Exception var0) {
       if (p_151379_0_ instanceof JsonException) {
          return (JsonException)p_151379_0_;
       } else {
@@ -59,7 +59,7 @@ public class JsonException extends IOException {
          this.jsonKeys = Lists.newArrayList();
       }
 
-      private void addJsonKey(String p_151373_1_) {
+      private void addJsonKey(String var1) {
          this.jsonKeys.add(0, p_151373_1_);
       }
 

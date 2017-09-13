@@ -4,20 +4,16 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import javax.crypto.Cipher;
+import javax.crypto.ShortBufferException;
 
 public class NettyEncryptingEncoder extends MessageToByteEncoder {
    private final NettyEncryptionTranslator encryptionCodec;
 
    public NettyEncryptingEncoder(Cipher var1) {
-      this.encryptionCodec = new NettyEncryptionTranslator(var1);
+      this.encryptionCodec = new NettyEncryptionTranslator(cipher);
    }
 
-   protected void encode(ChannelHandlerContext var1, ByteBuf var2, ByteBuf var3) throws Exception {
-      this.encryptionCodec.cipher(var2, var3);
-   }
-
-   // $FF: synthetic method
-   protected void encode(ChannelHandlerContext var1, Object var2, ByteBuf var3) throws Exception {
-      this.encode(var1, (ByteBuf)var2, var3);
+   protected void encode(ChannelHandlerContext var1, ByteBuf var2, ByteBuf var3) throws ShortBufferException, Exception {
+      this.encryptionCodec.cipher(p_encode_2_, p_encode_3_);
    }
 }

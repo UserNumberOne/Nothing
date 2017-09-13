@@ -10,7 +10,7 @@ public class ModelDragonHead extends ModelBase {
    private final ModelRenderer head;
    private final ModelRenderer jaw;
 
-   public ModelDragonHead(float p_i46588_1_) {
+   public ModelDragonHead(float var1) {
       this.textureWidth = 256;
       this.textureHeight = 256;
       this.setTextureOffset("body.body", 0, 0);
@@ -48,7 +48,7 @@ public class ModelDragonHead extends ModelBase {
       this.head.addChild(this.jaw);
    }
 
-   public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void render(Entity var1, float var2, float var3, float var4, float var5, float var6, float var7) {
       this.jaw.rotateAngleX = (float)(Math.sin((double)(limbSwing * 3.1415927F * 0.2F)) + 1.0D) * 0.2F;
       this.head.rotateAngleY = netHeadYaw * 0.017453292F;
       this.head.rotateAngleX = headPitch * 0.017453292F;

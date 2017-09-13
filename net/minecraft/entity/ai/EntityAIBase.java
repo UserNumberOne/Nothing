@@ -23,7 +23,7 @@ public abstract class EntityAIBase {
    }
 
    public void setMutexBits(int var1) {
-      this.mutexBits = var1;
+      this.mutexBits = mutexBitsIn;
    }
 
    public int getMutexBits() {

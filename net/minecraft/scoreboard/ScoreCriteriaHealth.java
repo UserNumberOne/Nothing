@@ -2,7 +2,7 @@ package net.minecraft.scoreboard;
 
 public class ScoreCriteriaHealth extends ScoreCriteria {
    public ScoreCriteriaHealth(String var1) {
-      super(var1);
+      super(name);
    }
 
    public boolean isReadOnly() {

@@ -12,15 +12,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class CompiledChunk {
    public static final CompiledChunk DUMMY = new CompiledChunk() {
-      protected void setLayerUsed(BlockRenderLayer layer) {
+      protected void setLayerUsed(BlockRenderLayer var1) {
          throw new UnsupportedOperationException();
       }
 
-      public void setLayerStarted(BlockRenderLayer layer) {
+      public void setLayerStarted(BlockRenderLayer var1) {
          throw new UnsupportedOperationException();
       }
 
-      public boolean isVisible(EnumFacing facing, EnumFacing facing2) {
+      public boolean isVisible(EnumFacing var1, EnumFacing var2) {
          return false;
       }
    };
@@ -35,20 +35,20 @@ public class CompiledChunk {
       return this.empty;
    }
 
-   protected void setLayerUsed(BlockRenderLayer layer) {
+   protected void setLayerUsed(BlockRenderLayer var1) {
       this.empty = false;
       this.layersUsed[layer.ordinal()] = true;
    }
 
-   public boolean isLayerEmpty(BlockRenderLayer layer) {
+   public boolean isLayerEmpty(BlockRenderLayer var1) {
       return !this.layersUsed[layer.ordinal()];
    }
 
-   public void setLayerStarted(BlockRenderLayer layer) {
+   public void setLayerStarted(BlockRenderLayer var1) {
       this.layersStarted[layer.ordinal()] = true;
    }
 
-   public boolean isLayerStarted(BlockRenderLayer layer) {
+   public boolean isLayerStarted(BlockRenderLayer var1) {
       return this.layersStarted[layer.ordinal()];
    }
 
@@ -56,15 +56,15 @@ public class CompiledChunk {
       return this.tileEntities;
    }
 
-   public void addTileEntity(TileEntity tileEntityIn) {
+   public void addTileEntity(TileEntity var1) {
       this.tileEntities.add(tileEntityIn);
    }
 
-   public boolean isVisible(EnumFacing facing, EnumFacing facing2) {
+   public boolean isVisible(EnumFacing var1, EnumFacing var2) {
       return this.setVisibility.isVisible(facing, facing2);
    }
 
-   public void setVisibility(SetVisibility visibility) {
+   public void setVisibility(SetVisibility var1) {
       this.setVisibility = visibility;
    }
 
@@ -72,7 +72,7 @@ public class CompiledChunk {
       return this.state;
    }
 
-   public void setState(VertexBuffer.State stateIn) {
+   public void setState(VertexBuffer.State var1) {
       this.state = stateIn;
    }
 }

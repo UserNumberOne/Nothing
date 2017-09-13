@@ -18,7 +18,7 @@ import org.apache.commons.lang3.Validate;
 
 @SideOnly(Side.CLIENT)
 public class AnimationMetadataSectionSerializer extends BaseMetadataSectionSerializer implements JsonSerializer {
-   public AnimationMetadataSection deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+   public AnimationMetadataSection deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
       List list = Lists.newArrayList();
       JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "metadata section");
       int i = JsonUtils.getInt(jsonobject, "frametime", 1);
@@ -56,7 +56,7 @@ public class AnimationMetadataSectionSerializer extends BaseMetadataSectionSeria
       return new AnimationMetadataSection(list, k, l, i, flag);
    }
 
-   private AnimationFrame parseAnimationFrame(int frame, JsonElement element) {
+   private AnimationFrame parseAnimationFrame(int var1, JsonElement var2) {
       if (element.isJsonPrimitive()) {
          return new AnimationFrame(JsonUtils.getInt(element, "frames[" + frame + "]"));
       } else if (element.isJsonObject()) {
@@ -74,7 +74,7 @@ public class AnimationMetadataSectionSerializer extends BaseMetadataSectionSeria
       }
    }
 
-   public JsonElement serialize(AnimationMetadataSection p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
+   public JsonElement serialize(AnimationMetadataSection var1, Type var2, JsonSerializationContext var3) {
       JsonObject jsonobject = new JsonObject();
       jsonobject.addProperty("frametime", Integer.valueOf(p_serialize_1_.getFrameTime()));
       if (p_serialize_1_.getFrameWidth() != -1) {

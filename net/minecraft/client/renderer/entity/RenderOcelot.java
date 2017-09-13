@@ -14,11 +14,11 @@ public class RenderOcelot extends RenderLiving {
    private static final ResourceLocation RED_OCELOT_TEXTURES = new ResourceLocation("textures/entity/cat/red.png");
    private static final ResourceLocation SIAMESE_OCELOT_TEXTURES = new ResourceLocation("textures/entity/cat/siamese.png");
 
-   public RenderOcelot(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn) {
+   public RenderOcelot(RenderManager var1, ModelBase var2, float var3) {
       super(renderManagerIn, modelBaseIn, shadowSizeIn);
    }
 
-   protected ResourceLocation getEntityTexture(EntityOcelot entity) {
+   protected ResourceLocation getEntityTexture(EntityOcelot var1) {
       switch(entity.getTameSkin()) {
       case 0:
       default:
@@ -32,7 +32,7 @@ public class RenderOcelot extends RenderLiving {
       }
    }
 
-   protected void preRenderCallback(EntityOcelot entitylivingbaseIn, float partialTickTime) {
+   protected void preRenderCallback(EntityOcelot var1, float var2) {
       super.preRenderCallback(entitylivingbaseIn, partialTickTime);
       if (entitylivingbaseIn.isTamed()) {
          GlStateManager.scale(0.8F, 0.8F, 0.8F);

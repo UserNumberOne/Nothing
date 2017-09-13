@@ -13,11 +13,11 @@ public class LayerSlimeGel implements LayerRenderer {
    private final RenderSlime slimeRenderer;
    private final ModelBase slimeModel = new ModelSlime(0);
 
-   public LayerSlimeGel(RenderSlime slimeRendererIn) {
+   public LayerSlimeGel(RenderSlime var1) {
       this.slimeRenderer = slimeRendererIn;
    }
 
-   public void doRenderLayer(EntitySlime entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntitySlime var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (!entitylivingbaseIn.isInvisible()) {
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          GlStateManager.enableNormalize();

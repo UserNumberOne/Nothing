@@ -63,15 +63,15 @@ public class BlockSign extends BlockContainer {
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
-      if (var1.isRemote) {
+      if (worldIn.isRemote) {
          return true;
       } else {
-         TileEntity var11 = var1.getTileEntity(var2);
-         return var11 instanceof TileEntitySign ? ((TileEntitySign)var11).executeCommand(var4) : false;
+         TileEntity tileentity = worldIn.getTileEntity(pos);
+         return tileentity instanceof TileEntitySign ? ((TileEntitySign)tileentity).executeCommand(playerIn) : false;
       }
    }
 
    public boolean canPlaceBlockAt(World var1, BlockPos var2) {
-      return !this.hasInvalidNeighbor(var1, var2) && super.canPlaceBlockAt(var1, var2);
+      return !this.hasInvalidNeighbor(worldIn, pos) && super.canPlaceBlockAt(worldIn, pos);
    }
 }

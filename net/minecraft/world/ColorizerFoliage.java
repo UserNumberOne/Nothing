@@ -7,11 +7,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ColorizerFoliage {
    private static int[] foliageBuffer = new int[65536];
 
-   public static void setFoliageBiomeColorizer(int[] foliageBufferIn) {
+   public static void setFoliageBiomeColorizer(int[] var0) {
       foliageBuffer = foliageBufferIn;
    }
 
-   public static int getFoliageColor(double temperature, double humidity) {
+   public static int getFoliageColor(double var0, double var2) {
       humidity = humidity * temperature;
       int i = (int)((1.0D - temperature) * 255.0D);
       int j = (int)((1.0D - humidity) * 255.0D);

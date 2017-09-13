@@ -9,7 +9,7 @@ public class RealmsServerAddress {
    private final String host;
    private final int port;
 
-   protected RealmsServerAddress(String hostIn, int portIn) {
+   protected RealmsServerAddress(String var1, int var2) {
       this.host = hostIn;
       this.port = portIn;
    }
@@ -22,7 +22,7 @@ public class RealmsServerAddress {
       return this.port;
    }
 
-   public static RealmsServerAddress parseString(String p_parseString_0_) {
+   public static RealmsServerAddress parseString(String var0) {
       ServerAddress serveraddress = ServerAddress.fromString(p_parseString_0_);
       return new RealmsServerAddress(serveraddress.getIP(), serveraddress.getPort());
    }

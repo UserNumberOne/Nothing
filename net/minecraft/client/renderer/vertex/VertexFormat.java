@@ -17,7 +17,7 @@ public class VertexFormat {
    private final List uvOffsetsById;
    private int normalElementOffset;
 
-   public VertexFormat(VertexFormat vertexFormatIn) {
+   public VertexFormat(VertexFormat var1) {
       this();
 
       for(int i = 0; i < vertexFormatIn.getElementCount(); ++i) {
@@ -44,7 +44,7 @@ public class VertexFormat {
       this.nextOffset = 0;
    }
 
-   public VertexFormat addElement(VertexFormatElement element) {
+   public VertexFormat addElement(VertexFormatElement var1) {
       if (element.isPositionElement() && this.hasPosition()) {
          LOGGER.warn("VertexFormat error: Trying to add a position VertexFormatElement when one already exists, ignoring.");
          return this;
@@ -83,11 +83,11 @@ public class VertexFormat {
       return this.colorElementOffset;
    }
 
-   public boolean hasUvOffset(int id) {
+   public boolean hasUvOffset(int var1) {
       return this.uvOffsetsById.size() - 1 >= id;
    }
 
-   public int getUvOffsetById(int id) {
+   public int getUvOffsetById(int var1) {
       return ((Integer)this.uvOffsetsById.get(id)).intValue();
    }
 
@@ -133,15 +133,15 @@ public class VertexFormat {
       return this.elements.size();
    }
 
-   public VertexFormatElement getElement(int index) {
+   public VertexFormatElement getElement(int var1) {
       return (VertexFormatElement)this.elements.get(index);
    }
 
-   public int getOffset(int index) {
+   public int getOffset(int var1) {
       return ((Integer)this.offsets.get(index)).intValue();
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {

@@ -10,14 +10,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class TileEntityMobSpawnerRenderer extends TileEntitySpecialRenderer {
-   public void renderTileEntityAt(TileEntityMobSpawner te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntityMobSpawner var1, double var2, double var4, double var6, float var8, int var9) {
       GlStateManager.pushMatrix();
       GlStateManager.translate((float)x + 0.5F, (float)y, (float)z + 0.5F);
       renderMob(te.getSpawnerBaseLogic(), x, y, z, partialTicks);
       GlStateManager.popMatrix();
    }
 
-   public static void renderMob(MobSpawnerBaseLogic mobSpawnerLogic, double posX, double posY, double posZ, float partialTicks) {
+   public static void renderMob(MobSpawnerBaseLogic var0, double var1, double var3, double var5, float var7) {
       Entity entity = mobSpawnerLogic.getCachedEntity();
       if (entity != null) {
          float f = 0.53125F;

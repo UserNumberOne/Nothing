@@ -30,6 +30,8 @@ public interface ITextComponent extends Iterable {
 
    String getUnformattedText();
 
+   String getFormattedText();
+
    List getSiblings();
 
    ITextComponent createCopy();
@@ -38,178 +40,168 @@ public interface ITextComponent extends Iterable {
       private static final Gson GSON;
 
       public ITextComponent deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-         if (var1.isJsonPrimitive()) {
-            return new TextComponentString(var1.getAsString());
-         } else if (!var1.isJsonObject()) {
-            if (var1.isJsonArray()) {
-               JsonArray var11 = var1.getAsJsonArray();
-               ITextComponent var12 = null;
+         if (p_deserialize_1_.isJsonPrimitive()) {
+            return new TextComponentString(p_deserialize_1_.getAsString());
+         } else if (!p_deserialize_1_.isJsonObject()) {
+            if (p_deserialize_1_.isJsonArray()) {
+               JsonArray jsonarray1 = p_deserialize_1_.getAsJsonArray();
+               ITextComponent itextcomponent1 = null;
 
-               for(JsonElement var17 : var11) {
-                  ITextComponent var18 = this.deserialize(var17, var17.getClass(), var3);
-                  if (var12 == null) {
-                     var12 = var18;
+               for(JsonElement jsonelement : jsonarray1) {
+                  ITextComponent itextcomponent2 = this.deserialize(jsonelement, jsonelement.getClass(), p_deserialize_3_);
+                  if (itextcomponent1 == null) {
+                     itextcomponent1 = itextcomponent2;
                   } else {
-                     var12.appendSibling(var18);
+                     itextcomponent1.appendSibling(itextcomponent2);
                   }
                }
 
-               return var12;
+               return itextcomponent1;
             } else {
-               throw new JsonParseException("Don't know how to turn " + var1 + " into a Component");
+               throw new JsonParseException("Don't know how to turn " + p_deserialize_1_ + " into a Component");
             }
          } else {
-            JsonObject var4 = var1.getAsJsonObject();
-            Object var5;
-            if (var4.has("text")) {
-               var5 = new TextComponentString(var4.get("text").getAsString());
-            } else if (var4.has("translate")) {
-               String var6 = var4.get("translate").getAsString();
-               if (var4.has("with")) {
-                  JsonArray var7 = var4.getAsJsonArray("with");
-                  Object[] var8 = new Object[var7.size()];
+            JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
+            Object itextcomponent;
+            if (jsonobject.has("text")) {
+               itextcomponent = new TextComponentString(jsonobject.get("text").getAsString());
+            } else if (jsonobject.has("translate")) {
+               String s = jsonobject.get("translate").getAsString();
+               if (jsonobject.has("with")) {
+                  JsonArray jsonarray = jsonobject.getAsJsonArray("with");
+                  Object[] aobject = new Object[jsonarray.size()];
 
-                  for(int var9 = 0; var9 < var8.length; ++var9) {
-                     var8[var9] = this.deserialize(var7.get(var9), var2, var3);
-                     if (var8[var9] instanceof TextComponentString) {
-                        TextComponentString var10 = (TextComponentString)var8[var9];
-                        if (var10.getStyle().isEmpty() && var10.getSiblings().isEmpty()) {
-                           var8[var9] = var10.getText();
+                  for(int i = 0; i < aobject.length; ++i) {
+                     aobject[i] = this.deserialize(jsonarray.get(i), p_deserialize_2_, p_deserialize_3_);
+                     if (aobject[i] instanceof TextComponentString) {
+                        TextComponentString textcomponentstring = (TextComponentString)aobject[i];
+                        if (textcomponentstring.getStyle().isEmpty() && textcomponentstring.getSiblings().isEmpty()) {
+                           aobject[i] = textcomponentstring.getText();
                         }
                      }
                   }
 
-                  var5 = new TextComponentTranslation(var6, var8);
+                  itextcomponent = new TextComponentTranslation(s, aobject);
                } else {
-                  var5 = new TextComponentTranslation(var6, new Object[0]);
+                  itextcomponent = new TextComponentTranslation(s, new Object[0]);
                }
-            } else if (var4.has("score")) {
-               JsonObject var13 = var4.getAsJsonObject("score");
-               if (!var13.has("name") || !var13.has("objective")) {
+            } else if (jsonobject.has("score")) {
+               JsonObject jsonobject1 = jsonobject.getAsJsonObject("score");
+               if (!jsonobject1.has("name") || !jsonobject1.has("objective")) {
                   throw new JsonParseException("A score component needs a least a name and an objective");
                }
 
-               var5 = new TextComponentScore(JsonUtils.getString(var13, "name"), JsonUtils.getString(var13, "objective"));
-               if (var13.has("value")) {
-                  ((TextComponentScore)var5).setValue(JsonUtils.getString(var13, "value"));
+               itextcomponent = new TextComponentScore(JsonUtils.getString(jsonobject1, "name"), JsonUtils.getString(jsonobject1, "objective"));
+               if (jsonobject1.has("value")) {
+                  ((TextComponentScore)itextcomponent).setValue(JsonUtils.getString(jsonobject1, "value"));
                }
             } else {
-               if (!var4.has("selector")) {
-                  throw new JsonParseException("Don't know how to turn " + var1 + " into a Component");
+               if (!jsonobject.has("selector")) {
+                  throw new JsonParseException("Don't know how to turn " + p_deserialize_1_ + " into a Component");
                }
 
-               var5 = new TextComponentSelector(JsonUtils.getString(var4, "selector"));
+               itextcomponent = new TextComponentSelector(JsonUtils.getString(jsonobject, "selector"));
             }
 
-            if (var4.has("extra")) {
-               JsonArray var14 = var4.getAsJsonArray("extra");
-               if (var14.size() <= 0) {
+            if (jsonobject.has("extra")) {
+               JsonArray jsonarray2 = jsonobject.getAsJsonArray("extra");
+               if (jsonarray2.size() <= 0) {
                   throw new JsonParseException("Unexpected empty array of components");
                }
 
-               for(int var16 = 0; var16 < var14.size(); ++var16) {
-                  ((ITextComponent)var5).appendSibling(this.deserialize(var14.get(var16), var2, var3));
+               for(int j = 0; j < jsonarray2.size(); ++j) {
+                  itextcomponent.appendSibling(this.deserialize(jsonarray2.get(j), p_deserialize_2_, p_deserialize_3_));
                }
             }
 
-            ((ITextComponent)var5).setStyle((Style)var3.deserialize(var1, Style.class));
-            return (ITextComponent)var5;
+            itextcomponent.setStyle((Style)p_deserialize_3_.deserialize(p_deserialize_1_, Style.class));
+            return itextcomponent;
          }
       }
 
       private void serializeChatStyle(Style var1, JsonObject var2, JsonSerializationContext var3) {
-         JsonElement var4 = var3.serialize(var1);
-         if (var4.isJsonObject()) {
-            JsonObject var5 = (JsonObject)var4;
+         JsonElement jsonelement = ctx.serialize(style);
+         if (jsonelement.isJsonObject()) {
+            JsonObject jsonobject = (JsonObject)jsonelement;
 
-            for(Entry var7 : var5.entrySet()) {
-               var2.add((String)var7.getKey(), (JsonElement)var7.getValue());
+            for(Entry entry : jsonobject.entrySet()) {
+               object.add((String)entry.getKey(), (JsonElement)entry.getValue());
             }
          }
 
       }
 
       public JsonElement serialize(ITextComponent var1, Type var2, JsonSerializationContext var3) {
-         JsonObject var4 = new JsonObject();
-         if (!var1.getStyle().isEmpty()) {
-            this.serializeChatStyle(var1.getStyle(), var4, var3);
+         JsonObject jsonobject = new JsonObject();
+         if (!p_serialize_1_.getStyle().isEmpty()) {
+            this.serializeChatStyle(p_serialize_1_.getStyle(), jsonobject, p_serialize_3_);
          }
 
-         if (!var1.getSiblings().isEmpty()) {
-            JsonArray var5 = new JsonArray();
+         if (!p_serialize_1_.getSiblings().isEmpty()) {
+            JsonArray jsonarray = new JsonArray();
 
-            for(ITextComponent var7 : var1.getSiblings()) {
-               var5.add(this.serialize(var7, var7.getClass(), var3));
+            for(ITextComponent itextcomponent : p_serialize_1_.getSiblings()) {
+               jsonarray.add(this.serialize(itextcomponent, itextcomponent.getClass(), p_serialize_3_));
             }
 
-            var4.add("extra", var5);
+            jsonobject.add("extra", jsonarray);
          }
 
-         if (var1 instanceof TextComponentString) {
-            var4.addProperty("text", ((TextComponentString)var1).getText());
-         } else if (var1 instanceof TextComponentTranslation) {
-            TextComponentTranslation var11 = (TextComponentTranslation)var1;
-            var4.addProperty("translate", var11.getKey());
-            if (var11.getFormatArgs() != null && var11.getFormatArgs().length > 0) {
-               JsonArray var14 = new JsonArray();
+         if (p_serialize_1_ instanceof TextComponentString) {
+            jsonobject.addProperty("text", ((TextComponentString)p_serialize_1_).getText());
+         } else if (p_serialize_1_ instanceof TextComponentTranslation) {
+            TextComponentTranslation textcomponenttranslation = (TextComponentTranslation)p_serialize_1_;
+            jsonobject.addProperty("translate", textcomponenttranslation.getKey());
+            if (textcomponenttranslation.getFormatArgs() != null && textcomponenttranslation.getFormatArgs().length > 0) {
+               JsonArray jsonarray1 = new JsonArray();
 
-               for(Object var10 : var11.getFormatArgs()) {
-                  if (var10 instanceof ITextComponent) {
-                     var14.add(this.serialize((ITextComponent)var10, var10.getClass(), var3));
+               for(Object object : textcomponenttranslation.getFormatArgs()) {
+                  if (object instanceof ITextComponent) {
+                     jsonarray1.add(this.serialize((ITextComponent)object, object.getClass(), p_serialize_3_));
                   } else {
-                     var14.add(new JsonPrimitive(String.valueOf(var10)));
+                     jsonarray1.add(new JsonPrimitive(String.valueOf(object)));
                   }
                }
 
-               var4.add("with", var14);
+               jsonobject.add("with", jsonarray1);
             }
-         } else if (var1 instanceof TextComponentScore) {
-            TextComponentScore var12 = (TextComponentScore)var1;
-            JsonObject var15 = new JsonObject();
-            var15.addProperty("name", var12.getName());
-            var15.addProperty("objective", var12.getObjective());
-            var15.addProperty("value", var12.getUnformattedComponentText());
-            var4.add("score", var15);
+         } else if (p_serialize_1_ instanceof TextComponentScore) {
+            TextComponentScore textcomponentscore = (TextComponentScore)p_serialize_1_;
+            JsonObject jsonobject1 = new JsonObject();
+            jsonobject1.addProperty("name", textcomponentscore.getName());
+            jsonobject1.addProperty("objective", textcomponentscore.getObjective());
+            jsonobject1.addProperty("value", textcomponentscore.getUnformattedComponentText());
+            jsonobject.add("score", jsonobject1);
          } else {
-            if (!(var1 instanceof TextComponentSelector)) {
-               throw new IllegalArgumentException("Don't know how to serialize " + var1 + " as a Component");
+            if (!(p_serialize_1_ instanceof TextComponentSelector)) {
+               throw new IllegalArgumentException("Don't know how to serialize " + p_serialize_1_ + " as a Component");
             }
 
-            TextComponentSelector var13 = (TextComponentSelector)var1;
-            var4.addProperty("selector", var13.getSelector());
+            TextComponentSelector textcomponentselector = (TextComponentSelector)p_serialize_1_;
+            jsonobject.addProperty("selector", textcomponentselector.getSelector());
          }
 
-         return var4;
+         return jsonobject;
       }
 
       public static String componentToJson(ITextComponent var0) {
-         return GSON.toJson(var0);
+         return GSON.toJson(component);
       }
 
       public static ITextComponent jsonToComponent(String var0) {
-         return (ITextComponent)JsonUtils.gsonDeserialize(GSON, var0, ITextComponent.class, false);
+         return (ITextComponent)JsonUtils.gsonDeserialize(GSON, json, ITextComponent.class, false);
       }
 
       public static ITextComponent fromJsonLenient(String var0) {
-         return (ITextComponent)JsonUtils.gsonDeserialize(GSON, var0, ITextComponent.class, true);
-      }
-
-      // $FF: synthetic method
-      public JsonElement serialize(Object var1, Type var2, JsonSerializationContext var3) {
-         return this.serialize((ITextComponent)var1, var2, var3);
-      }
-
-      // $FF: synthetic method
-      public Object deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
-         return this.deserialize(var1, var2, var3);
+         return (ITextComponent)JsonUtils.gsonDeserialize(GSON, json, ITextComponent.class, true);
       }
 
       static {
-         GsonBuilder var0 = new GsonBuilder();
-         var0.registerTypeHierarchyAdapter(ITextComponent.class, new ITextComponent.Serializer());
-         var0.registerTypeHierarchyAdapter(Style.class, new Style.Serializer());
-         var0.registerTypeAdapterFactory(new EnumTypeAdapterFactory());
-         GSON = var0.create();
+         GsonBuilder gsonbuilder = new GsonBuilder();
+         gsonbuilder.registerTypeHierarchyAdapter(ITextComponent.class, new ITextComponent.Serializer());
+         gsonbuilder.registerTypeHierarchyAdapter(Style.class, new Style.Serializer());
+         gsonbuilder.registerTypeAdapterFactory(new EnumTypeAdapterFactory());
+         GSON = gsonbuilder.create();
       }
    }
 }

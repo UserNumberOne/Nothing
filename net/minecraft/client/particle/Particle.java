@@ -53,7 +53,7 @@ public class Particle {
    public static double interpPosZ;
    public static Vec3d cameraViewDir;
 
-   protected Particle(World worldIn, double posXIn, double posYIn, double posZIn) {
+   protected Particle(World var1, double var2, double var4, double var6) {
       this.boundingBox = EMPTY_AABB;
       this.width = 0.6F;
       this.height = 1.8F;
@@ -76,7 +76,7 @@ public class Particle {
       this.canCollide = true;
    }
 
-   public Particle(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn) {
+   public Particle(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
       this(worldIn, xCoordIn, yCoordIn, zCoordIn);
       this.motionX = xSpeedIn + (Math.random() * 2.0D - 1.0D) * 0.4000000059604645D;
       this.motionY = ySpeedIn + (Math.random() * 2.0D - 1.0D) * 0.4000000059604645D;
@@ -88,26 +88,26 @@ public class Particle {
       this.motionZ = this.motionZ / (double)f1 * (double)f * 0.4000000059604645D;
    }
 
-   public Particle multiplyVelocity(float multiplier) {
+   public Particle multiplyVelocity(float var1) {
       this.motionX *= (double)multiplier;
       this.motionY = (this.motionY - 0.10000000149011612D) * (double)multiplier + 0.10000000149011612D;
       this.motionZ *= (double)multiplier;
       return this;
    }
 
-   public Particle multipleParticleScaleBy(float scale) {
+   public Particle multipleParticleScaleBy(float var1) {
       this.setSize(0.2F * scale, 0.2F * scale);
       this.particleScale *= scale;
       return this;
    }
 
-   public void setRBGColorF(float particleRedIn, float particleGreenIn, float particleBlueIn) {
+   public void setRBGColorF(float var1, float var2, float var3) {
       this.particleRed = particleRedIn;
       this.particleGreen = particleGreenIn;
       this.particleBlue = particleBlueIn;
    }
 
-   public void setAlphaF(float alpha) {
+   public void setAlphaF(float var1) {
       this.particleAlpha = alpha;
    }
 
@@ -127,7 +127,7 @@ public class Particle {
       return this.particleBlue;
    }
 
-   public void setMaxAge(int p_187114_1_) {
+   public void setMaxAge(int var1) {
       this.particleMaxAge = p_187114_1_;
    }
 
@@ -151,7 +151,7 @@ public class Particle {
 
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = (float)this.particleTextureIndexX / 16.0F;
       float f1 = f + 0.0624375F;
       float f2 = (float)this.particleTextureIndexY / 16.0F;
@@ -194,7 +194,7 @@ public class Particle {
       return 0;
    }
 
-   public void setParticleTexture(TextureAtlasSprite texture) {
+   public void setParticleTexture(TextureAtlasSprite var1) {
       int i = this.getFXLayer();
       if (i == 1) {
          this.particleTexture = texture;
@@ -203,7 +203,7 @@ public class Particle {
       }
    }
 
-   public void setParticleTextureIndex(int particleTextureIndex) {
+   public void setParticleTextureIndex(int var1) {
       if (this.getFXLayer() != 0) {
          throw new RuntimeException("Invalid call to Particle.setMiscTex");
       } else {
@@ -224,7 +224,7 @@ public class Particle {
       this.isExpired = true;
    }
 
-   protected void setSize(float p_187115_1_, float p_187115_2_) {
+   protected void setSize(float var1, float var2) {
       if (p_187115_1_ != this.width || p_187115_2_ != this.height) {
          this.width = p_187115_1_;
          this.height = p_187115_2_;
@@ -234,7 +234,7 @@ public class Particle {
 
    }
 
-   public void setPosition(double p_187109_1_, double p_187109_3_, double p_187109_5_) {
+   public void setPosition(double var1, double var3, double var5) {
       this.posX = p_187109_1_;
       this.posY = p_187109_3_;
       this.posZ = p_187109_5_;
@@ -243,7 +243,7 @@ public class Particle {
       this.setBoundingBox(new AxisAlignedBB(p_187109_1_ - (double)f, p_187109_3_, p_187109_5_ - (double)f, p_187109_1_ + (double)f, p_187109_3_ + (double)f1, p_187109_5_ + (double)f));
    }
 
-   public void move(double x, double y, double z) {
+   public void move(double var1, double var3, double var5) {
       double d0 = y;
       if (this.canCollide) {
          List list = this.world.getCollisionBoxes((Entity)null, this.getBoundingBox().addCoord(x, y, z));
@@ -288,7 +288,7 @@ public class Particle {
       this.posZ = (axisalignedbb.minZ + axisalignedbb.maxZ) / 2.0D;
    }
 
-   public int getBrightnessForRender(float p_189214_1_) {
+   public int getBrightnessForRender(float var1) {
       BlockPos blockpos = new BlockPos(this.posX, this.posY, this.posZ);
       return this.world.isBlockLoaded(blockpos) ? this.world.getCombinedLight(blockpos, 0) : 0;
    }
@@ -301,7 +301,7 @@ public class Particle {
       return this.boundingBox;
    }
 
-   public void setBoundingBox(AxisAlignedBB bb) {
+   public void setBoundingBox(AxisAlignedBB var1) {
       this.boundingBox = bb;
    }
 }

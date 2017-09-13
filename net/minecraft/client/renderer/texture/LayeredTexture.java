@@ -19,11 +19,11 @@ public class LayeredTexture extends AbstractTexture {
    private static final Logger LOGGER = LogManager.getLogger();
    public final List layeredTextureNames;
 
-   public LayeredTexture(String... textureNames) {
+   public LayeredTexture(String... var1) {
       this.layeredTextureNames = Lists.newArrayList(textureNames);
    }
 
-   public void loadTexture(IResourceManager resourceManager) throws IOException {
+   public void loadTexture(IResourceManager var1) throws IOException {
       this.deleteGlTexture();
       BufferedImage bufferedimage = null;
 

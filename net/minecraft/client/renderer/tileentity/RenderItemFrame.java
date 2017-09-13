@@ -35,12 +35,12 @@ public class RenderItemFrame extends Render {
    private final ModelResourceLocation mapModel = new ModelResourceLocation("item_frame", "map");
    private final RenderItem itemRenderer;
 
-   public RenderItemFrame(RenderManager renderManagerIn, RenderItem itemRendererIn) {
+   public RenderItemFrame(RenderManager var1, RenderItem var2) {
       super(renderManagerIn);
       this.itemRenderer = itemRendererIn;
    }
 
-   public void doRender(EntityItemFrame entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityItemFrame var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       BlockPos blockpos = entity.getHangingPosition();
       double d0 = (double)blockpos.getX() - entity.posX + x;
@@ -78,11 +78,11 @@ public class RenderItemFrame extends Render {
       this.renderName(entity, x + (double)((float)entity.facingDirection.getFrontOffsetX() * 0.3F), y - 0.25D, z + (double)((float)entity.facingDirection.getFrontOffsetZ() * 0.3F));
    }
 
-   protected ResourceLocation getEntityTexture(EntityItemFrame entity) {
+   protected ResourceLocation getEntityTexture(EntityItemFrame var1) {
       return null;
    }
 
-   private void renderItem(EntityItemFrame itemFrame) {
+   private void renderItem(EntityItemFrame var1) {
       ItemStack itemstack = itemFrame.getDisplayedItem();
       if (itemstack != null) {
          EntityItem entityitem = new EntityItem(itemFrame.world, 0.0D, 0.0D, 0.0D, itemstack);
@@ -130,7 +130,7 @@ public class RenderItemFrame extends Render {
 
    }
 
-   protected void renderName(EntityItemFrame entity, double x, double y, double z) {
+   protected void renderName(EntityItemFrame var1, double var2, double var4, double var6) {
       if (Minecraft.isGuiEnabled() && entity.getDisplayedItem() != null && entity.getDisplayedItem().hasDisplayName() && this.renderManager.pointedEntity == entity) {
          double d0 = entity.getDistanceSqToEntity(this.renderManager.renderViewEntity);
          float f = entity.isSneaking() ? 32.0F : 64.0F;

@@ -13,14 +13,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ConditionOr implements ICondition {
    final Iterable conditions;
 
-   public ConditionOr(Iterable conditionsIn) {
+   public ConditionOr(Iterable var1) {
       this.conditions = conditionsIn;
    }
 
-   public Predicate getPredicate(final BlockStateContainer blockState) {
+   public Predicate getPredicate(final BlockStateContainer var1) {
       return Predicates.or(Iterables.transform(this.conditions, new Function() {
          @Nullable
-         public Predicate apply(@Nullable ICondition p_apply_1_) {
+         public Predicate apply(@Nullable ICondition var1x) {
             return p_apply_1_ == null ? null : p_apply_1_.getPredicate(blockState);
          }
       }));

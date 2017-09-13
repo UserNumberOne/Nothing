@@ -10,7 +10,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuardianSound extends MovingSound {
    private final EntityGuardian guardian;
 
-   public GuardianSound(EntityGuardian guardian) {
+   public GuardianSound(EntityGuardian var1) {
       super(SoundEvents.ENTITY_GUARDIAN_ATTACK, SoundCategory.HOSTILE);
       this.guardian = guardian;
       this.attenuationType = ISound.AttenuationType.NONE;

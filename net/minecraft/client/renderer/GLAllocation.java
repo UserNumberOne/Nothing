@@ -10,7 +10,7 @@ import org.lwjgl.util.glu.GLU;
 
 @SideOnly(Side.CLIENT)
 public class GLAllocation {
-   public static synchronized int generateDisplayLists(int range) {
+   public static synchronized int generateDisplayLists(int var0) {
       int i = GlStateManager.glGenLists(range);
       if (i == 0) {
          int j = GlStateManager.glGetError();
@@ -25,23 +25,23 @@ public class GLAllocation {
       }
    }
 
-   public static synchronized void deleteDisplayLists(int list, int range) {
+   public static synchronized void deleteDisplayLists(int var0, int var1) {
       GlStateManager.glDeleteLists(list, range);
    }
 
-   public static synchronized void deleteDisplayLists(int list) {
+   public static synchronized void deleteDisplayLists(int var0) {
       deleteDisplayLists(list, 1);
    }
 
-   public static synchronized ByteBuffer createDirectByteBuffer(int capacity) {
+   public static synchronized ByteBuffer createDirectByteBuffer(int var0) {
       return ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder());
    }
 
-   public static IntBuffer createDirectIntBuffer(int capacity) {
+   public static IntBuffer createDirectIntBuffer(int var0) {
       return createDirectByteBuffer(capacity << 2).asIntBuffer();
    }
 
-   public static FloatBuffer createDirectFloatBuffer(int capacity) {
+   public static FloatBuffer createDirectFloatBuffer(int var0) {
       return createDirectByteBuffer(capacity << 2).asFloatBuffer();
    }
 }

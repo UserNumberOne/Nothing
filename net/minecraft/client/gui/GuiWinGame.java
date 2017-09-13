@@ -52,7 +52,7 @@ public class GuiWinGame extends GuiScreen {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (keyCode == 1) {
          this.sendRespawnPacket();
       }
@@ -122,7 +122,7 @@ public class GuiWinGame extends GuiScreen {
 
    }
 
-   private void drawWinGameScreen(int p_146575_1_, int p_146575_2_, float p_146575_3_) {
+   private void drawWinGameScreen(int var1, int var2, float var3) {
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();
       this.mc.getTextureManager().bindTexture(Gui.OPTIONS_BACKGROUND);
@@ -151,7 +151,7 @@ public class GuiWinGame extends GuiScreen {
       tessellator.draw();
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawWinGameScreen(mouseX, mouseY, partialTicks);
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();

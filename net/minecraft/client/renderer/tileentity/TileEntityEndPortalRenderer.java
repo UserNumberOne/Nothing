@@ -21,7 +21,7 @@ public class TileEntityEndPortalRenderer extends TileEntitySpecialRenderer {
    private static final Random RANDOM = new Random(31100L);
    FloatBuffer buffer = GLAllocation.createDirectFloatBuffer(16);
 
-   public void renderTileEntityAt(TileEntityEndPortal te, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntityEndPortal var1, double var2, double var4, double var6, float var8, int var9) {
       float f = (float)this.rendererDispatcher.entityX;
       float f1 = (float)this.rendererDispatcher.entityY;
       float f2 = (float)this.rendererDispatcher.entityZ;
@@ -107,7 +107,7 @@ public class TileEntityEndPortalRenderer extends TileEntitySpecialRenderer {
       GlStateManager.enableLighting();
    }
 
-   private FloatBuffer getBuffer(float p_147525_1_, float p_147525_2_, float p_147525_3_, float p_147525_4_) {
+   private FloatBuffer getBuffer(float var1, float var2, float var3, float var4) {
       this.buffer.clear();
       this.buffer.put(p_147525_1_).put(p_147525_2_).put(p_147525_3_).put(p_147525_4_);
       this.buffer.flip();

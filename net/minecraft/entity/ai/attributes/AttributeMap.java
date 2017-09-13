@@ -2,7 +2,6 @@ package net.minecraft.entity.ai.attributes;
 
 import com.google.common.collect.Sets;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.util.LowerStringMap;
@@ -12,40 +11,40 @@ public class AttributeMap extends AbstractAttributeMap {
    protected final Map descriptionToAttributeInstanceMap = new LowerStringMap();
 
    public ModifiableAttributeInstance getAttributeInstance(IAttribute var1) {
-      return (ModifiableAttributeInstance)super.getAttributeInstance(var1);
+      return (ModifiableAttributeInstance)super.getAttributeInstance(attribute);
    }
 
    public ModifiableAttributeInstance getAttributeInstanceByName(String var1) {
-      IAttributeInstance var2 = super.getAttributeInstanceByName(var1);
-      if (var2 == null) {
-         var2 = (IAttributeInstance)this.descriptionToAttributeInstanceMap.get(var1);
+      IAttributeInstance iattributeinstance = super.getAttributeInstanceByName(attributeName);
+      if (iattributeinstance == null) {
+         iattributeinstance = (IAttributeInstance)this.descriptionToAttributeInstanceMap.get(attributeName);
       }
 
-      return (ModifiableAttributeInstance)var2;
+      return (ModifiableAttributeInstance)iattributeinstance;
    }
 
    public IAttributeInstance registerAttribute(IAttribute var1) {
-      IAttributeInstance var2 = super.registerAttribute(var1);
-      if (var1 instanceof RangedAttribute && ((RangedAttribute)var1).getDescription() != null) {
-         this.descriptionToAttributeInstanceMap.put(((RangedAttribute)var1).getDescription(), var2);
+      IAttributeInstance iattributeinstance = super.registerAttribute(attribute);
+      if (attribute instanceof RangedAttribute && ((RangedAttribute)attribute).getDescription() != null) {
+         this.descriptionToAttributeInstanceMap.put(((RangedAttribute)attribute).getDescription(), iattributeinstance);
       }
 
-      return var2;
+      return iattributeinstance;
    }
 
    protected IAttributeInstance createInstance(IAttribute var1) {
-      return new ModifiableAttributeInstance(this, var1);
+      return new ModifiableAttributeInstance(this, attribute);
    }
 
    public void onAttributeModified(IAttributeInstance var1) {
-      if (var1.getAttribute().getShouldWatch()) {
-         this.attributeInstanceSet.add(var1);
+      if (instance.getAttribute().getShouldWatch()) {
+         this.attributeInstanceSet.add(instance);
       }
 
-      for(IAttribute var3 : this.descendantsByParent.get(var1.getAttribute())) {
-         ModifiableAttributeInstance var4 = this.getAttributeInstance(var3);
-         if (var4 != null) {
-            var4.flagForUpdate();
+      for(IAttribute iattribute : this.descendantsByParent.get(instance.getAttribute())) {
+         ModifiableAttributeInstance modifiableattributeinstance = this.getAttributeInstance(iattribute);
+         if (modifiableattributeinstance != null) {
+            modifiableattributeinstance.flagForUpdate();
          }
       }
 
@@ -56,24 +55,14 @@ public class AttributeMap extends AbstractAttributeMap {
    }
 
    public Collection getWatchedAttributes() {
-      HashSet var1 = Sets.newHashSet();
+      Set set = Sets.newHashSet();
 
-      for(IAttributeInstance var3 : this.getAllAttributes()) {
-         if (var3.getAttribute().getShouldWatch()) {
-            var1.add(var3);
+      for(IAttributeInstance iattributeinstance : this.getAllAttributes()) {
+         if (iattributeinstance.getAttribute().getShouldWatch()) {
+            set.add(iattributeinstance);
          }
       }
 
-      return var1;
-   }
-
-   // $FF: synthetic method
-   public IAttributeInstance getAttributeInstanceByName(String var1) {
-      return this.getAttributeInstanceByName(var1);
-   }
-
-   // $FF: synthetic method
-   public IAttributeInstance getAttributeInstance(IAttribute var1) {
-      return this.getAttributeInstance(var1);
+      return set;
    }
 }

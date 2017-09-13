@@ -19,7 +19,7 @@ public class ResourcePackListEntryServer extends ResourcePackListEntry {
    private final IResourcePack resourcePack;
    private final ResourceLocation resourcePackIcon;
 
-   public ResourcePackListEntryServer(GuiScreenResourcePacks p_i46594_1_, IResourcePack p_i46594_2_) {
+   public ResourcePackListEntryServer(GuiScreenResourcePacks var1, IResourcePack var2) {
       super(p_i46594_1_);
       this.resourcePack = p_i46594_2_;
 

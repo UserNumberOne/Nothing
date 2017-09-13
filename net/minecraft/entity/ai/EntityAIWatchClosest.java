@@ -13,18 +13,18 @@ public class EntityAIWatchClosest extends EntityAIBase {
    protected Class watchedClass;
 
    public EntityAIWatchClosest(EntityLiving var1, Class var2, float var3) {
-      this.theWatcher = var1;
-      this.watchedClass = var2;
-      this.maxDistanceForPlayer = var3;
+      this.theWatcher = entitylivingIn;
+      this.watchedClass = watchTargetClass;
+      this.maxDistanceForPlayer = maxDistance;
       this.chance = 0.02F;
       this.setMutexBits(2);
    }
 
    public EntityAIWatchClosest(EntityLiving var1, Class var2, float var3, float var4) {
-      this.theWatcher = var1;
-      this.watchedClass = var2;
-      this.maxDistanceForPlayer = var3;
-      this.chance = var4;
+      this.theWatcher = entitylivingIn;
+      this.watchedClass = watchTargetClass;
+      this.maxDistanceForPlayer = maxDistance;
+      this.chance = chanceIn;
       this.setMutexBits(2);
    }
 
@@ -47,13 +47,7 @@ public class EntityAIWatchClosest extends EntityAIBase {
    }
 
    public boolean continueExecuting() {
-      if (!this.closestEntity.isEntityAlive()) {
-         return false;
-      } else if (this.theWatcher.getDistanceSqToEntity(this.closestEntity) > (double)(this.maxDistanceForPlayer * this.maxDistanceForPlayer)) {
-         return false;
-      } else {
-         return this.lookTime > 0;
-      }
+      return !this.closestEntity.isEntityAlive() ? false : (this.theWatcher.getDistanceSqToEntity(this.closestEntity) > (double)(this.maxDistanceForPlayer * this.maxDistanceForPlayer) ? false : this.lookTime > 0);
    }
 
    public void startExecuting() {

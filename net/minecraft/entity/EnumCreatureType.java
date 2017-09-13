@@ -5,6 +5,7 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityWaterMob;
+import net.minecraft.entity.passive.IAnimals;
 
 public enum EnumCreatureType {
    MONSTER(IMob.class, 70, Material.AIR, false, false),
@@ -19,11 +20,11 @@ public enum EnumCreatureType {
    private final boolean isAnimal;
 
    private EnumCreatureType(Class var3, int var4, Material var5, boolean var6, boolean var7) {
-      this.creatureClass = var3;
-      this.maxNumberOfCreature = var4;
-      this.creatureMaterial = var5;
-      this.isPeacefulCreature = var6;
-      this.isAnimal = var7;
+      this.creatureClass = creatureClassIn;
+      this.maxNumberOfCreature = maxNumberOfCreatureIn;
+      this.creatureMaterial = creatureMaterialIn;
+      this.isPeacefulCreature = isPeacefulCreatureIn;
+      this.isAnimal = isAnimalIn;
    }
 
    public Class getCreatureClass() {

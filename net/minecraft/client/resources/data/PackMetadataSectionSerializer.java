@@ -14,7 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class PackMetadataSectionSerializer extends BaseMetadataSectionSerializer implements JsonSerializer {
-   public PackMetadataSection deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+   public PackMetadataSection deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
       JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
       ITextComponent itextcomponent = (ITextComponent)p_deserialize_3_.deserialize(jsonobject.get("description"), ITextComponent.class);
       if (itextcomponent == null) {
@@ -25,7 +25,7 @@ public class PackMetadataSectionSerializer extends BaseMetadataSectionSerializer
       }
    }
 
-   public JsonElement serialize(PackMetadataSection p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
+   public JsonElement serialize(PackMetadataSection var1, Type var2, JsonSerializationContext var3) {
       JsonObject jsonobject = new JsonObject();
       jsonobject.addProperty("pack_format", Integer.valueOf(p_serialize_1_.getPackFormat()));
       jsonobject.add("description", p_serialize_3_.serialize(p_serialize_1_.getPackDescription()));

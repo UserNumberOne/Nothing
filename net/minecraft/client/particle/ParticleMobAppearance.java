@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ParticleMobAppearance extends Particle {
    private EntityLivingBase entity;
 
-   protected ParticleMobAppearance(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn) {
+   protected ParticleMobAppearance(World var1, double var2, double var4, double var6) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0D, 0.0D, 0.0D);
       this.particleRed = 1.0F;
       this.particleGreen = 1.0F;
@@ -43,7 +43,7 @@ public class ParticleMobAppearance extends Particle {
 
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       if (this.entity != null) {
          RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
          rendermanager.setRenderPosition(Particle.interpPosX, Particle.interpPosY, Particle.interpPosZ);
@@ -76,7 +76,7 @@ public class ParticleMobAppearance extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleMobAppearance(worldIn, xCoordIn, yCoordIn, zCoordIn);
       }
    }

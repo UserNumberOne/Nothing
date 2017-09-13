@@ -13,7 +13,7 @@ public abstract class LootFunction {
    private final LootCondition[] conditions;
 
    protected LootFunction(LootCondition[] var1) {
-      this.conditions = var1;
+      this.conditions = conditionsIn;
    }
 
    public abstract ItemStack apply(ItemStack var1, Random var2, LootContext var3);
@@ -27,8 +27,8 @@ public abstract class LootFunction {
       private final Class functionClass;
 
       protected Serializer(ResourceLocation var1, Class var2) {
-         this.lootTableLocation = var1;
-         this.functionClass = var2;
+         this.lootTableLocation = location;
+         this.functionClass = clazz;
       }
 
       public ResourceLocation getFunctionName() {

@@ -28,7 +28,7 @@ public class SimpleResource implements IResource, Closeable {
    private boolean mcmetaJsonChecked;
    private JsonObject mcmetaJson;
 
-   public SimpleResource(String resourcePackNameIn, ResourceLocation srResourceLocationIn, InputStream resourceInputStreamIn, InputStream mcmetaInputStreamIn, MetadataSerializer srMetadataSerializerIn) {
+   public SimpleResource(String var1, ResourceLocation var2, InputStream var3, InputStream var4, MetadataSerializer var5) {
       this.resourcePackName = resourcePackNameIn;
       this.srResourceLocation = srResourceLocationIn;
       this.resourceInputStream = resourceInputStreamIn;
@@ -49,7 +49,7 @@ public class SimpleResource implements IResource, Closeable {
    }
 
    @Nullable
-   public IMetadataSection getMetadata(String sectionName) {
+   public IMetadataSection getMetadata(String var1) {
       if (!this.hasMetadata()) {
          return (IMetadataSection)null;
       } else {
@@ -78,7 +78,7 @@ public class SimpleResource implements IResource, Closeable {
       return this.resourcePackName;
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else if (!(p_equals_1_ instanceof SimpleResource)) {

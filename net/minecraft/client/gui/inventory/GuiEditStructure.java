@@ -62,7 +62,7 @@ public class GuiEditStructure extends GuiScreen {
    private final List tabOrder = Lists.newArrayList();
    private final DecimalFormat decimalFormat = new DecimalFormat("0.0###");
 
-   public GuiEditStructure(TileEntityStructure p_i47142_1_) {
+   public GuiEditStructure(TileEntityStructure var1) {
       this.tileStructure = p_i47142_1_;
       this.decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
    }
@@ -157,7 +157,7 @@ public class GuiEditStructure extends GuiScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          if (button.id == 1) {
             this.tileStructure.setMirror(this.mirror);
@@ -372,7 +372,7 @@ public class GuiEditStructure extends GuiScreen {
       this.modeButton.displayString = I18n.format("structure_block.mode." + this.tileStructure.getMode().getName());
    }
 
-   private boolean sendToServer(int p_189820_1_) {
+   private boolean sendToServer(int var1) {
       try {
          PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
          this.tileStructure.writeCoordinates(packetbuffer);
@@ -401,7 +401,7 @@ public class GuiEditStructure extends GuiScreen {
       }
    }
 
-   private long parseSeed(String p_189821_1_) {
+   private long parseSeed(String var1) {
       try {
          return Long.valueOf(p_189821_1_).longValue();
       } catch (NumberFormatException var3) {
@@ -409,7 +409,7 @@ public class GuiEditStructure extends GuiScreen {
       }
    }
 
-   private float parseIntegrity(String p_189819_1_) {
+   private float parseIntegrity(String var1) {
       try {
          return Float.valueOf(p_189819_1_).floatValue();
       } catch (NumberFormatException var3) {
@@ -417,7 +417,7 @@ public class GuiEditStructure extends GuiScreen {
       }
    }
 
-   private int parseCoordinate(String p_189817_1_) {
+   private int parseCoordinate(String var1) {
       try {
          return Integer.parseInt(p_189817_1_);
       } catch (NumberFormatException var3) {
@@ -425,7 +425,7 @@ public class GuiEditStructure extends GuiScreen {
       }
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (this.nameEdit.getVisible() && isValidCharacterForName(typedChar, keyCode)) {
          this.nameEdit.textboxKeyTyped(typedChar, keyCode);
       }
@@ -506,7 +506,7 @@ public class GuiEditStructure extends GuiScreen {
 
    }
 
-   private static boolean isValidCharacterForName(char p_190301_0_, int p_190301_1_) {
+   private static boolean isValidCharacterForName(char var0, int var1) {
       boolean flag = true;
 
       for(int i : LEGAL_KEY_CODES) {
@@ -525,7 +525,7 @@ public class GuiEditStructure extends GuiScreen {
       return flag;
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       if (this.nameEdit.getVisible()) {
          this.nameEdit.mouseClicked(mouseX, mouseY, mouseButton);
@@ -569,7 +569,7 @@ public class GuiEditStructure extends GuiScreen {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       TileEntityStructure.Mode tileentitystructure$mode = this.tileStructure.getMode();
       this.drawCenteredString(this.fontRendererObj, I18n.format("tile.structureBlock.name"), this.width / 2, 10, 16777215);

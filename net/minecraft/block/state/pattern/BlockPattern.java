@@ -18,12 +18,12 @@ public class BlockPattern {
    private final int palmLength;
 
    public BlockPattern(Predicate[][][] var1) {
-      this.blockMatches = var1;
-      this.fingerLength = var1.length;
+      this.blockMatches = predicatesIn;
+      this.fingerLength = predicatesIn.length;
       if (this.fingerLength > 0) {
-         this.thumbLength = var1[0].length;
+         this.thumbLength = predicatesIn[0].length;
          if (this.thumbLength > 0) {
-            this.palmLength = var1[0][0].length;
+            this.palmLength = predicatesIn[0][0].length;
          } else {
             this.palmLength = 0;
          }
@@ -48,31 +48,31 @@ public class BlockPattern {
 
    @Nullable
    private BlockPattern.PatternHelper checkPatternAt(BlockPos var1, EnumFacing var2, EnumFacing var3, LoadingCache var4) {
-      for(int var5 = 0; var5 < this.palmLength; ++var5) {
-         for(int var6 = 0; var6 < this.thumbLength; ++var6) {
-            for(int var7 = 0; var7 < this.fingerLength; ++var7) {
-               if (!this.blockMatches[var7][var6][var5].apply(var4.getUnchecked(translateOffset(var1, var2, var3, var5, var6, var7)))) {
+      for(int i = 0; i < this.palmLength; ++i) {
+         for(int j = 0; j < this.thumbLength; ++j) {
+            for(int k = 0; k < this.fingerLength; ++k) {
+               if (!this.blockMatches[k][j][i].apply(lcache.getUnchecked(translateOffset(pos, finger, thumb, i, j, k)))) {
                   return null;
                }
             }
          }
       }
 
-      return new BlockPattern.PatternHelper(var1, var2, var3, var4, this.palmLength, this.thumbLength, this.fingerLength);
+      return new BlockPattern.PatternHelper(pos, finger, thumb, lcache, this.palmLength, this.thumbLength, this.fingerLength);
    }
 
    @Nullable
    public BlockPattern.PatternHelper match(World var1, BlockPos var2) {
-      LoadingCache var3 = createLoadingCache(var1, false);
-      int var4 = Math.max(Math.max(this.palmLength, this.thumbLength), this.fingerLength);
+      LoadingCache loadingcache = createLoadingCache(worldIn, false);
+      int i = Math.max(Math.max(this.palmLength, this.thumbLength), this.fingerLength);
 
-      for(BlockPos var6 : BlockPos.getAllInBox(var2, var2.add(var4 - 1, var4 - 1, var4 - 1))) {
-         for(EnumFacing var10 : EnumFacing.values()) {
-            for(EnumFacing var14 : EnumFacing.values()) {
-               if (var14 != var10 && var14 != var10.getOpposite()) {
-                  BlockPattern.PatternHelper var15 = this.checkPatternAt(var6, var10, var14, var3);
-                  if (var15 != null) {
-                     return var15;
+      for(BlockPos blockpos : BlockPos.getAllInBox(pos, pos.add(i - 1, i - 1, i - 1))) {
+         for(EnumFacing enumfacing : EnumFacing.values()) {
+            for(EnumFacing enumfacing1 : EnumFacing.values()) {
+               if (enumfacing1 != enumfacing && enumfacing1 != enumfacing.getOpposite()) {
+                  BlockPattern.PatternHelper blockpattern$patternhelper = this.checkPatternAt(blockpos, enumfacing, enumfacing1, loadingcache);
+                  if (blockpattern$patternhelper != null) {
+                     return blockpattern$patternhelper;
                   }
                }
             }
@@ -83,15 +83,15 @@ public class BlockPattern {
    }
 
    public static LoadingCache createLoadingCache(World var0, boolean var1) {
-      return CacheBuilder.newBuilder().build(new BlockPattern.CacheLoader(var0, var1));
+      return CacheBuilder.newBuilder().build(new BlockPattern.CacheLoader(worldIn, forceLoadIn));
    }
 
    protected static BlockPos translateOffset(BlockPos var0, EnumFacing var1, EnumFacing var2, int var3, int var4, int var5) {
-      if (var1 != var2 && var1 != var2.getOpposite()) {
-         Vec3i var6 = new Vec3i(var1.getFrontOffsetX(), var1.getFrontOffsetY(), var1.getFrontOffsetZ());
-         Vec3i var7 = new Vec3i(var2.getFrontOffsetX(), var2.getFrontOffsetY(), var2.getFrontOffsetZ());
-         Vec3i var8 = var6.crossProduct(var7);
-         return var0.add(var7.getX() * -var4 + var8.getX() * var3 + var6.getX() * var5, var7.getY() * -var4 + var8.getY() * var3 + var6.getY() * var5, var7.getZ() * -var4 + var8.getZ() * var3 + var6.getZ() * var5);
+      if (finger != thumb && finger != thumb.getOpposite()) {
+         Vec3i vec3i = new Vec3i(finger.getFrontOffsetX(), finger.getFrontOffsetY(), finger.getFrontOffsetZ());
+         Vec3i vec3i1 = new Vec3i(thumb.getFrontOffsetX(), thumb.getFrontOffsetY(), thumb.getFrontOffsetZ());
+         Vec3i vec3i2 = vec3i.crossProduct(vec3i1);
+         return pos.add(vec3i1.getX() * -thumbOffset + vec3i2.getX() * palmOffset + vec3i.getX() * fingerOffset, vec3i1.getY() * -thumbOffset + vec3i2.getY() * palmOffset + vec3i.getY() * fingerOffset, vec3i1.getZ() * -thumbOffset + vec3i2.getZ() * palmOffset + vec3i.getZ() * fingerOffset);
       } else {
          throw new IllegalArgumentException("Invalid forwards & up combination");
       }
@@ -102,17 +102,12 @@ public class BlockPattern {
       private final boolean forceLoad;
 
       public CacheLoader(World var1, boolean var2) {
-         this.world = var1;
-         this.forceLoad = var2;
+         this.world = worldIn;
+         this.forceLoad = forceLoadIn;
       }
 
       public BlockWorldState load(BlockPos var1) throws Exception {
-         return new BlockWorldState(this.world, var1, this.forceLoad);
-      }
-
-      // $FF: synthetic method
-      public Object load(Object var1) throws Exception {
-         return this.load((BlockPos)var1);
+         return new BlockWorldState(this.world, p_load_1_, this.forceLoad);
       }
    }
 
@@ -126,13 +121,13 @@ public class BlockPattern {
       private final int depth;
 
       public PatternHelper(BlockPos var1, EnumFacing var2, EnumFacing var3, LoadingCache var4, int var5, int var6, int var7) {
-         this.frontTopLeft = var1;
-         this.forwards = var2;
-         this.up = var3;
-         this.lcache = var4;
-         this.width = var5;
-         this.height = var6;
-         this.depth = var7;
+         this.frontTopLeft = posIn;
+         this.forwards = fingerIn;
+         this.up = thumbIn;
+         this.lcache = lcacheIn;
+         this.width = p_i46378_5_;
+         this.height = p_i46378_6_;
+         this.depth = p_i46378_7_;
       }
 
       public BlockPos getFrontTopLeft() {
@@ -156,7 +151,7 @@ public class BlockPattern {
       }
 
       public BlockWorldState translateOffset(int var1, int var2, int var3) {
-         return (BlockWorldState)this.lcache.getUnchecked(BlockPattern.translateOffset(this.frontTopLeft, this.getForwards(), this.getUp(), var1, var2, var3));
+         return (BlockWorldState)this.lcache.getUnchecked(BlockPattern.translateOffset(this.frontTopLeft, this.getForwards(), this.getUp(), palmOffset, thumbOffset, fingerOffset));
       }
 
       public String toString() {

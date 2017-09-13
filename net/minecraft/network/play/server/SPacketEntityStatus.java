@@ -5,6 +5,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SPacketEntityStatus implements Packet {
    private int entityId;
@@ -14,21 +17,31 @@ public class SPacketEntityStatus implements Packet {
    }
 
    public SPacketEntityStatus(Entity var1, byte var2) {
-      this.entityId = var1.getEntityId();
-      this.logicOpcode = var2;
+      this.entityId = entityIn.getEntityId();
+      this.logicOpcode = opcodeIn;
    }
 
    public void readPacketData(PacketBuffer var1) throws IOException {
-      this.entityId = var1.readInt();
-      this.logicOpcode = var1.readByte();
+      this.entityId = buf.readInt();
+      this.logicOpcode = buf.readByte();
    }
 
    public void writePacketData(PacketBuffer var1) throws IOException {
-      var1.writeInt(this.entityId);
-      var1.writeByte(this.logicOpcode);
+      buf.writeInt(this.entityId);
+      buf.writeByte(this.logicOpcode);
    }
 
    public void processPacket(INetHandlerPlayClient var1) {
-      var1.handleEntityStatus(this);
+      handler.handleEntityStatus(this);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public Entity getEntity(World var1) {
+      return worldIn.getEntityByID(this.entityId);
+   }
+
+   @SideOnly(Side.CLIENT)
+   public byte getOpCode() {
+      return this.logicOpcode;
    }
 }

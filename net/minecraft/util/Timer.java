@@ -18,7 +18,7 @@ public class Timer {
    private long counter;
    private double timeSyncAdjustment = 1.0D;
 
-   public Timer(float tps) {
+   public Timer(float var1) {
       this.ticksPerSecond = tps;
       this.lastSyncSysClock = Minecraft.getSystemTime();
       this.lastSyncHRClock = System.nanoTime() / 1000000L;

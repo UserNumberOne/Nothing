@@ -24,7 +24,7 @@ public class Selector {
    private final ICondition condition;
    private final VariantList variantList;
 
-   public Selector(ICondition conditionIn, VariantList variantListIn) {
+   public Selector(ICondition var1, VariantList var2) {
       if (conditionIn == null) {
          throw new IllegalArgumentException("Missing condition for selector");
       } else if (variantListIn == null) {
@@ -39,11 +39,11 @@ public class Selector {
       return this.variantList;
    }
 
-   public Predicate getPredicate(BlockStateContainer state) {
+   public Predicate getPredicate(BlockStateContainer var1) {
       return this.condition.getPredicate(state);
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else {
@@ -66,28 +66,28 @@ public class Selector {
    public static class Deserializer implements JsonDeserializer {
       private static final Function FUNCTION_OR_AND = new Function() {
          @Nullable
-         public ICondition apply(@Nullable JsonElement p_apply_1_) {
+         public ICondition apply(@Nullable JsonElement var1) {
             return p_apply_1_ == null ? null : Selector.Deserializer.getOrAndCondition(p_apply_1_.getAsJsonObject());
          }
       };
       private static final Function FUNCTION_PROPERTY_VALUE = new Function() {
          @Nullable
-         public ICondition apply(@Nullable Entry p_apply_1_) {
+         public ICondition apply(@Nullable Entry var1) {
             return p_apply_1_ == null ? null : Selector.Deserializer.makePropertyValue(p_apply_1_);
          }
       };
 
-      public Selector deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public Selector deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          return new Selector(this.getWhenCondition(jsonobject), (VariantList)p_deserialize_3_.deserialize(jsonobject.get("apply"), VariantList.class));
       }
 
-      private ICondition getWhenCondition(JsonObject json) {
+      private ICondition getWhenCondition(JsonObject var1) {
          return json.has("when") ? getOrAndCondition(JsonUtils.getJsonObject(json, "when")) : ICondition.TRUE;
       }
 
       @VisibleForTesting
-      static ICondition getOrAndCondition(JsonObject json) {
+      static ICondition getOrAndCondition(JsonObject var0) {
          Set set = json.entrySet();
          if (set.isEmpty()) {
             throw new JsonParseException("No elements found in selector");
@@ -96,7 +96,7 @@ public class Selector {
          }
       }
 
-      private static ConditionPropertyValue makePropertyValue(Entry entry) {
+      private static ConditionPropertyValue makePropertyValue(Entry var0) {
          return new ConditionPropertyValue((String)entry.getKey(), ((JsonElement)entry.getValue()).getAsString());
       }
    }

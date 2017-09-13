@@ -9,36 +9,36 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 public class ObjectIntIdentityMap implements IObjectIntIterable {
-   private final IdentityHashMap identityMap;
-   private final List objectList;
+   protected final IdentityHashMap identityMap;
+   protected final List objectList;
 
    public ObjectIntIdentityMap() {
       this(512);
    }
 
    public ObjectIntIdentityMap(int var1) {
-      this.objectList = Lists.newArrayListWithExpectedSize(var1);
-      this.identityMap = new IdentityHashMap(var1);
+      this.objectList = Lists.newArrayListWithExpectedSize(expectedSize);
+      this.identityMap = new IdentityHashMap(expectedSize);
    }
 
    public void put(Object var1, int var2) {
-      this.identityMap.put(var1, Integer.valueOf(var2));
+      this.identityMap.put(key, Integer.valueOf(value));
 
-      while(this.objectList.size() <= var2) {
+      while(this.objectList.size() <= value) {
          this.objectList.add((Object)null);
       }
 
-      this.objectList.set(var2, var1);
+      this.objectList.set(value, key);
    }
 
    public int get(Object var1) {
-      Integer var2 = (Integer)this.identityMap.get(var1);
-      return var2 == null ? -1 : var2.intValue();
+      Integer integer = (Integer)this.identityMap.get(key);
+      return integer == null ? -1 : integer.intValue();
    }
 
    @Nullable
    public final Object getByValue(int var1) {
-      return var1 >= 0 && var1 < this.objectList.size() ? this.objectList.get(var1) : null;
+      return value >= 0 && value < this.objectList.size() ? this.objectList.get(value) : null;
    }
 
    public Iterator iterator() {

@@ -8,16 +8,18 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class DerivedWorldInfo extends WorldInfo {
    private final WorldInfo delegate;
 
    public DerivedWorldInfo(WorldInfo var1) {
-      this.delegate = var1;
+      this.delegate = worldInfoIn;
    }
 
    public NBTTagCompound cloneNBTCompound(@Nullable NBTTagCompound var1) {
-      return this.delegate.cloneNBTCompound(var1);
+      return this.delegate.cloneNBTCompound(nbt);
    }
 
    public long getSeed() {
@@ -44,6 +46,11 @@ public class DerivedWorldInfo extends WorldInfo {
       return this.delegate.getWorldTime();
    }
 
+   @SideOnly(Side.CLIENT)
+   public long getSizeOnDisk() {
+      return this.delegate.getSizeOnDisk();
+   }
+
    public NBTTagCompound getPlayerNBTTagCompound() {
       return this.delegate.getPlayerNBTTagCompound();
    }
@@ -54,6 +61,11 @@ public class DerivedWorldInfo extends WorldInfo {
 
    public int getSaveVersion() {
       return this.delegate.getSaveVersion();
+   }
+
+   @SideOnly(Side.CLIENT)
+   public long getLastTimePlayed() {
+      return this.delegate.getLastTimePlayed();
    }
 
    public boolean isThundering() {
@@ -76,7 +88,19 @@ public class DerivedWorldInfo extends WorldInfo {
       return this.delegate.getGameType();
    }
 
+   @SideOnly(Side.CLIENT)
+   public void setSpawnX(int var1) {
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void setSpawnY(int var1) {
+   }
+
    public void setWorldTotalTime(long var1) {
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void setSpawnZ(int var1) {
    }
 
    public void setWorldTime(long var1) {
@@ -151,10 +175,10 @@ public class DerivedWorldInfo extends WorldInfo {
    }
 
    public void setDimensionData(DimensionType var1, NBTTagCompound var2) {
-      this.delegate.setDimensionData(var1, var2);
+      this.delegate.setDimensionData(dimensionIn, compound);
    }
 
    public NBTTagCompound getDimensionData(DimensionType var1) {
-      return this.delegate.getDimensionData(var1);
+      return this.delegate.getDimensionData(dimensionIn);
    }
 }

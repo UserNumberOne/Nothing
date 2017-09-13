@@ -34,12 +34,12 @@ public class GuiOverlayDebug extends Gui {
    private final Minecraft mc;
    private final FontRenderer fontRenderer;
 
-   public GuiOverlayDebug(Minecraft mc) {
+   public GuiOverlayDebug(Minecraft var1) {
       this.mc = mc;
       this.fontRenderer = mc.fontRendererObj;
    }
 
-   public void renderDebugInfo(ScaledResolution scaledResolutionIn) {
+   public void renderDebugInfo(ScaledResolution var1) {
       this.mc.mcProfiler.startSection("debug");
       GlStateManager.pushMatrix();
       this.renderDebugInfoLeft();
@@ -72,7 +72,7 @@ public class GuiOverlayDebug extends Gui {
 
    }
 
-   protected void renderDebugInfoRight(ScaledResolution scaledRes) {
+   protected void renderDebugInfoRight(ScaledResolution var1) {
       List list = this.getDebugInfoRight();
 
       for(int i = 0; i < list.size(); ++i) {
@@ -223,11 +223,11 @@ public class GuiOverlayDebug extends Gui {
       GlStateManager.enableDepth();
    }
 
-   private int getFrameColor(int p_181552_1_, int p_181552_2_, int p_181552_3_, int p_181552_4_) {
+   private int getFrameColor(int var1, int var2, int var3, int var4) {
       return p_181552_1_ < p_181552_3_ ? this.blendColors(-16711936, -256, (float)p_181552_1_ / (float)p_181552_3_) : this.blendColors(-256, -65536, (float)(p_181552_1_ - p_181552_3_) / (float)(p_181552_4_ - p_181552_3_));
    }
 
-   private int blendColors(int p_181553_1_, int p_181553_2_, float p_181553_3_) {
+   private int blendColors(int var1, int var2, float var3) {
       int i = p_181553_1_ >> 24 & 255;
       int j = p_181553_1_ >> 16 & 255;
       int k = p_181553_1_ >> 8 & 255;
@@ -243,7 +243,7 @@ public class GuiOverlayDebug extends Gui {
       return i2 << 24 | j2 << 16 | k2 << 8 | l2;
    }
 
-   private static long bytesToMb(long bytes) {
+   private static long bytesToMb(long var0) {
       return bytes / 1024L / 1024L;
    }
 }

@@ -75,7 +75,7 @@ public class TileEntityRendererDispatcher {
 
    }
 
-   public TileEntitySpecialRenderer getSpecialRendererByClass(Class teClass) {
+   public TileEntitySpecialRenderer getSpecialRendererByClass(Class var1) {
       TileEntitySpecialRenderer tileentityspecialrenderer = (TileEntitySpecialRenderer)this.mapSpecialRenderers.get(teClass);
       if (tileentityspecialrenderer == null && teClass != TileEntity.class) {
          tileentityspecialrenderer = this.getSpecialRendererByClass(teClass.getSuperclass());
@@ -86,11 +86,11 @@ public class TileEntityRendererDispatcher {
    }
 
    @Nullable
-   public TileEntitySpecialRenderer getSpecialRenderer(@Nullable TileEntity tileEntityIn) {
+   public TileEntitySpecialRenderer getSpecialRenderer(@Nullable TileEntity var1) {
       return tileEntityIn == null ? null : this.getSpecialRendererByClass(tileEntityIn.getClass());
    }
 
-   public void prepare(World p_190056_1_, TextureManager p_190056_2_, FontRenderer p_190056_3_, Entity p_190056_4_, RayTraceResult p_190056_5_, float p_190056_6_) {
+   public void prepare(World var1, TextureManager var2, FontRenderer var3, Entity var4, RayTraceResult var5, float var6) {
       if (this.world != p_190056_1_) {
          this.setWorld(p_190056_1_);
       }
@@ -106,7 +106,7 @@ public class TileEntityRendererDispatcher {
       this.entityZ = p_190056_4_.lastTickPosZ + (p_190056_4_.posZ - p_190056_4_.lastTickPosZ) * (double)p_190056_6_;
    }
 
-   public void renderTileEntity(TileEntity tileentityIn, float partialTicks, int destroyStage) {
+   public void renderTileEntity(TileEntity var1, float var2, int var3) {
       if (tileentityIn.getDistanceSq(this.entityX, this.entityY, this.entityZ) < tileentityIn.getMaxRenderDistanceSquared()) {
          RenderHelper.enableStandardItemLighting();
          if (!this.drawingBatch || !tileentityIn.hasFastRenderer()) {
@@ -123,11 +123,11 @@ public class TileEntityRendererDispatcher {
 
    }
 
-   public void renderTileEntityAt(TileEntity tileEntityIn, double x, double y, double z, float partialTicks) {
+   public void renderTileEntityAt(TileEntity var1, double var2, double var4, double var6, float var8) {
       this.renderTileEntityAt(tileEntityIn, x, y, z, partialTicks, -1);
    }
 
-   public void renderTileEntityAt(TileEntity tileEntityIn, double x, double y, double z, float partialTicks, int destroyStage) {
+   public void renderTileEntityAt(TileEntity var1, double var2, double var4, double var6, float var8, int var9) {
       TileEntitySpecialRenderer tileentityspecialrenderer = this.getSpecialRenderer(tileEntityIn);
       if (tileentityspecialrenderer != null) {
          try {
@@ -146,7 +146,7 @@ public class TileEntityRendererDispatcher {
 
    }
 
-   public void setWorld(@Nullable World worldIn) {
+   public void setWorld(@Nullable World var1) {
       this.world = worldIn;
       if (worldIn == null) {
          this.entity = null;
@@ -163,7 +163,7 @@ public class TileEntityRendererDispatcher {
       this.drawingBatch = true;
    }
 
-   public void drawBatch(int pass) {
+   public void drawBatch(int var1) {
       this.renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
       RenderHelper.disableStandardItemLighting();
       GlStateManager.blendFunc(770, 771);

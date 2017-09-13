@@ -20,7 +20,7 @@ public enum SoundCategory {
    private final String name;
 
    private SoundCategory(String var3) {
-      this.name = var3;
+      this.name = nameIn;
    }
 
    public String getName() {
@@ -28,7 +28,7 @@ public enum SoundCategory {
    }
 
    public static SoundCategory getByName(String var0) {
-      return (SoundCategory)SOUND_CATEGORIES.get(var0);
+      return (SoundCategory)SOUND_CATEGORIES.get(categoryName);
    }
 
    public static Set getSoundCategoryNames() {
@@ -36,12 +36,12 @@ public enum SoundCategory {
    }
 
    static {
-      for(SoundCategory var3 : values()) {
-         if (SOUND_CATEGORIES.containsKey(var3.getName())) {
-            throw new Error("Clash in Sound Category name pools! Cannot insert " + var3);
+      for(SoundCategory soundcategory : values()) {
+         if (SOUND_CATEGORIES.containsKey(soundcategory.getName())) {
+            throw new Error("Clash in Sound Category name pools! Cannot insert " + soundcategory);
          }
 
-         SOUND_CATEGORIES.put(var3.getName(), var3);
+         SOUND_CATEGORIES.put(soundcategory.getName(), soundcategory);
       }
 
    }

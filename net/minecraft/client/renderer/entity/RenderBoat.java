@@ -15,12 +15,12 @@ public class RenderBoat extends Render {
    private static final ResourceLocation[] BOAT_TEXTURES = new ResourceLocation[]{new ResourceLocation("textures/entity/boat/boat_oak.png"), new ResourceLocation("textures/entity/boat/boat_spruce.png"), new ResourceLocation("textures/entity/boat/boat_birch.png"), new ResourceLocation("textures/entity/boat/boat_jungle.png"), new ResourceLocation("textures/entity/boat/boat_acacia.png"), new ResourceLocation("textures/entity/boat/boat_darkoak.png")};
    protected ModelBase modelBoat = new ModelBoat();
 
-   public RenderBoat(RenderManager renderManagerIn) {
+   public RenderBoat(RenderManager var1) {
       super(renderManagerIn);
       this.shadowSize = 0.5F;
    }
 
-   public void doRender(EntityBoat entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityBoat var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       this.setupTranslation(x, y, z);
       this.setupRotation(entity, entityYaw, partialTicks);
@@ -40,7 +40,7 @@ public class RenderBoat extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   public void setupRotation(EntityBoat p_188311_1_, float p_188311_2_, float p_188311_3_) {
+   public void setupRotation(EntityBoat var1, float var2, float var3) {
       GlStateManager.rotate(180.0F - p_188311_2_, 0.0F, 1.0F, 0.0F);
       float f = (float)p_188311_1_.getTimeSinceHit() - p_188311_3_;
       float f1 = p_188311_1_.getDamageTaken() - p_188311_3_;
@@ -55,11 +55,11 @@ public class RenderBoat extends Render {
       GlStateManager.scale(-1.0F, -1.0F, 1.0F);
    }
 
-   public void setupTranslation(double p_188309_1_, double p_188309_3_, double p_188309_5_) {
+   public void setupTranslation(double var1, double var3, double var5) {
       GlStateManager.translate((float)p_188309_1_, (float)p_188309_3_ + 0.375F, (float)p_188309_5_);
    }
 
-   protected ResourceLocation getEntityTexture(EntityBoat entity) {
+   protected ResourceLocation getEntityTexture(EntityBoat var1) {
       return BOAT_TEXTURES[entity.getBoatType().ordinal()];
    }
 
@@ -67,7 +67,7 @@ public class RenderBoat extends Render {
       return true;
    }
 
-   public void renderMultipass(EntityBoat p_188300_1_, double p_188300_2_, double p_188300_4_, double p_188300_6_, float p_188300_8_, float p_188300_9_) {
+   public void renderMultipass(EntityBoat var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       this.setupTranslation(p_188300_2_, p_188300_4_, p_188300_6_);
       this.setupRotation(p_188300_1_, p_188300_8_, p_188300_9_);

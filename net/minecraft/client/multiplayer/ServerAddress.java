@@ -13,7 +13,7 @@ public class ServerAddress {
    private final String ipAddress;
    private final int serverPort;
 
-   private ServerAddress(String address, int port) {
+   private ServerAddress(String var1, int var2) {
       this.ipAddress = address;
       this.serverPort = port;
    }
@@ -30,7 +30,7 @@ public class ServerAddress {
       return this.serverPort;
    }
 
-   public static ServerAddress fromString(String addrString) {
+   public static ServerAddress fromString(String var0) {
       if (addrString == null) {
          return null;
       } else {
@@ -65,7 +65,7 @@ public class ServerAddress {
       }
    }
 
-   private static String[] getServerAddress(String p_78863_0_) {
+   private static String[] getServerAddress(String var0) {
       try {
          String s = "com.sun.jndi.dns.DnsContextFactory";
          Class.forName("com.sun.jndi.dns.DnsContextFactory");
@@ -77,12 +77,12 @@ public class ServerAddress {
          Attributes attributes = dircontext.getAttributes("_minecraft._tcp." + p_78863_0_, new String[]{"SRV"});
          String[] astring = attributes.get("srv").get().toString().split(" ", 4);
          return new String[]{astring[3], astring[2]};
-      } catch (Throwable var61) {
+      } catch (Throwable var6) {
          return new String[]{p_78863_0_, Integer.toString(25565)};
       }
    }
 
-   private static int getInt(String value, int defaultValue) {
+   private static int getInt(String var0, int var1) {
       try {
          return Integer.parseInt(value.trim());
       } catch (Exception var3) {

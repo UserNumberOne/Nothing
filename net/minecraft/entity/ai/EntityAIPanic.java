@@ -4,7 +4,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -17,9 +16,9 @@ public class EntityAIPanic extends EntityAIBase {
    private double randPosY;
    private double randPosZ;
 
-   public EntityAIPanic(EntityCreature entitycreature, double d0) {
-      this.theEntityCreature = entitycreature;
-      this.speed = d0;
+   public EntityAIPanic(EntityCreature var1, double var2) {
+      this.theEntityCreature = creature;
+      this.speed = speedIn;
       this.setMutexBits(1);
    }
 
@@ -37,13 +36,13 @@ public class EntityAIPanic extends EntityAIBase {
             return true;
          }
       } else {
-         BlockPos blockposition = this.getRandPos(this.theEntityCreature.world, this.theEntityCreature, 5, 4);
-         if (blockposition == null) {
+         BlockPos blockpos = this.getRandPos(this.theEntityCreature.world, this.theEntityCreature, 5, 4);
+         if (blockpos == null) {
             return false;
          } else {
-            this.randPosX = (double)blockposition.getX();
-            this.randPosY = (double)blockposition.getY();
-            this.randPosZ = (double)blockposition.getZ();
+            this.randPosX = (double)blockpos.getX();
+            this.randPosY = (double)blockpos.getY();
+            this.randPosZ = (double)blockpos.getZ();
             return true;
          }
       }
@@ -54,40 +53,35 @@ public class EntityAIPanic extends EntityAIBase {
    }
 
    public boolean continueExecuting() {
-      if (this.theEntityCreature.ticksExisted - this.theEntityCreature.restoreWaterCost > 100) {
-         this.theEntityCreature.onKillEntity((EntityLivingBase)null);
-         return false;
-      } else {
-         return !this.theEntityCreature.getNavigator().noPath();
-      }
+      return !this.theEntityCreature.getNavigator().noPath();
    }
 
-   private BlockPos getRandPos(World world, Entity entity, int i, int j) {
-      BlockPos blockposition = new BlockPos(entity);
-      BlockPos.MutableBlockPos blockposition_mutableblockposition = new BlockPos.MutableBlockPos();
-      int k = blockposition.getX();
-      int l = blockposition.getY();
-      int i1 = blockposition.getZ();
-      float f = (float)(i * i * j * 2);
-      BlockPos blockposition1 = null;
+   private BlockPos getRandPos(World var1, Entity var2, int var3, int var4) {
+      BlockPos blockpos = new BlockPos(entityIn);
+      BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+      int i = blockpos.getX();
+      int j = blockpos.getY();
+      int k = blockpos.getZ();
+      float f = (float)(horizontalRange * horizontalRange * verticalRange * 2);
+      BlockPos blockpos1 = null;
 
-      for(int j1 = k - i; j1 <= k + i; ++j1) {
-         for(int k1 = l - j; k1 <= l + j; ++k1) {
-            for(int l1 = i1 - i; l1 <= i1 + i; ++l1) {
-               blockposition_mutableblockposition.setPos(j1, k1, l1);
-               IBlockState iblockdata = world.getBlockState(blockposition_mutableblockposition);
-               Block block = iblockdata.getBlock();
+      for(int l = i - horizontalRange; l <= i + horizontalRange; ++l) {
+         for(int i1 = j - verticalRange; i1 <= j + verticalRange; ++i1) {
+            for(int j1 = k - horizontalRange; j1 <= k + horizontalRange; ++j1) {
+               blockpos$mutableblockpos.setPos(l, i1, j1);
+               IBlockState iblockstate = worldIn.getBlockState(blockpos$mutableblockpos);
+               Block block = iblockstate.getBlock();
                if (block == Blocks.WATER || block == Blocks.FLOWING_WATER) {
-                  float f1 = (float)((j1 - k) * (j1 - k) + (k1 - l) * (k1 - l) + (l1 - i1) * (l1 - i1));
+                  float f1 = (float)((l - i) * (l - i) + (i1 - j) * (i1 - j) + (j1 - k) * (j1 - k));
                   if (f1 < f) {
                      f = f1;
-                     blockposition1 = new BlockPos(blockposition_mutableblockposition);
+                     blockpos1 = new BlockPos(blockpos$mutableblockpos);
                   }
                }
             }
          }
       }
 
-      return blockposition1;
+      return blockpos1;
    }
 }

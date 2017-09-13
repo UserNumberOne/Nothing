@@ -13,11 +13,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class DebugRendererChunkBorder implements DebugRenderer.IDebugRenderer {
    private final Minecraft minecraft;
 
-   public DebugRendererChunkBorder(Minecraft minecraftIn) {
+   public DebugRendererChunkBorder(Minecraft var1) {
       this.minecraft = minecraftIn;
    }
 
-   public void render(float p_190060_1_, long p_190060_2_) {
+   public void render(float var1, long var2) {
       EntityPlayer entityplayer = this.minecraft.player;
       Tessellator tessellator = Tessellator.getInstance();
       VertexBuffer vertexbuffer = tessellator.getBuffer();

@@ -12,16 +12,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderIronGolem extends RenderLiving {
    private static final ResourceLocation IRON_GOLEM_TEXTURES = new ResourceLocation("textures/entity/iron_golem.png");
 
-   public RenderIronGolem(RenderManager renderManagerIn) {
+   public RenderIronGolem(RenderManager var1) {
       super(renderManagerIn, new ModelIronGolem(), 0.5F);
       this.addLayer(new LayerIronGolemFlower(this));
    }
 
-   protected ResourceLocation getEntityTexture(EntityIronGolem entity) {
+   protected ResourceLocation getEntityTexture(EntityIronGolem var1) {
       return IRON_GOLEM_TEXTURES;
    }
 
-   protected void applyRotations(EntityIronGolem entityLiving, float p_77043_2_, float p_77043_3_, float partialTicks) {
+   protected void applyRotations(EntityIronGolem var1, float var2, float var3, float var4) {
       super.applyRotations(entityLiving, p_77043_2_, p_77043_3_, partialTicks);
       if ((double)entityLiving.limbSwingAmount >= 0.01D) {
          float f = 13.0F;

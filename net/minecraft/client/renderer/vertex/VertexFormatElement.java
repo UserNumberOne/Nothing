@@ -15,7 +15,7 @@ public class VertexFormatElement {
    private final int index;
    private final int elementCount;
 
-   public VertexFormatElement(int indexIn, VertexFormatElement.EnumType typeIn, VertexFormatElement.EnumUsage usageIn, int count) {
+   public VertexFormatElement(int var1, VertexFormatElement.EnumType var2, VertexFormatElement.EnumUsage var3, int var4) {
       if (this.isFirstOrUV(indexIn, usageIn)) {
          this.usage = usageIn;
       } else {
@@ -28,7 +28,7 @@ public class VertexFormatElement {
       this.elementCount = count;
    }
 
-   private final boolean isFirstOrUV(int p_177372_1_, VertexFormatElement.EnumUsage p_177372_2_) {
+   private final boolean isFirstOrUV(int var1, VertexFormatElement.EnumUsage var2) {
       return p_177372_1_ == 0 || p_177372_2_ == VertexFormatElement.EnumUsage.UV;
    }
 
@@ -60,7 +60,7 @@ public class VertexFormatElement {
       return this.usage == VertexFormatElement.EnumUsage.POSITION;
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
@@ -93,7 +93,7 @@ public class VertexFormatElement {
       private final String displayName;
       private final int glConstant;
 
-      private EnumType(int sizeIn, String displayNameIn, int glConstantIn) {
+      private EnumType(int var3, String var4, int var5) {
          this.size = sizeIn;
          this.displayName = displayNameIn;
          this.glConstant = glConstantIn;
@@ -129,15 +129,15 @@ public class VertexFormatElement {
 
       private final String displayName;
 
-      public void preDraw(VertexFormat format, int element, int stride, ByteBuffer buffer) {
+      public void preDraw(VertexFormat var1, int var2, int var3, ByteBuffer var4) {
          ForgeHooksClient.preDraw(this, format, element, stride, buffer);
       }
 
-      public void postDraw(VertexFormat format, int element, int stride, ByteBuffer buffer) {
+      public void postDraw(VertexFormat var1, int var2, int var3, ByteBuffer var4) {
          ForgeHooksClient.postDraw(this, format, element, stride, buffer);
       }
 
-      private EnumUsage(String displayNameIn) {
+      private EnumUsage(String var3) {
          this.displayName = displayNameIn;
       }
 

@@ -63,19 +63,19 @@ public class PlayerControllerMP {
    private GameType currentGameType = GameType.SURVIVAL;
    private int currentPlayerItem;
 
-   public PlayerControllerMP(Minecraft mcIn, NetHandlerPlayClient netHandler) {
+   public PlayerControllerMP(Minecraft var1, NetHandlerPlayClient var2) {
       this.mc = mcIn;
       this.connection = netHandler;
    }
 
-   public static void clickBlockCreative(Minecraft mcIn, PlayerControllerMP playerController, BlockPos pos, EnumFacing facing) {
+   public static void clickBlockCreative(Minecraft var0, PlayerControllerMP var1, BlockPos var2, EnumFacing var3) {
       if (!mcIn.world.extinguishFire(mcIn.player, pos, facing)) {
          playerController.onPlayerDestroyBlock(pos);
       }
 
    }
 
-   public void setPlayerCapabilities(EntityPlayer player) {
+   public void setPlayerCapabilities(EntityPlayer var1) {
       this.currentGameType.configurePlayerCapabilities(player.capabilities);
    }
 
@@ -83,12 +83,12 @@ public class PlayerControllerMP {
       return this.currentGameType == GameType.SPECTATOR;
    }
 
-   public void setGameType(GameType type) {
+   public void setGameType(GameType var1) {
       this.currentGameType = type;
       this.currentGameType.configurePlayerCapabilities(this.mc.player.capabilities);
    }
 
-   public void flipPlayer(EntityPlayer playerIn) {
+   public void flipPlayer(EntityPlayer var1) {
       playerIn.rotationYaw = -180.0F;
    }
 
@@ -96,7 +96,7 @@ public class PlayerControllerMP {
       return this.currentGameType.isSurvivalOrAdventure();
    }
 
-   public boolean onPlayerDestroyBlock(BlockPos pos) {
+   public boolean onPlayerDestroyBlock(BlockPos var1) {
       if (this.currentGameType.isAdventure()) {
          if (this.currentGameType == GameType.SPECTATOR) {
             return false;
@@ -151,7 +151,7 @@ public class PlayerControllerMP {
       }
    }
 
-   public boolean clickBlock(BlockPos loc, EnumFacing face) {
+   public boolean clickBlock(BlockPos var1, EnumFacing var2) {
       if (this.currentGameType.isAdventure()) {
          if (this.currentGameType == GameType.SPECTATOR) {
             return false;
@@ -223,7 +223,7 @@ public class PlayerControllerMP {
 
    }
 
-   public boolean onPlayerDamageBlock(BlockPos posBlock, EnumFacing directionFacing) {
+   public boolean onPlayerDamageBlock(BlockPos var1, EnumFacing var2) {
       this.syncCurrentPlayItem();
       if (this.blockHitDelay > 0) {
          --this.blockHitDelay;
@@ -278,7 +278,7 @@ public class PlayerControllerMP {
 
    }
 
-   private boolean isHittingPosition(BlockPos pos) {
+   private boolean isHittingPosition(BlockPos var1) {
       ItemStack itemstack = this.mc.player.getHeldItemMainhand();
       boolean flag = this.currentItemHittingBlock == null && itemstack == null;
       if (this.currentItemHittingBlock != null && itemstack != null) {
@@ -297,7 +297,7 @@ public class PlayerControllerMP {
 
    }
 
-   public EnumActionResult processRightClickBlock(EntityPlayerSP player, WorldClient worldIn, @Nullable ItemStack stack, BlockPos pos, EnumFacing facing, Vec3d vec, EnumHand hand) {
+   public EnumActionResult processRightClickBlock(EntityPlayerSP var1, WorldClient var2, @Nullable ItemStack var3, BlockPos var4, EnumFacing var5, Vec3d var6, EnumHand var7) {
       this.syncCurrentPlayItem();
       float f = (float)(vec.xCoord - (double)pos.getX());
       float f1 = (float)(vec.yCoord - (double)pos.getY());
@@ -386,7 +386,7 @@ public class PlayerControllerMP {
       }
    }
 
-   public EnumActionResult processRightClick(EntityPlayer player, World worldIn, ItemStack stack, EnumHand hand) {
+   public EnumActionResult processRightClick(EntityPlayer var1, World var2, ItemStack var3, EnumHand var4) {
       if (this.currentGameType == GameType.SPECTATOR) {
          return EnumActionResult.PASS;
       } else {
@@ -413,11 +413,11 @@ public class PlayerControllerMP {
       }
    }
 
-   public EntityPlayerSP createClientPlayer(World worldIn, StatisticsManager statWriter) {
+   public EntityPlayerSP createClientPlayer(World var1, StatisticsManager var2) {
       return new EntityPlayerSP(this.mc, worldIn, this.connection, statWriter);
    }
 
-   public void attackEntity(EntityPlayer playerIn, Entity targetEntity) {
+   public void attackEntity(EntityPlayer var1, Entity var2) {
       this.syncCurrentPlayItem();
       this.connection.sendPacket(new CPacketUseEntity(targetEntity));
       if (this.currentGameType != GameType.SPECTATOR) {
@@ -427,13 +427,13 @@ public class PlayerControllerMP {
 
    }
 
-   public EnumActionResult interactWithEntity(EntityPlayer player, Entity target, @Nullable ItemStack heldItem, EnumHand hand) {
+   public EnumActionResult interactWithEntity(EntityPlayer var1, Entity var2, @Nullable ItemStack var3, EnumHand var4) {
       this.syncCurrentPlayItem();
       this.connection.sendPacket(new CPacketUseEntity(target, hand));
       return this.currentGameType == GameType.SPECTATOR ? EnumActionResult.PASS : player.interact(target, heldItem, hand);
    }
 
-   public EnumActionResult interactWithEntity(EntityPlayer player, Entity target, RayTraceResult raytrace, @Nullable ItemStack heldItem, EnumHand hand) {
+   public EnumActionResult interactWithEntity(EntityPlayer var1, Entity var2, RayTraceResult var3, @Nullable ItemStack var4, EnumHand var5) {
       this.syncCurrentPlayItem();
       Vec3d vec3d = new Vec3d(raytrace.hitVec.xCoord - target.posX, raytrace.hitVec.yCoord - target.posY, raytrace.hitVec.zCoord - target.posZ);
       this.connection.sendPacket(new CPacketUseEntity(target, hand, vec3d));
@@ -444,32 +444,32 @@ public class PlayerControllerMP {
       }
    }
 
-   public ItemStack windowClick(int windowId, int slotId, int mouseButton, ClickType type, EntityPlayer player) {
+   public ItemStack windowClick(int var1, int var2, int var3, ClickType var4, EntityPlayer var5) {
       short short1 = player.openContainer.getNextTransactionID(player.inventory);
       ItemStack itemstack = player.openContainer.slotClick(slotId, mouseButton, type, player);
       this.connection.sendPacket(new CPacketClickWindow(windowId, slotId, mouseButton, type, itemstack, short1));
       return itemstack;
    }
 
-   public void sendEnchantPacket(int windowID, int button) {
+   public void sendEnchantPacket(int var1, int var2) {
       this.connection.sendPacket(new CPacketEnchantItem(windowID, button));
    }
 
-   public void sendSlotPacket(ItemStack itemStackIn, int slotId) {
+   public void sendSlotPacket(ItemStack var1, int var2) {
       if (this.currentGameType.isCreative()) {
          this.connection.sendPacket(new CPacketCreativeInventoryAction(slotId, itemStackIn));
       }
 
    }
 
-   public void sendPacketDropItem(ItemStack itemStackIn) {
+   public void sendPacketDropItem(ItemStack var1) {
       if (this.currentGameType.isCreative() && itemStackIn != null) {
          this.connection.sendPacket(new CPacketCreativeInventoryAction(-1, itemStackIn));
       }
 
    }
 
-   public void onStoppedUsingItem(EntityPlayer playerIn) {
+   public void onStoppedUsingItem(EntityPlayer var1) {
       this.syncCurrentPlayItem();
       this.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
       playerIn.stopActiveHand();
@@ -507,7 +507,7 @@ public class PlayerControllerMP {
       return this.isHittingBlock;
    }
 
-   public void pickItem(int index) {
+   public void pickItem(int var1) {
       this.connection.sendPacket(new CPacketCustomPayload("MC|PickItem", (new PacketBuffer(Unpooled.buffer())).writeVarInt(index)));
    }
 }

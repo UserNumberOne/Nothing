@@ -19,7 +19,7 @@ public class ParticleItemPickup extends Particle {
    private final float yOffset;
    private final RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
 
-   public ParticleItemPickup(World worldIn, Entity p_i1233_2_, Entity p_i1233_3_, float p_i1233_4_) {
+   public ParticleItemPickup(World var1, Entity var2, Entity var3, float var4) {
       super(worldIn, p_i1233_2_.posX, p_i1233_2_.posY, p_i1233_2_.posZ, p_i1233_2_.motionX, p_i1233_2_.motionY, p_i1233_2_.motionZ);
       this.item = p_i1233_2_;
       this.target = p_i1233_3_;
@@ -27,7 +27,7 @@ public class ParticleItemPickup extends Particle {
       this.yOffset = p_i1233_4_;
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = ((float)this.age + partialTicks) / (float)this.maxAge;
       f = f * f;
       double d0 = this.item.posX;

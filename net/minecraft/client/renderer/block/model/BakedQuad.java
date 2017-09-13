@@ -21,11 +21,11 @@ public class BakedQuad implements IVertexProducer {
 
    /** @deprecated */
    @Deprecated
-   public BakedQuad(int[] vertexDataIn, int tintIndexIn, EnumFacing faceIn, TextureAtlasSprite spriteIn) {
+   public BakedQuad(int[] var1, int var2, EnumFacing var3, TextureAtlasSprite var4) {
       this(vertexDataIn, tintIndexIn, faceIn, spriteIn, true, DefaultVertexFormats.ITEM);
    }
 
-   public BakedQuad(int[] vertexDataIn, int tintIndexIn, EnumFacing faceIn, TextureAtlasSprite spriteIn, boolean applyDiffuseLighting, VertexFormat format) {
+   public BakedQuad(int[] var1, int var2, EnumFacing var3, TextureAtlasSprite var4, boolean var5, VertexFormat var6) {
       this.format = format;
       this.applyDiffuseLighting = applyDiffuseLighting;
       this.vertexData = vertexDataIn;
@@ -54,7 +54,7 @@ public class BakedQuad implements IVertexProducer {
       return this.face;
    }
 
-   public void pipe(IVertexConsumer consumer) {
+   public void pipe(IVertexConsumer var1) {
       LightUtil.putBakedQuad(consumer, this);
    }
 

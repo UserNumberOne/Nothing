@@ -10,11 +10,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderCow extends RenderLiving {
    private static final ResourceLocation COW_TEXTURES = new ResourceLocation("textures/entity/cow/cow.png");
 
-   public RenderCow(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn) {
+   public RenderCow(RenderManager var1, ModelBase var2, float var3) {
       super(renderManagerIn, modelBaseIn, shadowSizeIn);
    }
 
-   protected ResourceLocation getEntityTexture(EntityCow entity) {
+   protected ResourceLocation getEntityTexture(EntityCow var1) {
       return COW_TEXTURES;
    }
 }

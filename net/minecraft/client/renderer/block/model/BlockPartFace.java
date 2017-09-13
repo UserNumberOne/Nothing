@@ -20,7 +20,7 @@ public class BlockPartFace {
    public final String texture;
    public final BlockFaceUV blockFaceUV;
 
-   public BlockPartFace(@Nullable EnumFacing cullFaceIn, int tintIndexIn, String textureIn, BlockFaceUV blockFaceUVIn) {
+   public BlockPartFace(@Nullable EnumFacing var1, int var2, String var3, BlockFaceUV var4) {
       this.cullFace = cullFaceIn;
       this.tintIndex = tintIndexIn;
       this.texture = textureIn;
@@ -29,7 +29,7 @@ public class BlockPartFace {
 
    @SideOnly(Side.CLIENT)
    static class Deserializer implements JsonDeserializer {
-      public BlockPartFace deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+      public BlockPartFace deserialize(JsonElement var1, Type var2, JsonDeserializationContext var3) throws JsonParseException {
          JsonObject jsonobject = p_deserialize_1_.getAsJsonObject();
          EnumFacing enumfacing = this.parseCullFace(jsonobject);
          int i = this.parseTintIndex(jsonobject);
@@ -38,16 +38,16 @@ public class BlockPartFace {
          return new BlockPartFace(enumfacing, i, s, blockfaceuv);
       }
 
-      protected int parseTintIndex(JsonObject object) {
+      protected int parseTintIndex(JsonObject var1) {
          return JsonUtils.getInt(object, "tintindex", -1);
       }
 
-      private String parseTexture(JsonObject object) {
+      private String parseTexture(JsonObject var1) {
          return JsonUtils.getString(object, "texture");
       }
 
       @Nullable
-      private EnumFacing parseCullFace(JsonObject object) {
+      private EnumFacing parseCullFace(JsonObject var1) {
          String s = JsonUtils.getString(object, "cullface", "");
          return EnumFacing.byName(s);
       }

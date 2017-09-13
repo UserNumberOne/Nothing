@@ -2,7 +2,7 @@ package net.minecraft.potion;
 
 public class PotionHealth extends Potion {
    public PotionHealth(boolean var1, int var2) {
-      super(var1, var2);
+      super(isBadEffectIn, liquidColorIn);
    }
 
    public boolean isInstant() {
@@ -10,6 +10,6 @@ public class PotionHealth extends Potion {
    }
 
    public boolean isReady(int var1, int var2) {
-      return var1 >= 1;
+      return duration >= 1;
    }
 }

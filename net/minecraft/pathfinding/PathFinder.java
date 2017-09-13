@@ -15,104 +15,104 @@ public class PathFinder {
    private final NodeProcessor nodeProcessor;
 
    public PathFinder(NodeProcessor var1) {
-      this.nodeProcessor = var1;
+      this.nodeProcessor = processor;
    }
 
    @Nullable
    public Path findPath(IBlockAccess var1, EntityLiving var2, Entity var3, float var4) {
-      return this.findPath(var1, var2, var3.posX, var3.getEntityBoundingBox().minY, var3.posZ, var4);
+      return this.findPath(worldIn, p_186333_2_, p_186333_3_.posX, p_186333_3_.getEntityBoundingBox().minY, p_186333_3_.posZ, p_186333_4_);
    }
 
    @Nullable
    public Path findPath(IBlockAccess var1, EntityLiving var2, BlockPos var3, float var4) {
-      return this.findPath(var1, var2, (double)((float)var3.getX() + 0.5F), (double)((float)var3.getY() + 0.5F), (double)((float)var3.getZ() + 0.5F), var4);
+      return this.findPath(worldIn, p_186336_2_, (double)((float)p_186336_3_.getX() + 0.5F), (double)((float)p_186336_3_.getY() + 0.5F), (double)((float)p_186336_3_.getZ() + 0.5F), p_186336_4_);
    }
 
    @Nullable
    private Path findPath(IBlockAccess var1, EntityLiving var2, double var3, double var5, double var7, float var9) {
       this.path.clearPath();
-      this.nodeProcessor.initProcessor(var1, var2);
-      PathPoint var10 = this.nodeProcessor.getStart();
-      PathPoint var11 = this.nodeProcessor.getPathPointToCoords(var3, var5, var7);
-      Path var12 = this.findPath(var10, var11, var9);
+      this.nodeProcessor.initProcessor(worldIn, p_186334_2_);
+      PathPoint pathpoint = this.nodeProcessor.getStart();
+      PathPoint pathpoint1 = this.nodeProcessor.getPathPointToCoords(p_186334_3_, p_186334_5_, p_186334_7_);
+      Path path = this.findPath(pathpoint, pathpoint1, p_186334_9_);
       this.nodeProcessor.postProcess();
-      return var12;
+      return path;
    }
 
    @Nullable
    private Path findPath(PathPoint var1, PathPoint var2, float var3) {
-      var1.totalPathDistance = 0.0F;
-      var1.distanceToNext = var1.distanceManhattan(var2);
-      var1.distanceToTarget = var1.distanceToNext;
+      p_186335_1_.totalPathDistance = 0.0F;
+      p_186335_1_.distanceToNext = p_186335_1_.distanceManhattan(p_186335_2_);
+      p_186335_1_.distanceToTarget = p_186335_1_.distanceToNext;
       this.path.clearPath();
       this.closedSet.clear();
-      this.path.addPoint(var1);
-      PathPoint var4 = var1;
-      int var5 = 0;
+      this.path.addPoint(p_186335_1_);
+      PathPoint pathpoint = p_186335_1_;
+      int i = 0;
 
       while(!this.path.isPathEmpty()) {
-         ++var5;
-         if (var5 >= 200) {
+         ++i;
+         if (i >= 200) {
             break;
          }
 
-         PathPoint var6 = this.path.dequeue();
-         if (var6.equals(var2)) {
-            var4 = var2;
+         PathPoint pathpoint1 = this.path.dequeue();
+         if (pathpoint1.equals(p_186335_2_)) {
+            pathpoint = p_186335_2_;
             break;
          }
 
-         if (var6.distanceManhattan(var2) < var4.distanceManhattan(var2)) {
-            var4 = var6;
+         if (pathpoint1.distanceManhattan(p_186335_2_) < pathpoint.distanceManhattan(p_186335_2_)) {
+            pathpoint = pathpoint1;
          }
 
-         var6.visited = true;
-         int var7 = this.nodeProcessor.findPathOptions(this.pathOptions, var6, var2, var3);
+         pathpoint1.visited = true;
+         int j = this.nodeProcessor.findPathOptions(this.pathOptions, pathpoint1, p_186335_2_, p_186335_3_);
 
-         for(int var8 = 0; var8 < var7; ++var8) {
-            PathPoint var9 = this.pathOptions[var8];
-            float var10 = var6.distanceManhattan(var9);
-            var9.distanceFromOrigin = var6.distanceFromOrigin + var10;
-            var9.cost = var10 + var9.costMalus;
-            float var11 = var6.totalPathDistance + var9.cost;
-            if (var9.distanceFromOrigin < var3 && (!var9.isAssigned() || var11 < var9.totalPathDistance)) {
-               var9.previous = var6;
-               var9.totalPathDistance = var11;
-               var9.distanceToNext = var9.distanceManhattan(var2) + var9.costMalus;
-               if (var9.isAssigned()) {
-                  this.path.changeDistance(var9, var9.totalPathDistance + var9.distanceToNext);
+         for(int k = 0; k < j; ++k) {
+            PathPoint pathpoint2 = this.pathOptions[k];
+            float f = pathpoint1.distanceManhattan(pathpoint2);
+            pathpoint2.distanceFromOrigin = pathpoint1.distanceFromOrigin + f;
+            pathpoint2.cost = f + pathpoint2.costMalus;
+            float f1 = pathpoint1.totalPathDistance + pathpoint2.cost;
+            if (pathpoint2.distanceFromOrigin < p_186335_3_ && (!pathpoint2.isAssigned() || f1 < pathpoint2.totalPathDistance)) {
+               pathpoint2.previous = pathpoint1;
+               pathpoint2.totalPathDistance = f1;
+               pathpoint2.distanceToNext = pathpoint2.distanceManhattan(p_186335_2_) + pathpoint2.costMalus;
+               if (pathpoint2.isAssigned()) {
+                  this.path.changeDistance(pathpoint2, pathpoint2.totalPathDistance + pathpoint2.distanceToNext);
                } else {
-                  var9.distanceToTarget = var9.totalPathDistance + var9.distanceToNext;
-                  this.path.addPoint(var9);
+                  pathpoint2.distanceToTarget = pathpoint2.totalPathDistance + pathpoint2.distanceToNext;
+                  this.path.addPoint(pathpoint2);
                }
             }
          }
       }
 
-      if (var4 == var1) {
+      if (pathpoint == p_186335_1_) {
          return null;
       } else {
-         Path var12 = this.createEntityPath(var1, var4);
-         return var12;
+         Path path = this.createEntityPath(p_186335_1_, pathpoint);
+         return path;
       }
    }
 
    private Path createEntityPath(PathPoint var1, PathPoint var2) {
-      int var3 = 1;
+      int i = 1;
 
-      for(PathPoint var4 = var2; var4.previous != null; var4 = var4.previous) {
-         ++var3;
+      for(PathPoint pathpoint = end; pathpoint.previous != null; pathpoint = pathpoint.previous) {
+         ++i;
       }
 
-      PathPoint[] var5 = new PathPoint[var3];
-      PathPoint var7 = var2;
-      --var3;
+      PathPoint[] apathpoint = new PathPoint[i];
+      PathPoint pathpoint1 = end;
+      --i;
 
-      for(var5[var3] = var2; var7.previous != null; var5[var3] = var7) {
-         var7 = var7.previous;
-         --var3;
+      for(apathpoint[i] = end; pathpoint1.previous != null; apathpoint[i] = pathpoint1) {
+         pathpoint1 = pathpoint1.previous;
+         --i;
       }
 
-      return new Path(var5);
+      return new Path(apathpoint);
    }
 }

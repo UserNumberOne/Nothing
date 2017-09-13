@@ -7,110 +7,106 @@ import net.minecraft.world.biome.BiomeMesa;
 
 public class GenLayerShore extends GenLayer {
    public GenLayerShore(long var1, GenLayer var3) {
-      super(var1);
-      this.parent = var3;
+      super(p_i2130_1_);
+      this.parent = p_i2130_3_;
    }
 
    public int[] getInts(int var1, int var2, int var3, int var4) {
-      int[] var5 = this.parent.getInts(var1 - 1, var2 - 1, var3 + 2, var4 + 2);
-      int[] var6 = IntCache.getIntCache(var3 * var4);
+      int[] aint = this.parent.getInts(areaX - 1, areaY - 1, areaWidth + 2, areaHeight + 2);
+      int[] aint1 = IntCache.getIntCache(areaWidth * areaHeight);
 
-      for(int var7 = 0; var7 < var4; ++var7) {
-         for(int var8 = 0; var8 < var3; ++var8) {
-            this.initChunkSeed((long)(var8 + var1), (long)(var7 + var2));
-            int var9 = var5[var8 + 1 + (var7 + 1) * (var3 + 2)];
-            Biome var10 = Biome.getBiome(var9);
-            if (var9 == Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND)) {
-               int var17 = var5[var8 + 1 + (var7 + 1 - 1) * (var3 + 2)];
-               int var20 = var5[var8 + 1 + 1 + (var7 + 1) * (var3 + 2)];
-               int var23 = var5[var8 + 1 - 1 + (var7 + 1) * (var3 + 2)];
-               int var26 = var5[var8 + 1 + (var7 + 1 + 1) * (var3 + 2)];
-               if (var17 != Biome.getIdForBiome(Biomes.OCEAN) && var20 != Biome.getIdForBiome(Biomes.OCEAN) && var23 != Biome.getIdForBiome(Biomes.OCEAN) && var26 != Biome.getIdForBiome(Biomes.OCEAN)) {
-                  var6[var8 + var7 * var3] = var9;
+      for(int i = 0; i < areaHeight; ++i) {
+         for(int j = 0; j < areaWidth; ++j) {
+            this.initChunkSeed((long)(j + areaX), (long)(i + areaY));
+            int k = aint[j + 1 + (i + 1) * (areaWidth + 2)];
+            Biome biome = Biome.getBiome(k);
+            if (k == Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND)) {
+               int j2 = aint[j + 1 + (i + 1 - 1) * (areaWidth + 2)];
+               int i3 = aint[j + 1 + 1 + (i + 1) * (areaWidth + 2)];
+               int l3 = aint[j + 1 - 1 + (i + 1) * (areaWidth + 2)];
+               int k4 = aint[j + 1 + (i + 1 + 1) * (areaWidth + 2)];
+               if (j2 != Biome.getIdForBiome(Biomes.OCEAN) && i3 != Biome.getIdForBiome(Biomes.OCEAN) && l3 != Biome.getIdForBiome(Biomes.OCEAN) && k4 != Biome.getIdForBiome(Biomes.OCEAN)) {
+                  aint1[j + i * areaWidth] = k;
                } else {
-                  var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND_SHORE);
+                  aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND_SHORE);
                }
-            } else if (var10 != null && var10.getBiomeClass() == BiomeJungle.class) {
-               int var16 = var5[var8 + 1 + (var7 + 1 - 1) * (var3 + 2)];
-               int var19 = var5[var8 + 1 + 1 + (var7 + 1) * (var3 + 2)];
-               int var22 = var5[var8 + 1 - 1 + (var7 + 1) * (var3 + 2)];
-               int var25 = var5[var8 + 1 + (var7 + 1 + 1) * (var3 + 2)];
-               if (this.isJungleCompatible(var16) && this.isJungleCompatible(var19) && this.isJungleCompatible(var22) && this.isJungleCompatible(var25)) {
-                  if (!isBiomeOceanic(var16) && !isBiomeOceanic(var19) && !isBiomeOceanic(var22) && !isBiomeOceanic(var25)) {
-                     var6[var8 + var7 * var3] = var9;
+            } else if (biome != null && biome.getBiomeClass() == BiomeJungle.class) {
+               int i2 = aint[j + 1 + (i + 1 - 1) * (areaWidth + 2)];
+               int l2 = aint[j + 1 + 1 + (i + 1) * (areaWidth + 2)];
+               int k3 = aint[j + 1 - 1 + (i + 1) * (areaWidth + 2)];
+               int j4 = aint[j + 1 + (i + 1 + 1) * (areaWidth + 2)];
+               if (this.isJungleCompatible(i2) && this.isJungleCompatible(l2) && this.isJungleCompatible(k3) && this.isJungleCompatible(j4)) {
+                  if (!isBiomeOceanic(i2) && !isBiomeOceanic(l2) && !isBiomeOceanic(k3) && !isBiomeOceanic(j4)) {
+                     aint1[j + i * areaWidth] = k;
                   } else {
-                     var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.BEACH);
+                     aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.BEACH);
                   }
                } else {
-                  var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.JUNGLE_EDGE);
+                  aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.JUNGLE_EDGE);
                }
-            } else if (var9 != Biome.getIdForBiome(Biomes.EXTREME_HILLS) && var9 != Biome.getIdForBiome(Biomes.EXTREME_HILLS_WITH_TREES) && var9 != Biome.getIdForBiome(Biomes.EXTREME_HILLS_EDGE)) {
-               if (var10 != null && var10.isSnowyBiome()) {
-                  this.replaceIfNeighborOcean(var5, var6, var8, var7, var3, var9, Biome.getIdForBiome(Biomes.COLD_BEACH));
-               } else if (var9 != Biome.getIdForBiome(Biomes.MESA) && var9 != Biome.getIdForBiome(Biomes.MESA_ROCK)) {
-                  if (var9 != Biome.getIdForBiome(Biomes.OCEAN) && var9 != Biome.getIdForBiome(Biomes.DEEP_OCEAN) && var9 != Biome.getIdForBiome(Biomes.RIVER) && var9 != Biome.getIdForBiome(Biomes.SWAMPLAND)) {
-                     int var15 = var5[var8 + 1 + (var7 + 1 - 1) * (var3 + 2)];
-                     int var18 = var5[var8 + 1 + 1 + (var7 + 1) * (var3 + 2)];
-                     int var21 = var5[var8 + 1 - 1 + (var7 + 1) * (var3 + 2)];
-                     int var24 = var5[var8 + 1 + (var7 + 1 + 1) * (var3 + 2)];
-                     if (!isBiomeOceanic(var15) && !isBiomeOceanic(var18) && !isBiomeOceanic(var21) && !isBiomeOceanic(var24)) {
-                        var6[var8 + var7 * var3] = var9;
+            } else if (k != Biome.getIdForBiome(Biomes.EXTREME_HILLS) && k != Biome.getIdForBiome(Biomes.EXTREME_HILLS_WITH_TREES) && k != Biome.getIdForBiome(Biomes.EXTREME_HILLS_EDGE)) {
+               if (biome != null && biome.isSnowyBiome()) {
+                  this.replaceIfNeighborOcean(aint, aint1, j, i, areaWidth, k, Biome.getIdForBiome(Biomes.COLD_BEACH));
+               } else if (k != Biome.getIdForBiome(Biomes.MESA) && k != Biome.getIdForBiome(Biomes.MESA_ROCK)) {
+                  if (k != Biome.getIdForBiome(Biomes.OCEAN) && k != Biome.getIdForBiome(Biomes.DEEP_OCEAN) && k != Biome.getIdForBiome(Biomes.RIVER) && k != Biome.getIdForBiome(Biomes.SWAMPLAND)) {
+                     int l1 = aint[j + 1 + (i + 1 - 1) * (areaWidth + 2)];
+                     int k2 = aint[j + 1 + 1 + (i + 1) * (areaWidth + 2)];
+                     int j3 = aint[j + 1 - 1 + (i + 1) * (areaWidth + 2)];
+                     int i4 = aint[j + 1 + (i + 1 + 1) * (areaWidth + 2)];
+                     if (!isBiomeOceanic(l1) && !isBiomeOceanic(k2) && !isBiomeOceanic(j3) && !isBiomeOceanic(i4)) {
+                        aint1[j + i * areaWidth] = k;
                      } else {
-                        var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.BEACH);
+                        aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.BEACH);
                      }
                   } else {
-                     var6[var8 + var7 * var3] = var9;
+                     aint1[j + i * areaWidth] = k;
                   }
                } else {
-                  int var11 = var5[var8 + 1 + (var7 + 1 - 1) * (var3 + 2)];
-                  int var12 = var5[var8 + 1 + 1 + (var7 + 1) * (var3 + 2)];
-                  int var13 = var5[var8 + 1 - 1 + (var7 + 1) * (var3 + 2)];
-                  int var14 = var5[var8 + 1 + (var7 + 1 + 1) * (var3 + 2)];
-                  if (!isBiomeOceanic(var11) && !isBiomeOceanic(var12) && !isBiomeOceanic(var13) && !isBiomeOceanic(var14)) {
-                     if (this.isMesa(var11) && this.isMesa(var12) && this.isMesa(var13) && this.isMesa(var14)) {
-                        var6[var8 + var7 * var3] = var9;
+                  int l = aint[j + 1 + (i + 1 - 1) * (areaWidth + 2)];
+                  int i1 = aint[j + 1 + 1 + (i + 1) * (areaWidth + 2)];
+                  int j1 = aint[j + 1 - 1 + (i + 1) * (areaWidth + 2)];
+                  int k1 = aint[j + 1 + (i + 1 + 1) * (areaWidth + 2)];
+                  if (!isBiomeOceanic(l) && !isBiomeOceanic(i1) && !isBiomeOceanic(j1) && !isBiomeOceanic(k1)) {
+                     if (this.isMesa(l) && this.isMesa(i1) && this.isMesa(j1) && this.isMesa(k1)) {
+                        aint1[j + i * areaWidth] = k;
                      } else {
-                        var6[var8 + var7 * var3] = Biome.getIdForBiome(Biomes.DESERT);
+                        aint1[j + i * areaWidth] = Biome.getIdForBiome(Biomes.DESERT);
                      }
                   } else {
-                     var6[var8 + var7 * var3] = var9;
+                     aint1[j + i * areaWidth] = k;
                   }
                }
             } else {
-               this.replaceIfNeighborOcean(var5, var6, var8, var7, var3, var9, Biome.getIdForBiome(Biomes.STONE_BEACH));
+               this.replaceIfNeighborOcean(aint, aint1, j, i, areaWidth, k, Biome.getIdForBiome(Biomes.STONE_BEACH));
             }
          }
       }
 
-      return var6;
+      return aint1;
    }
 
    private void replaceIfNeighborOcean(int[] var1, int[] var2, int var3, int var4, int var5, int var6, int var7) {
-      if (isBiomeOceanic(var6)) {
-         var2[var3 + var4 * var5] = var6;
+      if (isBiomeOceanic(p_151632_6_)) {
+         p_151632_2_[p_151632_3_ + p_151632_4_ * p_151632_5_] = p_151632_6_;
       } else {
-         int var8 = var1[var3 + 1 + (var4 + 1 - 1) * (var5 + 2)];
-         int var9 = var1[var3 + 1 + 1 + (var4 + 1) * (var5 + 2)];
-         int var10 = var1[var3 + 1 - 1 + (var4 + 1) * (var5 + 2)];
-         int var11 = var1[var3 + 1 + (var4 + 1 + 1) * (var5 + 2)];
-         if (!isBiomeOceanic(var8) && !isBiomeOceanic(var9) && !isBiomeOceanic(var10) && !isBiomeOceanic(var11)) {
-            var2[var3 + var4 * var5] = var6;
+         int i = p_151632_1_[p_151632_3_ + 1 + (p_151632_4_ + 1 - 1) * (p_151632_5_ + 2)];
+         int j = p_151632_1_[p_151632_3_ + 1 + 1 + (p_151632_4_ + 1) * (p_151632_5_ + 2)];
+         int k = p_151632_1_[p_151632_3_ + 1 - 1 + (p_151632_4_ + 1) * (p_151632_5_ + 2)];
+         int l = p_151632_1_[p_151632_3_ + 1 + (p_151632_4_ + 1 + 1) * (p_151632_5_ + 2)];
+         if (!isBiomeOceanic(i) && !isBiomeOceanic(j) && !isBiomeOceanic(k) && !isBiomeOceanic(l)) {
+            p_151632_2_[p_151632_3_ + p_151632_4_ * p_151632_5_] = p_151632_6_;
          } else {
-            var2[var3 + var4 * var5] = var7;
+            p_151632_2_[p_151632_3_ + p_151632_4_ * p_151632_5_] = p_151632_7_;
          }
-
       }
+
    }
 
    private boolean isJungleCompatible(int var1) {
-      if (Biome.getBiome(var1) != null && Biome.getBiome(var1).getBiomeClass() == BiomeJungle.class) {
-         return true;
-      } else {
-         return var1 == Biome.getIdForBiome(Biomes.JUNGLE_EDGE) || var1 == Biome.getIdForBiome(Biomes.JUNGLE) || var1 == Biome.getIdForBiome(Biomes.JUNGLE_HILLS) || var1 == Biome.getIdForBiome(Biomes.FOREST) || var1 == Biome.getIdForBiome(Biomes.TAIGA) || isBiomeOceanic(var1);
-      }
+      return Biome.getBiome(p_151631_1_) != null && Biome.getBiome(p_151631_1_).getBiomeClass() == BiomeJungle.class ? true : p_151631_1_ == Biome.getIdForBiome(Biomes.JUNGLE_EDGE) || p_151631_1_ == Biome.getIdForBiome(Biomes.JUNGLE) || p_151631_1_ == Biome.getIdForBiome(Biomes.JUNGLE_HILLS) || p_151631_1_ == Biome.getIdForBiome(Biomes.FOREST) || p_151631_1_ == Biome.getIdForBiome(Biomes.TAIGA) || isBiomeOceanic(p_151631_1_);
    }
 
    private boolean isMesa(int var1) {
-      return Biome.getBiome(var1) instanceof BiomeMesa;
+      return Biome.getBiome(p_151633_1_) instanceof BiomeMesa;
    }
 }

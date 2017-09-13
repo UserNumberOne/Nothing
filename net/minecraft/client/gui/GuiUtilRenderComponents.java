@@ -11,17 +11,17 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiUtilRenderComponents {
-   public static String removeTextColorsIfConfigured(String text, boolean forceColor) {
+   public static String removeTextColorsIfConfigured(String var0, boolean var1) {
       return !forceColor && !Minecraft.getMinecraft().gameSettings.chatColours ? TextFormatting.getTextWithoutFormattingCodes(text) : text;
    }
 
-   public static List splitText(ITextComponent textComponent, int maxTextLenght, FontRenderer fontRendererIn, boolean p_178908_3_, boolean forceTextColor) {
+   public static List splitText(ITextComponent var0, int var1, FontRenderer var2, boolean var3, boolean var4) {
       int i = 0;
       ITextComponent itextcomponent = new TextComponentString("");
       List list = Lists.newArrayList();
       List list1 = Lists.newArrayList(textComponent);
 
-      for(int j = 0; j < list1.size(); ++j) {
+      for(int j = 0; j < ((List)list1).size(); ++j) {
          ITextComponent itextcomponent1 = (ITextComponent)list1.get(j);
          String s = itextcomponent1.getUnformattedComponentText();
          boolean flag = false;

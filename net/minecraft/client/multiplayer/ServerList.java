@@ -18,7 +18,7 @@ public class ServerList {
    private final Minecraft mc;
    private final List servers = Lists.newArrayList();
 
-   public ServerList(Minecraft mcIn) {
+   public ServerList(Minecraft var1) {
       this.mc = mcIn;
       this.loadServerList();
    }
@@ -59,15 +59,15 @@ public class ServerList {
 
    }
 
-   public ServerData getServerData(int index) {
+   public ServerData getServerData(int var1) {
       return (ServerData)this.servers.get(index);
    }
 
-   public void removeServerData(int index) {
+   public void removeServerData(int var1) {
       this.servers.remove(index);
    }
 
-   public void addServerData(ServerData server) {
+   public void addServerData(ServerData var1) {
       this.servers.add(server);
    }
 
@@ -75,18 +75,18 @@ public class ServerList {
       return this.servers.size();
    }
 
-   public void swapServers(int pos1, int pos2) {
+   public void swapServers(int var1, int var2) {
       ServerData serverdata = this.getServerData(pos1);
       this.servers.set(pos1, this.getServerData(pos2));
       this.servers.set(pos2, serverdata);
       this.saveServerList();
    }
 
-   public void set(int index, ServerData server) {
+   public void set(int var1, ServerData var2) {
       this.servers.set(index, server);
    }
 
-   public static void saveSingleServer(ServerData server) {
+   public static void saveSingleServer(ServerData var0) {
       ServerList serverlist = new ServerList(Minecraft.getMinecraft());
       serverlist.loadServerList();
 

@@ -7,49 +7,49 @@ public class NoiseGeneratorPerlin extends NoiseGenerator {
    private final int levels;
 
    public NoiseGeneratorPerlin(Random var1, int var2) {
-      this.levels = var2;
-      this.noiseLevels = new NoiseGeneratorSimplex[var2];
+      this.levels = p_i45470_2_;
+      this.noiseLevels = new NoiseGeneratorSimplex[p_i45470_2_];
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-         this.noiseLevels[var3] = new NoiseGeneratorSimplex(var1);
+      for(int i = 0; i < p_i45470_2_; ++i) {
+         this.noiseLevels[i] = new NoiseGeneratorSimplex(p_i45470_1_);
       }
 
    }
 
    public double getValue(double var1, double var3) {
-      double var5 = 0.0D;
-      double var7 = 1.0D;
+      double d0 = 0.0D;
+      double d1 = 1.0D;
 
-      for(int var9 = 0; var9 < this.levels; ++var9) {
-         var5 += this.noiseLevels[var9].getValue(var1 * var7, var3 * var7) / var7;
-         var7 /= 2.0D;
+      for(int i = 0; i < this.levels; ++i) {
+         d0 += this.noiseLevels[i].getValue(p_151601_1_ * d1, p_151601_3_ * d1) / d1;
+         d1 /= 2.0D;
       }
 
-      return var5;
+      return d0;
    }
 
    public double[] getRegion(double[] var1, double var2, double var4, int var6, int var7, double var8, double var10, double var12) {
-      return this.getRegion(var1, var2, var4, var6, var7, var8, var10, var12, 0.5D);
+      return this.getRegion(p_151599_1_, p_151599_2_, p_151599_4_, p_151599_6_, p_151599_7_, p_151599_8_, p_151599_10_, p_151599_12_, 0.5D);
    }
 
    public double[] getRegion(double[] var1, double var2, double var4, int var6, int var7, double var8, double var10, double var12, double var14) {
-      if (var1 != null && var1.length >= var6 * var7) {
-         for(int var16 = 0; var16 < var1.length; ++var16) {
-            var1[var16] = 0.0D;
+      if (p_151600_1_ != null && p_151600_1_.length >= p_151600_6_ * p_151600_7_) {
+         for(int i = 0; i < p_151600_1_.length; ++i) {
+            p_151600_1_[i] = 0.0D;
          }
       } else {
-         var1 = new double[var6 * var7];
+         p_151600_1_ = new double[p_151600_6_ * p_151600_7_];
       }
 
-      double var17 = 1.0D;
-      double var19 = 1.0D;
+      double d1 = 1.0D;
+      double d0 = 1.0D;
 
-      for(int var21 = 0; var21 < this.levels; ++var21) {
-         this.noiseLevels[var21].add(var1, var2, var4, var6, var7, var8 * var19 * var17, var10 * var19 * var17, 0.55D / var17);
-         var19 *= var12;
-         var17 *= var14;
+      for(int j = 0; j < this.levels; ++j) {
+         this.noiseLevels[j].add(p_151600_1_, p_151600_2_, p_151600_4_, p_151600_6_, p_151600_7_, p_151600_8_ * d0 * d1, p_151600_10_ * d0 * d1, 0.55D / d1);
+         d0 *= p_151600_12_;
+         d1 *= p_151600_14_;
       }
 
-      return var1;
+      return p_151600_1_;
    }
 }

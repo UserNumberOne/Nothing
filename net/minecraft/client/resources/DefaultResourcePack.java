@@ -21,11 +21,11 @@ public class DefaultResourcePack implements IResourcePack {
    public static final Set DEFAULT_RESOURCE_DOMAINS = ImmutableSet.of("minecraft", "realms");
    private final ResourceIndex resourceIndex;
 
-   public DefaultResourcePack(ResourceIndex resourceIndexIn) {
+   public DefaultResourcePack(ResourceIndex var1) {
       this.resourceIndex = resourceIndexIn;
    }
 
-   public InputStream getInputStream(ResourceLocation location) throws IOException {
+   public InputStream getInputStream(ResourceLocation var1) throws IOException {
       InputStream inputstream = this.getResourceStream(location);
       if (inputstream != null) {
          return inputstream;
@@ -40,16 +40,16 @@ public class DefaultResourcePack implements IResourcePack {
    }
 
    @Nullable
-   public InputStream getInputStreamAssets(ResourceLocation location) throws IOException, FileNotFoundException {
+   public InputStream getInputStreamAssets(ResourceLocation var1) throws IOException, FileNotFoundException {
       File file1 = this.resourceIndex.getFile(location);
       return file1 != null && file1.isFile() ? new FileInputStream(file1) : null;
    }
 
-   private InputStream getResourceStream(ResourceLocation location) {
+   private InputStream getResourceStream(ResourceLocation var1) {
       return DefaultResourcePack.class.getResourceAsStream("/assets/" + location.getResourceDomain() + "/" + location.getResourcePath());
    }
 
-   public boolean resourceExists(ResourceLocation location) {
+   public boolean resourceExists(ResourceLocation var1) {
       return this.getResourceStream(location) != null || this.resourceIndex.isFileExisting(location);
    }
 
@@ -57,13 +57,13 @@ public class DefaultResourcePack implements IResourcePack {
       return DEFAULT_RESOURCE_DOMAINS;
    }
 
-   public IMetadataSection getPackMetadata(MetadataSerializer metadataSerializer, String metadataSectionName) throws IOException {
+   public IMetadataSection getPackMetadata(MetadataSerializer var1, String var2) throws IOException {
       try {
          InputStream inputstream = new FileInputStream(this.resourceIndex.getPackMcmeta());
          return AbstractResourcePack.readMetadata(metadataSerializer, inputstream, metadataSectionName);
       } catch (RuntimeException var4) {
          return (IMetadataSection)null;
-      } catch (FileNotFoundException var51) {
+      } catch (FileNotFoundException var5) {
          return (IMetadataSection)null;
       }
    }

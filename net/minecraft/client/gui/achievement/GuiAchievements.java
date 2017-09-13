@@ -54,7 +54,7 @@ public class GuiAchievements extends GuiScreen implements IProgressMeter {
    private GuiButton button;
    private LinkedList minecraftAchievements = new LinkedList();
 
-   public GuiAchievements(GuiScreen parentScreenIn, StatisticsManager statFileWriterIn) {
+   public GuiAchievements(GuiScreen var1, StatisticsManager var2) {
       this.parentScreen = parentScreenIn;
       this.statFileWriter = statFileWriterIn;
       int i = 141;
@@ -82,7 +82,7 @@ public class GuiAchievements extends GuiScreen implements IProgressMeter {
       this.buttonList.add(this.button = new GuiButton(2, (this.width - this.imageWidth) / 2 + 24, this.height / 2 + 74, 125, 20, AchievementPage.getTitle(this.currentPage)));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (!this.loadingAchievements) {
          if (button.id == 1) {
             this.mc.displayGuiScreen(this.parentScreen);
@@ -100,7 +100,7 @@ public class GuiAchievements extends GuiScreen implements IProgressMeter {
 
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       if (this.mc.gameSettings.keyBindInventory.isActiveAndMatches(keyCode)) {
          this.mc.displayGuiScreen((GuiScreen)null);
          this.mc.setIngameFocus();
@@ -110,7 +110,7 @@ public class GuiAchievements extends GuiScreen implements IProgressMeter {
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       if (this.loadingAchievements) {
          this.drawDefaultBackground();
          this.drawCenteredString(this.fontRendererObj, I18n.format("multiplayer.downloadingStats"), this.width / 2, this.height / 2, 16777215);
@@ -219,7 +219,7 @@ public class GuiAchievements extends GuiScreen implements IProgressMeter {
       this.fontRendererObj.drawString(I18n.format("gui.achievements"), i + 15, j + 5, 4210752);
    }
 
-   protected void drawAchievementScreen(int p_146552_1_, int p_146552_2_, float p_146552_3_) {
+   protected void drawAchievementScreen(int var1, int var2, float var3) {
       int i = MathHelper.floor(this.xScrollO + (this.xScrollP - this.xScrollO) * (double)p_146552_3_);
       int j = MathHelper.floor(this.yScrollO + (this.yScrollP - this.yScrollO) * (double)p_146552_3_);
       if (i < X_MIN) {
@@ -303,7 +303,7 @@ public class GuiAchievements extends GuiScreen implements IProgressMeter {
       this.mc.getTextureManager().bindTexture(ACHIEVEMENT_BACKGROUND);
       List achievementList = (List<Achievement>)(this.currentPage == -1 ? this.minecraftAchievements : AchievementPage.getAchievementPage(this.currentPage).getAchievements());
 
-      for(int j5 = 0; j5 < achievementList.size(); ++j5) {
+      for(int j5 = 0; j5 < ((List)achievementList).size(); ++j5) {
          Achievement achievement1 = (Achievement)achievementList.get(j5);
          if (achievement1.parentAchievement != null && achievementList.contains(achievement1.parentAchievement)) {
             int k5 = achievement1.displayColumn * 24 - i + 11;
@@ -344,7 +344,7 @@ public class GuiAchievements extends GuiScreen implements IProgressMeter {
       GlStateManager.enableRescaleNormal();
       GlStateManager.enableColorMaterial();
 
-      for(int i6 = 0; i6 < achievementList.size(); ++i6) {
+      for(int i6 = 0; i6 < ((List)achievementList).size(); ++i6) {
          Achievement achievement2 = (Achievement)achievementList.get(i6);
          int l6 = achievement2.displayColumn * 24 - i;
          int j7 = achievement2.displayRow * 24 - j;
@@ -458,7 +458,7 @@ public class GuiAchievements extends GuiScreen implements IProgressMeter {
       RenderHelper.disableStandardItemLighting();
    }
 
-   private TextureAtlasSprite getTexture(Block blockIn) {
+   private TextureAtlasSprite getTexture(Block var1) {
       return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(blockIn.getDefaultState());
    }
 

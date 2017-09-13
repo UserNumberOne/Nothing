@@ -11,12 +11,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderSheep extends RenderLiving {
    private static final ResourceLocation SHEARED_SHEEP_TEXTURES = new ResourceLocation("textures/entity/sheep/sheep.png");
 
-   public RenderSheep(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn) {
+   public RenderSheep(RenderManager var1, ModelBase var2, float var3) {
       super(renderManagerIn, modelBaseIn, shadowSizeIn);
       this.addLayer(new LayerSheepWool(this));
    }
 
-   protected ResourceLocation getEntityTexture(EntitySheep entity) {
+   protected ResourceLocation getEntityTexture(EntitySheep var1) {
       return SHEARED_SHEEP_TEXTURES;
    }
 }

@@ -15,11 +15,11 @@ public class RegionRenderCacheBuilder {
       this.worldRenderers[BlockRenderLayer.TRANSLUCENT.ordinal()] = new VertexBuffer(262144);
    }
 
-   public VertexBuffer getWorldRendererByLayer(BlockRenderLayer layer) {
+   public VertexBuffer getWorldRendererByLayer(BlockRenderLayer var1) {
       return this.worldRenderers[layer.ordinal()];
    }
 
-   public VertexBuffer getWorldRendererByLayerId(int id) {
+   public VertexBuffer getWorldRendererByLayerId(int var1) {
       return this.worldRenderers[id];
    }
 }

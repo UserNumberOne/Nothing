@@ -13,11 +13,11 @@ public class RenderShulkerBullet extends Render {
    private static final ResourceLocation SHULKER_SPARK_TEXTURE = new ResourceLocation("textures/entity/shulker/spark.png");
    private final ModelShulkerBullet model = new ModelShulkerBullet();
 
-   public RenderShulkerBullet(RenderManager manager) {
+   public RenderShulkerBullet(RenderManager var1) {
       super(manager);
    }
 
-   private float rotLerp(float p_188347_1_, float p_188347_2_, float p_188347_3_) {
+   private float rotLerp(float var1, float var2, float var3) {
       float f;
       for(f = p_188347_2_ - p_188347_1_; f < -180.0F; f += 360.0F) {
          ;
@@ -30,7 +30,7 @@ public class RenderShulkerBullet extends Render {
       return p_188347_1_ + p_188347_3_ * f;
    }
 
-   public void doRender(EntityShulkerBullet entity, double x, double y, double z, float entityYaw, float partialTicks) {
+   public void doRender(EntityShulkerBullet var1, double var2, double var4, double var6, float var8, float var9) {
       GlStateManager.pushMatrix();
       float f = this.rotLerp(entity.prevRotationYaw, entity.rotationYaw, partialTicks);
       float f1 = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
@@ -53,7 +53,7 @@ public class RenderShulkerBullet extends Render {
       super.doRender(entity, x, y, z, entityYaw, partialTicks);
    }
 
-   protected ResourceLocation getEntityTexture(EntityShulkerBullet entity) {
+   protected ResourceLocation getEntityTexture(EntityShulkerBullet var1) {
       return SHULKER_SPARK_TEXTURE;
    }
 }

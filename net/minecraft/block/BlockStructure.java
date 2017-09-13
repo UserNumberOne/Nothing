@@ -32,23 +32,24 @@ public class BlockStructure extends BlockContainer {
    }
 
    public boolean onBlockActivated(World var1, BlockPos var2, IBlockState var3, EntityPlayer var4, EnumHand var5, @Nullable ItemStack var6, EnumFacing var7, float var8, float var9, float var10) {
-      TileEntity var11 = var1.getTileEntity(var2);
-      return var11 instanceof TileEntityStructure ? ((TileEntityStructure)var11).usedBy(var4) : false;
+      TileEntity tileentity = worldIn.getTileEntity(pos);
+      return tileentity instanceof TileEntityStructure ? ((TileEntityStructure)tileentity).usedBy(playerIn) : false;
    }
 
    public void onBlockPlacedBy(World var1, BlockPos var2, IBlockState var3, EntityLivingBase var4, ItemStack var5) {
-      if (!var1.isRemote) {
-         TileEntity var6 = var1.getTileEntity(var2);
-         if (var6 instanceof TileEntityStructure) {
-            TileEntityStructure var7 = (TileEntityStructure)var6;
-            var7.createdBy(var4);
+      if (!worldIn.isRemote) {
+         TileEntity tileentity = worldIn.getTileEntity(pos);
+         if (tileentity instanceof TileEntityStructure) {
+            TileEntityStructure tileentitystructure = (TileEntityStructure)tileentity;
+            tileentitystructure.createdBy(placer);
          }
       }
+
    }
 
    @Nullable
    public ItemStack getItem(World var1, BlockPos var2, IBlockState var3) {
-      return super.getItem(var1, var2, var3);
+      return super.getItem(worldIn, pos, state);
    }
 
    public int quantityDropped(Random var1) {
@@ -64,11 +65,11 @@ public class BlockStructure extends BlockContainer {
    }
 
    public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(MODE, TileEntityStructure.Mode.getById(var1));
+      return this.getDefaultState().withProperty(MODE, TileEntityStructure.Mode.getById(meta));
    }
 
    public int getMetaFromState(IBlockState var1) {
-      return ((TileEntityStructure.Mode)var1.getValue(MODE)).getModeId();
+      return ((TileEntityStructure.Mode)state.getValue(MODE)).getModeId();
    }
 
    protected BlockStateContainer createBlockState() {
@@ -76,33 +77,33 @@ public class BlockStructure extends BlockContainer {
    }
 
    public void neighborChanged(IBlockState var1, World var2, BlockPos var3, Block var4) {
-      if (!var2.isRemote) {
-         TileEntity var5 = var2.getTileEntity(var3);
-         if (var5 instanceof TileEntityStructure) {
-            TileEntityStructure var6 = (TileEntityStructure)var5;
-            boolean var7 = var2.isBlockPowered(var3);
-            boolean var8 = var6.isPowered();
-            if (var7 && !var8) {
-               var6.setPowered(true);
-               this.trigger(var6);
-            } else if (!var7 && var8) {
-               var6.setPowered(false);
+      if (!worldIn.isRemote) {
+         TileEntity tileentity = worldIn.getTileEntity(pos);
+         if (tileentity instanceof TileEntityStructure) {
+            TileEntityStructure tileentitystructure = (TileEntityStructure)tileentity;
+            boolean flag = worldIn.isBlockPowered(pos);
+            boolean flag1 = tileentitystructure.isPowered();
+            if (flag && !flag1) {
+               tileentitystructure.setPowered(true);
+               this.trigger(tileentitystructure);
+            } else if (!flag && flag1) {
+               tileentitystructure.setPowered(false);
             }
-
          }
       }
+
    }
 
    private void trigger(TileEntityStructure var1) {
-      switch(var1.getMode()) {
+      switch(p_189874_1_.getMode()) {
       case SAVE:
-         var1.save(false);
+         p_189874_1_.save(false);
          break;
       case LOAD:
-         var1.load(false);
+         p_189874_1_.load(false);
          break;
       case CORNER:
-         var1.unloadStructure();
+         p_189874_1_.unloadStructure();
       case DATA:
       }
 

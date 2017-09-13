@@ -13,15 +13,15 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 
 @SideOnly(Side.CLIENT)
 public class FolderResourcePack extends AbstractResourcePack {
-   public FolderResourcePack(File resourcePackFileIn) {
+   public FolderResourcePack(File var1) {
       super(resourcePackFileIn);
    }
 
-   protected InputStream getInputStreamByName(String name) throws IOException {
+   protected InputStream getInputStreamByName(String var1) throws IOException {
       return new BufferedInputStream(new FileInputStream(new File(this.resourcePackFile, name)));
    }
 
-   protected boolean hasResourceName(String name) {
+   protected boolean hasResourceName(String var1) {
       return (new File(this.resourcePackFile, name)).isFile();
    }
 

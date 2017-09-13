@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderPigZombie extends RenderBiped {
    private static final ResourceLocation ZOMBIE_PIGMAN_TEXTURE = new ResourceLocation("textures/entity/zombie_pigman.png");
 
-   public RenderPigZombie(RenderManager renderManagerIn) {
+   public RenderPigZombie(RenderManager var1) {
       super(renderManagerIn, new ModelZombie(), 0.5F, 1.0F);
       this.addLayer(new LayerHeldItem(this));
       this.addLayer(new LayerBipedArmor(this) {
@@ -23,7 +23,7 @@ public class RenderPigZombie extends RenderBiped {
       });
    }
 
-   protected ResourceLocation getEntityTexture(EntityPigZombie entity) {
+   protected ResourceLocation getEntityTexture(EntityPigZombie var1) {
       return ZOMBIE_PIGMAN_TEXTURE;
    }
 }

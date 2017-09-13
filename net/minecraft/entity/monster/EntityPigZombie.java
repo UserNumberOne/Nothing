@@ -31,19 +31,19 @@ import net.minecraft.world.storage.loot.LootTableList;
 public class EntityPigZombie extends EntityZombie {
    private static final UUID ATTACK_SPEED_BOOST_MODIFIER_UUID = UUID.fromString("49455A49-7EC5-45BA-B886-3B90B23A1718");
    private static final AttributeModifier ATTACK_SPEED_BOOST_MODIFIER = (new AttributeModifier(ATTACK_SPEED_BOOST_MODIFIER_UUID, "Attacking speed boost", 0.05D, 0)).setSaved(false);
-   public int angerLevel;
+   private int angerLevel;
    private int randomSoundDelay;
    private UUID angerTargetUUID;
 
    public EntityPigZombie(World var1) {
-      super(var1);
+      super(worldIn);
       this.isImmuneToFire = true;
    }
 
    public void setRevengeTarget(@Nullable EntityLivingBase var1) {
-      super.setRevengeTarget(var1);
-      if (var1 != null) {
-         this.angerTargetUUID = var1.getUniqueID();
+      super.setRevengeTarget(livingBase);
+      if (livingBase != null) {
+         this.angerTargetUUID = livingBase.getUniqueID();
       }
 
    }
@@ -65,15 +65,15 @@ public class EntityPigZombie extends EntityZombie {
    }
 
    protected void updateAITasks() {
-      IAttributeInstance var1 = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+      IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
       if (this.isAngry()) {
-         if (!this.isChild() && !var1.hasModifier(ATTACK_SPEED_BOOST_MODIFIER)) {
-            var1.applyModifier(ATTACK_SPEED_BOOST_MODIFIER);
+         if (!this.isChild() && !iattributeinstance.hasModifier(ATTACK_SPEED_BOOST_MODIFIER)) {
+            iattributeinstance.applyModifier(ATTACK_SPEED_BOOST_MODIFIER);
          }
 
          --this.angerLevel;
-      } else if (var1.hasModifier(ATTACK_SPEED_BOOST_MODIFIER)) {
-         var1.removeModifier(ATTACK_SPEED_BOOST_MODIFIER);
+      } else if (iattributeinstance.hasModifier(ATTACK_SPEED_BOOST_MODIFIER)) {
+         iattributeinstance.removeModifier(ATTACK_SPEED_BOOST_MODIFIER);
       }
 
       if (this.randomSoundDelay > 0 && --this.randomSoundDelay == 0) {
@@ -81,9 +81,9 @@ public class EntityPigZombie extends EntityZombie {
       }
 
       if (this.angerLevel > 0 && this.angerTargetUUID != null && this.getAITarget() == null) {
-         EntityPlayer var2 = this.world.getPlayerEntityByUUID(this.angerTargetUUID);
-         this.setRevengeTarget(var2);
-         this.attackingPlayer = var2;
+         EntityPlayer entityplayer = this.world.getPlayerEntityByUUID(this.angerTargetUUID);
+         this.setRevengeTarget(entityplayer);
+         this.attackingPlayer = entityplayer;
          this.recentlyHit = this.getRevengeTimer();
       }
 
@@ -99,30 +99,30 @@ public class EntityPigZombie extends EntityZombie {
    }
 
    public static void registerFixesPigZombie(DataFixer var0) {
-      EntityLiving.registerFixesMob(var0, "PigZombie");
+      EntityLiving.registerFixesMob(fixer, "PigZombie");
    }
 
    public void writeEntityToNBT(NBTTagCompound var1) {
-      super.writeEntityToNBT(var1);
-      var1.setShort("Anger", (short)this.angerLevel);
+      super.writeEntityToNBT(compound);
+      compound.setShort("Anger", (short)this.angerLevel);
       if (this.angerTargetUUID != null) {
-         var1.setString("HurtBy", this.angerTargetUUID.toString());
+         compound.setString("HurtBy", this.angerTargetUUID.toString());
       } else {
-         var1.setString("HurtBy", "");
+         compound.setString("HurtBy", "");
       }
 
    }
 
    public void readEntityFromNBT(NBTTagCompound var1) {
-      super.readEntityFromNBT(var1);
-      this.angerLevel = var1.getShort("Anger");
-      String var2 = var1.getString("HurtBy");
-      if (!var2.isEmpty()) {
-         this.angerTargetUUID = UUID.fromString(var2);
-         EntityPlayer var3 = this.world.getPlayerEntityByUUID(this.angerTargetUUID);
-         this.setRevengeTarget(var3);
-         if (var3 != null) {
-            this.attackingPlayer = var3;
+      super.readEntityFromNBT(compound);
+      this.angerLevel = compound.getShort("Anger");
+      String s = compound.getString("HurtBy");
+      if (!s.isEmpty()) {
+         this.angerTargetUUID = UUID.fromString(s);
+         EntityPlayer entityplayer = this.world.getPlayerEntityByUUID(this.angerTargetUUID);
+         this.setRevengeTarget(entityplayer);
+         if (entityplayer != null) {
+            this.attackingPlayer = entityplayer;
             this.recentlyHit = this.getRevengeTimer();
          }
       }
@@ -130,23 +130,23 @@ public class EntityPigZombie extends EntityZombie {
    }
 
    public boolean attackEntityFrom(DamageSource var1, float var2) {
-      if (this.isEntityInvulnerable(var1)) {
+      if (this.isEntityInvulnerable(source)) {
          return false;
       } else {
-         Entity var3 = var1.getEntity();
-         if (var3 instanceof EntityPlayer) {
-            this.becomeAngryAt(var3);
+         Entity entity = source.getEntity();
+         if (entity instanceof EntityPlayer) {
+            this.becomeAngryAt(entity);
          }
 
-         return super.attackEntityFrom(var1, var2);
+         return super.attackEntityFrom(source, amount);
       }
    }
 
    private void becomeAngryAt(Entity var1) {
       this.angerLevel = 400 + this.rand.nextInt(400);
       this.randomSoundDelay = this.rand.nextInt(40);
-      if (var1 instanceof EntityLivingBase) {
-         this.setRevengeTarget((EntityLivingBase)var1);
+      if (p_70835_1_ instanceof EntityLivingBase) {
+         this.setRevengeTarget((EntityLivingBase)p_70835_1_);
       }
 
    }
@@ -182,20 +182,20 @@ public class EntityPigZombie extends EntityZombie {
 
    @Nullable
    public IEntityLivingData onInitialSpawn(DifficultyInstance var1, @Nullable IEntityLivingData var2) {
-      super.onInitialSpawn(var1, var2);
+      super.onInitialSpawn(difficulty, livingdata);
       this.setZombieType(ZombieType.NORMAL);
-      return var2;
+      return livingdata;
    }
 
    static class AIHurtByAggressor extends EntityAIHurtByTarget {
       public AIHurtByAggressor(EntityPigZombie var1) {
-         super(var1, true);
+         super(p_i45828_1_, true);
       }
 
       protected void setEntityAttackTarget(EntityCreature var1, EntityLivingBase var2) {
-         super.setEntityAttackTarget(var1, var2);
-         if (var1 instanceof EntityPigZombie) {
-            ((EntityPigZombie)var1).becomeAngryAt(var2);
+         super.setEntityAttackTarget(creatureIn, entityLivingBaseIn);
+         if (creatureIn instanceof EntityPigZombie) {
+            ((EntityPigZombie)creatureIn).becomeAngryAt(entityLivingBaseIn);
          }
 
       }
@@ -203,7 +203,7 @@ public class EntityPigZombie extends EntityZombie {
 
    static class AITargetAggressor extends EntityAINearestAttackableTarget {
       public AITargetAggressor(EntityPigZombie var1) {
-         super(var1, EntityPlayer.class, true);
+         super(p_i45829_1_, EntityPlayer.class, true);
       }
 
       public boolean shouldExecute() {

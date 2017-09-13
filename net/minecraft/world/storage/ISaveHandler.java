@@ -1,7 +1,6 @@
 package net.minecraft.world.storage;
 
 import java.io.File;
-import java.util.UUID;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
@@ -28,6 +27,4 @@ public interface ISaveHandler {
    File getMapFileFromName(String var1);
 
    TemplateManager getStructureTemplateManager();
-
-   UUID getUUID();
 }

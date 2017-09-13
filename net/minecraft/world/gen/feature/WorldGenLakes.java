@@ -13,55 +13,55 @@ public class WorldGenLakes extends WorldGenerator {
    private final Block block;
 
    public WorldGenLakes(Block var1) {
-      this.block = var1;
+      this.block = blockIn;
    }
 
    public boolean generate(World var1, Random var2, BlockPos var3) {
-      for(var3 = var3.add(-8, 0, -8); var3.getY() > 5 && var1.isAirBlock(var3); var3 = var3.down()) {
+      for(position = position.add(-8, 0, -8); position.getY() > 5 && worldIn.isAirBlock(position); position = position.down()) {
          ;
       }
 
-      if (var3.getY() <= 4) {
+      if (position.getY() <= 4) {
          return false;
       } else {
-         var3 = var3.down(4);
-         boolean[] var4 = new boolean[2048];
-         int var5 = var2.nextInt(4) + 4;
+         position = position.down(4);
+         boolean[] aboolean = new boolean[2048];
+         int i = rand.nextInt(4) + 4;
 
-         for(int var6 = 0; var6 < var5; ++var6) {
-            double var7 = var2.nextDouble() * 6.0D + 3.0D;
-            double var9 = var2.nextDouble() * 4.0D + 2.0D;
-            double var11 = var2.nextDouble() * 6.0D + 3.0D;
-            double var13 = var2.nextDouble() * (16.0D - var7 - 2.0D) + 1.0D + var7 / 2.0D;
-            double var15 = var2.nextDouble() * (8.0D - var9 - 4.0D) + 2.0D + var9 / 2.0D;
-            double var17 = var2.nextDouble() * (16.0D - var11 - 2.0D) + 1.0D + var11 / 2.0D;
+         for(int j = 0; j < i; ++j) {
+            double d0 = rand.nextDouble() * 6.0D + 3.0D;
+            double d1 = rand.nextDouble() * 4.0D + 2.0D;
+            double d2 = rand.nextDouble() * 6.0D + 3.0D;
+            double d3 = rand.nextDouble() * (16.0D - d0 - 2.0D) + 1.0D + d0 / 2.0D;
+            double d4 = rand.nextDouble() * (8.0D - d1 - 4.0D) + 2.0D + d1 / 2.0D;
+            double d5 = rand.nextDouble() * (16.0D - d2 - 2.0D) + 1.0D + d2 / 2.0D;
 
-            for(int var19 = 1; var19 < 15; ++var19) {
-               for(int var20 = 1; var20 < 15; ++var20) {
-                  for(int var21 = 1; var21 < 7; ++var21) {
-                     double var22 = ((double)var19 - var13) / (var7 / 2.0D);
-                     double var24 = ((double)var21 - var15) / (var9 / 2.0D);
-                     double var26 = ((double)var20 - var17) / (var11 / 2.0D);
-                     double var28 = var22 * var22 + var24 * var24 + var26 * var26;
-                     if (var28 < 1.0D) {
-                        var4[(var19 * 16 + var20) * 8 + var21] = true;
+            for(int l = 1; l < 15; ++l) {
+               for(int i1 = 1; i1 < 15; ++i1) {
+                  for(int j1 = 1; j1 < 7; ++j1) {
+                     double d6 = ((double)l - d3) / (d0 / 2.0D);
+                     double d7 = ((double)j1 - d4) / (d1 / 2.0D);
+                     double d8 = ((double)i1 - d5) / (d2 / 2.0D);
+                     double d9 = d6 * d6 + d7 * d7 + d8 * d8;
+                     if (d9 < 1.0D) {
+                        aboolean[(l * 16 + i1) * 8 + j1] = true;
                      }
                   }
                }
             }
          }
 
-         for(int var36 = 0; var36 < 16; ++var36) {
-            for(int var30 = 0; var30 < 16; ++var30) {
-               for(int var31 = 0; var31 < 8; ++var31) {
-                  boolean var32 = !var4[(var36 * 16 + var30) * 8 + var31] && (var36 < 15 && var4[((var36 + 1) * 16 + var30) * 8 + var31] || var36 > 0 && var4[((var36 - 1) * 16 + var30) * 8 + var31] || var30 < 15 && var4[(var36 * 16 + var30 + 1) * 8 + var31] || var30 > 0 && var4[(var36 * 16 + (var30 - 1)) * 8 + var31] || var31 < 7 && var4[(var36 * 16 + var30) * 8 + var31 + 1] || var31 > 0 && var4[(var36 * 16 + var30) * 8 + (var31 - 1)]);
-                  if (var32) {
-                     Material var33 = var1.getBlockState(var3.add(var36, var31, var30)).getMaterial();
-                     if (var31 >= 4 && var33.isLiquid()) {
+         for(int k1 = 0; k1 < 16; ++k1) {
+            for(int l2 = 0; l2 < 16; ++l2) {
+               for(int k = 0; k < 8; ++k) {
+                  boolean flag = !aboolean[(k1 * 16 + l2) * 8 + k] && (k1 < 15 && aboolean[((k1 + 1) * 16 + l2) * 8 + k] || k1 > 0 && aboolean[((k1 - 1) * 16 + l2) * 8 + k] || l2 < 15 && aboolean[(k1 * 16 + l2 + 1) * 8 + k] || l2 > 0 && aboolean[(k1 * 16 + (l2 - 1)) * 8 + k] || k < 7 && aboolean[(k1 * 16 + l2) * 8 + k + 1] || k > 0 && aboolean[(k1 * 16 + l2) * 8 + (k - 1)]);
+                  if (flag) {
+                     Material material = worldIn.getBlockState(position.add(k1, k, l2)).getMaterial();
+                     if (k >= 4 && material.isLiquid()) {
                         return false;
                      }
 
-                     if (var31 < 4 && !var33.isSolid() && var1.getBlockState(var3.add(var36, var31, var30)).getBlock() != this.block) {
+                     if (k < 4 && !material.isSolid() && worldIn.getBlockState(position.add(k1, k, l2)).getBlock() != this.block) {
                         return false;
                      }
                   }
@@ -69,27 +69,27 @@ public class WorldGenLakes extends WorldGenerator {
             }
          }
 
-         for(int var37 = 0; var37 < 16; ++var37) {
-            for(int var41 = 0; var41 < 16; ++var41) {
-               for(int var45 = 0; var45 < 8; ++var45) {
-                  if (var4[(var37 * 16 + var41) * 8 + var45]) {
-                     var1.setBlockState(var3.add(var37, var45, var41), var45 >= 4 ? Blocks.AIR.getDefaultState() : this.block.getDefaultState(), 2);
+         for(int l1 = 0; l1 < 16; ++l1) {
+            for(int i3 = 0; i3 < 16; ++i3) {
+               for(int i4 = 0; i4 < 8; ++i4) {
+                  if (aboolean[(l1 * 16 + i3) * 8 + i4]) {
+                     worldIn.setBlockState(position.add(l1, i4, i3), i4 >= 4 ? Blocks.AIR.getDefaultState() : this.block.getDefaultState(), 2);
                   }
                }
             }
          }
 
-         for(int var38 = 0; var38 < 16; ++var38) {
-            for(int var42 = 0; var42 < 16; ++var42) {
-               for(int var46 = 4; var46 < 8; ++var46) {
-                  if (var4[(var38 * 16 + var42) * 8 + var46]) {
-                     BlockPos var49 = var3.add(var38, var46 - 1, var42);
-                     if (var1.getBlockState(var49).getBlock() == Blocks.DIRT && var1.getLightFor(EnumSkyBlock.SKY, var3.add(var38, var46, var42)) > 0) {
-                        Biome var51 = var1.getBiome(var49);
-                        if (var51.topBlock.getBlock() == Blocks.MYCELIUM) {
-                           var1.setBlockState(var49, Blocks.MYCELIUM.getDefaultState(), 2);
+         for(int i2 = 0; i2 < 16; ++i2) {
+            for(int j3 = 0; j3 < 16; ++j3) {
+               for(int j4 = 4; j4 < 8; ++j4) {
+                  if (aboolean[(i2 * 16 + j3) * 8 + j4]) {
+                     BlockPos blockpos = position.add(i2, j4 - 1, j3);
+                     if (worldIn.getBlockState(blockpos).getBlock() == Blocks.DIRT && worldIn.getLightFor(EnumSkyBlock.SKY, position.add(i2, j4, j3)) > 0) {
+                        Biome biome = worldIn.getBiome(blockpos);
+                        if (biome.topBlock.getBlock() == Blocks.MYCELIUM) {
+                           worldIn.setBlockState(blockpos, Blocks.MYCELIUM.getDefaultState(), 2);
                         } else {
-                           var1.setBlockState(var49, Blocks.GRASS.getDefaultState(), 2);
+                           worldIn.setBlockState(blockpos, Blocks.GRASS.getDefaultState(), 2);
                         }
                      }
                   }
@@ -98,12 +98,12 @@ public class WorldGenLakes extends WorldGenerator {
          }
 
          if (this.block.getDefaultState().getMaterial() == Material.LAVA) {
-            for(int var39 = 0; var39 < 16; ++var39) {
-               for(int var43 = 0; var43 < 16; ++var43) {
-                  for(int var47 = 0; var47 < 8; ++var47) {
-                     boolean var50 = !var4[(var39 * 16 + var43) * 8 + var47] && (var39 < 15 && var4[((var39 + 1) * 16 + var43) * 8 + var47] || var39 > 0 && var4[((var39 - 1) * 16 + var43) * 8 + var47] || var43 < 15 && var4[(var39 * 16 + var43 + 1) * 8 + var47] || var43 > 0 && var4[(var39 * 16 + (var43 - 1)) * 8 + var47] || var47 < 7 && var4[(var39 * 16 + var43) * 8 + var47 + 1] || var47 > 0 && var4[(var39 * 16 + var43) * 8 + (var47 - 1)]);
-                     if (var50 && (var47 < 4 || var2.nextInt(2) != 0) && var1.getBlockState(var3.add(var39, var47, var43)).getMaterial().isSolid()) {
-                        var1.setBlockState(var3.add(var39, var47, var43), Blocks.STONE.getDefaultState(), 2);
+            for(int j2 = 0; j2 < 16; ++j2) {
+               for(int k3 = 0; k3 < 16; ++k3) {
+                  for(int k4 = 0; k4 < 8; ++k4) {
+                     boolean flag1 = !aboolean[(j2 * 16 + k3) * 8 + k4] && (j2 < 15 && aboolean[((j2 + 1) * 16 + k3) * 8 + k4] || j2 > 0 && aboolean[((j2 - 1) * 16 + k3) * 8 + k4] || k3 < 15 && aboolean[(j2 * 16 + k3 + 1) * 8 + k4] || k3 > 0 && aboolean[(j2 * 16 + (k3 - 1)) * 8 + k4] || k4 < 7 && aboolean[(j2 * 16 + k3) * 8 + k4 + 1] || k4 > 0 && aboolean[(j2 * 16 + k3) * 8 + (k4 - 1)]);
+                     if (flag1 && (k4 < 4 || rand.nextInt(2) != 0) && worldIn.getBlockState(position.add(j2, k4, k3)).getMaterial().isSolid()) {
+                        worldIn.setBlockState(position.add(j2, k4, k3), Blocks.STONE.getDefaultState(), 2);
                      }
                   }
                }
@@ -111,11 +111,11 @@ public class WorldGenLakes extends WorldGenerator {
          }
 
          if (this.block.getDefaultState().getMaterial() == Material.WATER) {
-            for(int var40 = 0; var40 < 16; ++var40) {
-               for(int var44 = 0; var44 < 16; ++var44) {
-                  boolean var48 = true;
-                  if (var1.canBlockFreezeWater(var3.add(var40, 4, var44))) {
-                     var1.setBlockState(var3.add(var40, 4, var44), Blocks.ICE.getDefaultState(), 2);
+            for(int k2 = 0; k2 < 16; ++k2) {
+               for(int l3 = 0; l3 < 16; ++l3) {
+                  int l4 = 4;
+                  if (worldIn.canBlockFreezeWater(position.add(k2, 4, l3))) {
+                     worldIn.setBlockState(position.add(k2, 4, l3), Blocks.ICE.getDefaultState(), 2);
                   }
                }
             }

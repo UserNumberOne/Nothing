@@ -10,15 +10,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderEndermite extends RenderLiving {
    private static final ResourceLocation ENDERMITE_TEXTURES = new ResourceLocation("textures/entity/endermite.png");
 
-   public RenderEndermite(RenderManager renderManagerIn) {
+   public RenderEndermite(RenderManager var1) {
       super(renderManagerIn, new ModelEnderMite(), 0.3F);
    }
 
-   protected float getDeathMaxRotation(EntityEndermite entityLivingBaseIn) {
+   protected float getDeathMaxRotation(EntityEndermite var1) {
       return 180.0F;
    }
 
-   protected ResourceLocation getEntityTexture(EntityEndermite entity) {
+   protected ResourceLocation getEntityTexture(EntityEndermite var1) {
       return ENDERMITE_TEXTURES;
    }
 }

@@ -9,7 +9,7 @@ public class ModelEnderman extends ModelBiped {
    public boolean isCarrying;
    public boolean isAttacking;
 
-   public ModelEnderman(float scale) {
+   public ModelEnderman(float var1) {
       super(0.0F, -14.0F, 64, 32);
       float f = -14.0F;
       this.bipedHeadwear = new ModelRenderer(this, 0, 16);
@@ -34,7 +34,7 @@ public class ModelEnderman extends ModelBiped {
       this.bipedLeftLeg.setRotationPoint(2.0F, -2.0F, 0.0F);
    }
 
-   public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
+   public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6, Entity var7) {
       super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
       this.bipedHead.showModel = true;
       float f = -14.0F;

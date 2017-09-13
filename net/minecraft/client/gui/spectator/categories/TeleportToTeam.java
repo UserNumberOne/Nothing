@@ -43,7 +43,7 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject 
       return new TextComponentString("Select a team to teleport to");
    }
 
-   public void selectItem(SpectatorMenu menu) {
+   public void selectItem(SpectatorMenu var1) {
       menu.selectCategory(this);
    }
 
@@ -51,7 +51,7 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject 
       return new TextComponentString("Teleport to team member");
    }
 
-   public void renderIcon(float p_178663_1_, int alpha) {
+   public void renderIcon(float var1, int var2) {
       Minecraft.getMinecraft().getTextureManager().bindTexture(GuiSpectator.SPECTATOR_WIDGETS);
       Gui.drawModalRectWithCustomSizedTexture(0, 0, 16.0F, 0.0F, 16, 16, 256.0F, 256.0F);
    }
@@ -72,7 +72,7 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject 
       private final ResourceLocation location;
       private final List players;
 
-      public TeamSelectionObject(ScorePlayerTeam p_i45492_2_) {
+      public TeamSelectionObject(ScorePlayerTeam var2) {
          this.team = p_i45492_2_;
          this.players = Lists.newArrayList();
 
@@ -93,7 +93,7 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject 
 
       }
 
-      public void selectItem(SpectatorMenu menu) {
+      public void selectItem(SpectatorMenu var1) {
          menu.selectCategory(new TeleportToPlayer(this.players));
       }
 
@@ -101,7 +101,7 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject 
          return new TextComponentString(this.team.getTeamName());
       }
 
-      public void renderIcon(float p_178663_1_, int alpha) {
+      public void renderIcon(float var1, int var2) {
          int i = -1;
          String s = FontRenderer.getFormatFromString(this.team.getColorPrefix());
          if (s.length() >= 2) {

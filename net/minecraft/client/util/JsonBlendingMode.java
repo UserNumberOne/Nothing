@@ -17,7 +17,7 @@ public class JsonBlendingMode {
    private final boolean separateBlend;
    private final boolean opaque;
 
-   private JsonBlendingMode(boolean p_i45084_1_, boolean p_i45084_2_, int p_i45084_3_, int p_i45084_4_, int p_i45084_5_, int p_i45084_6_, int p_i45084_7_) {
+   private JsonBlendingMode(boolean var1, boolean var2, int var3, int var4, int var5, int var6, int var7) {
       this.separateBlend = p_i45084_1_;
       this.srcColorFactor = p_i45084_3_;
       this.destColorFactor = p_i45084_4_;
@@ -31,11 +31,11 @@ public class JsonBlendingMode {
       this(false, true, 1, 0, 1, 0, 32774);
    }
 
-   public JsonBlendingMode(int p_i45085_1_, int p_i45085_2_, int p_i45085_3_) {
+   public JsonBlendingMode(int var1, int var2, int var3) {
       this(false, false, p_i45085_1_, p_i45085_2_, p_i45085_1_, p_i45085_2_, p_i45085_3_);
    }
 
-   public JsonBlendingMode(int p_i45086_1_, int p_i45086_2_, int p_i45086_3_, int p_i45086_4_, int p_i45086_5_) {
+   public JsonBlendingMode(int var1, int var2, int var3, int var4, int var5) {
       this(true, false, p_i45086_1_, p_i45086_2_, p_i45086_3_, p_i45086_4_, p_i45086_5_);
    }
 
@@ -61,7 +61,7 @@ public class JsonBlendingMode {
 
    }
 
-   public boolean equals(Object p_equals_1_) {
+   public boolean equals(Object var1) {
       if (this == p_equals_1_) {
          return true;
       } else if (!(p_equals_1_ instanceof JsonBlendingMode)) {
@@ -87,7 +87,7 @@ public class JsonBlendingMode {
       return this.opaque;
    }
 
-   public static JsonBlendingMode parseBlendNode(JsonObject json) {
+   public static JsonBlendingMode parseBlendNode(JsonObject var0) {
       if (json == null) {
          return new JsonBlendingMode();
       } else {
@@ -141,12 +141,12 @@ public class JsonBlendingMode {
       }
    }
 
-   private static int stringToBlendFunction(String p_148108_0_) {
+   private static int stringToBlendFunction(String var0) {
       String s = p_148108_0_.trim().toLowerCase();
       return "add".equals(s) ? '耆' : ("subtract".equals(s) ? '耊' : ("reversesubtract".equals(s) ? '耋' : ("reverse_subtract".equals(s) ? '耋' : ("min".equals(s) ? '耇' : ("max".equals(s) ? '耈' : '耆')))));
    }
 
-   private static int stringToBlendFactor(String p_148107_0_) {
+   private static int stringToBlendFactor(String var0) {
       String s = p_148107_0_.trim().toLowerCase();
       s = s.replaceAll("_", "");
       s = s.replaceAll("one", "1");

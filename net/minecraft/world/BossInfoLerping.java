@@ -11,7 +11,7 @@ public class BossInfoLerping extends BossInfo {
    protected float rawPercent;
    protected long percentSetTime;
 
-   public BossInfoLerping(SPacketUpdateBossInfo packetIn) {
+   public BossInfoLerping(SPacketUpdateBossInfo var1) {
       super(packetIn.getUniqueId(), packetIn.getName(), packetIn.getColor(), packetIn.getOverlay());
       this.rawPercent = packetIn.getPercent();
       this.percent = packetIn.getPercent();
@@ -21,7 +21,7 @@ public class BossInfoLerping extends BossInfo {
       this.setCreateFog(packetIn.shouldCreateFog());
    }
 
-   public void setPercent(float percentIn) {
+   public void setPercent(float var1) {
       this.percent = this.getPercent();
       this.rawPercent = percentIn;
       this.percentSetTime = Minecraft.getSystemTime();
@@ -33,7 +33,7 @@ public class BossInfoLerping extends BossInfo {
       return this.percent + (this.rawPercent - this.percent) * f;
    }
 
-   public void updateFromPacket(SPacketUpdateBossInfo packetIn) {
+   public void updateFromPacket(SPacketUpdateBossInfo var1) {
       switch(packetIn.getOperation()) {
       case UPDATE_NAME:
          this.setName(packetIn.getName());

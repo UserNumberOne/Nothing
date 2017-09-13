@@ -9,29 +9,29 @@ import java.util.List;
 
 public class NettyVarint21FrameDecoder extends ByteToMessageDecoder {
    protected void decode(ChannelHandlerContext var1, ByteBuf var2, List var3) throws Exception {
-      var2.markReaderIndex();
-      byte[] var4 = new byte[3];
+      p_decode_2_.markReaderIndex();
+      byte[] abyte = new byte[3];
 
-      for(int var5 = 0; var5 < var4.length; ++var5) {
-         if (!var2.isReadable()) {
-            var2.resetReaderIndex();
+      for(int i = 0; i < abyte.length; ++i) {
+         if (!p_decode_2_.isReadable()) {
+            p_decode_2_.resetReaderIndex();
             return;
          }
 
-         var4[var5] = var2.readByte();
-         if (var4[var5] >= 0) {
-            PacketBuffer var6 = new PacketBuffer(Unpooled.wrappedBuffer(var4));
+         abyte[i] = p_decode_2_.readByte();
+         if (abyte[i] >= 0) {
+            PacketBuffer packetbuffer = new PacketBuffer(Unpooled.wrappedBuffer(abyte));
 
             try {
-               int var7 = var6.readVarInt();
-               if (var2.readableBytes() >= var7) {
-                  var3.add(var2.readBytes(var7));
+               int j = packetbuffer.readVarInt();
+               if (p_decode_2_.readableBytes() < j) {
+                  p_decode_2_.resetReaderIndex();
                   return;
                }
 
-               var2.resetReaderIndex();
+               p_decode_3_.add(p_decode_2_.readBytes(j));
             } finally {
-               var6.release();
+               packetbuffer.release();
             }
 
             return;

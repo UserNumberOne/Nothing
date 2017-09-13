@@ -21,7 +21,7 @@ public class ServerData {
    private String serverIcon;
    private boolean lanServer;
 
-   public ServerData(String name, String ip, boolean isLan) {
+   public ServerData(String var1, String var2, boolean var3) {
       this.serverName = name;
       this.serverIP = ip;
       this.lanServer = isLan;
@@ -48,11 +48,11 @@ public class ServerData {
       return this.resourceMode;
    }
 
-   public void setResourceMode(ServerData.ServerResourceMode mode) {
+   public void setResourceMode(ServerData.ServerResourceMode var1) {
       this.resourceMode = mode;
    }
 
-   public static ServerData getServerDataFromNBTCompound(NBTTagCompound nbtCompound) {
+   public static ServerData getServerDataFromNBTCompound(NBTTagCompound var0) {
       ServerData serverdata = new ServerData(nbtCompound.getString("name"), nbtCompound.getString("ip"), false);
       if (nbtCompound.hasKey("icon", 8)) {
          serverdata.setBase64EncodedIconData(nbtCompound.getString("icon"));
@@ -75,7 +75,7 @@ public class ServerData {
       return this.serverIcon;
    }
 
-   public void setBase64EncodedIconData(String icon) {
+   public void setBase64EncodedIconData(String var1) {
       this.serverIcon = icon;
    }
 
@@ -83,7 +83,7 @@ public class ServerData {
       return this.lanServer;
    }
 
-   public void copyFrom(ServerData serverDataIn) {
+   public void copyFrom(ServerData var1) {
       this.serverIP = serverDataIn.serverIP;
       this.serverName = serverDataIn.serverName;
       this.setResourceMode(serverDataIn.getResourceMode());
@@ -99,7 +99,7 @@ public class ServerData {
 
       private final ITextComponent motd;
 
-      private ServerResourceMode(String name) {
+      private ServerResourceMode(String var3) {
          this.motd = new TextComponentTranslation("addServer.resourcePack." + name, new Object[0]);
       }
 

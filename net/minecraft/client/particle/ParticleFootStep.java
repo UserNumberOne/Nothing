@@ -20,7 +20,7 @@ public class ParticleFootStep extends Particle {
    private final int footstepMaxAge;
    private final TextureManager currentFootSteps;
 
-   protected ParticleFootStep(TextureManager currentFootStepsIn, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn) {
+   protected ParticleFootStep(TextureManager var1, World var2, double var3, double var5, double var7) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.0D, 0.0D, 0.0D);
       this.currentFootSteps = currentFootStepsIn;
       this.motionX = 0.0D;
@@ -29,7 +29,7 @@ public class ParticleFootStep extends Particle {
       this.footstepMaxAge = 200;
    }
 
-   public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+   public void renderParticle(VertexBuffer var1, Entity var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       float f = ((float)this.footstepAge + partialTicks) / (float)this.footstepMaxAge;
       f = f * f;
       float f1 = 2.0F - f * 2.0F;
@@ -71,7 +71,7 @@ public class ParticleFootStep extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleFootStep(Minecraft.getMinecraft().getTextureManager(), worldIn, xCoordIn, yCoordIn, zCoordIn);
       }
    }

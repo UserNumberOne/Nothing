@@ -14,14 +14,14 @@ public class ParticleSimpleAnimated extends Particle {
    private float fadeTargetBlue;
    private boolean fadingColor;
 
-   public ParticleSimpleAnimated(World worldIn, double x, double y, double z, int textureIdxIn, int numFrames, float yAccelIn) {
+   public ParticleSimpleAnimated(World var1, double var2, double var4, double var6, int var8, int var9, float var10) {
       super(worldIn, x, y, z);
       this.textureIdx = textureIdxIn;
       this.numAgingFrames = numFrames;
       this.yAccel = yAccelIn;
    }
 
-   public void setColor(int p_187146_1_) {
+   public void setColor(int var1) {
       float f = (float)((p_187146_1_ & 16711680) >> 16) / 255.0F;
       float f1 = (float)((p_187146_1_ & '\uff00') >> 8) / 255.0F;
       float f2 = (float)((p_187146_1_ & 255) >> 0) / 255.0F;
@@ -29,7 +29,7 @@ public class ParticleSimpleAnimated extends Particle {
       this.setRBGColorF(f * 1.0F, f1 * 1.0F, f2 * 1.0F);
    }
 
-   public void setColorFade(int rgb) {
+   public void setColorFade(int var1) {
       this.fadeTargetRed = (float)((rgb & 16711680) >> 16) / 255.0F;
       this.fadeTargetGreen = (float)((rgb & '\uff00') >> 8) / 255.0F;
       this.fadeTargetBlue = (float)((rgb & 255) >> 0) / 255.0F;
@@ -70,7 +70,7 @@ public class ParticleSimpleAnimated extends Particle {
 
    }
 
-   public int getBrightnessForRender(float p_189214_1_) {
+   public int getBrightnessForRender(float var1) {
       return 15728880;
    }
 }

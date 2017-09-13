@@ -34,7 +34,7 @@ public interface IScoreCriteria {
       private final String renderType;
 
       private EnumRenderType(String var3) {
-         this.renderType = var3;
+         this.renderType = renderTypeIn;
       }
 
       public String getRenderType() {
@@ -42,13 +42,13 @@ public interface IScoreCriteria {
       }
 
       public static IScoreCriteria.EnumRenderType getByName(String var0) {
-         IScoreCriteria.EnumRenderType var1 = (IScoreCriteria.EnumRenderType)BY_NAME.get(var0);
-         return var1 == null ? INTEGER : var1;
+         IScoreCriteria.EnumRenderType iscorecriteria$enumrendertype = (IScoreCriteria.EnumRenderType)BY_NAME.get(name);
+         return iscorecriteria$enumrendertype == null ? INTEGER : iscorecriteria$enumrendertype;
       }
 
       static {
-         for(IScoreCriteria.EnumRenderType var3 : values()) {
-            BY_NAME.put(var3.getRenderType(), var3);
+         for(IScoreCriteria.EnumRenderType iscorecriteria$enumrendertype : values()) {
+            BY_NAME.put(iscorecriteria$enumrendertype.getRenderType(), iscorecriteria$enumrendertype);
          }
 
       }

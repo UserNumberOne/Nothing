@@ -10,7 +10,7 @@ public class ParticleSpell extends Particle {
    private static final Random RANDOM = new Random();
    private int baseSpellTextureIndex = 128;
 
-   protected ParticleSpell(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double p_i1229_8_, double ySpeed, double p_i1229_12_) {
+   protected ParticleSpell(World var1, double var2, double var4, double var6, double var8, double var10, double var12) {
       super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0.5D - RANDOM.nextDouble(), ySpeed, 0.5D - RANDOM.nextDouble());
       this.motionY *= 0.20000000298023224D;
       if (p_i1229_8_ == 0.0D && p_i1229_12_ == 0.0D) {
@@ -52,13 +52,13 @@ public class ParticleSpell extends Particle {
 
    }
 
-   public void setBaseSpellTextureIndex(int baseSpellTextureIndexIn) {
+   public void setBaseSpellTextureIndex(int var1) {
       this.baseSpellTextureIndex = baseSpellTextureIndexIn;
    }
 
    @SideOnly(Side.CLIENT)
    public static class AmbientMobFactory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          Particle particle = new ParticleSpell(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
          particle.setAlphaF(0.15F);
          particle.setRBGColorF((float)xSpeedIn, (float)ySpeedIn, (float)zSpeedIn);
@@ -68,14 +68,14 @@ public class ParticleSpell extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class Factory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          return new ParticleSpell(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
       }
    }
 
    @SideOnly(Side.CLIENT)
    public static class InstantFactory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          Particle particle = new ParticleSpell(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
          ((ParticleSpell)particle).setBaseSpellTextureIndex(144);
          return particle;
@@ -84,7 +84,7 @@ public class ParticleSpell extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class MobFactory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          Particle particle = new ParticleSpell(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
          particle.setRBGColorF((float)xSpeedIn, (float)ySpeedIn, (float)zSpeedIn);
          return particle;
@@ -93,7 +93,7 @@ public class ParticleSpell extends Particle {
 
    @SideOnly(Side.CLIENT)
    public static class WitchFactory implements IParticleFactory {
-      public Particle createParticle(int particleID, World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, int... p_178902_15_) {
+      public Particle createParticle(int var1, World var2, double var3, double var5, double var7, double var9, double var11, double var13, int... var15) {
          Particle particle = new ParticleSpell(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
          ((ParticleSpell)particle).setBaseSpellTextureIndex(144);
          float f = worldIn.rand.nextFloat() * 0.5F + 0.35F;

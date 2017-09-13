@@ -1,5 +1,6 @@
 package net.minecraft.block;
 
+import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -7,7 +8,11 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockPlanks extends Block {
    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockPlanks.EnumType.class);
@@ -19,19 +24,27 @@ public class BlockPlanks extends Block {
    }
 
    public int damageDropped(IBlockState var1) {
-      return ((BlockPlanks.EnumType)var1.getValue(VARIANT)).getMetadata();
+      return ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMetadata();
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void getSubBlocks(Item var1, CreativeTabs var2, List var3) {
+      for(BlockPlanks.EnumType blockplanks$enumtype : BlockPlanks.EnumType.values()) {
+         list.add(new ItemStack(itemIn, 1, blockplanks$enumtype.getMetadata()));
+      }
+
    }
 
    public IBlockState getStateFromMeta(int var1) {
-      return this.getDefaultState().withProperty(VARIANT, BlockPlanks.EnumType.byMetadata(var1));
+      return this.getDefaultState().withProperty(VARIANT, BlockPlanks.EnumType.byMetadata(meta));
    }
 
    public MapColor getMapColor(IBlockState var1) {
-      return ((BlockPlanks.EnumType)var1.getValue(VARIANT)).getMapColor();
+      return ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMapColor();
    }
 
    public int getMetaFromState(IBlockState var1) {
-      return ((BlockPlanks.EnumType)var1.getValue(VARIANT)).getMetadata();
+      return ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMetadata();
    }
 
    protected BlockStateContainer createBlockState() {
@@ -53,14 +66,14 @@ public class BlockPlanks extends Block {
       private final MapColor mapColor;
 
       private EnumType(int var3, String var4, MapColor var5) {
-         this(var3, var4, var4, var5);
+         this(metaIn, nameIn, nameIn, mapColorIn);
       }
 
       private EnumType(int var3, String var4, String var5, MapColor var6) {
-         this.meta = var3;
-         this.name = var4;
-         this.unlocalizedName = var5;
-         this.mapColor = var6;
+         this.meta = metaIn;
+         this.name = nameIn;
+         this.unlocalizedName = unlocalizedNameIn;
+         this.mapColor = mapColorIn;
       }
 
       public int getMetadata() {
@@ -76,11 +89,11 @@ public class BlockPlanks extends Block {
       }
 
       public static BlockPlanks.EnumType byMetadata(int var0) {
-         if (var0 < 0 || var0 >= META_LOOKUP.length) {
-            var0 = 0;
+         if (meta < 0 || meta >= META_LOOKUP.length) {
+            meta = 0;
          }
 
-         return META_LOOKUP[var0];
+         return META_LOOKUP[meta];
       }
 
       public String getName() {
@@ -92,8 +105,8 @@ public class BlockPlanks extends Block {
       }
 
       static {
-         for(BlockPlanks.EnumType var3 : values()) {
-            META_LOOKUP[var3.getMetadata()] = var3;
+         for(BlockPlanks.EnumType blockplanks$enumtype : values()) {
+            META_LOOKUP[blockplanks$enumtype.getMetadata()] = blockplanks$enumtype;
          }
 
       }

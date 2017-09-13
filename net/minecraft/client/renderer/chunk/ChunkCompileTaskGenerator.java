@@ -20,7 +20,7 @@ public class ChunkCompileTaskGenerator implements Comparable {
    private ChunkCompileTaskGenerator.Status status = ChunkCompileTaskGenerator.Status.PENDING;
    private boolean finished;
 
-   public ChunkCompileTaskGenerator(RenderChunk p_i46560_1_, ChunkCompileTaskGenerator.Type p_i46560_2_, double p_i46560_3_) {
+   public ChunkCompileTaskGenerator(RenderChunk var1, ChunkCompileTaskGenerator.Type var2, double var3) {
       this.renderChunk = p_i46560_1_;
       this.type = p_i46560_2_;
       this.distanceSq = p_i46560_3_;
@@ -38,7 +38,7 @@ public class ChunkCompileTaskGenerator implements Comparable {
       return this.compiledChunk;
    }
 
-   public void setCompiledChunk(CompiledChunk compiledChunkIn) {
+   public void setCompiledChunk(CompiledChunk var1) {
       this.compiledChunk = compiledChunkIn;
    }
 
@@ -46,11 +46,11 @@ public class ChunkCompileTaskGenerator implements Comparable {
       return this.regionRenderCacheBuilder;
    }
 
-   public void setRegionRenderCacheBuilder(RegionRenderCacheBuilder regionRenderCacheBuilderIn) {
+   public void setRegionRenderCacheBuilder(RegionRenderCacheBuilder var1) {
       this.regionRenderCacheBuilder = regionRenderCacheBuilderIn;
    }
 
-   public void setStatus(ChunkCompileTaskGenerator.Status statusIn) {
+   public void setStatus(ChunkCompileTaskGenerator.Status var1) {
       this.lock.lock();
 
       try {
@@ -81,7 +81,7 @@ public class ChunkCompileTaskGenerator implements Comparable {
 
    }
 
-   public void addFinishRunnable(Runnable runnable) {
+   public void addFinishRunnable(Runnable var1) {
       this.lock.lock();
 
       try {
@@ -107,7 +107,7 @@ public class ChunkCompileTaskGenerator implements Comparable {
       return this.finished;
    }
 
-   public int compareTo(ChunkCompileTaskGenerator p_compareTo_1_) {
+   public int compareTo(ChunkCompileTaskGenerator var1) {
       return Doubles.compare(this.distanceSq, p_compareTo_1_.distanceSq);
    }
 

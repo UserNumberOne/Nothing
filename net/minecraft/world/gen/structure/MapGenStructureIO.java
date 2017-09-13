@@ -15,67 +15,67 @@ public class MapGenStructureIO {
    private static final Map componentNameToClassMap = Maps.newHashMap();
    private static final Map componentClassToNameMap = Maps.newHashMap();
 
-   private static void registerStructure(Class var0, String var1) {
-      startNameToClassMap.put(var1, var0);
-      startClassToNameMap.put(var0, var1);
+   public static void registerStructure(Class var0, String var1) {
+      startNameToClassMap.put(structureName, startClass);
+      startClassToNameMap.put(startClass, structureName);
    }
 
-   static void registerStructureComponent(Class var0, String var1) {
-      componentNameToClassMap.put(var1, var0);
-      componentClassToNameMap.put(var0, var1);
+   public static void registerStructureComponent(Class var0, String var1) {
+      componentNameToClassMap.put(componentName, componentClass);
+      componentClassToNameMap.put(componentClass, componentName);
    }
 
    public static String getStructureStartName(StructureStart var0) {
-      return (String)startClassToNameMap.get(var0.getClass());
+      return (String)startClassToNameMap.get(start.getClass());
    }
 
    public static String getStructureComponentName(StructureComponent var0) {
-      return (String)componentClassToNameMap.get(var0.getClass());
+      return (String)componentClassToNameMap.get(component.getClass());
    }
 
    @Nullable
    public static StructureStart getStructureStart(NBTTagCompound var0, World var1) {
-      StructureStart var2 = null;
+      StructureStart structurestart = null;
 
       try {
-         Class var3 = (Class)startNameToClassMap.get(var0.getString("id"));
-         if (var3 != null) {
-            var2 = (StructureStart)var3.newInstance();
+         Class oclass = (Class)startNameToClassMap.get(tagCompound.getString("id"));
+         if (oclass != null) {
+            structurestart = (StructureStart)oclass.newInstance();
          }
       } catch (Exception var4) {
-         LOGGER.warn("Failed Start with id {}", new Object[]{var0.getString("id")});
+         LOGGER.warn("Failed Start with id {}", new Object[]{tagCompound.getString("id")});
          var4.printStackTrace();
       }
 
-      if (var2 != null) {
-         var2.readStructureComponentsFromNBT(var1, var0);
+      if (structurestart != null) {
+         structurestart.readStructureComponentsFromNBT(worldIn, tagCompound);
       } else {
-         LOGGER.warn("Skipping Structure with id {}", new Object[]{var0.getString("id")});
+         LOGGER.warn("Skipping Structure with id {}", new Object[]{tagCompound.getString("id")});
       }
 
-      return var2;
+      return structurestart;
    }
 
    public static StructureComponent getStructureComponent(NBTTagCompound var0, World var1) {
-      StructureComponent var2 = null;
+      StructureComponent structurecomponent = null;
 
       try {
-         Class var3 = (Class)componentNameToClassMap.get(var0.getString("id"));
-         if (var3 != null) {
-            var2 = (StructureComponent)var3.newInstance();
+         Class oclass = (Class)componentNameToClassMap.get(tagCompound.getString("id"));
+         if (oclass != null) {
+            structurecomponent = (StructureComponent)oclass.newInstance();
          }
       } catch (Exception var4) {
-         LOGGER.warn("Failed Piece with id {}", new Object[]{var0.getString("id")});
+         LOGGER.warn("Failed Piece with id {}", new Object[]{tagCompound.getString("id")});
          var4.printStackTrace();
       }
 
-      if (var2 != null) {
-         var2.readStructureBaseNBT(var1, var0);
+      if (structurecomponent != null) {
+         structurecomponent.readStructureBaseNBT(worldIn, tagCompound);
       } else {
-         LOGGER.warn("Skipping Piece with id {}", new Object[]{var0.getString("id")});
+         LOGGER.warn("Skipping Piece with id {}", new Object[]{tagCompound.getString("id")});
       }
 
-      return var2;
+      return structurecomponent;
    }
 
    static {

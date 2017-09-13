@@ -1,7 +1,6 @@
 package net.minecraft.item.crafting;
 
 import com.google.common.collect.Maps;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
@@ -13,19 +12,18 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFishFood;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.FMLLog;
 
 public class FurnaceRecipes {
    private static final FurnaceRecipes SMELTING_BASE = new FurnaceRecipes();
-   public Map smeltingList = Maps.newHashMap();
+   private final Map smeltingList = Maps.newHashMap();
    private final Map experienceList = Maps.newHashMap();
-   public Map customRecipes = Maps.newHashMap();
-   public Map customExperience = Maps.newHashMap();
 
    public static FurnaceRecipes instance() {
       return SMELTING_BASE;
    }
 
-   public FurnaceRecipes() {
+   private FurnaceRecipes() {
       this.addSmeltingRecipeForBlock(Blocks.IRON_ORE, new ItemStack(Items.IRON_INGOT), 0.7F);
       this.addSmeltingRecipeForBlock(Blocks.GOLD_ORE, new ItemStack(Items.GOLD_INGOT), 1.0F);
       this.addSmeltingRecipeForBlock(Blocks.DIAMOND_ORE, new ItemStack(Items.DIAMOND), 1.0F);
@@ -48,9 +46,9 @@ public class FurnaceRecipes {
       this.addSmeltingRecipe(new ItemStack(Blocks.SPONGE, 1, 1), new ItemStack(Blocks.SPONGE, 1, 0), 0.15F);
       this.addSmelting(Items.CHORUS_FRUIT, new ItemStack(Items.CHORUS_FRUIT_POPPED), 0.1F);
 
-      for(ItemFishFood.FishType itemfish_enumfish : ItemFishFood.FishType.values()) {
-         if (itemfish_enumfish.canCook()) {
-            this.addSmeltingRecipe(new ItemStack(Items.FISH, 1, itemfish_enumfish.getMetadata()), new ItemStack(Items.COOKED_FISH, 1, itemfish_enumfish.getMetadata()), 0.35F);
+      for(ItemFishFood.FishType itemfishfood$fishtype : ItemFishFood.FishType.values()) {
+         if (itemfishfood$fishtype.canCook()) {
+            this.addSmeltingRecipe(new ItemStack(Items.FISH, 1, itemfishfood$fishtype.getMetadata()), new ItemStack(Items.COOKED_FISH, 1, itemfishfood$fishtype.getMetadata()), 0.35F);
          }
       }
 
@@ -60,77 +58,54 @@ public class FurnaceRecipes {
       this.addSmeltingRecipeForBlock(Blocks.QUARTZ_ORE, new ItemStack(Items.QUARTZ), 0.2F);
    }
 
-   public void registerRecipe(ItemStack itemstack, ItemStack itemstack1, float f) {
-      this.customRecipes.put(itemstack, itemstack1);
+   public void addSmeltingRecipeForBlock(Block var1, ItemStack var2, float var3) {
+      this.addSmelting(Item.getItemFromBlock(input), stack, experience);
    }
 
-   public void addSmeltingRecipeForBlock(Block block, ItemStack itemstack, float f) {
-      this.addSmelting(Item.getItemFromBlock(block), itemstack, f);
+   public void addSmelting(Item var1, ItemStack var2, float var3) {
+      this.addSmeltingRecipe(new ItemStack(input, 1, 32767), stack, experience);
    }
 
-   public void addSmelting(Item item, ItemStack itemstack, float f) {
-      this.addSmeltingRecipe(new ItemStack(item, 1, 32767), itemstack, f);
-   }
-
-   public void addSmeltingRecipe(ItemStack itemstack, ItemStack itemstack1, float f) {
-      this.smeltingList.put(itemstack, itemstack1);
-      this.experienceList.put(itemstack1, Float.valueOf(f));
+   public void addSmeltingRecipe(ItemStack var1, ItemStack var2, float var3) {
+      if (this.getSmeltingResult(input) != null) {
+         FMLLog.info("Ignored smelting recipe with conflicting input: " + input + " = " + stack, new Object[0]);
+      } else {
+         this.smeltingList.put(input, stack);
+         this.experienceList.put(stack, Float.valueOf(experience));
+      }
    }
 
    @Nullable
-   public ItemStack getSmeltingResult(ItemStack itemstack) {
-      boolean vanilla = false;
-      Iterator iterator = this.customRecipes.entrySet().iterator();
-
-      Entry entry;
-      while(true) {
-         if (!iterator.hasNext()) {
-            if (vanilla || this.smeltingList.isEmpty()) {
-               return null;
-            }
-
-            iterator = this.smeltingList.entrySet().iterator();
-            vanilla = true;
-         }
-
-         entry = (Entry)iterator.next();
-         if (this.compareItemStacks(itemstack, (ItemStack)entry.getKey())) {
-            break;
+   public ItemStack getSmeltingResult(ItemStack var1) {
+      for(Entry entry : this.smeltingList.entrySet()) {
+         if (this.compareItemStacks(stack, (ItemStack)entry.getKey())) {
+            return (ItemStack)entry.getValue();
          }
       }
 
-      return (ItemStack)entry.getValue();
+      return null;
    }
 
-   private boolean compareItemStacks(ItemStack itemstack, ItemStack itemstack1) {
-      return itemstack1.getItem() == itemstack.getItem() && (itemstack1.getMetadata() == 32767 || itemstack1.getMetadata() == itemstack.getMetadata());
+   private boolean compareItemStacks(ItemStack var1, ItemStack var2) {
+      return stack2.getItem() == stack1.getItem() && (stack2.getMetadata() == 32767 || stack2.getMetadata() == stack1.getMetadata());
    }
 
    public Map getSmeltingList() {
       return this.smeltingList;
    }
 
-   public float getSmeltingExperience(ItemStack itemstack) {
-      boolean vanilla = false;
-      Iterator iterator = this.customExperience.entrySet().iterator();
-
-      Entry entry;
-      while(true) {
-         if (!iterator.hasNext()) {
-            if (vanilla || this.experienceList.isEmpty()) {
-               return 0.0F;
+   public float getSmeltingExperience(ItemStack var1) {
+      float ret = stack.getItem().getSmeltingExperience(stack);
+      if (ret != -1.0F) {
+         return ret;
+      } else {
+         for(Entry entry : this.experienceList.entrySet()) {
+            if (this.compareItemStacks(stack, (ItemStack)entry.getKey())) {
+               return ((Float)entry.getValue()).floatValue();
             }
-
-            iterator = this.experienceList.entrySet().iterator();
-            vanilla = true;
          }
 
-         entry = (Entry)iterator.next();
-         if (this.compareItemStacks(itemstack, (ItemStack)entry.getKey())) {
-            break;
-         }
+         return 0.0F;
       }
-
-      return ((Float)entry.getValue()).floatValue();
    }
 }

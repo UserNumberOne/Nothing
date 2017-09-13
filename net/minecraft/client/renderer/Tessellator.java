@@ -13,7 +13,7 @@ public class Tessellator {
       return INSTANCE;
    }
 
-   public Tessellator(int bufferSize) {
+   public Tessellator(int var1) {
       this.worldRenderer = new VertexBuffer(bufferSize);
    }
 

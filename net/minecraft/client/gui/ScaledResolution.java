@@ -13,7 +13,7 @@ public class ScaledResolution {
    private int scaledHeight;
    private int scaleFactor;
 
-   public ScaledResolution(Minecraft minecraftClient) {
+   public ScaledResolution(Minecraft var1) {
       this.scaledWidth = minecraftClient.displayWidth;
       this.scaledHeight = minecraftClient.displayHeight;
       this.scaleFactor = 1;

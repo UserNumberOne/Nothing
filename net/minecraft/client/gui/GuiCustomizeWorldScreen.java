@@ -37,7 +37,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
    private int confirmMode;
    private boolean confirmDismissed;
    private final Predicate numberFilter = new Predicate() {
-      public boolean apply(@Nullable String p_apply_1_) {
+      public boolean apply(@Nullable String var1) {
          Float f = Floats.tryParse(p_apply_1_);
          return p_apply_1_.isEmpty() || f != null && Floats.isFinite(f.floatValue()) && f.floatValue() >= 0.0F;
       }
@@ -46,7 +46,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
    private ChunkProviderSettings.Factory settings;
    private final Random random = new Random();
 
-   public GuiCustomizeWorldScreen(GuiScreen p_i45521_1_, String p_i45521_2_) {
+   public GuiCustomizeWorldScreen(GuiScreen var1, String var2) {
       this.parent = (GuiCreateWorld)p_i45521_1_;
       this.loadValues(p_i45521_2_);
    }
@@ -111,7 +111,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
       return this.settings.toString().replace("\n", "");
    }
 
-   public void loadValues(String p_175324_1_) {
+   public void loadValues(String var1) {
       if (p_175324_1_ != null && !p_175324_1_.isEmpty()) {
          this.settings = ChunkProviderSettings.Factory.jsonToFactory(p_175324_1_);
       } else {
@@ -120,7 +120,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
 
    }
 
-   public void setEntryValue(int id, String value) {
+   public void setEntryValue(int var1, String var2) {
       float f = 0.0F;
 
       try {
@@ -207,16 +207,16 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
 
    }
 
-   private void setSettingsModified(boolean p_181031_1_) {
+   private void setSettingsModified(boolean var1) {
       this.settingsModified = p_181031_1_;
       this.defaults.enabled = p_181031_1_;
    }
 
-   public String getText(int id, String name, float value) {
+   public String getText(int var1, String var2, float var3) {
       return name + ": " + this.getFormattedValue(id, value);
    }
 
-   private String getFormattedValue(int p_175330_1_, float p_175330_2_) {
+   private String getFormattedValue(int var1, float var2) {
       switch(p_175330_1_) {
       case 100:
       case 101:
@@ -297,7 +297,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
       }
    }
 
-   public void setEntryValue(int id, boolean value) {
+   public void setEntryValue(int var1, boolean var2) {
       switch(id) {
       case 148:
          this.settings.useCaves = value;
@@ -339,7 +339,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
 
    }
 
-   public void setEntryValue(int id, float value) {
+   public void setEntryValue(int var1, float var2) {
       switch(id) {
       case 100:
          this.settings.mainNoiseScaleX = value;
@@ -600,7 +600,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
 
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       if (button.enabled) {
          switch(button.id) {
          case 300:
@@ -667,7 +667,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
       this.setSettingsModified(false);
    }
 
-   private void enterConfirmation(int p_175322_1_) {
+   private void enterConfirmation(int var1) {
       this.confirmMode = p_175322_1_;
       this.setConfirmationControls(true);
    }
@@ -686,7 +686,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
       this.setConfirmationControls(false);
    }
 
-   private void setConfirmationControls(boolean p_175329_1_) {
+   private void setConfirmationControls(boolean var1) {
       this.confirm.visible = p_175329_1_;
       this.cancel.visible = p_175329_1_;
       this.randomize.enabled = !p_175329_1_;
@@ -706,7 +706,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
       this.randomize.enabled = this.list.getPage() != this.list.getPageCount() - 1;
    }
 
-   protected void keyTyped(char typedChar, int keyCode) throws IOException {
+   protected void keyTyped(char var1, int var2) throws IOException {
       super.keyTyped(typedChar, keyCode);
       if (this.confirmMode == 0) {
          switch(keyCode) {
@@ -723,7 +723,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
 
    }
 
-   private void modifyFocusValue(float p_175327_1_) {
+   private void modifyFocusValue(float var1) {
       Gui gui = this.list.getFocusedControl();
       if (gui instanceof GuiTextField) {
          float f = p_175327_1_;
@@ -752,7 +752,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
 
    }
 
-   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+   protected void mouseClicked(int var1, int var2, int var3) throws IOException {
       super.mouseClicked(mouseX, mouseY, mouseButton);
       if (this.confirmMode == 0 && !this.confirmDismissed) {
          this.list.mouseClicked(mouseX, mouseY, mouseButton);
@@ -760,7 +760,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
 
    }
 
-   protected void mouseReleased(int mouseX, int mouseY, int state) {
+   protected void mouseReleased(int var1, int var2, int var3) {
       super.mouseReleased(mouseX, mouseY, state);
       if (this.confirmDismissed) {
          this.confirmDismissed = false;
@@ -770,7 +770,7 @@ public class GuiCustomizeWorldScreen extends GuiScreen implements GuiSlider.Form
 
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.list.drawScreen(mouseX, mouseY, partialTicks);
       this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 2, 16777215);

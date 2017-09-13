@@ -13,11 +13,11 @@ public class LayerSpiderEyes implements LayerRenderer {
    private static final ResourceLocation SPIDER_EYES = new ResourceLocation("textures/entity/spider_eyes.png");
    private final RenderSpider spiderRenderer;
 
-   public LayerSpiderEyes(RenderSpider spiderRendererIn) {
+   public LayerSpiderEyes(RenderSpider var1) {
       this.spiderRenderer = spiderRendererIn;
    }
 
-   public void doRenderLayer(EntitySpider entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntitySpider var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       this.spiderRenderer.bindTexture(SPIDER_EYES);
       GlStateManager.enableBlend();
       GlStateManager.disableAlpha();

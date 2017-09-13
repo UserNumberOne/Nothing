@@ -10,7 +10,7 @@ public class LanServerInfo {
    private final String lanServerIpPort;
    private long timeLastSeen;
 
-   public LanServerInfo(String p_i47130_1_, String p_i47130_2_) {
+   public LanServerInfo(String var1, String var2) {
       this.lanServerMotd = p_i47130_1_;
       this.lanServerIpPort = p_i47130_2_;
       this.timeLastSeen = Minecraft.getSystemTime();

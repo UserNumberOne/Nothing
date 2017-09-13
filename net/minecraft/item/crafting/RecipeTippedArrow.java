@@ -8,18 +8,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.world.World;
 
-class RecipeTippedArrow extends ShapedRecipes implements IRecipe {
+public class RecipeTippedArrow implements IRecipe {
    private static final ItemStack[] EMPTY_ITEMS = new ItemStack[9];
 
-   RecipeTippedArrow() {
-      super(3, 3, new ItemStack[]{new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.LINGERING_POTION, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0)}, new ItemStack(Items.TIPPED_ARROW, 8));
-   }
-
-   public boolean matches(InventoryCrafting inventorycrafting, World world) {
-      if (inventorycrafting.getWidth() == 3 && inventorycrafting.getHeight() == 3) {
-         for(int i = 0; i < inventorycrafting.getWidth(); ++i) {
-            for(int j = 0; j < inventorycrafting.getHeight(); ++j) {
-               ItemStack itemstack = inventorycrafting.getStackInRowAndColumn(i, j);
+   public boolean matches(InventoryCrafting var1, World var2) {
+      if (inv.getWidth() == 3 && inv.getHeight() == 3) {
+         for(int i = 0; i < inv.getWidth(); ++i) {
+            for(int j = 0; j < inv.getHeight(); ++j) {
+               ItemStack itemstack = inv.getStackInRowAndColumn(i, j);
                if (itemstack == null) {
                   return false;
                }
@@ -42,8 +38,8 @@ class RecipeTippedArrow extends ShapedRecipes implements IRecipe {
    }
 
    @Nullable
-   public ItemStack getCraftingResult(InventoryCrafting inventorycrafting) {
-      ItemStack itemstack = inventorycrafting.getStackInRowAndColumn(1, 1);
+   public ItemStack getCraftingResult(InventoryCrafting var1) {
+      ItemStack itemstack = inv.getStackInRowAndColumn(1, 1);
       if (itemstack != null && itemstack.getItem() == Items.LINGERING_POTION) {
          ItemStack itemstack1 = new ItemStack(Items.TIPPED_ARROW, 8);
          PotionUtils.addPotionToItemStack(itemstack1, PotionUtils.getPotionFromItem(itemstack));
@@ -63,7 +59,7 @@ class RecipeTippedArrow extends ShapedRecipes implements IRecipe {
       return null;
    }
 
-   public ItemStack[] getRemainingItems(InventoryCrafting inventorycrafting) {
+   public ItemStack[] getRemainingItems(InventoryCrafting var1) {
       return EMPTY_ITEMS;
    }
 }

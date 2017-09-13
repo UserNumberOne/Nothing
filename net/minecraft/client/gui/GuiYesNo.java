@@ -18,7 +18,7 @@ public class GuiYesNo extends GuiScreen {
    protected int parentButtonClickedId;
    private int ticksUntilEnable;
 
-   public GuiYesNo(GuiYesNoCallback p_i1082_1_, String p_i1082_2_, String p_i1082_3_, int p_i1082_4_) {
+   public GuiYesNo(GuiYesNoCallback var1, String var2, String var3, int var4) {
       this.parentScreen = p_i1082_1_;
       this.messageLine1 = p_i1082_2_;
       this.messageLine2 = p_i1082_3_;
@@ -27,7 +27,7 @@ public class GuiYesNo extends GuiScreen {
       this.cancelButtonText = I18n.format("gui.no");
    }
 
-   public GuiYesNo(GuiYesNoCallback p_i1083_1_, String p_i1083_2_, String p_i1083_3_, String p_i1083_4_, String p_i1083_5_, int p_i1083_6_) {
+   public GuiYesNo(GuiYesNoCallback var1, String var2, String var3, String var4, String var5, int var6) {
       this.parentScreen = p_i1083_1_;
       this.messageLine1 = p_i1083_2_;
       this.messageLine2 = p_i1083_3_;
@@ -43,11 +43,11 @@ public class GuiYesNo extends GuiScreen {
       this.listLines.addAll(this.fontRendererObj.listFormattedStringToWidth(this.messageLine2, this.width - 50));
    }
 
-   protected void actionPerformed(GuiButton button) throws IOException {
+   protected void actionPerformed(GuiButton var1) throws IOException {
       this.parentScreen.confirmClicked(button.id == 0, this.parentButtonClickedId);
    }
 
-   public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+   public void drawScreen(int var1, int var2, float var3) {
       this.drawDefaultBackground();
       this.drawCenteredString(this.fontRendererObj, this.messageLine1, this.width / 2, 70, 16777215);
       int i = 90;
@@ -60,7 +60,7 @@ public class GuiYesNo extends GuiScreen {
       super.drawScreen(mouseX, mouseY, partialTicks);
    }
 
-   public void setButtonDelay(int p_146350_1_) {
+   public void setButtonDelay(int var1) {
       this.ticksUntilEnable = p_146350_1_;
 
       for(GuiButton guibutton : this.buttonList) {

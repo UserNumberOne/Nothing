@@ -15,11 +15,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LayerHeldBlock implements LayerRenderer {
    private final RenderEnderman endermanRenderer;
 
-   public LayerHeldBlock(RenderEnderman endermanRendererIn) {
+   public LayerHeldBlock(RenderEnderman var1) {
       this.endermanRenderer = endermanRendererIn;
    }
 
-   public void doRenderLayer(EntityEnderman entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+   public void doRenderLayer(EntityEnderman var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8) {
       IBlockState iblockstate = entitylivingbaseIn.getHeldBlockState();
       if (iblockstate != null) {
          BlockRendererDispatcher blockrendererdispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();

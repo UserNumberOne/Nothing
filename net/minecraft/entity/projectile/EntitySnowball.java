@@ -10,32 +10,32 @@ import net.minecraft.world.World;
 
 public class EntitySnowball extends EntityThrowable {
    public EntitySnowball(World var1) {
-      super(var1);
+      super(worldIn);
    }
 
    public EntitySnowball(World var1, EntityLivingBase var2) {
-      super(var1, var2);
+      super(worldIn, throwerIn);
    }
 
    public EntitySnowball(World var1, double var2, double var4, double var6) {
-      super(var1, var2, var4, var6);
+      super(worldIn, x, y, z);
    }
 
    public static void registerFixesSnowball(DataFixer var0) {
-      EntityThrowable.registerFixesThrowable(var0, "Snowball");
+      EntityThrowable.registerFixesThrowable(fixer, "Snowball");
    }
 
    protected void onImpact(RayTraceResult var1) {
-      if (var1.entityHit != null) {
-         byte var2 = 0;
-         if (var1.entityHit instanceof EntityBlaze) {
-            var2 = 3;
+      if (result.entityHit != null) {
+         int i = 0;
+         if (result.entityHit instanceof EntityBlaze) {
+            i = 3;
          }
 
-         var1.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), (float)var2);
+         result.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), (float)i);
       }
 
-      for(int var3 = 0; var3 < 8; ++var3) {
+      for(int j = 0; j < 8; ++j) {
          this.world.spawnParticle(EnumParticleTypes.SNOWBALL, this.posX, this.posY, this.posZ, 0.0D, 0.0D, 0.0D);
       }
 
