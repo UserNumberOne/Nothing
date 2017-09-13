@@ -1,0 +1,139 @@
+package net.minecraft.entity;
+
+import javax.annotation.Nullable;
+import net.minecraft.block.BlockFence;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+public class EntityLeashKnot extends EntityHanging {
+   public EntityLeashKnot(World var1) {
+      super(var1);
+   }
+
+   public EntityLeashKnot(World var1, BlockPos var2) {
+      super(var1, var2);
+      this.setPosition((double)var2.getX() + 0.5D, (double)var2.getY() + 0.5D, (double)var2.getZ() + 0.5D);
+      float var3 = 0.125F;
+      float var4 = 0.1875F;
+      float var5 = 0.25F;
+      this.setEntityBoundingBox(new AxisAlignedBB(this.posX - 0.1875D, this.posY - 0.25D + 0.125D, this.posZ - 0.1875D, this.posX + 0.1875D, this.posY + 0.25D + 0.125D, this.posZ + 0.1875D));
+   }
+
+   public void setPosition(double var1, double var3, double var5) {
+      super.setPosition((double)MathHelper.floor(var1) + 0.5D, (double)MathHelper.floor(var3) + 0.5D, (double)MathHelper.floor(var5) + 0.5D);
+   }
+
+   protected void updateBoundingBox() {
+      this.posX = (double)this.hangingPosition.getX() + 0.5D;
+      this.posY = (double)this.hangingPosition.getY() + 0.5D;
+      this.posZ = (double)this.hangingPosition.getZ() + 0.5D;
+   }
+
+   public void updateFacingWithBoundingBox(EnumFacing var1) {
+   }
+
+   public int getWidthPixels() {
+      return 9;
+   }
+
+   public int getHeightPixels() {
+      return 9;
+   }
+
+   public float getEyeHeight() {
+      return -0.0625F;
+   }
+
+   @SideOnly(Side.CLIENT)
+   public boolean isInRangeToRenderDist(double var1) {
+      return var1 < 1024.0D;
+   }
+
+   public void onBroken(@Nullable Entity var1) {
+      this.playSound(SoundEvents.ENTITY_LEASHKNOT_BREAK, 1.0F, 1.0F);
+   }
+
+   public boolean writeToNBTOptional(NBTTagCompound var1) {
+      return false;
+   }
+
+   public void writeEntityToNBT(NBTTagCompound var1) {
+   }
+
+   public void readEntityFromNBT(NBTTagCompound var1) {
+   }
+
+   public boolean processInitialInteract(EntityPlayer var1, @Nullable ItemStack var2, EnumHand var3) {
+      if (this.world.isRemote) {
+         return true;
+      } else {
+         boolean var4 = false;
+         if (var2 != null && var2.getItem() == Items.LEAD) {
+            double var5 = 7.0D;
+
+            for(EntityLiving var8 : this.world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(this.posX - 7.0D, this.posY - 7.0D, this.posZ - 7.0D, this.posX + 7.0D, this.posY + 7.0D, this.posZ + 7.0D))) {
+               if (var8.getLeashed() && var8.getLeashedToEntity() == var1) {
+                  var8.setLeashedToEntity(this, true);
+                  var4 = true;
+               }
+            }
+         }
+
+         if (!var4) {
+            this.setDead();
+            if (var1.capabilities.isCreativeMode) {
+               double var9 = 7.0D;
+
+               for(EntityLiving var11 : this.world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(this.posX - 7.0D, this.posY - 7.0D, this.posZ - 7.0D, this.posX + 7.0D, this.posY + 7.0D, this.posZ + 7.0D))) {
+                  if (var11.getLeashed() && var11.getLeashedToEntity() == this) {
+                     var11.clearLeashed(true, false);
+                  }
+               }
+            }
+         }
+
+         return true;
+      }
+   }
+
+   public boolean onValidSurface() {
+      return this.world.getBlockState(this.hangingPosition).getBlock() instanceof BlockFence;
+   }
+
+   public static EntityLeashKnot createKnot(World var0, BlockPos var1) {
+      EntityLeashKnot var2 = new EntityLeashKnot(var0, var1);
+      var2.forceSpawn = true;
+      var0.spawnEntity(var2);
+      var2.playPlaceSound();
+      return var2;
+   }
+
+   public static EntityLeashKnot getKnotForPosition(World var0, BlockPos var1) {
+      int var2 = var1.getX();
+      int var3 = var1.getY();
+      int var4 = var1.getZ();
+
+      for(EntityLeashKnot var6 : var0.getEntitiesWithinAABB(EntityLeashKnot.class, new AxisAlignedBB((double)var2 - 1.0D, (double)var3 - 1.0D, (double)var4 - 1.0D, (double)var2 + 1.0D, (double)var3 + 1.0D, (double)var4 + 1.0D))) {
+         if (var6.getHangingPosition().equals(var1)) {
+            return var6;
+         }
+      }
+
+      return null;
+   }
+
+   public void playPlaceSound() {
+      this.playSound(SoundEvents.ENTITY_LEASHKNOT_PLACE, 1.0F, 1.0F);
+   }
+}
